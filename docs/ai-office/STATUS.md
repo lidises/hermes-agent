@@ -2037,3 +2037,40 @@ Final verification before commit:
 - Backend focused office tests -> 18 passed in 1.62s.
 - `git diff --check` passed.
 - Browser smoke `/office?stage14a=tracking`: tracking cue count 11, inspect button count 11, counts match, tracking rail exists, Stage 14-A label visible in DOM, raw leak regex false, console JS errors none.
+
+## Stage 14-B room activity meters implemented
+
+Updated: 2026-05-09 15:05 KST
+
+Stage 14-B continues the DeskRPG-like dynamic tracking loop by adding room-level activity meters to the CSS/SVG office map. It keeps `/office` read-only and keeps all rendering dependency-free.
+
+Implemented:
+
+- `buildOfficeRoomActivityMeters(nodes, characters, delta)` in `web/src/pages/officeView.ts`.
+- One safe meter per office room: sessions, work, automation, routing.
+- Coarse Korean levels: `조용함`, `활동`, `분주함`, `변화 감지`.
+- Rooms touched by node/flow delta are prioritized as `변화 감지`.
+- React map rendering adds non-interactive `data-office-room-activity="true"` meter bars near room cards.
+- Text-equivalent `data-office-room-activity-rail="true"` rail preserves reduced-motion meaning.
+- CSS remains DOM/CSS-only and disables meter animation under `prefers-reduced-motion: reduce`.
+
+Safety posture:
+
+- Helper derives only from safe `OfficeMapNode[]`, generated `OfficeCharacter[]`, and safe `OfficeStateDelta`.
+- No raw prompt/transcript/task body/cron script/log/auth/secret/model/provider identity or individual task identity is inspected or projected.
+- No backend/API/schema changes, no mutation controls, no persistent storage, no renderer/dependency adoption.
+
+Verification so far:
+
+- RED observed: `buildOfficeRoomActivityMeters is not a function`.
+- GREEN: `npm test -- --run OfficePage.test.ts` -> 31 passed.
+- ESLint for touched TS/TSX/test files passed.
+
+Final verification before commit:
+
+- `npm test -- --run OfficePage.test.ts` -> 31 passed.
+- ESLint for `OfficePage.tsx`, `officeView.ts`, `OfficePage.test.ts` passed.
+- `npm run build` passed. Build output: JS 1,262.30 kB / gzip 368.98 kB; CSS 131.25 kB / gzip 21.09 kB. Existing Vite large chunk warning remains.
+- Backend focused office tests -> 18 passed in 1.32s.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14b=room-activity`: room meter count 4, room activity rail exists, Stage 14-A tracking cues still 11, character inspect buttons 11, raw leak regex false, console JS errors none.

@@ -13,6 +13,7 @@ import {
   buildOfficeMapJumpTargets,
   buildOfficeMapPolishPlan,
   buildOfficeResponsiveReadabilityPlan,
+  buildOfficeRoomActivityMeters,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -641,6 +642,41 @@ describe("OfficePage view helpers", () => {
     expect(cues[0].style["--office-tracking-delay"]).toMatch(/s$/);
     expect(cues.every((cue) => cue.ariaHidden === true && cue.interactive === false)).toBe(true);
     expect(cues.map((cue) => `${cue.label} ${cue.detail} ${cue.reducedMotionLabel}`).join(" ")).not.toMatch(/raw|prompt|transcript|body|script|secret|model-name/i);
+  });
+
+  it("builds safe Stage 14-B room activity meters from room counts, characters, and delta", () => {
+    const nodes = buildOfficeMapNodes(
+      officeFixture({
+        agents: Array.from({ length: 5 }, (_, index) => ({ id: `agent-${index}`, prompt: "raw prompt must not matter" })),
+        work_items: [{ id: "task-raw", title: "raw task body must not matter", body: "raw body must not matter" }],
+        automations: [],
+        topics: [],
+        provenance: [],
+      }),
+    );
+    const characters = [
+      { id: "model-1", role: "model" as const, roomId: "sessions" as const, label: "raw model", status: "active" as const, detail: "raw prompt", redactionNote: "safe", x: 20, y: 20 },
+      { id: "worker-1", role: "worker" as const, roomId: "work" as const, label: "작업자", status: "working" as const, detail: "safe", redactionNote: "safe", x: 60, y: 20 },
+      { id: "worker-2", role: "worker" as const, roomId: "work" as const, label: "작업자", status: "working" as const, detail: "safe", redactionNote: "safe", x: 64, y: 20 },
+    ];
+    const delta = {
+      hasChanges: true,
+      nodeBadges: { sessions: [], work: [{ label: "+1", tone: "positive" as const }], automation: [], routing: [] },
+      changedFlows: [{ from: "work" as const, to: "automation" as const, label: "raw transcript must not matter", tone: "positive" as const }],
+      recentChanges: [],
+    };
+
+    const meters = buildOfficeRoomActivityMeters(nodes, characters, delta);
+
+    expect(meters.map((meter) => [meter.roomId, meter.label, meter.level])).toEqual([
+      ["sessions", "분주함", "busy"],
+      ["work", "변화 감지", "changed"],
+      ["automation", "변화 감지", "changed"],
+      ["routing", "조용함", "quiet"],
+    ]);
+    expect(meters.every((meter) => meter.ariaHidden === true && meter.interactive === false)).toBe(true);
+    expect(meters[0].detail).toContain("안전 항목 5개");
+    expect(meters.map((meter) => `${meter.label} ${meter.detail} ${meter.reducedMotionLabel}`).join(" ")).not.toMatch(/raw|prompt|transcript|body|script|secret|model/i);
   });
 
   it("builds Korean empty-source copy without exposing raw adapter data", () => {

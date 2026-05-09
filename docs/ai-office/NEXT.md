@@ -329,3 +329,11 @@ Next if Stage 14-A verifies cleanly:
 1. Commit/push Stage 14-A: `feat(office): add dynamic character tracking cues`.
 2. Plan Stage 14-B as the next small DeskRPG-like slice. Recommended direction: room-level ambient activity meters or safe route pulse timeline, still derived only from safe DTO counts/deltas.
 3. Maintain constraints: read-only `/office`, no backend/API/schema changes, no mutation controls, no persistent storage, no raw projection, no Phaser/Pixi/canvas/sprites.
+
+## Stage 14-B handoff: room activity meters
+
+Current branch: `ai-office-stage14-dynamic-tracking-20260509`
+
+Stage 14-B implemented safe room activity meters and passed final local verification. Continue in small DeskRPG-like observability slices after commit. Recommended Stage 14-C direction: safe event pulse timeline or room-to-room breadcrumb rail derived only from browser-local safe deltas.
+
+Keep constraints: no renderer/dependency, no backend/API/schema changes, no mutation controls, no persistent storage, no raw record projection.

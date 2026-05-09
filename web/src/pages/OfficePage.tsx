@@ -33,6 +33,7 @@ import {
   buildOfficeMapJumpTargets,
   buildOfficeMapPolishPlan,
   buildOfficeResponsiveReadabilityPlan,
+  buildOfficeRoomActivityMeters,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -327,6 +328,29 @@ function trackingToneClass(tone: ReturnType<typeof buildOfficeCharacterTrackingC
   return "office-character-tracking--steady";
 }
 
+function roomActivityClass(level: ReturnType<typeof buildOfficeRoomActivityMeters>[number]["level"]): string {
+  if (level === "changed") return "office-room-activity--changed";
+  if (level === "busy") return "office-room-activity--busy";
+  if (level === "active") return "office-room-activity--active";
+  return "office-room-activity--quiet";
+}
+
+function RoomActivityMeter({ node, meter }: { node: OfficeMapNode; meter: ReturnType<typeof buildOfficeRoomActivityMeters>[number] }) {
+  return (
+    <div
+      className={`office-room-activity absolute z-[24] -translate-x-1/2 ${roomActivityClass(meter.level)}`}
+      style={{ left: `${node.x}%`, top: `calc(${node.y}% + 3.15rem)`, "--office-room-activity-percent": `${meter.percent}%` } as React.CSSProperties}
+      title={`${meter.detail} · ${meter.reducedMotionLabel}`}
+      aria-hidden={meter.ariaHidden}
+      data-office-room-activity="true"
+      data-office-room-activity-level={meter.level}
+    >
+      <span className="office-room-activity__label">{meter.label}</span>
+      <span className="office-room-activity__bar"><span /></span>
+    </div>
+  );
+}
+
 function CharacterTrackingCue({ character, cue }: { character: OfficeCharacter; cue: ReturnType<typeof buildOfficeCharacterTrackingCues>[number] }) {
   return (
     <div
@@ -423,6 +447,8 @@ function OfficeMap({
   const polishPlan = buildOfficeMapPolishPlan(densityPlan);
   const trackingCues = buildOfficeCharacterTrackingCues(densityPlan.visibleCharacters, latestDelta);
   const trackingCueByCharacterId = new Map(trackingCues.map((cue) => [cue.characterId, cue]));
+  const roomActivityMeters = buildOfficeRoomActivityMeters(nodes, densityPlan.visibleCharacters, latestDelta);
+  const roomActivityById = new Map(roomActivityMeters.map((meter) => [meter.roomId, meter]));
 
   return (
     <Card>
@@ -544,6 +570,10 @@ function OfficeMap({
             ? densityPlan.visibleCharacters.map((character) => <CharacterMarker key={character.id} character={character} latestDelta={latestDelta} onInspect={() => onInspectCharacter(character)} />)
             : sceneObjects.map((object) => <SceneObjectMarker key={object.id} object={object} />)}
           {nodes.map((node) => {
+            const meter = roomActivityById.get(node.id);
+            return meter ? <RoomActivityMeter key={`room-activity-${node.id}`} node={node} meter={meter} /> : null;
+          })}
+          {nodes.map((node) => {
             const badges = latestDelta.nodeBadges[node.id] ?? [];
             return (
               <button
@@ -578,6 +608,7 @@ function OfficeMap({
               <span className="text-emerald-200">{polishPlan.stageLabel}</span>
               <span className="text-sky-200">{responsivePlan.stageLabel} · {responsivePlan.viewportMode === "narrow" ? "좁은 화면" : "데스크톱"}</span>
               <span className="text-lime-200">Stage 14-A 동적 추적 · 큐 {trackingCues.length}개</span>
+              <span className="text-amber-200">Stage 14-B 방 활동 · 미터 {roomActivityMeters.length}개</span>
               {flows.map((flow) => {
                 const changedFlow = changedFlowById.get(`${flow.from}->${flow.to}`);
                 return (
@@ -599,6 +630,14 @@ function OfficeMap({
               {trackingCues.slice(0, 4).map((cue) => (
                 <span key={`tracking-rail-${cue.characterId}`} className={cue.tone === "alert" ? "text-yellow-200" : cue.tone === "warning" ? "text-orange-200" : "text-emerald-200"}>
                   {cue.label} · {cue.detail}
+                </span>
+              ))}
+            </div>
+            <div className="mb-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-semibold tracking-[0.14em] text-amber-100/80" aria-label="Stage 14-B 방 활동 rail" data-office-room-activity-rail="true">
+              <span>Stage 14-B 방 활동</span>
+              {roomActivityMeters.map((meter) => (
+                <span key={`room-activity-rail-${meter.roomId}`} className={meter.level === "changed" ? "text-yellow-200" : meter.level === "busy" ? "text-orange-200" : meter.level === "active" ? "text-emerald-200" : "text-midground/60"}>
+                  {meter.label} · {meter.detail}
                 </span>
               ))}
             </div>

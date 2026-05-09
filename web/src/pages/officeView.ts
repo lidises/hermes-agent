@@ -118,6 +118,19 @@ export type OfficeCharacterTrackingCue = {
   interactive: false;
 };
 
+export type OfficeRoomActivityLevel = "quiet" | "active" | "busy" | "changed";
+
+export type OfficeRoomActivityMeter = {
+  roomId: OfficeMapNode["id"];
+  label: string;
+  detail: string;
+  level: OfficeRoomActivityLevel;
+  percent: number;
+  reducedMotionLabel: string;
+  ariaHidden: true;
+  interactive: false;
+};
+
 export type OfficeDeltaBadge = {
   label: string;
   tone: "positive" | "negative" | "warning" | "neutral";
@@ -1053,6 +1066,43 @@ export function buildOfficeCharacterTrackingCues(characters: OfficeCharacter[], 
         "--office-tracking-delay": `${-1 * (index % 5)}s`,
       },
       reducedMotionLabel: `${label} · 텍스트 rail로 의미 유지`,
+      ariaHidden: true,
+      interactive: false,
+    };
+  });
+}
+
+function roomTouchedByDelta(roomId: OfficeMapNode["id"], delta: OfficeStateDelta): boolean {
+  return delta.nodeBadges[roomId]?.length > 0 || delta.changedFlows.some((flow) => flow.from === roomId || flow.to === roomId);
+}
+
+function roomActivityLevel(node: OfficeMapNode, characterCount: number, changed: boolean): OfficeRoomActivityLevel {
+  if (changed) return "changed";
+  if (node.count >= 5 || characterCount >= 2) return "busy";
+  if (node.count > 0 || characterCount > 0) return "active";
+  return "quiet";
+}
+
+const ROOM_ACTIVITY_LABEL: Record<OfficeRoomActivityLevel, string> = {
+  quiet: "조용함",
+  active: "활동",
+  busy: "분주함",
+  changed: "변화 감지",
+};
+
+export function buildOfficeRoomActivityMeters(nodes: OfficeMapNode[], characters: OfficeCharacter[], delta: OfficeStateDelta): OfficeRoomActivityMeter[] {
+  return nodes.map((node) => {
+    const characterCount = characters.filter((character) => character.roomId === node.id).length;
+    const changed = roomTouchedByDelta(node.id, delta);
+    const level = roomActivityLevel(node, characterCount, changed);
+    const percent = level === "changed" ? 100 : Math.min(100, Math.max(12, node.count * 12 + characterCount * 18));
+    return {
+      roomId: node.id,
+      label: ROOM_ACTIVITY_LABEL[level],
+      detail: `${node.label} · 안전 항목 ${node.count}개 · 캐릭터 ${characterCount}개`,
+      level,
+      percent,
+      reducedMotionLabel: `${ROOM_ACTIVITY_LABEL[level]} · 방 활동 rail로 의미 유지`,
       ariaHidden: true,
       interactive: false,
     };
