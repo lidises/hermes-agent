@@ -1,10 +1,10 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-09 17:57 KST
+Last updated: 2026-05-09 18:03 KST
 
 ## Current phase
 
-Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, and Stage 14-A through Stage 14-J safe dynamic-tracking layers are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
+Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, and Stage 14-A through Stage 14-K safe dynamic-tracking layers are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
 
 Current Stage 9-E result: the `/office` page now uses Korean for primary headings, buttons, helper text, safety copy, status labels, inspector field labels, and office-map room/zone labels while keeping stable technical identifiers such as DTO, OfficeState, source IDs, cron, and enum-like adapter values visible for debugging.
 
@@ -52,6 +52,8 @@ Current Stage 14-I result: `/office` now adds safe flow pulse bands over the CSS
 
 Current Stage 14-J result: `/office` now adds a safe tactical minimap that compresses Stage 14-H room beacons and Stage 14-I flow pulse bands into a compact DeskRPG-like cell grid. `OfficeSafeTacticalMinimapCell`, `OfficeSafeTacticalMinimap`, and `buildOfficeSafeTacticalMinimap(delta)` derive only from safe beacon weights, known room labels, generated tone labels, and safe flow counts. The UI exposes `data-office-safe-tactical-minimap`, summary, and per-room cell hooks while staying decorative and non-interactive.
 
+Current Stage 14-K result: `/office` now adds a safe tactical ticker that compresses the Stage 14-J minimap and Stage 14-G attention strip into one compact operational readout. `OfficeSafeTacticalTickerItem`, `OfficeSafeTacticalTicker`, and `buildOfficeSafeTacticalTicker(delta)` derive only from safe attention/minimap aggregates and generated room-weight summaries.
+
 Next phase: continue with another small non-renderer/read-only safe dynamic-tracking slice only if it can be derived from existing safe DTO/delta aggregates. Still no individual task identity, generated content-like speech bubbles, sprite assets, Phaser, PixiJS, canvas renderer, backend/API changes, mutation controls, persistent storage, or raw record projection.
 
 Stage 6 slices were approved by the user, including proceeding through the recommended remaining slices. Stage 7 was approved with testing deferred until the end. Stage 8-A was approved as the next safe step by the user saying to proceed in order, and the user then requested items 1 through 3 to run automatically in sequence. The user also approved installing missing test/runtime extras as needed in earlier setup. No gateway restart, cron change, Kanban mutation, NAS/Obsidian write, service/config mutation, memory/skill update, pixel dependency, or mutation-control implementation has been performed. The local dashboard process was restarted only to smoke-test the newly built local frontend bundle.
@@ -60,6 +62,39 @@ Stage 6 slices were approved by the user, including proceeding through the recom
 
 
 
+
+## Stage 14-K safe tactical ticker implemented
+
+Implemented files/changes:
+
+- `web/src/pages/officeView.ts`
+  - Added `OfficeSafeTacticalTickerItem`, `OfficeSafeTacticalTicker`, and `buildOfficeSafeTacticalTicker(delta)`.
+  - The helper composes the safe tactical minimap and safe attention strip into aggregate-only `focus|map|cells` ticker items.
+- `web/src/pages/OfficePage.tsx`
+  - Renders a compact tactical ticker with `data-office-safe-tactical-ticker`, headline hook, and per-item hooks.
+  - Adds the Stage 14-K headline to the detached map legend.
+- `web/src/index.css`
+  - Adds compact CSS-only ticker styling, reusing existing tone classes.
+- `web/src/pages/OfficePage.test.ts`
+  - Adds RED/GREEN helper coverage for headline, item order/details, decorative/non-interactive posture, and raw-term exclusion.
+- `docs/ai-office/plans/2026-05-09-stage-14k-safe-tactical-ticker.md`
+  - Records scope, constraints, TDD record, implementation, and verification target.
+
+Safety notes:
+
+- Stage 14-K remains frontend-only, read-only, CSS/DOM-only, and does not add backend/API/schema changes, renderer dependencies, mutation controls, persistent storage, or raw record projection.
+- The tactical ticker does not use raw changed-flow labels, raw badge labels, recent-change labels/details, provider/model identity, individual task identity, prompts, transcripts, task bodies, scripts, logs, auth fields, secrets, or tokens.
+
+Verification 2026-05-09 18:03 KST:
+
+- RED verified first: Stage 14-K test failed because `buildOfficeSafeTacticalTicker` was not a function.
+- GREEN focused helper test passed: `OfficePage.test.ts` 40 passed.
+- Focused frontend verification passed: `npm test -- --run OfficePage.test.ts` → 40 passed.
+- ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/officeView.ts`, and `src/pages/OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large-chunk warning; current build size was JS `1,279.11 kB` / gzip `372.92 kB`, CSS `143.11 kB` / gzip `22.84 kB`.
+- Backend focused office tests passed: `18 passed in 1.03s`.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14k=safe-tactical-ticker`: tactical ticker present, headline present, ticker items `focus|map|cells`, Stage 14-J/I/H/G/F/E/D/C hooks present, raw leak regex false, console JS errors none.
 
 ## Stage 14-J safe tactical minimap implemented
 

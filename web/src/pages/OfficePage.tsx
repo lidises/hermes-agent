@@ -42,6 +42,7 @@ import {
   buildOfficeSafeRoomBeacons,
   buildOfficeSafeFlowPulseBands,
   buildOfficeSafeTacticalMinimap,
+  buildOfficeSafeTacticalTicker,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -479,6 +480,7 @@ function OfficeMap({
   const safeRoomBeacons = buildOfficeSafeRoomBeacons(latestDelta);
   const safeFlowPulseBands = buildOfficeSafeFlowPulseBands(latestDelta);
   const safeTacticalMinimap = buildOfficeSafeTacticalMinimap(latestDelta);
+  const safeTacticalTicker = buildOfficeSafeTacticalTicker(latestDelta);
 
   return (
     <Card>
@@ -680,6 +682,7 @@ function OfficeMap({
               <span className="text-amber-100">Stage 14-H beacons · {safeRoomBeacons.beacons.filter((beacon) => beacon.weight > 0).length}개</span>
               <span className="text-teal-100">Stage 14-I flow · {safeFlowPulseBands.bands.length}개</span>
               <span className="text-emerald-100">Stage 14-J minimap · {safeTacticalMinimap.summary}</span>
+              <span className="text-lime-100">Stage 14-K ticker · {safeTacticalTicker.headline}</span>
               {flows.map((flow) => {
                 const changedFlow = changedFlowById.get(`${flow.from}->${flow.to}`);
                 return (
@@ -844,6 +847,22 @@ function OfficeMap({
                   </span>
                 ))}
               </div>
+            </div>
+            <div className={`office-safe-tactical-ticker mb-2 ${safePulseToneClass(safeTacticalTicker.tone)}`} aria-label="Stage 14-K 안전 tactical ticker" data-office-safe-tactical-ticker="true">
+              <span className="office-safe-tactical-ticker__title">{safeTacticalTicker.stageLabel}</span>
+              <span className="office-safe-tactical-ticker__headline" data-office-safe-tactical-ticker-headline="true">{safeTacticalTicker.headline}</span>
+              {safeTacticalTicker.items.map((item) => (
+                <span
+                  key={`tactical-ticker-${item.id}`}
+                  className={`office-safe-tactical-ticker__item ${safePulseToneClass(item.tone)}`}
+                  title={`${item.detail} · ${safeTacticalTicker.detail}`}
+                  aria-hidden={item.ariaHidden}
+                  data-office-safe-tactical-ticker-item={item.id}
+                >
+                  <span>{item.label}</span>
+                  <span>{item.detail}</span>
+                </span>
+              ))}
             </div>
             <div className="mb-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-semibold tracking-[0.14em] text-midground/75" aria-label="RPG 역할 범례">
               <span>캐릭터 역할 투영</span>

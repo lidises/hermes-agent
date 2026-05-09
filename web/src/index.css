@@ -650,6 +650,37 @@ code { font-size: 0.875rem; }
   font-weight: 800;
   letter-spacing: 0.08em;
 }
+.office-safe-tactical-ticker {
+  pointer-events: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.28rem 0.52rem;
+  align-items: center;
+  border: 1px solid rgba(190, 242, 100, 0.18);
+  background: linear-gradient(90deg, rgba(63, 98, 18, 0.18), rgba(0, 0, 0, 0.2));
+  padding: 0.36rem 0.44rem;
+  color: rgba(217, 249, 157, 0.9);
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 0.11em;
+}
+.office-safe-tactical-ticker__title {
+  color: #bef264;
+  text-transform: uppercase;
+}
+.office-safe-tactical-ticker__headline {
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  background: rgba(0, 0, 0, 0.32);
+  padding: 0.08rem 0.32rem;
+  color: color-mix(in srgb, currentColor 88%, white 10%);
+}
+.office-safe-tactical-ticker__item {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+  border-left: 1px solid color-mix(in srgb, currentColor 34%, transparent);
+  padding-left: 0.42rem;
+}
 @keyframes office-safe-flow-pulse-band {
   0% { stroke-dashoffset: 0; opacity: 0.42; }
   50% { opacity: 0.96; }

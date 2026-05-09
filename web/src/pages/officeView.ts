@@ -277,6 +277,23 @@ export type OfficeSafeTacticalMinimap = {
   cells: OfficeSafeTacticalMinimapCell[];
 };
 
+export type OfficeSafeTacticalTickerItem = {
+  id: "focus" | "map" | "cells";
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeTacticalTicker = {
+  stageLabel: string;
+  headline: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  items: OfficeSafeTacticalTickerItem[];
+};
+
 export type OfficeDeltaBadge = {
   label: string;
   tone: "positive" | "negative" | "warning" | "neutral";
@@ -1596,6 +1613,27 @@ export function buildOfficeSafeTacticalMinimap(delta: OfficeStateDelta): OfficeS
         interactive: false,
       };
     }),
+  };
+}
+
+export function buildOfficeSafeTacticalTicker(delta: OfficeStateDelta): OfficeSafeTacticalTicker {
+  const minimap = buildOfficeSafeTacticalMinimap(delta);
+  const attention = buildOfficeSafeAttentionStrip(delta);
+  const focusChip = attention.chips.find((chip) => chip.id === "focus");
+  const activeCells = minimap.cells.filter((cell) => cell.active);
+  const cellDetail = activeCells.length > 0 ? activeCells.map((cell) => `${cell.label} ${cell.weight}`).join(" · ") : "대기 0";
+  const tone = focusChip?.tone ?? attention.tone;
+
+  return {
+    stageLabel: "Stage 14-K 안전 tactical ticker",
+    headline: `${attention.heading} · ${minimap.summary}`,
+    detail: "attention strip과 tactical minimap의 안전 신호를 하단 ticker로 압축",
+    tone,
+    items: [
+      { id: "focus", label: "초점", detail: focusChip?.detail ?? "대기 · 밀도 0", tone, ariaHidden: true, interactive: false },
+      { id: "map", label: "전술", detail: minimap.summary, tone: "neutral", ariaHidden: true, interactive: false },
+      { id: "cells", label: "방", detail: cellDetail, tone, ariaHidden: true, interactive: false },
+    ],
   };
 }
 

@@ -22,6 +22,7 @@ import {
   buildOfficeSafeRoomBeacons,
   buildOfficeSafeFlowPulseBands,
   buildOfficeSafeTacticalMinimap,
+  buildOfficeSafeTacticalTicker,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -895,6 +896,35 @@ describe("OfficePage view helpers", () => {
     ]);
     expect(minimap.cells.every((cell) => cell.ariaHidden === true && cell.interactive === false)).toBe(true);
     expect(`${minimap.summary} ${minimap.cells.map((cell) => `${cell.label} ${cell.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("builds safe Stage 14-K tactical ticker from safe minimap and attention signals", () => {
+    const delta = {
+      hasChanges: true,
+      nodeBadges: {
+        sessions: [{ label: "raw model provider", tone: "positive" as const }],
+        work: [{ label: "raw prompt", tone: "negative" as const }],
+        automation: [{ label: "raw script", tone: "warning" as const }],
+        routing: [],
+      },
+      changedFlows: [
+        { from: "sessions" as const, to: "work" as const, label: "raw transcript must not matter", tone: "negative" as const },
+        { from: "work" as const, to: "automation" as const, label: "raw secret must not matter", tone: "warning" as const },
+      ],
+      recentChanges: [{ id: "recent-token", label: "raw token", detail: "sk-sho...leak", tone: "negative" as const }],
+    };
+
+    const ticker = buildOfficeSafeTacticalTicker(delta);
+
+    expect(ticker.stageLabel).toBe("Stage 14-K 안전 tactical ticker");
+    expect(ticker.headline).toBe("주의 방 우선 · 활성 방 3개 · 흐름 2개");
+    expect(ticker.items.map((item) => [item.id, item.label, item.detail, item.tone])).toEqual([
+      ["focus", "초점", "작업 · 밀도 4", "negative"],
+      ["map", "전술", "활성 방 3개 · 흐름 2개", "neutral"],
+      ["cells", "방", "세션 2 · 작업 4 · 자동화 2", "negative"],
+    ]);
+    expect(ticker.items.every((item) => item.ariaHidden === true && item.interactive === false)).toBe(true);
+    expect(`${ticker.headline} ${ticker.items.map((item) => `${item.label} ${item.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
   });
 
   it("builds Korean empty-source copy without exposing raw adapter data", () => {
