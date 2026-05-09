@@ -43,6 +43,7 @@ import {
   buildOfficeSafeFlowPulseBands,
   buildOfficeSafeTacticalMinimap,
   buildOfficeSafeTacticalTicker,
+  buildOfficeSafeMissionClock,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -1020,6 +1021,8 @@ export default function OfficePage() {
   const [densityMode, setDensityMode] = useState<OfficeMapDensityMode>("standard");
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [viewportWidth, setViewportWidth] = useState<number | undefined>(undefined);
+  const [tabVisible, setTabVisible] = useState(true);
+  const [liveFailureCount, setLiveFailureCount] = useState(0);
   const previousStateRef = useRef<OfficeState | null>(null);
   const liveFailureCountRef = useRef(0);
 
@@ -1072,13 +1075,17 @@ export default function OfficePage() {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
     const updateMotion = () => setPrefersReducedMotion(media.matches);
     const updateViewport = () => setViewportWidth(window.innerWidth);
+    const updateVisibility = () => setTabVisible(typeof document === "undefined" ? true : !document.hidden);
     updateMotion();
     updateViewport();
+    updateVisibility();
     media.addEventListener("change", updateMotion);
     window.addEventListener("resize", updateViewport);
+    document.addEventListener("visibilitychange", updateVisibility);
     return () => {
       media.removeEventListener("change", updateMotion);
       window.removeEventListener("resize", updateViewport);
+      document.removeEventListener("visibilitychange", updateVisibility);
     };
   }, []);
 
@@ -1096,7 +1103,9 @@ export default function OfficePage() {
       });
       timeoutId = window.setTimeout(() => {
         void load().then((ok) => {
-          liveFailureCountRef.current = ok ? 0 : liveFailureCountRef.current + 1;
+          const nextFailureCount = ok ? 0 : liveFailureCountRef.current + 1;
+          liveFailureCountRef.current = nextFailureCount;
+          setLiveFailureCount(nextFailureCount);
           schedule();
         });
       }, delay);
@@ -1139,6 +1148,15 @@ export default function OfficePage() {
   );
   const emptyHints = useMemo(() => buildOfficeEmptyStateHints(), []);
   const emptySourceCopy = useMemo(() => buildOfficeEmptySourceCopyPlan(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
+  const safeMissionClock = useMemo(
+    () => buildOfficeSafeMissionClock({
+      liveTracking,
+      isVisible: tabVisible,
+      consecutiveFailures: liveFailureCount,
+      hasRecentChanges: latestDelta.hasChanges,
+    }),
+    [latestDelta.hasChanges, liveFailureCount, liveTracking, tabVisible],
+  );
 
   const sourceCounts = sourceHealth.counts;
 
@@ -1213,6 +1231,26 @@ export default function OfficePage() {
               <div>원격 모드: {state.capabilities.remote_mode}</div>
               <div>변경 기능: {state.capabilities.mutations_enabled ? "켜짐" : "없음"}</div>
             </div>
+            <div className={`office-safe-mission-clock mt-3 ${safePulseToneClass(safeMissionClock.tone)}`} aria-label="Stage 14-L 안전 mission clock" data-office-safe-mission-clock="true">
+              <div className="office-safe-mission-clock__header">
+                <span className="office-safe-mission-clock__title">{safeMissionClock.stageLabel}</span>
+                <span className="office-safe-mission-clock__headline" data-office-safe-mission-clock-headline="true">{safeMissionClock.headline}</span>
+              </div>
+              <div className="office-safe-mission-clock__grid" aria-hidden="true">
+                {safeMissionClock.items.map((item) => (
+                  <span
+                    key={`mission-clock-${item.id}`}
+                    className={`office-safe-mission-clock__item ${safePulseToneClass(item.tone)}`}
+                    title={`${item.detail} · ${safeMissionClock.detail}`}
+                    aria-hidden={item.ariaHidden}
+                    data-office-safe-mission-clock-item={item.id}
+                  >
+                    <span>{item.label}</span>
+                    <span>{item.detail}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
             <Button onClick={load} className="mt-4 w-full gap-2 uppercase" disabled={refreshing}>
               <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} /> 새로고침
             </Button>
@@ -1220,6 +1258,7 @@ export default function OfficePage() {
               type="button"
               onClick={() => {
                 liveFailureCountRef.current = 0;
+                setLiveFailureCount(0);
                 setLiveTracking((value) => !value);
               }}
               className="mt-2 flex w-full items-center justify-center gap-2 border border-current/20 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-midground/80 hover:text-foreground"

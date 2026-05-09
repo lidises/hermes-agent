@@ -294,6 +294,30 @@ export type OfficeSafeTacticalTicker = {
   items: OfficeSafeTacticalTickerItem[];
 };
 
+export type OfficeSafeMissionClockOptions = {
+  liveTracking: boolean;
+  isVisible: boolean;
+  consecutiveFailures: number;
+  hasRecentChanges: boolean;
+};
+
+export type OfficeSafeMissionClockItem = {
+  id: "mode" | "cadence" | "safety" | "pulse";
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeMissionClock = {
+  stageLabel: string;
+  headline: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  items: OfficeSafeMissionClockItem[];
+};
+
 export type OfficeDeltaBadge = {
   label: string;
   tone: "positive" | "negative" | "warning" | "neutral";
@@ -1633,6 +1657,31 @@ export function buildOfficeSafeTacticalTicker(delta: OfficeStateDelta): OfficeSa
       { id: "focus", label: "초점", detail: focusChip?.detail ?? "대기 · 밀도 0", tone, ariaHidden: true, interactive: false },
       { id: "map", label: "전술", detail: minimap.summary, tone: "neutral", ariaHidden: true, interactive: false },
       { id: "cells", label: "방", detail: cellDetail, tone, ariaHidden: true, interactive: false },
+    ],
+  };
+}
+
+export function buildOfficeSafeMissionClock(options: OfficeSafeMissionClockOptions): OfficeSafeMissionClock {
+  const delay = resolveOfficeLiveTrackingInterval({ isVisible: options.isVisible, consecutiveFailures: options.consecutiveFailures });
+  const seconds = Math.round(delay / 1000);
+  const cadenceDetail = options.liveTracking ? `${seconds}초` : "수동 새로고침";
+  const modeDetail = options.liveTracking ? "실시간 추적" : "수동 추적";
+  const tabDetail = options.isVisible ? "표시 탭" : "숨김 탭";
+  const pulseDetail = options.hasRecentChanges ? "최근 변화 있음" : "변화 대기";
+  const cadenceTone: OfficeDeltaBadge["tone"] = options.consecutiveFailures > 0 || !options.isVisible ? "warning" : "neutral";
+  const modeTone: OfficeDeltaBadge["tone"] = options.liveTracking ? "positive" : "neutral";
+  const pulseTone: OfficeDeltaBadge["tone"] = options.hasRecentChanges ? "positive" : "neutral";
+
+  return {
+    stageLabel: "Stage 14-L 안전 mission clock",
+    headline: options.liveTracking ? `실시간 · ${tabDetail} · ${seconds}초` : `수동 · ${tabDetail} · 대기`,
+    detail: "브라우저 탭의 수동/실시간 추적 자세를 안전 작전 시계로 압축",
+    tone: options.liveTracking ? cadenceTone : "neutral",
+    items: [
+      { id: "mode", label: "모드", detail: modeDetail, tone: modeTone, ariaHidden: true, interactive: false },
+      { id: "cadence", label: "간격", detail: cadenceDetail, tone: cadenceTone, ariaHidden: true, interactive: false },
+      { id: "safety", label: "안전", detail: "브라우저 로컬 · 읽기 전용", tone: "neutral", ariaHidden: true, interactive: false },
+      { id: "pulse", label: "변화", detail: pulseDetail, tone: pulseTone, ariaHidden: true, interactive: false },
     ],
   };
 }

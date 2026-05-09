@@ -23,6 +23,7 @@ import {
   buildOfficeSafeFlowPulseBands,
   buildOfficeSafeTacticalMinimap,
   buildOfficeSafeTacticalTicker,
+  buildOfficeSafeMissionClock,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -925,6 +926,30 @@ describe("OfficePage view helpers", () => {
     ]);
     expect(ticker.items.every((item) => item.ariaHidden === true && item.interactive === false)).toBe(true);
     expect(`${ticker.headline} ${ticker.items.map((item) => `${item.label} ${item.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("builds safe Stage 14-L mission clock from browser-local posture only", () => {
+    const clock = buildOfficeSafeMissionClock({
+      liveTracking: true,
+      isVisible: false,
+      consecutiveFailures: 2,
+      hasRecentChanges: true,
+    });
+
+    expect(clock.stageLabel).toBe("Stage 14-L 안전 mission clock");
+    expect(clock.headline).toBe("실시간 · 숨김 탭 · 120초");
+    expect(clock.items.map((item) => [item.id, item.label, item.detail, item.tone])).toEqual([
+      ["mode", "모드", "실시간 추적", "positive"],
+      ["cadence", "간격", "120초", "warning"],
+      ["safety", "안전", "브라우저 로컬 · 읽기 전용", "neutral"],
+      ["pulse", "변화", "최근 변화 있음", "positive"],
+    ]);
+    expect(clock.items.every((item) => item.ariaHidden === true && item.interactive === false)).toBe(true);
+    expect(`${clock.headline} ${clock.items.map((item) => `${item.label} ${item.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+
+    const manual = buildOfficeSafeMissionClock({ liveTracking: false, isVisible: true, consecutiveFailures: 0, hasRecentChanges: false });
+    expect(manual.headline).toBe("수동 · 표시 탭 · 대기");
+    expect(manual.items.find((item) => item.id === "cadence")?.detail).toBe("수동 새로고침");
   });
 
   it("builds Korean empty-source copy without exposing raw adapter data", () => {
