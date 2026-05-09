@@ -2110,3 +2110,35 @@ Final verification before commit:
 - Backend focused office tests -> 18 passed in 1.02s.
 - `git diff --check` passed.
 - Browser smoke `/office?stage14c=safe-pulse-timeline`: pulse timeline exists, pulse item count 1, Stage 14-A tracking cues 11, Stage 14-B room meters 4, raw leak regex false, console JS errors none.
+
+## Stage 14-D safe breadcrumb trail implemented (2026-05-09 16:31 KST)
+
+Stage 14-D adds a compact safe breadcrumb rail to the `/office` DeskRPG map. The rail summarizes room-to-room change order from browser-local `OfficeStateDelta.changedFlows` only, using generated Korean labels/details and never projecting raw flow labels, raw recent-change text, prompts, transcripts, task bodies, scripts, logs, auth material, secrets, tokens, model/provider identities, or individual task identities.
+
+Implemented:
+
+- Added `OfficeSafeBreadcrumbSegment` and `OfficeSafeBreadcrumbTrail` types in `web/src/pages/officeView.ts`.
+- Added `buildOfficeSafeBreadcrumbTrail(delta)` with idle fallback, generated room labels, generated 출발/경유/도착 details, tone propagation from safe flow deltas, and a five-room cap.
+- Added RED/GREEN coverage in `web/src/pages/OfficePage.test.ts`; RED failure was `buildOfficeSafeBreadcrumbTrail is not a function`, then GREEN passed after helper implementation.
+- Rendered a read-only decorative breadcrumb rail in `web/src/pages/OfficePage.tsx` with `data-office-safe-breadcrumb="true"` and per-segment hooks.
+- Added lightweight CSS in `web/src/index.css`; CSS/SVG/DOM only, no renderer/runtime dependency.
+
+Safety posture:
+
+- `/office` remains read-only.
+- No backend/API/schema changes.
+- No mutation controls.
+- No persistent storage.
+- No raw record projection.
+- Breadcrumb segments are decorative/non-interactive (`aria-hidden`, pointer-events disabled) while visible labels remain generated safe Korean copy.
+
+Final verification before commit:
+
+- `npm test -- --run OfficePage.test.ts` -> 33 passed.
+- ESLint for `OfficePage.tsx`, `officeView.ts`, `OfficePage.test.ts` passed.
+- `npm run build` passed with the existing Vite large-chunk warning. Build output: JS 1,266.26 kB / gzip 369.99 kB; CSS 132.91 kB / gzip 21.41 kB.
+- Backend focused office tests -> 18 passed in 1.05s.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14d=safe-breadcrumb-trail`: breadcrumb exists, segments 1, Stage 14-C pulse timeline exists, pulse items 1, Stage 14-A tracking cues 11, Stage 14-B room activity meters 4, raw leak regex false, raw HTML sentinel leak false, console JS errors none.
+
+Next Stage 14-E candidate: compact safe route compass or room heartbeat legend tying Stage 14-B room meters, Stage 14-C pulse timeline, and Stage 14-D breadcrumb together without backend/schema/renderer changes.

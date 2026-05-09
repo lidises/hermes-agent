@@ -15,6 +15,7 @@ import {
   buildOfficeResponsiveReadabilityPlan,
   buildOfficeRoomActivityMeters,
   buildOfficeSafePulseTimeline,
+  buildOfficeSafeBreadcrumbTrail,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -702,6 +703,29 @@ describe("OfficePage view helpers", () => {
     ]);
     expect(timeline.items.every((item) => item.ariaHidden === true && item.interactive === false)).toBe(true);
     expect(timeline.items.map((item) => `${item.label} ${item.detail} ${item.reducedMotionLabel}`).join(" ")).not.toMatch(/raw|prompt|transcript|body|script|secret|token|sk-/i);
+  });
+
+  it("builds safe Stage 14-D breadcrumb trail from changed flows", () => {
+    const delta = {
+      hasChanges: true,
+      nodeBadges: { sessions: [], work: [], automation: [], routing: [] },
+      changedFlows: [
+        { from: "sessions" as const, to: "work" as const, label: "raw prompt must not matter", tone: "positive" as const },
+        { from: "work" as const, to: "automation" as const, label: "raw task_body script must not matter", tone: "warning" as const },
+      ],
+      recentChanges: [{ id: "recent-secret", label: "raw token", detail: "sk-should-not-leak", tone: "negative" as const }],
+    };
+
+    const trail = buildOfficeSafeBreadcrumbTrail(delta);
+
+    expect(trail.stageLabel).toBe("Stage 14-D 안전 breadcrumb");
+    expect(trail.segments.map((segment) => [segment.label, segment.detail, segment.tone])).toEqual([
+      ["세션", "출발 방 · 안전 흐름 변화", "positive"],
+      ["작업", "경유 방 · 안전 흐름 변화", "warning"],
+      ["자동화", "도착 방 · 안전 흐름 변화", "warning"],
+    ]);
+    expect(trail.segments.every((segment) => segment.ariaHidden === true && segment.interactive === false)).toBe(true);
+    expect(trail.segments.map((segment) => `${segment.label} ${segment.detail}`).join(" ")).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|sk-/i);
   });
 
   it("builds Korean empty-source copy without exposing raw adapter data", () => {

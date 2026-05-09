@@ -332,6 +332,29 @@ code { font-size: 0.875rem; }
 .office-safe-pulse-timeline__item--negative { color: #fca5a5; }
 .office-safe-pulse-timeline__item--warning { color: #fde68a; }
 .office-safe-pulse-timeline__item--neutral { color: rgba(203,213,225,0.72); }
+.office-safe-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.46rem;
+  align-items: center;
+  color: rgba(165, 243, 252, 0.86);
+  font-size: 0.62rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+}
+.office-safe-breadcrumb__title {
+  color: #67e8f9;
+  text-transform: uppercase;
+}
+.office-safe-breadcrumb__segment {
+  display: inline-flex;
+  gap: 0.24rem;
+  align-items: center;
+  pointer-events: none;
+}
+.office-safe-breadcrumb__arrow {
+  color: rgba(255,255,255,0.46);
+}
 .office-character-inspect {
   border: 0;
   background: transparent;

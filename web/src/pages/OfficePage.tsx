@@ -35,6 +35,7 @@ import {
   buildOfficeResponsiveReadabilityPlan,
   buildOfficeRoomActivityMeters,
   buildOfficeSafePulseTimeline,
+  buildOfficeSafeBreadcrumbTrail,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -458,6 +459,7 @@ function OfficeMap({
   const roomActivityMeters = buildOfficeRoomActivityMeters(nodes, densityPlan.visibleCharacters, latestDelta);
   const roomActivityById = new Map(roomActivityMeters.map((meter) => [meter.roomId, meter]));
   const safePulseTimeline = buildOfficeSafePulseTimeline(latestDelta);
+  const safeBreadcrumbTrail = buildOfficeSafeBreadcrumbTrail(latestDelta);
 
   return (
     <Card>
@@ -619,6 +621,7 @@ function OfficeMap({
               <span className="text-lime-200">Stage 14-A 동적 추적 · 큐 {trackingCues.length}개</span>
               <span className="text-amber-200">Stage 14-B 방 활동 · 미터 {roomActivityMeters.length}개</span>
               <span className="text-fuchsia-200">Stage 14-C pulse · {safePulseTimeline.items.length}개</span>
+              <span className="text-cyan-200">Stage 14-D breadcrumb · {safeBreadcrumbTrail.segments.length}개</span>
               {flows.map((flow) => {
                 const changedFlow = changedFlowById.get(`${flow.from}->${flow.to}`);
                 return (
@@ -664,6 +667,21 @@ function OfficeMap({
                 >
                   <span className="office-safe-pulse-timeline__dot" />
                   <span>{item.label}</span>
+                </span>
+              ))}
+            </div>
+            <div className="office-safe-breadcrumb mb-2" aria-label="Stage 14-D 안전 breadcrumb" data-office-safe-breadcrumb="true">
+              <span className="office-safe-breadcrumb__title">{safeBreadcrumbTrail.stageLabel}</span>
+              {safeBreadcrumbTrail.segments.map((segment, index) => (
+                <span
+                  key={segment.id}
+                  className={`office-safe-breadcrumb__segment ${safePulseToneClass(segment.tone)}`}
+                  title={segment.detail}
+                  aria-hidden={segment.ariaHidden}
+                  data-office-safe-breadcrumb-segment="true"
+                >
+                  <span>{segment.label}</span>
+                  {index < safeBreadcrumbTrail.segments.length - 1 ? <span className="office-safe-breadcrumb__arrow">→</span> : null}
                 </span>
               ))}
             </div>

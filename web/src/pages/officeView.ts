@@ -148,6 +148,21 @@ export type OfficeSafePulseTimeline = {
   items: OfficeSafePulseTimelineItem[];
 };
 
+export type OfficeSafeBreadcrumbSegment = {
+  id: string;
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeBreadcrumbTrail = {
+  stageLabel: string;
+  detail: string;
+  segments: OfficeSafeBreadcrumbSegment[];
+};
+
 export type OfficeDeltaBadge = {
   label: string;
   tone: "positive" | "negative" | "warning" | "neutral";
@@ -1197,6 +1212,42 @@ export function buildOfficeSafePulseTimeline(delta: OfficeStateDelta): OfficeSaf
     stageLabel: "Stage 14-C 안전 pulse timeline",
     detail: "방 badge, 흐름, 최근 변화 rail을 원문 없이 시간감 있는 pulse로 요약",
     items: items.slice(0, 6),
+  };
+}
+
+export function buildOfficeSafeBreadcrumbTrail(delta: OfficeStateDelta): OfficeSafeBreadcrumbTrail {
+  const firstFlow = delta.changedFlows[0];
+  if (!firstFlow) {
+    return {
+      stageLabel: "Stage 14-D 안전 breadcrumb",
+      detail: "아직 흐름 변화가 없어 현재 방 순서를 대기 상태로 표시",
+      segments: [{ id: "breadcrumb-idle", label: "대기", detail: "안전 흐름 변화 없음", tone: "neutral", ariaHidden: true, interactive: false }],
+    };
+  }
+
+  const roomOrder: OfficeMapNode["id"][] = [firstFlow.from, firstFlow.to];
+  const toneByRoom = new Map<OfficeMapNode["id"], OfficeDeltaBadge["tone"]>([
+    [firstFlow.from, firstFlow.tone],
+    [firstFlow.to, firstFlow.tone],
+  ]);
+  delta.changedFlows.slice(1, 4).forEach((flow) => {
+    if (!roomOrder.includes(flow.from)) roomOrder.push(flow.from);
+    if (!roomOrder.includes(flow.to)) roomOrder.push(flow.to);
+    toneByRoom.set(flow.from, flow.tone);
+    toneByRoom.set(flow.to, flow.tone);
+  });
+
+  return {
+    stageLabel: "Stage 14-D 안전 breadcrumb",
+    detail: "최근 안전 흐름 변화의 방 이동 순서를 원문 없이 요약",
+    segments: roomOrder.slice(0, 5).map((roomId, index, rooms) => ({
+      id: `breadcrumb-${roomId}-${index}`,
+      label: CHARACTER_ROOM_LABEL[roomId],
+      detail: `${index === 0 ? "출발" : index === rooms.length - 1 ? "도착" : "경유"} 방 · 안전 흐름 변화`,
+      tone: toneByRoom.get(roomId) ?? "neutral",
+      ariaHidden: true,
+      interactive: false,
+    })),
   };
 }
 

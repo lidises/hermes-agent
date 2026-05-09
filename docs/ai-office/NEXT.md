@@ -342,8 +342,18 @@ Keep constraints: no renderer/dependency, no backend/API/schema changes, no muta
 
 Current branch: `ai-office-stage14-dynamic-tracking-20260509`
 
-Stage 14-C implemented a safe pulse timeline from browser-local `OfficeStateDelta` (`nodeBadges`, `changedFlows`, `recentChanges`) and passed focused frontend test/lint/build. Finish final backend/diff/browser verification, then commit/push with `feat(office): add safe pulse timeline`.
+Stage 14-C implemented a safe pulse timeline from browser-local `OfficeStateDelta` (`nodeBadges`, `changedFlows`, `recentChanges`) and passed final local verification. Commit/push completed as `5e2b26d8 feat(office): add safe pulse timeline`.
 
 Next recommended Stage 14-D direction: safe breadcrumb trail for room-to-room changes or a compact character/room heartbeat legend, still CSS/SVG only and derived from safe DTO/delta fields.
+
+Keep constraints: no renderer/dependency, no backend/API/schema changes, no mutation controls, no persistent storage, no raw record projection.
+
+## Stage 14-D handoff: safe breadcrumb trail
+
+Current branch: `ai-office-stage14-dynamic-tracking-20260509`
+
+Stage 14-D implemented a safe breadcrumb rail from browser-local `OfficeStateDelta.changedFlows`. It generates Korean room labels/details only, ignores raw flow labels and recent change text, and keeps the rail decorative/non-interactive. Final local verification passed: 33 focused frontend tests, ESLint, build with existing Vite large-chunk warning, 18 backend office tests, `git diff --check`, and browser smoke for `/office?stage14d=safe-breadcrumb-trail`.
+
+Next recommended Stage 14-E direction: compact safe route compass or room heartbeat legend that ties Stage 14-B meters, Stage 14-C pulse, and Stage 14-D breadcrumb together without adding renderer dependencies or backend schema changes.
 
 Keep constraints: no renderer/dependency, no backend/API/schema changes, no mutation controls, no persistent storage, no raw record projection.
