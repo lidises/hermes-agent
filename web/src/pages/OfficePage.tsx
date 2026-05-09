@@ -46,6 +46,7 @@ import {
   buildOfficeSafeMissionClock,
   buildOfficeSafeCommandDeck,
   buildOfficeSafeStatusSnapshot,
+  buildOfficeSafeScanIndex,
   buildOfficeSafeFloorLegend,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
@@ -1196,6 +1197,15 @@ export default function OfficePage() {
     }),
     [latestDelta, liveFailureCount, liveTracking, state, tabVisible],
   );
+  const safeScanIndex = useMemo(
+    () => buildOfficeSafeScanIndex(state ?? { ...EMPTY_OFFICE_STATE }, latestDelta, {
+      liveTracking,
+      isVisible: tabVisible,
+      consecutiveFailures: liveFailureCount,
+      hasRecentChanges: latestDelta.hasChanges,
+    }),
+    [latestDelta, liveFailureCount, liveTracking, state, tabVisible],
+  );
 
   const sourceCounts = sourceHealth.counts;
 
@@ -1323,6 +1333,26 @@ export default function OfficePage() {
                     title={`${item.detail} · ${safeStatusSnapshot.detail}`}
                     aria-hidden={item.ariaHidden}
                     data-office-safe-status-snapshot-item={item.id}
+                  >
+                    <span>{item.label}</span>
+                    <span>{item.detail}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className={`office-safe-scan-index mt-3 ${safePulseToneClass(safeScanIndex.tone)}`} aria-label="Stage 14-P 안전 scan index" data-office-safe-scan-index="true">
+              <div className="office-safe-scan-index__header">
+                <span className="office-safe-scan-index__title">{safeScanIndex.stageLabel}</span>
+                <span className="office-safe-scan-index__headline" data-office-safe-scan-index-headline="true">{safeScanIndex.headline}</span>
+              </div>
+              <div className="office-safe-scan-index__grid" aria-hidden="true">
+                {safeScanIndex.items.map((item) => (
+                  <span
+                    key={`scan-index-${item.id}`}
+                    className={`office-safe-scan-index__item ${safePulseToneClass(item.tone)}`}
+                    title={`${item.detail} · ${safeScanIndex.detail}`}
+                    aria-hidden={item.ariaHidden}
+                    data-office-safe-scan-index-item={item.id}
                   >
                     <span>{item.label}</span>
                     <span>{item.detail}</span>

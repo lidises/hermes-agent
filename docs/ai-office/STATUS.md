@@ -1,10 +1,10 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-09 18:46 KST
+Last updated: 2026-05-09 18:56 KST
 
 ## Current phase
 
-Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, and Stage 14-A through Stage 14-O safe dynamic-tracking layers are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
+Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, and Stage 14-A through Stage 14-P safe dynamic-tracking layers are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
 
 Current Stage 9-E result: the `/office` page now uses Korean for primary headings, buttons, helper text, safety copy, status labels, inspector field labels, and office-map room/zone labels while keeping stable technical identifiers such as DTO, OfficeState, source IDs, cron, and enum-like adapter values visible for debugging.
 
@@ -62,6 +62,8 @@ Current Stage 14-N result: `/office` now adds a safe floor legend that compresse
 
 Current Stage 14-O result: `/office` now adds a safe status snapshot in the safety panel. `OfficeSafeStatusSnapshotItem`, `OfficeSafeStatusSnapshot`, and `buildOfficeSafeStatusSnapshot(state, delta, missionOptions)` compose command deck, floor legend, source health, and fixed guard copy into `deck|floor|source|guard` items.
 
+Current Stage 14-P result: `/office` now adds a safe scan index in the safety panel. `OfficeSafeScanIndexItem`, `OfficeSafeScanIndex`, and `buildOfficeSafeScanIndex(state, delta, missionOptions)` compose the safe status snapshot, floor legend rail count, and browser-local live/manual posture into `snapshot|rail|mode` items.
+
 Next phase: continue with another small non-renderer/read-only safe dynamic-tracking slice only if it can be derived from existing safe DTO/delta aggregates. Still no individual task identity, generated content-like speech bubbles, sprite assets, Phaser, PixiJS, canvas renderer, backend/API changes, mutation controls, persistent storage, or raw record projection.
 
 Stage 6 slices were approved by the user, including proceeding through the recommended remaining slices. Stage 7 was approved with testing deferred until the end. Stage 8-A was approved as the next safe step by the user saying to proceed in order, and the user then requested items 1 through 3 to run automatically in sequence. The user also approved installing missing test/runtime extras as needed in earlier setup. No gateway restart, cron change, Kanban mutation, NAS/Obsidian write, service/config mutation, memory/skill update, pixel dependency, or mutation-control implementation has been performed. The local dashboard process was restarted only to smoke-test the newly built local frontend bundle.
@@ -70,6 +72,38 @@ Stage 6 slices were approved by the user, including proceeding through the recom
 
 
 
+
+## Stage 14-P safe scan index implemented
+
+Implemented files/changes:
+
+- `web/src/pages/officeView.ts`
+  - Added `OfficeSafeScanIndexItem`, `OfficeSafeScanIndex`, and `buildOfficeSafeScanIndex(state, delta, missionOptions)`.
+  - The helper composes safe status snapshot, floor legend, rail count, and browser-local tracking mode only.
+- `web/src/pages/OfficePage.tsx`
+  - Renders the scan index in the safety panel with `data-office-safe-scan-index`, headline hook, and per-item hooks.
+- `web/src/index.css`
+  - Adds compact CSS-only scan index styling.
+- `web/src/pages/OfficePage.test.ts`
+  - Adds RED/GREEN helper coverage for `snapshot|rail|mode` items and raw-term exclusion.
+- `docs/ai-office/plans/2026-05-09-stage-14p-safe-scan-index.md`
+  - Records scope, constraints, TDD record, implementation, and verification target.
+
+Safety notes:
+
+- Stage 14-P remains frontend-only, read-only, CSS/DOM-only, and does not add backend/API/schema changes, renderer dependencies, mutation controls, persistent storage, or raw record projection.
+- The scan index does not use raw changed-flow labels, raw badge labels, recent-change labels/details, adapter error strings, provider/model identity, individual task identity, prompts, transcripts, task bodies, scripts, logs, auth fields, secrets, or tokens.
+
+Verification 2026-05-09 18:56 KST:
+
+- RED verified first: Stage 14-P test failed because `buildOfficeSafeScanIndex` was not a function.
+- GREEN focused helper/UI test passed: `OfficePage.test.ts` 45 passed.
+- Focused frontend verification passed: `npm test -- --run OfficePage.test.ts` → 45 passed.
+- ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/officeView.ts`, and `src/pages/OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large-chunk warning; current build size was JS `1,288.89 kB` / gzip `374.80 kB`, CSS `150.21 kB` / gzip `23.59 kB`.
+- Backend focused office tests passed: `18 passed in 1.02s`.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14p=safe-scan-index`: scan index present, headline present, items `snapshot|rail|mode`, Stage 14-O/N/M/L/K/J/I/H/G/F/E/D/C hooks present, raw leak regex false, console JS errors none.
 
 ## Stage 14-O safe status snapshot implemented
 
