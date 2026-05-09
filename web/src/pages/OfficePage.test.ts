@@ -36,6 +36,7 @@ import {
   buildOfficeSafeEventSubstrate,
   buildOfficeSafeMotionCommands,
   buildOfficeSafeStreamPosture,
+  buildOfficeSafeMotionHeartbeat,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -560,6 +561,33 @@ describe("OfficePage view helpers", () => {
     expect(unavailable.mode).toBe("local-fallback");
     expect(unavailable.events.map((event) => event.category)).toEqual(["snapshot_static"]);
     expect(`${loaded.summary} ${loaded.events[0].safeLabel} ${loaded.events[0].detail} ${unavailable.summary}`).not.toMatch(/raw|prompt|transcript|secret|token|provider|model|api_key|password|sk-/i);
+  });
+
+  it("builds safe Stage 16-D motion heartbeat from safe stream posture", () => {
+    const local = buildOfficeSafeEventSubstrate(buildOfficeStateDelta(null, officeFixture()), { visibleCharacterCount: 11, hasEventStream: false });
+    const stream = buildOfficeSafeStreamPosture({
+      status: "loaded",
+      events: [
+        { id: "event-1", category: "workload_changed", room_id: "work", tone: "negative", count: 4, generated_at: "2026-05-10T00:00:00Z", redacted: true },
+        { id: "event-2", category: "source_health_changed", room_id: "routing", tone: "warning", count: 2, generated_at: "2026-05-10T00:00:00Z", redacted: true },
+      ],
+      generated_at: "2026-05-10T00:00:00Z",
+    }, local);
+
+    const heartbeat = buildOfficeSafeMotionHeartbeat(stream, { pollStatus: "active", tick: 7, failureCount: 0, reducedMotion: false });
+    const reduced = buildOfficeSafeMotionHeartbeat(stream, { pollStatus: "active", tick: 8, failureCount: 0, reducedMotion: true });
+    const fallback = buildOfficeSafeMotionHeartbeat(local, { pollStatus: "unavailable", tick: 0, failureCount: 2, reducedMotion: false });
+
+    expect(heartbeat.stageLabel).toBe("Stage 16-D 안전 motion heartbeat");
+    expect(heartbeat.mode).toBe("safe-polling");
+    expect(heartbeat.phase).toBe("pulse");
+    expect(heartbeat.intensity).toBe("high");
+    expect(heartbeat.items.map((item) => item.id)).toEqual(["stream", "cadence", "motion"]);
+    expect(heartbeat.items[0].detail).toContain("백엔드 안전 이벤트");
+    expect(reduced.motionEnabled).toBe(false);
+    expect(fallback.mode).toBe("local-fallback");
+    expect(fallback.intensity).toBe("low");
+    expect(`${heartbeat.summary} ${heartbeat.items.map((item) => item.detail).join(" ")} ${fallback.summary}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|api_key|password|sk-/i);
   });
 
   it("builds Stage 10-F usability summary for dense, missing-source, reduced-motion, and responsive states", () => {

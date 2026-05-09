@@ -636,6 +636,32 @@ export type OfficeSafeMotionCommand = {
   interactive: false;
 };
 
+export type OfficeSafeMotionHeartbeatItem = {
+  id: "stream" | "cadence" | "motion";
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+};
+
+export type OfficeSafeMotionHeartbeat = {
+  stageLabel: string;
+  mode: "safe-polling" | "local-fallback" | "checking";
+  phase: "idle" | "scan" | "pulse" | "hold";
+  intensity: "low" | "medium" | "high";
+  summary: string;
+  motionEnabled: boolean;
+  items: OfficeSafeMotionHeartbeatItem[];
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeMotionHeartbeatOptions = {
+  pollStatus: "idle" | "active" | "loading" | "unavailable";
+  tick: number;
+  failureCount: number;
+  reducedMotion: boolean;
+};
+
 export function textField(row: Record<string, unknown>, key: string): string {
   const value = row[key];
   return typeof value === "string" && value.length > 0 ? value : "—";
@@ -988,6 +1014,47 @@ export function buildOfficeSafeMotionCommands(events: OfficeSafeEvent[]): Office
       interactive: false,
     };
   });
+}
+
+function safeHeartbeatIntensity(events: OfficeSafeEvent[]): OfficeSafeMotionHeartbeat["intensity"] {
+  const weight = events.reduce((total, event) => total + event.count + (event.tone === "negative" ? 4 : event.tone === "warning" ? 2 : 0), 0);
+  if (weight >= 8) return "high";
+  if (weight >= 3) return "medium";
+  return "low";
+}
+
+function safeHeartbeatPhase(options: OfficeSafeMotionHeartbeatOptions, mode: OfficeSafeMotionHeartbeat["mode"]): OfficeSafeMotionHeartbeat["phase"] {
+  if (mode === "checking") return "scan";
+  if (options.pollStatus === "unavailable") return "hold";
+  if (options.tick <= 0) return "idle";
+  return options.tick % 2 === 1 ? "pulse" : "scan";
+}
+
+export function buildOfficeSafeMotionHeartbeat(posture: OfficeSafeStreamPosture | OfficeSafeEventSubstrate, options: OfficeSafeMotionHeartbeatOptions): OfficeSafeMotionHeartbeat {
+  const postureMode = "label" in posture ? posture.mode : posture.mode === "event-stream" ? "backend-safe-stream" : "local-fallback";
+  const mode: OfficeSafeMotionHeartbeat["mode"] = options.pollStatus === "loading" || postureMode === "loading" ? "checking" : postureMode === "backend-safe-stream" && options.pollStatus === "active" ? "safe-polling" : "local-fallback";
+  const eventCount = posture.events.length;
+  const intensity = mode === "local-fallback" ? "low" : safeHeartbeatIntensity(posture.events);
+  const phase = safeHeartbeatPhase(options, mode);
+  const motionEnabled = !options.reducedMotion && phase !== "hold";
+  const streamDetail = mode === "safe-polling" ? `백엔드 안전 이벤트 ${eventCount}개` : mode === "checking" ? "안전 endpoint 확인 중" : `로컬 안전 투영 ${eventCount}개`;
+  const cadenceDetail = options.failureCount > 0 ? `poll 보류 ${options.failureCount}회 · fallback 유지` : `tick ${Math.max(0, options.tick)} · ${phase}`;
+  const motionDetail = motionEnabled ? `${intensity} heartbeat · CSS safe motion` : "정지/감속 · reduced/fallback posture";
+  return {
+    stageLabel: "Stage 16-D 안전 motion heartbeat",
+    mode,
+    phase,
+    intensity,
+    summary: `${streamDetail} · ${cadenceDetail} · ${motionEnabled ? "움직임 켜짐" : "움직임 제한"}`,
+    motionEnabled,
+    items: [
+      { id: "stream", label: "스트림", detail: streamDetail, tone: mode === "safe-polling" ? "positive" : mode === "checking" ? "warning" : "neutral" },
+      { id: "cadence", label: "박자", detail: cadenceDetail, tone: options.failureCount > 0 ? "warning" : "positive" },
+      { id: "motion", label: "움직임", detail: motionDetail, tone: intensity === "high" ? "negative" : intensity === "medium" ? "warning" : "neutral" },
+    ],
+    ariaHidden: true,
+    interactive: false,
+  };
 }
 
 export function numberField(row: Record<string, unknown>, key: string): number | null {

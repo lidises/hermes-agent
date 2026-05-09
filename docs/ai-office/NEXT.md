@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-10 00:28 KST
+Last updated: 2026-05-10 00:50 KST
 
 ## Start here after `/new`
 
@@ -64,37 +64,39 @@ When not to rely on `/goal` alone:
 
 ## Current next stage
 
-Stage 16-C is now the active implementation stage on `ai-office-stage16c-safe-event-stream-20260510`: connect the Stage 16-B safe event substrate to a protected read-only backend safe event endpoint without exposing raw commands, prompts, transcripts, task bodies, scripts, logs, provider/model identity, secrets, tokens, adapter errors, or task identity.
+Stage 16-D is now the active implementation stage on `ai-office-stage16d-safe-motion-heartbeat-20260510`: make the Stage 16-C safe event endpoint visibly drive a safe heartbeat/scan cadence in `/office`, without raw event content, renderer dependencies, persistent storage, mutation controls, SSE, or WebSocket.
 
-Stage 16-C current implementation:
+Stage 16-D current implementation:
 
-- Backend `GET /api/office/events` is dashboard-session protected and read-only.
-- Payload shape is allowlisted: schema/generation metadata plus events with `id`, `category`, `room_id`, `tone`, `count`, `generated_at`, and `redacted`.
-- Backend projection is built from already-redacted `OfficeState` summary/source posture only.
-- Mutation methods against `/api/office/events` are rejected.
-- Frontend `api.getOfficeEvents()` fetches the safe event endpoint.
-- `buildOfficeSafeStreamPosture(...)` maps backend loaded/unavailable states to `backend-safe-stream` or `local-fallback`.
-- `/office` exposes `data-office-safe-stream-status` and keeps the Stage 16-B local projection as fallback.
+- `buildOfficeSafeMotionHeartbeat(...)` maps safe stream posture + local polling metadata into generated Korean heartbeat mode/phase/intensity copy.
+- `/office` polls `/api/office/events` every 5 seconds while the tab is visible and keeps Stage 16-C local fallback if unavailable.
+- The UI renders a compact `Stage 16-D 안전 motion heartbeat` rail near the safe event substrate.
+- New smoke hooks:
+  - `data-office-safe-motion-heartbeat="true"`
+  - `data-office-safe-motion-heartbeat-mode`
+  - `data-office-safe-motion-heartbeat-phase`
+  - `data-office-safe-motion-heartbeat-intensity`
+  - `data-office-safe-motion-heartbeat-enabled`
+  - `data-office-safe-motion-heartbeat-item="stream|cadence|motion"`
+- CSS-only pulse/scan cues are reduced-motion aware.
 
 Verification completed:
 
-- Backend RED verified before endpoint implementation.
-- Backend GREEN: `test_office_api.py` 6 passed.
-- Frontend RED verified before `buildOfficeSafeStreamPosture` implementation.
-- Frontend GREEN: `OfficePage.test.ts` 53 passed.
-- Final frontend focused test: `OfficePage.test.ts` 53 passed.
+- RED verified before helper implementation: `buildOfficeSafeMotionHeartbeat is not a function`.
+- GREEN after helper implementation: `OfficePage.test.ts` 54 passed.
+- Final frontend focused test: `OfficePage.test.ts` 54 passed.
 - ESLint passed for `OfficePage.tsx`, `officeView.ts`, `OfficePage.test.ts`, and `api.ts`.
 - `npm run build` passed with the existing Vite large chunk warning only.
-- Backend focused office tests passed: 21 passed in 1.68s.
+- Backend focused office tests passed: 21 passed in 1.02s.
 - `git diff --check` passed.
-- Browser smoke `/office?stage16c=safe-event-stream` passed: safe event substrate, stream status `local-fallback`, static safe event item, idle motion command, raw leak false, and console JS errors none.
+- Browser smoke `/office?stage16d=safe-motion-heartbeat` passed: safe event substrate, stream status, heartbeat mode/phase/intensity hooks, heartbeat items, motion lane, raw leak false, and console JS errors none.
 
-Immediate next action: commit and push Stage 16-C:
+Immediate next action: commit/push Stage 16-D:
 
-- `git commit -m "feat(office): add read-only safe event stream"`
-- `git push origin ai-office-stage16c-safe-event-stream-20260510`
+- `git commit -m "feat(office): add safe motion heartbeat"`
+- `git push origin ai-office-stage16d-safe-motion-heartbeat-20260510`
 
-Recommended next implementation stage after Stage 16-C: Stage 16-D can evaluate whether a long-lived SSE/WebSocket stream is worth adding. If added, it must reuse the same safe event shape and include redaction-before-emit tests; do not stream raw logs/prompts/transcripts/tool args/scripts/provider/model identity/task bodies.
+Recommended next implementation stage after Stage 16-D: if more movement is still desired, Stage 16-E can add richer safe spatial choreography over rooms/routes using the same safe event shape. Keep it CSS/SVG, read-only, and raw-free unless explicitly approved otherwise.
 
 
 Stage 9-E current implementation:

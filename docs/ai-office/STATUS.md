@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-10 00:28 KST
+Last updated: 2026-05-10 00:50 KST
 
 ## Current phase
 
@@ -66,9 +66,9 @@ Current Stage 14-P result: `/office` now adds a safe scan index in the safety pa
 
 Current Stage 14-Q result: `/office` now adds a safe HUD readability strip in the safety panel. `OfficeSafeHudReadabilityPlanOptions`, `OfficeSafeHudReadabilityPlanItem`, `OfficeSafeHudReadabilityPlan`, and `buildOfficeSafeHudReadabilityPlan(options)` derive only from browser-local viewport width, reduced-motion preference, safe panel count, and live/manual tracking posture, then render generated `layout|motion|density|tracking` items.
 
-Current Stage 16-C result in progress: Stage 16-C now adds a protected read-only backend safe event endpoint on branch `ai-office-stage16c-safe-event-stream-20260510`. `/api/office/events` is dashboard-session protected, rejects mutation methods, and returns an allowlisted `safe_snapshot_events` payload built from already-redacted `OfficeState` summary/source posture only. The frontend adds `api.getOfficeEvents()`, `buildOfficeSafeStreamPosture(...)`, and `data-office-safe-stream-status` so `/office` can show `backend-safe-stream`, `local-fallback`, or loading posture while preserving the Stage 16-B local projection. Payload/UI copy remains category/count/room/tone/timestamp only; raw prompts, transcripts, task bodies, scripts, logs, provider/model identity, secrets, tokens, adapter errors, and task identity are not emitted or rendered.
+Current Stage 16-D result in progress: Stage 16-D now adds a browser-local safe motion heartbeat on branch `ai-office-stage16d-safe-motion-heartbeat-20260510`. `buildOfficeSafeMotionHeartbeat(...)` maps the Stage 16-C stream posture plus local polling tick/failure metadata into generated Korean heartbeat labels, phase (`idle|scan|pulse|hold`), intensity (`low|medium|high`), and decorative/read-only flags. `/office` polls `/api/office/events` while the tab is visible, increments a local safe tick on successful safe-event fetches, and renders `data-office-safe-motion-heartbeat` with mode/phase/intensity/enabled hooks plus CSS-only pulse/scan cues. This keeps Stage 16-C backend-safe stream/local fallback behavior and still excludes raw prompts, transcripts, task bodies, scripts, logs, provider/model identity, secrets, tokens, adapter errors, and task identity.
 
-Next phase after Stage 16-C: finish verification/commit on `ai-office-stage16c-safe-event-stream-20260510`. If more real-time behavior is needed after this branch, Stage 16-D can evaluate SSE/WebSocket polling cadence, but only over the same safe event shape and with explicit redaction-before-emit tests.
+Next phase after Stage 16-D: finish verification/commit on `ai-office-stage16d-safe-motion-heartbeat-20260510`. If even more motion is wanted after this branch, Stage 16-E should stay within the same safe event shape and can add richer spatial choreography over rooms/routes; do not add renderer dependencies, SSE/WebSocket, mutation controls, or raw payload exposure without explicit approval and tests.
 
 Stage 6 slices were approved by the user, including proceeding through the recommended remaining slices. Stage 7 was approved with testing deferred until the end. Stage 8-A was approved as the next safe step by the user saying to proceed in order, and the user then requested items 1 through 3 to run automatically in sequence. The user also approved installing missing test/runtime extras as needed in earlier setup. No gateway restart, cron change, Kanban mutation, NAS/Obsidian write, service/config mutation, memory/skill update, pixel dependency, or mutation-control implementation has been performed. The local dashboard process was restarted only to smoke-test the newly built local frontend bundle.
 
@@ -78,7 +78,46 @@ Stage 6 slices were approved by the user, including proceeding through the recom
 
 
 
-## Stage 16-C read-only safe event stream in progress
+## Stage 16-D safe motion heartbeat in progress
+
+Branch: `ai-office-stage16d-safe-motion-heartbeat-20260510`
+
+Plan:
+
+- `docs/ai-office/plans/2026-05-10-stage-16d-safe-motion-heartbeat.md`
+
+Implementation summary:
+
+- Added `OfficeSafeMotionHeartbeat`, `OfficeSafeMotionHeartbeatItem`, and `buildOfficeSafeMotionHeartbeat(...)`.
+- The heartbeat derives only from Stage 16-C safe stream posture plus browser-local poll status, tick count, failure count, and reduced-motion preference.
+- `/office` performs safe visible-tab polling for `/api/office/events` and keeps local fallback if unavailable.
+- Added a compact heartbeat rail near the safe event substrate:
+  - `data-office-safe-motion-heartbeat="true"`
+  - `data-office-safe-motion-heartbeat-mode`
+  - `data-office-safe-motion-heartbeat-phase`
+  - `data-office-safe-motion-heartbeat-intensity`
+  - `data-office-safe-motion-heartbeat-enabled`
+  - `data-office-safe-motion-heartbeat-item="stream|cadence|motion"`
+- Added CSS-only heartbeat/scan cues with reduced-motion fallback.
+
+Safety posture:
+
+- read-only endpoint polling only.
+- no SSE/WebSocket, renderer dependency, persistent browser storage, mutation controls, or service/config change.
+- no raw prompt/transcript/task_body/script/log/provider/model/secret/token/adapter error/task identity rendered.
+
+Verification 2026-05-10 00:52 KST:
+
+- RED verified: `buildOfficeSafeMotionHeartbeat` missing test failed.
+- GREEN verified: `OfficePage.test.ts` 54 passed after helper implementation.
+- Final frontend focused test: `OfficePage.test.ts` 54 passed.
+- ESLint passed for `OfficePage.tsx`, `officeView.ts`, `OfficePage.test.ts`, and `api.ts`.
+- `npm run build` passed with the existing Vite large chunk warning only.
+- Backend focused office tests passed: 21 passed in 1.02s.
+- `git diff --check` passed.
+- Browser smoke `/office?stage16d=safe-motion-heartbeat` passed: office-first layout, safe event substrate, stream status `local-fallback`, heartbeat present, heartbeat mode/phase/intensity/enabled hooks present, heartbeat items `stream|cadence|motion`, motion lane, tracking truth, diagnostics drawer, raw leak false, console JS errors none.
+
+## Stage 16-C read-only safe event stream completed
 
 Branch: `ai-office-stage16c-safe-event-stream-20260510`
 

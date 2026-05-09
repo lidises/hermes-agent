@@ -55,6 +55,7 @@ import {
   buildOfficeSafeEventSubstrate,
   buildOfficeSafeMotionCommands,
   buildOfficeSafeStreamPosture,
+  buildOfficeSafeMotionHeartbeat,
   buildOfficeSafeFloorLegend,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
@@ -475,6 +476,7 @@ function OfficeMap({
   selectedCharacterId,
   selectedCharacterFocus,
   safeStreamPosture,
+  safeMotionHeartbeat,
   onDensityModeChange,
   onInspect,
   onInspectCharacter,
@@ -495,6 +497,7 @@ function OfficeMap({
   selectedCharacterId: string | null;
   selectedCharacterFocus: ReturnType<typeof buildOfficeSelectedCharacterFocus>;
   safeStreamPosture: ReturnType<typeof buildOfficeSafeStreamPosture>;
+  safeMotionHeartbeat: ReturnType<typeof buildOfficeSafeMotionHeartbeat>;
   onDensityModeChange: (mode: OfficeMapDensityMode) => void;
   onInspect: (node: OfficeMapNode) => void;
   onInspectCharacter: (character: OfficeCharacter) => void;
@@ -595,6 +598,20 @@ function OfficeMap({
                 ))}
               </div>
             </div>
+            <div className="office-safe-motion-heartbeat" data-office-safe-motion-heartbeat="true" data-office-safe-motion-heartbeat-mode={safeMotionHeartbeat.mode} data-office-safe-motion-heartbeat-phase={safeMotionHeartbeat.phase} data-office-safe-motion-heartbeat-intensity={safeMotionHeartbeat.intensity} data-office-safe-motion-heartbeat-enabled={safeMotionHeartbeat.motionEnabled ? "true" : "false"} aria-hidden={safeMotionHeartbeat.ariaHidden}>
+              <div className="office-safe-motion-heartbeat__pulse" />
+              <div>
+                <div className="office-safe-motion-heartbeat__title">Stage 16-D 안전 motion heartbeat</div>
+                <div className="office-safe-motion-heartbeat__summary">{safeMotionHeartbeat.summary}</div>
+              </div>
+              <div className="office-safe-motion-heartbeat__items">
+                {safeMotionHeartbeat.items.map((item) => (
+                  <span key={item.id} className={`office-safe-motion-heartbeat__item ${safePulseToneClass(item.tone)}`} data-office-safe-motion-heartbeat-item={item.id} title={item.detail}>
+                    {item.label}
+                  </span>
+                ))}
+              </div>
+            </div>
             <div className="office-safe-motion-lane" data-office-safe-motion-lane="true" aria-label="안전 이벤트 기반 움직임 신호">
               {safeMotionCommands.slice(0, 4).map((command) => (
                 <span key={command.id} className={`${command.className} ${safePulseToneClass(command.tone)}`} data-office-safe-motion-command={command.kind} data-office-safe-motion-room={command.roomId} aria-hidden={command.ariaHidden} title={command.detail}>
@@ -630,6 +647,7 @@ function OfficeMap({
           data-office-responsive-mode={responsivePlan.viewportMode}
           data-office-responsive-recommended-density={responsivePlan.recommendedDensityMode}
           data-office-safe-event-motion={safeStreamPosture.mode}
+          data-office-safe-motion-heartbeat-map={safeMotionHeartbeat.phase}
         >
           <svg className="pointer-events-none absolute inset-0 z-10 h-full w-full text-midground/20" role="img" aria-label="읽기 전용 오피스 흐름 연결" viewBox="0 0 100 100" preserveAspectRatio="none">
             <defs>
@@ -1124,6 +1142,8 @@ export default function OfficePage() {
   const [error, setError] = useState<string | null>(null);
   const [safeEvents, setSafeEvents] = useState<OfficeSafeEventsResponse | null>(null);
   const [safeEventsStatus, setSafeEventsStatus] = useState<"idle" | "loading" | "loaded" | "unavailable">("idle");
+  const [safeMotionTick, setSafeMotionTick] = useState(0);
+  const [safeMotionFailures, setSafeMotionFailures] = useState(0);
   const [focus, setFocus] = useState<FocusOption>("overview");
   const [selection, setSelection] = useState<InspectorSelection | null>(null);
   const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
@@ -1153,10 +1173,13 @@ export default function OfficePage() {
       const next = await api.getOfficeEvents();
       setSafeEvents(next);
       setSafeEventsStatus("loaded");
+      setSafeMotionTick((current) => current + 1);
+      setSafeMotionFailures(0);
       return true;
     } catch {
       setSafeEvents(null);
       setSafeEventsStatus("unavailable");
+      setSafeMotionFailures((current) => current + 1);
       return false;
     }
   }, []);
@@ -1186,12 +1209,15 @@ export default function OfficePage() {
         if (!cancelled) {
           setSafeEvents(next);
           setSafeEventsStatus("loaded");
+          setSafeMotionTick((current) => current + 1);
+          setSafeMotionFailures(0);
         }
       })
       .catch(() => {
         if (!cancelled) {
           setSafeEvents(null);
           setSafeEventsStatus("unavailable");
+          setSafeMotionFailures((current) => current + 1);
         }
       });
     api
@@ -1228,6 +1254,14 @@ export default function OfficePage() {
       document.removeEventListener("visibilitychange", updateVisibility);
     };
   }, []);
+
+  useEffect(() => {
+    if (!tabVisible) return undefined;
+    const intervalId = window.setInterval(() => {
+      void loadSafeEvents();
+    }, 5000);
+    return () => window.clearInterval(intervalId);
+  }, [loadSafeEvents, tabVisible]);
 
   useEffect(() => {
     if (!liveTracking) return undefined;
@@ -1306,6 +1340,15 @@ export default function OfficePage() {
       localSafeEventSubstrate,
     ),
     [localSafeEventSubstrate, safeEvents, safeEventsStatus],
+  );
+  const safeMotionHeartbeat = useMemo(
+    () => buildOfficeSafeMotionHeartbeat(safeStreamPosture, {
+      pollStatus: safeEventsStatus === "loaded" ? "active" : safeEventsStatus,
+      tick: safeMotionTick,
+      failureCount: safeMotionFailures,
+      reducedMotion: prefersReducedMotion,
+    }),
+    [prefersReducedMotion, safeEventsStatus, safeMotionFailures, safeMotionTick, safeStreamPosture],
   );
   const trackingTruth = useMemo(
     () => buildOfficeTrackingTruthPlan(latestDelta, { hasEventStream: safeStreamPosture.mode === "backend-safe-stream", visibleCharacterCount: densityPlan.visibleCharacters.length }),
@@ -1439,6 +1482,7 @@ export default function OfficePage() {
           selectedCharacterId={selectedCharacterId}
           selectedCharacterFocus={selectedCharacterFocus}
           safeStreamPosture={safeStreamPosture}
+          safeMotionHeartbeat={safeMotionHeartbeat}
           onDensityModeChange={setDensityMode}
           onInspect={(node) => inspectRecord("오피스 맵 방", node.label, [
             ["방", node.id],
