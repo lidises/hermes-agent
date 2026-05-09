@@ -26,6 +26,7 @@ import {
   buildOfficeSafeMissionClock,
   buildOfficeSafeCommandDeck,
   buildOfficeSafeFloorLegend,
+  buildOfficeSafeStatusSnapshot,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -1012,6 +1013,44 @@ describe("OfficePage view helpers", () => {
     ]);
     expect(legend.items.every((item) => item.ariaHidden === true && item.interactive === false)).toBe(true);
     expect(`${legend.summary} ${legend.items.map((item) => `${item.label} ${item.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("builds safe Stage 14-O status snapshot from existing safe HUD helpers", () => {
+    const state = officeFixture({
+      data_sources: [
+        { id: "sessions", status: "ok", checked_at: "2026-05-08T00:00:00Z", item_count: 1 },
+        { id: "kanban", status: "unavailable", checked_at: "2026-05-08T00:00:00Z", item_count: 0, warning_count: 1 },
+      ],
+    });
+    const delta = {
+      hasChanges: true,
+      nodeBadges: {
+        sessions: [{ label: "raw prompt", tone: "positive" as const }],
+        work: [{ label: "raw task_body", tone: "negative" as const }],
+        automation: [],
+        routing: [],
+      },
+      changedFlows: [{ from: "sessions" as const, to: "work" as const, label: "raw provider", tone: "negative" as const }],
+      recentChanges: [],
+    };
+
+    const snapshot = buildOfficeSafeStatusSnapshot(state, delta, {
+      liveTracking: false,
+      isVisible: true,
+      consecutiveFailures: 0,
+      hasRecentChanges: true,
+    });
+
+    expect(snapshot.stageLabel).toBe("Stage 14-O 안전 status snapshot");
+    expect(snapshot.headline).toBe("소스 주의 · 활성 2 · 대기 2 · 흐름 1");
+    expect(snapshot.items.map((item) => [item.id, item.label, item.detail, item.tone])).toEqual([
+      ["deck", "상태판", "수동 · 표시 탭 · 변화 감지", "warning"],
+      ["floor", "바닥", "활성 2 · 대기 2 · 흐름 1", "negative"],
+      ["source", "소스", "2개 중 1개 사용 가능", "warning"],
+      ["guard", "가드", "읽기 전용 · 원문 제외", "neutral"],
+    ]);
+    expect(snapshot.items.every((item) => item.ariaHidden === true && item.interactive === false)).toBe(true);
+    expect(`${snapshot.headline} ${snapshot.items.map((item) => `${item.label} ${item.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
   });
 
   it("builds Korean empty-source copy without exposing raw adapter data", () => {

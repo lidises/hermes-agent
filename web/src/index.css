@@ -810,6 +810,56 @@ code { font-size: 0.875rem; }
 .office-safe-command-deck__card span:first-child {
   color: color-mix(in srgb, currentColor 70%, white 16%);
 }
+.office-safe-status-snapshot {
+  pointer-events: none;
+  border: 1px solid rgba(34, 211, 238, 0.2);
+  background:
+    linear-gradient(135deg, rgba(14, 116, 144, 0.16), rgba(0, 0, 0, 0.3)),
+    radial-gradient(circle at 12% 18%, rgba(103, 232, 249, 0.12), transparent 34%);
+  padding: 0.48rem;
+  color: rgba(207, 250, 254, 0.9);
+}
+.office-safe-status-snapshot__header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.28rem 0.45rem;
+  align-items: center;
+  justify-content: space-between;
+}
+.office-safe-status-snapshot__title {
+  color: #67e8f9;
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.office-safe-status-snapshot__headline {
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  background: rgba(0, 0, 0, 0.34);
+  padding: 0.08rem 0.28rem;
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+.office-safe-status-snapshot__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.25rem;
+  margin-top: 0.4rem;
+}
+.office-safe-status-snapshot__item {
+  display: grid;
+  gap: 0.06rem;
+  border-left: 1px solid color-mix(in srgb, currentColor 34%, transparent);
+  background: rgba(0, 0, 0, 0.22);
+  padding: 0.22rem 0.28rem;
+  font-size: 0.55rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+}
+.office-safe-status-snapshot__item span:first-child {
+  color: color-mix(in srgb, currentColor 70%, white 16%);
+}
 @keyframes office-safe-flow-pulse-band {
   0% { stroke-dashoffset: 0; opacity: 0.42; }
   50% { opacity: 0.96; }

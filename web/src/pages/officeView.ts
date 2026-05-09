@@ -352,6 +352,23 @@ export type OfficeSafeFloorLegend = {
   items: OfficeSafeFloorLegendItem[];
 };
 
+export type OfficeSafeStatusSnapshotItem = {
+  id: "deck" | "floor" | "source" | "guard";
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeStatusSnapshot = {
+  stageLabel: string;
+  headline: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  items: OfficeSafeStatusSnapshotItem[];
+};
+
 export type OfficeDeltaBadge = {
   label: string;
   tone: "positive" | "negative" | "warning" | "neutral";
@@ -1760,6 +1777,33 @@ export function buildOfficeSafeFloorLegend(delta: OfficeStateDelta): OfficeSafeF
     stageLabel: "Stage 14-N 안전 floor legend",
     summary: `활성 ${activeCells.length} · 대기 ${idleCells.length} · 흐름 ${flowBands.bands.length}`,
     detail: "tactical minimap과 flow bands를 바닥 범례로 압축",
+    tone: items.reduce<OfficeDeltaBadge["tone"]>((current, item) => (tonePriority[item.tone] > tonePriority[current] ? item.tone : current), "neutral"),
+    items,
+  };
+}
+
+export function buildOfficeSafeStatusSnapshot(state: OfficeState, delta: OfficeStateDelta, missionOptions: OfficeSafeMissionClockOptions): OfficeSafeStatusSnapshot {
+  const commandDeck = buildOfficeSafeCommandDeck(state, delta, missionOptions);
+  const floorLegend = buildOfficeSafeFloorLegend(delta);
+  const sourceHealth = buildOfficeSourceHealthSummary(state);
+  const reportedSourceCount = state.data_sources.length;
+  const usableSourceCount = state.data_sources.filter((source) => source.status === "ok").length;
+  const reportedSourceAttention = state.data_sources.some((source) => source.status !== "ok" || (source.warning_count ?? 0) > 0);
+  const sourceTone: OfficeDeltaBadge["tone"] = reportedSourceAttention ? "warning" : sourceHealth.tone;
+  const sourceHeadline = sourceTone === "warning" ? "소스 주의" : sourceTone === "positive" ? "소스 정상" : "소스 공백";
+  const missionDetail = missionOptions.hasRecentChanges ? commandDeck.cards[0]?.detail.replace("대기", "변화 감지") : commandDeck.cards[0]?.detail;
+  const tonePriority: Record<OfficeDeltaBadge["tone"], number> = { negative: 4, warning: 3, positive: 2, neutral: 1 };
+  const items: OfficeSafeStatusSnapshotItem[] = [
+    { id: "deck", label: "상태판", detail: missionDetail ?? commandDeck.headline, tone: missionOptions.hasRecentChanges ? "warning" : commandDeck.tone, ariaHidden: true, interactive: false },
+    { id: "floor", label: "바닥", detail: floorLegend.summary, tone: floorLegend.tone, ariaHidden: true, interactive: false },
+    { id: "source", label: "소스", detail: `${reportedSourceCount}개 중 ${usableSourceCount}개 사용 가능`, tone: sourceTone, ariaHidden: true, interactive: false },
+    { id: "guard", label: "가드", detail: "읽기 전용 · 원문 제외", tone: "neutral", ariaHidden: true, interactive: false },
+  ];
+
+  return {
+    stageLabel: "Stage 14-O 안전 status snapshot",
+    headline: `${sourceHeadline} · ${floorLegend.summary}`,
+    detail: "command deck, floor legend, source health를 안전 상태 스냅샷으로 압축",
     tone: items.reduce<OfficeDeltaBadge["tone"]>((current, item) => (tonePriority[item.tone] > tonePriority[current] ? item.tone : current), "neutral"),
     items,
   };

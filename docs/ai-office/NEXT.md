@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-09 18:39 KST
+Last updated: 2026-05-09 18:46 KST
 
 ## Start here after `/new`
 
@@ -64,7 +64,7 @@ When not to rely on `/goal` alone:
 
 ## Current next stage
 
-Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer evidence/polish/decision closure, Stage 12 product-polish slices, Stage 13 PR/handoff summary, and Stage 14-A through Stage 14-N safe dynamic-tracking layers are implemented on top of Stage 9-D and the Stage 8 read-only dashboard. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
+Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer evidence/polish/decision closure, Stage 12 product-polish slices, Stage 13 PR/handoff summary, and Stage 14-A through Stage 14-O safe dynamic-tracking layers are implemented on top of Stage 9-D and the Stage 8 read-only dashboard. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
 
 
 Stage 9-E current implementation:
@@ -106,10 +106,11 @@ Stage 9-F current implementation:
 - Stage 14-L adds a safe mission clock: `OfficeSafeMissionClock` and `buildOfficeSafeMissionClock(options)` compress browser-local live/manual posture, tab visibility, local read failures, and latest safe-delta presence into `mode|cadence|safety|pulse` items with `data-office-safe-mission-clock`.
 - Stage 14-M adds a safe command deck: `OfficeSafeCommandDeck` and `buildOfficeSafeCommandDeck(state, delta, missionOptions)` group mission/tactical/source/safety cards with `data-office-safe-command-deck`.
 - Stage 14-N adds a safe floor legend: `OfficeSafeFloorLegend` and `buildOfficeSafeFloorLegend(delta)` group generated active rooms, idle rooms, safe flow count, and projection safety with `data-office-safe-floor-legend`.
+- Stage 14-O adds a safe status snapshot: `OfficeSafeStatusSnapshot` and `buildOfficeSafeStatusSnapshot(state, delta, missionOptions)` consolidate deck/floor/source/guard posture with `data-office-safe-status-snapshot`.
 - First snapshots produce no fabricated history; manual refresh remains the default.
 - Planning note expanded: `docs/ai-office/plans/2026-05-09-koreanization-and-dynamic-map.md`.
 
-Recommended next implementation/design stage: after Stage 14-N final verification and commit, continue only with another small non-renderer/read-only safe dynamic-tracking or readability slice derived from existing safe DTO/delta aggregates. Do not expose individual task identity, generate content-like speech bubbles, add character mutation targets, or add Phaser, PixiJS, canvas, sprite assets, DeskRPG code/assets, backend/schema/API changes, mutation controls, persistent storage, or raw record projection. Renderer work remains closed unless new measured evidence and explicit approval reopen it.
+Recommended next implementation/design stage: after Stage 14-O final verification and commit, continue only with another small non-renderer/read-only safe dynamic-tracking or readability slice derived from existing safe DTO/delta aggregates. Do not expose individual task identity, generate content-like speech bubbles, add character mutation targets, or add Phaser, PixiJS, canvas, sprite assets, DeskRPG code/assets, backend/schema/API changes, mutation controls, persistent storage, or raw record projection. Renderer work remains closed unless new measured evidence and explicit approval reopen it.
 
 Stage 9-D completed:
 
@@ -145,11 +146,11 @@ Browser smoke: http://127.0.0.1:8765/office
 
 ## Immediate next action
 
-Immediate next action is Stage 14-N final verification and commit/push, then continue only with the next very small safe dynamic-tracking/readability slice if it remains non-duplicative:
+Immediate next action is Stage 14-O final verification and commit/push, then continue only with the next very small safe dynamic-tracking/readability slice if it remains non-duplicative:
 
-1. Verify Stage 14-N with frontend tests, ESLint, build, backend office tests, diff checks, and browser smoke on `/office?stage14n=safe-floor-legend`.
-2. Commit/push with `feat(office): add safe floor legend` if verification passes.
-3. Candidate Stage 14-O, only if continued: safe consolidation/readability status snapshot only if it improves scanability derived from existing safe DTO/delta aggregates, with no new source reads and no renderer decision reopening.
+1. Verify Stage 14-O with frontend tests, ESLint, build, backend office tests, diff checks, and browser smoke on `/office?stage14o=safe-status-snapshot`.
+2. Commit/push with `feat(office): add safe status snapshot` if verification passes.
+3. Candidate Stage 14-P, only if continued: safe consolidation/readability pass only if it improves scanability derived from existing safe DTO/delta aggregates, with no new source reads and no renderer decision reopening.
 4. Keep CSS/SVG/DOM-only, frontend-only, read-only, no persistence, no mutation controls, no backend/API/schema changes, no renderer dependencies, and no raw record projection.
 5. Do not add mutation controls, expose dashboard remotely, add Pixi/Phaser/canvas, copy DeskRPG assets/code, create/edit topic registry data, or create/modify Kanban/Cron state without separate approval.
 

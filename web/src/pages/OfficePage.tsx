@@ -45,6 +45,7 @@ import {
   buildOfficeSafeTacticalTicker,
   buildOfficeSafeMissionClock,
   buildOfficeSafeCommandDeck,
+  buildOfficeSafeStatusSnapshot,
   buildOfficeSafeFloorLegend,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
@@ -1186,6 +1187,15 @@ export default function OfficePage() {
     }),
     [latestDelta, liveFailureCount, liveTracking, state, tabVisible],
   );
+  const safeStatusSnapshot = useMemo(
+    () => buildOfficeSafeStatusSnapshot(state ?? { ...EMPTY_OFFICE_STATE }, latestDelta, {
+      liveTracking,
+      isVisible: tabVisible,
+      consecutiveFailures: liveFailureCount,
+      hasRecentChanges: latestDelta.hasChanges,
+    }),
+    [latestDelta, liveFailureCount, liveTracking, state, tabVisible],
+  );
 
   const sourceCounts = sourceHealth.counts;
 
@@ -1296,6 +1306,26 @@ export default function OfficePage() {
                   >
                     <span>{card.label}</span>
                     <span>{card.detail}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className={`office-safe-status-snapshot mt-3 ${safePulseToneClass(safeStatusSnapshot.tone)}`} aria-label="Stage 14-O 안전 status snapshot" data-office-safe-status-snapshot="true">
+              <div className="office-safe-status-snapshot__header">
+                <span className="office-safe-status-snapshot__title">{safeStatusSnapshot.stageLabel}</span>
+                <span className="office-safe-status-snapshot__headline" data-office-safe-status-snapshot-headline="true">{safeStatusSnapshot.headline}</span>
+              </div>
+              <div className="office-safe-status-snapshot__grid" aria-hidden="true">
+                {safeStatusSnapshot.items.map((item) => (
+                  <span
+                    key={`status-snapshot-${item.id}`}
+                    className={`office-safe-status-snapshot__item ${safePulseToneClass(item.tone)}`}
+                    title={`${item.detail} · ${safeStatusSnapshot.detail}`}
+                    aria-hidden={item.ariaHidden}
+                    data-office-safe-status-snapshot-item={item.id}
+                  >
+                    <span>{item.label}</span>
+                    <span>{item.detail}</span>
                   </span>
                 ))}
               </div>
