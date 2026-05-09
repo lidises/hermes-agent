@@ -1083,9 +1083,9 @@ describe("OfficePage view helpers", () => {
     });
 
     expect(index.stageLabel).toBe("Stage 14-P 안전 scan index");
-    expect(index.headline).toBe("스캔 4칸 · 소스 주의 · 활성 3 · 대기 1 · 흐름 1");
+    expect(index.headline).toBe("스캔 4칸 · snapshot 기준");
     expect(index.items.map((item) => [item.id, item.label, item.detail, item.tone])).toEqual([
-      ["snapshot", "스냅샷", "소스 주의 · 활성 3 · 대기 1 · 흐름 1", "negative"],
+      ["snapshot", "스냅샷", "상태 snapshot 참조", "negative"],
       ["rail", "레일", "4개 안전 칸", "negative"],
       ["mode", "모드", "실시간 · 표시 탭", "positive"],
     ]);
@@ -1133,6 +1133,29 @@ describe("OfficePage view helpers", () => {
     ]);
     expect(hierarchy.sections.every((section) => section.ariaHidden === true && section.interactive === false)).toBe(true);
     expect(`${hierarchy.headline} ${hierarchy.summary} ${hierarchy.sections.map((section) => `${section.label} ${section.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("reduces duplicate Stage 15-B scan copy while preserving safe ownership", () => {
+    const state = officeFixture({
+      data_sources: [
+        { id: "sessions", status: "ok", checked_at: "2026-05-08T00:00:00Z", item_count: 1 },
+        { id: "cron", status: "partial", checked_at: "2026-05-08T00:00:00Z", item_count: 1, warning_count: 1 },
+      ],
+    });
+    const delta = buildOfficeStateDelta(null, state);
+    const index = buildOfficeSafeScanIndex(state, delta, {
+      liveTracking: true,
+      isVisible: true,
+      consecutiveFailures: 0,
+      hasRecentChanges: true,
+    });
+
+    expect(index.headline).toBe("스캔 4칸 · snapshot 기준");
+    expect(index.items.find((item) => item.id === "snapshot")?.detail).toBe("상태 snapshot 참조");
+    expect(index.items.find((item) => item.id === "rail")?.detail).toBe("4개 안전 칸");
+    expect(index.headline).not.toContain("활성");
+    expect(index.headline).not.toContain("흐름");
+    expect(`${index.headline} ${index.items.map((item) => `${item.label} ${item.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
   });
 
   it("builds Korean empty-source copy without exposing raw adapter data", () => {

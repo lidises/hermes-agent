@@ -1884,14 +1884,14 @@ export function buildOfficeSafeScanIndex(state: OfficeState, delta: OfficeStateD
   const modeDetail = `${missionOptions.liveTracking ? "실시간" : "수동"} · ${missionOptions.isVisible ? "표시 탭" : "숨김 탭"}`;
   const tonePriority: Record<OfficeDeltaBadge["tone"], number> = { negative: 4, warning: 3, positive: 2, neutral: 1 };
   const items: OfficeSafeScanIndexItem[] = [
-    { id: "snapshot", label: "스냅샷", detail: snapshot.headline, tone: snapshot.tone, ariaHidden: true, interactive: false },
+    { id: "snapshot", label: "스냅샷", detail: "상태 snapshot 참조", tone: snapshot.tone, ariaHidden: true, interactive: false },
     { id: "rail", label: "레일", detail: `${railCount}개 안전 칸`, tone: floorLegend.tone, ariaHidden: true, interactive: false },
     { id: "mode", label: "모드", detail: modeDetail, tone: missionOptions.liveTracking && missionOptions.isVisible && missionOptions.consecutiveFailures === 0 ? "positive" : "warning", ariaHidden: true, interactive: false },
   ];
 
   return {
     stageLabel: "Stage 14-P 안전 scan index",
-    headline: `스캔 ${railCount}칸 · ${snapshot.headline}`,
+    headline: `스캔 ${railCount}칸 · snapshot 기준`,
     detail: "status snapshot과 안전 rail 수를 빠른 스캔 색인으로 압축",
     tone: items.reduce<OfficeDeltaBadge["tone"]>((current, item) => (tonePriority[item.tone] > tonePriority[current] ? item.tone : current), "neutral"),
     items,
