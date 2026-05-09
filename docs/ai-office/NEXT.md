@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-09 22:55 KST
+Last updated: 2026-05-09 23:18 KST
 
 ## Start here after `/new`
 
@@ -64,29 +64,34 @@ When not to rely on `/goal` alone:
 
 ## Current next stage
 
-Stage 16-A is now the active implementation stage on `ai-office-stage16a-office-first-reset-20260509`: reset `/office` to an AI Office-first scene surface after the Stage 14/15 HUD stack was merged. The current branch adds a scene-first layout plan, snapshot/delta tracking truth copy, click-first selected-character focus, a persistent safe selected-character panel, and a secondary diagnostics drawer posture. Keep finishing verification/commit on this branch before starting Stage 16-B.
+Stage 16-B is now the active implementation stage on `ai-office-stage16-safe-realtime-motion-20260509`: make `/office` feel reactive by projecting existing safe snapshot/delta aggregates into a redacted event substrate and generated movement lane. This is still frontend-only/read-only and does not add backend SSE/WebSocket yet.
 
-Stage 16-A current implementation:
+Stage 16-B current implementation:
 
-- `buildOfficeFirstLayoutPlan(...)` makes scene primary, inspector/timeline secondary, diagnostics secondary-collapsed, with Korean-first heading `AI Office 먼저 보기`.
-- `buildOfficeTrackingTruthPlan(...)` labels the current tracking substrate as snapshot/delta unless a future safe event stream exists.
-- `buildOfficeSelectedCharacterFocus(...)` creates a safe selected-character card from generated character fields and safe delta only.
-- `/office` renders `data-office-first-layout="true"`, `data-office-tracking-truth="true"`, `data-office-selected-character-panel="true"`, and per-marker `data-office-character-selected="true|false"`.
-- Stage 14/15 HUD remains read-only and available, but sits behind `data-office-diagnostics-drawer="true"` as secondary diagnostics.
-- Safe event substrate remains a future planning boundary: redacted event categories/counts/timing buckets only; no raw logs/prompts/transcripts/tool args/scripts/provider/model identity/task bodies.
+- `buildOfficeSafeEventSubstrate(delta, options)` generates allowlisted safe events only: `snapshot_static`, `room_density_changed`, `flow_changed`, and `attention_changed`.
+- `buildOfficeSafeMotionCommands(events)` converts those safe events into generated visual commands: `idle-glow`, `pulse-room`, `route-lane`, and `attention-spark`.
+- `/office` renders `data-office-safe-event-substrate="true"`, `data-office-safe-event-item`, `data-office-safe-motion-lane="true"`, and `data-office-safe-motion-command` near the Stage 16-A tracking truth strip.
+- First/static snapshots intentionally show a static posture event instead of fabricated movement.
+- Event and command copy is generated from known room IDs, tones, and counts; raw badge/flow labels are ignored.
 
 Verification completed:
 
-- RED verified for the missing Stage 16-A helper.
-- GREEN focused helper/UI test: `OfficePage.test.ts` 50 passed.
-- Final frontend focused test: `OfficePage.test.ts` 50 passed.
+- RED verified for missing `buildOfficeSafeEventSubstrate`.
+- GREEN focused helper/UI test: `OfficePage.test.ts` 52 passed.
+- Final frontend focused test: `OfficePage.test.ts` 52 passed.
 - ESLint passed for `OfficePage.tsx`, `officeView.ts`, and `OfficePage.test.ts`.
 - `npm run build` passed with the existing Vite large chunk warning only.
-- Backend focused office tests passed: 18 passed in 1.05s.
+- Backend focused office tests passed: 18 passed in 0.98s.
 - `git diff --check` passed.
-- Browser smoke `/office?stage16a=office-first-reset` passed: office-first layout, tracking truth strip, click-selected character marker/panel, diagnostics drawer, prior Stage 14 hooks, raw leak false, and console JS errors none.
+- Browser smoke `/office?stage16b=safe-event-substrate-motion` passed: office-first layout, tracking truth, safe event substrate, static event item, safe motion lane, selected-character click, diagnostics drawer, prior Stage 14 hooks, raw leak false, and console JS errors none.
 
-Recommended next implementation/design stage after Stage 16-A: do not add another HUD. If the user continues, Stage 16-B should be a safe event substrate design/implementation decision gate, not renderer work and not mutation controls. CSS/SVG/DOM remains primary unless new measured evidence and explicit approval reopen renderer work.
+Immediate next action: commit and push Stage 16-B:
+
+- `git add ...`
+- `git commit -m "feat(office): add safe event substrate motion"`
+- `git push origin ai-office-stage16-safe-realtime-motion-20260509`
+
+Recommended next implementation stage after Stage 16-B: Stage 16-C can connect a read-only backend event stream to this safe event shape, but only with allowlist-only payloads, redaction-before-emit tests, no raw logs/prompts/transcripts/tool args/scripts/provider/model identity/task bodies, and explicit approval.
 
 
 Stage 9-E current implementation:

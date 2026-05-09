@@ -52,6 +52,8 @@ import {
   buildOfficeFirstLayoutPlan,
   buildOfficeTrackingTruthPlan,
   buildOfficeSelectedCharacterFocus,
+  buildOfficeSafeEventSubstrate,
+  buildOfficeSafeMotionCommands,
   buildOfficeSafeFloorLegend,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
@@ -512,6 +514,8 @@ function OfficeMap({
   const safeTacticalMinimap = buildOfficeSafeTacticalMinimap(latestDelta);
   const safeTacticalTicker = buildOfficeSafeTacticalTicker(latestDelta);
   const safeFloorLegend = buildOfficeSafeFloorLegend(latestDelta);
+  const safeEventSubstrate = buildOfficeSafeEventSubstrate(latestDelta, { visibleCharacterCount: densityPlan.visibleCharacters.length, hasEventStream: false });
+  const safeMotionCommands = buildOfficeSafeMotionCommands(safeEventSubstrate.events);
 
   return (
     <Card className="office-first-layout" data-office-first-layout="true">
@@ -577,6 +581,24 @@ function OfficeMap({
             <div className="mt-2 flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.12em] text-emerald-100/60">
               {trackingTruth.caveats.map((caveat) => <span key={caveat}>{caveat}</span>)}
             </div>
+            <div className="office-safe-event-substrate" data-office-safe-event-substrate="true" data-office-safe-event-substrate-mode={safeEventSubstrate.mode}>
+              <div className="office-safe-event-substrate__title">Stage 16-B 안전 이벤트 substrate</div>
+              <div className="office-safe-event-substrate__summary">{safeEventSubstrate.summary}</div>
+              <div className="office-safe-event-substrate__items">
+                {safeEventSubstrate.events.slice(0, 4).map((event) => (
+                  <span key={event.id} className={`office-safe-event-substrate__item ${safePulseToneClass(event.tone)}`} data-office-safe-event-item={event.category} data-office-safe-event-room={event.roomId} title={event.detail}>
+                    {event.safeLabel} · {event.count}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="office-safe-motion-lane" data-office-safe-motion-lane="true" aria-label="안전 이벤트 기반 움직임 신호">
+              {safeMotionCommands.slice(0, 4).map((command) => (
+                <span key={command.id} className={`${command.className} ${safePulseToneClass(command.tone)}`} data-office-safe-motion-command={command.kind} data-office-safe-motion-room={command.roomId} aria-hidden={command.ariaHidden} title={command.detail}>
+                  {command.label}
+                </span>
+              ))}
+            </div>
           </div>
           <div className="border border-current/15 bg-black/20 p-3 text-xs" data-office-selected-character-panel="true">
             <div className="flex items-center justify-between gap-3">
@@ -604,6 +626,7 @@ function OfficeMap({
           data-office-responsive="true"
           data-office-responsive-mode={responsivePlan.viewportMode}
           data-office-responsive-recommended-density={responsivePlan.recommendedDensityMode}
+          data-office-safe-event-motion={safeEventSubstrate.mode}
         >
           <svg className="pointer-events-none absolute inset-0 z-10 h-full w-full text-midground/20" role="img" aria-label="읽기 전용 오피스 흐름 연결" viewBox="0 0 100 100" preserveAspectRatio="none">
             <defs>

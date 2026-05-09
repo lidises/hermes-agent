@@ -33,6 +33,8 @@ import {
   buildOfficeFirstLayoutPlan,
   buildOfficeTrackingTruthPlan,
   buildOfficeSelectedCharacterFocus,
+  buildOfficeSafeEventSubstrate,
+  buildOfficeSafeMotionCommands,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -477,6 +479,57 @@ describe("OfficePage view helpers", () => {
       ],
     });
     expect(`${truth.label} ${truth.detail} ${truth.caveats.join(" ")} ${focus.title} ${focus.summary} ${focus.fields.flat().join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|body|script|secret|token|provider|model provider|sk-/i);
+  });
+
+  it("builds safe Stage 16-B event substrate and motion commands", () => {
+    const delta = {
+      ...buildOfficeStateDelta(null, officeFixture()),
+      nodeBadges: {
+        sessions: [{ label: "raw prompt +3 token must not matter", tone: "positive" as const }],
+        work: [{ label: "raw task_body warning secret must not matter", tone: "warning" as const }],
+        automation: [],
+        routing: [],
+      },
+      changedFlows: [{ from: "sessions" as const, to: "work" as const, label: "raw transcript script provider must not matter", tone: "warning" as const }],
+    };
+
+    const substrate = buildOfficeSafeEventSubstrate(delta, { visibleCharacterCount: 11, hasEventStream: false });
+    const commands = buildOfficeSafeMotionCommands(substrate.events);
+
+    expect(substrate.stageLabel).toBe("Stage 16-B safe event substrate");
+    expect(substrate.mode).toBe("projected-events");
+    expect(substrate.summary).toBe("안전 이벤트 4개 · snapshot/delta 투영");
+    expect(substrate.events.map((event) => event.category)).toEqual(["room_density_changed", "room_density_changed", "flow_changed", "attention_changed"]);
+    expect(substrate.events.map((event) => event.roomId)).toEqual(["sessions", "work", "sessions", "work"]);
+    expect(substrate.events.every((event) => event.redacted && event.safeLabel.length > 0 && event.rawSource === false)).toBe(true);
+    expect(commands.map((command) => command.kind)).toEqual(["pulse-room", "pulse-room", "route-lane", "attention-spark"]);
+    expect(commands.find((command) => command.kind === "route-lane")?.lane).toBe("sessions-work");
+    expect(`${substrate.summary} ${substrate.events.map((event) => `${event.safeLabel} ${event.detail}`).join(" ")} ${commands.map((command) => `${command.label} ${command.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|body|script|secret|token|provider|model|api_key|password|sk-/i);
+  });
+
+  it("keeps Stage 16-B first snapshot static without fabricated movement", () => {
+    const substrate = buildOfficeSafeEventSubstrate(buildOfficeStateDelta(null, officeFixture()), { visibleCharacterCount: 11, hasEventStream: false });
+    const commands = buildOfficeSafeMotionCommands(substrate.events);
+
+    expect(substrate.mode).toBe("static-posture");
+    expect(substrate.events).toEqual([
+      expect.objectContaining({
+        category: "snapshot_static",
+        roomId: "sessions",
+        tone: "neutral",
+        count: 11,
+        safeLabel: "정적 안전 스냅샷",
+        redacted: true,
+        rawSource: false,
+      }),
+    ]);
+    expect(commands).toEqual([
+      expect.objectContaining({
+        kind: "idle-glow",
+        roomId: "sessions",
+        label: "대기 광원",
+      }),
+    ]);
   });
 
   it("builds Stage 10-F usability summary for dense, missing-source, reduced-motion, and responsive states", () => {

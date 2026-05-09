@@ -1054,6 +1054,74 @@ code { font-size: 0.875rem; }
 .office-first-layout {
   box-shadow: 0 24px 80px rgba(16, 185, 129, 0.08);
 }
+.office-safe-event-substrate {
+  margin-top: 0.75rem;
+  border: 1px solid rgba(110, 231, 183, 0.18);
+  background: rgba(6, 78, 59, 0.14);
+  padding: 0.55rem;
+}
+.office-safe-event-substrate__title {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(167, 243, 208, 0.9);
+}
+.office-safe-event-substrate__summary {
+  margin-top: 0.18rem;
+  color: rgba(209, 250, 229, 0.76);
+  font-size: 0.72rem;
+}
+.office-safe-event-substrate__items,
+.office-safe-motion-lane {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.45rem;
+}
+.office-safe-event-substrate__item,
+.office-safe-motion-command {
+  border: 1px solid rgba(167, 243, 208, 0.2);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.22);
+  padding: 0.16rem 0.45rem;
+  color: rgba(236, 253, 245, 0.82);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.office-safe-motion-command {
+  position: relative;
+  overflow: hidden;
+}
+.office-safe-motion-command::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.24), transparent);
+  transform: translateX(-120%);
+  animation: office-safe-event-scan 2.4s ease-in-out infinite;
+}
+.office-safe-motion-command--idle::after {
+  animation-duration: 4.5s;
+  opacity: 0.45;
+}
+.office-safe-motion-command--attention::after {
+  animation-duration: 1.25s;
+}
+[data-office-safe-event-motion="projected-events"] {
+  box-shadow: inset 0 0 36px rgba(16, 185, 129, 0.08), 0 0 0 1px rgba(16, 185, 129, 0.12);
+}
+@keyframes office-safe-event-scan {
+  0% { transform: translateX(-120%); }
+  55%, 100% { transform: translateX(120%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .office-safe-motion-command::after {
+    animation: none;
+    opacity: 0;
+  }
+}
 .office-character {
   --office-character-main: color-mix(in srgb, var(--midground-base) 68%, #ffffff 4%);
   --office-character-accent: #9ee7d7;

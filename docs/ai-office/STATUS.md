@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-09 22:56 KST
+Last updated: 2026-05-09 23:18 KST
 
 ## Current phase
 
@@ -66,9 +66,9 @@ Current Stage 14-P result: `/office` now adds a safe scan index in the safety pa
 
 Current Stage 14-Q result: `/office` now adds a safe HUD readability strip in the safety panel. `OfficeSafeHudReadabilityPlanOptions`, `OfficeSafeHudReadabilityPlanItem`, `OfficeSafeHudReadabilityPlan`, and `buildOfficeSafeHudReadabilityPlan(options)` derive only from browser-local viewport width, reduced-motion preference, safe panel count, and live/manual tracking posture, then render generated `layout|motion|density|tracking` items.
 
-Current Stage 16-A result in progress: `/office` is being reset to an AI Office-first surface after the Stage 14/15 HUD stack was merged. The map/scene now leads the page, Stage 14/15 diagnostic HUD is secondary, character inspection is click-first with browser-local selected-character state, and the UI explicitly labels current tracking as snapshot/delta based rather than a true event stream. This remains frontend-only, read-only, CSS/DOM/SVG-only, and still has no backend/API/schema changes, mutation controls, persistent storage, renderer dependency, individual task identity, raw record projection, or secret/provider/model exposure.
+Current Stage 16-B result in progress: Stage 16-B now adds a frontend-only safe event substrate projection on branch `ai-office-stage16-safe-realtime-motion-20260509`. `OfficeSafeEvent`, `OfficeSafeEventSubstrate`, and `buildOfficeSafeEventSubstrate(delta, options)` convert existing safe snapshot/delta aggregates into redacted event categories such as `snapshot_static`, `room_density_changed`, `flow_changed`, and `attention_changed`. `OfficeSafeMotionCommand` and `buildOfficeSafeMotionCommands(events)` convert those events into generated movement cues such as `idle-glow`, `pulse-room`, `route-lane`, and `attention-spark`. `/office` renders `data-office-safe-event-substrate`, `data-office-safe-event-item`, `data-office-safe-motion-lane`, and `data-office-safe-motion-command` near the Stage 16-A tracking truth strip so the office visibly reacts like a live room while still using only safe categories/counts/rooms/tones. This is not a backend SSE/WebSocket stream; it is the safe frontend contract and motion substrate for a later approved Stage 16-C stream.
 
-Next phase after Stage 16-A: do not add more HUD by default. If continued, Stage 16-B should first define the safe event substrate boundary for real tracking: redacted event categories/counts and safe timing buckets only, never raw logs, prompts, transcripts, tool args, scripts, provider/model identity, credentials, or task bodies.
+Next phase after Stage 16-B: finish verification/commit on `ai-office-stage16-safe-realtime-motion-20260509`. If more real-time behavior is needed after this branch, Stage 16-C should connect a read-only backend event stream to this exact safe event shape, with allowlist-only payloads and redaction-before-emit tests.
 
 Stage 6 slices were approved by the user, including proceeding through the recommended remaining slices. Stage 7 was approved with testing deferred until the end. Stage 8-A was approved as the next safe step by the user saying to proceed in order, and the user then requested items 1 through 3 to run automatically in sequence. The user also approved installing missing test/runtime extras as needed in earlier setup. No gateway restart, cron change, Kanban mutation, NAS/Obsidian write, service/config mutation, memory/skill update, pixel dependency, or mutation-control implementation has been performed. The local dashboard process was restarted only to smoke-test the newly built local frontend bundle.
 
@@ -78,7 +78,51 @@ Stage 6 slices were approved by the user, including proceeding through the recom
 
 
 
-## Stage 16-A AI Office-first reset in progress
+## Stage 16-B safe event substrate motion in progress
+
+Branch: `ai-office-stage16-safe-realtime-motion-20260509`
+
+Plan:
+
+- `docs/ai-office/plans/2026-05-09-stage-16b-safe-event-substrate-motion.md`
+
+Implementation summary:
+
+- Added safe event substrate helper/view-models:
+  - `OfficeSafeEvent` / `OfficeSafeEventSubstrate` / `buildOfficeSafeEventSubstrate(...)`
+  - `OfficeSafeMotionCommand` / `buildOfficeSafeMotionCommands(...)`
+- Safe events are generated from existing safe `OfficeStateDelta` only:
+  - `snapshot_static` for first/static snapshots with no fabricated movement.
+  - `room_density_changed` for safe room badge density.
+  - `flow_changed` for known room-to-room flow deltas.
+  - `attention_changed` for warning/negative room posture.
+- `/office` renders a compact Stage 16-B event substrate strip and movement lane near Stage 16-A tracking truth:
+  - `data-office-safe-event-substrate="true"`
+  - `data-office-safe-event-item`
+  - `data-office-safe-motion-lane="true"`
+  - `data-office-safe-motion-command`
+- CSS adds subtle scan/pulse effects for generated motion commands, with reduced-motion fallback.
+
+Safety posture:
+
+- frontend-only, read-only, CSS/DOM/SVG-only.
+- no backend/API/schema changes, no SSE/WebSocket yet.
+- no mutation controls, no persistent browser storage, no renderer dependency.
+- no raw prompt/transcript/task_body/script/log/provider/model/secret/token/task identity projection.
+- this stage creates the safe visual/event contract that a later Stage 16-C backend stream can feed.
+
+Verification 2026-05-09 23:20 KST:
+
+- RED verified for missing `buildOfficeSafeEventSubstrate`.
+- GREEN focused helper/UI test: `OfficePage.test.ts` 52 passed.
+- Final frontend focused test: `OfficePage.test.ts` 52 passed.
+- ESLint passed for `OfficePage.tsx`, `officeView.ts`, and `OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large chunk warning only.
+- Backend focused office tests passed: 18 passed in 0.98s.
+- `git diff --check` passed.
+- Browser smoke `/office?stage16b=safe-event-substrate-motion`: office-first layout present, tracking truth present, safe event substrate present, static first-snapshot event item present, safe motion lane present with `idle-glow`, selected-character click still works, diagnostics drawer present, prior route compass/focus lane/breadcrumb/pulse timeline hooks present, raw leak false, console JS errors none.
+
+## Stage 16-A AI Office-first reset completed
 
 Branch: `ai-office-stage16a-office-first-reset-20260509`
 

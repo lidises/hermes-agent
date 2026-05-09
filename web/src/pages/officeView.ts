@@ -582,6 +582,44 @@ export type OfficeSelectedCharacterFocus = {
   fields: Array<[string, string]>;
 };
 
+export type OfficeSafeEventCategory = "snapshot_static" | "room_density_changed" | "flow_changed" | "attention_changed";
+
+export type OfficeSafeEvent = {
+  id: string;
+  category: OfficeSafeEventCategory;
+  roomId: OfficeMapNode["id"];
+  toRoomId?: OfficeMapNode["id"];
+  tone: OfficeDeltaBadge["tone"];
+  count: number;
+  lane?: string;
+  safeLabel: string;
+  detail: string;
+  redacted: true;
+  rawSource: false;
+};
+
+export type OfficeSafeEventSubstrate = {
+  stageLabel: string;
+  mode: "static-posture" | "projected-events" | "event-stream";
+  summary: string;
+  events: OfficeSafeEvent[];
+};
+
+export type OfficeSafeMotionCommand = {
+  id: string;
+  kind: "idle-glow" | "pulse-room" | "route-lane" | "attention-spark";
+  roomId: OfficeMapNode["id"];
+  toRoomId?: OfficeMapNode["id"];
+  lane?: string;
+  tone: OfficeDeltaBadge["tone"];
+  count: number;
+  label: string;
+  detail: string;
+  className: string;
+  ariaHidden: true;
+  interactive: false;
+};
+
 export function textField(row: Record<string, unknown>, key: string): string {
   const value = row[key];
   return typeof value === "string" && value.length > 0 ? value : "—";
@@ -682,6 +720,172 @@ export function buildOfficeSelectedCharacterFocus(character: OfficeCharacter | n
       ["추적", "스냅샷 변화 기반 · 원문 제외"],
     ],
   };
+}
+
+const OFFICE_SAFE_EVENT_ROOM_ORDER: OfficeMapNode["id"][] = ["sessions", "work", "automation", "routing"];
+
+function safeEventToneRank(tone: OfficeDeltaBadge["tone"]): number {
+  if (tone === "negative") return 4;
+  if (tone === "warning") return 3;
+  if (tone === "positive") return 2;
+  return 1;
+}
+
+function safeEventToneLabel(tone: OfficeDeltaBadge["tone"]): string {
+  if (tone === "negative") return "긴급";
+  if (tone === "warning") return "주의";
+  if (tone === "positive") return "증가";
+  return "변화";
+}
+
+function safeEventDetail(roomId: OfficeMapNode["id"], tone: OfficeDeltaBadge["tone"], count: number): string {
+  return `${CHARACTER_ROOM_LABEL[roomId]} · ${safeEventToneLabel(tone)} · 안전 변화 ${count}개`;
+}
+
+export function buildOfficeSafeEventSubstrate(
+  delta: OfficeStateDelta,
+  options: { visibleCharacterCount: number; hasEventStream?: boolean },
+): OfficeSafeEventSubstrate {
+  const events: OfficeSafeEvent[] = [];
+  for (const roomId of OFFICE_SAFE_EVENT_ROOM_ORDER) {
+    const badges = delta.nodeBadges[roomId] ?? [];
+    if (badges.length === 0) continue;
+    const tone = badges.reduce<OfficeDeltaBadge["tone"]>((selected, badge) => (safeEventToneRank(badge.tone) > safeEventToneRank(selected) ? badge.tone : selected), "neutral");
+    events.push({
+      id: `room-${roomId}-${events.length}`,
+      category: "room_density_changed",
+      roomId,
+      tone,
+      count: badges.length,
+      safeLabel: `${CHARACTER_ROOM_LABEL[roomId]} 변화`,
+      detail: safeEventDetail(roomId, tone, badges.length),
+      redacted: true,
+      rawSource: false,
+    });
+  }
+
+  for (const flow of delta.changedFlows) {
+    const lane = `${flow.from}-${flow.to}`;
+    events.push({
+      id: `flow-${lane}-${events.length}`,
+      category: "flow_changed",
+      roomId: flow.from,
+      toRoomId: flow.to,
+      tone: flow.tone,
+      count: 1,
+      lane,
+      safeLabel: "방 이동 신호",
+      detail: `${CHARACTER_ROOM_LABEL[flow.from]}에서 ${CHARACTER_ROOM_LABEL[flow.to]}로 · 안전 흐름 변화`,
+      redacted: true,
+      rawSource: false,
+    });
+  }
+
+  const attentionRooms = OFFICE_SAFE_EVENT_ROOM_ORDER.filter((roomId) => (delta.nodeBadges[roomId] ?? []).some((badge) => badge.tone === "warning" || badge.tone === "negative"));
+  for (const roomId of attentionRooms) {
+    const badges = delta.nodeBadges[roomId] ?? [];
+    const tone = badges.some((badge) => badge.tone === "negative") ? "negative" : "warning";
+    events.push({
+      id: `attention-${roomId}-${events.length}`,
+      category: "attention_changed",
+      roomId,
+      tone,
+      count: badges.length || 1,
+      safeLabel: `${CHARACTER_ROOM_LABEL[roomId]} 주의`,
+      detail: `${CHARACTER_ROOM_LABEL[roomId]} · 주의 우선 · 원문 제외`,
+      redacted: true,
+      rawSource: false,
+    });
+  }
+
+  if (events.length === 0) {
+    return {
+      stageLabel: "Stage 16-B safe event substrate",
+      mode: "static-posture",
+      summary: "안전 이벤트 1개 · 정적 posture",
+      events: [
+        {
+          id: "snapshot-static",
+          category: "snapshot_static",
+          roomId: "sessions",
+          tone: "neutral",
+          count: options.visibleCharacterCount,
+          safeLabel: "정적 안전 스냅샷",
+          detail: `캐릭터 ${options.visibleCharacterCount}개 · fabricated movement 없음`,
+          redacted: true,
+          rawSource: false,
+        },
+      ],
+    };
+  }
+
+  return {
+    stageLabel: "Stage 16-B safe event substrate",
+    mode: options.hasEventStream ? "event-stream" : "projected-events",
+    summary: `안전 이벤트 ${events.length}개 · ${options.hasEventStream ? "event stream" : "snapshot/delta 투영"}`,
+    events,
+  };
+}
+
+export function buildOfficeSafeMotionCommands(events: OfficeSafeEvent[]): OfficeSafeMotionCommand[] {
+  return events.map((event): OfficeSafeMotionCommand => {
+    if (event.category === "snapshot_static") {
+      return {
+        id: `motion-${event.id}`,
+        kind: "idle-glow",
+        roomId: event.roomId,
+        tone: "neutral",
+        count: event.count,
+        label: "대기 광원",
+        detail: `${CHARACTER_ROOM_LABEL[event.roomId]} 정적 posture`,
+        className: "office-safe-motion-command office-safe-motion-command--idle",
+        ariaHidden: true,
+        interactive: false,
+      };
+    }
+    if (event.category === "flow_changed") {
+      return {
+        id: `motion-${event.id}`,
+        kind: "route-lane",
+        roomId: event.roomId,
+        toRoomId: event.toRoomId,
+        lane: event.lane,
+        tone: event.tone,
+        count: event.count,
+        label: "흐름 이동",
+        detail: event.toRoomId ? `${CHARACTER_ROOM_LABEL[event.roomId]}에서 ${CHARACTER_ROOM_LABEL[event.toRoomId]}로` : CHARACTER_ROOM_LABEL[event.roomId],
+        className: "office-safe-motion-command office-safe-motion-command--route",
+        ariaHidden: true,
+        interactive: false,
+      };
+    }
+    if (event.category === "attention_changed") {
+      return {
+        id: `motion-${event.id}`,
+        kind: "attention-spark",
+        roomId: event.roomId,
+        tone: event.tone,
+        count: event.count,
+        label: "주의 반응",
+        detail: `${CHARACTER_ROOM_LABEL[event.roomId]} attention spark`,
+        className: "office-safe-motion-command office-safe-motion-command--attention",
+        ariaHidden: true,
+        interactive: false,
+      };
+    }
+    return {
+      id: `motion-${event.id}`,
+      kind: "pulse-room",
+      roomId: event.roomId,
+      tone: event.tone,
+      count: event.count,
+      label: "방 pulse",
+      detail: `${CHARACTER_ROOM_LABEL[event.roomId]} safe pulse`,
+      className: "office-safe-motion-command office-safe-motion-command--pulse",
+      ariaHidden: true,
+      interactive: false,
+    };
+  });
 }
 
 export function numberField(row: Record<string, unknown>, key: string): number | null {
