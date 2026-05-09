@@ -235,6 +235,27 @@ export type OfficeSafeRoomBeacons = {
   beacons: OfficeSafeRoomBeacon[];
 };
 
+export type OfficeSafeFlowPulseBand = {
+  id: string;
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  intensity: OfficeSafeRoomBeaconIntensity;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  reducedMotionLabel: string;
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeFlowPulseBands = {
+  stageLabel: string;
+  detail: string;
+  bands: OfficeSafeFlowPulseBand[];
+};
+
 export type OfficeDeltaBadge = {
   label: string;
   tone: "positive" | "negative" | "warning" | "neutral";
@@ -1487,6 +1508,36 @@ export function buildOfficeSafeRoomBeacons(delta: OfficeStateDelta): OfficeSafeR
         x: position.x,
         y: position.y,
         reducedMotionLabel: `${item.label} 방 비콘 · 텍스트 rail로 밀도 유지`,
+        ariaHidden: true,
+        interactive: false,
+      };
+    }),
+  };
+}
+
+function flowPulseIntensity(tone: OfficeDeltaBadge["tone"], index: number): OfficeSafeRoomBeaconIntensity {
+  if (tone === "negative" || tone === "warning" || index > 0) return "high";
+  return "medium";
+}
+
+export function buildOfficeSafeFlowPulseBands(delta: OfficeStateDelta): OfficeSafeFlowPulseBands {
+  return {
+    stageLabel: "Stage 14-I 안전 flow pulse bands",
+    detail: "changedFlows의 안전 방 ID만 맵 위 흐름 pulse band로 표시",
+    bands: delta.changedFlows.map((flow, index) => {
+      const from = ROOM_BEACON_POSITION[flow.from];
+      const to = ROOM_BEACON_POSITION[flow.to];
+      return {
+        id: `${flow.from}-to-${flow.to}`,
+        label: `${CHARACTER_ROOM_LABEL[flow.from]} → ${CHARACTER_ROOM_LABEL[flow.to]} pulse`,
+        detail: `${FOCUS_LANE_TONE_LABEL[flow.tone]} · 안전 흐름 ${index + 1}`,
+        tone: flow.tone,
+        intensity: flowPulseIntensity(flow.tone, index),
+        x1: from.x,
+        y1: from.y,
+        x2: to.x,
+        y2: to.y,
+        reducedMotionLabel: `${CHARACTER_ROOM_LABEL[flow.from]}에서 ${CHARACTER_ROOM_LABEL[flow.to]}로 · 정적 흐름 rail 유지`,
         ariaHidden: true,
         interactive: false,
       };

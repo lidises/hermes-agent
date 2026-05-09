@@ -40,6 +40,7 @@ import {
   buildOfficeSafeFocusLane,
   buildOfficeSafeAttentionStrip,
   buildOfficeSafeRoomBeacons,
+  buildOfficeSafeFlowPulseBands,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -475,6 +476,7 @@ function OfficeMap({
   const safeFocusLane = buildOfficeSafeFocusLane(latestDelta);
   const safeAttentionStrip = buildOfficeSafeAttentionStrip(latestDelta);
   const safeRoomBeacons = buildOfficeSafeRoomBeacons(latestDelta);
+  const safeFlowPulseBands = buildOfficeSafeFlowPulseBands(latestDelta);
 
   return (
     <Card>
@@ -559,6 +561,21 @@ function OfficeMap({
                 />
               );
             })}
+          </svg>
+          <svg className="office-safe-flow-pulse-bands" aria-label="Stage 14-I 안전 flow pulse bands" data-office-safe-flow-pulse-bands="true" viewBox="0 0 100 100" preserveAspectRatio="none">
+            {safeFlowPulseBands.bands.map((band) => (
+              <line
+                key={band.id}
+                x1={band.x1}
+                y1={band.y1}
+                x2={band.x2}
+                y2={band.y2}
+                className={`office-safe-flow-pulse-band ${safePulseToneClass(band.tone)} ${safeRoomBeaconIntensityClass(band.intensity)}`}
+                aria-hidden={band.ariaHidden}
+                data-office-safe-flow-pulse-band={band.id}
+                data-office-safe-flow-pulse-band-intensity={band.intensity}
+              />
+            ))}
           </svg>
           <div className="absolute left-4 top-4 z-40 border border-current/10 bg-black/35 px-2 py-1 text-[10px] uppercase tracking-[0.22em] text-midground/80">안전 오피스 투영</div>
           {OFFICE_ZONE_PANELS.map((zone) => (
@@ -659,6 +676,7 @@ function OfficeMap({
               <span className="text-violet-200">Stage 14-F focus · {safeFocusLane.items[0]?.label ?? "대기"}</span>
               <span className="text-orange-200">Stage 14-G attention · {safeAttentionStrip.heading}</span>
               <span className="text-amber-100">Stage 14-H beacons · {safeRoomBeacons.beacons.filter((beacon) => beacon.weight > 0).length}개</span>
+              <span className="text-teal-100">Stage 14-I flow · {safeFlowPulseBands.bands.length}개</span>
               {flows.map((flow) => {
                 const changedFlow = changedFlowById.get(`${flow.from}->${flow.to}`);
                 return (
@@ -785,6 +803,21 @@ function OfficeMap({
                   <span>{beacon.intensity} · {beacon.weight}</span>
                 </span>
               ))}
+            </div>
+            <div className="office-safe-flow-pulse-rail mb-2" aria-label="Stage 14-I 안전 flow pulse rail" data-office-safe-flow-pulse-rail="true">
+              <span className="office-safe-flow-pulse-rail__title">{safeFlowPulseBands.stageLabel}</span>
+              {safeFlowPulseBands.bands.length ? safeFlowPulseBands.bands.map((band) => (
+                <span
+                  key={`flow-pulse-rail-${band.id}`}
+                  className={`office-safe-flow-pulse-rail__item ${safePulseToneClass(band.tone)}`}
+                  title={`${band.detail} · ${safeFlowPulseBands.detail}`}
+                  aria-hidden={band.ariaHidden}
+                  data-office-safe-flow-pulse-rail-item={band.id}
+                >
+                  <span>{band.label}</span>
+                  <span>{band.intensity}</span>
+                </span>
+              )) : <span className="office-safe-flow-pulse-rail__item office-safe-pulse-timeline__item--neutral" data-office-safe-flow-pulse-rail-empty="true">대기 · 흐름 0개</span>}
             </div>
             <div className="mb-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-semibold tracking-[0.14em] text-midground/75" aria-label="RPG 역할 범례">
               <span>캐릭터 역할 투영</span>

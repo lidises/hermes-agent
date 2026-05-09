@@ -1,10 +1,10 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-09 17:37 KST
+Last updated: 2026-05-09 17:43 KST
 
 ## Current phase
 
-Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, and Stage 14-A through Stage 14-H safe dynamic-tracking layers are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
+Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, and Stage 14-A through Stage 14-I safe dynamic-tracking layers are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
 
 Current Stage 9-E result: the `/office` page now uses Korean for primary headings, buttons, helper text, safety copy, status labels, inspector field labels, and office-map room/zone labels while keeping stable technical identifiers such as DTO, OfficeState, source IDs, cron, and enum-like adapter values visible for debugging.
 
@@ -48,6 +48,8 @@ Current Stage 14-G result: `/office` now adds a safe attention strip that compre
 
 Current Stage 14-H result: `/office` now adds safe room beacons over the CSS/SVG map. `OfficeSafeRoomBeacon`, `OfficeSafeRoomBeacons`, and `buildOfficeSafeRoomBeacons(delta)` reuse the safe focus lane, fixed known room coordinates, and generated density/intensity labels to render decorative spatial beacon cues plus a compact text rail.
 
+Current Stage 14-I result: `/office` now adds safe flow pulse bands over the CSS/SVG map. `OfficeSafeFlowPulseBand`, `OfficeSafeFlowPulseBands`, and `buildOfficeSafeFlowPulseBands(delta)` read only `changedFlows`, ignore raw flow labels, use known room IDs/coordinates, and render generated decorative flow bands plus a compact rail.
+
 Next phase: continue with another small non-renderer/read-only safe dynamic-tracking slice only if it can be derived from existing safe DTO/delta aggregates. Still no individual task identity, generated content-like speech bubbles, sprite assets, Phaser, PixiJS, canvas renderer, backend/API changes, mutation controls, persistent storage, or raw record projection.
 
 Stage 6 slices were approved by the user, including proceeding through the recommended remaining slices. Stage 7 was approved with testing deferred until the end. Stage 8-A was approved as the next safe step by the user saying to proceed in order, and the user then requested items 1 through 3 to run automatically in sequence. The user also approved installing missing test/runtime extras as needed in earlier setup. No gateway restart, cron change, Kanban mutation, NAS/Obsidian write, service/config mutation, memory/skill update, pixel dependency, or mutation-control implementation has been performed. The local dashboard process was restarted only to smoke-test the newly built local frontend bundle.
@@ -55,6 +57,40 @@ Stage 6 slices were approved by the user, including proceeding through the recom
 
 
 
+
+
+## Stage 14-I safe flow pulse bands implemented
+
+Implemented files/changes:
+
+- `web/src/pages/officeView.ts`
+  - Added `OfficeSafeFlowPulseBand`, `OfficeSafeFlowPulseBands`, and `buildOfficeSafeFlowPulseBands(delta)`.
+  - The helper reads only `OfficeStateDelta.changedFlows`, ignores raw flow labels, uses known room IDs/coordinates, and emits generated labels/details/intensities.
+- `web/src/pages/OfficePage.tsx`
+  - Renders a decorative SVG pulse-band overlay with `data-office-safe-flow-pulse-bands` and per-flow hooks.
+  - Adds a compact Stage 14-I flow pulse rail with an explicit empty state when there are no changed safe flows.
+- `web/src/index.css`
+  - Adds CSS-only pulse-band dash animation, intensity styling, compact rail styling, and `prefers-reduced-motion` fallback.
+- `web/src/pages/OfficePage.test.ts`
+  - Adds RED/GREEN helper coverage for generated pulse-band IDs, labels, details, coordinates, intensities, decorative/non-interactive posture, and raw-term exclusion.
+- `docs/ai-office/plans/2026-05-09-stage-14i-safe-flow-pulse-bands.md`
+  - Records scope, constraints, TDD record, implementation, and verification target.
+
+Safety notes:
+
+- Stage 14-I remains frontend-only, read-only, CSS/SVG/DOM-only, and does not add backend/API/schema changes, renderer dependencies, mutation controls, persistent storage, or raw record projection.
+- The flow pulse bands do not use raw changed-flow labels, raw badge labels, recent-change labels/details, provider/model identity, individual task identity, prompts, transcripts, task bodies, scripts, logs, auth fields, secrets, or tokens.
+
+Verification 2026-05-09 17:43 KST:
+
+- RED verified first: Stage 14-I test failed because `buildOfficeSafeFlowPulseBands` was not a function.
+- GREEN focused helper test passed: `OfficePage.test.ts` 38 passed.
+- Focused frontend verification passed: `npm test -- --run OfficePage.test.ts` → 38 passed.
+- ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/officeView.ts`, and `src/pages/OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large-chunk warning; current build size was JS `1,275.72 kB` / gzip `372.25 kB`, CSS `139.76 kB` / gzip `22.37 kB`.
+- Backend focused office tests passed: `18 passed in 1.38s`.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14i=safe-flow-pulse-bands`: flow pulse overlay present, flow pulse rail present, empty first-snapshot rail explicit with no fabricated flow bands, room beacons present with `sessions|work|automation|routing`, attention strip present, focus lane present, route compass present, breadcrumb present, pulse timeline present, raw leak regex false, console JS errors none.
 
 ## Stage 14-H safe room beacons implemented
 

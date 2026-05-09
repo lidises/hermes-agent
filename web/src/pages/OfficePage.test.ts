@@ -20,6 +20,7 @@ import {
   buildOfficeSafeFocusLane,
   buildOfficeSafeAttentionStrip,
   buildOfficeSafeRoomBeacons,
+  buildOfficeSafeFlowPulseBands,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -841,6 +842,28 @@ describe("OfficePage view helpers", () => {
     ]);
     expect(beacons.beacons.every((beacon) => beacon.ariaHidden === true && beacon.interactive === false)).toBe(true);
     expect(beacons.beacons.map((beacon) => `${beacon.label} ${beacon.detail} ${beacon.reducedMotionLabel}`).join(" ")).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("builds safe Stage 14-I flow pulse bands from changed safe flows", () => {
+    const delta = {
+      hasChanges: true,
+      nodeBadges: { sessions: [], work: [], automation: [], routing: [] },
+      changedFlows: [
+        { from: "sessions" as const, to: "work" as const, label: "raw prompt transcript", tone: "positive" as const },
+        { from: "work" as const, to: "automation" as const, label: "raw script secret", tone: "warning" as const },
+      ],
+      recentChanges: [{ id: "recent-token", label: "raw token", detail: "sk-sho...leak", tone: "negative" as const }],
+    };
+
+    const bands = buildOfficeSafeFlowPulseBands(delta);
+
+    expect(bands.stageLabel).toBe("Stage 14-I 안전 flow pulse bands");
+    expect(bands.bands.map((band) => [band.id, band.label, band.detail, band.tone, band.intensity, band.x1, band.y1, band.x2, band.y2])).toEqual([
+      ["sessions-to-work", "세션 → 작업 pulse", "정상 · 안전 흐름 1", "positive", "medium", 24, 30, 70, 30],
+      ["work-to-automation", "작업 → 자동화 pulse", "확인 · 안전 흐름 2", "warning", "high", 70, 30, 24, 67],
+    ]);
+    expect(bands.bands.every((band) => band.ariaHidden === true && band.interactive === false)).toBe(true);
+    expect(bands.bands.map((band) => `${band.label} ${band.detail} ${band.reducedMotionLabel}`).join(" ")).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
   });
 
   it("builds Korean empty-source copy without exposing raw adapter data", () => {
