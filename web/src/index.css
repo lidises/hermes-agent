@@ -355,6 +355,34 @@ code { font-size: 0.875rem; }
 .office-safe-breadcrumb__arrow {
   color: rgba(255,255,255,0.46);
 }
+.office-safe-route-compass {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.5rem;
+  align-items: center;
+  color: rgba(254, 205, 211, 0.86);
+  font-size: 0.62rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+}
+.office-safe-route-compass__title {
+  color: #fda4af;
+  text-transform: uppercase;
+}
+.office-safe-route-compass__heading {
+  border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+  background: rgba(0,0,0,0.34);
+  padding: 0.1rem 0.36rem;
+  color: currentColor;
+}
+.office-safe-route-compass__point {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+  border-left: 1px solid color-mix(in srgb, currentColor 36%, transparent);
+  padding-left: 0.42rem;
+  pointer-events: none;
+}
 .office-character-inspect {
   border: 0;
   background: transparent;

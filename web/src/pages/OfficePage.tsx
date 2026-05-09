@@ -36,6 +36,7 @@ import {
   buildOfficeRoomActivityMeters,
   buildOfficeSafePulseTimeline,
   buildOfficeSafeBreadcrumbTrail,
+  buildOfficeSafeRouteCompass,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -460,6 +461,7 @@ function OfficeMap({
   const roomActivityById = new Map(roomActivityMeters.map((meter) => [meter.roomId, meter]));
   const safePulseTimeline = buildOfficeSafePulseTimeline(latestDelta);
   const safeBreadcrumbTrail = buildOfficeSafeBreadcrumbTrail(latestDelta);
+  const safeRouteCompass = buildOfficeSafeRouteCompass(latestDelta);
 
   return (
     <Card>
@@ -622,6 +624,7 @@ function OfficeMap({
               <span className="text-amber-200">Stage 14-B 방 활동 · 미터 {roomActivityMeters.length}개</span>
               <span className="text-fuchsia-200">Stage 14-C pulse · {safePulseTimeline.items.length}개</span>
               <span className="text-cyan-200">Stage 14-D breadcrumb · {safeBreadcrumbTrail.segments.length}개</span>
+              <span className="text-rose-200">Stage 14-E compass · {safeRouteCompass.heading}</span>
               {flows.map((flow) => {
                 const changedFlow = changedFlowById.get(`${flow.from}->${flow.to}`);
                 return (
@@ -682,6 +685,22 @@ function OfficeMap({
                 >
                   <span>{segment.label}</span>
                   {index < safeBreadcrumbTrail.segments.length - 1 ? <span className="office-safe-breadcrumb__arrow">→</span> : null}
+                </span>
+              ))}
+            </div>
+            <div className={`office-safe-route-compass mb-2 ${safePulseToneClass(safeRouteCompass.tone)}`} aria-label="Stage 14-E 안전 route compass" data-office-safe-route-compass="true">
+              <span className="office-safe-route-compass__title">{safeRouteCompass.stageLabel}</span>
+              <span className="office-safe-route-compass__heading">{safeRouteCompass.heading}</span>
+              {safeRouteCompass.points.map((point) => (
+                <span
+                  key={point.id}
+                  className={`office-safe-route-compass__point ${safePulseToneClass(point.tone)}`}
+                  title={`${point.detail} · ${safeRouteCompass.detail}`}
+                  aria-hidden={point.ariaHidden}
+                  data-office-safe-route-compass-point={point.id}
+                >
+                  <span>{point.label}</span>
+                  <span>{point.detail}</span>
                 </span>
               ))}
             </div>

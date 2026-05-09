@@ -1,10 +1,10 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-09 13:56 KST
+Last updated: 2026-05-09 16:54 KST
 
 ## Current phase
 
-Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A RPG character projection, Stage 10-B CSS/SVG character presentation, Stage 10-C safe role action chips, Stage 10-D room-to-room RPG route choreography, Stage 10-E safe character inspector, Stage 10-F usability hardening, Stage 10-G density/readability modes, and Stage 10-H keyboard jump targets are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
+Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, and Stage 14-A through Stage 14-E safe dynamic-tracking layers are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
 
 Current Stage 9-E result: the `/office` page now uses Korean for primary headings, buttons, helper text, safety copy, status labels, inspector field labels, and office-map room/zone labels while keeping stable technical identifiers such as DTO, OfficeState, source IDs, cron, and enum-like adapter values visible for debugging.
 
@@ -40,12 +40,47 @@ Current Stage 12-B result: `/office` now adds Korean empty-source copy polish fo
 
 Current Stage 13 result: a non-mutating PR/handoff summary pass is documented in `docs/ai-office/plans/2026-05-09-stage-13-pr-handoff-summary.md`, including review summary, PR body draft, safety/non-goals, verification history, and reviewer focus checklist.
 
-Next phase: open/update the GitHub PR from this branch or continue with another small non-renderer review/polish slice only if selected. Still no individual task identity, generated content-like speech bubbles, sprite assets, Phaser, PixiJS, canvas renderer, backend/API changes, mutation controls, persistent storage, or raw record projection.
+Current Stage 14-E result: `/office` now adds a compact safe route compass that ties Stage 14-B room meters, Stage 14-C pulse timeline, and Stage 14-D breadcrumb into one direction/signal/summary rail. `OfficeSafeRouteCompass`, `OfficeSafeRouteCompassPoint`, and `buildOfficeSafeRouteCompass(delta)` derive only from safe `OfficeStateDelta` aggregates and known room labels, with tone priority `negative > warning > positive > neutral`. The UI exposes `data-office-safe-route-compass` and `data-office-safe-route-compass-point="direction|signal|summary"` while staying decorative, non-interactive, and frontend-only.
+
+Next phase: continue with another small non-renderer/read-only safe dynamic-tracking slice only if it can be derived from existing safe DTO/delta aggregates. Still no individual task identity, generated content-like speech bubbles, sprite assets, Phaser, PixiJS, canvas renderer, backend/API changes, mutation controls, persistent storage, or raw record projection.
 
 Stage 6 slices were approved by the user, including proceeding through the recommended remaining slices. Stage 7 was approved with testing deferred until the end. Stage 8-A was approved as the next safe step by the user saying to proceed in order, and the user then requested items 1 through 3 to run automatically in sequence. The user also approved installing missing test/runtime extras as needed in earlier setup. No gateway restart, cron change, Kanban mutation, NAS/Obsidian write, service/config mutation, memory/skill update, pixel dependency, or mutation-control implementation has been performed. The local dashboard process was restarted only to smoke-test the newly built local frontend bundle.
 
 
 
+
+## Stage 14-E safe route compass implemented
+
+Implemented files/changes:
+
+- `web/src/pages/officeView.ts`
+  - Added `OfficeSafeRouteCompassPoint`, `OfficeSafeRouteCompass`, `routeCompassTone(delta)`, `ROUTE_COMPASS_HEADING`, and `buildOfficeSafeRouteCompass(delta)`.
+  - The helper summarizes direction, signal, and aggregate safe-change count from `OfficeStateDelta` only.
+- `web/src/pages/OfficePage.tsx`
+  - Renders the compact Stage 14-E compass rail near the Stage 14-C/14-D rails and adds the compass heading to the detached map legend.
+  - Adds smoke hooks `data-office-safe-route-compass` and `data-office-safe-route-compass-point`.
+- `web/src/index.css`
+  - Adds compact route-compass styling while reusing the existing safe pulse tone classes.
+- `web/src/pages/OfficePage.test.ts`
+  - Adds focused helper coverage for tone priority, generated room labels, decorative/non-interactive flags, and raw-term exclusion.
+- `docs/ai-office/plans/2026-05-09-stage-14e-safe-route-compass.md`
+  - Records scope, constraints, implementation, verification target, and next candidate.
+
+Safety notes:
+
+- Stage 14-E remains frontend-only, read-only, CSS/SVG/DOM-only, and does not add backend/API/schema changes, renderer dependencies, mutation controls, persistent storage, or raw record projection.
+- The compass does not use raw changed-flow labels, recent-change labels/details, provider/model identity, individual task identity, prompts, transcripts, task bodies, scripts, logs, auth fields, secrets, or tokens.
+
+Verification 2026-05-09 16:54 KST:
+
+- RED was verified before implementation in the handoff: focused test failed because `buildOfficeSafeRouteCompass` was not a function.
+- GREEN focused frontend test passed after helper implementation: `OfficePage.test.ts` 34 passed.
+- Focused frontend verification passed: `npm test -- --run OfficePage.test.ts` → 34 passed.
+- ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/officeView.ts`, and `src/pages/OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large-chunk warning; current build size was JS `1,268.07 kB` / gzip `370.41 kB`, CSS `133.85 kB` / gzip `21.55 kB`.
+- Backend focused office tests passed: `18 passed in 1.47s`.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14e=safe-route-compass`: route compass present, compass points `direction|signal|summary`, breadcrumb present, pulse timeline present, tracking cues 11, room meters 4, raw leak regex false, console JS errors none.
 
 ## Stage 12-B empty-source copy polish implemented
 

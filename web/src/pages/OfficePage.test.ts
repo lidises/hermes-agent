@@ -16,6 +16,7 @@ import {
   buildOfficeRoomActivityMeters,
   buildOfficeSafePulseTimeline,
   buildOfficeSafeBreadcrumbTrail,
+  buildOfficeSafeRouteCompass,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -713,7 +714,7 @@ describe("OfficePage view helpers", () => {
         { from: "sessions" as const, to: "work" as const, label: "raw prompt must not matter", tone: "positive" as const },
         { from: "work" as const, to: "automation" as const, label: "raw task_body script must not matter", tone: "warning" as const },
       ],
-      recentChanges: [{ id: "recent-secret", label: "raw token", detail: "sk-should-not-leak", tone: "negative" as const }],
+      recentChanges: [{ id: "recent-secret", label: "raw token", detail: "sk-sho...leak", tone: "negative" as const }],
     };
 
     const trail = buildOfficeSafeBreadcrumbTrail(delta);
@@ -726,6 +727,30 @@ describe("OfficePage view helpers", () => {
     ]);
     expect(trail.segments.every((segment) => segment.ariaHidden === true && segment.interactive === false)).toBe(true);
     expect(trail.segments.map((segment) => `${segment.label} ${segment.detail}`).join(" ")).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|sk-/i);
+  });
+
+  it("builds safe Stage 14-E route compass from safe deltas", () => {
+    const delta = {
+      hasChanges: true,
+      nodeBadges: { sessions: [], work: [], automation: [{ label: "raw model provider", tone: "warning" as const }], routing: [] },
+      changedFlows: [
+        { from: "sessions" as const, to: "work" as const, label: "raw prompt transcript must not matter", tone: "positive" as const },
+        { from: "work" as const, to: "automation" as const, label: "raw script secret must not matter", tone: "warning" as const },
+      ],
+      recentChanges: [{ id: "recent-token", label: "raw token", detail: "sk-sho...leak", tone: "negative" as const }],
+    };
+
+    const compass = buildOfficeSafeRouteCompass(delta);
+
+    expect(compass.stageLabel).toBe("Stage 14-E 안전 route compass");
+    expect(compass.heading).toBe("주의 집중");
+    expect(compass.points.map((point) => [point.label, point.detail, point.tone])).toEqual([
+      ["방향", "세션 → 자동화", "negative"],
+      ["신호", "감소 우선", "negative"],
+      ["요약", "안전 변화 4개 · 방 3개", "neutral"],
+    ]);
+    expect(compass.points.every((point) => point.ariaHidden === true && point.interactive === false)).toBe(true);
+    expect(`${compass.heading} ${compass.detail} ${compass.points.map((point) => `${point.label} ${point.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
   });
 
   it("builds Korean empty-source copy without exposing raw adapter data", () => {

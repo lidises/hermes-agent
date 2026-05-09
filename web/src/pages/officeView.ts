@@ -163,6 +163,23 @@ export type OfficeSafeBreadcrumbTrail = {
   segments: OfficeSafeBreadcrumbSegment[];
 };
 
+export type OfficeSafeRouteCompassPoint = {
+  id: "direction" | "signal" | "summary";
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeRouteCompass = {
+  stageLabel: string;
+  heading: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  points: OfficeSafeRouteCompassPoint[];
+};
+
 export type OfficeDeltaBadge = {
   label: string;
   tone: "positive" | "negative" | "warning" | "neutral";
@@ -1248,6 +1265,47 @@ export function buildOfficeSafeBreadcrumbTrail(delta: OfficeStateDelta): OfficeS
       ariaHidden: true,
       interactive: false,
     })),
+  };
+}
+
+function routeCompassTone(delta: OfficeStateDelta): OfficeDeltaBadge["tone"] {
+  const tones = [
+    ...Object.values(delta.nodeBadges).flat().map((badge) => badge.tone),
+    ...delta.changedFlows.map((flow) => flow.tone),
+    ...delta.recentChanges.map((change) => change.tone),
+  ];
+  if (tones.includes("negative")) return "negative";
+  if (tones.includes("warning")) return "warning";
+  if (tones.includes("positive")) return "positive";
+  return "neutral";
+}
+
+const ROUTE_COMPASS_HEADING: Record<OfficeDeltaBadge["tone"], string> = {
+  positive: "정상 이동",
+  negative: "주의 집중",
+  warning: "흐름 확인",
+  neutral: "대기",
+};
+
+export function buildOfficeSafeRouteCompass(delta: OfficeStateDelta): OfficeSafeRouteCompass {
+  const trail = buildOfficeSafeBreadcrumbTrail(delta);
+  const tone = routeCompassTone(delta);
+  const activeSegments = trail.segments.filter((segment) => segment.id !== "breadcrumb-idle");
+  const fromLabel = activeSegments[0]?.label ?? "대기";
+  const toLabel = activeSegments[activeSegments.length - 1]?.label ?? fromLabel;
+  const changeCount = Object.values(delta.nodeBadges).reduce((total, badges) => total + badges.length, 0) + delta.changedFlows.length + delta.recentChanges.length;
+  const roomCount = activeSegments.length;
+
+  return {
+    stageLabel: "Stage 14-E 안전 route compass",
+    heading: ROUTE_COMPASS_HEADING[tone],
+    detail: "방 활동, pulse, breadcrumb를 안전 delta 기준의 짧은 방향계로 요약",
+    tone,
+    points: [
+      { id: "direction", label: "방향", detail: `${fromLabel} → ${toLabel}`, tone, ariaHidden: true, interactive: false },
+      { id: "signal", label: "신호", detail: `${PULSE_TONE_LABEL[tone]} 우선`, tone, ariaHidden: true, interactive: false },
+      { id: "summary", label: "요약", detail: `안전 변화 ${changeCount}개 · 방 ${roomCount}개`, tone: "neutral", ariaHidden: true, interactive: false },
+    ],
   };
 }
 

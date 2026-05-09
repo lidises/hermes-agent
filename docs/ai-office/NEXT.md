@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-09 13:56 KST
+Last updated: 2026-05-09 16:54 KST
 
 ## Start here after `/new`
 
@@ -64,7 +64,7 @@ When not to rely on `/goal` alone:
 
 ## Current next stage
 
-Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A RPG character projection, Stage 10-B CSS/SVG character presentation, Stage 10-C safe role action chips, Stage 10-D room-to-room RPG route choreography, Stage 10-E safe character inspector, Stage 10-F usability hardening, Stage 10-G density/readability modes, Stage 10-H keyboard jump targets, Stage 11-A renderer evidence, Stage 11-B CSS/SVG layout-density polish, Stage 11-C renderer decision checkpoint, Stage 12-A responsive readability, Stage 12-B empty-source copy polish, and Stage 13 PR/handoff summary are implemented on top of Stage 9-D and the Stage 8 read-only dashboard. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
+Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer evidence/polish/decision closure, Stage 12 product-polish slices, Stage 13 PR/handoff summary, and Stage 14-A through Stage 14-E safe dynamic-tracking layers are implemented on top of Stage 9-D and the Stage 8 read-only dashboard. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
 
 
 Stage 9-E current implementation:
@@ -95,10 +95,12 @@ Stage 9-F current implementation:
 - Stage 12-A adds responsive/mobile readability posture with browser-local viewport width, CSS-only responsive hooks, and no renderer dependency.
 - Stage 12-B adds empty-source copy polish: `OfficeEmptySourceCopyPlan` and `buildOfficeEmptySourceCopyPlan(state)` explain an empty source list as a safe DTO/source-gap state and render `data-office-empty-source-copy` without controls or raw projection.
 - Stage 13 adds a PR/handoff summary draft in `docs/ai-office/plans/2026-05-09-stage-13-pr-handoff-summary.md` for review and fresh-session continuity.
+- Stage 14-A through Stage 14-D add safe dynamic-tracking layers: character tracking cues, room activity meters, safe pulse timeline, and safe breadcrumb trail.
+- Stage 14-E adds the safe route compass: `OfficeSafeRouteCompass` and `buildOfficeSafeRouteCompass(delta)` summarize direction/signal/safe-change count from safe `OfficeStateDelta` aggregates only, and `/office` renders `data-office-safe-route-compass` with three decorative points.
 - First snapshots produce no fabricated history; manual refresh remains the default.
 - Planning note expanded: `docs/ai-office/plans/2026-05-09-koreanization-and-dynamic-map.md`.
 
-Recommended next implementation/design stage: open/update the GitHub PR from the Stage 13 summary, or pick a small non-renderer review/polish slice only if selected explicitly. Stage 11-A found a safe functional page with borderline density/crowding, Stage 11-B addressed that with compact/minimal nameplates plus a detached lower legend, and Stage 11-C closed the renderer decision gate for now; none found a measured need for PixiJS/Phaser/canvas. Do not expose individual task identity, generate content-like speech bubbles, add character mutation targets, or add Phaser, PixiJS, canvas, sprite assets, DeskRPG code/assets, backend/schema/API changes, mutation controls, persistent storage, or raw record projection. Stage 11 remains the separate renderer decision gate.
+Recommended next implementation/design stage: after Stage 14-E final verification and commit, continue only with another small non-renderer/read-only safe dynamic-tracking or readability slice derived from existing safe DTO/delta aggregates. Do not expose individual task identity, generate content-like speech bubbles, add character mutation targets, or add Phaser, PixiJS, canvas, sprite assets, DeskRPG code/assets, backend/schema/API changes, mutation controls, persistent storage, or raw record projection. Renderer work remains closed unless new measured evidence and explicit approval reopen it.
 
 Stage 9-D completed:
 
@@ -134,12 +136,12 @@ Browser smoke: http://127.0.0.1:8765/office
 
 ## Immediate next action
 
-Immediate next action should remain a product/UX decision point, not a control-plane expansion:
+Immediate next action is Stage 14-E final verification and commit/push, then either stop at the stage boundary or continue with the next very small safe dynamic-tracking slice:
 
-1. Stage 13 PR/handoff summary is now documented in `docs/ai-office/plans/2026-05-09-stage-13-pr-handoff-summary.md`. If a GitHub PR is desired, use the PR body draft from that file and open/update the branch PR.
-2. Renderer decision: keep CSS/SVG by default; Stage 11-A/B/C and Stage 12-A did not record a measured performance/functional gap that justifies a renderer spike.
-3. Product polish: continue only with another small non-renderer slice if selected explicitly.
-4. Test-harness review: consider React DOM coverage for polling cleanup/pause behavior only if adding/standardizing that harness is separately approved.
+1. Verify Stage 14-E with focused Vitest, ESLint, frontend build, backend office tests, diff checks, and browser smoke on `/office?stage14e=safe-route-compass`.
+2. Commit/push with `feat(office): add safe route compass` if verification passes.
+3. Candidate Stage 14-F: a compact safe change-density minimap or focus-lane rail derived from existing safe deltas only.
+4. Keep CSS/SVG/DOM-only, frontend-only, read-only, no persistence, no mutation controls, no backend/API/schema changes, no renderer dependencies, and no raw record projection.
 5. Do not add mutation controls, expose dashboard remotely, add Pixi/Phaser/canvas, copy DeskRPG assets/code, create/edit topic registry data, or create/modify Kanban/Cron state without separate approval.
 
 Completed Stage 6 files:
