@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-09 21:58 KST
+Last updated: 2026-05-09 22:04 KST
 
 ## Start here after `/new`
 
@@ -112,7 +112,7 @@ Stage 9-F current implementation:
 - First snapshots produce no fabricated history; manual refresh remains the default.
 - Planning note expanded: `docs/ai-office/plans/2026-05-09-koreanization-and-dynamic-map.md`.
 
-Recommended next implementation/design stage: after Stage 14-Q final verification and commit, continue only with another small non-renderer/read-only safe dynamic-tracking or readability slice derived from existing safe DTO/delta aggregates. Do not expose individual task identity, generate content-like speech bubbles, add character mutation targets, or add Phaser, PixiJS, canvas, sprite assets, DeskRPG code/assets, backend/schema/API changes, mutation controls, persistent storage, or raw record projection. Renderer work remains closed unless new measured evidence and explicit approval reopen it.
+Recommended next implementation/design stage: Stage 14 is closed at 14-Q. First PR/merge the completed branch into `main`, then start Stage 15 consolidation from updated `main` or a fresh branch off `main`. Stage 15 should focus on HUD hierarchy, duplicate signal reduction, PR/readiness refresh, and only evidence-driven visual polish. Do not expose individual task identity, generate content-like speech bubbles, add character mutation targets, or add Phaser, PixiJS, canvas, sprite assets, DeskRPG code/assets, backend/schema/API changes, mutation controls, persistent storage, or raw record projection. Renderer work remains closed unless new measured evidence and explicit approval reopen it.
 
 Stage 9-D completed:
 
@@ -148,13 +148,16 @@ Browser smoke: http://127.0.0.1:8765/office
 
 ## Immediate next action
 
-Immediate next action is Stage 14-Q final verification and commit/push, then continue only with the next very small safe dynamic-tracking/readability slice if it remains non-duplicative:
+Immediate next action is PR/merge, then Stage 15 planning/execution from updated `main`:
 
-1. Verify Stage 14-Q with frontend tests, ESLint, build, backend office tests, diff checks, and browser smoke on `/office?stage14q=safe-hud-readability`.
-2. Commit/push with `feat(office): add safe hud readability` if verification passes.
-3. Candidate Stage 14-R, only if continued: safe consolidation/readability pass only if it improves scanability derived from existing safe DTO/delta aggregates, with no new source reads and no renderer decision reopening.
-4. Keep CSS/SVG/DOM-only, frontend-only, read-only, no persistence, no mutation controls, no backend/API/schema changes, no renderer dependencies, and no raw record projection.
-5. Do not add mutation controls, expose dashboard remotely, add Pixi/Phaser/canvas, copy DeskRPG assets/code, create/edit topic registry data, or create/modify Kanban/Cron state without separate approval.
+1. Create or update PR from `ai-office-stage14-dynamic-tracking-20260509` to `main` and include Stage 14-Q verification plus `docs/ai-office/plans/2026-05-09-stage-15-consolidation-pr-merge-plan.md`.
+2. Merge the PR after checks/status allow it, preferably squash merge, and sync local `main`.
+3. Start Stage 15-A from updated `main` or a fresh branch off `main`: HUD hierarchy audit.
+4. Stage 15-B: duplicate signal reduction.
+5. Stage 15-C: PR/readiness checklist refresh.
+6. Stage 15-D: visual polish only if evidence demands it.
+7. Keep CSS/SVG/DOM-only, frontend-only, read-only, no persistence, no mutation controls, no backend/API/schema changes, no renderer dependencies, and no raw record projection.
+8. Do not add mutation controls, expose dashboard remotely, add Pixi/Phaser/canvas, copy DeskRPG assets/code, create/edit topic registry data, or create/modify Kanban/Cron state without separate approval.
 
 Completed Stage 6 files:
 

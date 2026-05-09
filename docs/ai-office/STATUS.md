@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-09 21:58 KST
+Last updated: 2026-05-09 22:04 KST
 
 ## Current phase
 
@@ -66,14 +66,32 @@ Current Stage 14-P result: `/office` now adds a safe scan index in the safety pa
 
 Current Stage 14-Q result: `/office` now adds a safe HUD readability strip in the safety panel. `OfficeSafeHudReadabilityPlanOptions`, `OfficeSafeHudReadabilityPlanItem`, `OfficeSafeHudReadabilityPlan`, and `buildOfficeSafeHudReadabilityPlan(options)` derive only from browser-local viewport width, reduced-motion preference, safe panel count, and live/manual tracking posture, then render generated `layout|motion|density|tracking` items.
 
-Next phase: continue with another small non-renderer/read-only safe dynamic-tracking slice only if it can be derived from existing safe DTO/delta aggregates. Still no individual task identity, generated content-like speech bubbles, sprite assets, Phaser, PixiJS, canvas renderer, backend/API changes, mutation controls, persistent storage, or raw record projection.
+Next phase: Stage 14 is closed at 14-Q. Proceed with PR/merge, then start Stage 15 consolidation from `main` or a fresh branch off `main`. Stage 15 starts with HUD hierarchy audit, duplicate signal reduction, and PR/readiness checklist refresh; it should not add another decorative HUD layer by default. Still no individual task identity, generated content-like speech bubbles, sprite assets, Phaser, PixiJS, canvas renderer, backend/API changes, mutation controls, persistent storage, or raw record projection.
 
 Stage 6 slices were approved by the user, including proceeding through the recommended remaining slices. Stage 7 was approved with testing deferred until the end. Stage 8-A was approved as the next safe step by the user saying to proceed in order, and the user then requested items 1 through 3 to run automatically in sequence. The user also approved installing missing test/runtime extras as needed in earlier setup. No gateway restart, cron change, Kanban mutation, NAS/Obsidian write, service/config mutation, memory/skill update, pixel dependency, or mutation-control implementation has been performed. The local dashboard process was restarted only to smoke-test the newly built local frontend bundle.
 
 
 
 
+## Stage 15 consolidation plan prepared
 
+Planned file:
+
+- `docs/ai-office/plans/2026-05-09-stage-15-consolidation-pr-merge-plan.md`
+
+Plan summary:
+
+- Stage 14 is intentionally closed at 14-Q because the safe dynamic-tracking/HUD stack is now materially complete.
+- Stage 15 should begin after PR/merge from `main` or a fresh branch off `main`.
+- Stage 15-A: HUD hierarchy audit. Make the safety panel scan order explicit without new data sources.
+- Stage 15-B: duplicate signal reduction. Reduce repeated safe summary text/counts across command deck, status snapshot, scan index, and HUD readability.
+- Stage 15-C: PR/readiness checklist refresh. Make the merged dashboard branch reviewable and easy to continue.
+- Stage 15-D: visual polish only if hierarchy/duplicate-reduction smoke reveals a concrete readability issue.
+
+Merge notes:
+
+- Current branch should be PR'd to `main` with the Stage 14-Q verification record and Stage 15 plan.
+- After merge, do not continue implementation on the old Stage 14 branch; start from updated `main`.
 
 ## Stage 14-Q safe HUD readability implemented
 
