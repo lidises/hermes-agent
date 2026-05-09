@@ -24,6 +24,7 @@ import {
   buildOfficeSafeTacticalMinimap,
   buildOfficeSafeTacticalTicker,
   buildOfficeSafeMissionClock,
+  buildOfficeSafeCommandDeck,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -950,6 +951,39 @@ describe("OfficePage view helpers", () => {
     const manual = buildOfficeSafeMissionClock({ liveTracking: false, isVisible: true, consecutiveFailures: 0, hasRecentChanges: false });
     expect(manual.headline).toBe("수동 · 표시 탭 · 대기");
     expect(manual.items.find((item) => item.id === "cadence")?.detail).toBe("수동 새로고침");
+  });
+
+  it("builds safe Stage 14-M command deck from mission clock, tactical ticker, and source health", () => {
+    const state = officeFixture({
+      data_sources: [
+        { id: "sessions", status: "ok", checked_at: "2026-05-09T00:00:00Z", item_count: 2, warning_count: 0, error_summary: "raw provider must not matter" },
+        { id: "kanban", status: "partial", checked_at: "2026-05-09T00:00:00Z", item_count: 1, warning_count: 2, error_summary: "raw token must not matter" },
+      ],
+    });
+    const delta = {
+      hasChanges: true,
+      nodeBadges: {
+        sessions: [{ label: "raw model provider", tone: "positive" as const }],
+        work: [{ label: "raw prompt", tone: "negative" as const }],
+        automation: [],
+        routing: [],
+      },
+      changedFlows: [{ from: "sessions" as const, to: "work" as const, label: "raw transcript", tone: "negative" as const }],
+      recentChanges: [{ id: "recent-token", label: "raw token", detail: "sk-sho...leak", tone: "negative" as const }],
+    };
+
+    const deck = buildOfficeSafeCommandDeck(state, delta, { liveTracking: false, isVisible: true, consecutiveFailures: 0, hasRecentChanges: true });
+
+    expect(deck.stageLabel).toBe("Stage 14-M 안전 command deck");
+    expect(deck.headline).toBe("수동 · 표시 탭 · 대기 · 주의 필요");
+    expect(deck.cards.map((card) => [card.id, card.label, card.detail, card.tone])).toEqual([
+      ["mission", "작전 시계", "수동 · 표시 탭 · 대기", "neutral"],
+      ["tactical", "전술 HUD", "주의 방 우선 · 활성 방 2개 · 흐름 1개", "negative"],
+      ["sources", "소스", "정상 1 · 주의 1 · 공백/미연결 3 · 경고 2", "warning"],
+      ["safety", "안전", "읽기 전용 · 로컬 표시 · 원문 제외", "neutral"],
+    ]);
+    expect(deck.cards.every((card) => card.ariaHidden === true && card.interactive === false)).toBe(true);
+    expect(`${deck.headline} ${deck.cards.map((card) => `${card.label} ${card.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
   });
 
   it("builds Korean empty-source copy without exposing raw adapter data", () => {

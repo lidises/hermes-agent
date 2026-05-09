@@ -44,6 +44,7 @@ import {
   buildOfficeSafeTacticalMinimap,
   buildOfficeSafeTacticalTicker,
   buildOfficeSafeMissionClock,
+  buildOfficeSafeCommandDeck,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -1157,6 +1158,15 @@ export default function OfficePage() {
     }),
     [latestDelta.hasChanges, liveFailureCount, liveTracking, tabVisible],
   );
+  const safeCommandDeck = useMemo(
+    () => buildOfficeSafeCommandDeck(state ?? { ...EMPTY_OFFICE_STATE }, latestDelta, {
+      liveTracking,
+      isVisible: tabVisible,
+      consecutiveFailures: liveFailureCount,
+      hasRecentChanges: latestDelta.hasChanges,
+    }),
+    [latestDelta, liveFailureCount, liveTracking, state, tabVisible],
+  );
 
   const sourceCounts = sourceHealth.counts;
 
@@ -1247,6 +1257,26 @@ export default function OfficePage() {
                   >
                     <span>{item.label}</span>
                     <span>{item.detail}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className={`office-safe-command-deck mt-3 ${safePulseToneClass(safeCommandDeck.tone)}`} aria-label="Stage 14-M 안전 command deck" data-office-safe-command-deck="true">
+              <div className="office-safe-command-deck__header">
+                <span className="office-safe-command-deck__title">{safeCommandDeck.stageLabel}</span>
+                <span className="office-safe-command-deck__headline" data-office-safe-command-deck-headline="true">{safeCommandDeck.headline}</span>
+              </div>
+              <div className="office-safe-command-deck__grid" aria-hidden="true">
+                {safeCommandDeck.cards.map((card) => (
+                  <span
+                    key={`command-deck-${card.id}`}
+                    className={`office-safe-command-deck__card ${safePulseToneClass(card.tone)}`}
+                    title={`${card.detail} · ${safeCommandDeck.detail}`}
+                    aria-hidden={card.ariaHidden}
+                    data-office-safe-command-deck-card={card.id}
+                  >
+                    <span>{card.label}</span>
+                    <span>{card.detail}</span>
                   </span>
                 ))}
               </div>

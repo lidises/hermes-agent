@@ -318,6 +318,23 @@ export type OfficeSafeMissionClock = {
   items: OfficeSafeMissionClockItem[];
 };
 
+export type OfficeSafeCommandDeckCard = {
+  id: "mission" | "tactical" | "sources" | "safety";
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeCommandDeck = {
+  stageLabel: string;
+  headline: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  cards: OfficeSafeCommandDeckCard[];
+};
+
 export type OfficeDeltaBadge = {
   label: string;
   tone: "positive" | "negative" | "warning" | "neutral";
@@ -1683,6 +1700,27 @@ export function buildOfficeSafeMissionClock(options: OfficeSafeMissionClockOptio
       { id: "safety", label: "안전", detail: "브라우저 로컬 · 읽기 전용", tone: "neutral", ariaHidden: true, interactive: false },
       { id: "pulse", label: "변화", detail: pulseDetail, tone: pulseTone, ariaHidden: true, interactive: false },
     ],
+  };
+}
+
+export function buildOfficeSafeCommandDeck(state: OfficeState, delta: OfficeStateDelta, missionOptions: OfficeSafeMissionClockOptions): OfficeSafeCommandDeck {
+  const missionClock = buildOfficeSafeMissionClock(missionOptions);
+  const tacticalTicker = buildOfficeSafeTacticalTicker(delta);
+  const sourceHealth = buildOfficeSourceHealthSummary(state);
+  const tonePriority: Record<OfficeDeltaBadge["tone"], number> = { negative: 4, warning: 3, positive: 2, neutral: 1 };
+  const cards: OfficeSafeCommandDeckCard[] = [
+    { id: "mission", label: "작전 시계", detail: missionClock.headline, tone: missionClock.tone, ariaHidden: true, interactive: false },
+    { id: "tactical", label: "전술 HUD", detail: tacticalTicker.headline, tone: tacticalTicker.tone, ariaHidden: true, interactive: false },
+    { id: "sources", label: "소스", detail: sourceHealth.detail, tone: sourceHealth.tone, ariaHidden: true, interactive: false },
+    { id: "safety", label: "안전", detail: "읽기 전용 · 로컬 표시 · 원문 제외", tone: "neutral", ariaHidden: true, interactive: false },
+  ];
+
+  return {
+    stageLabel: "Stage 14-M 안전 command deck",
+    headline: `${missionClock.headline} · ${sourceHealth.label}`,
+    detail: "mission clock, tactical ticker, source health를 안전 command deck으로 압축",
+    tone: cards.reduce<OfficeDeltaBadge["tone"]>((current, card) => (tonePriority[card.tone] > tonePriority[current] ? card.tone : current), "neutral"),
+    cards,
   };
 }
 
