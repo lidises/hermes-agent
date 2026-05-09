@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-09 22:23 KST
+Last updated: 2026-05-09 22:26 KST
 
 ## Current phase
 
@@ -74,6 +74,27 @@ Stage 6 slices were approved by the user, including proceeding through the recom
 
 
 
+
+
+## Stage 15-C readiness checklist in progress
+
+Branch: `ai-office-stage15-consolidation-20260509`
+
+Plan:
+
+- `docs/ai-office/plans/2026-05-09-stage-15c-readiness-checklist.md`
+
+Summary:
+
+- Stage 15-A added safe HUD hierarchy/read-order guidance.
+- Stage 15-B reduced confirmed scan-index duplicate signal copy.
+- Stage 15-C closes the consolidation loop with a PR/merge readiness checklist.
+- No Stage 15-D visual polish is planned before PR unless verification or user review finds a concrete issue.
+
+Recommendation:
+
+- Create PR from `ai-office-stage15-consolidation-20260509` to `main`.
+- Squash merge if checks/mergeability allow.
 
 ## Stage 15-B duplicate signal reduction in progress
 

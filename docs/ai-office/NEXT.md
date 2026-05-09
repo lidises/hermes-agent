@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-09 22:23 KST
+Last updated: 2026-05-09 22:26 KST
 
 ## Start here after `/new`
 
@@ -150,9 +150,10 @@ Browser smoke: http://127.0.0.1:8765/office
 
 Immediate next action is PR/merge, then Stage 15 planning/execution from updated `main`:
 
-1. Complete Stage 15-B on `ai-office-stage15-consolidation-20260509`: final test/lint/build/backend/browser verification, then commit/push.
-2. Stage 15-C: PR/readiness checklist refresh for the Stage 15 consolidation branch.
-3. Stage 15-D: visual polish only if evidence demands it.
+1. Complete Stage 15-C readiness checklist commit/push on `ai-office-stage15-consolidation-20260509`.
+2. Create PR from `ai-office-stage15-consolidation-20260509` to `main`.
+3. Merge after checks/mergeability allow it.
+4. Do not start Stage 15-D unless browser/user review exposes a concrete visual issue.
 7. Keep CSS/SVG/DOM-only, frontend-only, read-only, no persistence, no mutation controls, no backend/API/schema changes, no renderer dependencies, and no raw record projection.
 8. Do not add mutation controls, expose dashboard remotely, add Pixi/Phaser/canvas, copy DeskRPG assets/code, create/edit topic registry data, or create/modify Kanban/Cron state without separate approval.
 
