@@ -39,6 +39,7 @@ import {
   buildOfficeSafeRouteCompass,
   buildOfficeSafeFocusLane,
   buildOfficeSafeAttentionStrip,
+  buildOfficeSafeRoomBeacons,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -347,6 +348,13 @@ function safePulseToneClass(tone: OfficeRecentChange["tone"]): string {
   return "office-safe-pulse-timeline__item--neutral";
 }
 
+function safeRoomBeaconIntensityClass(intensity: ReturnType<typeof buildOfficeSafeRoomBeacons>["beacons"][number]["intensity"]): string {
+  if (intensity === "high") return "office-safe-room-beacon--high";
+  if (intensity === "medium") return "office-safe-room-beacon--medium";
+  if (intensity === "low") return "office-safe-room-beacon--low";
+  return "office-safe-room-beacon--idle";
+}
+
 function RoomActivityMeter({ node, meter }: { node: OfficeMapNode; meter: ReturnType<typeof buildOfficeRoomActivityMeters>[number] }) {
   return (
     <div
@@ -466,6 +474,7 @@ function OfficeMap({
   const safeRouteCompass = buildOfficeSafeRouteCompass(latestDelta);
   const safeFocusLane = buildOfficeSafeFocusLane(latestDelta);
   const safeAttentionStrip = buildOfficeSafeAttentionStrip(latestDelta);
+  const safeRoomBeacons = buildOfficeSafeRoomBeacons(latestDelta);
 
   return (
     <Card>
@@ -577,6 +586,24 @@ function OfficeMap({
               </div>
             );
           })}
+          <div className="office-safe-room-beacons" aria-label="Stage 14-H 안전 room beacons" data-office-safe-room-beacons="true">
+            {safeRoomBeacons.beacons.map((beacon) => (
+              <span
+                key={beacon.roomId}
+                className={`office-safe-room-beacon ${safePulseToneClass(beacon.tone)} ${safeRoomBeaconIntensityClass(beacon.intensity)}`}
+                style={{ left: `${beacon.x}%`, top: `${beacon.y}%`, "--office-safe-room-beacon-scale": `${Math.min(2.4, 0.8 + beacon.weight * 0.28)}` } as React.CSSProperties}
+                title={`${beacon.detail} · ${beacon.reducedMotionLabel}`}
+                aria-hidden={beacon.ariaHidden}
+                data-office-safe-room-beacon={beacon.roomId}
+                data-office-safe-room-beacon-intensity={beacon.intensity}
+                data-office-safe-room-beacon-weight={beacon.weight}
+              >
+                <span className="office-safe-room-beacon__ring" />
+                <span className="office-safe-room-beacon__core" />
+                <span className="office-safe-room-beacon__label">{beacon.label}</span>
+              </span>
+            ))}
+          </div>
           {densityPlan.visibleCharacters.length > 0
             ? densityPlan.visibleCharacters.map((character) => {
                 const cue = trackingCueByCharacterId.get(character.id);
@@ -631,6 +658,7 @@ function OfficeMap({
               <span className="text-rose-200">Stage 14-E compass · {safeRouteCompass.heading}</span>
               <span className="text-violet-200">Stage 14-F focus · {safeFocusLane.items[0]?.label ?? "대기"}</span>
               <span className="text-orange-200">Stage 14-G attention · {safeAttentionStrip.heading}</span>
+              <span className="text-amber-100">Stage 14-H beacons · {safeRoomBeacons.beacons.filter((beacon) => beacon.weight > 0).length}개</span>
               {flows.map((flow) => {
                 const changedFlow = changedFlowById.get(`${flow.from}->${flow.to}`);
                 return (
@@ -740,6 +768,21 @@ function OfficeMap({
                 >
                   <span>{chip.label}</span>
                   <span>{chip.detail}</span>
+                </span>
+              ))}
+            </div>
+            <div className="office-safe-room-beacon-rail mb-2" aria-label="Stage 14-H 안전 room beacon rail" data-office-safe-room-beacon-rail="true">
+              <span className="office-safe-room-beacon-rail__title">{safeRoomBeacons.stageLabel}</span>
+              {safeRoomBeacons.beacons.map((beacon) => (
+                <span
+                  key={`beacon-rail-${beacon.roomId}`}
+                  className={`office-safe-room-beacon-rail__item ${safePulseToneClass(beacon.tone)}`}
+                  title={`${beacon.detail} · ${safeRoomBeacons.detail}`}
+                  aria-hidden={beacon.ariaHidden}
+                  data-office-safe-room-beacon-rail-item={beacon.roomId}
+                >
+                  <span>{beacon.label}</span>
+                  <span>{beacon.intensity} · {beacon.weight}</span>
                 </span>
               ))}
             </div>

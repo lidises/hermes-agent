@@ -19,6 +19,7 @@ import {
   buildOfficeSafeRouteCompass,
   buildOfficeSafeFocusLane,
   buildOfficeSafeAttentionStrip,
+  buildOfficeSafeRoomBeacons,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -811,6 +812,35 @@ describe("OfficePage view helpers", () => {
     ]);
     expect(strip.chips.every((chip) => chip.ariaHidden === true && chip.interactive === false)).toBe(true);
     expect(`${strip.stageLabel} ${strip.heading} ${strip.detail} ${strip.chips.map((chip) => `${chip.label} ${chip.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("builds safe Stage 14-H room beacons from safe focus lane density", () => {
+    const delta = {
+      hasChanges: true,
+      nodeBadges: {
+        sessions: [{ label: "raw model provider", tone: "positive" as const }],
+        work: [{ label: "raw prompt", tone: "negative" as const }],
+        automation: [{ label: "raw script", tone: "warning" as const }],
+        routing: [],
+      },
+      changedFlows: [
+        { from: "sessions" as const, to: "work" as const, label: "raw transcript must not matter", tone: "negative" as const },
+        { from: "work" as const, to: "automation" as const, label: "raw secret must not matter", tone: "warning" as const },
+      ],
+      recentChanges: [{ id: "recent-token", label: "raw token", detail: "sk-sho...leak", tone: "negative" as const }],
+    };
+
+    const beacons = buildOfficeSafeRoomBeacons(delta);
+
+    expect(beacons.stageLabel).toBe("Stage 14-H 안전 room beacons");
+    expect(beacons.beacons.map((beacon) => [beacon.roomId, beacon.label, beacon.detail, beacon.tone, beacon.intensity, beacon.x, beacon.y])).toEqual([
+      ["work", "작업 beacon", "주의 · 밀도 4 · 맵 표시", "negative", "high", 70, 30],
+      ["automation", "자동화 beacon", "확인 · 밀도 2 · 맵 표시", "warning", "medium", 24, 67],
+      ["sessions", "세션 beacon", "정상 · 밀도 2 · 맵 표시", "positive", "medium", 24, 30],
+      ["routing", "라우팅 beacon", "대기 · 밀도 0 · 맵 표시", "neutral", "idle", 70, 67],
+    ]);
+    expect(beacons.beacons.every((beacon) => beacon.ariaHidden === true && beacon.interactive === false)).toBe(true);
+    expect(beacons.beacons.map((beacon) => `${beacon.label} ${beacon.detail} ${beacon.reducedMotionLabel}`).join(" ")).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
   });
 
   it("builds Korean empty-source copy without exposing raw adapter data", () => {

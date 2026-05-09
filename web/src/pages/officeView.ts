@@ -213,6 +213,28 @@ export type OfficeSafeAttentionStrip = {
   chips: OfficeSafeAttentionStripChip[];
 };
 
+export type OfficeSafeRoomBeaconIntensity = "idle" | "low" | "medium" | "high";
+
+export type OfficeSafeRoomBeacon = {
+  roomId: OfficeMapNode["id"];
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  intensity: OfficeSafeRoomBeaconIntensity;
+  weight: number;
+  x: number;
+  y: number;
+  reducedMotionLabel: string;
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeRoomBeacons = {
+  stageLabel: string;
+  detail: string;
+  beacons: OfficeSafeRoomBeacon[];
+};
+
 export type OfficeDeltaBadge = {
   label: string;
   tone: "positive" | "negative" | "warning" | "neutral";
@@ -1431,6 +1453,44 @@ export function buildOfficeSafeAttentionStrip(delta: OfficeStateDelta): OfficeSa
       { id: "signal", label: "신호", detail: ATTENTION_STRIP_SIGNAL[tone], tone, ariaHidden: true, interactive: false },
       { id: "scope", label: "범위", detail: `방 ${activeRoomCount}개 · 밀도 ${totalWeight}`, tone: "neutral", ariaHidden: true, interactive: false },
     ],
+  };
+}
+
+const ROOM_BEACON_POSITION: Record<OfficeMapNode["id"], { x: number; y: number }> = {
+  sessions: { x: 24, y: 30 },
+  work: { x: 70, y: 30 },
+  automation: { x: 24, y: 67 },
+  routing: { x: 70, y: 67 },
+};
+
+function roomBeaconIntensity(weight: number): OfficeSafeRoomBeaconIntensity {
+  if (weight >= 4) return "high";
+  if (weight >= 2) return "medium";
+  if (weight > 0) return "low";
+  return "idle";
+}
+
+export function buildOfficeSafeRoomBeacons(delta: OfficeStateDelta): OfficeSafeRoomBeacons {
+  const lane = buildOfficeSafeFocusLane(delta);
+  return {
+    stageLabel: "Stage 14-H 안전 room beacons",
+    detail: "focus lane의 안전 밀도를 맵 위 방별 비콘으로 표시",
+    beacons: lane.items.map((item) => {
+      const position = ROOM_BEACON_POSITION[item.roomId];
+      return {
+        roomId: item.roomId,
+        label: `${item.label} beacon`,
+        detail: `${FOCUS_LANE_TONE_LABEL[item.tone]} · 밀도 ${item.weight} · 맵 표시`,
+        tone: item.tone,
+        intensity: roomBeaconIntensity(item.weight),
+        weight: item.weight,
+        x: position.x,
+        y: position.y,
+        reducedMotionLabel: `${item.label} 방 비콘 · 텍스트 rail로 밀도 유지`,
+        ariaHidden: true,
+        interactive: false,
+      };
+    }),
   };
 }
 

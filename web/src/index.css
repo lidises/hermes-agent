@@ -444,6 +444,95 @@ code { font-size: 0.875rem; }
   padding-left: 0.42rem;
   pointer-events: none;
 }
+.office-safe-room-beacons {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+}
+.office-safe-room-beacon {
+  position: absolute;
+  display: grid;
+  width: 2.9rem;
+  height: 2.9rem;
+  place-items: center;
+  color: rgba(251, 191, 36, 0.82);
+  transform: translate(-50%, -50%) scale(var(--office-safe-room-beacon-scale, 1));
+}
+.office-safe-room-beacon__ring,
+.office-safe-room-beacon__core {
+  position: absolute;
+  border-radius: 999px;
+}
+.office-safe-room-beacon__ring {
+  inset: 0.25rem;
+  border: 1px solid color-mix(in srgb, currentColor 62%, transparent);
+  background: radial-gradient(circle, color-mix(in srgb, currentColor 24%, transparent), transparent 62%);
+  animation: office-safe-room-beacon-pulse 2.8s ease-in-out infinite;
+}
+.office-safe-room-beacon__core {
+  width: 0.46rem;
+  height: 0.46rem;
+  border: 1px solid color-mix(in srgb, currentColor 78%, white 8%);
+  background: currentColor;
+  box-shadow: 0 0 10px currentColor;
+}
+.office-safe-room-beacon__label {
+  position: absolute;
+  top: 2.25rem;
+  border: 1px solid color-mix(in srgb, currentColor 24%, transparent);
+  background: rgba(0,0,0,0.48);
+  padding: 0.05rem 0.22rem;
+  color: currentColor;
+  font-size: 0.45rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+.office-safe-room-beacon--idle {
+  opacity: 0.34;
+}
+.office-safe-room-beacon--idle .office-safe-room-beacon__ring {
+  animation: none;
+}
+.office-safe-room-beacon--low {
+  opacity: 0.62;
+}
+.office-safe-room-beacon--medium {
+  opacity: 0.82;
+}
+.office-safe-room-beacon--high {
+  opacity: 1;
+}
+.office-safe-room-beacon--high .office-safe-room-beacon__ring {
+  animation-duration: 1.55s;
+}
+.office-safe-room-beacon-rail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.28rem 0.5rem;
+  align-items: center;
+  color: rgba(253, 230, 138, 0.86);
+  font-size: 0.62rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+}
+.office-safe-room-beacon-rail__title {
+  color: #fde68a;
+  text-transform: uppercase;
+}
+.office-safe-room-beacon-rail__item {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+  border-left: 1px solid color-mix(in srgb, currentColor 34%, transparent);
+  padding-left: 0.42rem;
+  pointer-events: none;
+}
+@keyframes office-safe-room-beacon-pulse {
+  0%, 100% { opacity: 0.36; transform: scale(0.76); }
+  50% { opacity: 0.96; transform: scale(1.08); }
+}
 .office-character-inspect {
   border: 0;
   background: transparent;
@@ -701,12 +790,17 @@ code { font-size: 0.875rem; }
   .office-route-hint__dot,
   .office-character-tracking,
   .office-room-activity__bar > span,
-  .office-safe-pulse-timeline__dot {
+  .office-safe-pulse-timeline__dot,
+  .office-safe-room-beacon__ring {
     animation: none;
     will-change: auto;
   }
   .office-character-tracking {
     opacity: 0.52;
+  }
+  .office-safe-room-beacon__ring {
+    opacity: 0.5;
+    transform: none;
   }
 }
 
