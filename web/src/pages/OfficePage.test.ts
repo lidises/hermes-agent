@@ -29,6 +29,7 @@ import {
   buildOfficeSafeStatusSnapshot,
   buildOfficeSafeScanIndex,
   buildOfficeSafeHudReadabilityPlan,
+  buildOfficeSafeHudHierarchy,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -1110,6 +1111,28 @@ describe("OfficePage view helpers", () => {
     ]);
     expect(plan.items.every((item) => item.ariaHidden === true && item.interactive === false)).toBe(true);
     expect(`${plan.summary} ${plan.items.map((item) => `${item.label} ${item.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("builds safe Stage 15-A HUD hierarchy from existing safe panels", () => {
+    const hierarchy = buildOfficeSafeHudHierarchy({
+      statusTone: "warning",
+      scanTone: "neutral",
+      readabilityTone: "warning",
+      statusItemCount: 4,
+      scanItemCount: 3,
+      readabilityItemCount: 4,
+    });
+
+    expect(hierarchy.stageLabel).toBe("Stage 15-A 안전 HUD hierarchy");
+    expect(hierarchy.headline).toBe("먼저 볼 순서 정리");
+    expect(hierarchy.summary).toBe("핵심 4개 · 보조 3개 · 진단 4개");
+    expect(hierarchy.sections.map((section) => [section.id, section.label, section.detail, section.tone])).toEqual([
+      ["primary", "핵심", "상태 snapshot 먼저", "warning"],
+      ["secondary", "보조", "scan index로 범위 확인", "neutral"],
+      ["diagnostic", "진단", "HUD readability로 밀도 확인", "warning"],
+    ]);
+    expect(hierarchy.sections.every((section) => section.ariaHidden === true && section.interactive === false)).toBe(true);
+    expect(`${hierarchy.headline} ${hierarchy.summary} ${hierarchy.sections.map((section) => `${section.label} ${section.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
   });
 
   it("builds Korean empty-source copy without exposing raw adapter data", () => {

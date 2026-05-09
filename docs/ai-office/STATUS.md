@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-09 22:04 KST
+Last updated: 2026-05-09 22:18 KST
 
 ## Current phase
 
@@ -72,6 +72,39 @@ Stage 6 slices were approved by the user, including proceeding through the recom
 
 
 
+
+
+## Stage 15-A safe HUD hierarchy in progress
+
+Branch: `ai-office-stage15-consolidation-20260509`
+
+Plan:
+
+- `docs/ai-office/plans/2026-05-09-stage-15a-safe-hud-hierarchy.md`
+
+Implementation summary:
+
+- Added `buildOfficeSafeHudHierarchy(options)` and `OfficeSafeHudHierarchy*` types.
+- Inputs are only existing safe panel tones/counts from status snapshot, scan index, and HUD readability.
+- Added stable DOM hooks: `data-office-safe-hud-hierarchy`, `data-office-safe-hud-hierarchy-headline`, `data-office-safe-hud-hierarchy-summary`, and `data-office-safe-hud-hierarchy-section=primary|secondary|diagnostic`.
+- Purpose is consolidation/read-order guidance, not another raw data source or decorative Stage 14 extension.
+
+Verification 2026-05-09 22:18 KST:
+
+- RED verified first: focused helper test failed with `TypeError: buildOfficeSafeHudHierarchy is not a function`.
+- GREEN verified: `OfficePage.test.ts` 47 passed after helper implementation.
+- Final frontend focused test: `OfficePage.test.ts` 47 passed.
+- ESLint passed for `OfficePage.tsx`, `officeView.ts`, and `OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large chunk warning only.
+- Backend focused office tests passed: 18 passed in 1.46s.
+- `git diff --check` passed.
+- Browser smoke `/office?stage15a=hud-hierarchy`: hierarchy/headline/summary/primary-secondary-diagnostic sections present; prior Stage 14 hooks present; raw leak false; console JS errors none.
+
+Safety posture:
+
+- frontend-only, read-only, CSS/DOM-only.
+- no backend/API/schema changes, no mutation controls, no persistent browser storage, no renderer dependency.
+- no raw prompt/transcript/task_body/script/log/provider/model/secret/token/task identity projection.
 
 ## Stage 15 consolidation plan prepared
 
