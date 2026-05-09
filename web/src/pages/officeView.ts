@@ -386,6 +386,30 @@ export type OfficeSafeScanIndex = {
   items: OfficeSafeScanIndexItem[];
 };
 
+export type OfficeSafeHudReadabilityPlanOptions = {
+  viewportWidth?: number;
+  prefersReducedMotion: boolean;
+  safePanelCount: number;
+  liveTracking: boolean;
+};
+
+export type OfficeSafeHudReadabilityPlanItem = {
+  id: "layout" | "motion" | "density" | "tracking";
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeHudReadabilityPlan = {
+  stageLabel: string;
+  summary: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  items: OfficeSafeHudReadabilityPlanItem[];
+};
+
 export type OfficeDeltaBadge = {
   label: string;
   tone: "positive" | "negative" | "warning" | "neutral";
@@ -1842,6 +1866,30 @@ export function buildOfficeSafeScanIndex(state: OfficeState, delta: OfficeStateD
     stageLabel: "Stage 14-P 안전 scan index",
     headline: `스캔 ${railCount}칸 · ${snapshot.headline}`,
     detail: "status snapshot과 안전 rail 수를 빠른 스캔 색인으로 압축",
+    tone: items.reduce<OfficeDeltaBadge["tone"]>((current, item) => (tonePriority[item.tone] > tonePriority[current] ? item.tone : current), "neutral"),
+    items,
+  };
+}
+
+export function buildOfficeSafeHudReadabilityPlan(options: OfficeSafeHudReadabilityPlanOptions): OfficeSafeHudReadabilityPlan {
+  const viewport = options.viewportWidth ?? 0;
+  const layoutDetail = viewport >= 1024 ? "넓은 HUD" : viewport >= 720 ? "중간 HUD" : "압축 HUD";
+  const layoutTone: OfficeDeltaBadge["tone"] = viewport >= 1024 ? "positive" : viewport >= 720 ? "neutral" : "warning";
+  const motionDetail = options.prefersReducedMotion ? "정적 모션" : "동적 모션";
+  const densityTone: OfficeDeltaBadge["tone"] = options.safePanelCount >= 6 ? "warning" : "positive";
+  const trackingDetail = options.liveTracking ? "실시간" : "수동";
+  const tonePriority: Record<OfficeDeltaBadge["tone"], number> = { negative: 4, warning: 3, positive: 2, neutral: 1 };
+  const items: OfficeSafeHudReadabilityPlanItem[] = [
+    { id: "layout", label: "배치", detail: layoutDetail, tone: layoutTone, ariaHidden: true, interactive: false },
+    { id: "motion", label: "모션", detail: motionDetail, tone: options.prefersReducedMotion ? "neutral" : "positive", ariaHidden: true, interactive: false },
+    { id: "density", label: "밀도", detail: `${options.safePanelCount}개 패널`, tone: densityTone, ariaHidden: true, interactive: false },
+    { id: "tracking", label: "추적", detail: trackingDetail, tone: options.liveTracking ? "positive" : "neutral", ariaHidden: true, interactive: false },
+  ];
+
+  return {
+    stageLabel: "Stage 14-Q 안전 HUD readability",
+    summary: `${layoutDetail} · ${motionDetail} · ${options.safePanelCount}개 패널`,
+    detail: "브라우저 로컬 레이아웃 신호만으로 안전 HUD 가독성을 요약",
     tone: items.reduce<OfficeDeltaBadge["tone"]>((current, item) => (tonePriority[item.tone] > tonePriority[current] ? item.tone : current), "neutral"),
     items,
   };

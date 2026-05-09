@@ -1,10 +1,10 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-09 18:56 KST
+Last updated: 2026-05-09 21:58 KST
 
 ## Current phase
 
-Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, and Stage 14-A through Stage 14-P safe dynamic-tracking layers are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
+Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, and Stage 14-A through Stage 14-Q safe dynamic-tracking/readability layers are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
 
 Current Stage 9-E result: the `/office` page now uses Korean for primary headings, buttons, helper text, safety copy, status labels, inspector field labels, and office-map room/zone labels while keeping stable technical identifiers such as DTO, OfficeState, source IDs, cron, and enum-like adapter values visible for debugging.
 
@@ -64,6 +64,8 @@ Current Stage 14-O result: `/office` now adds a safe status snapshot in the safe
 
 Current Stage 14-P result: `/office` now adds a safe scan index in the safety panel. `OfficeSafeScanIndexItem`, `OfficeSafeScanIndex`, and `buildOfficeSafeScanIndex(state, delta, missionOptions)` compose the safe status snapshot, floor legend rail count, and browser-local live/manual posture into `snapshot|rail|mode` items.
 
+Current Stage 14-Q result: `/office` now adds a safe HUD readability strip in the safety panel. `OfficeSafeHudReadabilityPlanOptions`, `OfficeSafeHudReadabilityPlanItem`, `OfficeSafeHudReadabilityPlan`, and `buildOfficeSafeHudReadabilityPlan(options)` derive only from browser-local viewport width, reduced-motion preference, safe panel count, and live/manual tracking posture, then render generated `layout|motion|density|tracking` items.
+
 Next phase: continue with another small non-renderer/read-only safe dynamic-tracking slice only if it can be derived from existing safe DTO/delta aggregates. Still no individual task identity, generated content-like speech bubbles, sprite assets, Phaser, PixiJS, canvas renderer, backend/API changes, mutation controls, persistent storage, or raw record projection.
 
 Stage 6 slices were approved by the user, including proceeding through the recommended remaining slices. Stage 7 was approved with testing deferred until the end. Stage 8-A was approved as the next safe step by the user saying to proceed in order, and the user then requested items 1 through 3 to run automatically in sequence. The user also approved installing missing test/runtime extras as needed in earlier setup. No gateway restart, cron change, Kanban mutation, NAS/Obsidian write, service/config mutation, memory/skill update, pixel dependency, or mutation-control implementation has been performed. The local dashboard process was restarted only to smoke-test the newly built local frontend bundle.
@@ -72,6 +74,39 @@ Stage 6 slices were approved by the user, including proceeding through the recom
 
 
 
+
+## Stage 14-Q safe HUD readability implemented
+
+Implemented files/changes:
+
+- `web/src/pages/officeView.ts`
+  - Added `OfficeSafeHudReadabilityPlanOptions`, `OfficeSafeHudReadabilityPlanItem`, `OfficeSafeHudReadabilityPlan`, and `buildOfficeSafeHudReadabilityPlan(options)`.
+  - The helper uses only browser-local viewport width, reduced-motion preference, safe panel count, and live/manual tracking posture.
+- `web/src/pages/OfficePage.tsx`
+  - Renders the HUD readability strip in the safety panel with `data-office-safe-hud-readability`, summary hook, and per-item hooks.
+- `web/src/index.css`
+  - Adds compact CSS-only HUD readability styling.
+- `web/src/pages/OfficePage.test.ts`
+  - Adds RED/GREEN helper coverage for `layout|motion|density|tracking` items and raw-term exclusion.
+- `docs/ai-office/plans/2026-05-09-stage-14q-safe-hud-readability.md`
+  - Records scope, constraints, TDD record, warning/error audit, implementation, and verification target.
+
+Safety notes:
+
+- Stage 14-Q remains frontend-only, read-only, CSS/DOM-only, and does not add backend/API/schema changes, renderer dependencies, mutation controls, persistent storage, or raw record projection.
+- The HUD readability strip does not use raw changed-flow labels, raw badge labels, recent-change labels/details, adapter error strings, provider/model identity, individual task identity, prompts, transcripts, task bodies, scripts, logs, auth fields, secrets, or tokens.
+
+Verification 2026-05-09 21:58 KST:
+
+- RED verified first: Stage 14-Q test failed because `buildOfficeSafeHudReadabilityPlan` was not a function.
+- Warning/error audit found one active frontend issue: `buildOfficeSafeHudReadabilityPlan` / `safeHudReadability` was unused while UI wiring was incomplete. Fixed by rendering the Stage 14-Q strip and adding CSS.
+- GREEN focused helper/UI test passed: `OfficePage.test.ts` 46 passed.
+- Focused frontend verification passed: `npm test -- --run OfficePage.test.ts` → 46 passed.
+- ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/officeView.ts`, and `src/pages/OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large-chunk warning; current build size was JS `1,290.94 kB` / gzip `375.18 kB`, CSS `151.73 kB` / gzip `23.73 kB`.
+- Backend focused office tests passed: `18 passed in 1.30s`.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14q=warning-audit`: HUD readability present, summary present, items `layout|motion|density|tracking`, Stage 14-P/O/M/L hooks present, raw leak regex false, console JS errors none.
 
 ## Stage 14-P safe scan index implemented
 

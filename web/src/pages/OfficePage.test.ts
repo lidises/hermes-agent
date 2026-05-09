@@ -28,6 +28,7 @@ import {
   buildOfficeSafeFloorLegend,
   buildOfficeSafeStatusSnapshot,
   buildOfficeSafeScanIndex,
+  buildOfficeSafeHudReadabilityPlan,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -1089,6 +1090,26 @@ describe("OfficePage view helpers", () => {
     ]);
     expect(index.items.every((item) => item.ariaHidden === true && item.interactive === false)).toBe(true);
     expect(`${index.headline} ${index.items.map((item) => `${item.label} ${item.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("builds safe Stage 14-Q HUD readability plan from browser-local layout signals", () => {
+    const plan = buildOfficeSafeHudReadabilityPlan({
+      viewportWidth: 1120,
+      prefersReducedMotion: true,
+      safePanelCount: 6,
+      liveTracking: true,
+    });
+
+    expect(plan.stageLabel).toBe("Stage 14-Q 안전 HUD readability");
+    expect(plan.summary).toBe("넓은 HUD · 정적 모션 · 6개 패널");
+    expect(plan.items.map((item) => [item.id, item.label, item.detail, item.tone])).toEqual([
+      ["layout", "배치", "넓은 HUD", "positive"],
+      ["motion", "모션", "정적 모션", "neutral"],
+      ["density", "밀도", "6개 패널", "warning"],
+      ["tracking", "추적", "실시간", "positive"],
+    ]);
+    expect(plan.items.every((item) => item.ariaHidden === true && item.interactive === false)).toBe(true);
+    expect(`${plan.summary} ${plan.items.map((item) => `${item.label} ${item.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
   });
 
   it("builds Korean empty-source copy without exposing raw adapter data", () => {

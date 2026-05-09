@@ -47,6 +47,7 @@ import {
   buildOfficeSafeCommandDeck,
   buildOfficeSafeStatusSnapshot,
   buildOfficeSafeScanIndex,
+  buildOfficeSafeHudReadabilityPlan,
   buildOfficeSafeFloorLegend,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
@@ -1206,6 +1207,15 @@ export default function OfficePage() {
     }),
     [latestDelta, liveFailureCount, liveTracking, state, tabVisible],
   );
+  const safeHudReadability = useMemo(
+    () => buildOfficeSafeHudReadabilityPlan({
+      viewportWidth,
+      prefersReducedMotion,
+      safePanelCount: safeStatusSnapshot.items.length + safeScanIndex.items.length,
+      liveTracking,
+    }),
+    [liveTracking, prefersReducedMotion, safeScanIndex.items.length, safeStatusSnapshot.items.length, viewportWidth],
+  );
 
   const sourceCounts = sourceHealth.counts;
 
@@ -1353,6 +1363,26 @@ export default function OfficePage() {
                     title={`${item.detail} · ${safeScanIndex.detail}`}
                     aria-hidden={item.ariaHidden}
                     data-office-safe-scan-index-item={item.id}
+                  >
+                    <span>{item.label}</span>
+                    <span>{item.detail}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className={`office-safe-hud-readability mt-3 ${safePulseToneClass(safeHudReadability.tone)}`} aria-label="Stage 14-Q 안전 HUD readability" data-office-safe-hud-readability="true">
+              <div className="office-safe-hud-readability__header">
+                <span className="office-safe-hud-readability__title">{safeHudReadability.stageLabel}</span>
+                <span className="office-safe-hud-readability__summary" data-office-safe-hud-readability-summary="true">{safeHudReadability.summary}</span>
+              </div>
+              <div className="office-safe-hud-readability__grid" aria-hidden="true">
+                {safeHudReadability.items.map((item) => (
+                  <span
+                    key={`hud-readability-${item.id}`}
+                    className={`office-safe-hud-readability__item ${safePulseToneClass(item.tone)}`}
+                    title={`${item.detail} · ${safeHudReadability.detail}`}
+                    aria-hidden={item.ariaHidden}
+                    data-office-safe-hud-readability-item={item.id}
                   >
                     <span>{item.label}</span>
                     <span>{item.detail}</span>
