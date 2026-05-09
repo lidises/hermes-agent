@@ -6,12 +6,29 @@ import {
   buildOfficeCharacterInspector,
   buildOfficeCharacterRoutes,
   buildOfficeCharacterSceneObjects,
+  buildOfficeCharacterTrackingCues,
   buildOfficeCharacterView,
   buildOfficeCharacters,
   buildOfficeMapDensityPlan,
   buildOfficeMapJumpTargets,
   buildOfficeMapPolishPlan,
   buildOfficeResponsiveReadabilityPlan,
+  buildOfficeRoomActivityMeters,
+  buildOfficeSafePulseTimeline,
+  buildOfficeSafeBreadcrumbTrail,
+  buildOfficeSafeRouteCompass,
+  buildOfficeSafeFocusLane,
+  buildOfficeSafeAttentionStrip,
+  buildOfficeSafeRoomBeacons,
+  buildOfficeSafeFlowPulseBands,
+  buildOfficeSafeTacticalMinimap,
+  buildOfficeSafeTacticalTicker,
+  buildOfficeSafeMissionClock,
+  buildOfficeSafeCommandDeck,
+  buildOfficeSafeFloorLegend,
+  buildOfficeSafeStatusSnapshot,
+  buildOfficeSafeScanIndex,
+  buildOfficeSafeHudReadabilityPlan,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -578,6 +595,521 @@ describe("OfficePage view helpers", () => {
     expect(sceneObjects.find((object) => object.kind === "avatar")?.label).toBe("모델 캐릭터 1");
     expect(sceneObjects.every((object) => object.id.startsWith("character:"))).toBe(true);
     expect(sceneObjects.map((object) => `${object.label} ${object.detail}`).join(" ")).not.toMatch(/raw|prompt|transcript|body|script|secret|model-name/i);
+  });
+
+  it("builds safe Stage 14-A character tracking cues from visible characters and delta only", () => {
+    const characters = [
+      {
+        id: "model-1",
+        role: "model" as const,
+        roomId: "sessions" as const,
+        label: "raw prompt transcript model-name must not matter",
+        status: "active" as const,
+        detail: "raw task body script secret must not matter",
+        redactionNote: "안전 DTO 역할/상태/개수만 반영 · 원문 제외",
+        x: 22,
+        y: 24,
+      },
+      {
+        id: "worker-1",
+        role: "worker" as const,
+        roomId: "work" as const,
+        label: "작업자 1",
+        status: "working" as const,
+        detail: "safe detail",
+        redactionNote: "안전 DTO 역할/상태/개수만 반영 · 원문 제외",
+        x: 68,
+        y: 24,
+      },
+      {
+        id: "automation-1",
+        role: "automation_keeper" as const,
+        roomId: "automation" as const,
+        label: "자동화 관리인 1",
+        status: "scheduled" as const,
+        detail: "safe detail",
+        redactionNote: "안전 DTO 역할/상태/개수만 반영 · 원문 제외",
+        x: 24,
+        y: 68,
+      },
+    ];
+    const delta = {
+      hasChanges: true,
+      nodeBadges: {
+        sessions: [],
+        work: [{ label: "상태 변경", tone: "warning" as const }],
+        automation: [],
+        routing: [],
+      },
+      changedFlows: [{ from: "sessions" as const, to: "work" as const, label: "raw prompt transcript must not matter", tone: "warning" as const }],
+      recentChanges: [],
+    };
+
+    const cues = buildOfficeCharacterTrackingCues(characters, delta);
+
+    expect(cues).toHaveLength(3);
+    expect(cues.map((cue) => [cue.characterId, cue.label, cue.tone])).toEqual([
+      ["model-1", "변화 감지", "alert"],
+      ["worker-1", "변화 감지", "alert"],
+      ["automation-1", "자동화 감시", "steady"],
+    ]);
+    expect(cues[0].style["--office-tracking-x"]).toMatch(/px$/);
+    expect(cues[0].style["--office-tracking-delay"]).toMatch(/s$/);
+    expect(cues.every((cue) => cue.ariaHidden === true && cue.interactive === false)).toBe(true);
+    expect(cues.map((cue) => `${cue.label} ${cue.detail} ${cue.reducedMotionLabel}`).join(" ")).not.toMatch(/raw|prompt|transcript|body|script|secret|model-name/i);
+  });
+
+  it("builds safe Stage 14-B room activity meters from room counts, characters, and delta", () => {
+    const nodes = buildOfficeMapNodes(
+      officeFixture({
+        agents: Array.from({ length: 5 }, (_, index) => ({ id: `agent-${index}`, prompt: "raw prompt must not matter" })),
+        work_items: [{ id: "task-raw", title: "raw task body must not matter", body: "raw body must not matter" }],
+        automations: [],
+        topics: [],
+        provenance: [],
+      }),
+    );
+    const characters = [
+      { id: "model-1", role: "model" as const, roomId: "sessions" as const, label: "raw model", status: "active" as const, detail: "raw prompt", redactionNote: "safe", x: 20, y: 20 },
+      { id: "worker-1", role: "worker" as const, roomId: "work" as const, label: "작업자", status: "working" as const, detail: "safe", redactionNote: "safe", x: 60, y: 20 },
+      { id: "worker-2", role: "worker" as const, roomId: "work" as const, label: "작업자", status: "working" as const, detail: "safe", redactionNote: "safe", x: 64, y: 20 },
+    ];
+    const delta = {
+      hasChanges: true,
+      nodeBadges: { sessions: [], work: [{ label: "+1", tone: "positive" as const }], automation: [], routing: [] },
+      changedFlows: [{ from: "work" as const, to: "automation" as const, label: "raw transcript must not matter", tone: "positive" as const }],
+      recentChanges: [],
+    };
+
+    const meters = buildOfficeRoomActivityMeters(nodes, characters, delta);
+
+    expect(meters.map((meter) => [meter.roomId, meter.label, meter.level])).toEqual([
+      ["sessions", "분주함", "busy"],
+      ["work", "변화 감지", "changed"],
+      ["automation", "변화 감지", "changed"],
+      ["routing", "조용함", "quiet"],
+    ]);
+    expect(meters.every((meter) => meter.ariaHidden === true && meter.interactive === false)).toBe(true);
+    expect(meters[0].detail).toContain("안전 항목 5개");
+    expect(meters.map((meter) => `${meter.label} ${meter.detail} ${meter.reducedMotionLabel}`).join(" ")).not.toMatch(/raw|prompt|transcript|body|script|secret|model/i);
+  });
+
+  it("builds safe Stage 14-C pulse timeline from recent safe deltas", () => {
+    const delta = {
+      hasChanges: true,
+      nodeBadges: { sessions: [{ label: "+2", tone: "positive" as const }], work: [], automation: [], routing: [] },
+      changedFlows: [{ from: "sessions" as const, to: "work" as const, label: "raw prompt transcript body script secret must not matter", tone: "warning" as const }],
+      recentChanges: [
+        { id: "change-1", label: "세션 +2", detail: "raw transcript must not matter", tone: "positive" as const },
+        { id: "change-2", label: "자동화 상태", detail: "raw script secret must not matter", tone: "warning" as const },
+      ],
+    };
+
+    const timeline = buildOfficeSafePulseTimeline(delta);
+
+    expect(timeline.stageLabel).toBe("Stage 14-C 안전 pulse timeline");
+    expect(timeline.items.map((item) => [item.kind, item.label, item.tone])).toEqual([
+      ["room", "세션 변화", "positive"],
+      ["flow", "세션 → 작업", "warning"],
+      ["recent", "최근 안전 변화 1", "positive"],
+      ["recent", "최근 안전 변화 2", "warning"],
+    ]);
+    expect(timeline.items.every((item) => item.ariaHidden === true && item.interactive === false)).toBe(true);
+    expect(timeline.items.map((item) => `${item.label} ${item.detail} ${item.reducedMotionLabel}`).join(" ")).not.toMatch(/raw|prompt|transcript|body|script|secret|token|sk-/i);
+  });
+
+  it("builds safe Stage 14-D breadcrumb trail from changed flows", () => {
+    const delta = {
+      hasChanges: true,
+      nodeBadges: { sessions: [], work: [], automation: [], routing: [] },
+      changedFlows: [
+        { from: "sessions" as const, to: "work" as const, label: "raw prompt must not matter", tone: "positive" as const },
+        { from: "work" as const, to: "automation" as const, label: "raw task_body script must not matter", tone: "warning" as const },
+      ],
+      recentChanges: [{ id: "recent-secret", label: "raw token", detail: "sk-sho...leak", tone: "negative" as const }],
+    };
+
+    const trail = buildOfficeSafeBreadcrumbTrail(delta);
+
+    expect(trail.stageLabel).toBe("Stage 14-D 안전 breadcrumb");
+    expect(trail.segments.map((segment) => [segment.label, segment.detail, segment.tone])).toEqual([
+      ["세션", "출발 방 · 안전 흐름 변화", "positive"],
+      ["작업", "경유 방 · 안전 흐름 변화", "warning"],
+      ["자동화", "도착 방 · 안전 흐름 변화", "warning"],
+    ]);
+    expect(trail.segments.every((segment) => segment.ariaHidden === true && segment.interactive === false)).toBe(true);
+    expect(trail.segments.map((segment) => `${segment.label} ${segment.detail}`).join(" ")).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|sk-/i);
+  });
+
+  it("builds safe Stage 14-E route compass from safe deltas", () => {
+    const delta = {
+      hasChanges: true,
+      nodeBadges: { sessions: [], work: [], automation: [{ label: "raw model provider", tone: "warning" as const }], routing: [] },
+      changedFlows: [
+        { from: "sessions" as const, to: "work" as const, label: "raw prompt transcript must not matter", tone: "positive" as const },
+        { from: "work" as const, to: "automation" as const, label: "raw script secret must not matter", tone: "warning" as const },
+      ],
+      recentChanges: [{ id: "recent-token", label: "raw token", detail: "sk-sho...leak", tone: "negative" as const }],
+    };
+
+    const compass = buildOfficeSafeRouteCompass(delta);
+
+    expect(compass.stageLabel).toBe("Stage 14-E 안전 route compass");
+    expect(compass.heading).toBe("주의 집중");
+    expect(compass.points.map((point) => [point.label, point.detail, point.tone])).toEqual([
+      ["방향", "세션 → 자동화", "negative"],
+      ["신호", "감소 우선", "negative"],
+      ["요약", "안전 변화 4개 · 방 3개", "neutral"],
+    ]);
+    expect(compass.points.every((point) => point.ariaHidden === true && point.interactive === false)).toBe(true);
+    expect(`${compass.heading} ${compass.detail} ${compass.points.map((point) => `${point.label} ${point.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("builds safe Stage 14-F focus lane from safe delta density", () => {
+    const delta = {
+      hasChanges: true,
+      nodeBadges: {
+        sessions: [{ label: "raw model provider", tone: "positive" as const }],
+        work: [{ label: "raw prompt", tone: "negative" as const }],
+        automation: [{ label: "raw script", tone: "warning" as const }],
+        routing: [],
+      },
+      changedFlows: [
+        { from: "sessions" as const, to: "work" as const, label: "raw transcript must not matter", tone: "negative" as const },
+        { from: "work" as const, to: "automation" as const, label: "raw secret must not matter", tone: "warning" as const },
+      ],
+      recentChanges: [{ id: "recent-token", label: "raw token", detail: "sk-sho...leak", tone: "negative" as const }],
+    };
+
+    const lane = buildOfficeSafeFocusLane(delta);
+
+    expect(lane.stageLabel).toBe("Stage 14-F 안전 focus lane");
+    expect(lane.items.map((item) => [item.roomId, item.label, item.detail, item.tone, item.weight])).toEqual([
+      ["work", "작업", "주의 변화 2개 · 흐름 2개", "negative", 4],
+      ["automation", "자동화", "확인 변화 1개 · 흐름 1개", "warning", 2],
+      ["sessions", "세션", "정상 변화 1개 · 흐름 1개", "positive", 2],
+      ["routing", "라우팅", "대기 변화 0개 · 흐름 0개", "neutral", 0],
+    ]);
+    expect(lane.items.every((item) => item.ariaHidden === true && item.interactive === false)).toBe(true);
+    expect(`${lane.stageLabel} ${lane.detail} ${lane.items.map((item) => `${item.label} ${item.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("builds safe Stage 14-G attention strip from safe focus density", () => {
+    const delta = {
+      hasChanges: true,
+      nodeBadges: {
+        sessions: [{ label: "raw model provider", tone: "positive" as const }],
+        work: [{ label: "raw prompt", tone: "negative" as const }],
+        automation: [{ label: "raw script", tone: "warning" as const }],
+        routing: [],
+      },
+      changedFlows: [
+        { from: "sessions" as const, to: "work" as const, label: "raw transcript must not matter", tone: "negative" as const },
+        { from: "work" as const, to: "automation" as const, label: "raw secret must not matter", tone: "warning" as const },
+      ],
+      recentChanges: [{ id: "recent-token", label: "raw token", detail: "sk-sho...leak", tone: "negative" as const }],
+    };
+
+    const strip = buildOfficeSafeAttentionStrip(delta);
+
+    expect(strip.stageLabel).toBe("Stage 14-G 안전 attention strip");
+    expect(strip.heading).toBe("주의 방 우선");
+    expect(strip.chips.map((chip) => [chip.id, chip.label, chip.detail, chip.tone])).toEqual([
+      ["focus", "초점", "작업 · 밀도 4", "negative"],
+      ["signal", "신호", "주의 우선", "negative"],
+      ["scope", "범위", "방 3개 · 밀도 8", "neutral"],
+    ]);
+    expect(strip.chips.every((chip) => chip.ariaHidden === true && chip.interactive === false)).toBe(true);
+    expect(`${strip.stageLabel} ${strip.heading} ${strip.detail} ${strip.chips.map((chip) => `${chip.label} ${chip.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("builds safe Stage 14-H room beacons from safe focus lane density", () => {
+    const delta = {
+      hasChanges: true,
+      nodeBadges: {
+        sessions: [{ label: "raw model provider", tone: "positive" as const }],
+        work: [{ label: "raw prompt", tone: "negative" as const }],
+        automation: [{ label: "raw script", tone: "warning" as const }],
+        routing: [],
+      },
+      changedFlows: [
+        { from: "sessions" as const, to: "work" as const, label: "raw transcript must not matter", tone: "negative" as const },
+        { from: "work" as const, to: "automation" as const, label: "raw secret must not matter", tone: "warning" as const },
+      ],
+      recentChanges: [{ id: "recent-token", label: "raw token", detail: "sk-sho...leak", tone: "negative" as const }],
+    };
+
+    const beacons = buildOfficeSafeRoomBeacons(delta);
+
+    expect(beacons.stageLabel).toBe("Stage 14-H 안전 room beacons");
+    expect(beacons.beacons.map((beacon) => [beacon.roomId, beacon.label, beacon.detail, beacon.tone, beacon.intensity, beacon.x, beacon.y])).toEqual([
+      ["work", "작업 beacon", "주의 · 밀도 4 · 맵 표시", "negative", "high", 70, 30],
+      ["automation", "자동화 beacon", "확인 · 밀도 2 · 맵 표시", "warning", "medium", 24, 67],
+      ["sessions", "세션 beacon", "정상 · 밀도 2 · 맵 표시", "positive", "medium", 24, 30],
+      ["routing", "라우팅 beacon", "대기 · 밀도 0 · 맵 표시", "neutral", "idle", 70, 67],
+    ]);
+    expect(beacons.beacons.every((beacon) => beacon.ariaHidden === true && beacon.interactive === false)).toBe(true);
+    expect(beacons.beacons.map((beacon) => `${beacon.label} ${beacon.detail} ${beacon.reducedMotionLabel}`).join(" ")).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("builds safe Stage 14-I flow pulse bands from changed safe flows", () => {
+    const delta = {
+      hasChanges: true,
+      nodeBadges: { sessions: [], work: [], automation: [], routing: [] },
+      changedFlows: [
+        { from: "sessions" as const, to: "work" as const, label: "raw prompt transcript", tone: "positive" as const },
+        { from: "work" as const, to: "automation" as const, label: "raw script secret", tone: "warning" as const },
+      ],
+      recentChanges: [{ id: "recent-token", label: "raw token", detail: "sk-sho...leak", tone: "negative" as const }],
+    };
+
+    const bands = buildOfficeSafeFlowPulseBands(delta);
+
+    expect(bands.stageLabel).toBe("Stage 14-I 안전 flow pulse bands");
+    expect(bands.bands.map((band) => [band.id, band.label, band.detail, band.tone, band.intensity, band.x1, band.y1, band.x2, band.y2])).toEqual([
+      ["sessions-to-work", "세션 → 작업 pulse", "정상 · 안전 흐름 1", "positive", "medium", 24, 30, 70, 30],
+      ["work-to-automation", "작업 → 자동화 pulse", "확인 · 안전 흐름 2", "warning", "high", 70, 30, 24, 67],
+    ]);
+    expect(bands.bands.every((band) => band.ariaHidden === true && band.interactive === false)).toBe(true);
+    expect(bands.bands.map((band) => `${band.label} ${band.detail} ${band.reducedMotionLabel}`).join(" ")).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("builds safe Stage 14-J tactical minimap from safe beacons and flow bands", () => {
+    const delta = {
+      hasChanges: true,
+      nodeBadges: {
+        sessions: [{ label: "raw model provider", tone: "positive" as const }],
+        work: [{ label: "raw prompt", tone: "negative" as const }],
+        automation: [{ label: "raw script", tone: "warning" as const }],
+        routing: [],
+      },
+      changedFlows: [
+        { from: "sessions" as const, to: "work" as const, label: "raw transcript must not matter", tone: "negative" as const },
+        { from: "work" as const, to: "automation" as const, label: "raw secret must not matter", tone: "warning" as const },
+      ],
+      recentChanges: [{ id: "recent-token", label: "raw token", detail: "sk-sho...leak", tone: "negative" as const }],
+    };
+
+    const minimap = buildOfficeSafeTacticalMinimap(delta);
+
+    expect(minimap.stageLabel).toBe("Stage 14-J 안전 tactical minimap");
+    expect(minimap.summary).toBe("활성 방 3개 · 흐름 2개");
+    expect(minimap.cells.map((cell) => [cell.roomId, cell.label, cell.detail, cell.tone, cell.intensity, cell.active])).toEqual([
+      ["sessions", "세션", "정상 · 밀도 2", "positive", "medium", true],
+      ["work", "작업", "주의 · 밀도 4", "negative", "high", true],
+      ["automation", "자동화", "확인 · 밀도 2", "warning", "medium", true],
+      ["routing", "라우팅", "대기 · 밀도 0", "neutral", "idle", false],
+    ]);
+    expect(minimap.cells.every((cell) => cell.ariaHidden === true && cell.interactive === false)).toBe(true);
+    expect(`${minimap.summary} ${minimap.cells.map((cell) => `${cell.label} ${cell.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("builds safe Stage 14-K tactical ticker from safe minimap and attention signals", () => {
+    const delta = {
+      hasChanges: true,
+      nodeBadges: {
+        sessions: [{ label: "raw model provider", tone: "positive" as const }],
+        work: [{ label: "raw prompt", tone: "negative" as const }],
+        automation: [{ label: "raw script", tone: "warning" as const }],
+        routing: [],
+      },
+      changedFlows: [
+        { from: "sessions" as const, to: "work" as const, label: "raw transcript must not matter", tone: "negative" as const },
+        { from: "work" as const, to: "automation" as const, label: "raw secret must not matter", tone: "warning" as const },
+      ],
+      recentChanges: [{ id: "recent-token", label: "raw token", detail: "sk-sho...leak", tone: "negative" as const }],
+    };
+
+    const ticker = buildOfficeSafeTacticalTicker(delta);
+
+    expect(ticker.stageLabel).toBe("Stage 14-K 안전 tactical ticker");
+    expect(ticker.headline).toBe("주의 방 우선 · 활성 방 3개 · 흐름 2개");
+    expect(ticker.items.map((item) => [item.id, item.label, item.detail, item.tone])).toEqual([
+      ["focus", "초점", "작업 · 밀도 4", "negative"],
+      ["map", "전술", "활성 방 3개 · 흐름 2개", "neutral"],
+      ["cells", "방", "세션 2 · 작업 4 · 자동화 2", "negative"],
+    ]);
+    expect(ticker.items.every((item) => item.ariaHidden === true && item.interactive === false)).toBe(true);
+    expect(`${ticker.headline} ${ticker.items.map((item) => `${item.label} ${item.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("builds safe Stage 14-L mission clock from browser-local posture only", () => {
+    const clock = buildOfficeSafeMissionClock({
+      liveTracking: true,
+      isVisible: false,
+      consecutiveFailures: 2,
+      hasRecentChanges: true,
+    });
+
+    expect(clock.stageLabel).toBe("Stage 14-L 안전 mission clock");
+    expect(clock.headline).toBe("실시간 · 숨김 탭 · 120초");
+    expect(clock.items.map((item) => [item.id, item.label, item.detail, item.tone])).toEqual([
+      ["mode", "모드", "실시간 추적", "positive"],
+      ["cadence", "간격", "120초", "warning"],
+      ["safety", "안전", "브라우저 로컬 · 읽기 전용", "neutral"],
+      ["pulse", "변화", "최근 변화 있음", "positive"],
+    ]);
+    expect(clock.items.every((item) => item.ariaHidden === true && item.interactive === false)).toBe(true);
+    expect(`${clock.headline} ${clock.items.map((item) => `${item.label} ${item.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+
+    const manual = buildOfficeSafeMissionClock({ liveTracking: false, isVisible: true, consecutiveFailures: 0, hasRecentChanges: false });
+    expect(manual.headline).toBe("수동 · 표시 탭 · 대기");
+    expect(manual.items.find((item) => item.id === "cadence")?.detail).toBe("수동 새로고침");
+  });
+
+  it("builds safe Stage 14-M command deck from mission clock, tactical ticker, and source health", () => {
+    const state = officeFixture({
+      data_sources: [
+        { id: "sessions", status: "ok", checked_at: "2026-05-09T00:00:00Z", item_count: 2, warning_count: 0, error_summary: "raw provider must not matter" },
+        { id: "kanban", status: "partial", checked_at: "2026-05-09T00:00:00Z", item_count: 1, warning_count: 2, error_summary: "raw token must not matter" },
+      ],
+    });
+    const delta = {
+      hasChanges: true,
+      nodeBadges: {
+        sessions: [{ label: "raw model provider", tone: "positive" as const }],
+        work: [{ label: "raw prompt", tone: "negative" as const }],
+        automation: [],
+        routing: [],
+      },
+      changedFlows: [{ from: "sessions" as const, to: "work" as const, label: "raw transcript", tone: "negative" as const }],
+      recentChanges: [{ id: "recent-token", label: "raw token", detail: "sk-sho...leak", tone: "negative" as const }],
+    };
+
+    const deck = buildOfficeSafeCommandDeck(state, delta, { liveTracking: false, isVisible: true, consecutiveFailures: 0, hasRecentChanges: true });
+
+    expect(deck.stageLabel).toBe("Stage 14-M 안전 command deck");
+    expect(deck.headline).toBe("수동 · 표시 탭 · 대기 · 주의 필요");
+    expect(deck.cards.map((card) => [card.id, card.label, card.detail, card.tone])).toEqual([
+      ["mission", "작전 시계", "수동 · 표시 탭 · 대기", "neutral"],
+      ["tactical", "전술 HUD", "주의 방 우선 · 활성 방 2개 · 흐름 1개", "negative"],
+      ["sources", "소스", "정상 1 · 주의 1 · 공백/미연결 3 · 경고 2", "warning"],
+      ["safety", "안전", "읽기 전용 · 로컬 표시 · 원문 제외", "neutral"],
+    ]);
+    expect(deck.cards.every((card) => card.ariaHidden === true && card.interactive === false)).toBe(true);
+    expect(`${deck.headline} ${deck.cards.map((card) => `${card.label} ${card.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("builds safe Stage 14-N floor legend from safe minimap cells", () => {
+    const delta = {
+      hasChanges: true,
+      nodeBadges: {
+        sessions: [{ label: "raw prompt", tone: "positive" as const }],
+        work: [{ label: "raw token", tone: "negative" as const }, { label: "raw transcript", tone: "warning" as const }],
+        automation: [],
+        routing: [],
+      },
+      changedFlows: [{ from: "sessions" as const, to: "work" as const, label: "raw model", tone: "negative" as const }],
+      recentChanges: [],
+    };
+
+    const legend = buildOfficeSafeFloorLegend(delta);
+
+    expect(legend.stageLabel).toBe("Stage 14-N 안전 floor legend");
+    expect(legend.summary).toBe("활성 2 · 대기 2 · 흐름 1");
+    expect(legend.items.map((item) => [item.id, item.label, item.detail, item.tone])).toEqual([
+      ["active", "활성 방", "세션 · 작업", "negative"],
+      ["idle", "대기 방", "자동화 · 라우팅", "neutral"],
+      ["flow", "흐름", "안전 흐름 1개", "negative"],
+      ["safety", "투영", "집계 전용", "neutral"],
+    ]);
+    expect(legend.items.every((item) => item.ariaHidden === true && item.interactive === false)).toBe(true);
+    expect(`${legend.summary} ${legend.items.map((item) => `${item.label} ${item.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("builds safe Stage 14-O status snapshot from existing safe HUD helpers", () => {
+    const state = officeFixture({
+      data_sources: [
+        { id: "sessions", status: "ok", checked_at: "2026-05-08T00:00:00Z", item_count: 1 },
+        { id: "kanban", status: "unavailable", checked_at: "2026-05-08T00:00:00Z", item_count: 0, warning_count: 1 },
+      ],
+    });
+    const delta = {
+      hasChanges: true,
+      nodeBadges: {
+        sessions: [{ label: "raw prompt", tone: "positive" as const }],
+        work: [{ label: "raw task_body", tone: "negative" as const }],
+        automation: [],
+        routing: [],
+      },
+      changedFlows: [{ from: "sessions" as const, to: "work" as const, label: "raw provider", tone: "negative" as const }],
+      recentChanges: [],
+    };
+
+    const snapshot = buildOfficeSafeStatusSnapshot(state, delta, {
+      liveTracking: false,
+      isVisible: true,
+      consecutiveFailures: 0,
+      hasRecentChanges: true,
+    });
+
+    expect(snapshot.stageLabel).toBe("Stage 14-O 안전 status snapshot");
+    expect(snapshot.headline).toBe("소스 주의 · 활성 2 · 대기 2 · 흐름 1");
+    expect(snapshot.items.map((item) => [item.id, item.label, item.detail, item.tone])).toEqual([
+      ["deck", "상태판", "수동 · 표시 탭 · 변화 감지", "warning"],
+      ["floor", "바닥", "활성 2 · 대기 2 · 흐름 1", "negative"],
+      ["source", "소스", "2개 중 1개 사용 가능", "warning"],
+      ["guard", "가드", "읽기 전용 · 원문 제외", "neutral"],
+    ]);
+    expect(snapshot.items.every((item) => item.ariaHidden === true && item.interactive === false)).toBe(true);
+    expect(`${snapshot.headline} ${snapshot.items.map((item) => `${item.label} ${item.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("builds safe Stage 14-P scan index from status snapshot and safe rail count", () => {
+    const state = officeFixture({
+      data_sources: [
+        { id: "sessions", status: "ok", checked_at: "2026-05-08T00:00:00Z", item_count: 1 },
+        { id: "kanban", status: "partial", checked_at: "2026-05-08T00:00:00Z", item_count: 1, warning_count: 1 },
+      ],
+    });
+    const delta = {
+      hasChanges: true,
+      nodeBadges: {
+        sessions: [{ label: "raw prompt", tone: "positive" as const }],
+        work: [{ label: "raw token", tone: "negative" as const }],
+        automation: [],
+        routing: [],
+      },
+      changedFlows: [{ from: "work" as const, to: "automation" as const, label: "raw provider", tone: "warning" as const }],
+      recentChanges: [],
+    };
+
+    const index = buildOfficeSafeScanIndex(state, delta, {
+      liveTracking: true,
+      isVisible: true,
+      consecutiveFailures: 0,
+      hasRecentChanges: true,
+    });
+
+    expect(index.stageLabel).toBe("Stage 14-P 안전 scan index");
+    expect(index.headline).toBe("스캔 4칸 · 소스 주의 · 활성 3 · 대기 1 · 흐름 1");
+    expect(index.items.map((item) => [item.id, item.label, item.detail, item.tone])).toEqual([
+      ["snapshot", "스냅샷", "소스 주의 · 활성 3 · 대기 1 · 흐름 1", "negative"],
+      ["rail", "레일", "4개 안전 칸", "negative"],
+      ["mode", "모드", "실시간 · 표시 탭", "positive"],
+    ]);
+    expect(index.items.every((item) => item.ariaHidden === true && item.interactive === false)).toBe(true);
+    expect(`${index.headline} ${index.items.map((item) => `${item.label} ${item.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("builds safe Stage 14-Q HUD readability plan from browser-local layout signals", () => {
+    const plan = buildOfficeSafeHudReadabilityPlan({
+      viewportWidth: 1120,
+      prefersReducedMotion: true,
+      safePanelCount: 6,
+      liveTracking: true,
+    });
+
+    expect(plan.stageLabel).toBe("Stage 14-Q 안전 HUD readability");
+    expect(plan.summary).toBe("넓은 HUD · 정적 모션 · 6개 패널");
+    expect(plan.items.map((item) => [item.id, item.label, item.detail, item.tone])).toEqual([
+      ["layout", "배치", "넓은 HUD", "positive"],
+      ["motion", "모션", "정적 모션", "neutral"],
+      ["density", "밀도", "6개 패널", "warning"],
+      ["tracking", "추적", "실시간", "positive"],
+    ]);
+    expect(plan.items.every((item) => item.ariaHidden === true && item.interactive === false)).toBe(true);
+    expect(`${plan.summary} ${plan.items.map((item) => `${item.label} ${item.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
   });
 
   it("builds Korean empty-source copy without exposing raw adapter data", () => {

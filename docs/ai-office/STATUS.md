@@ -1,10 +1,10 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-09 13:56 KST
+Last updated: 2026-05-09 22:04 KST
 
 ## Current phase
 
-Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A RPG character projection, Stage 10-B CSS/SVG character presentation, Stage 10-C safe role action chips, Stage 10-D room-to-room RPG route choreography, Stage 10-E safe character inspector, Stage 10-F usability hardening, Stage 10-G density/readability modes, and Stage 10-H keyboard jump targets are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
+Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, and Stage 14-A through Stage 14-Q safe dynamic-tracking/readability layers are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
 
 Current Stage 9-E result: the `/office` page now uses Korean for primary headings, buttons, helper text, safety copy, status labels, inspector field labels, and office-map room/zone labels while keeping stable technical identifiers such as DTO, OfficeState, source IDs, cron, and enum-like adapter values visible for debugging.
 
@@ -40,12 +40,481 @@ Current Stage 12-B result: `/office` now adds Korean empty-source copy polish fo
 
 Current Stage 13 result: a non-mutating PR/handoff summary pass is documented in `docs/ai-office/plans/2026-05-09-stage-13-pr-handoff-summary.md`, including review summary, PR body draft, safety/non-goals, verification history, and reviewer focus checklist.
 
-Next phase: open/update the GitHub PR from this branch or continue with another small non-renderer review/polish slice only if selected. Still no individual task identity, generated content-like speech bubbles, sprite assets, Phaser, PixiJS, canvas renderer, backend/API changes, mutation controls, persistent storage, or raw record projection.
+Current Stage 14-E result: `/office` now adds a compact safe route compass that ties Stage 14-B room meters, Stage 14-C pulse timeline, and Stage 14-D breadcrumb into one direction/signal/summary rail. `OfficeSafeRouteCompass`, `OfficeSafeRouteCompassPoint`, and `buildOfficeSafeRouteCompass(delta)` derive only from safe `OfficeStateDelta` aggregates and known room labels, with tone priority `negative > warning > positive > neutral`. The UI exposes `data-office-safe-route-compass` and `data-office-safe-route-compass-point="direction|signal|summary"` while staying decorative, non-interactive, and frontend-only.
+
+Current Stage 14-F result: `/office` now adds a safe focus lane that ranks known rooms by safe delta density. `OfficeSafeFocusLane`, `OfficeSafeFocusLaneItem`, and `buildOfficeSafeFocusLane(delta)` derive only from safe node badges and changed-flow counts, regenerate Korean room labels/details, and expose `data-office-safe-focus-lane` plus per-room hooks without raw label/detail projection.
+
+Current Stage 14-G result: `/office` now adds a safe attention strip that compresses the Stage 14-F focus lane and Stage 14-E route compass into one top glance signal. `OfficeSafeAttentionStrip`, `OfficeSafeAttentionStripChip`, and `buildOfficeSafeAttentionStrip(delta)` derive only from safe focus density, active room counts, and compass tone, then expose `data-office-safe-attention-strip` with `focus|signal|scope` chips.
+
+Current Stage 14-H result: `/office` now adds safe room beacons over the CSS/SVG map. `OfficeSafeRoomBeacon`, `OfficeSafeRoomBeacons`, and `buildOfficeSafeRoomBeacons(delta)` reuse the safe focus lane, fixed known room coordinates, and generated density/intensity labels to render decorative spatial beacon cues plus a compact text rail.
+
+Current Stage 14-I result: `/office` now adds safe flow pulse bands over the CSS/SVG map. `OfficeSafeFlowPulseBand`, `OfficeSafeFlowPulseBands`, and `buildOfficeSafeFlowPulseBands(delta)` read only `changedFlows`, ignore raw flow labels, use known room IDs/coordinates, and render generated decorative flow bands plus a compact rail.
+
+Current Stage 14-J result: `/office` now adds a safe tactical minimap that compresses Stage 14-H room beacons and Stage 14-I flow pulse bands into a compact DeskRPG-like cell grid. `OfficeSafeTacticalMinimapCell`, `OfficeSafeTacticalMinimap`, and `buildOfficeSafeTacticalMinimap(delta)` derive only from safe beacon weights, known room labels, generated tone labels, and safe flow counts. The UI exposes `data-office-safe-tactical-minimap`, summary, and per-room cell hooks while staying decorative and non-interactive.
+
+Current Stage 14-K result: `/office` now adds a safe tactical ticker that compresses the Stage 14-J minimap and Stage 14-G attention strip into one compact operational readout. `OfficeSafeTacticalTickerItem`, `OfficeSafeTacticalTicker`, and `buildOfficeSafeTacticalTicker(delta)` derive only from safe attention/minimap aggregates and generated room-weight summaries.
+
+Current Stage 14-L result: `/office` now adds a safe mission clock that compresses browser-local tracking posture into a compact HUD element. `OfficeSafeMissionClockOptions`, `OfficeSafeMissionClockItem`, `OfficeSafeMissionClock`, and `buildOfficeSafeMissionClock(options)` derive only from live/manual mode, tab visibility, local failure count, and whether the latest safe delta has changes.
+
+Current Stage 14-M result: `/office` now adds a safe command deck that groups mission clock, tactical ticker, source health, and fixed safety posture into one compact HUD. `OfficeSafeCommandDeckCard`, `OfficeSafeCommandDeck`, and `buildOfficeSafeCommandDeck(state, delta, missionOptions)` derive only from safe helper outputs and generated source-health summary.
+
+Current Stage 14-N result: `/office` now adds a safe floor legend that compresses tactical minimap cells and flow pulse counts into generated `active|idle|flow|safety` legend items. `OfficeSafeFloorLegendItem`, `OfficeSafeFloorLegend`, and `buildOfficeSafeFloorLegend(delta)` derive only from safe minimap/flow helpers and generated room labels.
+
+Current Stage 14-O result: `/office` now adds a safe status snapshot in the safety panel. `OfficeSafeStatusSnapshotItem`, `OfficeSafeStatusSnapshot`, and `buildOfficeSafeStatusSnapshot(state, delta, missionOptions)` compose command deck, floor legend, source health, and fixed guard copy into `deck|floor|source|guard` items.
+
+Current Stage 14-P result: `/office` now adds a safe scan index in the safety panel. `OfficeSafeScanIndexItem`, `OfficeSafeScanIndex`, and `buildOfficeSafeScanIndex(state, delta, missionOptions)` compose the safe status snapshot, floor legend rail count, and browser-local live/manual posture into `snapshot|rail|mode` items.
+
+Current Stage 14-Q result: `/office` now adds a safe HUD readability strip in the safety panel. `OfficeSafeHudReadabilityPlanOptions`, `OfficeSafeHudReadabilityPlanItem`, `OfficeSafeHudReadabilityPlan`, and `buildOfficeSafeHudReadabilityPlan(options)` derive only from browser-local viewport width, reduced-motion preference, safe panel count, and live/manual tracking posture, then render generated `layout|motion|density|tracking` items.
+
+Next phase: Stage 14 is closed at 14-Q. Proceed with PR/merge, then start Stage 15 consolidation from `main` or a fresh branch off `main`. Stage 15 starts with HUD hierarchy audit, duplicate signal reduction, and PR/readiness checklist refresh; it should not add another decorative HUD layer by default. Still no individual task identity, generated content-like speech bubbles, sprite assets, Phaser, PixiJS, canvas renderer, backend/API changes, mutation controls, persistent storage, or raw record projection.
 
 Stage 6 slices were approved by the user, including proceeding through the recommended remaining slices. Stage 7 was approved with testing deferred until the end. Stage 8-A was approved as the next safe step by the user saying to proceed in order, and the user then requested items 1 through 3 to run automatically in sequence. The user also approved installing missing test/runtime extras as needed in earlier setup. No gateway restart, cron change, Kanban mutation, NAS/Obsidian write, service/config mutation, memory/skill update, pixel dependency, or mutation-control implementation has been performed. The local dashboard process was restarted only to smoke-test the newly built local frontend bundle.
 
 
 
+
+## Stage 15 consolidation plan prepared
+
+Planned file:
+
+- `docs/ai-office/plans/2026-05-09-stage-15-consolidation-pr-merge-plan.md`
+
+Plan summary:
+
+- Stage 14 is intentionally closed at 14-Q because the safe dynamic-tracking/HUD stack is now materially complete.
+- Stage 15 should begin after PR/merge from `main` or a fresh branch off `main`.
+- Stage 15-A: HUD hierarchy audit. Make the safety panel scan order explicit without new data sources.
+- Stage 15-B: duplicate signal reduction. Reduce repeated safe summary text/counts across command deck, status snapshot, scan index, and HUD readability.
+- Stage 15-C: PR/readiness checklist refresh. Make the merged dashboard branch reviewable and easy to continue.
+- Stage 15-D: visual polish only if hierarchy/duplicate-reduction smoke reveals a concrete readability issue.
+
+Merge notes:
+
+- Current branch should be PR'd to `main` with the Stage 14-Q verification record and Stage 15 plan.
+- After merge, do not continue implementation on the old Stage 14 branch; start from updated `main`.
+
+## Stage 14-Q safe HUD readability implemented
+
+Implemented files/changes:
+
+- `web/src/pages/officeView.ts`
+  - Added `OfficeSafeHudReadabilityPlanOptions`, `OfficeSafeHudReadabilityPlanItem`, `OfficeSafeHudReadabilityPlan`, and `buildOfficeSafeHudReadabilityPlan(options)`.
+  - The helper uses only browser-local viewport width, reduced-motion preference, safe panel count, and live/manual tracking posture.
+- `web/src/pages/OfficePage.tsx`
+  - Renders the HUD readability strip in the safety panel with `data-office-safe-hud-readability`, summary hook, and per-item hooks.
+- `web/src/index.css`
+  - Adds compact CSS-only HUD readability styling.
+- `web/src/pages/OfficePage.test.ts`
+  - Adds RED/GREEN helper coverage for `layout|motion|density|tracking` items and raw-term exclusion.
+- `docs/ai-office/plans/2026-05-09-stage-14q-safe-hud-readability.md`
+  - Records scope, constraints, TDD record, warning/error audit, implementation, and verification target.
+
+Safety notes:
+
+- Stage 14-Q remains frontend-only, read-only, CSS/DOM-only, and does not add backend/API/schema changes, renderer dependencies, mutation controls, persistent storage, or raw record projection.
+- The HUD readability strip does not use raw changed-flow labels, raw badge labels, recent-change labels/details, adapter error strings, provider/model identity, individual task identity, prompts, transcripts, task bodies, scripts, logs, auth fields, secrets, or tokens.
+
+Verification 2026-05-09 21:58 KST:
+
+- RED verified first: Stage 14-Q test failed because `buildOfficeSafeHudReadabilityPlan` was not a function.
+- Warning/error audit found one active frontend issue: `buildOfficeSafeHudReadabilityPlan` / `safeHudReadability` was unused while UI wiring was incomplete. Fixed by rendering the Stage 14-Q strip and adding CSS.
+- GREEN focused helper/UI test passed: `OfficePage.test.ts` 46 passed.
+- Focused frontend verification passed: `npm test -- --run OfficePage.test.ts` → 46 passed.
+- ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/officeView.ts`, and `src/pages/OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large-chunk warning; current build size was JS `1,290.94 kB` / gzip `375.18 kB`, CSS `151.73 kB` / gzip `23.73 kB`.
+- Backend focused office tests passed: `18 passed in 1.30s`.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14q=warning-audit`: HUD readability present, summary present, items `layout|motion|density|tracking`, Stage 14-P/O/M/L hooks present, raw leak regex false, console JS errors none.
+
+## Stage 14-P safe scan index implemented
+
+Implemented files/changes:
+
+- `web/src/pages/officeView.ts`
+  - Added `OfficeSafeScanIndexItem`, `OfficeSafeScanIndex`, and `buildOfficeSafeScanIndex(state, delta, missionOptions)`.
+  - The helper composes safe status snapshot, floor legend, rail count, and browser-local tracking mode only.
+- `web/src/pages/OfficePage.tsx`
+  - Renders the scan index in the safety panel with `data-office-safe-scan-index`, headline hook, and per-item hooks.
+- `web/src/index.css`
+  - Adds compact CSS-only scan index styling.
+- `web/src/pages/OfficePage.test.ts`
+  - Adds RED/GREEN helper coverage for `snapshot|rail|mode` items and raw-term exclusion.
+- `docs/ai-office/plans/2026-05-09-stage-14p-safe-scan-index.md`
+  - Records scope, constraints, TDD record, implementation, and verification target.
+
+Safety notes:
+
+- Stage 14-P remains frontend-only, read-only, CSS/DOM-only, and does not add backend/API/schema changes, renderer dependencies, mutation controls, persistent storage, or raw record projection.
+- The scan index does not use raw changed-flow labels, raw badge labels, recent-change labels/details, adapter error strings, provider/model identity, individual task identity, prompts, transcripts, task bodies, scripts, logs, auth fields, secrets, or tokens.
+
+Verification 2026-05-09 18:56 KST:
+
+- RED verified first: Stage 14-P test failed because `buildOfficeSafeScanIndex` was not a function.
+- GREEN focused helper/UI test passed: `OfficePage.test.ts` 45 passed.
+- Focused frontend verification passed: `npm test -- --run OfficePage.test.ts` → 45 passed.
+- ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/officeView.ts`, and `src/pages/OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large-chunk warning; current build size was JS `1,288.89 kB` / gzip `374.80 kB`, CSS `150.21 kB` / gzip `23.59 kB`.
+- Backend focused office tests passed: `18 passed in 1.02s`.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14p=safe-scan-index`: scan index present, headline present, items `snapshot|rail|mode`, Stage 14-O/N/M/L/K/J/I/H/G/F/E/D/C hooks present, raw leak regex false, console JS errors none.
+
+## Stage 14-O safe status snapshot implemented
+
+Implemented files/changes:
+
+- `web/src/pages/officeView.ts`
+  - Added `OfficeSafeStatusSnapshotItem`, `OfficeSafeStatusSnapshot`, and `buildOfficeSafeStatusSnapshot(state, delta, missionOptions)`.
+  - The helper composes safe command deck, floor legend, source health, and fixed guard copy only.
+- `web/src/pages/OfficePage.tsx`
+  - Renders the status snapshot in the safety panel with `data-office-safe-status-snapshot`, headline hook, and per-item hooks.
+- `web/src/index.css`
+  - Adds compact CSS-only status snapshot styling.
+- `web/src/pages/OfficePage.test.ts`
+  - Adds RED/GREEN helper coverage for `deck|floor|source|guard` items and raw-term exclusion.
+- `docs/ai-office/plans/2026-05-09-stage-14o-safe-status-snapshot.md`
+  - Records scope, constraints, TDD record, implementation, and verification target.
+
+Safety notes:
+
+- Stage 14-O remains frontend-only, read-only, CSS/DOM-only, and does not add backend/API/schema changes, renderer dependencies, mutation controls, persistent storage, or raw record projection.
+- The status snapshot does not use raw changed-flow labels, raw badge labels, recent-change labels/details, adapter error strings, provider/model identity, individual task identity, prompts, transcripts, task bodies, scripts, logs, auth fields, secrets, or tokens.
+
+Verification 2026-05-09 18:46 KST:
+
+- RED verified first: Stage 14-O test failed because `buildOfficeSafeStatusSnapshot` was not a function.
+- GREEN focused helper/UI test passed: `OfficePage.test.ts` 44 passed.
+- Focused frontend verification passed: `npm test -- --run OfficePage.test.ts` → 44 passed.
+- ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/officeView.ts`, and `src/pages/OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large-chunk warning; current build size was JS `1,287.17 kB` / gzip `374.53 kB`, CSS `148.74 kB` / gzip `23.48 kB`.
+- Backend focused office tests passed: `18 passed in 0.99s`.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14o=safe-status-snapshot`: status snapshot present, headline present, items `deck|floor|source|guard`, Stage 14-N/M/L/K/J/I/H/G/F/E/D/C hooks present, raw leak regex false, console JS errors none.
+
+## Stage 14-N safe floor legend implemented
+
+Implemented files/changes:
+
+- `web/src/pages/officeView.ts`
+  - Added `OfficeSafeFloorLegendItem`, `OfficeSafeFloorLegend`, and `buildOfficeSafeFloorLegend(delta)`.
+  - The helper composes safe tactical minimap cells and safe flow pulse bands only.
+- `web/src/pages/OfficePage.tsx`
+  - Renders the floor legend beneath the tactical ticker with `data-office-safe-floor-legend`, summary hook, and per-item hooks.
+- `web/src/index.css`
+  - Adds compact CSS-only floor legend styling.
+- `web/src/pages/OfficePage.test.ts`
+  - Adds RED/GREEN helper coverage for `active|idle|flow|safety` items and raw-term exclusion.
+- `docs/ai-office/plans/2026-05-09-stage-14n-safe-floor-legend.md`
+  - Records scope, constraints, TDD record, implementation, and verification target.
+
+Safety notes:
+
+- Stage 14-N remains frontend-only, read-only, CSS/DOM-only, and does not add backend/API/schema changes, renderer dependencies, mutation controls, persistent storage, or raw record projection.
+- The floor legend does not use raw changed-flow labels, raw badge labels, recent-change labels/details, adapter error strings, provider/model identity, individual task identity, prompts, transcripts, task bodies, scripts, logs, auth fields, secrets, or tokens.
+
+Verification 2026-05-09 18:39 KST:
+
+- RED verified first: Stage 14-N test failed because `buildOfficeSafeFloorLegend` was not a function.
+- GREEN focused helper/UI test passed: `OfficePage.test.ts` 43 passed.
+- Focused frontend verification passed: `npm test -- --run OfficePage.test.ts` → 43 passed.
+- ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/officeView.ts`, and `src/pages/OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large-chunk warning; current build size was JS `1,285.05 kB` / gzip `374.13 kB`, CSS `147.21 kB` / gzip `23.29 kB`.
+- Backend focused office tests passed: `18 passed in 0.99s`.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14n=safe-floor-legend`: floor legend present, summary present, items `active|idle|flow|safety`, Stage 14-M/L/K/J/I/H/G/F/E/D/C hooks present, raw leak regex false, console JS errors none.
+
+## Stage 14-M safe command deck implemented
+
+Implemented files/changes:
+
+- `web/src/pages/officeView.ts`
+  - Added `OfficeSafeCommandDeckCard`, `OfficeSafeCommandDeck`, and `buildOfficeSafeCommandDeck(state, delta, missionOptions)`.
+  - The helper composes safe mission clock, tactical ticker, source health summary, and fixed safety copy only.
+- `web/src/pages/OfficePage.tsx`
+  - Renders the command deck in the safety panel with `data-office-safe-command-deck`, headline hook, and per-card hooks.
+- `web/src/index.css`
+  - Adds compact CSS-only command-deck HUD styling.
+- `web/src/pages/OfficePage.test.ts`
+  - Adds RED/GREEN helper coverage for mission/tactical/source/safety cards and raw-term exclusion.
+- `docs/ai-office/plans/2026-05-09-stage-14m-safe-command-deck.md`
+  - Records scope, constraints, TDD record, implementation, and verification target.
+
+Safety notes:
+
+- Stage 14-M remains frontend-only, read-only, CSS/DOM-only, and does not add backend/API/schema changes, renderer dependencies, mutation controls, persistent storage, or raw record projection.
+- The command deck does not use raw changed-flow labels, raw badge labels, recent-change labels/details, adapter error strings, provider/model identity, individual task identity, prompts, transcripts, task bodies, scripts, logs, auth fields, secrets, or tokens.
+
+Verification 2026-05-09 18:20 KST:
+
+- RED verified first: Stage 14-M test failed because `buildOfficeSafeCommandDeck` was not a function.
+- GREEN focused helper test passed: `OfficePage.test.ts` 42 passed.
+- Focused frontend verification passed: `npm test -- --run OfficePage.test.ts` → 42 passed.
+- ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/officeView.ts`, and `src/pages/OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large-chunk warning; current build size was JS `1,283.16 kB` / gzip `373.80 kB`, CSS `146.05 kB` / gzip `23.18 kB`.
+- Backend focused office tests passed: `18 passed in 1.00s`.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14m=safe-command-deck`: command deck present, headline present, cards `mission|tactical|sources|safety`, Stage 14-L/K/J/I/H/G/F/E/D/C hooks present, raw leak regex false, console JS errors none.
+
+## Stage 14-L safe mission clock implemented
+
+Implemented files/changes:
+
+- `web/src/pages/officeView.ts`
+  - Added `OfficeSafeMissionClockOptions`, `OfficeSafeMissionClockItem`, `OfficeSafeMissionClock`, and `buildOfficeSafeMissionClock(options)`.
+  - The helper uses only browser-local live/manual posture, tab visibility, local read-failure count, and safe-delta change presence.
+- `web/src/pages/OfficePage.tsx`
+  - Renders the mission clock in the safety panel with `data-office-safe-mission-clock`, headline hook, and per-item hooks.
+  - Tracks tab visibility and local live-read failure count in React state so the clock is render-safe.
+- `web/src/index.css`
+  - Adds compact CSS-only mission-clock HUD styling.
+- `web/src/pages/OfficePage.test.ts`
+  - Adds RED/GREEN helper coverage for live/hidden/failure posture, manual fallback, decorative/non-interactive posture, and raw-term exclusion.
+- `docs/ai-office/plans/2026-05-09-stage-14l-safe-mission-clock.md`
+  - Records scope, constraints, TDD record, implementation, and verification target.
+
+Safety notes:
+
+- Stage 14-L remains frontend-only, read-only, CSS/DOM-only, and does not add backend/API/schema changes, renderer dependencies, mutation controls, persistent storage, or raw record projection.
+- The mission clock does not use raw changed-flow labels, raw badge labels, recent-change labels/details, provider/model identity, individual task identity, prompts, transcripts, task bodies, scripts, logs, auth fields, secrets, or tokens.
+
+Verification 2026-05-09 18:13 KST:
+
+- RED verified first: Stage 14-L test failed because `buildOfficeSafeMissionClock` was not a function.
+- GREEN focused helper test passed: `OfficePage.test.ts` 41 passed.
+- Focused frontend verification passed: `npm test -- --run OfficePage.test.ts` → 41 passed.
+- ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/officeView.ts`, and `src/pages/OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large-chunk warning; current build size was JS `1,281.43 kB` / gzip `373.48 kB`, CSS `144.55 kB` / gzip `23.03 kB`.
+- Backend focused office tests passed: `18 passed in 1.06s`.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14l=safe-mission-clock`: mission clock present, headline present, mission items `mode|cadence|safety|pulse`, Stage 14-K/J/I/H/G/F/E/D/C hooks present, raw leak regex false, console JS errors none.
+
+## Stage 14-K safe tactical ticker implemented
+
+Implemented files/changes:
+
+- `web/src/pages/officeView.ts`
+  - Added `OfficeSafeTacticalTickerItem`, `OfficeSafeTacticalTicker`, and `buildOfficeSafeTacticalTicker(delta)`.
+  - The helper composes the safe tactical minimap and safe attention strip into aggregate-only `focus|map|cells` ticker items.
+- `web/src/pages/OfficePage.tsx`
+  - Renders a compact tactical ticker with `data-office-safe-tactical-ticker`, headline hook, and per-item hooks.
+  - Adds the Stage 14-K headline to the detached map legend.
+- `web/src/index.css`
+  - Adds compact CSS-only ticker styling, reusing existing tone classes.
+- `web/src/pages/OfficePage.test.ts`
+  - Adds RED/GREEN helper coverage for headline, item order/details, decorative/non-interactive posture, and raw-term exclusion.
+- `docs/ai-office/plans/2026-05-09-stage-14k-safe-tactical-ticker.md`
+  - Records scope, constraints, TDD record, implementation, and verification target.
+
+Safety notes:
+
+- Stage 14-K remains frontend-only, read-only, CSS/DOM-only, and does not add backend/API/schema changes, renderer dependencies, mutation controls, persistent storage, or raw record projection.
+- The tactical ticker does not use raw changed-flow labels, raw badge labels, recent-change labels/details, provider/model identity, individual task identity, prompts, transcripts, task bodies, scripts, logs, auth fields, secrets, or tokens.
+
+Verification 2026-05-09 18:03 KST:
+
+- RED verified first: Stage 14-K test failed because `buildOfficeSafeTacticalTicker` was not a function.
+- GREEN focused helper test passed: `OfficePage.test.ts` 40 passed.
+- Focused frontend verification passed: `npm test -- --run OfficePage.test.ts` → 40 passed.
+- ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/officeView.ts`, and `src/pages/OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large-chunk warning; current build size was JS `1,279.11 kB` / gzip `372.92 kB`, CSS `143.11 kB` / gzip `22.84 kB`.
+- Backend focused office tests passed: `18 passed in 1.03s`.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14k=safe-tactical-ticker`: tactical ticker present, headline present, ticker items `focus|map|cells`, Stage 14-J/I/H/G/F/E/D/C hooks present, raw leak regex false, console JS errors none.
+
+## Stage 14-J safe tactical minimap implemented
+
+Implemented files/changes:
+
+- `web/src/pages/officeView.ts`
+  - Added `OfficeSafeTacticalMinimapCell`, `OfficeSafeTacticalMinimap`, and `buildOfficeSafeTacticalMinimap(delta)`.
+  - The helper composes safe room beacons and safe flow pulse bands, then emits fixed-order room cells and aggregate summary copy.
+- `web/src/pages/OfficePage.tsx`
+  - Renders a compact tactical minimap with `data-office-safe-tactical-minimap`, summary hook, and per-room cell hooks.
+  - Adds the Stage 14-J summary to the detached map legend.
+- `web/src/index.css`
+  - Adds compact DeskRPG-like minimap panel/cell styling using existing tone classes and no renderer dependency.
+- `web/src/pages/OfficePage.test.ts`
+  - Adds RED/GREEN helper coverage for generated room order, summary, detail, tone, intensity, active flags, decorative/non-interactive posture, and raw-term exclusion.
+- `docs/ai-office/plans/2026-05-09-stage-14j-safe-tactical-minimap.md`
+  - Records scope, constraints, TDD record, implementation, and verification target.
+
+Safety notes:
+
+- Stage 14-J remains frontend-only, read-only, CSS/DOM-only, and does not add backend/API/schema changes, renderer dependencies, mutation controls, persistent storage, or raw record projection.
+- The tactical minimap does not use raw changed-flow labels, raw badge labels, recent-change labels/details, provider/model identity, individual task identity, prompts, transcripts, task bodies, scripts, logs, auth fields, secrets, or tokens.
+
+Verification 2026-05-09 17:57 KST:
+
+- RED verified first: Stage 14-J test failed because `buildOfficeSafeTacticalMinimap` was not a function.
+- GREEN focused helper test passed: `OfficePage.test.ts` 39 passed.
+- Focused frontend verification passed: `npm test -- --run OfficePage.test.ts` → 39 passed.
+- ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/officeView.ts`, and `src/pages/OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large-chunk warning; current build size was JS `1,277.66 kB` / gzip `372.63 kB`, CSS `141.91 kB` / gzip `22.69 kB`.
+- Backend focused office tests passed: `18 passed in 1.04s`.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14j=safe-tactical-minimap`: tactical minimap present, summary present, cells `sessions|work|automation|routing` present, all first-snapshot cells idle/weight 0 with no fabricated history, Stage 14-I/H/G/F/E/D/C hooks present, raw leak regex false, console JS errors none.
+
+## Stage 14-I safe flow pulse bands implemented
+
+Implemented files/changes:
+
+- `web/src/pages/officeView.ts`
+  - Added `OfficeSafeFlowPulseBand`, `OfficeSafeFlowPulseBands`, and `buildOfficeSafeFlowPulseBands(delta)`.
+  - The helper reads only `OfficeStateDelta.changedFlows`, ignores raw flow labels, uses known room IDs/coordinates, and emits generated labels/details/intensities.
+- `web/src/pages/OfficePage.tsx`
+  - Renders a decorative SVG pulse-band overlay with `data-office-safe-flow-pulse-bands` and per-flow hooks.
+  - Adds a compact Stage 14-I flow pulse rail with an explicit empty state when there are no changed safe flows.
+- `web/src/index.css`
+  - Adds CSS-only pulse-band dash animation, intensity styling, compact rail styling, and `prefers-reduced-motion` fallback.
+- `web/src/pages/OfficePage.test.ts`
+  - Adds RED/GREEN helper coverage for generated pulse-band IDs, labels, details, coordinates, intensities, decorative/non-interactive posture, and raw-term exclusion.
+- `docs/ai-office/plans/2026-05-09-stage-14i-safe-flow-pulse-bands.md`
+  - Records scope, constraints, TDD record, implementation, and verification target.
+
+Safety notes:
+
+- Stage 14-I remains frontend-only, read-only, CSS/SVG/DOM-only, and does not add backend/API/schema changes, renderer dependencies, mutation controls, persistent storage, or raw record projection.
+- The flow pulse bands do not use raw changed-flow labels, raw badge labels, recent-change labels/details, provider/model identity, individual task identity, prompts, transcripts, task bodies, scripts, logs, auth fields, secrets, or tokens.
+
+Verification 2026-05-09 17:43 KST:
+
+- RED verified first: Stage 14-I test failed because `buildOfficeSafeFlowPulseBands` was not a function.
+- GREEN focused helper test passed: `OfficePage.test.ts` 38 passed.
+- Focused frontend verification passed: `npm test -- --run OfficePage.test.ts` → 38 passed.
+- ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/officeView.ts`, and `src/pages/OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large-chunk warning; current build size was JS `1,275.72 kB` / gzip `372.25 kB`, CSS `139.76 kB` / gzip `22.37 kB`.
+- Backend focused office tests passed: `18 passed in 1.38s`.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14i=safe-flow-pulse-bands`: flow pulse overlay present, flow pulse rail present, empty first-snapshot rail explicit with no fabricated flow bands, room beacons present with `sessions|work|automation|routing`, attention strip present, focus lane present, route compass present, breadcrumb present, pulse timeline present, raw leak regex false, console JS errors none.
+
+## Stage 14-H safe room beacons implemented
+
+Implemented files/changes:
+
+- `web/src/pages/officeView.ts`
+  - Added `OfficeSafeRoomBeaconIntensity`, `OfficeSafeRoomBeacon`, `OfficeSafeRoomBeacons`, and `buildOfficeSafeRoomBeacons(delta)`.
+  - The helper reuses the safe focus lane, maps known rooms to fixed map coordinates, and converts safe density weights into generated `idle|low|medium|high` beacon intensities.
+- `web/src/pages/OfficePage.tsx`
+  - Renders decorative map beacons with `data-office-safe-room-beacons` and per-room hooks `sessions|work|automation|routing`.
+  - Adds a compact Stage 14-H rail with `data-office-safe-room-beacon-rail` and a Stage 14-H summary in the detached map legend.
+- `web/src/index.css`
+  - Adds CSS-only beacon rings/cores/labels, intensity classes, pulse animation, compact rail styling, and `prefers-reduced-motion` fallback.
+- `web/src/pages/OfficePage.test.ts`
+  - Adds RED/GREEN helper coverage for generated beacon order, fixed room positions, intensity mapping, decorative/non-interactive posture, and raw-term exclusion.
+- `docs/ai-office/plans/2026-05-09-stage-14h-safe-room-beacons.md`
+  - Records scope, constraints, TDD record, implementation, and verification target.
+
+Safety notes:
+
+- Stage 14-H remains frontend-only, read-only, CSS/SVG/DOM-only, and does not add backend/API/schema changes, renderer dependencies, mutation controls, persistent storage, or raw record projection.
+- The room beacons do not use raw changed-flow labels, raw badge labels, recent-change labels/details, provider/model identity, individual task identity, prompts, transcripts, task bodies, scripts, logs, auth fields, secrets, or tokens.
+
+Verification 2026-05-09 17:37 KST:
+
+- RED verified first: Stage 14-H test failed because `buildOfficeSafeRoomBeacons` was not a function.
+- GREEN focused helper test passed: `OfficePage.test.ts` 37 passed.
+- Focused frontend verification passed: `npm test -- --run OfficePage.test.ts` → 37 passed.
+- ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/officeView.ts`, and `src/pages/OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large-chunk warning; current build size was JS `1,273.80 kB` / gzip `371.82 kB`, CSS `138.34 kB` / gzip `22.14 kB`.
+- Backend focused office tests passed: `18 passed in 1.49s`.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14h=safe-room-beacons`: room beacons present, per-room hooks `sessions|work|automation|routing`, beacon rail present, attention strip present, focus lane present, route compass present, breadcrumb present, pulse timeline present, raw leak regex false, console JS errors none.
+
+## Stage 14-G safe attention strip implemented
+
+Implemented files/changes:
+
+- `web/src/pages/officeView.ts`
+  - Added `OfficeSafeAttentionStripChip`, `OfficeSafeAttentionStrip`, `ATTENTION_STRIP_HEADING`, `ATTENTION_STRIP_SIGNAL`, and `buildOfficeSafeAttentionStrip(delta)`.
+  - The helper reuses the safe focus lane and safe route compass, then compresses top room density, tone signal, active room count, and total density into generated Korean chips.
+- `web/src/pages/OfficePage.tsx`
+  - Renders a compact Stage 14-G attention strip with `data-office-safe-attention-strip` and chip hooks `focus|signal|scope`.
+  - Adds the Stage 14-G heading to the detached map legend.
+- `web/src/index.css`
+  - Adds compact attention-strip styling while reusing the existing safe pulse tone classes.
+- `web/src/pages/OfficePage.test.ts`
+  - Adds RED/GREEN helper coverage for focus/signal/scope chips, decorative/non-interactive posture, and raw-term exclusion.
+- `docs/ai-office/plans/2026-05-09-stage-14g-safe-attention-strip.md`
+  - Records scope, constraints, TDD record, implementation, and verification target.
+
+Safety notes:
+
+- Stage 14-G remains frontend-only, read-only, CSS/SVG/DOM-only, and does not add backend/API/schema changes, renderer dependencies, mutation controls, persistent storage, or raw record projection.
+- The attention strip does not use raw changed-flow labels, raw badge labels, recent-change labels/details, provider/model identity, individual task identity, prompts, transcripts, task bodies, scripts, logs, auth fields, secrets, or tokens.
+
+Verification 2026-05-09 17:24 KST:
+
+- RED verified first in the current handoff: Stage 14-G test failed because `buildOfficeSafeAttentionStrip` was not a function.
+- GREEN focused helper test passed: `OfficePage.test.ts` 36 passed.
+- Focused frontend verification passed: `npm test -- --run OfficePage.test.ts` → 36 passed.
+- ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/officeView.ts`, and `src/pages/OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large-chunk warning; current build size was JS `1,271.49 kB` / gzip `371.29 kB`, CSS `135.56 kB` / gzip `21.77 kB`.
+- Backend focused office tests passed: `18 passed in 1.45s`.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14g=safe-attention-strip`: attention strip present, chips `focus|signal|scope`, focus lane present with four known room items, route compass present with `direction|signal|summary`, breadcrumb present, pulse timeline present, raw leak regex false, console JS errors none.
+
+## Stage 14-F safe focus lane implemented
+
+Implemented files/changes:
+
+- `web/src/pages/officeView.ts`
+  - Added `OfficeSafeFocusLaneItem`, `OfficeSafeFocusLane`, and `buildOfficeSafeFocusLane(delta)`.
+  - The helper ranks known rooms by safe badge/flow density and regenerates Korean room labels/details.
+- `web/src/pages/OfficePage.tsx`
+  - Renders a compact Stage 14-F focus lane with `data-office-safe-focus-lane` and per-room hooks.
+- `web/src/index.css`
+  - Adds compact focus-lane item/bar styling.
+- `web/src/pages/OfficePage.test.ts`
+  - Adds RED/GREEN helper coverage for ordering, tone, safe generated details, and raw-term exclusion.
+- `docs/ai-office/plans/2026-05-09-stage-14f-safe-focus-lane.md`
+  - Records scope, constraints, implementation, and verification target.
+
+Safety notes:
+
+- Stage 14-F remains frontend-only, read-only, CSS/SVG/DOM-only, and does not add backend/API/schema changes, renderer dependencies, mutation controls, persistent storage, or raw record projection.
+- The focus lane does not use raw changed-flow labels, raw badge labels, recent-change details, provider/model identity, individual task identity, prompts, transcripts, task bodies, scripts, logs, auth fields, secrets, or tokens.
+
+Verification 2026-05-09 17:05 KST:
+
+- RED verified first: Stage 14-F test failed because `buildOfficeSafeFocusLane` was not a function.
+- GREEN focused frontend test passed: `OfficePage.test.ts` 35 passed.
+- ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/officeView.ts`, and `src/pages/OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large-chunk warning; current build size was JS `1,269.90 kB` / gzip `370.89 kB`, CSS `134.69 kB` / gzip `21.68 kB`.
+- Backend focused office tests passed: `18 passed in 1.49s`.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14f=safe-focus-lane`: focus lane present with four known room items, route compass present with `direction|signal|summary`, breadcrumb present, pulse timeline present, raw leak regex false, console JS errors none. The first browser-local snapshot showed zero activity weights/items for delta-derived rails, preserving the no-fabricated-history rule.
+
+## Stage 14-E safe route compass implemented
+
+Implemented files/changes:
+
+- `web/src/pages/officeView.ts`
+  - Added `OfficeSafeRouteCompassPoint`, `OfficeSafeRouteCompass`, `routeCompassTone(delta)`, `ROUTE_COMPASS_HEADING`, and `buildOfficeSafeRouteCompass(delta)`.
+  - The helper summarizes direction, signal, and aggregate safe-change count from `OfficeStateDelta` only.
+- `web/src/pages/OfficePage.tsx`
+  - Renders the compact Stage 14-E compass rail near the Stage 14-C/14-D rails and adds the compass heading to the detached map legend.
+  - Adds smoke hooks `data-office-safe-route-compass` and `data-office-safe-route-compass-point`.
+- `web/src/index.css`
+  - Adds compact route-compass styling while reusing the existing safe pulse tone classes.
+- `web/src/pages/OfficePage.test.ts`
+  - Adds focused helper coverage for tone priority, generated room labels, decorative/non-interactive flags, and raw-term exclusion.
+- `docs/ai-office/plans/2026-05-09-stage-14e-safe-route-compass.md`
+  - Records scope, constraints, implementation, verification target, and next candidate.
+
+Safety notes:
+
+- Stage 14-E remains frontend-only, read-only, CSS/SVG/DOM-only, and does not add backend/API/schema changes, renderer dependencies, mutation controls, persistent storage, or raw record projection.
+- The compass does not use raw changed-flow labels, recent-change labels/details, provider/model identity, individual task identity, prompts, transcripts, task bodies, scripts, logs, auth fields, secrets, or tokens.
+
+Verification 2026-05-09 16:54 KST:
+
+- RED was verified before implementation in the handoff: focused test failed because `buildOfficeSafeRouteCompass` was not a function.
+- GREEN focused frontend test passed after helper implementation: `OfficePage.test.ts` 34 passed.
+- Focused frontend verification passed: `npm test -- --run OfficePage.test.ts` → 34 passed.
+- ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/officeView.ts`, and `src/pages/OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large-chunk warning; current build size was JS `1,268.07 kB` / gzip `370.41 kB`, CSS `133.85 kB` / gzip `21.55 kB`.
+- Backend focused office tests passed: `18 passed in 1.47s`.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14e=safe-route-compass`: route compass present, compass points `direction|signal|summary`, breadcrumb present, pulse timeline present, tracking cues 11, room meters 4, raw leak regex false, console JS errors none.
 
 ## Stage 12-B empty-source copy polish implemented
 
@@ -2001,3 +2470,144 @@ Recommended next stage options:
 3. Stage 8-C product hardening: add frontend tests for the `/office` focus chips, inspector, empty/loading/error/attention states, and document acceptance criteria for the polished operational map.
 4. Pixel/renderer review only after explicit dependency/licensing/security approval.
 5. Do not add mutation controls, restart services, expose dashboard remotely, add Pixi/Phaser, or create/modify Kanban/Cron state without separate approval.
+
+## Stage 14-A dynamic character tracking cues implemented
+
+Updated: 2026-05-09 14:56 KST
+
+Stage 14-A adds a dependency-free, CSS/SVG-safe tracking cue layer for the RPG office map. It keeps the renderer decision from Stage 11 intact: no Phaser, PixiJS, canvas renderer, sprite assets, DeskRPG code/assets, backend/API/schema changes, mutation controls, or persistent browser storage.
+
+Implemented:
+
+- `buildOfficeCharacterTrackingCues(characters, delta)` in `web/src/pages/officeView.ts`.
+- One decorative cue per visible generated safe character.
+- Rooms touched by safe node/flow deltas become `변화 감지`; ordinary rooms use Korean tracking labels such as `세션 순찰`, `작업 추적`, `자동화 감시`, and `라우팅 확인`.
+- React map rendering adds decorative `data-office-character-tracking="true"` rings/trails behind character markers.
+- A text-equivalent `data-office-character-tracking-rail="true"` rail preserves meaning when motion is reduced.
+- CSS animation is dependency-free and disabled under `prefers-reduced-motion: reduce`.
+
+Safety posture:
+
+- Tracking cues derive only from generated `OfficeCharacter[]` and safe `OfficeStateDelta`.
+- The helper does not inspect raw prompts, transcripts, task bodies, cron scripts, logs, auth fields, credentials, provider/model identities, or individual task identity.
+- Stage 14-A is read-only and informational.
+
+Verification so far:
+
+- RED observed: `buildOfficeCharacterTrackingCues is not a function`.
+- GREEN: `npm test -- --run OfficePage.test.ts` -> 30 passed.
+- ESLint for `OfficePage.tsx`, `officeView.ts`, `OfficePage.test.ts` passed.
+
+Final verification before commit:
+
+- `npm test -- --run OfficePage.test.ts` -> 30 passed.
+- ESLint for `OfficePage.tsx`, `officeView.ts`, `OfficePage.test.ts` passed.
+- `npm run build` passed. Build output: JS 1,260.13 kB / gzip 368.32 kB; CSS 129.59 kB / gzip 20.82 kB. Existing Vite large chunk warning remains.
+- Backend focused office tests -> 18 passed in 1.62s.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14a=tracking`: tracking cue count 11, inspect button count 11, counts match, tracking rail exists, Stage 14-A label visible in DOM, raw leak regex false, console JS errors none.
+
+## Stage 14-B room activity meters implemented
+
+Updated: 2026-05-09 15:05 KST
+
+Stage 14-B continues the DeskRPG-like dynamic tracking loop by adding room-level activity meters to the CSS/SVG office map. It keeps `/office` read-only and keeps all rendering dependency-free.
+
+Implemented:
+
+- `buildOfficeRoomActivityMeters(nodes, characters, delta)` in `web/src/pages/officeView.ts`.
+- One safe meter per office room: sessions, work, automation, routing.
+- Coarse Korean levels: `조용함`, `활동`, `분주함`, `변화 감지`.
+- Rooms touched by node/flow delta are prioritized as `변화 감지`.
+- React map rendering adds non-interactive `data-office-room-activity="true"` meter bars near room cards.
+- Text-equivalent `data-office-room-activity-rail="true"` rail preserves reduced-motion meaning.
+- CSS remains DOM/CSS-only and disables meter animation under `prefers-reduced-motion: reduce`.
+
+Safety posture:
+
+- Helper derives only from safe `OfficeMapNode[]`, generated `OfficeCharacter[]`, and safe `OfficeStateDelta`.
+- No raw prompt/transcript/task body/cron script/log/auth/secret/model/provider identity or individual task identity is inspected or projected.
+- No backend/API/schema changes, no mutation controls, no persistent storage, no renderer/dependency adoption.
+
+Verification so far:
+
+- RED observed: `buildOfficeRoomActivityMeters is not a function`.
+- GREEN: `npm test -- --run OfficePage.test.ts` -> 31 passed.
+- ESLint for touched TS/TSX/test files passed.
+
+Final verification before commit:
+
+- `npm test -- --run OfficePage.test.ts` -> 31 passed.
+- ESLint for `OfficePage.tsx`, `officeView.ts`, `OfficePage.test.ts` passed.
+- `npm run build` passed. Build output: JS 1,262.30 kB / gzip 368.98 kB; CSS 131.25 kB / gzip 21.09 kB. Existing Vite large chunk warning remains.
+- Backend focused office tests -> 18 passed in 1.32s.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14b=room-activity`: room meter count 4, room activity rail exists, Stage 14-A tracking cues still 11, character inspect buttons 11, raw leak regex false, console JS errors none.
+
+## Stage 14-C safe pulse timeline implemented
+
+Updated: 2026-05-09 16:24 KST
+
+Stage 14-C continues the DeskRPG-like dynamic tracking loop by adding a compact safe pulse timeline to the CSS/SVG office map legend. It keeps `/office` read-only and renderer-free.
+
+Implemented:
+
+- `buildOfficeSafePulseTimeline(delta)` in `web/src/pages/officeView.ts`.
+- Generated Korean pulse items from safe browser-local `OfficeStateDelta` fields only: `nodeBadges`, `changedFlows`, and `recentChanges`.
+- Generated labels such as `세션 변화`, `세션 → 작업`, and `최근 안전 변화 1` instead of copying raw change details.
+- React map rendering adds `data-office-safe-pulse-timeline="true"` and per-item `data-office-safe-pulse-item` hooks.
+- CSS adds dependency-free pulse dots and disables the pulse animation under `prefers-reduced-motion: reduce`.
+
+Safety posture:
+
+- Helper derives only from already-safe browser-local delta fields.
+- No raw prompt/transcript/task body/cron script/log/auth/secret/token/model/provider identity or individual task identity is inspected or projected.
+- No backend/API/schema changes, no mutation controls, no persistent storage, no renderer/dependency adoption.
+
+Verification so far:
+
+- RED observed: `buildOfficeSafePulseTimeline is not a function`.
+- GREEN: `npm test -- --run OfficePage.test.ts` -> 32 passed.
+- ESLint for touched TS/TSX/test files passed.
+- `npm run build` passed. Build output: JS 1,264.70 kB / gzip 369.56 kB; CSS 132.48 kB / gzip 21.33 kB. Existing Vite large chunk warning remains.
+
+Final verification before commit:
+
+- `npm test -- --run OfficePage.test.ts` -> 32 passed.
+- ESLint for `OfficePage.tsx`, `officeView.ts`, `OfficePage.test.ts` passed.
+- `npm run build` passed with the existing Vite large-chunk warning.
+- Backend focused office tests -> 18 passed in 1.02s.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14c=safe-pulse-timeline`: pulse timeline exists, pulse item count 1, Stage 14-A tracking cues 11, Stage 14-B room meters 4, raw leak regex false, console JS errors none.
+
+## Stage 14-D safe breadcrumb trail implemented (2026-05-09 16:31 KST)
+
+Stage 14-D adds a compact safe breadcrumb rail to the `/office` DeskRPG map. The rail summarizes room-to-room change order from browser-local `OfficeStateDelta.changedFlows` only, using generated Korean labels/details and never projecting raw flow labels, raw recent-change text, prompts, transcripts, task bodies, scripts, logs, auth material, secrets, tokens, model/provider identities, or individual task identities.
+
+Implemented:
+
+- Added `OfficeSafeBreadcrumbSegment` and `OfficeSafeBreadcrumbTrail` types in `web/src/pages/officeView.ts`.
+- Added `buildOfficeSafeBreadcrumbTrail(delta)` with idle fallback, generated room labels, generated 출발/경유/도착 details, tone propagation from safe flow deltas, and a five-room cap.
+- Added RED/GREEN coverage in `web/src/pages/OfficePage.test.ts`; RED failure was `buildOfficeSafeBreadcrumbTrail is not a function`, then GREEN passed after helper implementation.
+- Rendered a read-only decorative breadcrumb rail in `web/src/pages/OfficePage.tsx` with `data-office-safe-breadcrumb="true"` and per-segment hooks.
+- Added lightweight CSS in `web/src/index.css`; CSS/SVG/DOM only, no renderer/runtime dependency.
+
+Safety posture:
+
+- `/office` remains read-only.
+- No backend/API/schema changes.
+- No mutation controls.
+- No persistent storage.
+- No raw record projection.
+- Breadcrumb segments are decorative/non-interactive (`aria-hidden`, pointer-events disabled) while visible labels remain generated safe Korean copy.
+
+Final verification before commit:
+
+- `npm test -- --run OfficePage.test.ts` -> 33 passed.
+- ESLint for `OfficePage.tsx`, `officeView.ts`, `OfficePage.test.ts` passed.
+- `npm run build` passed with the existing Vite large-chunk warning. Build output: JS 1,266.26 kB / gzip 369.99 kB; CSS 132.91 kB / gzip 21.41 kB.
+- Backend focused office tests -> 18 passed in 1.05s.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14d=safe-breadcrumb-trail`: breadcrumb exists, segments 1, Stage 14-C pulse timeline exists, pulse items 1, Stage 14-A tracking cues 11, Stage 14-B room activity meters 4, raw leak regex false, raw HTML sentinel leak false, console JS errors none.
+
+Next Stage 14-E candidate: compact safe route compass or room heartbeat legend tying Stage 14-B room meters, Stage 14-C pulse timeline, and Stage 14-D breadcrumb together without backend/schema/renderer changes.

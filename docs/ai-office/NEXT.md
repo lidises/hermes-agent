@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-09 13:56 KST
+Last updated: 2026-05-09 22:04 KST
 
 ## Start here after `/new`
 
@@ -64,7 +64,7 @@ When not to rely on `/goal` alone:
 
 ## Current next stage
 
-Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A RPG character projection, Stage 10-B CSS/SVG character presentation, Stage 10-C safe role action chips, Stage 10-D room-to-room RPG route choreography, Stage 10-E safe character inspector, Stage 10-F usability hardening, Stage 10-G density/readability modes, Stage 10-H keyboard jump targets, Stage 11-A renderer evidence, Stage 11-B CSS/SVG layout-density polish, Stage 11-C renderer decision checkpoint, Stage 12-A responsive readability, Stage 12-B empty-source copy polish, and Stage 13 PR/handoff summary are implemented on top of Stage 9-D and the Stage 8 read-only dashboard. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
+Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer evidence/polish/decision closure, Stage 12 product-polish slices, Stage 13 PR/handoff summary, and Stage 14-A through Stage 14-Q safe dynamic-tracking/readability layers are implemented on top of Stage 9-D and the Stage 8 read-only dashboard. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
 
 
 Stage 9-E current implementation:
@@ -95,10 +95,24 @@ Stage 9-F current implementation:
 - Stage 12-A adds responsive/mobile readability posture with browser-local viewport width, CSS-only responsive hooks, and no renderer dependency.
 - Stage 12-B adds empty-source copy polish: `OfficeEmptySourceCopyPlan` and `buildOfficeEmptySourceCopyPlan(state)` explain an empty source list as a safe DTO/source-gap state and render `data-office-empty-source-copy` without controls or raw projection.
 - Stage 13 adds a PR/handoff summary draft in `docs/ai-office/plans/2026-05-09-stage-13-pr-handoff-summary.md` for review and fresh-session continuity.
+- Stage 14-A through Stage 14-D add safe dynamic-tracking layers: character tracking cues, room activity meters, safe pulse timeline, and safe breadcrumb trail.
+- Stage 14-E adds the safe route compass: `OfficeSafeRouteCompass` and `buildOfficeSafeRouteCompass(delta)` summarize direction/signal/safe-change count from safe `OfficeStateDelta` aggregates only, and `/office` renders `data-office-safe-route-compass` with three decorative points.
+- Stage 14-F adds the safe focus lane: `OfficeSafeFocusLane` and `buildOfficeSafeFocusLane(delta)` rank known rooms by safe delta density and render `data-office-safe-focus-lane` with per-room decorative items.
+- Stage 14-G adds the safe attention strip: `OfficeSafeAttentionStrip` and `buildOfficeSafeAttentionStrip(delta)` compress safe focus density plus route-compass signal into `focus|signal|scope` chips and render `data-office-safe-attention-strip`.
+- Stage 14-H adds safe room beacons: `OfficeSafeRoomBeacons` and `buildOfficeSafeRoomBeacons(delta)` convert safe focus-lane density into decorative map beacons and a compact room beacon rail with `data-office-safe-room-beacons`.
+- Stage 14-I adds safe flow pulse bands: `OfficeSafeFlowPulseBands` and `buildOfficeSafeFlowPulseBands(delta)` convert changed safe flows into decorative SVG pulse bands and a compact flow pulse rail with `data-office-safe-flow-pulse-bands`.
+- Stage 14-J adds a safe tactical minimap: `OfficeSafeTacticalMinimap` and `buildOfficeSafeTacticalMinimap(delta)` compress safe room beacons and flow pulse bands into fixed-order room cells with `data-office-safe-tactical-minimap`.
+- Stage 14-K adds a safe tactical ticker: `OfficeSafeTacticalTicker` and `buildOfficeSafeTacticalTicker(delta)` compress safe minimap and attention signals into `focus|map|cells` ticker items with `data-office-safe-tactical-ticker`.
+- Stage 14-L adds a safe mission clock: `OfficeSafeMissionClock` and `buildOfficeSafeMissionClock(options)` compress browser-local live/manual posture, tab visibility, local read failures, and latest safe-delta presence into `mode|cadence|safety|pulse` items with `data-office-safe-mission-clock`.
+- Stage 14-M adds a safe command deck: `OfficeSafeCommandDeck` and `buildOfficeSafeCommandDeck(state, delta, missionOptions)` group mission/tactical/source/safety cards with `data-office-safe-command-deck`.
+- Stage 14-N adds a safe floor legend: `OfficeSafeFloorLegend` and `buildOfficeSafeFloorLegend(delta)` group generated active rooms, idle rooms, safe flow count, and projection safety with `data-office-safe-floor-legend`.
+- Stage 14-O adds a safe status snapshot: `OfficeSafeStatusSnapshot` and `buildOfficeSafeStatusSnapshot(state, delta, missionOptions)` consolidate deck/floor/source/guard posture with `data-office-safe-status-snapshot`.
+- Stage 14-P adds a safe scan index: `OfficeSafeScanIndex` and `buildOfficeSafeScanIndex(state, delta, missionOptions)` consolidate snapshot/rail/mode posture with `data-office-safe-scan-index`.
+- Stage 14-Q adds a safe HUD readability strip: `OfficeSafeHudReadabilityPlan` and `buildOfficeSafeHudReadabilityPlan(options)` summarize browser-local layout/motion/density/tracking posture with `data-office-safe-hud-readability`.
 - First snapshots produce no fabricated history; manual refresh remains the default.
 - Planning note expanded: `docs/ai-office/plans/2026-05-09-koreanization-and-dynamic-map.md`.
 
-Recommended next implementation/design stage: open/update the GitHub PR from the Stage 13 summary, or pick a small non-renderer review/polish slice only if selected explicitly. Stage 11-A found a safe functional page with borderline density/crowding, Stage 11-B addressed that with compact/minimal nameplates plus a detached lower legend, and Stage 11-C closed the renderer decision gate for now; none found a measured need for PixiJS/Phaser/canvas. Do not expose individual task identity, generate content-like speech bubbles, add character mutation targets, or add Phaser, PixiJS, canvas, sprite assets, DeskRPG code/assets, backend/schema/API changes, mutation controls, persistent storage, or raw record projection. Stage 11 remains the separate renderer decision gate.
+Recommended next implementation/design stage: Stage 14 is closed at 14-Q. First PR/merge the completed branch into `main`, then start Stage 15 consolidation from updated `main` or a fresh branch off `main`. Stage 15 should focus on HUD hierarchy, duplicate signal reduction, PR/readiness refresh, and only evidence-driven visual polish. Do not expose individual task identity, generate content-like speech bubbles, add character mutation targets, or add Phaser, PixiJS, canvas, sprite assets, DeskRPG code/assets, backend/schema/API changes, mutation controls, persistent storage, or raw record projection. Renderer work remains closed unless new measured evidence and explicit approval reopen it.
 
 Stage 9-D completed:
 
@@ -134,13 +148,16 @@ Browser smoke: http://127.0.0.1:8765/office
 
 ## Immediate next action
 
-Immediate next action should remain a product/UX decision point, not a control-plane expansion:
+Immediate next action is PR/merge, then Stage 15 planning/execution from updated `main`:
 
-1. Stage 13 PR/handoff summary is now documented in `docs/ai-office/plans/2026-05-09-stage-13-pr-handoff-summary.md`. If a GitHub PR is desired, use the PR body draft from that file and open/update the branch PR.
-2. Renderer decision: keep CSS/SVG by default; Stage 11-A/B/C and Stage 12-A did not record a measured performance/functional gap that justifies a renderer spike.
-3. Product polish: continue only with another small non-renderer slice if selected explicitly.
-4. Test-harness review: consider React DOM coverage for polling cleanup/pause behavior only if adding/standardizing that harness is separately approved.
-5. Do not add mutation controls, expose dashboard remotely, add Pixi/Phaser/canvas, copy DeskRPG assets/code, create/edit topic registry data, or create/modify Kanban/Cron state without separate approval.
+1. Create or update PR from `ai-office-stage14-dynamic-tracking-20260509` to `main` and include Stage 14-Q verification plus `docs/ai-office/plans/2026-05-09-stage-15-consolidation-pr-merge-plan.md`.
+2. Merge the PR after checks/status allow it, preferably squash merge, and sync local `main`.
+3. Start Stage 15-A from updated `main` or a fresh branch off `main`: HUD hierarchy audit.
+4. Stage 15-B: duplicate signal reduction.
+5. Stage 15-C: PR/readiness checklist refresh.
+6. Stage 15-D: visual polish only if evidence demands it.
+7. Keep CSS/SVG/DOM-only, frontend-only, read-only, no persistence, no mutation controls, no backend/API/schema changes, no renderer dependencies, and no raw record projection.
+8. Do not add mutation controls, expose dashboard remotely, add Pixi/Phaser/canvas, copy DeskRPG assets/code, create/edit topic registry data, or create/modify Kanban/Cron state without separate approval.
 
 Completed Stage 6 files:
 
@@ -317,3 +334,43 @@ Before starting a fresh session:
 3. If the user approves the next stage, begin only with the approved smoke-test/polish/lint-cleanup scope and update handoff files after verification.
 4. If no approval is given, stay in review/planning mode.
 5. State explicitly what was not changed.
+
+## Stage 14-A handoff: dynamic character tracking cues
+
+Current branch: `ai-office-stage14-dynamic-tracking-20260509`
+
+Stage 14-A implemented safe character tracking cues and passed final local verification. Keep continuing in small CSS/SVG slices; do not add a renderer/dependency unless the user explicitly reopens the Stage 11 decision gate.
+
+Next if Stage 14-A verifies cleanly:
+
+1. Commit/push Stage 14-A: `feat(office): add dynamic character tracking cues`.
+2. Plan Stage 14-B as the next small DeskRPG-like slice. Recommended direction: room-level ambient activity meters or safe route pulse timeline, still derived only from safe DTO counts/deltas.
+3. Maintain constraints: read-only `/office`, no backend/API/schema changes, no mutation controls, no persistent storage, no raw projection, no Phaser/Pixi/canvas/sprites.
+
+## Stage 14-B handoff: room activity meters
+
+Current branch: `ai-office-stage14-dynamic-tracking-20260509`
+
+Stage 14-B implemented safe room activity meters and passed final local verification. Commit/push completed as `1d7ab666 feat(office): add room activity meters`. Recommended Stage 14-C direction: safe event pulse timeline or room-to-room breadcrumb rail derived only from browser-local safe deltas.
+
+Keep constraints: no renderer/dependency, no backend/API/schema changes, no mutation controls, no persistent storage, no raw record projection.
+
+## Stage 14-C handoff: safe pulse timeline
+
+Current branch: `ai-office-stage14-dynamic-tracking-20260509`
+
+Stage 14-C implemented a safe pulse timeline from browser-local `OfficeStateDelta` (`nodeBadges`, `changedFlows`, `recentChanges`) and passed final local verification. Commit/push completed as `5e2b26d8 feat(office): add safe pulse timeline`.
+
+Next recommended Stage 14-D direction: safe breadcrumb trail for room-to-room changes or a compact character/room heartbeat legend, still CSS/SVG only and derived from safe DTO/delta fields.
+
+Keep constraints: no renderer/dependency, no backend/API/schema changes, no mutation controls, no persistent storage, no raw record projection.
+
+## Stage 14-D handoff: safe breadcrumb trail
+
+Current branch: `ai-office-stage14-dynamic-tracking-20260509`
+
+Stage 14-D implemented a safe breadcrumb rail from browser-local `OfficeStateDelta.changedFlows`. It generates Korean room labels/details only, ignores raw flow labels and recent change text, and keeps the rail decorative/non-interactive. Final local verification passed: 33 focused frontend tests, ESLint, build with existing Vite large-chunk warning, 18 backend office tests, `git diff --check`, and browser smoke for `/office?stage14d=safe-breadcrumb-trail`.
+
+Next recommended Stage 14-E direction: compact safe route compass or room heartbeat legend that ties Stage 14-B meters, Stage 14-C pulse, and Stage 14-D breadcrumb together without adding renderer dependencies or backend schema changes.
+
+Keep constraints: no renderer/dependency, no backend/API/schema changes, no mutation controls, no persistent storage, no raw record projection.

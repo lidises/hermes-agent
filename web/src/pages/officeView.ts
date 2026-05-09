@@ -105,6 +105,311 @@ export type OfficeCharacterInspector = {
   fields: Array<[string, string]>;
 };
 
+export type OfficeCharacterTrackingStyle = Record<"--office-tracking-x" | "--office-tracking-y" | "--office-tracking-duration" | "--office-tracking-delay", string>;
+
+export type OfficeCharacterTrackingCue = {
+  characterId: string;
+  label: string;
+  detail: string;
+  tone: "steady" | "alert" | "warning";
+  style: OfficeCharacterTrackingStyle;
+  reducedMotionLabel: string;
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeRoomActivityLevel = "quiet" | "active" | "busy" | "changed";
+
+export type OfficeRoomActivityMeter = {
+  roomId: OfficeMapNode["id"];
+  label: string;
+  detail: string;
+  level: OfficeRoomActivityLevel;
+  percent: number;
+  reducedMotionLabel: string;
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafePulseTimelineItem = {
+  id: string;
+  kind: "room" | "flow" | "recent" | "idle";
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  reducedMotionLabel: string;
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafePulseTimeline = {
+  stageLabel: string;
+  detail: string;
+  items: OfficeSafePulseTimelineItem[];
+};
+
+export type OfficeSafeBreadcrumbSegment = {
+  id: string;
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeBreadcrumbTrail = {
+  stageLabel: string;
+  detail: string;
+  segments: OfficeSafeBreadcrumbSegment[];
+};
+
+export type OfficeSafeRouteCompassPoint = {
+  id: "direction" | "signal" | "summary";
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeRouteCompass = {
+  stageLabel: string;
+  heading: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  points: OfficeSafeRouteCompassPoint[];
+};
+
+export type OfficeSafeFocusLaneItem = {
+  roomId: OfficeMapNode["id"];
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  weight: number;
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeFocusLane = {
+  stageLabel: string;
+  detail: string;
+  items: OfficeSafeFocusLaneItem[];
+};
+
+export type OfficeSafeAttentionStripChip = {
+  id: "focus" | "signal" | "scope";
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeAttentionStrip = {
+  stageLabel: string;
+  heading: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  chips: OfficeSafeAttentionStripChip[];
+};
+
+export type OfficeSafeRoomBeaconIntensity = "idle" | "low" | "medium" | "high";
+
+export type OfficeSafeRoomBeacon = {
+  roomId: OfficeMapNode["id"];
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  intensity: OfficeSafeRoomBeaconIntensity;
+  weight: number;
+  x: number;
+  y: number;
+  reducedMotionLabel: string;
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeRoomBeacons = {
+  stageLabel: string;
+  detail: string;
+  beacons: OfficeSafeRoomBeacon[];
+};
+
+export type OfficeSafeFlowPulseBand = {
+  id: string;
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  intensity: OfficeSafeRoomBeaconIntensity;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  reducedMotionLabel: string;
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeFlowPulseBands = {
+  stageLabel: string;
+  detail: string;
+  bands: OfficeSafeFlowPulseBand[];
+};
+
+export type OfficeSafeTacticalMinimapCell = {
+  roomId: OfficeMapNode["id"];
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  intensity: OfficeSafeRoomBeaconIntensity;
+  active: boolean;
+  weight: number;
+  x: number;
+  y: number;
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeTacticalMinimap = {
+  stageLabel: string;
+  summary: string;
+  detail: string;
+  cells: OfficeSafeTacticalMinimapCell[];
+};
+
+export type OfficeSafeTacticalTickerItem = {
+  id: "focus" | "map" | "cells";
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeTacticalTicker = {
+  stageLabel: string;
+  headline: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  items: OfficeSafeTacticalTickerItem[];
+};
+
+export type OfficeSafeMissionClockOptions = {
+  liveTracking: boolean;
+  isVisible: boolean;
+  consecutiveFailures: number;
+  hasRecentChanges: boolean;
+};
+
+export type OfficeSafeMissionClockItem = {
+  id: "mode" | "cadence" | "safety" | "pulse";
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeMissionClock = {
+  stageLabel: string;
+  headline: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  items: OfficeSafeMissionClockItem[];
+};
+
+export type OfficeSafeCommandDeckCard = {
+  id: "mission" | "tactical" | "sources" | "safety";
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeCommandDeck = {
+  stageLabel: string;
+  headline: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  cards: OfficeSafeCommandDeckCard[];
+};
+
+export type OfficeSafeFloorLegendItem = {
+  id: "active" | "idle" | "flow" | "safety";
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeFloorLegend = {
+  stageLabel: string;
+  summary: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  items: OfficeSafeFloorLegendItem[];
+};
+
+export type OfficeSafeStatusSnapshotItem = {
+  id: "deck" | "floor" | "source" | "guard";
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeStatusSnapshot = {
+  stageLabel: string;
+  headline: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  items: OfficeSafeStatusSnapshotItem[];
+};
+
+export type OfficeSafeScanIndexItem = {
+  id: "snapshot" | "rail" | "mode";
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeScanIndex = {
+  stageLabel: string;
+  headline: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  items: OfficeSafeScanIndexItem[];
+};
+
+export type OfficeSafeHudReadabilityPlanOptions = {
+  viewportWidth?: number;
+  prefersReducedMotion: boolean;
+  safePanelCount: number;
+  liveTracking: boolean;
+};
+
+export type OfficeSafeHudReadabilityPlanItem = {
+  id: "layout" | "motion" | "density" | "tracking";
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeHudReadabilityPlan = {
+  stageLabel: string;
+  summary: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  items: OfficeSafeHudReadabilityPlanItem[];
+};
+
 export type OfficeDeltaBadge = {
   label: string;
   tone: "positive" | "negative" | "warning" | "neutral";
@@ -1000,6 +1305,593 @@ export function buildOfficeCharacterInspector(character: OfficeCharacter, delta:
       ["최근 안전 변화", characterRecentChangeLabel(character, delta)],
       ["가림", "안전 DTO 역할/상태/개수/흐름만 반영 · 원문 제외"],
     ],
+  };
+}
+
+function trackingLabelForRoom(roomId: OfficeMapNode["id"]): string {
+  if (roomId === "sessions") return "세션 순찰";
+  if (roomId === "work") return "작업 추적";
+  if (roomId === "automation") return "자동화 감시";
+  return "라우팅 확인";
+}
+
+function trackingRoomHasDelta(character: OfficeCharacter, delta: OfficeStateDelta): boolean {
+  return delta.nodeBadges[character.roomId]?.length > 0 || delta.changedFlows.some((flow) => flow.from === character.roomId || flow.to === character.roomId);
+}
+
+function trackingTone(character: OfficeCharacter, hasDelta: boolean): OfficeCharacterTrackingCue["tone"] {
+  if (hasDelta) return "alert";
+  if (character.status === "warning" || character.status === "error" || character.status === "blocked" || character.status === "unknown") return "warning";
+  return "steady";
+}
+
+export function buildOfficeCharacterTrackingCues(characters: OfficeCharacter[], delta: OfficeStateDelta): OfficeCharacterTrackingCue[] {
+  return characters.map((character, index) => {
+    const hasDelta = trackingRoomHasDelta(character, delta);
+    const label = hasDelta ? "변화 감지" : trackingLabelForRoom(character.roomId);
+    const tone = trackingTone(character, hasDelta);
+    const roomLabel = CHARACTER_ROOM_LABEL[character.roomId];
+    const roleLabel = CHARACTER_ROLE_LABEL[character.role];
+    const offsetSeed = (index % 3) - 1;
+    return {
+      characterId: character.id,
+      label,
+      detail: `${roomLabel} · ${roleLabel} · 안전 추적 큐`,
+      tone,
+      style: {
+        "--office-tracking-x": `${offsetSeed * 2}px`,
+        "--office-tracking-y": `${((index + 1) % 3 - 1) * 2}px`,
+        "--office-tracking-duration": `${5 + (index % 4)}s`,
+        "--office-tracking-delay": `${-1 * (index % 5)}s`,
+      },
+      reducedMotionLabel: `${label} · 텍스트 rail로 의미 유지`,
+      ariaHidden: true,
+      interactive: false,
+    };
+  });
+}
+
+function roomTouchedByDelta(roomId: OfficeMapNode["id"], delta: OfficeStateDelta): boolean {
+  return delta.nodeBadges[roomId]?.length > 0 || delta.changedFlows.some((flow) => flow.from === roomId || flow.to === roomId);
+}
+
+function roomActivityLevel(node: OfficeMapNode, characterCount: number, changed: boolean): OfficeRoomActivityLevel {
+  if (changed) return "changed";
+  if (node.count >= 5 || characterCount >= 2) return "busy";
+  if (node.count > 0 || characterCount > 0) return "active";
+  return "quiet";
+}
+
+const ROOM_ACTIVITY_LABEL: Record<OfficeRoomActivityLevel, string> = {
+  quiet: "조용함",
+  active: "활동",
+  busy: "분주함",
+  changed: "변화 감지",
+};
+
+export function buildOfficeRoomActivityMeters(nodes: OfficeMapNode[], characters: OfficeCharacter[], delta: OfficeStateDelta): OfficeRoomActivityMeter[] {
+  return nodes.map((node) => {
+    const characterCount = characters.filter((character) => character.roomId === node.id).length;
+    const changed = roomTouchedByDelta(node.id, delta);
+    const level = roomActivityLevel(node, characterCount, changed);
+    const percent = level === "changed" ? 100 : Math.min(100, Math.max(12, node.count * 12 + characterCount * 18));
+    return {
+      roomId: node.id,
+      label: ROOM_ACTIVITY_LABEL[level],
+      detail: `${node.label} · 안전 항목 ${node.count}개 · 캐릭터 ${characterCount}개`,
+      level,
+      percent,
+      reducedMotionLabel: `${ROOM_ACTIVITY_LABEL[level]} · 방 활동 rail로 의미 유지`,
+      ariaHidden: true,
+      interactive: false,
+    };
+  });
+}
+
+const PULSE_TONE_LABEL: Record<OfficeDeltaBadge["tone"], string> = {
+  positive: "증가",
+  negative: "감소",
+  warning: "확인",
+  neutral: "변화",
+};
+
+function pulseToneClass(tone: OfficeDeltaBadge["tone"]): OfficeDeltaBadge["tone"] {
+  return tone;
+}
+
+export function buildOfficeSafePulseTimeline(delta: OfficeStateDelta): OfficeSafePulseTimeline {
+  const items: OfficeSafePulseTimelineItem[] = [];
+  (Object.entries(delta.nodeBadges) as Array<[OfficeMapNode["id"], OfficeDeltaBadge[]]>).forEach(([roomId, badges]) => {
+    badges.slice(0, 1).forEach((badge) => {
+      items.push({
+        id: `room-${roomId}-${items.length}`,
+        kind: "room",
+        label: `${CHARACTER_ROOM_LABEL[roomId]} 변화`,
+        detail: `${CHARACTER_ROOM_LABEL[roomId]} 방 안전 badge · ${PULSE_TONE_LABEL[badge.tone]}`,
+        tone: pulseToneClass(badge.tone),
+        reducedMotionLabel: "timeline rail 텍스트로 변화 순서 유지",
+        ariaHidden: true,
+        interactive: false,
+      });
+    });
+  });
+
+  delta.changedFlows.slice(0, 2).forEach((flow) => {
+    items.push({
+      id: `flow-${flow.from}-${flow.to}-${items.length}`,
+      kind: "flow",
+      label: `${CHARACTER_ROOM_LABEL[flow.from]} → ${CHARACTER_ROOM_LABEL[flow.to]}`,
+      detail: `${CHARACTER_ROOM_LABEL[flow.from]}에서 ${CHARACTER_ROOM_LABEL[flow.to]}로 안전 흐름 변화`,
+      tone: pulseToneClass(flow.tone),
+      reducedMotionLabel: "timeline rail 텍스트로 흐름 변화 유지",
+      ariaHidden: true,
+      interactive: false,
+    });
+  });
+
+  delta.recentChanges.slice(0, 3).forEach((change, index) => {
+    items.push({
+      id: `recent-${change.id || index}`,
+      kind: "recent",
+      label: `최근 안전 변화 ${index + 1}`,
+      detail: `${PULSE_TONE_LABEL[change.tone]} · 브라우저 메모리 안전 delta`,
+      tone: pulseToneClass(change.tone),
+      reducedMotionLabel: "최근 변화 rail 텍스트로 의미 유지",
+      ariaHidden: true,
+      interactive: false,
+    });
+  });
+
+  if (items.length === 0) {
+    items.push({
+      id: "idle-no-delta",
+      kind: "idle",
+      label: "대기",
+      detail: "아직 비교할 안전 변화가 없습니다",
+      tone: "neutral",
+      reducedMotionLabel: "변화 없음 상태를 텍스트로 유지",
+      ariaHidden: true,
+      interactive: false,
+    });
+  }
+
+  return {
+    stageLabel: "Stage 14-C 안전 pulse timeline",
+    detail: "방 badge, 흐름, 최근 변화 rail을 원문 없이 시간감 있는 pulse로 요약",
+    items: items.slice(0, 6),
+  };
+}
+
+export function buildOfficeSafeBreadcrumbTrail(delta: OfficeStateDelta): OfficeSafeBreadcrumbTrail {
+  const firstFlow = delta.changedFlows[0];
+  if (!firstFlow) {
+    return {
+      stageLabel: "Stage 14-D 안전 breadcrumb",
+      detail: "아직 흐름 변화가 없어 현재 방 순서를 대기 상태로 표시",
+      segments: [{ id: "breadcrumb-idle", label: "대기", detail: "안전 흐름 변화 없음", tone: "neutral", ariaHidden: true, interactive: false }],
+    };
+  }
+
+  const roomOrder: OfficeMapNode["id"][] = [firstFlow.from, firstFlow.to];
+  const toneByRoom = new Map<OfficeMapNode["id"], OfficeDeltaBadge["tone"]>([
+    [firstFlow.from, firstFlow.tone],
+    [firstFlow.to, firstFlow.tone],
+  ]);
+  delta.changedFlows.slice(1, 4).forEach((flow) => {
+    if (!roomOrder.includes(flow.from)) roomOrder.push(flow.from);
+    if (!roomOrder.includes(flow.to)) roomOrder.push(flow.to);
+    toneByRoom.set(flow.from, flow.tone);
+    toneByRoom.set(flow.to, flow.tone);
+  });
+
+  return {
+    stageLabel: "Stage 14-D 안전 breadcrumb",
+    detail: "최근 안전 흐름 변화의 방 이동 순서를 원문 없이 요약",
+    segments: roomOrder.slice(0, 5).map((roomId, index, rooms) => ({
+      id: `breadcrumb-${roomId}-${index}`,
+      label: CHARACTER_ROOM_LABEL[roomId],
+      detail: `${index === 0 ? "출발" : index === rooms.length - 1 ? "도착" : "경유"} 방 · 안전 흐름 변화`,
+      tone: toneByRoom.get(roomId) ?? "neutral",
+      ariaHidden: true,
+      interactive: false,
+    })),
+  };
+}
+
+function routeCompassTone(delta: OfficeStateDelta): OfficeDeltaBadge["tone"] {
+  const tones = [
+    ...Object.values(delta.nodeBadges).flat().map((badge) => badge.tone),
+    ...delta.changedFlows.map((flow) => flow.tone),
+    ...delta.recentChanges.map((change) => change.tone),
+  ];
+  if (tones.includes("negative")) return "negative";
+  if (tones.includes("warning")) return "warning";
+  if (tones.includes("positive")) return "positive";
+  return "neutral";
+}
+
+const ROUTE_COMPASS_HEADING: Record<OfficeDeltaBadge["tone"], string> = {
+  positive: "정상 이동",
+  negative: "주의 집중",
+  warning: "흐름 확인",
+  neutral: "대기",
+};
+
+export function buildOfficeSafeRouteCompass(delta: OfficeStateDelta): OfficeSafeRouteCompass {
+  const trail = buildOfficeSafeBreadcrumbTrail(delta);
+  const tone = routeCompassTone(delta);
+  const activeSegments = trail.segments.filter((segment) => segment.id !== "breadcrumb-idle");
+  const fromLabel = activeSegments[0]?.label ?? "대기";
+  const toLabel = activeSegments[activeSegments.length - 1]?.label ?? fromLabel;
+  const changeCount = Object.values(delta.nodeBadges).reduce((total, badges) => total + badges.length, 0) + delta.changedFlows.length + delta.recentChanges.length;
+  const roomCount = activeSegments.length;
+
+  return {
+    stageLabel: "Stage 14-E 안전 route compass",
+    heading: ROUTE_COMPASS_HEADING[tone],
+    detail: "방 활동, pulse, breadcrumb를 안전 delta 기준의 짧은 방향계로 요약",
+    tone,
+    points: [
+      { id: "direction", label: "방향", detail: `${fromLabel} → ${toLabel}`, tone, ariaHidden: true, interactive: false },
+      { id: "signal", label: "신호", detail: `${PULSE_TONE_LABEL[tone]} 우선`, tone, ariaHidden: true, interactive: false },
+      { id: "summary", label: "요약", detail: `안전 변화 ${changeCount}개 · 방 ${roomCount}개`, tone: "neutral", ariaHidden: true, interactive: false },
+    ],
+  };
+}
+
+const FOCUS_LANE_TONE_LABEL: Record<OfficeDeltaBadge["tone"], string> = {
+  positive: "정상",
+  negative: "주의",
+  warning: "확인",
+  neutral: "대기",
+};
+
+const FOCUS_LANE_TONE_RANK: Record<OfficeDeltaBadge["tone"], number> = {
+  negative: 0,
+  warning: 1,
+  positive: 2,
+  neutral: 3,
+};
+
+function focusLaneTone(roomBadges: OfficeDeltaBadge[], roomFlows: OfficeFlowChange[]): OfficeDeltaBadge["tone"] {
+  if (roomBadges.length > 0) {
+    const badgeTones = roomBadges.map((badge) => badge.tone);
+    if (badgeTones.includes("negative")) return "negative";
+    if (badgeTones.includes("warning")) return "warning";
+    if (badgeTones.includes("positive")) return "positive";
+    return "neutral";
+  }
+  const flowTones = roomFlows.map((flow) => flow.tone);
+  if (flowTones.includes("negative")) return "negative";
+  if (flowTones.includes("warning")) return "warning";
+  if (flowTones.includes("positive")) return "positive";
+  return "neutral";
+}
+
+export function buildOfficeSafeFocusLane(delta: OfficeStateDelta): OfficeSafeFocusLane {
+  const roomOrder: OfficeMapNode["id"][] = ["sessions", "work", "automation", "routing"];
+  const items = roomOrder.map((roomId) => {
+    const roomBadges = delta.nodeBadges[roomId] ?? [];
+    const roomFlows = delta.changedFlows.filter((flow) => flow.from === roomId || flow.to === roomId);
+    const tone = focusLaneTone(roomBadges, roomFlows);
+    const attentionBonus = tone === "negative" ? 1 : 0;
+    const safeChangeCount = roomBadges.length + attentionBonus;
+    const weight = safeChangeCount + roomFlows.length;
+    return {
+      roomId,
+      label: CHARACTER_ROOM_LABEL[roomId],
+      detail: `${FOCUS_LANE_TONE_LABEL[tone]} 변화 ${safeChangeCount}개 · 흐름 ${roomFlows.length}개`,
+      tone,
+      weight,
+      ariaHidden: true as const,
+      interactive: false as const,
+    };
+  });
+
+  return {
+    stageLabel: "Stage 14-F 안전 focus lane",
+    detail: "방별 안전 변화 밀도를 원문 없이 정렬해 다음 시선 위치를 표시",
+    items: items.sort((a, b) => b.weight - a.weight || FOCUS_LANE_TONE_RANK[a.tone] - FOCUS_LANE_TONE_RANK[b.tone] || roomOrder.indexOf(a.roomId) - roomOrder.indexOf(b.roomId)),
+  };
+}
+
+const ATTENTION_STRIP_HEADING: Record<OfficeDeltaBadge["tone"], string> = {
+  positive: "정상 변화",
+  negative: "주의 방 우선",
+  warning: "확인 흐름",
+  neutral: "대기",
+};
+
+const ATTENTION_STRIP_SIGNAL: Record<OfficeDeltaBadge["tone"], string> = {
+  positive: "정상 우선",
+  negative: "주의 우선",
+  warning: "확인 우선",
+  neutral: "대기 우선",
+};
+
+export function buildOfficeSafeAttentionStrip(delta: OfficeStateDelta): OfficeSafeAttentionStrip {
+  const lane = buildOfficeSafeFocusLane(delta);
+  const compass = buildOfficeSafeRouteCompass(delta);
+  const topItem = lane.items[0];
+  const totalWeight = lane.items.reduce((total, item) => total + item.weight, 0);
+  const activeRoomCount = lane.items.filter((item) => item.weight > 0).length;
+  const tone = topItem && topItem.weight > 0 ? topItem.tone : compass.tone;
+  const focusDetail = topItem && topItem.weight > 0 ? `${topItem.label} · 밀도 ${topItem.weight}` : "대기 · 밀도 0";
+
+  return {
+    stageLabel: "Stage 14-G 안전 attention strip",
+    heading: ATTENTION_STRIP_HEADING[tone],
+    detail: "focus lane과 route compass의 안전 집계를 상단 한 줄 신호로 압축",
+    tone,
+    chips: [
+      { id: "focus", label: "초점", detail: focusDetail, tone, ariaHidden: true, interactive: false },
+      { id: "signal", label: "신호", detail: ATTENTION_STRIP_SIGNAL[tone], tone, ariaHidden: true, interactive: false },
+      { id: "scope", label: "범위", detail: `방 ${activeRoomCount}개 · 밀도 ${totalWeight}`, tone: "neutral", ariaHidden: true, interactive: false },
+    ],
+  };
+}
+
+const ROOM_BEACON_POSITION: Record<OfficeMapNode["id"], { x: number; y: number }> = {
+  sessions: { x: 24, y: 30 },
+  work: { x: 70, y: 30 },
+  automation: { x: 24, y: 67 },
+  routing: { x: 70, y: 67 },
+};
+
+function roomBeaconIntensity(weight: number): OfficeSafeRoomBeaconIntensity {
+  if (weight >= 4) return "high";
+  if (weight >= 2) return "medium";
+  if (weight > 0) return "low";
+  return "idle";
+}
+
+export function buildOfficeSafeRoomBeacons(delta: OfficeStateDelta): OfficeSafeRoomBeacons {
+  const lane = buildOfficeSafeFocusLane(delta);
+  return {
+    stageLabel: "Stage 14-H 안전 room beacons",
+    detail: "focus lane의 안전 밀도를 맵 위 방별 비콘으로 표시",
+    beacons: lane.items.map((item) => {
+      const position = ROOM_BEACON_POSITION[item.roomId];
+      return {
+        roomId: item.roomId,
+        label: `${item.label} beacon`,
+        detail: `${FOCUS_LANE_TONE_LABEL[item.tone]} · 밀도 ${item.weight} · 맵 표시`,
+        tone: item.tone,
+        intensity: roomBeaconIntensity(item.weight),
+        weight: item.weight,
+        x: position.x,
+        y: position.y,
+        reducedMotionLabel: `${item.label} 방 비콘 · 텍스트 rail로 밀도 유지`,
+        ariaHidden: true,
+        interactive: false,
+      };
+    }),
+  };
+}
+
+function flowPulseIntensity(tone: OfficeDeltaBadge["tone"], index: number): OfficeSafeRoomBeaconIntensity {
+  if (tone === "negative" || tone === "warning" || index > 0) return "high";
+  return "medium";
+}
+
+export function buildOfficeSafeFlowPulseBands(delta: OfficeStateDelta): OfficeSafeFlowPulseBands {
+  return {
+    stageLabel: "Stage 14-I 안전 flow pulse bands",
+    detail: "changedFlows의 안전 방 ID만 맵 위 흐름 pulse band로 표시",
+    bands: delta.changedFlows.map((flow, index) => {
+      const from = ROOM_BEACON_POSITION[flow.from];
+      const to = ROOM_BEACON_POSITION[flow.to];
+      return {
+        id: `${flow.from}-to-${flow.to}`,
+        label: `${CHARACTER_ROOM_LABEL[flow.from]} → ${CHARACTER_ROOM_LABEL[flow.to]} pulse`,
+        detail: `${FOCUS_LANE_TONE_LABEL[flow.tone]} · 안전 흐름 ${index + 1}`,
+        tone: flow.tone,
+        intensity: flowPulseIntensity(flow.tone, index),
+        x1: from.x,
+        y1: from.y,
+        x2: to.x,
+        y2: to.y,
+        reducedMotionLabel: `${CHARACTER_ROOM_LABEL[flow.from]}에서 ${CHARACTER_ROOM_LABEL[flow.to]}로 · 정적 흐름 rail 유지`,
+        ariaHidden: true,
+        interactive: false,
+      };
+    }),
+  };
+}
+
+export function buildOfficeSafeTacticalMinimap(delta: OfficeStateDelta): OfficeSafeTacticalMinimap {
+  const beacons = buildOfficeSafeRoomBeacons(delta);
+  const flowBands = buildOfficeSafeFlowPulseBands(delta);
+  const roomOrder: OfficeMapNode["id"][] = ["sessions", "work", "automation", "routing"];
+  const beaconByRoom = new Map(beacons.beacons.map((beacon) => [beacon.roomId, beacon]));
+  const activeRoomCount = beacons.beacons.filter((beacon) => beacon.weight > 0).length;
+
+  return {
+    stageLabel: "Stage 14-J 안전 tactical minimap",
+    summary: `활성 방 ${activeRoomCount}개 · 흐름 ${flowBands.bands.length}개`,
+    detail: "room beacons와 flow pulse bands의 안전 밀도를 작은 전술 지도 셀로 압축",
+    cells: roomOrder.map((roomId) => {
+      const beacon = beaconByRoom.get(roomId);
+      const weight = beacon?.weight ?? 0;
+      const position = ROOM_BEACON_POSITION[roomId];
+      const tone = beacon?.tone ?? "neutral";
+      return {
+        roomId,
+        label: CHARACTER_ROOM_LABEL[roomId],
+        detail: `${FOCUS_LANE_TONE_LABEL[tone]} · 밀도 ${weight}`,
+        tone,
+        intensity: beacon?.intensity ?? "idle",
+        active: weight > 0,
+        weight,
+        x: position.x,
+        y: position.y,
+        ariaHidden: true,
+        interactive: false,
+      };
+    }),
+  };
+}
+
+export function buildOfficeSafeTacticalTicker(delta: OfficeStateDelta): OfficeSafeTacticalTicker {
+  const minimap = buildOfficeSafeTacticalMinimap(delta);
+  const attention = buildOfficeSafeAttentionStrip(delta);
+  const focusChip = attention.chips.find((chip) => chip.id === "focus");
+  const activeCells = minimap.cells.filter((cell) => cell.active);
+  const cellDetail = activeCells.length > 0 ? activeCells.map((cell) => `${cell.label} ${cell.weight}`).join(" · ") : "대기 0";
+  const tone = focusChip?.tone ?? attention.tone;
+
+  return {
+    stageLabel: "Stage 14-K 안전 tactical ticker",
+    headline: `${attention.heading} · ${minimap.summary}`,
+    detail: "attention strip과 tactical minimap의 안전 신호를 하단 ticker로 압축",
+    tone,
+    items: [
+      { id: "focus", label: "초점", detail: focusChip?.detail ?? "대기 · 밀도 0", tone, ariaHidden: true, interactive: false },
+      { id: "map", label: "전술", detail: minimap.summary, tone: "neutral", ariaHidden: true, interactive: false },
+      { id: "cells", label: "방", detail: cellDetail, tone, ariaHidden: true, interactive: false },
+    ],
+  };
+}
+
+export function buildOfficeSafeMissionClock(options: OfficeSafeMissionClockOptions): OfficeSafeMissionClock {
+  const delay = resolveOfficeLiveTrackingInterval({ isVisible: options.isVisible, consecutiveFailures: options.consecutiveFailures });
+  const seconds = Math.round(delay / 1000);
+  const cadenceDetail = options.liveTracking ? `${seconds}초` : "수동 새로고침";
+  const modeDetail = options.liveTracking ? "실시간 추적" : "수동 추적";
+  const tabDetail = options.isVisible ? "표시 탭" : "숨김 탭";
+  const pulseDetail = options.hasRecentChanges ? "최근 변화 있음" : "변화 대기";
+  const cadenceTone: OfficeDeltaBadge["tone"] = options.consecutiveFailures > 0 || !options.isVisible ? "warning" : "neutral";
+  const modeTone: OfficeDeltaBadge["tone"] = options.liveTracking ? "positive" : "neutral";
+  const pulseTone: OfficeDeltaBadge["tone"] = options.hasRecentChanges ? "positive" : "neutral";
+
+  return {
+    stageLabel: "Stage 14-L 안전 mission clock",
+    headline: options.liveTracking ? `실시간 · ${tabDetail} · ${seconds}초` : `수동 · ${tabDetail} · 대기`,
+    detail: "브라우저 탭의 수동/실시간 추적 자세를 안전 작전 시계로 압축",
+    tone: options.liveTracking ? cadenceTone : "neutral",
+    items: [
+      { id: "mode", label: "모드", detail: modeDetail, tone: modeTone, ariaHidden: true, interactive: false },
+      { id: "cadence", label: "간격", detail: cadenceDetail, tone: cadenceTone, ariaHidden: true, interactive: false },
+      { id: "safety", label: "안전", detail: "브라우저 로컬 · 읽기 전용", tone: "neutral", ariaHidden: true, interactive: false },
+      { id: "pulse", label: "변화", detail: pulseDetail, tone: pulseTone, ariaHidden: true, interactive: false },
+    ],
+  };
+}
+
+export function buildOfficeSafeCommandDeck(state: OfficeState, delta: OfficeStateDelta, missionOptions: OfficeSafeMissionClockOptions): OfficeSafeCommandDeck {
+  const missionClock = buildOfficeSafeMissionClock(missionOptions);
+  const tacticalTicker = buildOfficeSafeTacticalTicker(delta);
+  const sourceHealth = buildOfficeSourceHealthSummary(state);
+  const tonePriority: Record<OfficeDeltaBadge["tone"], number> = { negative: 4, warning: 3, positive: 2, neutral: 1 };
+  const cards: OfficeSafeCommandDeckCard[] = [
+    { id: "mission", label: "작전 시계", detail: missionClock.headline, tone: missionClock.tone, ariaHidden: true, interactive: false },
+    { id: "tactical", label: "전술 HUD", detail: tacticalTicker.headline, tone: tacticalTicker.tone, ariaHidden: true, interactive: false },
+    { id: "sources", label: "소스", detail: sourceHealth.detail, tone: sourceHealth.tone, ariaHidden: true, interactive: false },
+    { id: "safety", label: "안전", detail: "읽기 전용 · 로컬 표시 · 원문 제외", tone: "neutral", ariaHidden: true, interactive: false },
+  ];
+
+  return {
+    stageLabel: "Stage 14-M 안전 command deck",
+    headline: `${missionClock.headline} · ${sourceHealth.label}`,
+    detail: "mission clock, tactical ticker, source health를 안전 command deck으로 압축",
+    tone: cards.reduce<OfficeDeltaBadge["tone"]>((current, card) => (tonePriority[card.tone] > tonePriority[current] ? card.tone : current), "neutral"),
+    cards,
+  };
+}
+
+export function buildOfficeSafeFloorLegend(delta: OfficeStateDelta): OfficeSafeFloorLegend {
+  const minimap = buildOfficeSafeTacticalMinimap(delta);
+  const flowBands = buildOfficeSafeFlowPulseBands(delta);
+  const activeCells = minimap.cells.filter((cell) => cell.active);
+  const idleCells = minimap.cells.filter((cell) => !cell.active);
+  const activeTone = activeCells.some((cell) => cell.tone === "negative") ? "negative" : activeCells.some((cell) => cell.tone === "warning") ? "warning" : activeCells.length > 0 ? "positive" : "neutral";
+  const flowTone = flowBands.bands.some((band) => band.tone === "negative") ? "negative" : flowBands.bands.some((band) => band.tone === "warning") ? "warning" : flowBands.bands.length > 0 ? "positive" : "neutral";
+  const tonePriority: Record<OfficeDeltaBadge["tone"], number> = { negative: 4, warning: 3, positive: 2, neutral: 1 };
+  const items: OfficeSafeFloorLegendItem[] = [
+    { id: "active", label: "활성 방", detail: activeCells.length > 0 ? activeCells.map((cell) => cell.label).join(" · ") : "없음", tone: activeTone, ariaHidden: true, interactive: false },
+    { id: "idle", label: "대기 방", detail: idleCells.length > 0 ? idleCells.map((cell) => cell.label).join(" · ") : "없음", tone: "neutral", ariaHidden: true, interactive: false },
+    { id: "flow", label: "흐름", detail: `안전 흐름 ${flowBands.bands.length}개`, tone: flowTone, ariaHidden: true, interactive: false },
+    { id: "safety", label: "투영", detail: "집계 전용", tone: "neutral", ariaHidden: true, interactive: false },
+  ];
+
+  return {
+    stageLabel: "Stage 14-N 안전 floor legend",
+    summary: `활성 ${activeCells.length} · 대기 ${idleCells.length} · 흐름 ${flowBands.bands.length}`,
+    detail: "tactical minimap과 flow bands를 바닥 범례로 압축",
+    tone: items.reduce<OfficeDeltaBadge["tone"]>((current, item) => (tonePriority[item.tone] > tonePriority[current] ? item.tone : current), "neutral"),
+    items,
+  };
+}
+
+export function buildOfficeSafeStatusSnapshot(state: OfficeState, delta: OfficeStateDelta, missionOptions: OfficeSafeMissionClockOptions): OfficeSafeStatusSnapshot {
+  const commandDeck = buildOfficeSafeCommandDeck(state, delta, missionOptions);
+  const floorLegend = buildOfficeSafeFloorLegend(delta);
+  const sourceHealth = buildOfficeSourceHealthSummary(state);
+  const reportedSourceCount = state.data_sources.length;
+  const usableSourceCount = state.data_sources.filter((source) => source.status === "ok").length;
+  const reportedSourceAttention = state.data_sources.some((source) => source.status !== "ok" || (source.warning_count ?? 0) > 0);
+  const sourceTone: OfficeDeltaBadge["tone"] = reportedSourceAttention ? "warning" : sourceHealth.tone;
+  const sourceHeadline = sourceTone === "warning" ? "소스 주의" : sourceTone === "positive" ? "소스 정상" : "소스 공백";
+  const missionDetail = missionOptions.hasRecentChanges ? commandDeck.cards[0]?.detail.replace("대기", "변화 감지") : commandDeck.cards[0]?.detail;
+  const tonePriority: Record<OfficeDeltaBadge["tone"], number> = { negative: 4, warning: 3, positive: 2, neutral: 1 };
+  const items: OfficeSafeStatusSnapshotItem[] = [
+    { id: "deck", label: "상태판", detail: missionDetail ?? commandDeck.headline, tone: missionOptions.hasRecentChanges ? "warning" : commandDeck.tone, ariaHidden: true, interactive: false },
+    { id: "floor", label: "바닥", detail: floorLegend.summary, tone: floorLegend.tone, ariaHidden: true, interactive: false },
+    { id: "source", label: "소스", detail: `${reportedSourceCount}개 중 ${usableSourceCount}개 사용 가능`, tone: sourceTone, ariaHidden: true, interactive: false },
+    { id: "guard", label: "가드", detail: "읽기 전용 · 원문 제외", tone: "neutral", ariaHidden: true, interactive: false },
+  ];
+
+  return {
+    stageLabel: "Stage 14-O 안전 status snapshot",
+    headline: `${sourceHeadline} · ${floorLegend.summary}`,
+    detail: "command deck, floor legend, source health를 안전 상태 스냅샷으로 압축",
+    tone: items.reduce<OfficeDeltaBadge["tone"]>((current, item) => (tonePriority[item.tone] > tonePriority[current] ? item.tone : current), "neutral"),
+    items,
+  };
+}
+
+export function buildOfficeSafeScanIndex(state: OfficeState, delta: OfficeStateDelta, missionOptions: OfficeSafeMissionClockOptions): OfficeSafeScanIndex {
+  const snapshot = buildOfficeSafeStatusSnapshot(state, delta, missionOptions);
+  const floorLegend = buildOfficeSafeFloorLegend(delta);
+  const railCount = snapshot.items.length;
+  const modeDetail = `${missionOptions.liveTracking ? "실시간" : "수동"} · ${missionOptions.isVisible ? "표시 탭" : "숨김 탭"}`;
+  const tonePriority: Record<OfficeDeltaBadge["tone"], number> = { negative: 4, warning: 3, positive: 2, neutral: 1 };
+  const items: OfficeSafeScanIndexItem[] = [
+    { id: "snapshot", label: "스냅샷", detail: snapshot.headline, tone: snapshot.tone, ariaHidden: true, interactive: false },
+    { id: "rail", label: "레일", detail: `${railCount}개 안전 칸`, tone: floorLegend.tone, ariaHidden: true, interactive: false },
+    { id: "mode", label: "모드", detail: modeDetail, tone: missionOptions.liveTracking && missionOptions.isVisible && missionOptions.consecutiveFailures === 0 ? "positive" : "warning", ariaHidden: true, interactive: false },
+  ];
+
+  return {
+    stageLabel: "Stage 14-P 안전 scan index",
+    headline: `스캔 ${railCount}칸 · ${snapshot.headline}`,
+    detail: "status snapshot과 안전 rail 수를 빠른 스캔 색인으로 압축",
+    tone: items.reduce<OfficeDeltaBadge["tone"]>((current, item) => (tonePriority[item.tone] > tonePriority[current] ? item.tone : current), "neutral"),
+    items,
+  };
+}
+
+export function buildOfficeSafeHudReadabilityPlan(options: OfficeSafeHudReadabilityPlanOptions): OfficeSafeHudReadabilityPlan {
+  const viewport = options.viewportWidth ?? 0;
+  const layoutDetail = viewport >= 1024 ? "넓은 HUD" : viewport >= 720 ? "중간 HUD" : "압축 HUD";
+  const layoutTone: OfficeDeltaBadge["tone"] = viewport >= 1024 ? "positive" : viewport >= 720 ? "neutral" : "warning";
+  const motionDetail = options.prefersReducedMotion ? "정적 모션" : "동적 모션";
+  const densityTone: OfficeDeltaBadge["tone"] = options.safePanelCount >= 6 ? "warning" : "positive";
+  const trackingDetail = options.liveTracking ? "실시간" : "수동";
+  const tonePriority: Record<OfficeDeltaBadge["tone"], number> = { negative: 4, warning: 3, positive: 2, neutral: 1 };
+  const items: OfficeSafeHudReadabilityPlanItem[] = [
+    { id: "layout", label: "배치", detail: layoutDetail, tone: layoutTone, ariaHidden: true, interactive: false },
+    { id: "motion", label: "모션", detail: motionDetail, tone: options.prefersReducedMotion ? "neutral" : "positive", ariaHidden: true, interactive: false },
+    { id: "density", label: "밀도", detail: `${options.safePanelCount}개 패널`, tone: densityTone, ariaHidden: true, interactive: false },
+    { id: "tracking", label: "추적", detail: trackingDetail, tone: options.liveTracking ? "positive" : "neutral", ariaHidden: true, interactive: false },
+  ];
+
+  return {
+    stageLabel: "Stage 14-Q 안전 HUD readability",
+    summary: `${layoutDetail} · ${motionDetail} · ${options.safePanelCount}개 패널`,
+    detail: "브라우저 로컬 레이아웃 신호만으로 안전 HUD 가독성을 요약",
+    tone: items.reduce<OfficeDeltaBadge["tone"]>((current, item) => (tonePriority[item.tone] > tonePriority[current] ? item.tone : current), "neutral"),
+    items,
   };
 }
 

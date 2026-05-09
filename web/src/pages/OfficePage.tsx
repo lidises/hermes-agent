@@ -24,6 +24,7 @@ import {
   buildOfficeCharacterInspector,
   buildOfficeCharacterRoutes,
   buildOfficeCharacterSceneObjects,
+  buildOfficeCharacterTrackingCues,
   buildOfficeCharacterView,
   buildOfficeCharacters,
   buildOfficeEmptySourceCopyPlan,
@@ -32,6 +33,22 @@ import {
   buildOfficeMapJumpTargets,
   buildOfficeMapPolishPlan,
   buildOfficeResponsiveReadabilityPlan,
+  buildOfficeRoomActivityMeters,
+  buildOfficeSafePulseTimeline,
+  buildOfficeSafeBreadcrumbTrail,
+  buildOfficeSafeRouteCompass,
+  buildOfficeSafeFocusLane,
+  buildOfficeSafeAttentionStrip,
+  buildOfficeSafeRoomBeacons,
+  buildOfficeSafeFlowPulseBands,
+  buildOfficeSafeTacticalMinimap,
+  buildOfficeSafeTacticalTicker,
+  buildOfficeSafeMissionClock,
+  buildOfficeSafeCommandDeck,
+  buildOfficeSafeStatusSnapshot,
+  buildOfficeSafeScanIndex,
+  buildOfficeSafeHudReadabilityPlan,
+  buildOfficeSafeFloorLegend,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -320,6 +337,65 @@ function activityToneClass(tone: ReturnType<typeof buildOfficeCharacterActivity>
   return "office-character__activity--normal";
 }
 
+function trackingToneClass(tone: ReturnType<typeof buildOfficeCharacterTrackingCues>[number]["tone"]): string {
+  if (tone === "alert") return "office-character-tracking--alert";
+  if (tone === "warning") return "office-character-tracking--warning";
+  return "office-character-tracking--steady";
+}
+
+function roomActivityClass(level: ReturnType<typeof buildOfficeRoomActivityMeters>[number]["level"]): string {
+  if (level === "changed") return "office-room-activity--changed";
+  if (level === "busy") return "office-room-activity--busy";
+  if (level === "active") return "office-room-activity--active";
+  return "office-room-activity--quiet";
+}
+
+function safePulseToneClass(tone: OfficeRecentChange["tone"]): string {
+  if (tone === "positive") return "office-safe-pulse-timeline__item--positive";
+  if (tone === "negative") return "office-safe-pulse-timeline__item--negative";
+  if (tone === "warning") return "office-safe-pulse-timeline__item--warning";
+  return "office-safe-pulse-timeline__item--neutral";
+}
+
+function safeRoomBeaconIntensityClass(intensity: ReturnType<typeof buildOfficeSafeRoomBeacons>["beacons"][number]["intensity"]): string {
+  if (intensity === "high") return "office-safe-room-beacon--high";
+  if (intensity === "medium") return "office-safe-room-beacon--medium";
+  if (intensity === "low") return "office-safe-room-beacon--low";
+  return "office-safe-room-beacon--idle";
+}
+
+function RoomActivityMeter({ node, meter }: { node: OfficeMapNode; meter: ReturnType<typeof buildOfficeRoomActivityMeters>[number] }) {
+  return (
+    <div
+      className={`office-room-activity absolute z-[24] -translate-x-1/2 ${roomActivityClass(meter.level)}`}
+      style={{ left: `${node.x}%`, top: `calc(${node.y}% + 3.15rem)`, "--office-room-activity-percent": `${meter.percent}%` } as React.CSSProperties}
+      title={`${meter.detail} · ${meter.reducedMotionLabel}`}
+      aria-hidden={meter.ariaHidden}
+      data-office-room-activity="true"
+      data-office-room-activity-level={meter.level}
+    >
+      <span className="office-room-activity__label">{meter.label}</span>
+      <span className="office-room-activity__bar"><span /></span>
+    </div>
+  );
+}
+
+function CharacterTrackingCue({ character, cue }: { character: OfficeCharacter; cue: ReturnType<typeof buildOfficeCharacterTrackingCues>[number] }) {
+  return (
+    <div
+      className={`office-character-tracking absolute z-[32] -translate-x-1/2 -translate-y-1/2 ${trackingToneClass(cue.tone)}`}
+      style={{ left: `${character.x}%`, top: `${character.y}%`, ...cue.style } as React.CSSProperties}
+      title={`${cue.detail} · ${cue.reducedMotionLabel}`}
+      aria-hidden={cue.ariaHidden}
+      data-office-character-tracking="true"
+      data-office-character-tracking-tone={cue.tone}
+    >
+      <span className="office-character-tracking__ring" />
+      <span className="office-character-tracking__label">{cue.label}</span>
+    </div>
+  );
+}
+
 function CharacterMarker({ character, latestDelta, onInspect }: { character: OfficeCharacter; latestDelta: OfficeStateDelta; onInspect: () => void }) {
   const view = buildOfficeCharacterView(character);
   const activity = buildOfficeCharacterActivity(character, latestDelta);
@@ -398,6 +474,20 @@ function OfficeMap({
   const characterRoutes = buildOfficeCharacterRoutes(latestDelta);
   const nodeById = new Map(nodes.map((node) => [node.id, node]));
   const polishPlan = buildOfficeMapPolishPlan(densityPlan);
+  const trackingCues = buildOfficeCharacterTrackingCues(densityPlan.visibleCharacters, latestDelta);
+  const trackingCueByCharacterId = new Map(trackingCues.map((cue) => [cue.characterId, cue]));
+  const roomActivityMeters = buildOfficeRoomActivityMeters(nodes, densityPlan.visibleCharacters, latestDelta);
+  const roomActivityById = new Map(roomActivityMeters.map((meter) => [meter.roomId, meter]));
+  const safePulseTimeline = buildOfficeSafePulseTimeline(latestDelta);
+  const safeBreadcrumbTrail = buildOfficeSafeBreadcrumbTrail(latestDelta);
+  const safeRouteCompass = buildOfficeSafeRouteCompass(latestDelta);
+  const safeFocusLane = buildOfficeSafeFocusLane(latestDelta);
+  const safeAttentionStrip = buildOfficeSafeAttentionStrip(latestDelta);
+  const safeRoomBeacons = buildOfficeSafeRoomBeacons(latestDelta);
+  const safeFlowPulseBands = buildOfficeSafeFlowPulseBands(latestDelta);
+  const safeTacticalMinimap = buildOfficeSafeTacticalMinimap(latestDelta);
+  const safeTacticalTicker = buildOfficeSafeTacticalTicker(latestDelta);
+  const safeFloorLegend = buildOfficeSafeFloorLegend(latestDelta);
 
   return (
     <Card>
@@ -483,6 +573,21 @@ function OfficeMap({
               );
             })}
           </svg>
+          <svg className="office-safe-flow-pulse-bands" aria-label="Stage 14-I 안전 flow pulse bands" data-office-safe-flow-pulse-bands="true" viewBox="0 0 100 100" preserveAspectRatio="none">
+            {safeFlowPulseBands.bands.map((band) => (
+              <line
+                key={band.id}
+                x1={band.x1}
+                y1={band.y1}
+                x2={band.x2}
+                y2={band.y2}
+                className={`office-safe-flow-pulse-band ${safePulseToneClass(band.tone)} ${safeRoomBeaconIntensityClass(band.intensity)}`}
+                aria-hidden={band.ariaHidden}
+                data-office-safe-flow-pulse-band={band.id}
+                data-office-safe-flow-pulse-band-intensity={band.intensity}
+              />
+            ))}
+          </svg>
           <div className="absolute left-4 top-4 z-40 border border-current/10 bg-black/35 px-2 py-1 text-[10px] uppercase tracking-[0.22em] text-midground/80">안전 오피스 투영</div>
           {OFFICE_ZONE_PANELS.map((zone) => (
             <div key={zone.id} className={`absolute z-0 border shadow-inner ${zone.className}`} style={zone.style} aria-hidden="true">
@@ -509,9 +614,37 @@ function OfficeMap({
               </div>
             );
           })}
+          <div className="office-safe-room-beacons" aria-label="Stage 14-H 안전 room beacons" data-office-safe-room-beacons="true">
+            {safeRoomBeacons.beacons.map((beacon) => (
+              <span
+                key={beacon.roomId}
+                className={`office-safe-room-beacon ${safePulseToneClass(beacon.tone)} ${safeRoomBeaconIntensityClass(beacon.intensity)}`}
+                style={{ left: `${beacon.x}%`, top: `${beacon.y}%`, "--office-safe-room-beacon-scale": `${Math.min(2.4, 0.8 + beacon.weight * 0.28)}` } as React.CSSProperties}
+                title={`${beacon.detail} · ${beacon.reducedMotionLabel}`}
+                aria-hidden={beacon.ariaHidden}
+                data-office-safe-room-beacon={beacon.roomId}
+                data-office-safe-room-beacon-intensity={beacon.intensity}
+                data-office-safe-room-beacon-weight={beacon.weight}
+              >
+                <span className="office-safe-room-beacon__ring" />
+                <span className="office-safe-room-beacon__core" />
+                <span className="office-safe-room-beacon__label">{beacon.label}</span>
+              </span>
+            ))}
+          </div>
+          {densityPlan.visibleCharacters.length > 0
+            ? densityPlan.visibleCharacters.map((character) => {
+                const cue = trackingCueByCharacterId.get(character.id);
+                return cue ? <CharacterTrackingCue key={`tracking-${character.id}`} character={character} cue={cue} /> : null;
+              })
+            : null}
           {densityPlan.visibleCharacters.length > 0
             ? densityPlan.visibleCharacters.map((character) => <CharacterMarker key={character.id} character={character} latestDelta={latestDelta} onInspect={() => onInspectCharacter(character)} />)
             : sceneObjects.map((object) => <SceneObjectMarker key={object.id} object={object} />)}
+          {nodes.map((node) => {
+            const meter = roomActivityById.get(node.id);
+            return meter ? <RoomActivityMeter key={`room-activity-${node.id}`} node={node} meter={meter} /> : null;
+          })}
           {nodes.map((node) => {
             const badges = latestDelta.nodeBadges[node.id] ?? [];
             return (
@@ -546,6 +679,18 @@ function OfficeMap({
             <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] uppercase tracking-[0.16em]">
               <span className="text-emerald-200">{polishPlan.stageLabel}</span>
               <span className="text-sky-200">{responsivePlan.stageLabel} · {responsivePlan.viewportMode === "narrow" ? "좁은 화면" : "데스크톱"}</span>
+              <span className="text-lime-200">Stage 14-A 동적 추적 · 큐 {trackingCues.length}개</span>
+              <span className="text-amber-200">Stage 14-B 방 활동 · 미터 {roomActivityMeters.length}개</span>
+              <span className="text-fuchsia-200">Stage 14-C pulse · {safePulseTimeline.items.length}개</span>
+              <span className="text-cyan-200">Stage 14-D breadcrumb · {safeBreadcrumbTrail.segments.length}개</span>
+              <span className="text-rose-200">Stage 14-E compass · {safeRouteCompass.heading}</span>
+              <span className="text-violet-200">Stage 14-F focus · {safeFocusLane.items[0]?.label ?? "대기"}</span>
+              <span className="text-orange-200">Stage 14-G attention · {safeAttentionStrip.heading}</span>
+              <span className="text-amber-100">Stage 14-H beacons · {safeRoomBeacons.beacons.filter((beacon) => beacon.weight > 0).length}개</span>
+              <span className="text-teal-100">Stage 14-I flow · {safeFlowPulseBands.bands.length}개</span>
+              <span className="text-emerald-100">Stage 14-J minimap · {safeTacticalMinimap.summary}</span>
+              <span className="text-lime-100">Stage 14-K ticker · {safeTacticalTicker.headline}</span>
+              <span className="text-cyan-100">Stage 14-N floor · {safeFloorLegend.summary}</span>
               {flows.map((flow) => {
                 const changedFlow = changedFlowById.get(`${flow.from}->${flow.to}`);
                 return (
@@ -560,6 +705,188 @@ function OfficeMap({
             </div>
             <div className="mb-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-semibold tracking-[0.14em] text-sky-100/80" aria-label="Stage 12-A 반응형 읽기 메모">
               {responsivePlan.notes.map((note) => <span key={note}>{note}</span>)}
+            </div>
+            <div className="mb-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-semibold tracking-[0.14em] text-emerald-100/80" aria-label="Stage 14-A 동적 추적 rail" data-office-character-tracking-rail="true">
+              <span>Stage 14-A 동적 추적</span>
+              <span>추적 큐 {trackingCues.length}개</span>
+              {trackingCues.slice(0, 4).map((cue) => (
+                <span key={`tracking-rail-${cue.characterId}`} className={cue.tone === "alert" ? "text-yellow-200" : cue.tone === "warning" ? "text-orange-200" : "text-emerald-200"}>
+                  {cue.label} · {cue.detail}
+                </span>
+              ))}
+            </div>
+            <div className="mb-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-semibold tracking-[0.14em] text-amber-100/80" aria-label="Stage 14-B 방 활동 rail" data-office-room-activity-rail="true">
+              <span>Stage 14-B 방 활동</span>
+              {roomActivityMeters.map((meter) => (
+                <span key={`room-activity-rail-${meter.roomId}`} className={meter.level === "changed" ? "text-yellow-200" : meter.level === "busy" ? "text-orange-200" : meter.level === "active" ? "text-emerald-200" : "text-midground/60"}>
+                  {meter.label} · {meter.detail}
+                </span>
+              ))}
+            </div>
+            <div className="office-safe-pulse-timeline mb-2" aria-label="Stage 14-C 안전 pulse timeline" data-office-safe-pulse-timeline="true">
+              <span className="office-safe-pulse-timeline__title">{safePulseTimeline.stageLabel}</span>
+              {safePulseTimeline.items.map((item, index) => (
+                <span
+                  key={item.id}
+                  className={`office-safe-pulse-timeline__item ${safePulseToneClass(item.tone)}`}
+                  style={{ "--office-safe-pulse-delay": `${index * -0.35}s` } as React.CSSProperties}
+                  title={`${item.detail} · ${item.reducedMotionLabel}`}
+                  aria-hidden={item.ariaHidden}
+                  data-office-safe-pulse-item={item.kind}
+                >
+                  <span className="office-safe-pulse-timeline__dot" />
+                  <span>{item.label}</span>
+                </span>
+              ))}
+            </div>
+            <div className="office-safe-breadcrumb mb-2" aria-label="Stage 14-D 안전 breadcrumb" data-office-safe-breadcrumb="true">
+              <span className="office-safe-breadcrumb__title">{safeBreadcrumbTrail.stageLabel}</span>
+              {safeBreadcrumbTrail.segments.map((segment, index) => (
+                <span
+                  key={segment.id}
+                  className={`office-safe-breadcrumb__segment ${safePulseToneClass(segment.tone)}`}
+                  title={segment.detail}
+                  aria-hidden={segment.ariaHidden}
+                  data-office-safe-breadcrumb-segment="true"
+                >
+                  <span>{segment.label}</span>
+                  {index < safeBreadcrumbTrail.segments.length - 1 ? <span className="office-safe-breadcrumb__arrow">→</span> : null}
+                </span>
+              ))}
+            </div>
+            <div className={`office-safe-route-compass mb-2 ${safePulseToneClass(safeRouteCompass.tone)}`} aria-label="Stage 14-E 안전 route compass" data-office-safe-route-compass="true">
+              <span className="office-safe-route-compass__title">{safeRouteCompass.stageLabel}</span>
+              <span className="office-safe-route-compass__heading">{safeRouteCompass.heading}</span>
+              {safeRouteCompass.points.map((point) => (
+                <span
+                  key={point.id}
+                  className={`office-safe-route-compass__point ${safePulseToneClass(point.tone)}`}
+                  title={`${point.detail} · ${safeRouteCompass.detail}`}
+                  aria-hidden={point.ariaHidden}
+                  data-office-safe-route-compass-point={point.id}
+                >
+                  <span>{point.label}</span>
+                  <span>{point.detail}</span>
+                </span>
+              ))}
+            </div>
+            <div className="office-safe-focus-lane mb-2" aria-label="Stage 14-F 안전 focus lane" data-office-safe-focus-lane="true">
+              <span className="office-safe-focus-lane__title">{safeFocusLane.stageLabel}</span>
+              {safeFocusLane.items.map((item) => (
+                <span
+                  key={item.roomId}
+                  className={`office-safe-focus-lane__item ${safePulseToneClass(item.tone)}`}
+                  title={`${item.detail} · ${safeFocusLane.detail}`}
+                  aria-hidden={item.ariaHidden}
+                  data-office-safe-focus-lane-item={item.roomId}
+                  data-office-safe-focus-lane-weight={item.weight}
+                >
+                  <span className="office-safe-focus-lane__bar" style={{ "--office-safe-focus-weight": `${Math.min(100, item.weight * 20 + 8)}%` } as React.CSSProperties} />
+                  <span>{item.label}</span>
+                  <span>{item.detail}</span>
+                </span>
+              ))}
+            </div>
+            <div className={`office-safe-attention-strip mb-2 ${safePulseToneClass(safeAttentionStrip.tone)}`} aria-label="Stage 14-G 안전 attention strip" data-office-safe-attention-strip="true">
+              <span className="office-safe-attention-strip__title">{safeAttentionStrip.stageLabel}</span>
+              <span className="office-safe-attention-strip__heading">{safeAttentionStrip.heading}</span>
+              {safeAttentionStrip.chips.map((chip) => (
+                <span
+                  key={chip.id}
+                  className={`office-safe-attention-strip__chip ${safePulseToneClass(chip.tone)}`}
+                  title={`${chip.detail} · ${safeAttentionStrip.detail}`}
+                  aria-hidden={chip.ariaHidden}
+                  data-office-safe-attention-strip-chip={chip.id}
+                >
+                  <span>{chip.label}</span>
+                  <span>{chip.detail}</span>
+                </span>
+              ))}
+            </div>
+            <div className="office-safe-room-beacon-rail mb-2" aria-label="Stage 14-H 안전 room beacon rail" data-office-safe-room-beacon-rail="true">
+              <span className="office-safe-room-beacon-rail__title">{safeRoomBeacons.stageLabel}</span>
+              {safeRoomBeacons.beacons.map((beacon) => (
+                <span
+                  key={`beacon-rail-${beacon.roomId}`}
+                  className={`office-safe-room-beacon-rail__item ${safePulseToneClass(beacon.tone)}`}
+                  title={`${beacon.detail} · ${safeRoomBeacons.detail}`}
+                  aria-hidden={beacon.ariaHidden}
+                  data-office-safe-room-beacon-rail-item={beacon.roomId}
+                >
+                  <span>{beacon.label}</span>
+                  <span>{beacon.intensity} · {beacon.weight}</span>
+                </span>
+              ))}
+            </div>
+            <div className="office-safe-flow-pulse-rail mb-2" aria-label="Stage 14-I 안전 flow pulse rail" data-office-safe-flow-pulse-rail="true">
+              <span className="office-safe-flow-pulse-rail__title">{safeFlowPulseBands.stageLabel}</span>
+              {safeFlowPulseBands.bands.length ? safeFlowPulseBands.bands.map((band) => (
+                <span
+                  key={`flow-pulse-rail-${band.id}`}
+                  className={`office-safe-flow-pulse-rail__item ${safePulseToneClass(band.tone)}`}
+                  title={`${band.detail} · ${safeFlowPulseBands.detail}`}
+                  aria-hidden={band.ariaHidden}
+                  data-office-safe-flow-pulse-rail-item={band.id}
+                >
+                  <span>{band.label}</span>
+                  <span>{band.intensity}</span>
+                </span>
+              )) : <span className="office-safe-flow-pulse-rail__item office-safe-pulse-timeline__item--neutral" data-office-safe-flow-pulse-rail-empty="true">대기 · 흐름 0개</span>}
+            </div>
+            <div className="office-safe-tactical-minimap mb-2" aria-label="Stage 14-J 안전 tactical minimap" data-office-safe-tactical-minimap="true">
+              <div className="office-safe-tactical-minimap__header">
+                <span className="office-safe-tactical-minimap__title">{safeTacticalMinimap.stageLabel}</span>
+                <span className="office-safe-tactical-minimap__summary" data-office-safe-tactical-minimap-summary="true">{safeTacticalMinimap.summary}</span>
+              </div>
+              <div className="office-safe-tactical-minimap__grid" aria-hidden="true">
+                {safeTacticalMinimap.cells.map((cell) => (
+                  <span
+                    key={`tactical-minimap-${cell.roomId}`}
+                    className={`office-safe-tactical-minimap__cell ${safePulseToneClass(cell.tone)} office-safe-tactical-minimap__cell--${cell.intensity}`}
+                    title={`${cell.detail} · ${safeTacticalMinimap.detail}`}
+                    aria-hidden={cell.ariaHidden}
+                    data-office-safe-tactical-minimap-cell={cell.roomId}
+                    data-office-safe-tactical-minimap-cell-intensity={cell.intensity}
+                    data-office-safe-tactical-minimap-cell-active={cell.active ? "true" : "false"}
+                    data-office-safe-tactical-minimap-cell-weight={cell.weight}
+                  >
+                    <span className="office-safe-tactical-minimap__cell-name">{cell.label}</span>
+                    <span className="office-safe-tactical-minimap__cell-detail">{cell.detail}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className={`office-safe-tactical-ticker mb-2 ${safePulseToneClass(safeTacticalTicker.tone)}`} aria-label="Stage 14-K 안전 tactical ticker" data-office-safe-tactical-ticker="true">
+              <span className="office-safe-tactical-ticker__title">{safeTacticalTicker.stageLabel}</span>
+              <span className="office-safe-tactical-ticker__headline" data-office-safe-tactical-ticker-headline="true">{safeTacticalTicker.headline}</span>
+              {safeTacticalTicker.items.map((item) => (
+                <span
+                  key={`tactical-ticker-${item.id}`}
+                  className={`office-safe-tactical-ticker__item ${safePulseToneClass(item.tone)}`}
+                  title={`${item.detail} · ${safeTacticalTicker.detail}`}
+                  aria-hidden={item.ariaHidden}
+                  data-office-safe-tactical-ticker-item={item.id}
+                >
+                  <span>{item.label}</span>
+                  <span>{item.detail}</span>
+                </span>
+              ))}
+            </div>
+            <div className={`office-safe-floor-legend mb-2 ${safePulseToneClass(safeFloorLegend.tone)}`} aria-label="Stage 14-N 안전 floor legend" data-office-safe-floor-legend="true">
+              <span className="office-safe-floor-legend__title">{safeFloorLegend.stageLabel}</span>
+              <span className="office-safe-floor-legend__summary" data-office-safe-floor-legend-summary="true">{safeFloorLegend.summary}</span>
+              {safeFloorLegend.items.map((item) => (
+                <span
+                  key={`floor-legend-${item.id}`}
+                  className={`office-safe-floor-legend__item ${safePulseToneClass(item.tone)}`}
+                  title={`${item.detail} · ${safeFloorLegend.detail}`}
+                  aria-hidden={item.ariaHidden}
+                  data-office-safe-floor-legend-item={item.id}
+                >
+                  <span>{item.label}</span>
+                  <span>{item.detail}</span>
+                </span>
+              ))}
             </div>
             <div className="mb-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-semibold tracking-[0.14em] text-midground/75" aria-label="RPG 역할 범례">
               <span>캐릭터 역할 투영</span>
@@ -717,6 +1044,8 @@ export default function OfficePage() {
   const [densityMode, setDensityMode] = useState<OfficeMapDensityMode>("standard");
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [viewportWidth, setViewportWidth] = useState<number | undefined>(undefined);
+  const [tabVisible, setTabVisible] = useState(true);
+  const [liveFailureCount, setLiveFailureCount] = useState(0);
   const previousStateRef = useRef<OfficeState | null>(null);
   const liveFailureCountRef = useRef(0);
 
@@ -769,13 +1098,17 @@ export default function OfficePage() {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
     const updateMotion = () => setPrefersReducedMotion(media.matches);
     const updateViewport = () => setViewportWidth(window.innerWidth);
+    const updateVisibility = () => setTabVisible(typeof document === "undefined" ? true : !document.hidden);
     updateMotion();
     updateViewport();
+    updateVisibility();
     media.addEventListener("change", updateMotion);
     window.addEventListener("resize", updateViewport);
+    document.addEventListener("visibilitychange", updateVisibility);
     return () => {
       media.removeEventListener("change", updateMotion);
       window.removeEventListener("resize", updateViewport);
+      document.removeEventListener("visibilitychange", updateVisibility);
     };
   }, []);
 
@@ -793,7 +1126,9 @@ export default function OfficePage() {
       });
       timeoutId = window.setTimeout(() => {
         void load().then((ok) => {
-          liveFailureCountRef.current = ok ? 0 : liveFailureCountRef.current + 1;
+          const nextFailureCount = ok ? 0 : liveFailureCountRef.current + 1;
+          liveFailureCountRef.current = nextFailureCount;
+          setLiveFailureCount(nextFailureCount);
           schedule();
         });
       }, delay);
@@ -836,6 +1171,51 @@ export default function OfficePage() {
   );
   const emptyHints = useMemo(() => buildOfficeEmptyStateHints(), []);
   const emptySourceCopy = useMemo(() => buildOfficeEmptySourceCopyPlan(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
+  const safeMissionClock = useMemo(
+    () => buildOfficeSafeMissionClock({
+      liveTracking,
+      isVisible: tabVisible,
+      consecutiveFailures: liveFailureCount,
+      hasRecentChanges: latestDelta.hasChanges,
+    }),
+    [latestDelta.hasChanges, liveFailureCount, liveTracking, tabVisible],
+  );
+  const safeCommandDeck = useMemo(
+    () => buildOfficeSafeCommandDeck(state ?? { ...EMPTY_OFFICE_STATE }, latestDelta, {
+      liveTracking,
+      isVisible: tabVisible,
+      consecutiveFailures: liveFailureCount,
+      hasRecentChanges: latestDelta.hasChanges,
+    }),
+    [latestDelta, liveFailureCount, liveTracking, state, tabVisible],
+  );
+  const safeStatusSnapshot = useMemo(
+    () => buildOfficeSafeStatusSnapshot(state ?? { ...EMPTY_OFFICE_STATE }, latestDelta, {
+      liveTracking,
+      isVisible: tabVisible,
+      consecutiveFailures: liveFailureCount,
+      hasRecentChanges: latestDelta.hasChanges,
+    }),
+    [latestDelta, liveFailureCount, liveTracking, state, tabVisible],
+  );
+  const safeScanIndex = useMemo(
+    () => buildOfficeSafeScanIndex(state ?? { ...EMPTY_OFFICE_STATE }, latestDelta, {
+      liveTracking,
+      isVisible: tabVisible,
+      consecutiveFailures: liveFailureCount,
+      hasRecentChanges: latestDelta.hasChanges,
+    }),
+    [latestDelta, liveFailureCount, liveTracking, state, tabVisible],
+  );
+  const safeHudReadability = useMemo(
+    () => buildOfficeSafeHudReadabilityPlan({
+      viewportWidth,
+      prefersReducedMotion,
+      safePanelCount: safeStatusSnapshot.items.length + safeScanIndex.items.length,
+      liveTracking,
+    }),
+    [liveTracking, prefersReducedMotion, safeScanIndex.items.length, safeStatusSnapshot.items.length, viewportWidth],
+  );
 
   const sourceCounts = sourceHealth.counts;
 
@@ -910,6 +1290,106 @@ export default function OfficePage() {
               <div>원격 모드: {state.capabilities.remote_mode}</div>
               <div>변경 기능: {state.capabilities.mutations_enabled ? "켜짐" : "없음"}</div>
             </div>
+            <div className={`office-safe-mission-clock mt-3 ${safePulseToneClass(safeMissionClock.tone)}`} aria-label="Stage 14-L 안전 mission clock" data-office-safe-mission-clock="true">
+              <div className="office-safe-mission-clock__header">
+                <span className="office-safe-mission-clock__title">{safeMissionClock.stageLabel}</span>
+                <span className="office-safe-mission-clock__headline" data-office-safe-mission-clock-headline="true">{safeMissionClock.headline}</span>
+              </div>
+              <div className="office-safe-mission-clock__grid" aria-hidden="true">
+                {safeMissionClock.items.map((item) => (
+                  <span
+                    key={`mission-clock-${item.id}`}
+                    className={`office-safe-mission-clock__item ${safePulseToneClass(item.tone)}`}
+                    title={`${item.detail} · ${safeMissionClock.detail}`}
+                    aria-hidden={item.ariaHidden}
+                    data-office-safe-mission-clock-item={item.id}
+                  >
+                    <span>{item.label}</span>
+                    <span>{item.detail}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className={`office-safe-command-deck mt-3 ${safePulseToneClass(safeCommandDeck.tone)}`} aria-label="Stage 14-M 안전 command deck" data-office-safe-command-deck="true">
+              <div className="office-safe-command-deck__header">
+                <span className="office-safe-command-deck__title">{safeCommandDeck.stageLabel}</span>
+                <span className="office-safe-command-deck__headline" data-office-safe-command-deck-headline="true">{safeCommandDeck.headline}</span>
+              </div>
+              <div className="office-safe-command-deck__grid" aria-hidden="true">
+                {safeCommandDeck.cards.map((card) => (
+                  <span
+                    key={`command-deck-${card.id}`}
+                    className={`office-safe-command-deck__card ${safePulseToneClass(card.tone)}`}
+                    title={`${card.detail} · ${safeCommandDeck.detail}`}
+                    aria-hidden={card.ariaHidden}
+                    data-office-safe-command-deck-card={card.id}
+                  >
+                    <span>{card.label}</span>
+                    <span>{card.detail}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className={`office-safe-status-snapshot mt-3 ${safePulseToneClass(safeStatusSnapshot.tone)}`} aria-label="Stage 14-O 안전 status snapshot" data-office-safe-status-snapshot="true">
+              <div className="office-safe-status-snapshot__header">
+                <span className="office-safe-status-snapshot__title">{safeStatusSnapshot.stageLabel}</span>
+                <span className="office-safe-status-snapshot__headline" data-office-safe-status-snapshot-headline="true">{safeStatusSnapshot.headline}</span>
+              </div>
+              <div className="office-safe-status-snapshot__grid" aria-hidden="true">
+                {safeStatusSnapshot.items.map((item) => (
+                  <span
+                    key={`status-snapshot-${item.id}`}
+                    className={`office-safe-status-snapshot__item ${safePulseToneClass(item.tone)}`}
+                    title={`${item.detail} · ${safeStatusSnapshot.detail}`}
+                    aria-hidden={item.ariaHidden}
+                    data-office-safe-status-snapshot-item={item.id}
+                  >
+                    <span>{item.label}</span>
+                    <span>{item.detail}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className={`office-safe-scan-index mt-3 ${safePulseToneClass(safeScanIndex.tone)}`} aria-label="Stage 14-P 안전 scan index" data-office-safe-scan-index="true">
+              <div className="office-safe-scan-index__header">
+                <span className="office-safe-scan-index__title">{safeScanIndex.stageLabel}</span>
+                <span className="office-safe-scan-index__headline" data-office-safe-scan-index-headline="true">{safeScanIndex.headline}</span>
+              </div>
+              <div className="office-safe-scan-index__grid" aria-hidden="true">
+                {safeScanIndex.items.map((item) => (
+                  <span
+                    key={`scan-index-${item.id}`}
+                    className={`office-safe-scan-index__item ${safePulseToneClass(item.tone)}`}
+                    title={`${item.detail} · ${safeScanIndex.detail}`}
+                    aria-hidden={item.ariaHidden}
+                    data-office-safe-scan-index-item={item.id}
+                  >
+                    <span>{item.label}</span>
+                    <span>{item.detail}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className={`office-safe-hud-readability mt-3 ${safePulseToneClass(safeHudReadability.tone)}`} aria-label="Stage 14-Q 안전 HUD readability" data-office-safe-hud-readability="true">
+              <div className="office-safe-hud-readability__header">
+                <span className="office-safe-hud-readability__title">{safeHudReadability.stageLabel}</span>
+                <span className="office-safe-hud-readability__summary" data-office-safe-hud-readability-summary="true">{safeHudReadability.summary}</span>
+              </div>
+              <div className="office-safe-hud-readability__grid" aria-hidden="true">
+                {safeHudReadability.items.map((item) => (
+                  <span
+                    key={`hud-readability-${item.id}`}
+                    className={`office-safe-hud-readability__item ${safePulseToneClass(item.tone)}`}
+                    title={`${item.detail} · ${safeHudReadability.detail}`}
+                    aria-hidden={item.ariaHidden}
+                    data-office-safe-hud-readability-item={item.id}
+                  >
+                    <span>{item.label}</span>
+                    <span>{item.detail}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
             <Button onClick={load} className="mt-4 w-full gap-2 uppercase" disabled={refreshing}>
               <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} /> 새로고침
             </Button>
@@ -917,6 +1397,7 @@ export default function OfficePage() {
               type="button"
               onClick={() => {
                 liveFailureCountRef.current = 0;
+                setLiveFailureCount(0);
                 setLiveTracking((value) => !value);
               }}
               className="mt-2 flex w-full items-center justify-center gap-2 border border-current/20 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-midground/80 hover:text-foreground"
