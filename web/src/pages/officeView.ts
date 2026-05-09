@@ -180,6 +180,22 @@ export type OfficeSafeRouteCompass = {
   points: OfficeSafeRouteCompassPoint[];
 };
 
+export type OfficeSafeFocusLaneItem = {
+  roomId: OfficeMapNode["id"];
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  weight: number;
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeFocusLane = {
+  stageLabel: string;
+  detail: string;
+  items: OfficeSafeFocusLaneItem[];
+};
+
 export type OfficeDeltaBadge = {
   label: string;
   tone: "positive" | "negative" | "warning" | "neutral";
@@ -1306,6 +1322,62 @@ export function buildOfficeSafeRouteCompass(delta: OfficeStateDelta): OfficeSafe
       { id: "signal", label: "신호", detail: `${PULSE_TONE_LABEL[tone]} 우선`, tone, ariaHidden: true, interactive: false },
       { id: "summary", label: "요약", detail: `안전 변화 ${changeCount}개 · 방 ${roomCount}개`, tone: "neutral", ariaHidden: true, interactive: false },
     ],
+  };
+}
+
+const FOCUS_LANE_TONE_LABEL: Record<OfficeDeltaBadge["tone"], string> = {
+  positive: "정상",
+  negative: "주의",
+  warning: "확인",
+  neutral: "대기",
+};
+
+const FOCUS_LANE_TONE_RANK: Record<OfficeDeltaBadge["tone"], number> = {
+  negative: 0,
+  warning: 1,
+  positive: 2,
+  neutral: 3,
+};
+
+function focusLaneTone(roomBadges: OfficeDeltaBadge[], roomFlows: OfficeFlowChange[]): OfficeDeltaBadge["tone"] {
+  if (roomBadges.length > 0) {
+    const badgeTones = roomBadges.map((badge) => badge.tone);
+    if (badgeTones.includes("negative")) return "negative";
+    if (badgeTones.includes("warning")) return "warning";
+    if (badgeTones.includes("positive")) return "positive";
+    return "neutral";
+  }
+  const flowTones = roomFlows.map((flow) => flow.tone);
+  if (flowTones.includes("negative")) return "negative";
+  if (flowTones.includes("warning")) return "warning";
+  if (flowTones.includes("positive")) return "positive";
+  return "neutral";
+}
+
+export function buildOfficeSafeFocusLane(delta: OfficeStateDelta): OfficeSafeFocusLane {
+  const roomOrder: OfficeMapNode["id"][] = ["sessions", "work", "automation", "routing"];
+  const items = roomOrder.map((roomId) => {
+    const roomBadges = delta.nodeBadges[roomId] ?? [];
+    const roomFlows = delta.changedFlows.filter((flow) => flow.from === roomId || flow.to === roomId);
+    const tone = focusLaneTone(roomBadges, roomFlows);
+    const attentionBonus = tone === "negative" ? 1 : 0;
+    const safeChangeCount = roomBadges.length + attentionBonus;
+    const weight = safeChangeCount + roomFlows.length;
+    return {
+      roomId,
+      label: CHARACTER_ROOM_LABEL[roomId],
+      detail: `${FOCUS_LANE_TONE_LABEL[tone]} 변화 ${safeChangeCount}개 · 흐름 ${roomFlows.length}개`,
+      tone,
+      weight,
+      ariaHidden: true as const,
+      interactive: false as const,
+    };
+  });
+
+  return {
+    stageLabel: "Stage 14-F 안전 focus lane",
+    detail: "방별 안전 변화 밀도를 원문 없이 정렬해 다음 시선 위치를 표시",
+    items: items.sort((a, b) => b.weight - a.weight || FOCUS_LANE_TONE_RANK[a.tone] - FOCUS_LANE_TONE_RANK[b.tone] || roomOrder.indexOf(a.roomId) - roomOrder.indexOf(b.roomId)),
   };
 }
 

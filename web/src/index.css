@@ -383,6 +383,39 @@ code { font-size: 0.875rem; }
   padding-left: 0.42rem;
   pointer-events: none;
 }
+.office-safe-focus-lane {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.28rem 0.5rem;
+  align-items: center;
+  color: rgba(221, 214, 254, 0.86);
+  font-size: 0.62rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+}
+.office-safe-focus-lane__title {
+  color: #c4b5fd;
+  text-transform: uppercase;
+}
+.office-safe-focus-lane__item {
+  position: relative;
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
+  background: rgba(0,0,0,0.28);
+  padding: 0.1rem 0.36rem;
+  pointer-events: none;
+}
+.office-safe-focus-lane__bar {
+  position: absolute;
+  inset: auto auto 0 0;
+  width: var(--office-safe-focus-weight, 8%);
+  height: 2px;
+  background: currentColor;
+  opacity: 0.65;
+}
 .office-character-inspect {
   border: 0;
   background: transparent;

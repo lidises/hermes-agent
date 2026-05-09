@@ -17,6 +17,7 @@ import {
   buildOfficeSafePulseTimeline,
   buildOfficeSafeBreadcrumbTrail,
   buildOfficeSafeRouteCompass,
+  buildOfficeSafeFocusLane,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -751,6 +752,35 @@ describe("OfficePage view helpers", () => {
     ]);
     expect(compass.points.every((point) => point.ariaHidden === true && point.interactive === false)).toBe(true);
     expect(`${compass.heading} ${compass.detail} ${compass.points.map((point) => `${point.label} ${point.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("builds safe Stage 14-F focus lane from safe delta density", () => {
+    const delta = {
+      hasChanges: true,
+      nodeBadges: {
+        sessions: [{ label: "raw model provider", tone: "positive" as const }],
+        work: [{ label: "raw prompt", tone: "negative" as const }],
+        automation: [{ label: "raw script", tone: "warning" as const }],
+        routing: [],
+      },
+      changedFlows: [
+        { from: "sessions" as const, to: "work" as const, label: "raw transcript must not matter", tone: "negative" as const },
+        { from: "work" as const, to: "automation" as const, label: "raw secret must not matter", tone: "warning" as const },
+      ],
+      recentChanges: [{ id: "recent-token", label: "raw token", detail: "sk-sho...leak", tone: "negative" as const }],
+    };
+
+    const lane = buildOfficeSafeFocusLane(delta);
+
+    expect(lane.stageLabel).toBe("Stage 14-F 안전 focus lane");
+    expect(lane.items.map((item) => [item.roomId, item.label, item.detail, item.tone, item.weight])).toEqual([
+      ["work", "작업", "주의 변화 2개 · 흐름 2개", "negative", 4],
+      ["automation", "자동화", "확인 변화 1개 · 흐름 1개", "warning", 2],
+      ["sessions", "세션", "정상 변화 1개 · 흐름 1개", "positive", 2],
+      ["routing", "라우팅", "대기 변화 0개 · 흐름 0개", "neutral", 0],
+    ]);
+    expect(lane.items.every((item) => item.ariaHidden === true && item.interactive === false)).toBe(true);
+    expect(`${lane.stageLabel} ${lane.detail} ${lane.items.map((item) => `${item.label} ${item.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
   });
 
   it("builds Korean empty-source copy without exposing raw adapter data", () => {

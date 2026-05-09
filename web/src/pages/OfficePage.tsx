@@ -37,6 +37,7 @@ import {
   buildOfficeSafePulseTimeline,
   buildOfficeSafeBreadcrumbTrail,
   buildOfficeSafeRouteCompass,
+  buildOfficeSafeFocusLane,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -462,6 +463,7 @@ function OfficeMap({
   const safePulseTimeline = buildOfficeSafePulseTimeline(latestDelta);
   const safeBreadcrumbTrail = buildOfficeSafeBreadcrumbTrail(latestDelta);
   const safeRouteCompass = buildOfficeSafeRouteCompass(latestDelta);
+  const safeFocusLane = buildOfficeSafeFocusLane(latestDelta);
 
   return (
     <Card>
@@ -625,6 +627,7 @@ function OfficeMap({
               <span className="text-fuchsia-200">Stage 14-C pulse · {safePulseTimeline.items.length}개</span>
               <span className="text-cyan-200">Stage 14-D breadcrumb · {safeBreadcrumbTrail.segments.length}개</span>
               <span className="text-rose-200">Stage 14-E compass · {safeRouteCompass.heading}</span>
+              <span className="text-violet-200">Stage 14-F focus · {safeFocusLane.items[0]?.label ?? "대기"}</span>
               {flows.map((flow) => {
                 const changedFlow = changedFlowById.get(`${flow.from}->${flow.to}`);
                 return (
@@ -701,6 +704,23 @@ function OfficeMap({
                 >
                   <span>{point.label}</span>
                   <span>{point.detail}</span>
+                </span>
+              ))}
+            </div>
+            <div className="office-safe-focus-lane mb-2" aria-label="Stage 14-F 안전 focus lane" data-office-safe-focus-lane="true">
+              <span className="office-safe-focus-lane__title">{safeFocusLane.stageLabel}</span>
+              {safeFocusLane.items.map((item) => (
+                <span
+                  key={item.roomId}
+                  className={`office-safe-focus-lane__item ${safePulseToneClass(item.tone)}`}
+                  title={`${item.detail} · ${safeFocusLane.detail}`}
+                  aria-hidden={item.ariaHidden}
+                  data-office-safe-focus-lane-item={item.roomId}
+                  data-office-safe-focus-lane-weight={item.weight}
+                >
+                  <span className="office-safe-focus-lane__bar" style={{ "--office-safe-focus-weight": `${Math.min(100, item.weight * 20 + 8)}%` } as React.CSSProperties} />
+                  <span>{item.label}</span>
+                  <span>{item.detail}</span>
                 </span>
               ))}
             </div>

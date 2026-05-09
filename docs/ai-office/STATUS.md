@@ -1,10 +1,10 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-09 16:54 KST
+Last updated: 2026-05-09 17:05 KST
 
 ## Current phase
 
-Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, and Stage 14-A through Stage 14-E safe dynamic-tracking layers are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
+Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, and Stage 14-A through Stage 14-F safe dynamic-tracking layers are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
 
 Current Stage 9-E result: the `/office` page now uses Korean for primary headings, buttons, helper text, safety copy, status labels, inspector field labels, and office-map room/zone labels while keeping stable technical identifiers such as DTO, OfficeState, source IDs, cron, and enum-like adapter values visible for debugging.
 
@@ -42,12 +42,45 @@ Current Stage 13 result: a non-mutating PR/handoff summary pass is documented in
 
 Current Stage 14-E result: `/office` now adds a compact safe route compass that ties Stage 14-B room meters, Stage 14-C pulse timeline, and Stage 14-D breadcrumb into one direction/signal/summary rail. `OfficeSafeRouteCompass`, `OfficeSafeRouteCompassPoint`, and `buildOfficeSafeRouteCompass(delta)` derive only from safe `OfficeStateDelta` aggregates and known room labels, with tone priority `negative > warning > positive > neutral`. The UI exposes `data-office-safe-route-compass` and `data-office-safe-route-compass-point="direction|signal|summary"` while staying decorative, non-interactive, and frontend-only.
 
+Current Stage 14-F result: `/office` now adds a safe focus lane that ranks known rooms by safe delta density. `OfficeSafeFocusLane`, `OfficeSafeFocusLaneItem`, and `buildOfficeSafeFocusLane(delta)` derive only from safe node badges and changed-flow counts, regenerate Korean room labels/details, and expose `data-office-safe-focus-lane` plus per-room hooks without raw label/detail projection.
+
 Next phase: continue with another small non-renderer/read-only safe dynamic-tracking slice only if it can be derived from existing safe DTO/delta aggregates. Still no individual task identity, generated content-like speech bubbles, sprite assets, Phaser, PixiJS, canvas renderer, backend/API changes, mutation controls, persistent storage, or raw record projection.
 
 Stage 6 slices were approved by the user, including proceeding through the recommended remaining slices. Stage 7 was approved with testing deferred until the end. Stage 8-A was approved as the next safe step by the user saying to proceed in order, and the user then requested items 1 through 3 to run automatically in sequence. The user also approved installing missing test/runtime extras as needed in earlier setup. No gateway restart, cron change, Kanban mutation, NAS/Obsidian write, service/config mutation, memory/skill update, pixel dependency, or mutation-control implementation has been performed. The local dashboard process was restarted only to smoke-test the newly built local frontend bundle.
 
 
 
+
+## Stage 14-F safe focus lane implemented
+
+Implemented files/changes:
+
+- `web/src/pages/officeView.ts`
+  - Added `OfficeSafeFocusLaneItem`, `OfficeSafeFocusLane`, and `buildOfficeSafeFocusLane(delta)`.
+  - The helper ranks known rooms by safe badge/flow density and regenerates Korean room labels/details.
+- `web/src/pages/OfficePage.tsx`
+  - Renders a compact Stage 14-F focus lane with `data-office-safe-focus-lane` and per-room hooks.
+- `web/src/index.css`
+  - Adds compact focus-lane item/bar styling.
+- `web/src/pages/OfficePage.test.ts`
+  - Adds RED/GREEN helper coverage for ordering, tone, safe generated details, and raw-term exclusion.
+- `docs/ai-office/plans/2026-05-09-stage-14f-safe-focus-lane.md`
+  - Records scope, constraints, implementation, and verification target.
+
+Safety notes:
+
+- Stage 14-F remains frontend-only, read-only, CSS/SVG/DOM-only, and does not add backend/API/schema changes, renderer dependencies, mutation controls, persistent storage, or raw record projection.
+- The focus lane does not use raw changed-flow labels, raw badge labels, recent-change details, provider/model identity, individual task identity, prompts, transcripts, task bodies, scripts, logs, auth fields, secrets, or tokens.
+
+Verification 2026-05-09 17:05 KST:
+
+- RED verified first: Stage 14-F test failed because `buildOfficeSafeFocusLane` was not a function.
+- GREEN focused frontend test passed: `OfficePage.test.ts` 35 passed.
+- ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/officeView.ts`, and `src/pages/OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large-chunk warning; current build size was JS `1,269.90 kB` / gzip `370.89 kB`, CSS `134.69 kB` / gzip `21.68 kB`.
+- Backend focused office tests passed: `18 passed in 1.49s`.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14f=safe-focus-lane`: focus lane present with four known room items, route compass present with `direction|signal|summary`, breadcrumb present, pulse timeline present, raw leak regex false, console JS errors none. The first browser-local snapshot showed zero activity weights/items for delta-derived rails, preserving the no-fabricated-history rule.
 
 ## Stage 14-E safe route compass implemented
 

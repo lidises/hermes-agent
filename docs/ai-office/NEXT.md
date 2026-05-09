@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-09 16:54 KST
+Last updated: 2026-05-09 17:05 KST
 
 ## Start here after `/new`
 
@@ -64,7 +64,7 @@ When not to rely on `/goal` alone:
 
 ## Current next stage
 
-Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer evidence/polish/decision closure, Stage 12 product-polish slices, Stage 13 PR/handoff summary, and Stage 14-A through Stage 14-E safe dynamic-tracking layers are implemented on top of Stage 9-D and the Stage 8 read-only dashboard. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
+Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer evidence/polish/decision closure, Stage 12 product-polish slices, Stage 13 PR/handoff summary, and Stage 14-A through Stage 14-F safe dynamic-tracking layers are implemented on top of Stage 9-D and the Stage 8 read-only dashboard. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
 
 
 Stage 9-E current implementation:
@@ -97,6 +97,7 @@ Stage 9-F current implementation:
 - Stage 13 adds a PR/handoff summary draft in `docs/ai-office/plans/2026-05-09-stage-13-pr-handoff-summary.md` for review and fresh-session continuity.
 - Stage 14-A through Stage 14-D add safe dynamic-tracking layers: character tracking cues, room activity meters, safe pulse timeline, and safe breadcrumb trail.
 - Stage 14-E adds the safe route compass: `OfficeSafeRouteCompass` and `buildOfficeSafeRouteCompass(delta)` summarize direction/signal/safe-change count from safe `OfficeStateDelta` aggregates only, and `/office` renders `data-office-safe-route-compass` with three decorative points.
+- Stage 14-F adds the safe focus lane: `OfficeSafeFocusLane` and `buildOfficeSafeFocusLane(delta)` rank known rooms by safe delta density and render `data-office-safe-focus-lane` with per-room decorative items.
 - First snapshots produce no fabricated history; manual refresh remains the default.
 - Planning note expanded: `docs/ai-office/plans/2026-05-09-koreanization-and-dynamic-map.md`.
 
@@ -136,11 +137,11 @@ Browser smoke: http://127.0.0.1:8765/office
 
 ## Immediate next action
 
-Immediate next action is Stage 14-E final verification and commit/push, then either stop at the stage boundary or continue with the next very small safe dynamic-tracking slice:
+Immediate next action is Stage 14-F backend/diff/browser verification and commit/push, then either stop at the stage boundary or continue with the next very small safe dynamic-tracking slice:
 
-1. Verify Stage 14-E with focused Vitest, ESLint, frontend build, backend office tests, diff checks, and browser smoke on `/office?stage14e=safe-route-compass`.
-2. Commit/push with `feat(office): add safe route compass` if verification passes.
-3. Candidate Stage 14-F: a compact safe change-density minimap or focus-lane rail derived from existing safe deltas only.
+1. Verify Stage 14-F with backend office tests, diff checks, and browser smoke on `/office?stage14f=safe-focus-lane`.
+2. Commit/push with `feat(office): add safe focus lane` if verification passes.
+3. Candidate Stage 14-G: only another compact safe readability layer derived from existing safe deltas, if it remains meaningfully different from compass/focus-lane.
 4. Keep CSS/SVG/DOM-only, frontend-only, read-only, no persistence, no mutation controls, no backend/API/schema changes, no renderer dependencies, and no raw record projection.
 5. Do not add mutation controls, expose dashboard remotely, add Pixi/Phaser/canvas, copy DeskRPG assets/code, create/edit topic registry data, or create/modify Kanban/Cron state without separate approval.
 
