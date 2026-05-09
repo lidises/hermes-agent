@@ -35,6 +35,7 @@ import {
   buildOfficeSelectedCharacterFocus,
   buildOfficeSafeEventSubstrate,
   buildOfficeSafeMotionCommands,
+  buildOfficeSafeStreamPosture,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -530,6 +531,35 @@ describe("OfficePage view helpers", () => {
         label: "대기 광원",
       }),
     ]);
+  });
+
+  it("builds safe Stage 16-C stream posture from backend events with local fallback", () => {
+    const local = buildOfficeSafeEventSubstrate(buildOfficeStateDelta(null, officeFixture()), { visibleCharacterCount: 11, hasEventStream: false });
+    const loaded = buildOfficeSafeStreamPosture({
+      status: "loaded",
+      events: [
+        {
+          id: "backend-1",
+          category: "source_health_changed",
+          room_id: "routing",
+          tone: "warning",
+          count: 2,
+          generated_at: "2026-05-10T00:00:00Z",
+          redacted: true,
+          raw_label: "raw prompt provider model token must not leak",
+        },
+      ],
+      generated_at: "2026-05-10T00:00:00Z",
+    }, local);
+    const unavailable = buildOfficeSafeStreamPosture({ status: "unavailable", events: [], error: "raw transcript secret token" }, local);
+
+    expect(loaded.mode).toBe("backend-safe-stream");
+    expect(loaded.label).toBe("백엔드 안전 이벤트 연결");
+    expect(loaded.events.map((event) => event.category)).toEqual(["source_health_changed"]);
+    expect(loaded.events[0]).toEqual(expect.objectContaining({ roomId: "routing", tone: "warning", count: 2, rawSource: false, redacted: true }));
+    expect(unavailable.mode).toBe("local-fallback");
+    expect(unavailable.events.map((event) => event.category)).toEqual(["snapshot_static"]);
+    expect(`${loaded.summary} ${loaded.events[0].safeLabel} ${loaded.events[0].detail} ${unavailable.summary}`).not.toMatch(/raw|prompt|transcript|secret|token|provider|model|api_key|password|sk-/i);
   });
 
   it("builds Stage 10-F usability summary for dense, missing-source, reduced-motion, and responsive states", () => {

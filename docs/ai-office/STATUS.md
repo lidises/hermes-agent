@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-09 23:18 KST
+Last updated: 2026-05-10 00:28 KST
 
 ## Current phase
 
@@ -66,9 +66,9 @@ Current Stage 14-P result: `/office` now adds a safe scan index in the safety pa
 
 Current Stage 14-Q result: `/office` now adds a safe HUD readability strip in the safety panel. `OfficeSafeHudReadabilityPlanOptions`, `OfficeSafeHudReadabilityPlanItem`, `OfficeSafeHudReadabilityPlan`, and `buildOfficeSafeHudReadabilityPlan(options)` derive only from browser-local viewport width, reduced-motion preference, safe panel count, and live/manual tracking posture, then render generated `layout|motion|density|tracking` items.
 
-Current Stage 16-B result in progress: Stage 16-B now adds a frontend-only safe event substrate projection on branch `ai-office-stage16-safe-realtime-motion-20260509`. `OfficeSafeEvent`, `OfficeSafeEventSubstrate`, and `buildOfficeSafeEventSubstrate(delta, options)` convert existing safe snapshot/delta aggregates into redacted event categories such as `snapshot_static`, `room_density_changed`, `flow_changed`, and `attention_changed`. `OfficeSafeMotionCommand` and `buildOfficeSafeMotionCommands(events)` convert those events into generated movement cues such as `idle-glow`, `pulse-room`, `route-lane`, and `attention-spark`. `/office` renders `data-office-safe-event-substrate`, `data-office-safe-event-item`, `data-office-safe-motion-lane`, and `data-office-safe-motion-command` near the Stage 16-A tracking truth strip so the office visibly reacts like a live room while still using only safe categories/counts/rooms/tones. This is not a backend SSE/WebSocket stream; it is the safe frontend contract and motion substrate for a later approved Stage 16-C stream.
+Current Stage 16-C result in progress: Stage 16-C now adds a protected read-only backend safe event endpoint on branch `ai-office-stage16c-safe-event-stream-20260510`. `/api/office/events` is dashboard-session protected, rejects mutation methods, and returns an allowlisted `safe_snapshot_events` payload built from already-redacted `OfficeState` summary/source posture only. The frontend adds `api.getOfficeEvents()`, `buildOfficeSafeStreamPosture(...)`, and `data-office-safe-stream-status` so `/office` can show `backend-safe-stream`, `local-fallback`, or loading posture while preserving the Stage 16-B local projection. Payload/UI copy remains category/count/room/tone/timestamp only; raw prompts, transcripts, task bodies, scripts, logs, provider/model identity, secrets, tokens, adapter errors, and task identity are not emitted or rendered.
 
-Next phase after Stage 16-B: finish verification/commit on `ai-office-stage16-safe-realtime-motion-20260509`. If more real-time behavior is needed after this branch, Stage 16-C should connect a read-only backend event stream to this exact safe event shape, with allowlist-only payloads and redaction-before-emit tests.
+Next phase after Stage 16-C: finish verification/commit on `ai-office-stage16c-safe-event-stream-20260510`. If more real-time behavior is needed after this branch, Stage 16-D can evaluate SSE/WebSocket polling cadence, but only over the same safe event shape and with explicit redaction-before-emit tests.
 
 Stage 6 slices were approved by the user, including proceeding through the recommended remaining slices. Stage 7 was approved with testing deferred until the end. Stage 8-A was approved as the next safe step by the user saying to proceed in order, and the user then requested items 1 through 3 to run automatically in sequence. The user also approved installing missing test/runtime extras as needed in earlier setup. No gateway restart, cron change, Kanban mutation, NAS/Obsidian write, service/config mutation, memory/skill update, pixel dependency, or mutation-control implementation has been performed. The local dashboard process was restarted only to smoke-test the newly built local frontend bundle.
 
@@ -78,7 +78,44 @@ Stage 6 slices were approved by the user, including proceeding through the recom
 
 
 
-## Stage 16-B safe event substrate motion in progress
+## Stage 16-C read-only safe event stream in progress
+
+Branch: `ai-office-stage16c-safe-event-stream-20260510`
+
+Plan:
+
+- `docs/ai-office/plans/2026-05-10-stage-16c-read-only-safe-event-stream.md`
+
+Implementation summary:
+
+- Added protected read-only `GET /api/office/events`.
+- Added backend safe event projection from already-redacted `OfficeState` summary/source posture only.
+- Event payload is allowlisted to schema/generation metadata plus events with `id`, `category`, `room_id`, `tone`, `count`, `generated_at`, and `redacted`.
+- Added frontend `api.getOfficeEvents()` and `OfficeSafeEventsResponse` DTO types.
+- Added `OfficeSafeStreamPosture` and `buildOfficeSafeStreamPosture(...)` to accept backend-safe events and fall back to the Stage 16-B local projection if unavailable or invalid.
+- `/office` renders `data-office-safe-stream-status` next to the safe event substrate and uses backend-safe events for the motion lane when available.
+
+Safety posture:
+
+- read-only endpoint only; mutation methods rejected.
+- no long-lived SSE/WebSocket yet; Stage 16-C is the minimal verified backend safe event endpoint.
+- no persistent browser storage, no renderer dependency, no mutation controls.
+- no raw prompt/transcript/task_body/script/log/provider/model/secret/token/adapter error/task identity emitted or rendered.
+
+Verification 2026-05-10 00:39 KST:
+
+- Backend RED verified: `/api/office/events` safe-shape test failed before implementation.
+- Backend GREEN verified: `test_office_api.py` 6 passed.
+- Frontend RED verified: `buildOfficeSafeStreamPosture` missing test failed.
+- Frontend GREEN verified: `OfficePage.test.ts` 53 passed.
+- Final frontend focused test: `OfficePage.test.ts` 53 passed.
+- ESLint passed for `OfficePage.tsx`, `officeView.ts`, `OfficePage.test.ts`, and `api.ts`.
+- `npm run build` passed with the existing Vite large chunk warning only.
+- Backend focused office tests passed: 21 passed in 1.68s.
+- `git diff --check` passed.
+- Browser smoke `/office?stage16c=safe-event-stream` passed: office-first layout, safe event substrate, stream status `local-fallback`, safe event item `snapshot_static`, motion lane command `idle-glow`, tracking truth, diagnostics drawer, prior route/focus/breadcrumb/pulse hooks, raw leak false, console JS errors none.
+
+## Stage 16-B safe event substrate motion completed
 
 Branch: `ai-office-stage16-safe-realtime-motion-20260509`
 

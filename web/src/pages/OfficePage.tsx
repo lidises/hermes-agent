@@ -17,7 +17,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeDataSource, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeDataSource, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -54,6 +54,7 @@ import {
   buildOfficeSelectedCharacterFocus,
   buildOfficeSafeEventSubstrate,
   buildOfficeSafeMotionCommands,
+  buildOfficeSafeStreamPosture,
   buildOfficeSafeFloorLegend,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
@@ -473,6 +474,7 @@ function OfficeMap({
   trackingTruth,
   selectedCharacterId,
   selectedCharacterFocus,
+  safeStreamPosture,
   onDensityModeChange,
   onInspect,
   onInspectCharacter,
@@ -492,6 +494,7 @@ function OfficeMap({
   trackingTruth: ReturnType<typeof buildOfficeTrackingTruthPlan>;
   selectedCharacterId: string | null;
   selectedCharacterFocus: ReturnType<typeof buildOfficeSelectedCharacterFocus>;
+  safeStreamPosture: ReturnType<typeof buildOfficeSafeStreamPosture>;
   onDensityModeChange: (mode: OfficeMapDensityMode) => void;
   onInspect: (node: OfficeMapNode) => void;
   onInspectCharacter: (character: OfficeCharacter) => void;
@@ -514,8 +517,8 @@ function OfficeMap({
   const safeTacticalMinimap = buildOfficeSafeTacticalMinimap(latestDelta);
   const safeTacticalTicker = buildOfficeSafeTacticalTicker(latestDelta);
   const safeFloorLegend = buildOfficeSafeFloorLegend(latestDelta);
-  const safeEventSubstrate = buildOfficeSafeEventSubstrate(latestDelta, { visibleCharacterCount: densityPlan.visibleCharacters.length, hasEventStream: false });
-  const safeMotionCommands = buildOfficeSafeMotionCommands(safeEventSubstrate.events);
+  const safeEventSubstrate = buildOfficeSafeEventSubstrate(latestDelta, { visibleCharacterCount: densityPlan.visibleCharacters.length, hasEventStream: safeStreamPosture.mode === "backend-safe-stream" });
+  const safeMotionCommands = buildOfficeSafeMotionCommands(safeStreamPosture.events);
 
   return (
     <Card className="office-first-layout" data-office-first-layout="true">
@@ -581,11 +584,11 @@ function OfficeMap({
             <div className="mt-2 flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.12em] text-emerald-100/60">
               {trackingTruth.caveats.map((caveat) => <span key={caveat}>{caveat}</span>)}
             </div>
-            <div className="office-safe-event-substrate" data-office-safe-event-substrate="true" data-office-safe-event-substrate-mode={safeEventSubstrate.mode}>
-              <div className="office-safe-event-substrate__title">Stage 16-B 안전 이벤트 substrate</div>
-              <div className="office-safe-event-substrate__summary">{safeEventSubstrate.summary}</div>
+            <div className="office-safe-event-substrate" data-office-safe-event-substrate="true" data-office-safe-event-substrate-mode={safeEventSubstrate.mode} data-office-safe-stream-status={safeStreamPosture.mode}>
+              <div className="office-safe-event-substrate__title">Stage 16-C 안전 이벤트 stream</div>
+              <div className="office-safe-event-substrate__summary">{safeStreamPosture.label} · {safeStreamPosture.summary}</div>
               <div className="office-safe-event-substrate__items">
-                {safeEventSubstrate.events.slice(0, 4).map((event) => (
+                {safeStreamPosture.events.slice(0, 4).map((event) => (
                   <span key={event.id} className={`office-safe-event-substrate__item ${safePulseToneClass(event.tone)}`} data-office-safe-event-item={event.category} data-office-safe-event-room={event.roomId} title={event.detail}>
                     {event.safeLabel} · {event.count}
                   </span>
@@ -626,7 +629,7 @@ function OfficeMap({
           data-office-responsive="true"
           data-office-responsive-mode={responsivePlan.viewportMode}
           data-office-responsive-recommended-density={responsivePlan.recommendedDensityMode}
-          data-office-safe-event-motion={safeEventSubstrate.mode}
+          data-office-safe-event-motion={safeStreamPosture.mode}
         >
           <svg className="pointer-events-none absolute inset-0 z-10 h-full w-full text-midground/20" role="img" aria-label="읽기 전용 오피스 흐름 연결" viewBox="0 0 100 100" preserveAspectRatio="none">
             <defs>
@@ -1119,6 +1122,8 @@ export default function OfficePage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [safeEvents, setSafeEvents] = useState<OfficeSafeEventsResponse | null>(null);
+  const [safeEventsStatus, setSafeEventsStatus] = useState<"idle" | "loading" | "loaded" | "unavailable">("idle");
   const [focus, setFocus] = useState<FocusOption>("overview");
   const [selection, setSelection] = useState<InspectorSelection | null>(null);
   const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
@@ -1143,12 +1148,26 @@ export default function OfficePage() {
     setState(next);
   }, []);
 
+  const loadSafeEvents = useCallback(async () => {
+    try {
+      const next = await api.getOfficeEvents();
+      setSafeEvents(next);
+      setSafeEventsStatus("loaded");
+      return true;
+    } catch {
+      setSafeEvents(null);
+      setSafeEventsStatus("unavailable");
+      return false;
+    }
+  }, []);
+
   const load = useCallback(async () => {
     setRefreshing(true);
     setError(null);
     try {
       const next = await api.getOfficeState();
       applyNextState(next);
+      void loadSafeEvents();
       return true;
     } catch (err) {
       setError(String(err));
@@ -1157,10 +1176,24 @@ export default function OfficePage() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [applyNextState]);
+  }, [applyNextState, loadSafeEvents]);
 
   useEffect(() => {
     let cancelled = false;
+    api
+      .getOfficeEvents()
+      .then((next) => {
+        if (!cancelled) {
+          setSafeEvents(next);
+          setSafeEventsStatus("loaded");
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setSafeEvents(null);
+          setSafeEventsStatus("unavailable");
+        }
+      });
     api
       .getOfficeState()
       .then((next) => {
@@ -1259,9 +1292,24 @@ export default function OfficePage() {
     }),
     [densityPlan.visibleCharacters.length, selectedCharacter],
   );
-  const trackingTruth = useMemo(
-    () => buildOfficeTrackingTruthPlan(latestDelta, { hasEventStream: false, visibleCharacterCount: densityPlan.visibleCharacters.length }),
+  const localSafeEventSubstrate = useMemo(
+    () => buildOfficeSafeEventSubstrate(latestDelta, { visibleCharacterCount: densityPlan.visibleCharacters.length, hasEventStream: false }),
     [densityPlan.visibleCharacters.length, latestDelta],
+  );
+  const safeStreamPosture = useMemo(
+    () => buildOfficeSafeStreamPosture(
+      {
+        status: safeEventsStatus,
+        events: safeEvents?.events as unknown as Array<Record<string, unknown>> | undefined,
+        generated_at: safeEvents?.generated_at,
+      },
+      localSafeEventSubstrate,
+    ),
+    [localSafeEventSubstrate, safeEvents, safeEventsStatus],
+  );
+  const trackingTruth = useMemo(
+    () => buildOfficeTrackingTruthPlan(latestDelta, { hasEventStream: safeStreamPosture.mode === "backend-safe-stream", visibleCharacterCount: densityPlan.visibleCharacters.length }),
+    [densityPlan.visibleCharacters.length, latestDelta, safeStreamPosture.mode],
   );
   const usabilitySummary = useMemo(
     () => (state ? buildOfficeUsabilitySummary(state, officeCharacters, { reducedMotion: prefersReducedMotion, viewportWidth }) : buildOfficeUsabilitySummary({ ...EMPTY_OFFICE_STATE }, [], { reducedMotion: prefersReducedMotion, viewportWidth })),
@@ -1390,6 +1438,7 @@ export default function OfficePage() {
           trackingTruth={trackingTruth}
           selectedCharacterId={selectedCharacterId}
           selectedCharacterFocus={selectedCharacterFocus}
+          safeStreamPosture={safeStreamPosture}
           onDensityModeChange={setDensityMode}
           onInspect={(node) => inspectRecord("오피스 맵 방", node.label, [
             ["방", node.id],

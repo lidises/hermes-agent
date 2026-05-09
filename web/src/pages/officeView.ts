@@ -582,7 +582,7 @@ export type OfficeSelectedCharacterFocus = {
   fields: Array<[string, string]>;
 };
 
-export type OfficeSafeEventCategory = "snapshot_static" | "room_density_changed" | "flow_changed" | "attention_changed";
+export type OfficeSafeEventCategory = "snapshot_static" | "room_density_changed" | "flow_changed" | "attention_changed" | "source_health_changed" | "workload_changed";
 
 export type OfficeSafeEvent = {
   id: string;
@@ -603,6 +603,22 @@ export type OfficeSafeEventSubstrate = {
   mode: "static-posture" | "projected-events" | "event-stream";
   summary: string;
   events: OfficeSafeEvent[];
+};
+
+export type OfficeSafeStreamPosture = {
+  stageLabel: string;
+  mode: "backend-safe-stream" | "local-fallback" | "loading";
+  label: string;
+  summary: string;
+  generatedAt?: string;
+  events: OfficeSafeEvent[];
+};
+
+export type OfficeSafeStreamInput = {
+  status: "idle" | "loading" | "loaded" | "unavailable";
+  generated_at?: unknown;
+  events?: Array<Record<string, unknown>>;
+  error?: unknown;
 };
 
 export type OfficeSafeMotionCommand = {
@@ -740,6 +756,92 @@ function safeEventToneLabel(tone: OfficeDeltaBadge["tone"]): string {
 
 function safeEventDetail(roomId: OfficeMapNode["id"], tone: OfficeDeltaBadge["tone"], count: number): string {
   return `${CHARACTER_ROOM_LABEL[roomId]} · ${safeEventToneLabel(tone)} · 안전 변화 ${count}개`;
+}
+
+function parseSafeEventRoom(value: unknown): OfficeMapNode["id"] | null {
+  return typeof value === "string" && OFFICE_SAFE_EVENT_ROOM_ORDER.includes(value as OfficeMapNode["id"]) ? (value as OfficeMapNode["id"]) : null;
+}
+
+function parseSafeEventTone(value: unknown): OfficeDeltaBadge["tone"] | null {
+  return value === "neutral" || value === "positive" || value === "warning" || value === "negative" ? value : null;
+}
+
+function parseSafeEventCategory(value: unknown): OfficeSafeEventCategory | null {
+  if (
+    value === "snapshot_static" ||
+    value === "room_density_changed" ||
+    value === "flow_changed" ||
+    value === "attention_changed" ||
+    value === "source_health_changed" ||
+    value === "workload_changed"
+  ) {
+    return value;
+  }
+  return null;
+}
+
+function safeEventLabel(category: OfficeSafeEventCategory, roomId: OfficeMapNode["id"]): string {
+  if (category === "snapshot_static") return "정적 안전 스냅샷";
+  if (category === "source_health_changed") return "소스 상태 신호";
+  if (category === "workload_changed") return `${CHARACTER_ROOM_LABEL[roomId]} 작업량`;
+  if (category === "flow_changed") return "방 이동 신호";
+  if (category === "attention_changed") return `${CHARACTER_ROOM_LABEL[roomId]} 주의`;
+  return `${CHARACTER_ROOM_LABEL[roomId]} 변화`;
+}
+
+function normalizeBackendSafeEvent(row: Record<string, unknown>, index: number): OfficeSafeEvent | null {
+  if (row.redacted !== true) return null;
+  const category = parseSafeEventCategory(row.category);
+  const roomId = parseSafeEventRoom(row.room_id ?? row.roomId);
+  const tone = parseSafeEventTone(row.tone);
+  if (!category || !roomId || !tone) return null;
+  const count = typeof row.count === "number" && Number.isFinite(row.count) ? Math.max(0, Math.trunc(row.count)) : 0;
+  const toRoomId = parseSafeEventRoom(row.to_room_id ?? row.toRoomId) ?? undefined;
+  const lane = category === "flow_changed" && toRoomId ? `${roomId}-${toRoomId}` : undefined;
+  return {
+    id: typeof row.id === "string" && row.id.length > 0 ? `backend-${index}` : `backend-${index}`,
+    category,
+    roomId,
+    toRoomId,
+    tone,
+    count,
+    lane,
+    safeLabel: safeEventLabel(category, roomId),
+    detail: category === "flow_changed" && toRoomId ? `${CHARACTER_ROOM_LABEL[roomId]}에서 ${CHARACTER_ROOM_LABEL[toRoomId]}로 · 백엔드 안전 이벤트` : safeEventDetail(roomId, tone, count),
+    redacted: true,
+    rawSource: false,
+  };
+}
+
+export function buildOfficeSafeStreamPosture(input: OfficeSafeStreamInput, fallback: OfficeSafeEventSubstrate): OfficeSafeStreamPosture {
+  if (input.status === "loading" || input.status === "idle") {
+    return {
+      stageLabel: "Stage 16-C safe event stream",
+      mode: "loading",
+      label: "안전 이벤트 연결 확인",
+      summary: "백엔드 안전 이벤트 확인 중 · 로컬 투영 유지",
+      events: fallback.events,
+    };
+  }
+  const backendEvents = input.status === "loaded" ? (input.events ?? []).map(normalizeBackendSafeEvent).filter((event): event is OfficeSafeEvent => Boolean(event)).slice(0, 8) : [];
+  if (backendEvents.length > 0) {
+    const generatedAt = typeof input.generated_at === "string" ? input.generated_at : undefined;
+    return {
+      stageLabel: "Stage 16-C safe event stream",
+      mode: "backend-safe-stream",
+      label: "백엔드 안전 이벤트 연결",
+      summary: `백엔드 안전 이벤트 ${backendEvents.length}개 · 원문 제외`,
+      generatedAt,
+      events: backendEvents,
+    };
+  }
+  return {
+    stageLabel: "Stage 16-C safe event stream",
+    mode: "local-fallback",
+    label: "로컬 안전 투영 유지",
+    summary: `백엔드 이벤트 없음 · ${fallback.summary}`,
+    events: fallback.events,
+  };
 }
 
 export function buildOfficeSafeEventSubstrate(

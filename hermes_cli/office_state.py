@@ -17,6 +17,36 @@ from hermes_cli.office_redaction import RedactionReport
 OFFICE_STATE_SCHEMA_VERSION = 1
 _OFFICE_SOURCE_IDS = ("kanban", "cron", "sessions", "topics", "provenance")
 SourceStatus = Literal["ok", "partial", "missing", "unavailable", "error"]
+OfficeSafeEventCategory = Literal[
+    "snapshot_static",
+    "source_health_changed",
+    "workload_changed",
+    "attention_changed",
+]
+OfficeSafeEventRoom = Literal["sessions", "work", "automation", "routing"]
+OfficeSafeEventTone = Literal["neutral", "positive", "warning", "negative"]
+
+
+@dataclass(frozen=True)
+class OfficeSafeEvent:
+    id: str
+    category: OfficeSafeEventCategory
+    room_id: OfficeSafeEventRoom
+    tone: OfficeSafeEventTone
+    count: int
+    generated_at: str
+    redacted: bool = True
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "id": self.id,
+            "category": self.category,
+            "room_id": self.room_id,
+            "tone": self.tone,
+            "count": self.count,
+            "generated_at": self.generated_at,
+            "redacted": self.redacted,
+        }
 
 
 @dataclass(frozen=True)
@@ -194,6 +224,86 @@ def _refresh_provenance_source(state: OfficeState) -> None:
         ),
     )
 
+
+def build_office_safe_event_payload(state: OfficeState) -> dict[str, object]:
+    """Build an allowlisted read-only event payload from redacted OfficeState."""
+
+    generated_at = state.generated_at
+    events: list[OfficeSafeEvent] = []
+    warning_count = int(state.summary.get("warning_count") or 0)
+    active_work_count = int(state.summary.get("active_work_count") or 0)
+    needs_attention_count = int(state.summary.get("needs_attention_count") or 0)
+    automation_count = int(state.summary.get("automation_count") or 0)
+    source_attention_count = sum(
+        1 for source in state.data_sources if source.status in {"partial", "unavailable", "error"} or source.warning_count > 0
+    )
+
+    if source_attention_count:
+        events.append(
+            OfficeSafeEvent(
+                id="source-health-1",
+                category="source_health_changed",
+                room_id="routing",
+                tone="warning",
+                count=source_attention_count,
+                generated_at=generated_at,
+            )
+        )
+    if active_work_count:
+        events.append(
+            OfficeSafeEvent(
+                id="workload-1",
+                category="workload_changed",
+                room_id="work",
+                tone="positive",
+                count=active_work_count,
+                generated_at=generated_at,
+            )
+        )
+    if automation_count:
+        events.append(
+            OfficeSafeEvent(
+                id="automation-1",
+                category="workload_changed",
+                room_id="automation",
+                tone="neutral",
+                count=automation_count,
+                generated_at=generated_at,
+            )
+        )
+    attention_count = max(needs_attention_count, warning_count)
+    if attention_count:
+        events.append(
+            OfficeSafeEvent(
+                id="attention-1",
+                category="attention_changed",
+                room_id="work" if needs_attention_count else "routing",
+                tone="negative" if needs_attention_count else "warning",
+                count=attention_count,
+                generated_at=generated_at,
+            )
+        )
+    if not events:
+        events.append(
+            OfficeSafeEvent(
+                id="snapshot-static-1",
+                category="snapshot_static",
+                room_id="sessions",
+                tone="neutral",
+                count=len(state.agents) + len(state.work_items) + len(state.automations),
+                generated_at=generated_at,
+            )
+        )
+
+    return {
+        "schema_version": OFFICE_STATE_SCHEMA_VERSION,
+        "generated_at": generated_at,
+        "mode": "read_only",
+        "stream": "safe_snapshot_events",
+        "redacted": True,
+        "fallback": "frontend_safe_projection",
+        "events": [event.to_dict() for event in events[:8]],
+    }
 
 def build_office_state(
     *,

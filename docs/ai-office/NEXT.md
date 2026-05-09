@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-09 23:18 KST
+Last updated: 2026-05-10 00:28 KST
 
 ## Start here after `/new`
 
@@ -64,34 +64,37 @@ When not to rely on `/goal` alone:
 
 ## Current next stage
 
-Stage 16-B is now the active implementation stage on `ai-office-stage16-safe-realtime-motion-20260509`: make `/office` feel reactive by projecting existing safe snapshot/delta aggregates into a redacted event substrate and generated movement lane. This is still frontend-only/read-only and does not add backend SSE/WebSocket yet.
+Stage 16-C is now the active implementation stage on `ai-office-stage16c-safe-event-stream-20260510`: connect the Stage 16-B safe event substrate to a protected read-only backend safe event endpoint without exposing raw commands, prompts, transcripts, task bodies, scripts, logs, provider/model identity, secrets, tokens, adapter errors, or task identity.
 
-Stage 16-B current implementation:
+Stage 16-C current implementation:
 
-- `buildOfficeSafeEventSubstrate(delta, options)` generates allowlisted safe events only: `snapshot_static`, `room_density_changed`, `flow_changed`, and `attention_changed`.
-- `buildOfficeSafeMotionCommands(events)` converts those safe events into generated visual commands: `idle-glow`, `pulse-room`, `route-lane`, and `attention-spark`.
-- `/office` renders `data-office-safe-event-substrate="true"`, `data-office-safe-event-item`, `data-office-safe-motion-lane="true"`, and `data-office-safe-motion-command` near the Stage 16-A tracking truth strip.
-- First/static snapshots intentionally show a static posture event instead of fabricated movement.
-- Event and command copy is generated from known room IDs, tones, and counts; raw badge/flow labels are ignored.
+- Backend `GET /api/office/events` is dashboard-session protected and read-only.
+- Payload shape is allowlisted: schema/generation metadata plus events with `id`, `category`, `room_id`, `tone`, `count`, `generated_at`, and `redacted`.
+- Backend projection is built from already-redacted `OfficeState` summary/source posture only.
+- Mutation methods against `/api/office/events` are rejected.
+- Frontend `api.getOfficeEvents()` fetches the safe event endpoint.
+- `buildOfficeSafeStreamPosture(...)` maps backend loaded/unavailable states to `backend-safe-stream` or `local-fallback`.
+- `/office` exposes `data-office-safe-stream-status` and keeps the Stage 16-B local projection as fallback.
 
 Verification completed:
 
-- RED verified for missing `buildOfficeSafeEventSubstrate`.
-- GREEN focused helper/UI test: `OfficePage.test.ts` 52 passed.
-- Final frontend focused test: `OfficePage.test.ts` 52 passed.
-- ESLint passed for `OfficePage.tsx`, `officeView.ts`, and `OfficePage.test.ts`.
+- Backend RED verified before endpoint implementation.
+- Backend GREEN: `test_office_api.py` 6 passed.
+- Frontend RED verified before `buildOfficeSafeStreamPosture` implementation.
+- Frontend GREEN: `OfficePage.test.ts` 53 passed.
+- Final frontend focused test: `OfficePage.test.ts` 53 passed.
+- ESLint passed for `OfficePage.tsx`, `officeView.ts`, `OfficePage.test.ts`, and `api.ts`.
 - `npm run build` passed with the existing Vite large chunk warning only.
-- Backend focused office tests passed: 18 passed in 0.98s.
+- Backend focused office tests passed: 21 passed in 1.68s.
 - `git diff --check` passed.
-- Browser smoke `/office?stage16b=safe-event-substrate-motion` passed: office-first layout, tracking truth, safe event substrate, static event item, safe motion lane, selected-character click, diagnostics drawer, prior Stage 14 hooks, raw leak false, and console JS errors none.
+- Browser smoke `/office?stage16c=safe-event-stream` passed: safe event substrate, stream status `local-fallback`, static safe event item, idle motion command, raw leak false, and console JS errors none.
 
-Immediate next action: commit and push Stage 16-B:
+Immediate next action: commit and push Stage 16-C:
 
-- `git add ...`
-- `git commit -m "feat(office): add safe event substrate motion"`
-- `git push origin ai-office-stage16-safe-realtime-motion-20260509`
+- `git commit -m "feat(office): add read-only safe event stream"`
+- `git push origin ai-office-stage16c-safe-event-stream-20260510`
 
-Recommended next implementation stage after Stage 16-B: Stage 16-C can connect a read-only backend event stream to this safe event shape, but only with allowlist-only payloads, redaction-before-emit tests, no raw logs/prompts/transcripts/tool args/scripts/provider/model identity/task bodies, and explicit approval.
+Recommended next implementation stage after Stage 16-C: Stage 16-D can evaluate whether a long-lived SSE/WebSocket stream is worth adding. If added, it must reuse the same safe event shape and include redaction-before-emit tests; do not stream raw logs/prompts/transcripts/tool args/scripts/provider/model identity/task bodies.
 
 
 Stage 9-E current implementation:

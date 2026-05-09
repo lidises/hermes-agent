@@ -64,6 +64,7 @@ async function getSessionToken(): Promise<string> {
 export const api = {
   getStatus: () => fetchJSON<StatusResponse>("/api/status"),
   getOfficeState: () => fetchJSON<OfficeState>("/api/office/state"),
+  getOfficeEvents: () => fetchJSON<OfficeSafeEventsResponse>("/api/office/events"),
   getSessions: (limit = 20, offset = 0) =>
     fetchJSON<PaginatedSessions>(`/api/sessions?limit=${limit}&offset=${offset}`),
   getSessionMessages: (id: string) =>
@@ -418,6 +419,26 @@ export interface OfficeState {
     omitted_sections: string[];
     warnings: string[];
   };
+}
+
+export interface OfficeSafeEventDTO {
+  id: string;
+  category: "snapshot_static" | "source_health_changed" | "workload_changed" | "attention_changed" | "room_density_changed" | "flow_changed";
+  room_id: "sessions" | "work" | "automation" | "routing";
+  tone: "neutral" | "positive" | "warning" | "negative";
+  count: number;
+  generated_at: string;
+  redacted: true;
+}
+
+export interface OfficeSafeEventsResponse {
+  schema_version: number;
+  generated_at: string;
+  mode: "read_only";
+  stream: "safe_snapshot_events";
+  redacted: true;
+  fallback: "frontend_safe_projection";
+  events: OfficeSafeEventDTO[];
 }
 
 export interface SessionInfo {

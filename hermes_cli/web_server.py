@@ -48,7 +48,7 @@ from hermes_cli.config import (
     redact_key,
 )
 from gateway.status import get_running_pid, read_runtime_status
-from hermes_cli.office_state import build_office_state
+from hermes_cli.office_state import build_office_safe_event_payload, build_office_state
 
 try:
     from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
@@ -527,6 +527,14 @@ async def get_office_state(mode: str = "localhost"):
     if mode != "localhost":
         raise HTTPException(status_code=400, detail="Unsupported office display mode")
     return build_office_state(display_mode=mode).to_dict()
+
+
+@app.get("/api/office/events")
+async def get_office_events(mode: str = "localhost"):
+    """Return allowlisted read-only AI Office safe events."""
+    if mode != "localhost":
+        raise HTTPException(status_code=400, detail="Unsupported office display mode")
+    return build_office_safe_event_payload(build_office_state(display_mode=mode))
 
 
 @app.get("/api/status")
