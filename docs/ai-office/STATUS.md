@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-09 22:04 KST
+Last updated: 2026-05-09 22:26 KST
 
 ## Current phase
 
@@ -72,6 +72,93 @@ Stage 6 slices were approved by the user, including proceeding through the recom
 
 
 
+
+
+
+
+## Stage 15-C readiness checklist in progress
+
+Branch: `ai-office-stage15-consolidation-20260509`
+
+Plan:
+
+- `docs/ai-office/plans/2026-05-09-stage-15c-readiness-checklist.md`
+
+Summary:
+
+- Stage 15-A added safe HUD hierarchy/read-order guidance.
+- Stage 15-B reduced confirmed scan-index duplicate signal copy.
+- Stage 15-C closes the consolidation loop with a PR/merge readiness checklist.
+- No Stage 15-D visual polish is planned before PR unless verification or user review finds a concrete issue.
+
+Recommendation:
+
+- Create PR from `ai-office-stage15-consolidation-20260509` to `main`.
+- Squash merge if checks/mergeability allow.
+
+## Stage 15-B duplicate signal reduction in progress
+
+Branch: `ai-office-stage15-consolidation-20260509`
+
+Plan:
+
+- `docs/ai-office/plans/2026-05-09-stage-15b-duplicate-signal-reduction.md`
+
+Implementation summary:
+
+- Reduced Stage 14-P scan-index duplicate copy so it no longer repeats the full Stage 14-O status snapshot headline.
+- New scan-index headline: `스캔 N칸 · snapshot 기준`.
+- New snapshot item detail: `상태 snapshot 참조`.
+- Tone propagation remains from the existing safe status snapshot, floor legend, and browser-local mode item.
+
+Verification 2026-05-09 22:24 KST:
+
+- RED verified: new duplicate-signal test failed because the old headline repeated `소스 주의 · 활성 ... · 흐름 ...`.
+- GREEN verified: `OfficePage.test.ts` 48 passed after copy consolidation.
+- Final frontend focused test: `OfficePage.test.ts` 48 passed.
+- ESLint passed for `OfficePage.tsx`, `officeView.ts`, and `OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large chunk warning only.
+- Backend focused office tests passed: 18 passed in 1.01s.
+- `git diff --check` passed.
+- Browser smoke `/office?stage15b=duplicate-signal-reduction`: scan index uses `snapshot 기준`, no scan-headline active/idle/flow duplication, Stage 15-A hierarchy and prior hooks present, raw leak false, console JS errors none.
+
+Safety posture:
+
+- frontend-only, read-only, no backend/API/schema changes.
+- no mutation controls, no persistent browser storage.
+- no raw prompt/transcript/task_body/script/log/provider/model/secret/token/task identity projection.
+
+## Stage 15-A safe HUD hierarchy in progress
+
+Branch: `ai-office-stage15-consolidation-20260509`
+
+Plan:
+
+- `docs/ai-office/plans/2026-05-09-stage-15a-safe-hud-hierarchy.md`
+
+Implementation summary:
+
+- Added `buildOfficeSafeHudHierarchy(options)` and `OfficeSafeHudHierarchy*` types.
+- Inputs are only existing safe panel tones/counts from status snapshot, scan index, and HUD readability.
+- Added stable DOM hooks: `data-office-safe-hud-hierarchy`, `data-office-safe-hud-hierarchy-headline`, `data-office-safe-hud-hierarchy-summary`, and `data-office-safe-hud-hierarchy-section=primary|secondary|diagnostic`.
+- Purpose is consolidation/read-order guidance, not another raw data source or decorative Stage 14 extension.
+
+Verification 2026-05-09 22:18 KST:
+
+- RED verified first: focused helper test failed with `TypeError: buildOfficeSafeHudHierarchy is not a function`.
+- GREEN verified: `OfficePage.test.ts` 47 passed after helper implementation.
+- Final frontend focused test: `OfficePage.test.ts` 47 passed.
+- ESLint passed for `OfficePage.tsx`, `officeView.ts`, and `OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large chunk warning only.
+- Backend focused office tests passed: 18 passed in 1.46s.
+- `git diff --check` passed.
+- Browser smoke `/office?stage15a=hud-hierarchy`: hierarchy/headline/summary/primary-secondary-diagnostic sections present; prior Stage 14 hooks present; raw leak false; console JS errors none.
+
+Safety posture:
+
+- frontend-only, read-only, CSS/DOM-only.
+- no backend/API/schema changes, no mutation controls, no persistent browser storage, no renderer dependency.
+- no raw prompt/transcript/task_body/script/log/provider/model/secret/token/task identity projection.
 
 ## Stage 15 consolidation plan prepared
 

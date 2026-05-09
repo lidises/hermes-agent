@@ -410,6 +410,33 @@ export type OfficeSafeHudReadabilityPlan = {
   items: OfficeSafeHudReadabilityPlanItem[];
 };
 
+export type OfficeSafeHudHierarchyOptions = {
+  statusTone: OfficeDeltaBadge["tone"];
+  scanTone: OfficeDeltaBadge["tone"];
+  readabilityTone: OfficeDeltaBadge["tone"];
+  statusItemCount: number;
+  scanItemCount: number;
+  readabilityItemCount: number;
+};
+
+export type OfficeSafeHudHierarchySection = {
+  id: "primary" | "secondary" | "diagnostic";
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeHudHierarchy = {
+  stageLabel: string;
+  headline: string;
+  summary: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  sections: OfficeSafeHudHierarchySection[];
+};
+
 export type OfficeDeltaBadge = {
   label: string;
   tone: "positive" | "negative" | "warning" | "neutral";
@@ -1857,14 +1884,14 @@ export function buildOfficeSafeScanIndex(state: OfficeState, delta: OfficeStateD
   const modeDetail = `${missionOptions.liveTracking ? "실시간" : "수동"} · ${missionOptions.isVisible ? "표시 탭" : "숨김 탭"}`;
   const tonePriority: Record<OfficeDeltaBadge["tone"], number> = { negative: 4, warning: 3, positive: 2, neutral: 1 };
   const items: OfficeSafeScanIndexItem[] = [
-    { id: "snapshot", label: "스냅샷", detail: snapshot.headline, tone: snapshot.tone, ariaHidden: true, interactive: false },
+    { id: "snapshot", label: "스냅샷", detail: "상태 snapshot 참조", tone: snapshot.tone, ariaHidden: true, interactive: false },
     { id: "rail", label: "레일", detail: `${railCount}개 안전 칸`, tone: floorLegend.tone, ariaHidden: true, interactive: false },
     { id: "mode", label: "모드", detail: modeDetail, tone: missionOptions.liveTracking && missionOptions.isVisible && missionOptions.consecutiveFailures === 0 ? "positive" : "warning", ariaHidden: true, interactive: false },
   ];
 
   return {
     stageLabel: "Stage 14-P 안전 scan index",
-    headline: `스캔 ${railCount}칸 · ${snapshot.headline}`,
+    headline: `스캔 ${railCount}칸 · snapshot 기준`,
     detail: "status snapshot과 안전 rail 수를 빠른 스캔 색인으로 압축",
     tone: items.reduce<OfficeDeltaBadge["tone"]>((current, item) => (tonePriority[item.tone] > tonePriority[current] ? item.tone : current), "neutral"),
     items,
@@ -1892,6 +1919,24 @@ export function buildOfficeSafeHudReadabilityPlan(options: OfficeSafeHudReadabil
     detail: "브라우저 로컬 레이아웃 신호만으로 안전 HUD 가독성을 요약",
     tone: items.reduce<OfficeDeltaBadge["tone"]>((current, item) => (tonePriority[item.tone] > tonePriority[current] ? item.tone : current), "neutral"),
     items,
+  };
+}
+
+export function buildOfficeSafeHudHierarchy(options: OfficeSafeHudHierarchyOptions): OfficeSafeHudHierarchy {
+  const tonePriority: Record<OfficeDeltaBadge["tone"], number> = { negative: 4, warning: 3, positive: 2, neutral: 1 };
+  const sections: OfficeSafeHudHierarchySection[] = [
+    { id: "primary", label: "핵심", detail: "상태 snapshot 먼저", tone: options.statusTone, ariaHidden: true, interactive: false },
+    { id: "secondary", label: "보조", detail: "scan index로 범위 확인", tone: options.scanTone, ariaHidden: true, interactive: false },
+    { id: "diagnostic", label: "진단", detail: "HUD readability로 밀도 확인", tone: options.readabilityTone, ariaHidden: true, interactive: false },
+  ];
+
+  return {
+    stageLabel: "Stage 15-A 안전 HUD hierarchy",
+    headline: "먼저 볼 순서 정리",
+    summary: `핵심 ${options.statusItemCount}개 · 보조 ${options.scanItemCount}개 · 진단 ${options.readabilityItemCount}개`,
+    detail: "기존 안전 패널의 읽기 순서만 정리하고 새 원문 데이터는 투영하지 않음",
+    tone: sections.reduce<OfficeDeltaBadge["tone"]>((current, section) => (tonePriority[section.tone] > tonePriority[current] ? section.tone : current), "neutral"),
+    sections,
   };
 }
 

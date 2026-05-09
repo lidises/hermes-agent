@@ -29,6 +29,7 @@ import {
   buildOfficeSafeStatusSnapshot,
   buildOfficeSafeScanIndex,
   buildOfficeSafeHudReadabilityPlan,
+  buildOfficeSafeHudHierarchy,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -1082,9 +1083,9 @@ describe("OfficePage view helpers", () => {
     });
 
     expect(index.stageLabel).toBe("Stage 14-P 안전 scan index");
-    expect(index.headline).toBe("스캔 4칸 · 소스 주의 · 활성 3 · 대기 1 · 흐름 1");
+    expect(index.headline).toBe("스캔 4칸 · snapshot 기준");
     expect(index.items.map((item) => [item.id, item.label, item.detail, item.tone])).toEqual([
-      ["snapshot", "스냅샷", "소스 주의 · 활성 3 · 대기 1 · 흐름 1", "negative"],
+      ["snapshot", "스냅샷", "상태 snapshot 참조", "negative"],
       ["rail", "레일", "4개 안전 칸", "negative"],
       ["mode", "모드", "실시간 · 표시 탭", "positive"],
     ]);
@@ -1110,6 +1111,51 @@ describe("OfficePage view helpers", () => {
     ]);
     expect(plan.items.every((item) => item.ariaHidden === true && item.interactive === false)).toBe(true);
     expect(`${plan.summary} ${plan.items.map((item) => `${item.label} ${item.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("builds safe Stage 15-A HUD hierarchy from existing safe panels", () => {
+    const hierarchy = buildOfficeSafeHudHierarchy({
+      statusTone: "warning",
+      scanTone: "neutral",
+      readabilityTone: "warning",
+      statusItemCount: 4,
+      scanItemCount: 3,
+      readabilityItemCount: 4,
+    });
+
+    expect(hierarchy.stageLabel).toBe("Stage 15-A 안전 HUD hierarchy");
+    expect(hierarchy.headline).toBe("먼저 볼 순서 정리");
+    expect(hierarchy.summary).toBe("핵심 4개 · 보조 3개 · 진단 4개");
+    expect(hierarchy.sections.map((section) => [section.id, section.label, section.detail, section.tone])).toEqual([
+      ["primary", "핵심", "상태 snapshot 먼저", "warning"],
+      ["secondary", "보조", "scan index로 범위 확인", "neutral"],
+      ["diagnostic", "진단", "HUD readability로 밀도 확인", "warning"],
+    ]);
+    expect(hierarchy.sections.every((section) => section.ariaHidden === true && section.interactive === false)).toBe(true);
+    expect(`${hierarchy.headline} ${hierarchy.summary} ${hierarchy.sections.map((section) => `${section.label} ${section.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("reduces duplicate Stage 15-B scan copy while preserving safe ownership", () => {
+    const state = officeFixture({
+      data_sources: [
+        { id: "sessions", status: "ok", checked_at: "2026-05-08T00:00:00Z", item_count: 1 },
+        { id: "cron", status: "partial", checked_at: "2026-05-08T00:00:00Z", item_count: 1, warning_count: 1 },
+      ],
+    });
+    const delta = buildOfficeStateDelta(null, state);
+    const index = buildOfficeSafeScanIndex(state, delta, {
+      liveTracking: true,
+      isVisible: true,
+      consecutiveFailures: 0,
+      hasRecentChanges: true,
+    });
+
+    expect(index.headline).toBe("스캔 4칸 · snapshot 기준");
+    expect(index.items.find((item) => item.id === "snapshot")?.detail).toBe("상태 snapshot 참조");
+    expect(index.items.find((item) => item.id === "rail")?.detail).toBe("4개 안전 칸");
+    expect(index.headline).not.toContain("활성");
+    expect(index.headline).not.toContain("흐름");
+    expect(`${index.headline} ${index.items.map((item) => `${item.label} ${item.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
   });
 
   it("builds Korean empty-source copy without exposing raw adapter data", () => {

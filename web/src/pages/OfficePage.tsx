@@ -48,6 +48,7 @@ import {
   buildOfficeSafeStatusSnapshot,
   buildOfficeSafeScanIndex,
   buildOfficeSafeHudReadabilityPlan,
+  buildOfficeSafeHudHierarchy,
   buildOfficeSafeFloorLegend,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
@@ -1216,6 +1217,24 @@ export default function OfficePage() {
     }),
     [liveTracking, prefersReducedMotion, safeScanIndex.items.length, safeStatusSnapshot.items.length, viewportWidth],
   );
+  const safeHudHierarchy = useMemo(
+    () => buildOfficeSafeHudHierarchy({
+      statusTone: safeStatusSnapshot.tone,
+      scanTone: safeScanIndex.tone,
+      readabilityTone: safeHudReadability.tone,
+      statusItemCount: safeStatusSnapshot.items.length,
+      scanItemCount: safeScanIndex.items.length,
+      readabilityItemCount: safeHudReadability.items.length,
+    }),
+    [
+      safeHudReadability.items.length,
+      safeHudReadability.tone,
+      safeScanIndex.items.length,
+      safeScanIndex.tone,
+      safeStatusSnapshot.items.length,
+      safeStatusSnapshot.tone,
+    ],
+  );
 
   const sourceCounts = sourceHealth.counts;
 
@@ -1326,6 +1345,27 @@ export default function OfficePage() {
                   >
                     <span>{card.label}</span>
                     <span>{card.detail}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className={`office-safe-hud-hierarchy mt-3 ${safePulseToneClass(safeHudHierarchy.tone)}`} aria-label="Stage 15-A 안전 HUD hierarchy" data-office-safe-hud-hierarchy="true">
+              <div className="office-safe-hud-hierarchy__header">
+                <span className="office-safe-hud-hierarchy__title">{safeHudHierarchy.stageLabel}</span>
+                <span className="office-safe-hud-hierarchy__headline" data-office-safe-hud-hierarchy-headline="true">{safeHudHierarchy.headline}</span>
+              </div>
+              <div className="office-safe-hud-hierarchy__summary" data-office-safe-hud-hierarchy-summary="true">{safeHudHierarchy.summary}</div>
+              <div className="office-safe-hud-hierarchy__grid" aria-hidden="true">
+                {safeHudHierarchy.sections.map((section) => (
+                  <span
+                    key={`hud-hierarchy-${section.id}`}
+                    className={`office-safe-hud-hierarchy__section ${safePulseToneClass(section.tone)}`}
+                    title={`${section.detail} · ${safeHudHierarchy.detail}`}
+                    aria-hidden={section.ariaHidden}
+                    data-office-safe-hud-hierarchy-section={section.id}
+                  >
+                    <span>{section.label}</span>
+                    <span>{section.detail}</span>
                   </span>
                 ))}
               </div>
