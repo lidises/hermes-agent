@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-09 17:43 KST
+Last updated: 2026-05-09 17:57 KST
 
 ## Start here after `/new`
 
@@ -64,7 +64,7 @@ When not to rely on `/goal` alone:
 
 ## Current next stage
 
-Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer evidence/polish/decision closure, Stage 12 product-polish slices, Stage 13 PR/handoff summary, and Stage 14-A through Stage 14-I safe dynamic-tracking layers are implemented on top of Stage 9-D and the Stage 8 read-only dashboard. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
+Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer evidence/polish/decision closure, Stage 12 product-polish slices, Stage 13 PR/handoff summary, and Stage 14-A through Stage 14-J safe dynamic-tracking layers are implemented on top of Stage 9-D and the Stage 8 read-only dashboard. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
 
 
 Stage 9-E current implementation:
@@ -101,10 +101,11 @@ Stage 9-F current implementation:
 - Stage 14-G adds the safe attention strip: `OfficeSafeAttentionStrip` and `buildOfficeSafeAttentionStrip(delta)` compress safe focus density plus route-compass signal into `focus|signal|scope` chips and render `data-office-safe-attention-strip`.
 - Stage 14-H adds safe room beacons: `OfficeSafeRoomBeacons` and `buildOfficeSafeRoomBeacons(delta)` convert safe focus-lane density into decorative map beacons and a compact room beacon rail with `data-office-safe-room-beacons`.
 - Stage 14-I adds safe flow pulse bands: `OfficeSafeFlowPulseBands` and `buildOfficeSafeFlowPulseBands(delta)` convert changed safe flows into decorative SVG pulse bands and a compact flow pulse rail with `data-office-safe-flow-pulse-bands`.
+- Stage 14-J adds a safe tactical minimap: `OfficeSafeTacticalMinimap` and `buildOfficeSafeTacticalMinimap(delta)` compress safe room beacons and flow pulse bands into fixed-order room cells with `data-office-safe-tactical-minimap`.
 - First snapshots produce no fabricated history; manual refresh remains the default.
 - Planning note expanded: `docs/ai-office/plans/2026-05-09-koreanization-and-dynamic-map.md`.
 
-Recommended next implementation/design stage: after Stage 14-I final verification and commit, continue only with another small non-renderer/read-only safe dynamic-tracking or readability slice derived from existing safe DTO/delta aggregates. Do not expose individual task identity, generate content-like speech bubbles, add character mutation targets, or add Phaser, PixiJS, canvas, sprite assets, DeskRPG code/assets, backend/schema/API changes, mutation controls, persistent storage, or raw record projection. Renderer work remains closed unless new measured evidence and explicit approval reopen it.
+Recommended next implementation/design stage: after Stage 14-J final verification and commit, continue only with another small non-renderer/read-only safe dynamic-tracking or readability slice derived from existing safe DTO/delta aggregates. Do not expose individual task identity, generate content-like speech bubbles, add character mutation targets, or add Phaser, PixiJS, canvas, sprite assets, DeskRPG code/assets, backend/schema/API changes, mutation controls, persistent storage, or raw record projection. Renderer work remains closed unless new measured evidence and explicit approval reopen it.
 
 Stage 9-D completed:
 
@@ -140,11 +141,11 @@ Browser smoke: http://127.0.0.1:8765/office
 
 ## Immediate next action
 
-Immediate next action is Stage 14-I final verification and commit/push, then continue only with the next very small safe dynamic-tracking/readability slice if it remains non-duplicative:
+Immediate next action is Stage 14-J final verification and commit/push, then continue only with the next very small safe dynamic-tracking/readability slice if it remains non-duplicative:
 
-1. Verify Stage 14-I with frontend tests, ESLint, build, backend office tests, diff checks, and browser smoke on `/office?stage14i=safe-flow-pulse-bands`.
-2. Commit/push with `feat(office): add safe flow pulse bands` if verification passes.
-3. Candidate Stage 14-J, only if continued: another tiny safe readability/summary layer derived from existing safe DTO/delta aggregates, with no new source reads and no renderer decision reopening.
+1. Verify Stage 14-J with frontend tests, ESLint, build, backend office tests, diff checks, and browser smoke on `/office?stage14j=safe-tactical-minimap`.
+2. Commit/push with `feat(office): add safe tactical minimap` if verification passes.
+3. Candidate Stage 14-K, only if continued: another tiny safe aggregate status ticker/readability layer derived from existing safe DTO/delta aggregates, with no new source reads and no renderer decision reopening.
 4. Keep CSS/SVG/DOM-only, frontend-only, read-only, no persistence, no mutation controls, no backend/API/schema changes, no renderer dependencies, and no raw record projection.
 5. Do not add mutation controls, expose dashboard remotely, add Pixi/Phaser/canvas, copy DeskRPG assets/code, create/edit topic registry data, or create/modify Kanban/Cron state without separate approval.
 

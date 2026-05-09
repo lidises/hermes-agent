@@ -256,6 +256,27 @@ export type OfficeSafeFlowPulseBands = {
   bands: OfficeSafeFlowPulseBand[];
 };
 
+export type OfficeSafeTacticalMinimapCell = {
+  roomId: OfficeMapNode["id"];
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  intensity: OfficeSafeRoomBeaconIntensity;
+  active: boolean;
+  weight: number;
+  x: number;
+  y: number;
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeTacticalMinimap = {
+  stageLabel: string;
+  summary: string;
+  detail: string;
+  cells: OfficeSafeTacticalMinimapCell[];
+};
+
 export type OfficeDeltaBadge = {
   label: string;
   tone: "positive" | "negative" | "warning" | "neutral";
@@ -1538,6 +1559,39 @@ export function buildOfficeSafeFlowPulseBands(delta: OfficeStateDelta): OfficeSa
         x2: to.x,
         y2: to.y,
         reducedMotionLabel: `${CHARACTER_ROOM_LABEL[flow.from]}에서 ${CHARACTER_ROOM_LABEL[flow.to]}로 · 정적 흐름 rail 유지`,
+        ariaHidden: true,
+        interactive: false,
+      };
+    }),
+  };
+}
+
+export function buildOfficeSafeTacticalMinimap(delta: OfficeStateDelta): OfficeSafeTacticalMinimap {
+  const beacons = buildOfficeSafeRoomBeacons(delta);
+  const flowBands = buildOfficeSafeFlowPulseBands(delta);
+  const roomOrder: OfficeMapNode["id"][] = ["sessions", "work", "automation", "routing"];
+  const beaconByRoom = new Map(beacons.beacons.map((beacon) => [beacon.roomId, beacon]));
+  const activeRoomCount = beacons.beacons.filter((beacon) => beacon.weight > 0).length;
+
+  return {
+    stageLabel: "Stage 14-J 안전 tactical minimap",
+    summary: `활성 방 ${activeRoomCount}개 · 흐름 ${flowBands.bands.length}개`,
+    detail: "room beacons와 flow pulse bands의 안전 밀도를 작은 전술 지도 셀로 압축",
+    cells: roomOrder.map((roomId) => {
+      const beacon = beaconByRoom.get(roomId);
+      const weight = beacon?.weight ?? 0;
+      const position = ROOM_BEACON_POSITION[roomId];
+      const tone = beacon?.tone ?? "neutral";
+      return {
+        roomId,
+        label: CHARACTER_ROOM_LABEL[roomId],
+        detail: `${FOCUS_LANE_TONE_LABEL[tone]} · 밀도 ${weight}`,
+        tone,
+        intensity: beacon?.intensity ?? "idle",
+        active: weight > 0,
+        weight,
+        x: position.x,
+        y: position.y,
         ariaHidden: true,
         interactive: false,
       };

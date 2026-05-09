@@ -21,6 +21,7 @@ import {
   buildOfficeSafeAttentionStrip,
   buildOfficeSafeRoomBeacons,
   buildOfficeSafeFlowPulseBands,
+  buildOfficeSafeTacticalMinimap,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -864,6 +865,36 @@ describe("OfficePage view helpers", () => {
     ]);
     expect(bands.bands.every((band) => band.ariaHidden === true && band.interactive === false)).toBe(true);
     expect(bands.bands.map((band) => `${band.label} ${band.detail} ${band.reducedMotionLabel}`).join(" ")).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("builds safe Stage 14-J tactical minimap from safe beacons and flow bands", () => {
+    const delta = {
+      hasChanges: true,
+      nodeBadges: {
+        sessions: [{ label: "raw model provider", tone: "positive" as const }],
+        work: [{ label: "raw prompt", tone: "negative" as const }],
+        automation: [{ label: "raw script", tone: "warning" as const }],
+        routing: [],
+      },
+      changedFlows: [
+        { from: "sessions" as const, to: "work" as const, label: "raw transcript must not matter", tone: "negative" as const },
+        { from: "work" as const, to: "automation" as const, label: "raw secret must not matter", tone: "warning" as const },
+      ],
+      recentChanges: [{ id: "recent-token", label: "raw token", detail: "sk-sho...leak", tone: "negative" as const }],
+    };
+
+    const minimap = buildOfficeSafeTacticalMinimap(delta);
+
+    expect(minimap.stageLabel).toBe("Stage 14-J 안전 tactical minimap");
+    expect(minimap.summary).toBe("활성 방 3개 · 흐름 2개");
+    expect(minimap.cells.map((cell) => [cell.roomId, cell.label, cell.detail, cell.tone, cell.intensity, cell.active])).toEqual([
+      ["sessions", "세션", "정상 · 밀도 2", "positive", "medium", true],
+      ["work", "작업", "주의 · 밀도 4", "negative", "high", true],
+      ["automation", "자동화", "확인 · 밀도 2", "warning", "medium", true],
+      ["routing", "라우팅", "대기 · 밀도 0", "neutral", "idle", false],
+    ]);
+    expect(minimap.cells.every((cell) => cell.ariaHidden === true && cell.interactive === false)).toBe(true);
+    expect(`${minimap.summary} ${minimap.cells.map((cell) => `${cell.label} ${cell.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
   });
 
   it("builds Korean empty-source copy without exposing raw adapter data", () => {

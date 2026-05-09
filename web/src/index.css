@@ -580,6 +580,76 @@ code { font-size: 0.875rem; }
   padding-left: 0.42rem;
   pointer-events: none;
 }
+.office-safe-tactical-minimap {
+  pointer-events: none;
+  display: grid;
+  gap: 0.36rem;
+  max-width: 34rem;
+  border: 1px solid rgba(110, 231, 183, 0.22);
+  background: linear-gradient(135deg, rgba(6, 78, 59, 0.24), rgba(0, 0, 0, 0.28));
+  padding: 0.44rem;
+  color: rgba(167, 243, 208, 0.9);
+  box-shadow: inset 0 0 18px rgba(16, 185, 129, 0.08);
+}
+.office-safe-tactical-minimap__header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.6rem;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.office-safe-tactical-minimap__title {
+  color: #a7f3d0;
+}
+.office-safe-tactical-minimap__summary {
+  border: 1px solid rgba(167, 243, 208, 0.22);
+  background: rgba(0, 0, 0, 0.32);
+  padding: 0.08rem 0.32rem;
+  color: rgba(209, 250, 229, 0.9);
+}
+.office-safe-tactical-minimap__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.28rem;
+}
+.office-safe-tactical-minimap__cell {
+  display: grid;
+  gap: 0.08rem;
+  min-height: 2.25rem;
+  border: 1px solid color-mix(in srgb, currentColor 32%, transparent);
+  background: radial-gradient(circle at 18% 20%, color-mix(in srgb, currentColor 18%, transparent), transparent 52%), rgba(0, 0, 0, 0.26);
+  padding: 0.34rem;
+  color: currentColor;
+  opacity: 0.78;
+}
+.office-safe-tactical-minimap__cell--idle {
+  opacity: 0.36;
+}
+.office-safe-tactical-minimap__cell--low {
+  opacity: 0.58;
+}
+.office-safe-tactical-minimap__cell--medium {
+  opacity: 0.82;
+}
+.office-safe-tactical-minimap__cell--high {
+  opacity: 1;
+  box-shadow: 0 0 12px color-mix(in srgb, currentColor 18%, transparent);
+}
+.office-safe-tactical-minimap__cell-name {
+  font-size: 0.64rem;
+  font-weight: 950;
+  letter-spacing: 0.1em;
+}
+.office-safe-tactical-minimap__cell-detail {
+  color: color-mix(in srgb, currentColor 78%, white 12%);
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
 @keyframes office-safe-flow-pulse-band {
   0% { stroke-dashoffset: 0; opacity: 0.42; }
   50% { opacity: 0.96; }

@@ -41,6 +41,7 @@ import {
   buildOfficeSafeAttentionStrip,
   buildOfficeSafeRoomBeacons,
   buildOfficeSafeFlowPulseBands,
+  buildOfficeSafeTacticalMinimap,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -477,6 +478,7 @@ function OfficeMap({
   const safeAttentionStrip = buildOfficeSafeAttentionStrip(latestDelta);
   const safeRoomBeacons = buildOfficeSafeRoomBeacons(latestDelta);
   const safeFlowPulseBands = buildOfficeSafeFlowPulseBands(latestDelta);
+  const safeTacticalMinimap = buildOfficeSafeTacticalMinimap(latestDelta);
 
   return (
     <Card>
@@ -677,6 +679,7 @@ function OfficeMap({
               <span className="text-orange-200">Stage 14-G attention · {safeAttentionStrip.heading}</span>
               <span className="text-amber-100">Stage 14-H beacons · {safeRoomBeacons.beacons.filter((beacon) => beacon.weight > 0).length}개</span>
               <span className="text-teal-100">Stage 14-I flow · {safeFlowPulseBands.bands.length}개</span>
+              <span className="text-emerald-100">Stage 14-J minimap · {safeTacticalMinimap.summary}</span>
               {flows.map((flow) => {
                 const changedFlow = changedFlowById.get(`${flow.from}->${flow.to}`);
                 return (
@@ -818,6 +821,29 @@ function OfficeMap({
                   <span>{band.intensity}</span>
                 </span>
               )) : <span className="office-safe-flow-pulse-rail__item office-safe-pulse-timeline__item--neutral" data-office-safe-flow-pulse-rail-empty="true">대기 · 흐름 0개</span>}
+            </div>
+            <div className="office-safe-tactical-minimap mb-2" aria-label="Stage 14-J 안전 tactical minimap" data-office-safe-tactical-minimap="true">
+              <div className="office-safe-tactical-minimap__header">
+                <span className="office-safe-tactical-minimap__title">{safeTacticalMinimap.stageLabel}</span>
+                <span className="office-safe-tactical-minimap__summary" data-office-safe-tactical-minimap-summary="true">{safeTacticalMinimap.summary}</span>
+              </div>
+              <div className="office-safe-tactical-minimap__grid" aria-hidden="true">
+                {safeTacticalMinimap.cells.map((cell) => (
+                  <span
+                    key={`tactical-minimap-${cell.roomId}`}
+                    className={`office-safe-tactical-minimap__cell ${safePulseToneClass(cell.tone)} office-safe-tactical-minimap__cell--${cell.intensity}`}
+                    title={`${cell.detail} · ${safeTacticalMinimap.detail}`}
+                    aria-hidden={cell.ariaHidden}
+                    data-office-safe-tactical-minimap-cell={cell.roomId}
+                    data-office-safe-tactical-minimap-cell-intensity={cell.intensity}
+                    data-office-safe-tactical-minimap-cell-active={cell.active ? "true" : "false"}
+                    data-office-safe-tactical-minimap-cell-weight={cell.weight}
+                  >
+                    <span className="office-safe-tactical-minimap__cell-name">{cell.label}</span>
+                    <span className="office-safe-tactical-minimap__cell-detail">{cell.detail}</span>
+                  </span>
+                ))}
+              </div>
             </div>
             <div className="mb-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-semibold tracking-[0.14em] text-midground/75" aria-label="RPG 역할 범례">
               <span>캐릭터 역할 투영</span>
