@@ -335,6 +335,23 @@ export type OfficeSafeCommandDeck = {
   cards: OfficeSafeCommandDeckCard[];
 };
 
+export type OfficeSafeFloorLegendItem = {
+  id: "active" | "idle" | "flow" | "safety";
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeFloorLegend = {
+  stageLabel: string;
+  summary: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  items: OfficeSafeFloorLegendItem[];
+};
+
 export type OfficeDeltaBadge = {
   label: string;
   tone: "positive" | "negative" | "warning" | "neutral";
@@ -1721,6 +1738,30 @@ export function buildOfficeSafeCommandDeck(state: OfficeState, delta: OfficeStat
     detail: "mission clock, tactical ticker, source health를 안전 command deck으로 압축",
     tone: cards.reduce<OfficeDeltaBadge["tone"]>((current, card) => (tonePriority[card.tone] > tonePriority[current] ? card.tone : current), "neutral"),
     cards,
+  };
+}
+
+export function buildOfficeSafeFloorLegend(delta: OfficeStateDelta): OfficeSafeFloorLegend {
+  const minimap = buildOfficeSafeTacticalMinimap(delta);
+  const flowBands = buildOfficeSafeFlowPulseBands(delta);
+  const activeCells = minimap.cells.filter((cell) => cell.active);
+  const idleCells = minimap.cells.filter((cell) => !cell.active);
+  const activeTone = activeCells.some((cell) => cell.tone === "negative") ? "negative" : activeCells.some((cell) => cell.tone === "warning") ? "warning" : activeCells.length > 0 ? "positive" : "neutral";
+  const flowTone = flowBands.bands.some((band) => band.tone === "negative") ? "negative" : flowBands.bands.some((band) => band.tone === "warning") ? "warning" : flowBands.bands.length > 0 ? "positive" : "neutral";
+  const tonePriority: Record<OfficeDeltaBadge["tone"], number> = { negative: 4, warning: 3, positive: 2, neutral: 1 };
+  const items: OfficeSafeFloorLegendItem[] = [
+    { id: "active", label: "활성 방", detail: activeCells.length > 0 ? activeCells.map((cell) => cell.label).join(" · ") : "없음", tone: activeTone, ariaHidden: true, interactive: false },
+    { id: "idle", label: "대기 방", detail: idleCells.length > 0 ? idleCells.map((cell) => cell.label).join(" · ") : "없음", tone: "neutral", ariaHidden: true, interactive: false },
+    { id: "flow", label: "흐름", detail: `안전 흐름 ${flowBands.bands.length}개`, tone: flowTone, ariaHidden: true, interactive: false },
+    { id: "safety", label: "투영", detail: "집계 전용", tone: "neutral", ariaHidden: true, interactive: false },
+  ];
+
+  return {
+    stageLabel: "Stage 14-N 안전 floor legend",
+    summary: `활성 ${activeCells.length} · 대기 ${idleCells.length} · 흐름 ${flowBands.bands.length}`,
+    detail: "tactical minimap과 flow bands를 바닥 범례로 압축",
+    tone: items.reduce<OfficeDeltaBadge["tone"]>((current, item) => (tonePriority[item.tone] > tonePriority[current] ? item.tone : current), "neutral"),
+    items,
   };
 }
 

@@ -25,6 +25,7 @@ import {
   buildOfficeSafeTacticalTicker,
   buildOfficeSafeMissionClock,
   buildOfficeSafeCommandDeck,
+  buildOfficeSafeFloorLegend,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -984,6 +985,33 @@ describe("OfficePage view helpers", () => {
     ]);
     expect(deck.cards.every((card) => card.ariaHidden === true && card.interactive === false)).toBe(true);
     expect(`${deck.headline} ${deck.cards.map((card) => `${card.label} ${card.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("builds safe Stage 14-N floor legend from safe minimap cells", () => {
+    const delta = {
+      hasChanges: true,
+      nodeBadges: {
+        sessions: [{ label: "raw prompt", tone: "positive" as const }],
+        work: [{ label: "raw token", tone: "negative" as const }, { label: "raw transcript", tone: "warning" as const }],
+        automation: [],
+        routing: [],
+      },
+      changedFlows: [{ from: "sessions" as const, to: "work" as const, label: "raw model", tone: "negative" as const }],
+      recentChanges: [],
+    };
+
+    const legend = buildOfficeSafeFloorLegend(delta);
+
+    expect(legend.stageLabel).toBe("Stage 14-N 안전 floor legend");
+    expect(legend.summary).toBe("활성 2 · 대기 2 · 흐름 1");
+    expect(legend.items.map((item) => [item.id, item.label, item.detail, item.tone])).toEqual([
+      ["active", "활성 방", "세션 · 작업", "negative"],
+      ["idle", "대기 방", "자동화 · 라우팅", "neutral"],
+      ["flow", "흐름", "안전 흐름 1개", "negative"],
+      ["safety", "투영", "집계 전용", "neutral"],
+    ]);
+    expect(legend.items.every((item) => item.ariaHidden === true && item.interactive === false)).toBe(true);
+    expect(`${legend.summary} ${legend.items.map((item) => `${item.label} ${item.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
   });
 
   it("builds Korean empty-source copy without exposing raw adapter data", () => {

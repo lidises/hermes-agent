@@ -45,6 +45,7 @@ import {
   buildOfficeSafeTacticalTicker,
   buildOfficeSafeMissionClock,
   buildOfficeSafeCommandDeck,
+  buildOfficeSafeFloorLegend,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -483,6 +484,7 @@ function OfficeMap({
   const safeFlowPulseBands = buildOfficeSafeFlowPulseBands(latestDelta);
   const safeTacticalMinimap = buildOfficeSafeTacticalMinimap(latestDelta);
   const safeTacticalTicker = buildOfficeSafeTacticalTicker(latestDelta);
+  const safeFloorLegend = buildOfficeSafeFloorLegend(latestDelta);
 
   return (
     <Card>
@@ -685,6 +687,7 @@ function OfficeMap({
               <span className="text-teal-100">Stage 14-I flow · {safeFlowPulseBands.bands.length}개</span>
               <span className="text-emerald-100">Stage 14-J minimap · {safeTacticalMinimap.summary}</span>
               <span className="text-lime-100">Stage 14-K ticker · {safeTacticalTicker.headline}</span>
+              <span className="text-cyan-100">Stage 14-N floor · {safeFloorLegend.summary}</span>
               {flows.map((flow) => {
                 const changedFlow = changedFlowById.get(`${flow.from}->${flow.to}`);
                 return (
@@ -860,6 +863,22 @@ function OfficeMap({
                   title={`${item.detail} · ${safeTacticalTicker.detail}`}
                   aria-hidden={item.ariaHidden}
                   data-office-safe-tactical-ticker-item={item.id}
+                >
+                  <span>{item.label}</span>
+                  <span>{item.detail}</span>
+                </span>
+              ))}
+            </div>
+            <div className={`office-safe-floor-legend mb-2 ${safePulseToneClass(safeFloorLegend.tone)}`} aria-label="Stage 14-N 안전 floor legend" data-office-safe-floor-legend="true">
+              <span className="office-safe-floor-legend__title">{safeFloorLegend.stageLabel}</span>
+              <span className="office-safe-floor-legend__summary" data-office-safe-floor-legend-summary="true">{safeFloorLegend.summary}</span>
+              {safeFloorLegend.items.map((item) => (
+                <span
+                  key={`floor-legend-${item.id}`}
+                  className={`office-safe-floor-legend__item ${safePulseToneClass(item.tone)}`}
+                  title={`${item.detail} · ${safeFloorLegend.detail}`}
+                  aria-hidden={item.ariaHidden}
+                  data-office-safe-floor-legend-item={item.id}
                 >
                   <span>{item.label}</span>
                   <span>{item.detail}</span>
