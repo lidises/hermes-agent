@@ -416,6 +416,34 @@ code { font-size: 0.875rem; }
   background: currentColor;
   opacity: 0.65;
 }
+.office-safe-attention-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.5rem;
+  align-items: center;
+  color: rgba(253, 186, 116, 0.9);
+  font-size: 0.62rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+}
+.office-safe-attention-strip__title {
+  color: #fdba74;
+  text-transform: uppercase;
+}
+.office-safe-attention-strip__heading {
+  border: 1px solid color-mix(in srgb, currentColor 38%, transparent);
+  background: rgba(0,0,0,0.38);
+  padding: 0.1rem 0.38rem;
+  color: currentColor;
+}
+.office-safe-attention-strip__chip {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+  border-left: 1px solid color-mix(in srgb, currentColor 36%, transparent);
+  padding-left: 0.42rem;
+  pointer-events: none;
+}
 .office-character-inspect {
   border: 0;
   background: transparent;

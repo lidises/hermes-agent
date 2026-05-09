@@ -196,6 +196,23 @@ export type OfficeSafeFocusLane = {
   items: OfficeSafeFocusLaneItem[];
 };
 
+export type OfficeSafeAttentionStripChip = {
+  id: "focus" | "signal" | "scope";
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeAttentionStrip = {
+  stageLabel: string;
+  heading: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  chips: OfficeSafeAttentionStripChip[];
+};
+
 export type OfficeDeltaBadge = {
   label: string;
   tone: "positive" | "negative" | "warning" | "neutral";
@@ -1378,6 +1395,42 @@ export function buildOfficeSafeFocusLane(delta: OfficeStateDelta): OfficeSafeFoc
     stageLabel: "Stage 14-F 안전 focus lane",
     detail: "방별 안전 변화 밀도를 원문 없이 정렬해 다음 시선 위치를 표시",
     items: items.sort((a, b) => b.weight - a.weight || FOCUS_LANE_TONE_RANK[a.tone] - FOCUS_LANE_TONE_RANK[b.tone] || roomOrder.indexOf(a.roomId) - roomOrder.indexOf(b.roomId)),
+  };
+}
+
+const ATTENTION_STRIP_HEADING: Record<OfficeDeltaBadge["tone"], string> = {
+  positive: "정상 변화",
+  negative: "주의 방 우선",
+  warning: "확인 흐름",
+  neutral: "대기",
+};
+
+const ATTENTION_STRIP_SIGNAL: Record<OfficeDeltaBadge["tone"], string> = {
+  positive: "정상 우선",
+  negative: "주의 우선",
+  warning: "확인 우선",
+  neutral: "대기 우선",
+};
+
+export function buildOfficeSafeAttentionStrip(delta: OfficeStateDelta): OfficeSafeAttentionStrip {
+  const lane = buildOfficeSafeFocusLane(delta);
+  const compass = buildOfficeSafeRouteCompass(delta);
+  const topItem = lane.items[0];
+  const totalWeight = lane.items.reduce((total, item) => total + item.weight, 0);
+  const activeRoomCount = lane.items.filter((item) => item.weight > 0).length;
+  const tone = topItem && topItem.weight > 0 ? topItem.tone : compass.tone;
+  const focusDetail = topItem && topItem.weight > 0 ? `${topItem.label} · 밀도 ${topItem.weight}` : "대기 · 밀도 0";
+
+  return {
+    stageLabel: "Stage 14-G 안전 attention strip",
+    heading: ATTENTION_STRIP_HEADING[tone],
+    detail: "focus lane과 route compass의 안전 집계를 상단 한 줄 신호로 압축",
+    tone,
+    chips: [
+      { id: "focus", label: "초점", detail: focusDetail, tone, ariaHidden: true, interactive: false },
+      { id: "signal", label: "신호", detail: ATTENTION_STRIP_SIGNAL[tone], tone, ariaHidden: true, interactive: false },
+      { id: "scope", label: "범위", detail: `방 ${activeRoomCount}개 · 밀도 ${totalWeight}`, tone: "neutral", ariaHidden: true, interactive: false },
+    ],
   };
 }
 

@@ -1,10 +1,10 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-09 17:05 KST
+Last updated: 2026-05-09 17:24 KST
 
 ## Current phase
 
-Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, and Stage 14-A through Stage 14-F safe dynamic-tracking layers are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
+Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, and Stage 14-A through Stage 14-G safe dynamic-tracking layers are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
 
 Current Stage 9-E result: the `/office` page now uses Korean for primary headings, buttons, helper text, safety copy, status labels, inspector field labels, and office-map room/zone labels while keeping stable technical identifiers such as DTO, OfficeState, source IDs, cron, and enum-like adapter values visible for debugging.
 
@@ -44,12 +44,47 @@ Current Stage 14-E result: `/office` now adds a compact safe route compass that 
 
 Current Stage 14-F result: `/office` now adds a safe focus lane that ranks known rooms by safe delta density. `OfficeSafeFocusLane`, `OfficeSafeFocusLaneItem`, and `buildOfficeSafeFocusLane(delta)` derive only from safe node badges and changed-flow counts, regenerate Korean room labels/details, and expose `data-office-safe-focus-lane` plus per-room hooks without raw label/detail projection.
 
+Current Stage 14-G result: `/office` now adds a safe attention strip that compresses the Stage 14-F focus lane and Stage 14-E route compass into one top glance signal. `OfficeSafeAttentionStrip`, `OfficeSafeAttentionStripChip`, and `buildOfficeSafeAttentionStrip(delta)` derive only from safe focus density, active room counts, and compass tone, then expose `data-office-safe-attention-strip` with `focus|signal|scope` chips.
+
 Next phase: continue with another small non-renderer/read-only safe dynamic-tracking slice only if it can be derived from existing safe DTO/delta aggregates. Still no individual task identity, generated content-like speech bubbles, sprite assets, Phaser, PixiJS, canvas renderer, backend/API changes, mutation controls, persistent storage, or raw record projection.
 
 Stage 6 slices were approved by the user, including proceeding through the recommended remaining slices. Stage 7 was approved with testing deferred until the end. Stage 8-A was approved as the next safe step by the user saying to proceed in order, and the user then requested items 1 through 3 to run automatically in sequence. The user also approved installing missing test/runtime extras as needed in earlier setup. No gateway restart, cron change, Kanban mutation, NAS/Obsidian write, service/config mutation, memory/skill update, pixel dependency, or mutation-control implementation has been performed. The local dashboard process was restarted only to smoke-test the newly built local frontend bundle.
 
 
 
+
+## Stage 14-G safe attention strip implemented
+
+Implemented files/changes:
+
+- `web/src/pages/officeView.ts`
+  - Added `OfficeSafeAttentionStripChip`, `OfficeSafeAttentionStrip`, `ATTENTION_STRIP_HEADING`, `ATTENTION_STRIP_SIGNAL`, and `buildOfficeSafeAttentionStrip(delta)`.
+  - The helper reuses the safe focus lane and safe route compass, then compresses top room density, tone signal, active room count, and total density into generated Korean chips.
+- `web/src/pages/OfficePage.tsx`
+  - Renders a compact Stage 14-G attention strip with `data-office-safe-attention-strip` and chip hooks `focus|signal|scope`.
+  - Adds the Stage 14-G heading to the detached map legend.
+- `web/src/index.css`
+  - Adds compact attention-strip styling while reusing the existing safe pulse tone classes.
+- `web/src/pages/OfficePage.test.ts`
+  - Adds RED/GREEN helper coverage for focus/signal/scope chips, decorative/non-interactive posture, and raw-term exclusion.
+- `docs/ai-office/plans/2026-05-09-stage-14g-safe-attention-strip.md`
+  - Records scope, constraints, TDD record, implementation, and verification target.
+
+Safety notes:
+
+- Stage 14-G remains frontend-only, read-only, CSS/SVG/DOM-only, and does not add backend/API/schema changes, renderer dependencies, mutation controls, persistent storage, or raw record projection.
+- The attention strip does not use raw changed-flow labels, raw badge labels, recent-change labels/details, provider/model identity, individual task identity, prompts, transcripts, task bodies, scripts, logs, auth fields, secrets, or tokens.
+
+Verification 2026-05-09 17:24 KST:
+
+- RED verified first in the current handoff: Stage 14-G test failed because `buildOfficeSafeAttentionStrip` was not a function.
+- GREEN focused helper test passed: `OfficePage.test.ts` 36 passed.
+- Focused frontend verification passed: `npm test -- --run OfficePage.test.ts` → 36 passed.
+- ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/officeView.ts`, and `src/pages/OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large-chunk warning; current build size was JS `1,271.49 kB` / gzip `371.29 kB`, CSS `135.56 kB` / gzip `21.77 kB`.
+- Backend focused office tests passed: `18 passed in 1.45s`.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14g=safe-attention-strip`: attention strip present, chips `focus|signal|scope`, focus lane present with four known room items, route compass present with `direction|signal|summary`, breadcrumb present, pulse timeline present, raw leak regex false, console JS errors none.
 
 ## Stage 14-F safe focus lane implemented
 

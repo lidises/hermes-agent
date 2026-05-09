@@ -38,6 +38,7 @@ import {
   buildOfficeSafeBreadcrumbTrail,
   buildOfficeSafeRouteCompass,
   buildOfficeSafeFocusLane,
+  buildOfficeSafeAttentionStrip,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -464,6 +465,7 @@ function OfficeMap({
   const safeBreadcrumbTrail = buildOfficeSafeBreadcrumbTrail(latestDelta);
   const safeRouteCompass = buildOfficeSafeRouteCompass(latestDelta);
   const safeFocusLane = buildOfficeSafeFocusLane(latestDelta);
+  const safeAttentionStrip = buildOfficeSafeAttentionStrip(latestDelta);
 
   return (
     <Card>
@@ -628,6 +630,7 @@ function OfficeMap({
               <span className="text-cyan-200">Stage 14-D breadcrumb · {safeBreadcrumbTrail.segments.length}개</span>
               <span className="text-rose-200">Stage 14-E compass · {safeRouteCompass.heading}</span>
               <span className="text-violet-200">Stage 14-F focus · {safeFocusLane.items[0]?.label ?? "대기"}</span>
+              <span className="text-orange-200">Stage 14-G attention · {safeAttentionStrip.heading}</span>
               {flows.map((flow) => {
                 const changedFlow = changedFlowById.get(`${flow.from}->${flow.to}`);
                 return (
@@ -721,6 +724,22 @@ function OfficeMap({
                   <span className="office-safe-focus-lane__bar" style={{ "--office-safe-focus-weight": `${Math.min(100, item.weight * 20 + 8)}%` } as React.CSSProperties} />
                   <span>{item.label}</span>
                   <span>{item.detail}</span>
+                </span>
+              ))}
+            </div>
+            <div className={`office-safe-attention-strip mb-2 ${safePulseToneClass(safeAttentionStrip.tone)}`} aria-label="Stage 14-G 안전 attention strip" data-office-safe-attention-strip="true">
+              <span className="office-safe-attention-strip__title">{safeAttentionStrip.stageLabel}</span>
+              <span className="office-safe-attention-strip__heading">{safeAttentionStrip.heading}</span>
+              {safeAttentionStrip.chips.map((chip) => (
+                <span
+                  key={chip.id}
+                  className={`office-safe-attention-strip__chip ${safePulseToneClass(chip.tone)}`}
+                  title={`${chip.detail} · ${safeAttentionStrip.detail}`}
+                  aria-hidden={chip.ariaHidden}
+                  data-office-safe-attention-strip-chip={chip.id}
+                >
+                  <span>{chip.label}</span>
+                  <span>{chip.detail}</span>
                 </span>
               ))}
             </div>

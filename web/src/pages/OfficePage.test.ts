@@ -18,6 +18,7 @@ import {
   buildOfficeSafeBreadcrumbTrail,
   buildOfficeSafeRouteCompass,
   buildOfficeSafeFocusLane,
+  buildOfficeSafeAttentionStrip,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -781,6 +782,35 @@ describe("OfficePage view helpers", () => {
     ]);
     expect(lane.items.every((item) => item.ariaHidden === true && item.interactive === false)).toBe(true);
     expect(`${lane.stageLabel} ${lane.detail} ${lane.items.map((item) => `${item.label} ${item.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("builds safe Stage 14-G attention strip from safe focus density", () => {
+    const delta = {
+      hasChanges: true,
+      nodeBadges: {
+        sessions: [{ label: "raw model provider", tone: "positive" as const }],
+        work: [{ label: "raw prompt", tone: "negative" as const }],
+        automation: [{ label: "raw script", tone: "warning" as const }],
+        routing: [],
+      },
+      changedFlows: [
+        { from: "sessions" as const, to: "work" as const, label: "raw transcript must not matter", tone: "negative" as const },
+        { from: "work" as const, to: "automation" as const, label: "raw secret must not matter", tone: "warning" as const },
+      ],
+      recentChanges: [{ id: "recent-token", label: "raw token", detail: "sk-sho...leak", tone: "negative" as const }],
+    };
+
+    const strip = buildOfficeSafeAttentionStrip(delta);
+
+    expect(strip.stageLabel).toBe("Stage 14-G 안전 attention strip");
+    expect(strip.heading).toBe("주의 방 우선");
+    expect(strip.chips.map((chip) => [chip.id, chip.label, chip.detail, chip.tone])).toEqual([
+      ["focus", "초점", "작업 · 밀도 4", "negative"],
+      ["signal", "신호", "주의 우선", "negative"],
+      ["scope", "범위", "방 3개 · 밀도 8", "neutral"],
+    ]);
+    expect(strip.chips.every((chip) => chip.ariaHidden === true && chip.interactive === false)).toBe(true);
+    expect(`${strip.stageLabel} ${strip.heading} ${strip.detail} ${strip.chips.map((chip) => `${chip.label} ${chip.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
   });
 
   it("builds Korean empty-source copy without exposing raw adapter data", () => {
