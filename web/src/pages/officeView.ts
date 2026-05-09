@@ -548,9 +548,140 @@ export type OfficeResponsiveReadabilityPlan = {
   notes: string[];
 };
 
+export type OfficeFirstLayoutSection = {
+  id: "scene" | "inspector" | "timeline" | "diagnostics";
+  label: string;
+  detail: string;
+  priority: number;
+};
+
+export type OfficeFirstLayoutPlan = {
+  stageLabel: string;
+  heading: string;
+  primarySurface: "scene";
+  diagnosticsMode: "secondary-collapsed" | "secondary-visible";
+  summary: string;
+  sections: OfficeFirstLayoutSection[];
+};
+
+export type OfficeTrackingTruthPlan = {
+  stageLabel: string;
+  mode: "snapshot-delta" | "event-stream" | "static";
+  label: string;
+  detail: string;
+  caveats: string[];
+};
+
+export type OfficeSelectedCharacterFocus = {
+  selectedCharacterId: OfficeCharacter["id"] | null;
+  title: string;
+  summary: string;
+  roomLabel: string;
+  actionLabel: string;
+  highlightSelector: string;
+  fields: Array<[string, string]>;
+};
+
 export function textField(row: Record<string, unknown>, key: string): string {
   const value = row[key];
   return typeof value === "string" && value.length > 0 ? value : "—";
+}
+
+export function buildOfficeFirstLayoutPlan(options: {
+  visibleCharacterCount: number;
+  diagnosticPanelCount: number;
+  hasSelectedCharacter: boolean;
+}): OfficeFirstLayoutPlan {
+  const diagnosticsMode: OfficeFirstLayoutPlan["diagnosticsMode"] = options.diagnosticPanelCount > 4 ? "secondary-collapsed" : "secondary-visible";
+  return {
+    stageLabel: "Stage 16-A AI Office-first reset",
+    heading: "AI Office 먼저 보기",
+    primarySurface: "scene",
+    diagnosticsMode,
+    summary: `캐릭터 ${options.visibleCharacterCount}개 · 진단 ${options.diagnosticPanelCount}개는 보조로 정리`,
+    sections: [
+      {
+        id: "scene",
+        label: "오피스 현장",
+        detail: `역할 캐릭터 ${options.visibleCharacterCount}개를 첫 화면 중심에 둡니다`,
+        priority: 1,
+      },
+      {
+        id: "inspector",
+        label: "선택 정보",
+        detail: options.hasSelectedCharacter ? "선택한 캐릭터의 안전 요약을 고정 표시합니다" : "캐릭터를 클릭하면 안전 요약이 이 위치에 고정됩니다",
+        priority: 2,
+      },
+      {
+        id: "timeline",
+        label: "최근 변화",
+        detail: "브라우저 메모리의 안전 변화만 짧게 이어서 보여줍니다",
+        priority: 3,
+      },
+      {
+        id: "diagnostics",
+        label: "진단 HUD",
+        detail: diagnosticsMode === "secondary-collapsed" ? "세부 진단은 보조 영역에서 접어 과밀을 줄입니다" : "세부 진단은 보조 영역에 낮은 우선순위로 둡니다",
+        priority: 4,
+      },
+    ],
+  };
+}
+
+export function buildOfficeTrackingTruthPlan(
+  delta: OfficeStateDelta,
+  options: { hasEventStream?: boolean; visibleCharacterCount: number },
+): OfficeTrackingTruthPlan {
+  const recentChangeCount = Object.values(delta.nodeBadges).reduce((total, badges) => total + badges.length, 0) + delta.changedFlows.length;
+  if (options.hasEventStream) {
+    return {
+      stageLabel: "Stage 16-A tracking truth",
+      mode: "event-stream",
+      label: "안전 이벤트 기반",
+      detail: `캐릭터 ${options.visibleCharacterCount}개 · 최근 안전 변화 ${recentChangeCount}개 · 안전 이벤트 스트림 사용`,
+      caveats: ["이벤트는 가림 처리된 범주만 사용합니다"],
+    };
+  }
+  return {
+    stageLabel: "Stage 16-A tracking truth",
+    mode: recentChangeCount > 0 ? "snapshot-delta" : "static",
+    label: recentChangeCount > 0 ? "스냅샷 변화 기반" : "정적 안전 스냅샷",
+    detail: `캐릭터 ${options.visibleCharacterCount}개 · 최근 안전 변화 ${recentChangeCount}개 · 실시간 이벤트 스트림 없음`,
+    caveats: ["움직임은 CSS 장식입니다", "실제 작업 추적은 안전 이벤트 스트림 승인 후 분리 구현"],
+  };
+}
+
+export function buildOfficeSelectedCharacterFocus(character: OfficeCharacter | null, delta: OfficeStateDelta): OfficeSelectedCharacterFocus {
+  if (!character) {
+    return {
+      selectedCharacterId: null,
+      title: "캐릭터를 선택하세요",
+      summary: "오피스 캐릭터를 클릭하면 안전 요약이 고정됩니다",
+      roomLabel: "미선택",
+      actionLabel: "대기",
+      highlightSelector: "",
+      fields: [["추적", "스냅샷 변화 기반 · 원문 제외"]],
+    };
+  }
+  const activity = buildOfficeCharacterActivity(character, delta);
+  const roleLabel = CHARACTER_ROLE_LABEL[character.role];
+  const roomLabel = CHARACTER_ROOM_LABEL[character.roomId];
+  const statusLabel = CHARACTER_STATUS_LABEL[character.status];
+  return {
+    selectedCharacterId: character.id,
+    title: `${roleLabel} 선택됨`,
+    summary: `${roomLabel} · ${statusLabel} · ${activity.label}`,
+    roomLabel,
+    actionLabel: activity.label,
+    highlightSelector: `[data-office-character-id="${character.id}"]`,
+    fields: [
+      ["역할", CHARACTER_ROLE_NAMEPLATE[character.role]],
+      ["방", roomLabel],
+      ["상태", statusLabel],
+      ["액션", activity.label],
+      ["추적", "스냅샷 변화 기반 · 원문 제외"],
+    ],
+  };
 }
 
 export function numberField(row: Record<string, unknown>, key: string): number | null {

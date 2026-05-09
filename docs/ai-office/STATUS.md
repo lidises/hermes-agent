@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-09 22:26 KST
+Last updated: 2026-05-09 22:56 KST
 
 ## Current phase
 
@@ -66,7 +66,9 @@ Current Stage 14-P result: `/office` now adds a safe scan index in the safety pa
 
 Current Stage 14-Q result: `/office` now adds a safe HUD readability strip in the safety panel. `OfficeSafeHudReadabilityPlanOptions`, `OfficeSafeHudReadabilityPlanItem`, `OfficeSafeHudReadabilityPlan`, and `buildOfficeSafeHudReadabilityPlan(options)` derive only from browser-local viewport width, reduced-motion preference, safe panel count, and live/manual tracking posture, then render generated `layout|motion|density|tracking` items.
 
-Next phase: Stage 14 is closed at 14-Q. Proceed with PR/merge, then start Stage 15 consolidation from `main` or a fresh branch off `main`. Stage 15 starts with HUD hierarchy audit, duplicate signal reduction, and PR/readiness checklist refresh; it should not add another decorative HUD layer by default. Still no individual task identity, generated content-like speech bubbles, sprite assets, Phaser, PixiJS, canvas renderer, backend/API changes, mutation controls, persistent storage, or raw record projection.
+Current Stage 16-A result in progress: `/office` is being reset to an AI Office-first surface after the Stage 14/15 HUD stack was merged. The map/scene now leads the page, Stage 14/15 diagnostic HUD is secondary, character inspection is click-first with browser-local selected-character state, and the UI explicitly labels current tracking as snapshot/delta based rather than a true event stream. This remains frontend-only, read-only, CSS/DOM/SVG-only, and still has no backend/API/schema changes, mutation controls, persistent storage, renderer dependency, individual task identity, raw record projection, or secret/provider/model exposure.
+
+Next phase after Stage 16-A: do not add more HUD by default. If continued, Stage 16-B should first define the safe event substrate boundary for real tracking: redacted event categories/counts and safe timing buckets only, never raw logs, prompts, transcripts, tool args, scripts, provider/model identity, credentials, or task bodies.
 
 Stage 6 slices were approved by the user, including proceeding through the recommended remaining slices. Stage 7 was approved with testing deferred until the end. Stage 8-A was approved as the next safe step by the user saying to proceed in order, and the user then requested items 1 through 3 to run automatically in sequence. The user also approved installing missing test/runtime extras as needed in earlier setup. No gateway restart, cron change, Kanban mutation, NAS/Obsidian write, service/config mutation, memory/skill update, pixel dependency, or mutation-control implementation has been performed. The local dashboard process was restarted only to smoke-test the newly built local frontend bundle.
 
@@ -75,6 +77,44 @@ Stage 6 slices were approved by the user, including proceeding through the recom
 
 
 
+
+## Stage 16-A AI Office-first reset in progress
+
+Branch: `ai-office-stage16a-office-first-reset-20260509`
+
+Plan:
+
+- `docs/ai-office/plans/2026-05-09-stage-16a-ai-office-first-reset.md`
+
+Implementation summary:
+
+- Added safe Stage 16-A helper/view-models:
+  - `OfficeFirstLayoutPlan` / `buildOfficeFirstLayoutPlan(...)`
+  - `OfficeTrackingTruthPlan` / `buildOfficeTrackingTruthPlan(...)`
+  - `OfficeSelectedCharacterFocus` / `buildOfficeSelectedCharacterFocus(...)`
+- `/office` now puts the AI Office scene/map before the generic dashboard summary and diagnostic HUD stack.
+- Character inspection is click-first: clicking a character sets browser-local selected-character state, highlights the marker with `data-office-character-selected`, and updates a persistent safe selected-character panel.
+- Hover/title copy is shortened to generated role/nameplate, status, and safe action only.
+- The tracking truth strip makes the current substrate explicit: snapshot/delta based unless a real safe event stream is added later.
+- Stage 14/15 HUD remains available but is moved into a secondary diagnostics drawer posture.
+
+Safety posture:
+
+- frontend-only, read-only, CSS/DOM/SVG-only.
+- no backend/API/schema changes, no mutation controls, no persistent browser storage, no renderer dependency.
+- no raw prompt/transcript/task_body/script/log/provider/model/secret/token/task identity projection.
+- safe event substrate is documented as a future boundary, not implemented in Stage 16-A.
+
+Verification 2026-05-09 22:58 KST:
+
+- RED verified for `buildOfficeFirstLayoutPlan` before implementation.
+- GREEN helper/UI focused test: `OfficePage.test.ts` 50 passed.
+- Final frontend focused test: `OfficePage.test.ts` 50 passed.
+- ESLint passed for `OfficePage.tsx`, `officeView.ts`, and `OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large chunk warning only.
+- Backend focused office tests passed: 18 passed in 1.05s.
+- `git diff --check` passed.
+- Browser smoke `/office?stage16a=office-first-reset`: office-first layout present, tracking truth present, selected character click sets `data-office-character-selected="true"`, selected-character panel updates, diagnostics drawer present, prior route compass/focus lane/breadcrumb/pulse timeline hooks present, raw leak false, console JS errors none.
 
 ## Stage 15-C readiness checklist in progress
 

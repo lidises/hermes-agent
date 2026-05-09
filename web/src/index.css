@@ -1037,8 +1037,22 @@ code { font-size: 0.875rem; }
   outline: 2px solid rgba(167, 243, 208, 0.92);
   outline-offset: 4px;
 }
-.office-character-inspect:hover .office-character {
+.office-character-inspect:hover .office-character,
+.office-character-inspect--selected .office-character {
   filter: drop-shadow(0 0 8px color-mix(in srgb, var(--office-character-accent) 70%, transparent));
+}
+.office-character-inspect--selected::before {
+  content: "";
+  position: absolute;
+  inset: -0.35rem -0.45rem;
+  border: 1px solid rgba(167, 243, 208, 0.75);
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.18), transparent 68%);
+  box-shadow: 0 0 18px rgba(16, 185, 129, 0.32);
+  pointer-events: none;
+}
+.office-first-layout {
+  box-shadow: 0 24px 80px rgba(16, 185, 129, 0.08);
 }
 .office-character {
   --office-character-main: color-mix(in srgb, var(--midground-base) 68%, #ffffff 4%);

@@ -30,6 +30,9 @@ import {
   buildOfficeSafeScanIndex,
   buildOfficeSafeHudReadabilityPlan,
   buildOfficeSafeHudHierarchy,
+  buildOfficeFirstLayoutPlan,
+  buildOfficeTrackingTruthPlan,
+  buildOfficeSelectedCharacterFocus,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -425,6 +428,55 @@ describe("OfficePage view helpers", () => {
       ["가림", "안전 DTO 역할/상태/개수/흐름만 반영 · 원문 제외"],
     ]);
     expect(`${inspector.title} ${inspector.ariaLabel} ${inspector.fields.flat().join(" ")}`).not.toMatch(/raw|prompt|transcript|body|script|secret|model provider/i);
+  });
+
+  it("builds safe Stage 16-A tracking truth and selected-character focus copy", () => {
+    const delta = {
+      ...buildOfficeStateDelta(null, officeFixture()),
+      nodeBadges: {
+        sessions: [{ label: "+2", tone: "positive" as const }],
+        work: [],
+        automation: [],
+        routing: [],
+      },
+      changedFlows: [{ from: "sessions" as const, to: "work" as const, label: "raw prompt transcript body script secret must not matter", tone: "warning" as const }],
+    };
+    const character = {
+      id: "model-1",
+      role: "model" as const,
+      roomId: "sessions" as const,
+      label: "raw model provider prompt must not matter",
+      status: "active" as const,
+      detail: "raw transcript body script secret must not matter",
+      redactionNote: "안전 DTO 역할/상태/개수만 반영 · 원문 제외",
+      x: 20,
+      y: 20,
+    };
+
+    const truth = buildOfficeTrackingTruthPlan(delta, { hasEventStream: false, visibleCharacterCount: 12 });
+    const focus = buildOfficeSelectedCharacterFocus(character, delta);
+
+    expect(truth.stageLabel).toBe("Stage 16-A tracking truth");
+    expect(truth.mode).toBe("snapshot-delta");
+    expect(truth.label).toBe("스냅샷 변화 기반");
+    expect(truth.detail).toBe("캐릭터 12개 · 최근 안전 변화 2개 · 실시간 이벤트 스트림 없음");
+    expect(truth.caveats).toEqual(["움직임은 CSS 장식입니다", "실제 작업 추적은 안전 이벤트 스트림 승인 후 분리 구현"]);
+    expect(focus).toEqual({
+      selectedCharacterId: "model-1",
+      title: "모델 캐릭터 선택됨",
+      summary: "세션 · 활성 · 생각 중",
+      roomLabel: "세션",
+      actionLabel: "생각 중",
+      highlightSelector: '[data-office-character-id="model-1"]',
+      fields: [
+        ["역할", "모델"],
+        ["방", "세션"],
+        ["상태", "활성"],
+        ["액션", "생각 중"],
+        ["추적", "스냅샷 변화 기반 · 원문 제외"],
+      ],
+    });
+    expect(`${truth.label} ${truth.detail} ${truth.caveats.join(" ")} ${focus.title} ${focus.summary} ${focus.fields.flat().join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|body|script|secret|token|provider|model provider|sk-/i);
   });
 
   it("builds Stage 10-F usability summary for dense, missing-source, reduced-motion, and responsive states", () => {
@@ -1156,6 +1208,28 @@ describe("OfficePage view helpers", () => {
     expect(index.headline).not.toContain("활성");
     expect(index.headline).not.toContain("흐름");
     expect(`${index.headline} ${index.items.map((item) => `${item.label} ${item.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("builds safe Stage 16-A AI Office-first layout plan", () => {
+    const layout = buildOfficeFirstLayoutPlan({
+      visibleCharacterCount: 12,
+      diagnosticPanelCount: 11,
+      hasSelectedCharacter: false,
+    });
+
+    expect(layout.stageLabel).toBe("Stage 16-A AI Office-first reset");
+    expect(layout.heading).toBe("AI Office 먼저 보기");
+    expect(layout.primarySurface).toBe("scene");
+    expect(layout.diagnosticsMode).toBe("secondary-collapsed");
+    expect(layout.sections.map((section) => [section.id, section.label, section.priority])).toEqual([
+      ["scene", "오피스 현장", 1],
+      ["inspector", "선택 정보", 2],
+      ["timeline", "최근 변화", 3],
+      ["diagnostics", "진단 HUD", 4],
+    ]);
+    expect(layout.summary).toBe("캐릭터 12개 · 진단 11개는 보조로 정리");
+    expect(layout.sections.every((section) => section.detail.length > 0)).toBe(true);
+    expect(`${layout.heading} ${layout.summary} ${layout.sections.map((section) => section.detail).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
   });
 
   it("builds Korean empty-source copy without exposing raw adapter data", () => {

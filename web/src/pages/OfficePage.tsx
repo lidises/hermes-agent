@@ -49,6 +49,9 @@ import {
   buildOfficeSafeScanIndex,
   buildOfficeSafeHudReadabilityPlan,
   buildOfficeSafeHudHierarchy,
+  buildOfficeFirstLayoutPlan,
+  buildOfficeTrackingTruthPlan,
+  buildOfficeSelectedCharacterFocus,
   buildOfficeSafeFloorLegend,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
@@ -397,7 +400,17 @@ function CharacterTrackingCue({ character, cue }: { character: OfficeCharacter; 
   );
 }
 
-function CharacterMarker({ character, latestDelta, onInspect }: { character: OfficeCharacter; latestDelta: OfficeStateDelta; onInspect: () => void }) {
+function CharacterMarker({
+  character,
+  latestDelta,
+  selected,
+  onInspect,
+}: {
+  character: OfficeCharacter;
+  latestDelta: OfficeStateDelta;
+  selected: boolean;
+  onInspect: () => void;
+}) {
   const view = buildOfficeCharacterView(character);
   const activity = buildOfficeCharacterActivity(character, latestDelta);
   const inspector = buildOfficeCharacterInspector(character, latestDelta);
@@ -406,12 +419,14 @@ function CharacterMarker({ character, latestDelta, onInspect }: { character: Off
   return (
     <button
       type="button"
-      className={`office-character-inspect absolute z-[35] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-0.5 ${motion.className}`}
+      className={`office-character-inspect absolute z-[35] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-0.5 ${motion.className} ${selected ? "office-character-inspect--selected" : ""}`}
       style={{ left: `${character.x}%`, top: `${character.y}%`, ...motion.style } as React.CSSProperties}
-      title={`${view.safeTitle} · ${activity.label} · ${activity.reducedMotionLabel} · ${motion.ariaLabel}`}
+      title={`${view.nameplate} · ${view.statusLabel} · ${activity.label}`}
       aria-label={inspector.ariaLabel}
       onClick={onInspect}
       data-office-scene-marker="true"
+      data-office-character-id={character.id}
+      data-office-character-selected={selected ? "true" : "false"}
       data-office-character-role={character.role}
       data-office-character-status={character.status}
       data-office-character-activity={activity.id}
@@ -452,6 +467,10 @@ function OfficeMap({
   densityPlan,
   jumpTargets,
   responsivePlan,
+  layoutPlan,
+  trackingTruth,
+  selectedCharacterId,
+  selectedCharacterFocus,
   onDensityModeChange,
   onInspect,
   onInspectCharacter,
@@ -467,6 +486,10 @@ function OfficeMap({
   densityPlan: ReturnType<typeof buildOfficeMapDensityPlan>;
   jumpTargets: ReturnType<typeof buildOfficeMapJumpTargets>;
   responsivePlan: ReturnType<typeof buildOfficeResponsiveReadabilityPlan>;
+  layoutPlan: ReturnType<typeof buildOfficeFirstLayoutPlan>;
+  trackingTruth: ReturnType<typeof buildOfficeTrackingTruthPlan>;
+  selectedCharacterId: string | null;
+  selectedCharacterFocus: ReturnType<typeof buildOfficeSelectedCharacterFocus>;
   onDensityModeChange: (mode: OfficeMapDensityMode) => void;
   onInspect: (node: OfficeMapNode) => void;
   onInspectCharacter: (character: OfficeCharacter) => void;
@@ -491,13 +514,25 @@ function OfficeMap({
   const safeFloorLegend = buildOfficeSafeFloorLegend(latestDelta);
 
   return (
-    <Card>
+    <Card className="office-first-layout" data-office-first-layout="true">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <MapPinned className="h-4 w-4" /> 오피스 맵
-        </CardTitle>
-        <div className="text-xs text-midground/55">
-          모델/에이전트가 역할별 캐릭터로 배치되는 RPG 오피스 맵입니다. 캐릭터 움직임, 액션 칩, 방 사이 흐름 표식은 안전 DTO의 상태/개수/흐름만 반영하며, 캐릭터 살펴보기도 생성된 안전 필드만 보여줍니다.
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-300">{layoutPlan.stageLabel}</div>
+            <CardTitle className="mt-2 flex items-center gap-2 text-base">
+              <MapPinned className="h-4 w-4" /> {layoutPlan.heading}
+            </CardTitle>
+            <div className="mt-2 text-xs text-midground/55">
+              오피스 현장을 먼저 보고, 캐릭터 클릭으로 안전 요약을 고정합니다. 세부 HUD는 보조 진단으로 내려 과밀을 줄입니다.
+            </div>
+          </div>
+          <div className="grid gap-1 text-[10px] uppercase tracking-[0.14em] text-midground/60 sm:grid-cols-4 xl:min-w-[30rem]" aria-label="Stage 16-A 우선순위">
+            {layoutPlan.sections.map((section) => (
+              <span key={section.id} className="border border-current/15 bg-black/15 px-2 py-1" data-office-first-section={section.id} title={section.detail}>
+                {section.priority}. {section.label}
+              </span>
+            ))}
+          </div>
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-2 text-xs" data-office-density-controls="true">
           <span className="mr-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-midground/45">Stage 10-G 밀도</span>
@@ -535,6 +570,30 @@ function OfficeMap({
         </nav>
       </CardHeader>
       <CardContent>
+        <div className="mb-4 grid gap-3 xl:grid-cols-[1fr_0.8fr]">
+          <div className="border border-emerald-400/20 bg-emerald-950/10 p-3 text-xs" data-office-tracking-truth="true" data-office-tracking-truth-mode={trackingTruth.mode}>
+            <div className="font-semibold text-emerald-200">{trackingTruth.label}</div>
+            <div className="mt-1 text-emerald-100/75">{trackingTruth.detail}</div>
+            <div className="mt-2 flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.12em] text-emerald-100/60">
+              {trackingTruth.caveats.map((caveat) => <span key={caveat}>{caveat}</span>)}
+            </div>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-3 text-xs" data-office-selected-character-panel="true">
+            <div className="flex items-center justify-between gap-3">
+              <span className="font-semibold text-foreground">{selectedCharacterFocus.title}</span>
+              <span className="text-[10px] uppercase tracking-[0.16em] text-midground/45">Click inspect</span>
+            </div>
+            <div className="mt-1 text-midground/70">{selectedCharacterFocus.summary}</div>
+            <div className="mt-3 grid gap-1 sm:grid-cols-2">
+              {selectedCharacterFocus.fields.map(([label, value]) => (
+                <div key={label} className="border border-current/10 bg-black/15 px-2 py-1">
+                  <span className="text-midground/45">{label}</span>
+                  <span className="ml-2 text-foreground/85">{value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
         <div
           id="office-map-canvas"
           tabIndex={-1}
@@ -640,7 +699,7 @@ function OfficeMap({
               })
             : null}
           {densityPlan.visibleCharacters.length > 0
-            ? densityPlan.visibleCharacters.map((character) => <CharacterMarker key={character.id} character={character} latestDelta={latestDelta} onInspect={() => onInspectCharacter(character)} />)
+            ? densityPlan.visibleCharacters.map((character) => <CharacterMarker key={character.id} character={character} latestDelta={latestDelta} selected={selectedCharacterId === character.id} onInspect={() => onInspectCharacter(character)} />)
             : sceneObjects.map((object) => <SceneObjectMarker key={object.id} object={object} />)}
           {nodes.map((node) => {
             const meter = roomActivityById.get(node.id);
@@ -1039,6 +1098,7 @@ export default function OfficePage() {
   const [error, setError] = useState<string | null>(null);
   const [focus, setFocus] = useState<FocusOption>("overview");
   const [selection, setSelection] = useState<InspectorSelection | null>(null);
+  const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
   const [latestDelta, setLatestDelta] = useState<OfficeStateDelta>(EMPTY_STATE_DELTA);
   const [recentChanges, setRecentChanges] = useState<OfficeRecentChange[]>([]);
   const [liveTracking, setLiveTracking] = useState(false);
@@ -1166,6 +1226,20 @@ export default function OfficePage() {
     return characterSceneObjects.length > 0 ? characterSceneObjects : fallbackSceneObjects;
   }, [fallbackSceneObjects, officeCharacters]);
   const sourceHealth = useMemo(() => (state ? buildOfficeSourceHealthSummary(state) : buildOfficeSourceHealthSummary({ ...EMPTY_OFFICE_STATE })), [state]);
+  const selectedCharacter = useMemo(() => officeCharacters.find((character) => character.id === selectedCharacterId) ?? null, [officeCharacters, selectedCharacterId]);
+  const selectedCharacterFocus = useMemo(() => buildOfficeSelectedCharacterFocus(selectedCharacter, latestDelta), [latestDelta, selectedCharacter]);
+  const layoutPlan = useMemo(
+    () => buildOfficeFirstLayoutPlan({
+      visibleCharacterCount: densityPlan.visibleCharacters.length,
+      diagnosticPanelCount: 11,
+      hasSelectedCharacter: selectedCharacter !== null,
+    }),
+    [densityPlan.visibleCharacters.length, selectedCharacter],
+  );
+  const trackingTruth = useMemo(
+    () => buildOfficeTrackingTruthPlan(latestDelta, { hasEventStream: false, visibleCharacterCount: densityPlan.visibleCharacters.length }),
+    [densityPlan.visibleCharacters.length, latestDelta],
+  );
   const usabilitySummary = useMemo(
     () => (state ? buildOfficeUsabilitySummary(state, officeCharacters, { reducedMotion: prefersReducedMotion, viewportWidth }) : buildOfficeUsabilitySummary({ ...EMPTY_OFFICE_STATE }, [], { reducedMotion: prefersReducedMotion, viewportWidth })),
     [officeCharacters, prefersReducedMotion, state, viewportWidth],
@@ -1276,6 +1350,39 @@ export default function OfficePage() {
 
   return (
     <div className="flex flex-col gap-6 normal-case">
+      {showOverview ? (
+        <OfficeMap
+          nodes={mapNodes}
+          flows={mapFlows}
+          characters={officeCharacters}
+          sceneObjects={sceneObjects}
+          latestDelta={latestDelta}
+          recentChanges={recentChanges}
+          usabilitySummary={usabilitySummary}
+          densityMode={densityMode}
+          densityPlan={densityPlan}
+          jumpTargets={jumpTargets}
+          responsivePlan={responsivePlan}
+          layoutPlan={layoutPlan}
+          trackingTruth={trackingTruth}
+          selectedCharacterId={selectedCharacterId}
+          selectedCharacterFocus={selectedCharacterFocus}
+          onDensityModeChange={setDensityMode}
+          onInspect={(node) => inspectRecord("오피스 맵 방", node.label, [
+            ["방", node.id],
+            ["구역", node.zone],
+            ["안전 개수", String(node.count)],
+            ["상태", node.health],
+            ["설명", node.detail],
+          ])}
+          onInspectCharacter={(character) => {
+            setSelectedCharacterId(character.id);
+            const inspector = buildOfficeCharacterInspector(character, latestDelta);
+            inspectRecord(inspector.kind, inspector.title, inspector.fields);
+          }}
+        />
+      ) : null}
+
       <div className="border border-current/20 bg-gradient-to-br from-black/35 to-black/10 p-5">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div className="max-w-3xl">
@@ -1299,10 +1406,10 @@ export default function OfficePage() {
               ))}
             </div>
           </div>
-          <div className="min-w-64 border border-current/15 bg-black/20 p-3 text-xs text-midground/70">
-            <div className="flex items-center gap-2 text-foreground">
-              <Lock className="h-4 w-4 text-emerald-300" /> 안전 모드
-            </div>
+          <details className="min-w-64 border border-current/15 bg-black/20 p-3 text-xs text-midground/70" data-office-diagnostics-drawer="true">
+            <summary className="flex cursor-pointer items-center gap-2 text-foreground">
+              <Lock className="h-4 w-4 text-emerald-300" /> 보조 진단 HUD
+            </summary>
             <div className="mt-2 grid gap-1">
               <div>생성 시각: {fmt(state.generated_at)}</div>
               <div>표시 모드: {state.display_mode}</div>
@@ -1449,7 +1556,7 @@ export default function OfficePage() {
                 ? `브라우저에서만 ${OFFICE_LIVE_TRACKING_BASE_INTERVAL_MS / 1000}초마다 안전 DTO를 다시 읽습니다. 탭이 숨겨지거나 실패가 반복되면 60–120초로 늦춥니다. cron/gateway/backend 작업은 건드리지 않습니다.`
                 : "기본은 수동 새로고침입니다. 실시간 추적은 이 브라우저 탭에서만 켜집니다."}
             </div>
-          </div>
+          </details>
         </div>
       </div>
 
@@ -1459,34 +1566,6 @@ export default function OfficePage() {
         <StatCard label="자동화" value={state.summary.automation_count ?? state.automations.length} detail="읽기 전용 기계처럼 표시한 cron 작업" />
         <StatCard label="가림 처리" value={state.redactions.redacted_field_count} detail={`정책 v${state.redactions.policy_version}; 민감 원문 필드 제외`} />
       </div>
-
-      {showOverview ? (
-        <OfficeMap
-          nodes={mapNodes}
-          flows={mapFlows}
-          characters={officeCharacters}
-          sceneObjects={sceneObjects}
-          latestDelta={latestDelta}
-          recentChanges={recentChanges}
-          usabilitySummary={usabilitySummary}
-          densityMode={densityMode}
-          densityPlan={densityPlan}
-          jumpTargets={jumpTargets}
-          responsivePlan={responsivePlan}
-          onDensityModeChange={setDensityMode}
-          onInspect={(node) => inspectRecord("오피스 맵 방", node.label, [
-            ["방", node.id],
-            ["구역", node.zone],
-            ["안전 개수", String(node.count)],
-            ["상태", node.health],
-            ["설명", node.detail],
-          ])}
-          onInspectCharacter={(character) => {
-            const inspector = buildOfficeCharacterInspector(character, latestDelta);
-            inspectRecord(inspector.kind, inspector.title, inspector.fields);
-          }}
-        />
-      ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <Card>

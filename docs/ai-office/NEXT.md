@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-09 22:26 KST
+Last updated: 2026-05-09 22:55 KST
 
 ## Start here after `/new`
 
@@ -64,7 +64,29 @@ When not to rely on `/goal` alone:
 
 ## Current next stage
 
-Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer evidence/polish/decision closure, Stage 12 product-polish slices, Stage 13 PR/handoff summary, and Stage 14-A through Stage 14-Q safe dynamic-tracking/readability layers are implemented on top of Stage 9-D and the Stage 8 read-only dashboard. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
+Stage 16-A is now the active implementation stage on `ai-office-stage16a-office-first-reset-20260509`: reset `/office` to an AI Office-first scene surface after the Stage 14/15 HUD stack was merged. The current branch adds a scene-first layout plan, snapshot/delta tracking truth copy, click-first selected-character focus, a persistent safe selected-character panel, and a secondary diagnostics drawer posture. Keep finishing verification/commit on this branch before starting Stage 16-B.
+
+Stage 16-A current implementation:
+
+- `buildOfficeFirstLayoutPlan(...)` makes scene primary, inspector/timeline secondary, diagnostics secondary-collapsed, with Korean-first heading `AI Office 먼저 보기`.
+- `buildOfficeTrackingTruthPlan(...)` labels the current tracking substrate as snapshot/delta unless a future safe event stream exists.
+- `buildOfficeSelectedCharacterFocus(...)` creates a safe selected-character card from generated character fields and safe delta only.
+- `/office` renders `data-office-first-layout="true"`, `data-office-tracking-truth="true"`, `data-office-selected-character-panel="true"`, and per-marker `data-office-character-selected="true|false"`.
+- Stage 14/15 HUD remains read-only and available, but sits behind `data-office-diagnostics-drawer="true"` as secondary diagnostics.
+- Safe event substrate remains a future planning boundary: redacted event categories/counts/timing buckets only; no raw logs/prompts/transcripts/tool args/scripts/provider/model identity/task bodies.
+
+Verification completed:
+
+- RED verified for the missing Stage 16-A helper.
+- GREEN focused helper/UI test: `OfficePage.test.ts` 50 passed.
+- Final frontend focused test: `OfficePage.test.ts` 50 passed.
+- ESLint passed for `OfficePage.tsx`, `officeView.ts`, and `OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large chunk warning only.
+- Backend focused office tests passed: 18 passed in 1.05s.
+- `git diff --check` passed.
+- Browser smoke `/office?stage16a=office-first-reset` passed: office-first layout, tracking truth strip, click-selected character marker/panel, diagnostics drawer, prior Stage 14 hooks, raw leak false, and console JS errors none.
+
+Recommended next implementation/design stage after Stage 16-A: do not add another HUD. If the user continues, Stage 16-B should be a safe event substrate design/implementation decision gate, not renderer work and not mutation controls. CSS/SVG/DOM remains primary unless new measured evidence and explicit approval reopen renderer work.
 
 
 Stage 9-E current implementation:
@@ -148,14 +170,25 @@ Browser smoke: http://127.0.0.1:8765/office
 
 ## Immediate next action
 
-Immediate next action is PR/merge, then Stage 15 planning/execution from updated `main`:
+Immediate next action is finishing Stage 16-A on `ai-office-stage16a-office-first-reset-20260509`:
 
-1. Complete Stage 15-C readiness checklist commit/push on `ai-office-stage15-consolidation-20260509`.
-2. Create PR from `ai-office-stage15-consolidation-20260509` to `main`.
-3. Merge after checks/mergeability allow it.
-4. Do not start Stage 15-D unless browser/user review exposes a concrete visual issue.
-7. Keep CSS/SVG/DOM-only, frontend-only, read-only, no persistence, no mutation controls, no backend/API/schema changes, no renderer dependencies, and no raw record projection.
-8. Do not add mutation controls, expose dashboard remotely, add Pixi/Phaser/canvas, copy DeskRPG assets/code, create/edit topic registry data, or create/modify Kanban/Cron state without separate approval.
+1. Run final frontend verification from `web`:
+   - `npm test -- --run OfficePage.test.ts`
+   - `./node_modules/.bin/eslint src/pages/OfficePage.tsx src/pages/officeView.ts src/pages/OfficePage.test.ts`
+   - `npm run build`
+2. Run backend/safety verification from repo root:
+   - `source .venv/bin/activate && scripts/run_tests.sh tests/hermes_cli/test_office_redaction.py tests/hermes_cli/test_office_state_adapters.py tests/hermes_cli/test_office_api.py -q --tb=short && git diff --check`
+3. Browser smoke `/office?stage16a=office-first-reset`:
+   - office-first layout exists.
+   - map/scene appears before generic dashboard diagnostics in DOM order.
+   - tracking truth strip exists and states snapshot/delta posture.
+   - clicking a character sets `data-office-character-selected="true"` and updates the selected-character panel.
+   - diagnostics drawer exists and Stage 14/15 hooks still exist.
+   - raw leak false and console JS errors none.
+4. Commit/push:
+   - `feat(office): add AI office-first layout reset`
+5. Do not start Stage 16-B until Stage 16-A is committed/pushed.
+6. Stage 16-B, if approved, should start with safe event substrate design: redacted event categories/counts/timing buckets only; no raw logs, prompts, transcripts, scripts, tool args, task bodies, provider/model identity, credentials, or mutation controls.
 
 Completed Stage 6 files:
 
