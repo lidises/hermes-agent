@@ -205,6 +205,52 @@ code { font-size: 0.875rem; }
 .office-scene-marker-walk { animation-name: office-scene-walk; }
 .office-scene-marker-idle { animation-name: office-scene-idle; }
 .office-scene-marker-blink { animation-name: office-scene-blink; }
+@keyframes office-character-tracking-pulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) translate(var(--office-tracking-x, 0), var(--office-tracking-y, 0)) scale(0.9);
+    opacity: 0.32;
+  }
+  48% {
+    transform: translate(-50%, -50%) translate(calc(var(--office-tracking-x, 0) * -0.45), calc(var(--office-tracking-y, 0) * -0.45)) scale(1.12);
+    opacity: 0.78;
+  }
+}
+.office-character-tracking {
+  width: 3.8rem;
+  height: 3.8rem;
+  color: #bbf7d0;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: office-character-tracking-pulse var(--office-tracking-duration, 6s) ease-in-out infinite;
+  animation-delay: var(--office-tracking-delay, 0s);
+  will-change: transform, opacity;
+}
+.office-character-tracking__ring {
+  position: absolute;
+  inset: 0.55rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  box-shadow: 0 0 14px color-mix(in srgb, currentColor 28%, transparent);
+}
+.office-character-tracking__label {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  max-width: 4.5rem;
+  transform: translateX(-50%);
+  overflow: hidden;
+  color: currentColor;
+  font-size: 0.42rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  white-space: nowrap;
+}
+.office-character-tracking--steady { color: #86efac; }
+.office-character-tracking--warning { color: #fde68a; }
+.office-character-tracking--alert { color: #fef08a; }
 .office-character-inspect {
   border: 0;
   background: transparent;
@@ -459,9 +505,13 @@ code { font-size: 0.875rem; }
 @media (prefers-reduced-motion: reduce) {
   .office-scene-marker-motion,
   .office-route-hint,
-  .office-route-hint__dot {
+  .office-route-hint__dot,
+  .office-character-tracking {
     animation: none;
     will-change: auto;
+  }
+  .office-character-tracking {
+    opacity: 0.52;
   }
 }
 

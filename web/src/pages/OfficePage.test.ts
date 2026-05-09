@@ -6,6 +6,7 @@ import {
   buildOfficeCharacterInspector,
   buildOfficeCharacterRoutes,
   buildOfficeCharacterSceneObjects,
+  buildOfficeCharacterTrackingCues,
   buildOfficeCharacterView,
   buildOfficeCharacters,
   buildOfficeMapDensityPlan,
@@ -578,6 +579,68 @@ describe("OfficePage view helpers", () => {
     expect(sceneObjects.find((object) => object.kind === "avatar")?.label).toBe("모델 캐릭터 1");
     expect(sceneObjects.every((object) => object.id.startsWith("character:"))).toBe(true);
     expect(sceneObjects.map((object) => `${object.label} ${object.detail}`).join(" ")).not.toMatch(/raw|prompt|transcript|body|script|secret|model-name/i);
+  });
+
+  it("builds safe Stage 14-A character tracking cues from visible characters and delta only", () => {
+    const characters = [
+      {
+        id: "model-1",
+        role: "model" as const,
+        roomId: "sessions" as const,
+        label: "raw prompt transcript model-name must not matter",
+        status: "active" as const,
+        detail: "raw task body script secret must not matter",
+        redactionNote: "안전 DTO 역할/상태/개수만 반영 · 원문 제외",
+        x: 22,
+        y: 24,
+      },
+      {
+        id: "worker-1",
+        role: "worker" as const,
+        roomId: "work" as const,
+        label: "작업자 1",
+        status: "working" as const,
+        detail: "safe detail",
+        redactionNote: "안전 DTO 역할/상태/개수만 반영 · 원문 제외",
+        x: 68,
+        y: 24,
+      },
+      {
+        id: "automation-1",
+        role: "automation_keeper" as const,
+        roomId: "automation" as const,
+        label: "자동화 관리인 1",
+        status: "scheduled" as const,
+        detail: "safe detail",
+        redactionNote: "안전 DTO 역할/상태/개수만 반영 · 원문 제외",
+        x: 24,
+        y: 68,
+      },
+    ];
+    const delta = {
+      hasChanges: true,
+      nodeBadges: {
+        sessions: [],
+        work: [{ label: "상태 변경", tone: "warning" as const }],
+        automation: [],
+        routing: [],
+      },
+      changedFlows: [{ from: "sessions" as const, to: "work" as const, label: "raw prompt transcript must not matter", tone: "warning" as const }],
+      recentChanges: [],
+    };
+
+    const cues = buildOfficeCharacterTrackingCues(characters, delta);
+
+    expect(cues).toHaveLength(3);
+    expect(cues.map((cue) => [cue.characterId, cue.label, cue.tone])).toEqual([
+      ["model-1", "변화 감지", "alert"],
+      ["worker-1", "변화 감지", "alert"],
+      ["automation-1", "자동화 감시", "steady"],
+    ]);
+    expect(cues[0].style["--office-tracking-x"]).toMatch(/px$/);
+    expect(cues[0].style["--office-tracking-delay"]).toMatch(/s$/);
+    expect(cues.every((cue) => cue.ariaHidden === true && cue.interactive === false)).toBe(true);
+    expect(cues.map((cue) => `${cue.label} ${cue.detail} ${cue.reducedMotionLabel}`).join(" ")).not.toMatch(/raw|prompt|transcript|body|script|secret|model-name/i);
   });
 
   it("builds Korean empty-source copy without exposing raw adapter data", () => {

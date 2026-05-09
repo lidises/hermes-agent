@@ -105,6 +105,19 @@ export type OfficeCharacterInspector = {
   fields: Array<[string, string]>;
 };
 
+export type OfficeCharacterTrackingStyle = Record<"--office-tracking-x" | "--office-tracking-y" | "--office-tracking-duration" | "--office-tracking-delay", string>;
+
+export type OfficeCharacterTrackingCue = {
+  characterId: string;
+  label: string;
+  detail: string;
+  tone: "steady" | "alert" | "warning";
+  style: OfficeCharacterTrackingStyle;
+  reducedMotionLabel: string;
+  ariaHidden: true;
+  interactive: false;
+};
+
 export type OfficeDeltaBadge = {
   label: string;
   tone: "positive" | "negative" | "warning" | "neutral";
@@ -1001,6 +1014,49 @@ export function buildOfficeCharacterInspector(character: OfficeCharacter, delta:
       ["가림", "안전 DTO 역할/상태/개수/흐름만 반영 · 원문 제외"],
     ],
   };
+}
+
+function trackingLabelForRoom(roomId: OfficeMapNode["id"]): string {
+  if (roomId === "sessions") return "세션 순찰";
+  if (roomId === "work") return "작업 추적";
+  if (roomId === "automation") return "자동화 감시";
+  return "라우팅 확인";
+}
+
+function trackingRoomHasDelta(character: OfficeCharacter, delta: OfficeStateDelta): boolean {
+  return delta.nodeBadges[character.roomId]?.length > 0 || delta.changedFlows.some((flow) => flow.from === character.roomId || flow.to === character.roomId);
+}
+
+function trackingTone(character: OfficeCharacter, hasDelta: boolean): OfficeCharacterTrackingCue["tone"] {
+  if (hasDelta) return "alert";
+  if (character.status === "warning" || character.status === "error" || character.status === "blocked" || character.status === "unknown") return "warning";
+  return "steady";
+}
+
+export function buildOfficeCharacterTrackingCues(characters: OfficeCharacter[], delta: OfficeStateDelta): OfficeCharacterTrackingCue[] {
+  return characters.map((character, index) => {
+    const hasDelta = trackingRoomHasDelta(character, delta);
+    const label = hasDelta ? "변화 감지" : trackingLabelForRoom(character.roomId);
+    const tone = trackingTone(character, hasDelta);
+    const roomLabel = CHARACTER_ROOM_LABEL[character.roomId];
+    const roleLabel = CHARACTER_ROLE_LABEL[character.role];
+    const offsetSeed = (index % 3) - 1;
+    return {
+      characterId: character.id,
+      label,
+      detail: `${roomLabel} · ${roleLabel} · 안전 추적 큐`,
+      tone,
+      style: {
+        "--office-tracking-x": `${offsetSeed * 2}px`,
+        "--office-tracking-y": `${((index + 1) % 3 - 1) * 2}px`,
+        "--office-tracking-duration": `${5 + (index % 4)}s`,
+        "--office-tracking-delay": `${-1 * (index % 5)}s`,
+      },
+      reducedMotionLabel: `${label} · 텍스트 rail로 의미 유지`,
+      ariaHidden: true,
+      interactive: false,
+    };
+  });
 }
 
 export function buildOfficeCharacters(state: OfficeState, nodes: OfficeMapNode[]): OfficeCharacter[] {

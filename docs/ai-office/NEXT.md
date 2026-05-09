@@ -317,3 +317,15 @@ Before starting a fresh session:
 3. If the user approves the next stage, begin only with the approved smoke-test/polish/lint-cleanup scope and update handoff files after verification.
 4. If no approval is given, stay in review/planning mode.
 5. State explicitly what was not changed.
+
+## Stage 14-A handoff: dynamic character tracking cues
+
+Current branch: `ai-office-stage14-dynamic-tracking-20260509`
+
+Stage 14-A implemented safe character tracking cues and passed final local verification. Keep continuing in small CSS/SVG slices; do not add a renderer/dependency unless the user explicitly reopens the Stage 11 decision gate.
+
+Next if Stage 14-A verifies cleanly:
+
+1. Commit/push Stage 14-A: `feat(office): add dynamic character tracking cues`.
+2. Plan Stage 14-B as the next small DeskRPG-like slice. Recommended direction: room-level ambient activity meters or safe route pulse timeline, still derived only from safe DTO counts/deltas.
+3. Maintain constraints: read-only `/office`, no backend/API/schema changes, no mutation controls, no persistent storage, no raw projection, no Phaser/Pixi/canvas/sprites.

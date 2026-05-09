@@ -2001,3 +2001,39 @@ Recommended next stage options:
 3. Stage 8-C product hardening: add frontend tests for the `/office` focus chips, inspector, empty/loading/error/attention states, and document acceptance criteria for the polished operational map.
 4. Pixel/renderer review only after explicit dependency/licensing/security approval.
 5. Do not add mutation controls, restart services, expose dashboard remotely, add Pixi/Phaser, or create/modify Kanban/Cron state without separate approval.
+
+## Stage 14-A dynamic character tracking cues implemented
+
+Updated: 2026-05-09 14:56 KST
+
+Stage 14-A adds a dependency-free, CSS/SVG-safe tracking cue layer for the RPG office map. It keeps the renderer decision from Stage 11 intact: no Phaser, PixiJS, canvas renderer, sprite assets, DeskRPG code/assets, backend/API/schema changes, mutation controls, or persistent browser storage.
+
+Implemented:
+
+- `buildOfficeCharacterTrackingCues(characters, delta)` in `web/src/pages/officeView.ts`.
+- One decorative cue per visible generated safe character.
+- Rooms touched by safe node/flow deltas become `변화 감지`; ordinary rooms use Korean tracking labels such as `세션 순찰`, `작업 추적`, `자동화 감시`, and `라우팅 확인`.
+- React map rendering adds decorative `data-office-character-tracking="true"` rings/trails behind character markers.
+- A text-equivalent `data-office-character-tracking-rail="true"` rail preserves meaning when motion is reduced.
+- CSS animation is dependency-free and disabled under `prefers-reduced-motion: reduce`.
+
+Safety posture:
+
+- Tracking cues derive only from generated `OfficeCharacter[]` and safe `OfficeStateDelta`.
+- The helper does not inspect raw prompts, transcripts, task bodies, cron scripts, logs, auth fields, credentials, provider/model identities, or individual task identity.
+- Stage 14-A is read-only and informational.
+
+Verification so far:
+
+- RED observed: `buildOfficeCharacterTrackingCues is not a function`.
+- GREEN: `npm test -- --run OfficePage.test.ts` -> 30 passed.
+- ESLint for `OfficePage.tsx`, `officeView.ts`, `OfficePage.test.ts` passed.
+
+Final verification before commit:
+
+- `npm test -- --run OfficePage.test.ts` -> 30 passed.
+- ESLint for `OfficePage.tsx`, `officeView.ts`, `OfficePage.test.ts` passed.
+- `npm run build` passed. Build output: JS 1,260.13 kB / gzip 368.32 kB; CSS 129.59 kB / gzip 20.82 kB. Existing Vite large chunk warning remains.
+- Backend focused office tests -> 18 passed in 1.62s.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14a=tracking`: tracking cue count 11, inspect button count 11, counts match, tracking rail exists, Stage 14-A label visible in DOM, raw leak regex false, console JS errors none.

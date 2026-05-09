@@ -24,6 +24,7 @@ import {
   buildOfficeCharacterInspector,
   buildOfficeCharacterRoutes,
   buildOfficeCharacterSceneObjects,
+  buildOfficeCharacterTrackingCues,
   buildOfficeCharacterView,
   buildOfficeCharacters,
   buildOfficeEmptySourceCopyPlan,
@@ -320,6 +321,28 @@ function activityToneClass(tone: ReturnType<typeof buildOfficeCharacterActivity>
   return "office-character__activity--normal";
 }
 
+function trackingToneClass(tone: ReturnType<typeof buildOfficeCharacterTrackingCues>[number]["tone"]): string {
+  if (tone === "alert") return "office-character-tracking--alert";
+  if (tone === "warning") return "office-character-tracking--warning";
+  return "office-character-tracking--steady";
+}
+
+function CharacterTrackingCue({ character, cue }: { character: OfficeCharacter; cue: ReturnType<typeof buildOfficeCharacterTrackingCues>[number] }) {
+  return (
+    <div
+      className={`office-character-tracking absolute z-[32] -translate-x-1/2 -translate-y-1/2 ${trackingToneClass(cue.tone)}`}
+      style={{ left: `${character.x}%`, top: `${character.y}%`, ...cue.style } as React.CSSProperties}
+      title={`${cue.detail} · ${cue.reducedMotionLabel}`}
+      aria-hidden={cue.ariaHidden}
+      data-office-character-tracking="true"
+      data-office-character-tracking-tone={cue.tone}
+    >
+      <span className="office-character-tracking__ring" />
+      <span className="office-character-tracking__label">{cue.label}</span>
+    </div>
+  );
+}
+
 function CharacterMarker({ character, latestDelta, onInspect }: { character: OfficeCharacter; latestDelta: OfficeStateDelta; onInspect: () => void }) {
   const view = buildOfficeCharacterView(character);
   const activity = buildOfficeCharacterActivity(character, latestDelta);
@@ -398,6 +421,8 @@ function OfficeMap({
   const characterRoutes = buildOfficeCharacterRoutes(latestDelta);
   const nodeById = new Map(nodes.map((node) => [node.id, node]));
   const polishPlan = buildOfficeMapPolishPlan(densityPlan);
+  const trackingCues = buildOfficeCharacterTrackingCues(densityPlan.visibleCharacters, latestDelta);
+  const trackingCueByCharacterId = new Map(trackingCues.map((cue) => [cue.characterId, cue]));
 
   return (
     <Card>
@@ -510,6 +535,12 @@ function OfficeMap({
             );
           })}
           {densityPlan.visibleCharacters.length > 0
+            ? densityPlan.visibleCharacters.map((character) => {
+                const cue = trackingCueByCharacterId.get(character.id);
+                return cue ? <CharacterTrackingCue key={`tracking-${character.id}`} character={character} cue={cue} /> : null;
+              })
+            : null}
+          {densityPlan.visibleCharacters.length > 0
             ? densityPlan.visibleCharacters.map((character) => <CharacterMarker key={character.id} character={character} latestDelta={latestDelta} onInspect={() => onInspectCharacter(character)} />)
             : sceneObjects.map((object) => <SceneObjectMarker key={object.id} object={object} />)}
           {nodes.map((node) => {
@@ -546,6 +577,7 @@ function OfficeMap({
             <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] uppercase tracking-[0.16em]">
               <span className="text-emerald-200">{polishPlan.stageLabel}</span>
               <span className="text-sky-200">{responsivePlan.stageLabel} · {responsivePlan.viewportMode === "narrow" ? "좁은 화면" : "데스크톱"}</span>
+              <span className="text-lime-200">Stage 14-A 동적 추적 · 큐 {trackingCues.length}개</span>
               {flows.map((flow) => {
                 const changedFlow = changedFlowById.get(`${flow.from}->${flow.to}`);
                 return (
@@ -560,6 +592,15 @@ function OfficeMap({
             </div>
             <div className="mb-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-semibold tracking-[0.14em] text-sky-100/80" aria-label="Stage 12-A 반응형 읽기 메모">
               {responsivePlan.notes.map((note) => <span key={note}>{note}</span>)}
+            </div>
+            <div className="mb-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-semibold tracking-[0.14em] text-emerald-100/80" aria-label="Stage 14-A 동적 추적 rail" data-office-character-tracking-rail="true">
+              <span>Stage 14-A 동적 추적</span>
+              <span>추적 큐 {trackingCues.length}개</span>
+              {trackingCues.slice(0, 4).map((cue) => (
+                <span key={`tracking-rail-${cue.characterId}`} className={cue.tone === "alert" ? "text-yellow-200" : cue.tone === "warning" ? "text-orange-200" : "text-emerald-200"}>
+                  {cue.label} · {cue.detail}
+                </span>
+              ))}
             </div>
             <div className="mb-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-semibold tracking-[0.14em] text-midground/75" aria-label="RPG 역할 범례">
               <span>캐릭터 역할 투영</span>
