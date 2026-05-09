@@ -334,6 +334,16 @@ Next if Stage 14-A verifies cleanly:
 
 Current branch: `ai-office-stage14-dynamic-tracking-20260509`
 
-Stage 14-B implemented safe room activity meters and passed final local verification. Continue in small DeskRPG-like observability slices after commit. Recommended Stage 14-C direction: safe event pulse timeline or room-to-room breadcrumb rail derived only from browser-local safe deltas.
+Stage 14-B implemented safe room activity meters and passed final local verification. Commit/push completed as `1d7ab666 feat(office): add room activity meters`. Recommended Stage 14-C direction: safe event pulse timeline or room-to-room breadcrumb rail derived only from browser-local safe deltas.
+
+Keep constraints: no renderer/dependency, no backend/API/schema changes, no mutation controls, no persistent storage, no raw record projection.
+
+## Stage 14-C handoff: safe pulse timeline
+
+Current branch: `ai-office-stage14-dynamic-tracking-20260509`
+
+Stage 14-C implemented a safe pulse timeline from browser-local `OfficeStateDelta` (`nodeBadges`, `changedFlows`, `recentChanges`) and passed focused frontend test/lint/build. Finish final backend/diff/browser verification, then commit/push with `feat(office): add safe pulse timeline`.
+
+Next recommended Stage 14-D direction: safe breadcrumb trail for room-to-room changes or a compact character/room heartbeat legend, still CSS/SVG only and derived from safe DTO/delta fields.
 
 Keep constraints: no renderer/dependency, no backend/API/schema changes, no mutation controls, no persistent storage, no raw record projection.

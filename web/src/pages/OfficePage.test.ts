@@ -14,6 +14,7 @@ import {
   buildOfficeMapPolishPlan,
   buildOfficeResponsiveReadabilityPlan,
   buildOfficeRoomActivityMeters,
+  buildOfficeSafePulseTimeline,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -677,6 +678,30 @@ describe("OfficePage view helpers", () => {
     expect(meters.every((meter) => meter.ariaHidden === true && meter.interactive === false)).toBe(true);
     expect(meters[0].detail).toContain("안전 항목 5개");
     expect(meters.map((meter) => `${meter.label} ${meter.detail} ${meter.reducedMotionLabel}`).join(" ")).not.toMatch(/raw|prompt|transcript|body|script|secret|model/i);
+  });
+
+  it("builds safe Stage 14-C pulse timeline from recent safe deltas", () => {
+    const delta = {
+      hasChanges: true,
+      nodeBadges: { sessions: [{ label: "+2", tone: "positive" as const }], work: [], automation: [], routing: [] },
+      changedFlows: [{ from: "sessions" as const, to: "work" as const, label: "raw prompt transcript body script secret must not matter", tone: "warning" as const }],
+      recentChanges: [
+        { id: "change-1", label: "세션 +2", detail: "raw transcript must not matter", tone: "positive" as const },
+        { id: "change-2", label: "자동화 상태", detail: "raw script secret must not matter", tone: "warning" as const },
+      ],
+    };
+
+    const timeline = buildOfficeSafePulseTimeline(delta);
+
+    expect(timeline.stageLabel).toBe("Stage 14-C 안전 pulse timeline");
+    expect(timeline.items.map((item) => [item.kind, item.label, item.tone])).toEqual([
+      ["room", "세션 변화", "positive"],
+      ["flow", "세션 → 작업", "warning"],
+      ["recent", "최근 안전 변화 1", "positive"],
+      ["recent", "최근 안전 변화 2", "warning"],
+    ]);
+    expect(timeline.items.every((item) => item.ariaHidden === true && item.interactive === false)).toBe(true);
+    expect(timeline.items.map((item) => `${item.label} ${item.detail} ${item.reducedMotionLabel}`).join(" ")).not.toMatch(/raw|prompt|transcript|body|script|secret|token|sk-/i);
   });
 
   it("builds Korean empty-source copy without exposing raw adapter data", () => {

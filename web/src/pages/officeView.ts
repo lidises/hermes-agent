@@ -131,6 +131,23 @@ export type OfficeRoomActivityMeter = {
   interactive: false;
 };
 
+export type OfficeSafePulseTimelineItem = {
+  id: string;
+  kind: "room" | "flow" | "recent" | "idle";
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  reducedMotionLabel: string;
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafePulseTimeline = {
+  stageLabel: string;
+  detail: string;
+  items: OfficeSafePulseTimelineItem[];
+};
+
 export type OfficeDeltaBadge = {
   label: string;
   tone: "positive" | "negative" | "warning" | "neutral";
@@ -1107,6 +1124,80 @@ export function buildOfficeRoomActivityMeters(nodes: OfficeMapNode[], characters
       interactive: false,
     };
   });
+}
+
+const PULSE_TONE_LABEL: Record<OfficeDeltaBadge["tone"], string> = {
+  positive: "증가",
+  negative: "감소",
+  warning: "확인",
+  neutral: "변화",
+};
+
+function pulseToneClass(tone: OfficeDeltaBadge["tone"]): OfficeDeltaBadge["tone"] {
+  return tone;
+}
+
+export function buildOfficeSafePulseTimeline(delta: OfficeStateDelta): OfficeSafePulseTimeline {
+  const items: OfficeSafePulseTimelineItem[] = [];
+  (Object.entries(delta.nodeBadges) as Array<[OfficeMapNode["id"], OfficeDeltaBadge[]]>).forEach(([roomId, badges]) => {
+    badges.slice(0, 1).forEach((badge) => {
+      items.push({
+        id: `room-${roomId}-${items.length}`,
+        kind: "room",
+        label: `${CHARACTER_ROOM_LABEL[roomId]} 변화`,
+        detail: `${CHARACTER_ROOM_LABEL[roomId]} 방 안전 badge · ${PULSE_TONE_LABEL[badge.tone]}`,
+        tone: pulseToneClass(badge.tone),
+        reducedMotionLabel: "timeline rail 텍스트로 변화 순서 유지",
+        ariaHidden: true,
+        interactive: false,
+      });
+    });
+  });
+
+  delta.changedFlows.slice(0, 2).forEach((flow) => {
+    items.push({
+      id: `flow-${flow.from}-${flow.to}-${items.length}`,
+      kind: "flow",
+      label: `${CHARACTER_ROOM_LABEL[flow.from]} → ${CHARACTER_ROOM_LABEL[flow.to]}`,
+      detail: `${CHARACTER_ROOM_LABEL[flow.from]}에서 ${CHARACTER_ROOM_LABEL[flow.to]}로 안전 흐름 변화`,
+      tone: pulseToneClass(flow.tone),
+      reducedMotionLabel: "timeline rail 텍스트로 흐름 변화 유지",
+      ariaHidden: true,
+      interactive: false,
+    });
+  });
+
+  delta.recentChanges.slice(0, 3).forEach((change, index) => {
+    items.push({
+      id: `recent-${change.id || index}`,
+      kind: "recent",
+      label: `최근 안전 변화 ${index + 1}`,
+      detail: `${PULSE_TONE_LABEL[change.tone]} · 브라우저 메모리 안전 delta`,
+      tone: pulseToneClass(change.tone),
+      reducedMotionLabel: "최근 변화 rail 텍스트로 의미 유지",
+      ariaHidden: true,
+      interactive: false,
+    });
+  });
+
+  if (items.length === 0) {
+    items.push({
+      id: "idle-no-delta",
+      kind: "idle",
+      label: "대기",
+      detail: "아직 비교할 안전 변화가 없습니다",
+      tone: "neutral",
+      reducedMotionLabel: "변화 없음 상태를 텍스트로 유지",
+      ariaHidden: true,
+      interactive: false,
+    });
+  }
+
+  return {
+    stageLabel: "Stage 14-C 안전 pulse timeline",
+    detail: "방 badge, 흐름, 최근 변화 rail을 원문 없이 시간감 있는 pulse로 요약",
+    items: items.slice(0, 6),
+  };
 }
 
 export function buildOfficeCharacters(state: OfficeState, nodes: OfficeMapNode[]): OfficeCharacter[] {

@@ -2074,3 +2074,39 @@ Final verification before commit:
 - Backend focused office tests -> 18 passed in 1.32s.
 - `git diff --check` passed.
 - Browser smoke `/office?stage14b=room-activity`: room meter count 4, room activity rail exists, Stage 14-A tracking cues still 11, character inspect buttons 11, raw leak regex false, console JS errors none.
+
+## Stage 14-C safe pulse timeline implemented
+
+Updated: 2026-05-09 16:24 KST
+
+Stage 14-C continues the DeskRPG-like dynamic tracking loop by adding a compact safe pulse timeline to the CSS/SVG office map legend. It keeps `/office` read-only and renderer-free.
+
+Implemented:
+
+- `buildOfficeSafePulseTimeline(delta)` in `web/src/pages/officeView.ts`.
+- Generated Korean pulse items from safe browser-local `OfficeStateDelta` fields only: `nodeBadges`, `changedFlows`, and `recentChanges`.
+- Generated labels such as `세션 변화`, `세션 → 작업`, and `최근 안전 변화 1` instead of copying raw change details.
+- React map rendering adds `data-office-safe-pulse-timeline="true"` and per-item `data-office-safe-pulse-item` hooks.
+- CSS adds dependency-free pulse dots and disables the pulse animation under `prefers-reduced-motion: reduce`.
+
+Safety posture:
+
+- Helper derives only from already-safe browser-local delta fields.
+- No raw prompt/transcript/task body/cron script/log/auth/secret/token/model/provider identity or individual task identity is inspected or projected.
+- No backend/API/schema changes, no mutation controls, no persistent storage, no renderer/dependency adoption.
+
+Verification so far:
+
+- RED observed: `buildOfficeSafePulseTimeline is not a function`.
+- GREEN: `npm test -- --run OfficePage.test.ts` -> 32 passed.
+- ESLint for touched TS/TSX/test files passed.
+- `npm run build` passed. Build output: JS 1,264.70 kB / gzip 369.56 kB; CSS 132.48 kB / gzip 21.33 kB. Existing Vite large chunk warning remains.
+
+Final verification before commit:
+
+- `npm test -- --run OfficePage.test.ts` -> 32 passed.
+- ESLint for `OfficePage.tsx`, `officeView.ts`, `OfficePage.test.ts` passed.
+- `npm run build` passed with the existing Vite large-chunk warning.
+- Backend focused office tests -> 18 passed in 1.02s.
+- `git diff --check` passed.
+- Browser smoke `/office?stage14c=safe-pulse-timeline`: pulse timeline exists, pulse item count 1, Stage 14-A tracking cues 11, Stage 14-B room meters 4, raw leak regex false, console JS errors none.
