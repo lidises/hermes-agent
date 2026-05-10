@@ -1,10 +1,10 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-10 00:50 KST
+Last updated: 2026-05-10 01:05 KST
 
 ## Current phase
 
-Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, and Stage 14-A through Stage 14-Q safe dynamic-tracking/readability layers are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
+Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, Stage 14-A through Stage 14-Q safe dynamic-tracking/readability layers, and Stage 16-B through Stage 16-E safe realtime/motion layers are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
 
 Current Stage 9-E result: the `/office` page now uses Korean for primary headings, buttons, helper text, safety copy, status labels, inspector field labels, and office-map room/zone labels while keeping stable technical identifiers such as DTO, OfficeState, source IDs, cron, and enum-like adapter values visible for debugging.
 
@@ -68,7 +68,7 @@ Current Stage 14-Q result: `/office` now adds a safe HUD readability strip in th
 
 Current Stage 16-D result in progress: Stage 16-D now adds a browser-local safe motion heartbeat on branch `ai-office-stage16d-safe-motion-heartbeat-20260510`. `buildOfficeSafeMotionHeartbeat(...)` maps the Stage 16-C stream posture plus local polling tick/failure metadata into generated Korean heartbeat labels, phase (`idle|scan|pulse|hold`), intensity (`low|medium|high`), and decorative/read-only flags. `/office` polls `/api/office/events` while the tab is visible, increments a local safe tick on successful safe-event fetches, and renders `data-office-safe-motion-heartbeat` with mode/phase/intensity/enabled hooks plus CSS-only pulse/scan cues. This keeps Stage 16-C backend-safe stream/local fallback behavior and still excludes raw prompts, transcripts, task bodies, scripts, logs, provider/model identity, secrets, tokens, adapter errors, and task identity.
 
-Next phase after Stage 16-D: finish verification/commit on `ai-office-stage16d-safe-motion-heartbeat-20260510`. If even more motion is wanted after this branch, Stage 16-E should stay within the same safe event shape and can add richer spatial choreography over rooms/routes; do not add renderer dependencies, SSE/WebSocket, mutation controls, or raw payload exposure without explicit approval and tests.
+Next phase after Stage 16-E: commit/push the safe spatial choreography branch. If more live feel is still needed afterward, keep future work frontend-safe and evidence-driven before considering any SSE/WebSocket or renderer decision.
 
 Stage 6 slices were approved by the user, including proceeding through the recommended remaining slices. Stage 7 was approved with testing deferred until the end. Stage 8-A was approved as the next safe step by the user saying to proceed in order, and the user then requested items 1 through 3 to run automatically in sequence. The user also approved installing missing test/runtime extras as needed in earlier setup. No gateway restart, cron change, Kanban mutation, NAS/Obsidian write, service/config mutation, memory/skill update, pixel dependency, or mutation-control implementation has been performed. The local dashboard process was restarted only to smoke-test the newly built local frontend bundle.
 
@@ -78,7 +78,42 @@ Stage 6 slices were approved by the user, including proceeding through the recom
 
 
 
-## Stage 16-D safe motion heartbeat in progress
+
+## Stage 16-E safe spatial choreography completed
+
+Branch: `ai-office-stage16e-safe-spatial-choreography-20260510`
+
+Plan:
+
+- `docs/ai-office/plans/2026-05-10-stage-16e-safe-spatial-choreography.md`
+
+Implementation summary:
+
+- Added `OfficeSafeSpatialChoreography`, `OfficeSafeSpatialChoreographyItem`, and `buildOfficeSafeSpatialChoreography(events, heartbeat)`.
+- The helper derives only from Stage 16-C safe events plus Stage 16-D heartbeat posture: known room coordinates, safe event category, safe tone, safe count, and generated Korean copy.
+- `/office` now renders a CSS/SVG-only Stage 16-E spatial overlay above the existing map:
+  - `data-office-safe-spatial-choreography="true"`
+  - `data-office-safe-spatial-choreography-mode`
+  - `data-office-safe-spatial-choreography-item="room-pulse|route-sweep"`
+  - `data-office-safe-spatial-choreography-room`
+  - `data-office-safe-spatial-choreography-intensity`
+- First/static snapshots stay honest: when only `snapshot_static` is available, the overlay remains in `safe-spatial-idle` and does not fabricate route/room movement.
+
+Safety posture:
+
+- CSS/SVG/DOM only; no renderer dependency, canvas engine, sprite assets, persistent browser storage, mutation controls, SSE/WebSocket, or service/config changes.
+- No raw prompt/transcript/task_body/script/log/provider/model/secret/token/adapter error/task identity rendered; backend event `detail` is ignored by the helper.
+
+Verification 2026-05-10 01:05 KST:
+
+- Focused frontend test: `OfficePage.test.ts` 55 passed.
+- ESLint passed for `OfficePage.tsx`, `officeView.ts`, `OfficePage.test.ts`, and `api.ts`.
+- `npm run build` passed with the existing Vite large chunk warning only.
+- Backend focused office tests passed: 21 passed in 1.34s.
+- `git diff --check` passed.
+- Browser smoke `/office?stage16e=safe-spatial-choreography` passed: office-first layout, safe motion heartbeat, safe spatial choreography container in `safe-spatial-idle` for first/static snapshot, motion lane, raw leak false, console JS errors none.
+
+## Stage 16-D safe motion heartbeat completed
 
 Branch: `ai-office-stage16d-safe-motion-heartbeat-20260510`
 

@@ -479,6 +479,71 @@ code { font-size: 0.875rem; }
   opacity: 0.28;
   animation: none;
 }
+.office-safe-spatial-choreography,
+.office-safe-spatial-choreography__rooms {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 26;
+  width: 100%;
+  height: 100%;
+  color: rgba(147, 197, 253, 0.78);
+}
+.office-safe-spatial-choreography__item--route {
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-dasharray: 2 5;
+  filter: drop-shadow(0 0 8px currentColor);
+  opacity: 0.84;
+  animation: office-safe-spatial-route-sweep 2.1s ease-in-out infinite;
+}
+.office-safe-spatial-choreography__item--room {
+  position: absolute;
+  display: grid;
+  width: 2.4rem;
+  height: 2.4rem;
+  place-items: center;
+  color: rgba(147, 197, 253, 0.86);
+  transform: translate(-50%, -50%);
+}
+.office-safe-spatial-choreography__pulse,
+.office-safe-spatial-choreography__core {
+  position: absolute;
+  border-radius: 999px;
+}
+.office-safe-spatial-choreography__pulse {
+  inset: 0.22rem;
+  border: 1px solid color-mix(in srgb, currentColor 58%, transparent);
+  background: radial-gradient(circle, color-mix(in srgb, currentColor 22%, transparent), transparent 64%);
+  animation: office-safe-spatial-room-pulse 1.9s ease-in-out infinite;
+}
+.office-safe-spatial-choreography__core {
+  width: 0.34rem;
+  height: 0.34rem;
+  background: currentColor;
+  box-shadow: 0 0 12px currentColor;
+}
+.office-safe-spatial-choreography__item--high {
+  opacity: 0.96;
+  animation-duration: 1.18s;
+}
+.office-safe-spatial-choreography__item--high .office-safe-spatial-choreography__pulse {
+  animation-duration: 1.18s;
+}
+.office-safe-spatial-choreography__item--medium {
+  opacity: 0.8;
+}
+.office-safe-spatial-choreography__item--low {
+  opacity: 0.58;
+}
+.office-safe-spatial-choreography__item--idle {
+  opacity: 0.24;
+  animation: none;
+}
+.office-safe-spatial-choreography__item--idle .office-safe-spatial-choreography__pulse {
+  animation: none;
+}
 .office-safe-room-beacon {
   position: absolute;
   display: grid;
@@ -1021,6 +1086,15 @@ code { font-size: 0.875rem; }
   50% { opacity: 0.96; }
   100% { stroke-dashoffset: -12; opacity: 0.42; }
 }
+@keyframes office-safe-spatial-route-sweep {
+  0% { stroke-dashoffset: 0; opacity: 0.28; }
+  46% { opacity: 0.92; }
+  100% { stroke-dashoffset: -14; opacity: 0.28; }
+}
+@keyframes office-safe-spatial-room-pulse {
+  0%, 100% { opacity: 0.34; transform: scale(0.72); }
+  50% { opacity: 0.95; transform: scale(1.18); }
+}
 @keyframes office-safe-room-beacon-pulse {
   0%, 100% { opacity: 0.36; transform: scale(0.76); }
   50% { opacity: 0.96; transform: scale(1.08); }
@@ -1177,6 +1251,8 @@ code { font-size: 0.875rem; }
   55%, 100% { transform: translateX(120%); }
 }
 @media (prefers-reduced-motion: reduce) {
+  .office-safe-spatial-choreography__item--route,
+  .office-safe-spatial-choreography__pulse,
   .office-safe-motion-command::after,
   .office-safe-motion-heartbeat__pulse {
     animation: none;

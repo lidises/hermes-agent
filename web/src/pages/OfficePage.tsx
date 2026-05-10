@@ -56,6 +56,7 @@ import {
   buildOfficeSafeMotionCommands,
   buildOfficeSafeStreamPosture,
   buildOfficeSafeMotionHeartbeat,
+  buildOfficeSafeSpatialChoreography,
   buildOfficeSafeFloorLegend,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
@@ -522,6 +523,7 @@ function OfficeMap({
   const safeFloorLegend = buildOfficeSafeFloorLegend(latestDelta);
   const safeEventSubstrate = buildOfficeSafeEventSubstrate(latestDelta, { visibleCharacterCount: densityPlan.visibleCharacters.length, hasEventStream: safeStreamPosture.mode === "backend-safe-stream" });
   const safeMotionCommands = buildOfficeSafeMotionCommands(safeStreamPosture.events);
+  const safeSpatialChoreography = buildOfficeSafeSpatialChoreography(safeStreamPosture.events, safeMotionHeartbeat);
 
   return (
     <Card className="office-first-layout" data-office-first-layout="true">
@@ -692,6 +694,39 @@ function OfficeMap({
               />
             ))}
           </svg>
+          <svg className="office-safe-spatial-choreography" aria-label="Stage 16-E 안전 spatial choreography" data-office-safe-spatial-choreography="true" data-office-safe-spatial-choreography-mode={safeSpatialChoreography.mode} viewBox="0 0 100 100" preserveAspectRatio="none">
+            {safeSpatialChoreography.items.filter((item) => item.kind === "route-sweep").map((item) => (
+              <line
+                key={item.id}
+                x1={item.x}
+                y1={item.y}
+                x2={item.x2}
+                y2={item.y2}
+                className={`${item.className} ${safePulseToneClass(item.tone)}`}
+                aria-hidden={item.ariaHidden}
+                data-office-safe-spatial-choreography-item={item.kind}
+                data-office-safe-spatial-choreography-room={item.roomId}
+                data-office-safe-spatial-choreography-intensity={item.intensity}
+              />
+            ))}
+          </svg>
+          <div className="office-safe-spatial-choreography__rooms" aria-hidden={safeSpatialChoreography.ariaHidden}>
+            {safeSpatialChoreography.items.filter((item) => item.kind === "room-pulse").map((item) => (
+              <span
+                key={item.id}
+                className={`${item.className} ${safePulseToneClass(item.tone)}`}
+                style={{ left: `${item.x}%`, top: `${item.y}%` }}
+                title={item.detail}
+                aria-hidden={item.ariaHidden}
+                data-office-safe-spatial-choreography-item={item.kind}
+                data-office-safe-spatial-choreography-room={item.roomId}
+                data-office-safe-spatial-choreography-intensity={item.intensity}
+              >
+                <span className="office-safe-spatial-choreography__pulse" />
+                <span className="office-safe-spatial-choreography__core" />
+              </span>
+            ))}
+          </div>
           <div className="absolute left-4 top-4 z-40 border border-current/10 bg-black/35 px-2 py-1 text-[10px] uppercase tracking-[0.22em] text-midground/80">안전 오피스 투영</div>
           {OFFICE_ZONE_PANELS.map((zone) => (
             <div key={zone.id} className={`absolute z-0 border shadow-inner ${zone.className}`} style={zone.style} aria-hidden="true">
@@ -795,6 +830,7 @@ function OfficeMap({
               <span className="text-emerald-100">Stage 14-J minimap · {safeTacticalMinimap.summary}</span>
               <span className="text-lime-100">Stage 14-K ticker · {safeTacticalTicker.headline}</span>
               <span className="text-cyan-100">Stage 14-N floor · {safeFloorLegend.summary}</span>
+              <span className="text-blue-100">Stage 16-E spatial · {safeSpatialChoreography.summary}</span>
               {flows.map((flow) => {
                 const changedFlow = changedFlowById.get(`${flow.from}->${flow.to}`);
                 return (

@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-10 00:50 KST
+Last updated: 2026-05-10 01:05 KST
 
 ## Start here after `/new`
 
@@ -64,7 +64,36 @@ When not to rely on `/goal` alone:
 
 ## Current next stage
 
-Stage 16-D is now the active implementation stage on `ai-office-stage16d-safe-motion-heartbeat-20260510`: make the Stage 16-C safe event endpoint visibly drive a safe heartbeat/scan cadence in `/office`, without raw event content, renderer dependencies, persistent storage, mutation controls, SSE, or WebSocket.
+Stage 16-E is now implemented on `ai-office-stage16e-safe-spatial-choreography-20260510`: it adds CSS/SVG-only safe spatial choreography over `/office` from Stage 16-C safe events and Stage 16-D heartbeat posture, without raw event content, renderer dependencies, persistent storage, mutation controls, SSE, or WebSocket. Immediate next action is commit/push Stage 16-E.
+
+
+Stage 16-E current implementation:
+
+- `buildOfficeSafeSpatialChoreography(events, heartbeat)` maps safe events to generated `room-pulse` and `route-sweep` items.
+- `/office` renders the spatial choreography overlay inside the existing CSS/SVG map.
+- New smoke hooks:
+  - `data-office-safe-spatial-choreography="true"`
+  - `data-office-safe-spatial-choreography-mode`
+  - `data-office-safe-spatial-choreography-item="room-pulse|route-sweep"`
+  - `data-office-safe-spatial-choreography-room`
+  - `data-office-safe-spatial-choreography-intensity`
+- First/static snapshots remain `safe-spatial-idle`; no fabricated route movement is shown without safe event activity.
+
+Verification completed:
+
+- Focused frontend test: `OfficePage.test.ts` 55 passed.
+- ESLint passed for `OfficePage.tsx`, `officeView.ts`, `OfficePage.test.ts`, and `api.ts`.
+- `npm run build` passed with the existing Vite large chunk warning only.
+- Backend focused office tests passed: 21 passed in 1.34s.
+- `git diff --check` passed.
+- Browser smoke `/office?stage16e=safe-spatial-choreography` passed: safe motion heartbeat, safe spatial choreography container, idle first/static posture, motion lane, raw leak false, and console JS errors none.
+
+Immediate next action: commit/push Stage 16-E:
+
+- `git commit -m "feat(office): add safe spatial choreography"`
+- `git push origin ai-office-stage16e-safe-spatial-choreography-20260510`
+
+Recommended next implementation stage after Stage 16-E: pause for PR/readiness consolidation unless the user asks for more motion. Any future motion should stay CSS/SVG, read-only, and raw-free unless explicitly approved otherwise.
 
 Stage 16-D current implementation:
 
@@ -90,14 +119,6 @@ Verification completed:
 - Backend focused office tests passed: 21 passed in 1.02s.
 - `git diff --check` passed.
 - Browser smoke `/office?stage16d=safe-motion-heartbeat` passed: safe event substrate, stream status, heartbeat mode/phase/intensity hooks, heartbeat items, motion lane, raw leak false, and console JS errors none.
-
-Immediate next action: commit/push Stage 16-D:
-
-- `git commit -m "feat(office): add safe motion heartbeat"`
-- `git push origin ai-office-stage16d-safe-motion-heartbeat-20260510`
-
-Recommended next implementation stage after Stage 16-D: if more movement is still desired, Stage 16-E can add richer safe spatial choreography over rooms/routes using the same safe event shape. Keep it CSS/SVG, read-only, and raw-free unless explicitly approved otherwise.
-
 
 Stage 9-E current implementation:
 

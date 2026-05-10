@@ -662,6 +662,33 @@ export type OfficeSafeMotionHeartbeatOptions = {
   reducedMotion: boolean;
 };
 
+export type OfficeSafeSpatialChoreographyItem = {
+  id: string;
+  kind: "room-pulse" | "route-sweep";
+  roomId: OfficeMapNode["id"];
+  toRoomId?: OfficeMapNode["id"];
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  intensity: OfficeSafeRoomBeaconIntensity;
+  x: number;
+  y: number;
+  x2?: number;
+  y2?: number;
+  className: string;
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeSpatialChoreography = {
+  stageLabel: string;
+  mode: "safe-spatial-motion" | "safe-spatial-idle";
+  summary: string;
+  items: OfficeSafeSpatialChoreographyItem[];
+  ariaHidden: true;
+  interactive: false;
+};
+
 export function textField(row: Record<string, unknown>, key: string): string {
   const value = row[key];
   return typeof value === "string" && value.length > 0 ? value : "—";
@@ -1052,6 +1079,65 @@ export function buildOfficeSafeMotionHeartbeat(posture: OfficeSafeStreamPosture 
       { id: "cadence", label: "박자", detail: cadenceDetail, tone: options.failureCount > 0 ? "warning" : "positive" },
       { id: "motion", label: "움직임", detail: motionDetail, tone: intensity === "high" ? "negative" : intensity === "medium" ? "warning" : "neutral" },
     ],
+    ariaHidden: true,
+    interactive: false,
+  };
+}
+
+function spatialChoreographyIntensity(event: OfficeSafeEvent, heartbeat: OfficeSafeMotionHeartbeat): OfficeSafeRoomBeaconIntensity {
+  if (!heartbeat.motionEnabled) return "idle";
+  if (heartbeat.intensity === "high" || event.tone === "negative" || event.count >= 4) return "high";
+  if (heartbeat.intensity === "medium" || event.tone === "warning" || event.count >= 2) return "medium";
+  return "low";
+}
+
+export function buildOfficeSafeSpatialChoreography(events: OfficeSafeEvent[], heartbeat: OfficeSafeMotionHeartbeat): OfficeSafeSpatialChoreography {
+  const items = events
+    .filter((event) => event.category !== "snapshot_static")
+    .slice(0, 6)
+    .map((event): OfficeSafeSpatialChoreographyItem => {
+      const from = ROOM_BEACON_POSITION[event.roomId];
+      const to = event.toRoomId ? ROOM_BEACON_POSITION[event.toRoomId] : undefined;
+      const intensity = spatialChoreographyIntensity(event, heartbeat);
+      if (event.category === "flow_changed" && event.toRoomId && to) {
+        return {
+          id: `spatial-${event.id}`,
+          kind: "route-sweep",
+          roomId: event.roomId,
+          toRoomId: event.toRoomId,
+          label: "안전 route sweep",
+          detail: `${CHARACTER_ROOM_LABEL[event.roomId]}에서 ${CHARACTER_ROOM_LABEL[event.toRoomId]}로 · 안전 흐름`,
+          tone: event.tone,
+          intensity,
+          x: from.x,
+          y: from.y,
+          x2: to.x,
+          y2: to.y,
+          className: `office-safe-spatial-choreography__item office-safe-spatial-choreography__item--route office-safe-spatial-choreography__item--${intensity}`,
+          ariaHidden: true,
+          interactive: false,
+        };
+      }
+      return {
+        id: `spatial-${event.id}`,
+        kind: "room-pulse",
+        roomId: event.roomId,
+        label: `${CHARACTER_ROOM_LABEL[event.roomId]} 안전 pulse`,
+        detail: `${safeEventToneLabel(event.tone)} · 안전 이벤트 ${event.count}개`,
+        tone: event.tone,
+        intensity,
+        x: from.x,
+        y: from.y,
+        className: `office-safe-spatial-choreography__item office-safe-spatial-choreography__item--room office-safe-spatial-choreography__item--${intensity}`,
+        ariaHidden: true,
+        interactive: false,
+      };
+    });
+  return {
+    stageLabel: "Stage 16-E 안전 spatial choreography",
+    mode: items.length > 0 && heartbeat.motionEnabled ? "safe-spatial-motion" : "safe-spatial-idle",
+    summary: items.length > 0 ? `안전 공간 움직임 ${items.length}개 · ${heartbeat.phase}` : "안전 공간 움직임 대기 · 정적 posture",
+    items,
     ariaHidden: true,
     interactive: false,
   };

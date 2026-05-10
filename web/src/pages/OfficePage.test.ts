@@ -37,6 +37,7 @@ import {
   buildOfficeSafeMotionCommands,
   buildOfficeSafeStreamPosture,
   buildOfficeSafeMotionHeartbeat,
+  buildOfficeSafeSpatialChoreography,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -588,6 +589,29 @@ describe("OfficePage view helpers", () => {
     expect(fallback.mode).toBe("local-fallback");
     expect(fallback.intensity).toBe("low");
     expect(`${heartbeat.summary} ${heartbeat.items.map((item) => item.detail).join(" ")} ${fallback.summary}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|api_key|password|sk-/i);
+  });
+
+  it("builds safe Stage 16-E spatial choreography from heartbeat events", () => {
+    const local = buildOfficeSafeEventSubstrate(buildOfficeStateDelta(null, officeFixture()), { visibleCharacterCount: 11, hasEventStream: false });
+    const stream = buildOfficeSafeStreamPosture({
+      status: "loaded",
+      events: [
+        { id: "event-1", category: "workload_changed", room_id: "work", tone: "negative", count: 4, generated_at: "2026-05-10T00:00:00Z", redacted: true },
+        { id: "event-2", category: "flow_changed", room_id: "work", to_room_id: "automation", tone: "warning", count: 1, generated_at: "2026-05-10T00:00:00Z", redacted: true },
+        { id: "event-3", category: "source_health_changed", room_id: "routing", tone: "warning", count: 2, generated_at: "2026-05-10T00:00:00Z", redacted: true, detail: "raw provider token must not leak" },
+      ],
+      generated_at: "2026-05-10T00:00:00Z",
+    }, local);
+    const heartbeat = buildOfficeSafeMotionHeartbeat(stream, { pollStatus: "active", tick: 9, failureCount: 0, reducedMotion: false });
+
+    const choreography = buildOfficeSafeSpatialChoreography(stream.events, heartbeat);
+
+    expect(choreography.stageLabel).toBe("Stage 16-E 안전 spatial choreography");
+    expect(choreography.mode).toBe("safe-spatial-motion");
+    expect(choreography.items.map((item) => item.kind)).toEqual(["room-pulse", "route-sweep", "room-pulse"]);
+    expect(choreography.items[0]).toEqual(expect.objectContaining({ roomId: "work", x: 70, y: 30, intensity: "high", interactive: false, ariaHidden: true }));
+    expect(choreography.items[1]).toEqual(expect.objectContaining({ roomId: "work", toRoomId: "automation", x: 70, y: 30, x2: 24, y2: 67 }));
+    expect(`${choreography.summary} ${choreography.items.map((item) => `${item.label} ${item.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|api_key|password|sk-/i);
   });
 
   it("builds Stage 10-F usability summary for dense, missing-source, reduced-motion, and responsive states", () => {
