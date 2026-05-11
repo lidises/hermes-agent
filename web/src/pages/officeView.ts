@@ -551,6 +551,27 @@ export type OfficeEmptySourceCopyPlan = {
 
 export type OfficeEmptyStateHints = Record<"rooms" | "agents" | "workItems" | "automations" | "topics" | "events", string>;
 
+export type OfficeLiveOperationsCueId = "working" | "reviewing" | "report-ready" | "blocked" | "automation-running";
+
+export type OfficeLiveOperationsCue = {
+  id: OfficeLiveOperationsCueId;
+  label: string;
+  detail: string;
+  count: number;
+  roomId: OfficeMapNode["id"];
+  tone: OfficeDeltaBadge["tone"];
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeLiveOperationsLayer = {
+  stageLabel: string;
+  summary: string;
+  detail: string;
+  cues: OfficeLiveOperationsCue[];
+  redactionNote: string;
+};
+
 export type OfficeUsabilityItem = {
   id: "density" | "source-fallback" | "motion" | "responsive" | "korean-copy";
   label: string;
@@ -1344,6 +1365,58 @@ export function buildOfficePaperclipMapProjection(sources: OfficePaperclipWorkbe
     detail: slots.length > 0 ? `CSS/SVG 보관함 슬롯 ${slots.length}개` : "표시할 안전 source 슬롯이 없습니다.",
     slots,
     ariaLabel: "안전 Paperclip source-tag 보관함 투영",
+  };
+}
+
+function liveWorkStatus(value: unknown): OfficeLiveOperationsCueId | "done" | "unknown" {
+  const text = typeof value === "string" ? value.toLowerCase() : "";
+  if (text.includes("block")) return "blocked";
+  if (text.includes("report") || text.includes("summary") || text.includes("done")) return "report-ready";
+  if (text.includes("review")) return "reviewing";
+  if (text.includes("run") || text.includes("progress") || text.includes("active") || text.includes("ready") || text.includes("todo") || text.includes("triage")) return "working";
+  if (text.includes("archive")) return "done";
+  return "unknown";
+}
+
+function liveAutomationActive(job: Record<string, unknown>): boolean {
+  const state = String(job.state ?? "").toLowerCase();
+  const lastStatus = String(job.last_status ?? "").toLowerCase();
+  const scheduledOrRunning = state.includes("run") || state.includes("sched") || state.includes("active");
+  return scheduledOrRunning || ((lastStatus.includes("run") || lastStatus.includes("active")) && !state.includes("done") && !state.includes("idle"));
+}
+
+export function buildOfficeLiveOperationsLayer(state: OfficeState): OfficeLiveOperationsLayer {
+  const counts: Record<OfficeLiveOperationsCueId, number> = {
+    working: 0,
+    reviewing: 0,
+    "report-ready": 0,
+    blocked: 0,
+    "automation-running": 0,
+  };
+
+  state.work_items.forEach((item) => {
+    const status = liveWorkStatus(item.status);
+    if (status === "working" || status === "reviewing" || status === "report-ready" || status === "blocked") counts[status] += 1;
+  });
+  counts["automation-running"] = state.automations.filter((job) => liveAutomationActive(job)).length;
+
+  const cueSpecs: Array<Omit<OfficeLiveOperationsCue, "count" | "ariaHidden" | "interactive">> = [
+    { id: "working", label: "작업 중", detail: "safe work item 상태 집계", roomId: "work", tone: "positive" },
+    { id: "reviewing", label: "리뷰 중", detail: "review 상태 항목 집계", roomId: "work", tone: "neutral" },
+    { id: "report-ready", label: "보고 대기", detail: "보고/요약 준비 상태 집계", roomId: "work", tone: "positive" },
+    { id: "blocked", label: "주의 필요", detail: "차단된 work item 집계", roomId: "work", tone: "negative" },
+    { id: "automation-running", label: "자동화", detail: "예약/실행 중 자동화 집계", roomId: "automation", tone: "neutral" },
+  ];
+  const cues = cueSpecs
+    .map<OfficeLiveOperationsCue>((cue) => ({ ...cue, count: counts[cue.id], ariaHidden: true, interactive: false }))
+    .filter((cue) => cue.count > 0);
+
+  return {
+    stageLabel: "Live operations layer",
+    summary: `작업 중 ${counts.working} · 리뷰 ${counts.reviewing} · 보고 ${counts["report-ready"]} · 주의 ${counts.blocked} · 자동화 ${counts["automation-running"]}`,
+    detail: "safe DTO의 상태 문자열을 allowlist 집계로 바꿔 오피스 운영감을 표시합니다.",
+    cues,
+    redactionNote: "원문 업무 제목·본문·프롬프트·로그·경로·비밀값은 live operations layer에 포함하지 않습니다.",
   };
 }
 

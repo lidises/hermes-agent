@@ -14,6 +14,7 @@ import {
   buildOfficeMapPolishPlan,
   buildOfficeResponsiveReadabilityPlan,
   buildOfficeRoomActivityMeters,
+  buildOfficeLiveOperationsLayer,
   buildOfficeSafePulseTimeline,
   buildOfficeSafeBreadcrumbTrail,
   buildOfficeSafeRouteCompass,
@@ -124,10 +125,10 @@ describe("OfficePage view helpers", () => {
           path: "/Users/lidises/nas/secret/raw/path",
           prompt: "raw prompt must not appear",
           transcript: "raw transcript must not appear",
-        } as any,
+        } as unknown as OfficeState["data_sources"][number],
       ],
       provenance: [
-        { source: "paperclip:clinic-blog", label: "Paperclip safe manifest", detail: "raw path must not appear" } as any,
+        { source: "paperclip:clinic-blog", label: "Paperclip safe manifest", detail: "raw path must not appear" } as unknown as OfficeState["provenance"][number],
       ],
     });
 
@@ -162,7 +163,7 @@ describe("OfficePage view helpers", () => {
           tags: ["source:koreandeer-shoulder", "token must not appear"],
           path: "/Users/lidises/nas/private/full/path",
           body: "secret body must not appear",
-        } as any,
+        } as unknown as OfficeState["data_sources"][number],
       ],
     });
     const source = buildOfficePaperclipWorkbench(state).sources[0];
@@ -173,6 +174,30 @@ describe("OfficePage view helpers", () => {
     expect(inspector.fields.map(([label]) => label)).toEqual(["id", "종류", "상태", "항목", "경고", "릴레이", "상태 시점", "태그", "가림"]);
     expect(projection.slots[0]).toMatchObject({ id: "paperclip:clinic-blog", label: "clinic-blog", health: "ok", x: 18, y: 50 });
     expect(JSON.stringify({ inspector, projection })).not.toMatch(/raw|prompt|transcript|secret|token|\/Users\/lidises\/nas|body/i);
+  });
+
+  it("builds live operations layer from safe aggregate state without raw work details", () => {
+    const layer = buildOfficeLiveOperationsLayer(officeFixture({
+      generated_at: "2026-05-11T09:00:00Z",
+      work_items: [
+        { id: "w1", status: "running", title: "raw task body must not appear", body: "secret body" } as unknown as OfficeState["work_items"][number],
+        { id: "w2", status: "blocked", title: "blocked private title", result: "raw result" } as unknown as OfficeState["work_items"][number],
+        { id: "w3", status: "reviewing", prompt: "raw prompt" } as unknown as OfficeState["work_items"][number],
+        { id: "w4", status: "report_ready", transcript: "raw transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      automations: [
+        { id: "a1", state: "scheduled", last_status: "ok", script: "/Users/lidises/private.py" } as unknown as OfficeState["automations"][number],
+        { id: "a2", state: "done", last_status: "ok", script: "/Users/lidises/private-done.py" } as unknown as OfficeState["automations"][number],
+      ],
+      data_sources: [{ id: "paperclip:rpg-office-runtime-roadmap", status: "ok", checked_at: "2026-05-11T08:00:00Z", item_count: 9, warning_count: 0 }],
+    }));
+
+    expect(layer.stageLabel).toBe("Live operations layer");
+    expect(layer.summary).toBe("작업 중 1 · 리뷰 1 · 보고 1 · 주의 1 · 자동화 1");
+    expect(layer.cues.map((cue) => cue.id)).toEqual(["working", "reviewing", "report-ready", "blocked", "automation-running"]);
+    expect(layer.cues.find((cue) => cue.id === "report-ready")).toMatchObject({ label: "보고 대기", count: 1, roomId: "work", tone: "positive" });
+    expect(layer.cues.every((cue) => cue.ariaHidden && cue.interactive === false)).toBe(true);
+    expect(JSON.stringify(layer)).not.toMatch(/raw|prompt|transcript|secret|body|result|\/Users\/lidises|private/i);
   });
 
   it("builds attention rail from blocked work, failed automations, and unhealthy sources", () => {

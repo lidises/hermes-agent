@@ -37,6 +37,7 @@ import {
   buildOfficeMapPolishPlan,
   buildOfficeResponsiveReadabilityPlan,
   buildOfficeRoomActivityMeters,
+  buildOfficeLiveOperationsLayer,
   buildOfficeSafePulseTimeline,
   buildOfficeSafeBreadcrumbTrail,
   buildOfficeSafeRouteCompass,
@@ -1436,6 +1437,7 @@ export default function OfficePage() {
   const emptySourceCopy = useMemo(() => buildOfficeEmptySourceCopyPlan(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const paperclipWorkbench = useMemo(() => buildOfficePaperclipWorkbench(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const paperclipMapProjection = useMemo(() => buildOfficePaperclipMapProjection(paperclipWorkbench.sources), [paperclipWorkbench]);
+  const liveOperationsLayer = useMemo(() => buildOfficeLiveOperationsLayer(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const safeMissionClock = useMemo(
     () => buildOfficeSafeMissionClock({
       liveTracking,
@@ -1749,6 +1751,34 @@ export default function OfficePage() {
                 : "기본은 수동 새로고침입니다. 실시간 추적은 이 브라우저 탭에서만 켜집니다."}
             </div>
           </details>
+        </div>
+        <div className="mt-4 border border-emerald-300/20 bg-emerald-950/10 p-3" data-office-live-operations-layer="true">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-200">
+                <Activity className="h-4 w-4" /> {liveOperationsLayer.stageLabel}
+              </div>
+              <div className="mt-1 text-sm text-midground/75" data-office-live-operations-summary="true">{liveOperationsLayer.summary}</div>
+            </div>
+            <div className="text-xs text-midground/55">{liveOperationsLayer.redactionNote}</div>
+          </div>
+          {liveOperationsLayer.cues.length > 0 ? (
+            <div className="mt-3 flex flex-wrap gap-2" aria-hidden="true">
+              {liveOperationsLayer.cues.map((cue) => (
+                <span
+                  key={cue.id}
+                  className={`border px-2 py-1 text-xs ${safePulseToneClass(cue.tone)}`}
+                  title={cue.detail}
+                  aria-hidden={cue.ariaHidden}
+                  data-office-live-operations-cue={cue.id}
+                >
+                  {cue.label} {cue.count}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-3 text-xs text-midground/55" data-office-live-operations-empty="true">현재 표시할 운영 cue가 없습니다. 빈 상태도 안전한 read-only 투영입니다.</div>
+          )}
         </div>
       </div>
 
