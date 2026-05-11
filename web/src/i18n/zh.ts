@@ -80,6 +80,13 @@ export const zh: Translations = {
       sessions: "会话",
       skills: "技能",
     },
+    navGroups: {
+      library: "工具箱",
+      operations: "运营",
+      other: "更多",
+      primary: "主要",
+      settings: "设置与帮助",
+    },
     modelToolsSheetSubtitle: "与工具",
     modelToolsSheetTitle: "模型",
     navigation: "导航",

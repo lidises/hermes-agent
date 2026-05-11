@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-10 01:05 KST
+Last updated: 2026-05-11 17:01 KST
 
 ## Start here after `/new`
 
@@ -64,7 +64,7 @@ When not to rely on `/goal` alone:
 
 ## Current next stage
 
-Stage 16-E is now implemented on `ai-office-stage16e-safe-spatial-choreography-20260510`: it adds CSS/SVG-only safe spatial choreography over `/office` from Stage 16-C safe events and Stage 16-D heartbeat posture, without raw event content, renderer dependencies, persistent storage, mutation controls, SSE, or WebSocket. Immediate next action is commit/push Stage 16-E.
+Stage 17-A is now implemented on `ai-office-stage16e-safe-spatial-choreography-20260510`: the dashboard sidebar keeps primary routes visible and folds secondary built-in routes into 운영/도구함/설정·도움말 groups, with a documented Paperclip bridge direction. Immediate next action is verification, then push the branch if the smoke checks pass.
 
 
 Stage 16-E current implementation:
@@ -88,12 +88,15 @@ Verification completed:
 - `git diff --check` passed.
 - Browser smoke `/office?stage16e=safe-spatial-choreography` passed: safe motion heartbeat, safe spatial choreography container, idle first/static posture, motion lane, raw leak false, and console JS errors none.
 
-Immediate next action: commit/push Stage 16-E:
+Immediate next action: verify and push Stage 17-A:
 
-- `git commit -m "feat(office): add safe spatial choreography"`
+- `cd web && npm test -- --run App.test.ts`
+- `cd web && ./node_modules/.bin/eslint src/App.tsx src/App.test.ts src/i18n/en.ts src/i18n/ko.ts src/i18n/zh.ts src/i18n/types.ts`
+- `cd web && npm run build`
+- Browser smoke `/office`: sidebar shows 세션/오피스 plus folded 운영/도구함/설정·도움말 groups; Office scene still renders; raw leak false; console errors none.
 - `git push origin ai-office-stage16e-safe-spatial-choreography-20260510`
 
-Recommended next implementation stage after Stage 16-E: pause for PR/readiness consolidation unless the user asks for more motion. Any future motion should stay CSS/SVG, read-only, and raw-free unless explicitly approved otherwise.
+Recommended next implementation/design stage after Stage 17-A: decide the Paperclip bridge connection surface before writing runtime code. First Paperclip pass should be read-only, folded into the existing Office/source/plugin model, and safe DTO-only. Do not expose raw Paperclip prompts/transcripts/tool args/task bodies/logs/secrets/provider identity, do not add mutation controls, and do not create a new always-visible top-level Paperclip sidebar item by default.
 
 Stage 16-D current implementation:
 

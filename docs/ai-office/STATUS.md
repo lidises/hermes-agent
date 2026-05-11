@@ -1,10 +1,10 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-10 01:05 KST
+Last updated: 2026-05-11 17:01 KST
 
 ## Current phase
 
-Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, Stage 14-A through Stage 14-Q safe dynamic-tracking/readability layers, and Stage 16-B through Stage 16-E safe realtime/motion layers are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
+Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, Stage 14-A through Stage 14-Q safe dynamic-tracking/readability layers, Stage 16-B through Stage 16-E safe realtime/motion layers, and Stage 17-A sidebar simplification/Paperclip bridge planning are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
 
 Current Stage 9-E result: the `/office` page now uses Korean for primary headings, buttons, helper text, safety copy, status labels, inspector field labels, and office-map room/zone labels while keeping stable technical identifiers such as DTO, OfficeState, source IDs, cron, and enum-like adapter values visible for debugging.
 
@@ -68,16 +68,35 @@ Current Stage 14-Q result: `/office` now adds a safe HUD readability strip in th
 
 Current Stage 16-D result in progress: Stage 16-D now adds a browser-local safe motion heartbeat on branch `ai-office-stage16d-safe-motion-heartbeat-20260510`. `buildOfficeSafeMotionHeartbeat(...)` maps the Stage 16-C stream posture plus local polling tick/failure metadata into generated Korean heartbeat labels, phase (`idle|scan|pulse|hold`), intensity (`low|medium|high`), and decorative/read-only flags. `/office` polls `/api/office/events` while the tab is visible, increments a local safe tick on successful safe-event fetches, and renders `data-office-safe-motion-heartbeat` with mode/phase/intensity/enabled hooks plus CSS-only pulse/scan cues. This keeps Stage 16-C backend-safe stream/local fallback behavior and still excludes raw prompts, transcripts, task bodies, scripts, logs, provider/model identity, secrets, tokens, adapter errors, and task identity.
 
-Next phase after Stage 16-E: commit/push the safe spatial choreography branch. If more live feel is still needed afterward, keep future work frontend-safe and evidence-driven before considering any SSE/WebSocket or renderer decision.
+Next phase after Stage 17-A: verify/push the sidebar simplification branch, then decide the Paperclip bridge connection surface before implementing any read-only adapter/plugin. Keep Paperclip first pass folded/read-only/raw-free; do not expose a new always-visible top-level menu or mutation controls without a separate approval model.
 
 Stage 6 slices were approved by the user, including proceeding through the recommended remaining slices. Stage 7 was approved with testing deferred until the end. Stage 8-A was approved as the next safe step by the user saying to proceed in order, and the user then requested items 1 through 3 to run automatically in sequence. The user also approved installing missing test/runtime extras as needed in earlier setup. No gateway restart, cron change, Kanban mutation, NAS/Obsidian write, service/config mutation, memory/skill update, pixel dependency, or mutation-control implementation has been performed. The local dashboard process was restarted only to smoke-test the newly built local frontend bundle.
 
+## Stage 17-A sidebar simplification and Paperclip bridge planning completed
 
+Branch: `ai-office-stage16e-safe-spatial-choreography-20260510`
 
+Plan:
 
+- `docs/ai-office/plans/2026-05-11-sidebar-simplification-paperclip-bridge.md`
 
+Implementation summary:
 
+- Added `buildSidebarNavGroups(items)` in `web/src/App.tsx`.
+- Left sidebar now keeps primary routes visible and folds secondary built-in routes into Korean-first groups:
+  - `운영`: analytics/models/logs/cron
+  - `도구함`: skills/plugins/profiles
+  - `설정 · 도움말`: config/keys/docs
+  - `더 보기`: future unknown built-in entries
+- Active child routes auto-open their folded group.
+- Plugin tabs remain in the existing plugin section instead of becoming permanent top-level clutter.
+- Added `web/src/App.test.ts` coverage so sidebar grouping remains stable.
+- Documented a Paperclip bridge direction: read-only, folded, safe DTO/source projection first; no raw prompts/transcripts/tool args/task bodies/logs/secrets/provider identity, no mutation controls, and no new always-visible top-level Paperclip menu by default.
 
+Safety posture:
+
+- Frontend/sidebar organization and docs only.
+- No backend/API/schema changes, Paperclip runtime connection, service/config mutation, persistent browser storage, or mutation controls.
 
 ## Stage 16-E safe spatial choreography completed
 
