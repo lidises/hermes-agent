@@ -854,31 +854,31 @@ function OfficeMap({
             );
           })}
           <div className={`${polishPlan.legendClassName} ${responsivePlan.railClassName}`} data-office-polish-legend="true" data-office-responsive-rail="true">
-            <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] uppercase tracking-[0.16em]">
-              <span className="text-emerald-200">{polishPlan.stageLabel}</span>
-              <span className="text-sky-200">{responsivePlan.stageLabel} · {responsivePlan.viewportMode === "narrow" ? "좁은 화면" : "데스크톱"}</span>
-              <span className="text-lime-200">Stage 14-A 동적 추적 · 큐 {trackingCues.length}개</span>
-              <span className="text-amber-200">Stage 14-B 방 활동 · 미터 {roomActivityMeters.length}개</span>
-              <span className="text-fuchsia-200">Stage 14-C pulse · {safePulseTimeline.items.length}개</span>
-              <span className="text-cyan-200">Stage 14-D breadcrumb · {safeBreadcrumbTrail.segments.length}개</span>
-              <span className="text-rose-200">Stage 14-E compass · {safeRouteCompass.heading}</span>
-              <span className="text-violet-200">Stage 14-F focus · {safeFocusLane.items[0]?.label ?? "대기"}</span>
-              <span className="text-orange-200">Stage 14-G attention · {safeAttentionStrip.heading}</span>
-              <span className="text-amber-100">Stage 14-H beacons · {safeRoomBeacons.beacons.filter((beacon) => beacon.weight > 0).length}개</span>
-              <span className="text-teal-100">Stage 14-I flow · {safeFlowPulseBands.bands.length}개</span>
-              <span className="text-emerald-100">Stage 14-J minimap · {safeTacticalMinimap.summary}</span>
-              <span className="text-lime-100">Stage 14-K ticker · {safeTacticalTicker.headline}</span>
-              <span className="text-cyan-100">Stage 14-N floor · {safeFloorLegend.summary}</span>
-              <span className="text-blue-100">Stage 16-E spatial · {safeSpatialChoreography.summary}</span>
-              {flows.map((flow) => {
-                const changedFlow = changedFlowById.get(`${flow.from}->${flow.to}`);
-                return (
-                  <span key={`${flow.from}-${flow.to}`} className={changedFlow ? changedFlowToneClass(changedFlow.tone) : mapFlowTone(flow.health)}>
-                    {flow.label} · {HEALTH_LABEL[flow.health]}{changedFlow ? " · 방금 변경" : ""}
-                  </span>
-                );
-              })}
+            <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] uppercase tracking-[0.16em]" data-office-map-compact-header="true">
+              <span className="text-emerald-200">오피스 요약</span>
+              <span className="text-sky-200">{responsivePlan.viewportMode === "narrow" ? "좁은 화면" : "데스크톱"} · {densityPlan.label}</span>
+              <span className="text-lime-200">추적 {trackingCues.length} · 방 활동 {roomActivityMeters.length}</span>
+              <span className="text-teal-100">흐름 {safeFlowPulseBands.bands.length} · 공간 {safeSpatialChoreography.items.length}</span>
             </div>
+            <div className="mb-3 grid gap-2 text-xs md:grid-cols-3" data-office-map-summary="true">
+              <div className="border border-emerald-400/20 bg-emerald-950/10 p-2">
+                <div className="text-[10px] uppercase tracking-[0.16em] text-emerald-100/65">핵심 상태</div>
+                <div className="mt-1 font-semibold text-emerald-100">{safeFloorLegend.summary}</div>
+              </div>
+              <div className="border border-sky-400/20 bg-sky-950/10 p-2">
+                <div className="text-[10px] uppercase tracking-[0.16em] text-sky-100/65">최근 신호</div>
+                <div className="mt-1 font-semibold text-sky-100">{safeTacticalTicker.headline}</div>
+              </div>
+              <div className="border border-blue-400/20 bg-blue-950/10 p-2">
+                <div className="text-[10px] uppercase tracking-[0.16em] text-blue-100/65">공간 움직임</div>
+                <div className="mt-1 font-semibold text-blue-100">{safeSpatialChoreography.summary}</div>
+              </div>
+            </div>
+            <details className="office-map-diagnostics-drawer border border-current/15 bg-black/15 p-3 text-xs" data-office-map-diagnostics-drawer="true">
+              <summary className="cursor-pointer select-none font-semibold uppercase tracking-[0.16em] text-midground/80 hover:text-foreground">
+                세부 진단 열기 · Stage 14/16 rail {trackingCues.length + roomActivityMeters.length + safePulseTimeline.items.length + safeBreadcrumbTrail.segments.length + safeFocusLane.items.length + safeAttentionStrip.chips.length}개 신호
+              </summary>
+              <div className="mt-3 border-t border-current/10 pt-3">
             <div className="mb-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-semibold tracking-[0.14em] text-midground/75" aria-label="Stage 11-B CSS/SVG 정돈 메모">
               {polishPlan.notes.map((note) => <span key={note}>{note}</span>)}
             </div>
@@ -1080,7 +1080,11 @@ function OfficeMap({
               <span>흐름 표식: 방금 변경</span>
               <span>캐릭터 Enter: 안전 정보</span>
             </div>
-            이 지도는 시각 인덱스입니다. 움직이는 캐릭터, 액션 칩, 방 사이 흐름 표식, 캐릭터 살펴보기는 안전 개수/상태/변화의 표시일 뿐이며 원문 프롬프트, 대화 기록, cron 스크립트, 작업 본문, 로그, 인증 정보, 비밀값은 브라우저 DTO 밖에 둡니다.
+            <div className="mt-3 border border-emerald-400/15 bg-emerald-950/10 p-2 text-[11px] leading-5 text-emerald-100/80">
+              이 지도는 시각 인덱스입니다. 움직이는 캐릭터, 액션 칩, 방 사이 흐름 표식, 캐릭터 살펴보기는 안전 개수/상태/변화의 표시일 뿐이며 원문 프롬프트, 대화 기록, cron 스크립트, 작업 본문, 로그, 인증 정보, 비밀값은 브라우저 DTO 밖에 둡니다.
+            </div>
+              </div>
+            </details>
             {densityPlan.hiddenCharacterCount > 0 ? <span className="ml-2 text-sky-200">현재 {densityPlan.label} 모드에서 캐릭터 {densityPlan.hiddenCharacterCount}개는 접혀 있습니다.</span> : null}
           </div>
         </div>
