@@ -485,6 +485,58 @@ export type OfficeSourceHealthSummary = {
   tone: OfficeDeltaBadge["tone"];
 };
 
+export type OfficePaperclipSourceType = "paperclip" | "nas_manifest" | "session_tag" | "relay_projection" | "unknown";
+
+export type OfficePaperclipRelay = "MacBook" | "WSL" | "VPS" | "unknown";
+
+export type OfficePaperclipTimingBucket = "fresh" | "recent" | "stale" | "unknown";
+
+export type OfficePaperclipWorkbenchSource = {
+  id: string;
+  label: string;
+  health: OfficeSourceStatus;
+  sourceType: OfficePaperclipSourceType;
+  itemCount: number;
+  warningCount: number;
+  relay: OfficePaperclipRelay;
+  tags: string[];
+  timingBucket: OfficePaperclipTimingBucket;
+  redactionNote: string;
+};
+
+export type OfficePaperclipWorkbench = {
+  stageLabel: string;
+  detail: string;
+  sources: OfficePaperclipWorkbenchSource[];
+  redactionNote: string;
+};
+
+export type OfficePaperclipInspector = {
+  kind: "Paperclip 안전 작업대";
+  title: string;
+  fields: Array<[string, string]>;
+};
+
+export type OfficePaperclipMapSlot = {
+  id: string;
+  label: string;
+  health: OfficeSourceStatus;
+  sourceType: OfficePaperclipSourceType;
+  x: number;
+  y: number;
+  itemCount: number;
+  warningCount: number;
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficePaperclipMapProjection = {
+  stageLabel: string;
+  detail: string;
+  slots: OfficePaperclipMapSlot[];
+  ariaLabel: string;
+};
+
 export type OfficeEmptySourceCopyItem = {
   label: string;
   detail: string;
@@ -1190,6 +1242,108 @@ export function buildOfficeSourceHealthSummary(state: OfficeState): OfficeSource
     totalWarningCount,
     missingSourceIds,
     tone,
+  };
+}
+
+const PAPERCLIP_SOURCE_TYPES = new Set<OfficePaperclipSourceType>(["paperclip", "nas_manifest", "session_tag", "relay_projection"]);
+const PAPERCLIP_RELAYS = new Set<OfficePaperclipRelay>(["MacBook", "WSL", "VPS"]);
+const PAPERCLIP_TAG_PATTERN = /^source:[a-z0-9][a-z0-9_-]{1,80}$/;
+
+function safePaperclipSourceType(value: unknown): OfficePaperclipSourceType {
+  return typeof value === "string" && PAPERCLIP_SOURCE_TYPES.has(value as OfficePaperclipSourceType) ? (value as OfficePaperclipSourceType) : "unknown";
+}
+
+function safePaperclipRelay(value: unknown): OfficePaperclipRelay {
+  return typeof value === "string" && PAPERCLIP_RELAYS.has(value as OfficePaperclipRelay) ? (value as OfficePaperclipRelay) : "unknown";
+}
+
+function safePaperclipLabel(id: string): string {
+  const withoutPrefix = id.replace(/^paperclip:/, "");
+  const basename = withoutPrefix.split(/[\\/]/).filter(Boolean).pop() ?? withoutPrefix;
+  const safe = basename.replace(/[^a-zA-Z0-9가-힣._:-]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+  return (safe || "paperclip-source").slice(0, 48);
+}
+
+function safePaperclipTags(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return Array.from(new Set(value.filter((tag): tag is string => typeof tag === "string" && PAPERCLIP_TAG_PATTERN.test(tag)))).slice(0, 8);
+}
+
+function buildPaperclipTimingBucket(checkedAt: string | undefined, generatedAt: string): OfficePaperclipTimingBucket {
+  if (!checkedAt) return "unknown";
+  const checked = Date.parse(checkedAt);
+  const reference = Date.parse(generatedAt);
+  if (!Number.isFinite(checked) || !Number.isFinite(reference)) return "unknown";
+  const ageMs = Math.max(reference - checked, 0);
+  if (ageMs <= 24 * 60 * 60 * 1000) return "fresh";
+  if (ageMs <= 7 * 24 * 60 * 60 * 1000) return "recent";
+  return "stale";
+}
+
+export function buildOfficePaperclipWorkbench(state: OfficeState): OfficePaperclipWorkbench {
+  const sources = state.data_sources
+    .filter((source) => source.id.startsWith("paperclip:") || PAPERCLIP_SOURCE_TYPES.has(safePaperclipSourceType((source as unknown as Record<string, unknown>).source_type)))
+    .map<OfficePaperclipWorkbenchSource>((source) => {
+      const row = source as unknown as Record<string, unknown>;
+      return {
+        id: source.id,
+        label: safePaperclipLabel(source.id),
+        health: source.status,
+        sourceType: source.id.startsWith("paperclip:") ? "paperclip" : safePaperclipSourceType(row.source_type),
+        itemCount: typeof source.item_count === "number" ? Math.max(0, source.item_count) : 0,
+        warningCount: typeof source.warning_count === "number" ? Math.max(0, source.warning_count) : 0,
+        relay: safePaperclipRelay(row.relay),
+        tags: safePaperclipTags(row.tags),
+        timingBucket: buildPaperclipTimingBucket(source.checked_at, state.generated_at),
+        redactionNote: "민감 원문·실행 인자·로그·경로·비밀값은 Paperclip 작업대 DTO에 포함하지 않습니다.",
+      };
+    });
+
+  return {
+    stageLabel: "Paperclip / 공유 컨텍스트 작업대",
+    detail: sources.length > 0 ? `안전 source-tag 투영 ${sources.length}개` : "연결된 Paperclip/source-tag 투영이 아직 없습니다.",
+    sources,
+    redactionNote: "브라우저에는 source id, 안전 태그, 개수, 건강도, 릴레이 allowlist, coarse timing bucket만 표시합니다.",
+  };
+}
+
+export function buildOfficePaperclipInspector(source: OfficePaperclipWorkbenchSource): OfficePaperclipInspector {
+  return {
+    kind: "Paperclip 안전 작업대",
+    title: source.label,
+    fields: [
+      ["id", source.id],
+      ["종류", source.sourceType],
+      ["상태", source.health],
+      ["항목", String(source.itemCount)],
+      ["경고", String(source.warningCount)],
+      ["릴레이", source.relay],
+      ["상태 시점", source.timingBucket],
+      ["태그", source.tags.length === 0 ? "—" : source.tags.join(" · ")],
+      ["가림", source.redactionNote],
+    ],
+  };
+}
+
+export function buildOfficePaperclipMapProjection(sources: OfficePaperclipWorkbenchSource[]): OfficePaperclipMapProjection {
+  const slots = sources.slice(0, 8).map<OfficePaperclipMapSlot>((source, index) => ({
+    id: source.id,
+    label: source.label,
+    health: source.health,
+    sourceType: source.sourceType,
+    x: 18 + (index % 4) * 21,
+    y: 50 + Math.floor(index / 4) * 24,
+    itemCount: source.itemCount,
+    warningCount: source.warningCount,
+    ariaHidden: true,
+    interactive: false,
+  }));
+
+  return {
+    stageLabel: "Paperclip archive shelf",
+    detail: slots.length > 0 ? `CSS/SVG 보관함 슬롯 ${slots.length}개` : "표시할 안전 source 슬롯이 없습니다.",
+    slots,
+    ariaLabel: "안전 Paperclip source-tag 보관함 투영",
   };
 }
 

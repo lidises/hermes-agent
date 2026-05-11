@@ -30,6 +30,9 @@ import {
   buildOfficeEmptySourceCopyPlan,
   buildOfficeEmptyStateHints,
   buildOfficeMapDensityPlan,
+  buildOfficePaperclipWorkbench,
+  buildOfficePaperclipInspector,
+  buildOfficePaperclipMapProjection,
   buildOfficeMapJumpTargets,
   buildOfficeMapPolishPlan,
   buildOfficeResponsiveReadabilityPlan,
@@ -77,6 +80,7 @@ import {
   type OfficeMapDensityMode,
   type OfficeMapFlow,
   type OfficeMapNode,
+  type OfficePaperclipWorkbenchSource,
   type OfficeRecentChange,
   type OfficeSceneObject,
   type OfficeStateDelta,
@@ -200,6 +204,40 @@ function SourceCard({ source, onInspect }: { source: OfficeDataSource; onInspect
       ) : null}
       <button type="button" onClick={onInspect} className="mt-3 flex items-center gap-1 text-xs uppercase tracking-[0.16em] text-midground/70 hover:text-foreground">
         <Eye className="h-3 w-3" /> 살펴보기
+      </button>
+    </div>
+  );
+}
+
+function PaperclipWorkbenchCard({ source, onInspect }: { source: OfficePaperclipWorkbenchSource; onInspect: () => void }) {
+  return (
+    <div className="border border-cyan-400/20 bg-cyan-950/10 p-3" data-office-paperclip-source={source.id}>
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-sm font-semibold text-foreground">{source.label}</span>
+        <StatusPill status={source.health} />
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-midground/75">
+        <div>
+          <div className="text-midground/45">항목</div>
+          <div className="text-foreground">{source.itemCount}</div>
+        </div>
+        <div>
+          <div className="text-midground/45">릴레이</div>
+          <div className="text-foreground">{source.relay}</div>
+        </div>
+        <div>
+          <div className="text-midground/45">종류</div>
+          <div className="text-foreground">{source.sourceType}</div>
+        </div>
+        <div>
+          <div className="text-midground/45">상태 시점</div>
+          <div className="text-foreground">{source.timingBucket}</div>
+        </div>
+      </div>
+      {source.tags.length > 0 ? <div className="mt-3 text-xs text-cyan-200/80">{source.tags.join(" · ")}</div> : null}
+      <div className="mt-2 text-[10px] leading-4 text-midground/50">{source.redactionNote}</div>
+      <button type="button" onClick={onInspect} className="mt-3 flex items-center gap-1 text-xs uppercase tracking-[0.16em] text-midground/70 hover:text-foreground">
+        <Eye className="h-3 w-3" /> 안전 요약 보기
       </button>
     </div>
   );
@@ -1396,6 +1434,8 @@ export default function OfficePage() {
   );
   const emptyHints = useMemo(() => buildOfficeEmptyStateHints(), []);
   const emptySourceCopy = useMemo(() => buildOfficeEmptySourceCopyPlan(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
+  const paperclipWorkbench = useMemo(() => buildOfficePaperclipWorkbench(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
+  const paperclipMapProjection = useMemo(() => buildOfficePaperclipMapProjection(paperclipWorkbench.sources), [paperclipWorkbench]);
   const safeMissionClock = useMemo(
     () => buildOfficeSafeMissionClock({
       liveTracking,
@@ -1797,6 +1837,60 @@ export default function OfficePage() {
           </CardContent>
         </Card>
       </div>
+
+      {showOverview ? (
+        <Card data-office-paperclip-workbench="true">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Database className="h-4 w-4" /> {paperclipWorkbench.stageLabel}
+            </CardTitle>
+            <div className="text-xs leading-5 text-midground/55">{paperclipWorkbench.detail} · {paperclipWorkbench.redactionNote}</div>
+          </CardHeader>
+          <CardContent>
+            {paperclipMapProjection.slots.length > 0 ? (
+              <div className="mb-4 border border-cyan-300/15 bg-black/20 p-3" aria-label={paperclipMapProjection.ariaLabel} data-office-paperclip-map-projection="true">
+                <div className="mb-2 flex items-center justify-between gap-3 text-xs">
+                  <span className="font-semibold uppercase tracking-[0.16em] text-cyan-100">{paperclipMapProjection.stageLabel}</span>
+                  <span className="text-midground/55">{paperclipMapProjection.detail}</span>
+                </div>
+                <div className="relative h-32 overflow-hidden border border-cyan-300/10 bg-gradient-to-br from-cyan-950/20 to-black/20" aria-hidden="true">
+                  <div className="absolute inset-x-4 top-1/2 border-t border-dashed border-cyan-200/15" />
+                  {paperclipMapProjection.slots.map((slot) => (
+                    <span
+                      key={`paperclip-map-${slot.id}`}
+                      className={`absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center border px-2 py-1 text-[10px] ${SOURCE_TONE[slot.health]}`}
+                      style={{ left: `${slot.x}%`, top: `${slot.y}%` }}
+                      title={`${slot.label} · ${slot.sourceType} · 항목 ${slot.itemCount} · 경고 ${slot.warningCount}`}
+                      data-office-paperclip-map-slot={slot.id}
+                    >
+                      <span>▤</span>
+                      <span className="max-w-20 truncate">{slot.label}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            {paperclipWorkbench.sources.length === 0 ? (
+              <div className="border border-dashed border-cyan-400/25 bg-cyan-950/10 p-4 text-sm text-cyan-100/75" data-office-paperclip-empty="true">
+                연결된 Paperclip/source-tag 투영이 없습니다. 이것은 원문 자료 부재가 아니라 안전 manifest가 아직 보고되지 않은 상태입니다.
+              </div>
+            ) : (
+              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                {paperclipWorkbench.sources.map((source) => (
+                  <PaperclipWorkbenchCard
+                    key={source.id}
+                    source={source}
+                    onInspect={() => {
+                      const inspector = buildOfficePaperclipInspector(source);
+                      inspectRecord(inspector.kind, inspector.title, inspector.fields);
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[1fr_24rem]">
         <div className="flex flex-col gap-6">

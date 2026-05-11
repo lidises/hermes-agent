@@ -38,6 +38,9 @@ import {
   buildOfficeSafeStreamPosture,
   buildOfficeSafeMotionHeartbeat,
   buildOfficeSafeSpatialChoreography,
+  buildOfficePaperclipWorkbench,
+  buildOfficePaperclipInspector,
+  buildOfficePaperclipMapProjection,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -103,6 +106,73 @@ describe("OfficePage view helpers", () => {
 
     expect(visibleRows(rows, 6, false)).toHaveLength(6);
     expect(visibleRows(rows, 6, true)).toHaveLength(8);
+  });
+
+  it("builds a safe Paperclip workbench projection from source tags without raw content", () => {
+    const state = officeFixture({
+      data_sources: [
+        {
+          id: "paperclip:clinic-blog",
+          status: "partial",
+          checked_at: "2026-05-11T08:00:00Z",
+          item_count: 12,
+          warning_count: 1,
+          error_summary: "1 stale manifest",
+          source_type: "paperclip",
+          relay: "MacBook",
+          tags: ["source:koreandeer-shoulder", "raw prompt must not appear"],
+          path: "/Users/lidises/nas/secret/raw/path",
+          prompt: "raw prompt must not appear",
+          transcript: "raw transcript must not appear",
+        } as any,
+      ],
+      provenance: [
+        { source: "paperclip:clinic-blog", label: "Paperclip safe manifest", detail: "raw path must not appear" } as any,
+      ],
+    });
+
+    const workbench = buildOfficePaperclipWorkbench(state);
+
+    expect(workbench.sources).toHaveLength(1);
+    expect(workbench.sources[0]).toMatchObject({
+      id: "paperclip:clinic-blog",
+      label: "clinic-blog",
+      health: "partial",
+      sourceType: "paperclip",
+      itemCount: 12,
+      warningCount: 1,
+      relay: "MacBook",
+    });
+    expect(workbench.sources[0].tags).toEqual(["source:koreandeer-shoulder"]);
+    expect(JSON.stringify(workbench)).not.toMatch(/raw|prompt|transcript|secret|\/Users\/lidises\/nas/i);
+  });
+
+  it("builds safe Paperclip inspector fields and CSS map slots from the sanitized workbench only", () => {
+    const state = officeFixture({
+      generated_at: "2026-05-11T09:00:00Z",
+      data_sources: [
+        {
+          id: "paperclip:clinic-blog",
+          status: "ok",
+          checked_at: "2026-05-11T08:00:00Z",
+          item_count: 3,
+          warning_count: 0,
+          source_type: "paperclip",
+          relay: "MacBook",
+          tags: ["source:koreandeer-shoulder", "token must not appear"],
+          path: "/Users/lidises/nas/private/full/path",
+          body: "secret body must not appear",
+        } as any,
+      ],
+    });
+    const source = buildOfficePaperclipWorkbench(state).sources[0];
+    const inspector = buildOfficePaperclipInspector(source);
+    const projection = buildOfficePaperclipMapProjection([source]);
+
+    expect(inspector.kind).toBe("Paperclip 안전 작업대");
+    expect(inspector.fields.map(([label]) => label)).toEqual(["id", "종류", "상태", "항목", "경고", "릴레이", "상태 시점", "태그", "가림"]);
+    expect(projection.slots[0]).toMatchObject({ id: "paperclip:clinic-blog", label: "clinic-blog", health: "ok", x: 18, y: 50 });
+    expect(JSON.stringify({ inspector, projection })).not.toMatch(/raw|prompt|transcript|secret|token|\/Users\/lidises\/nas|body/i);
   });
 
   it("builds attention rail from blocked work, failed automations, and unhealthy sources", () => {
