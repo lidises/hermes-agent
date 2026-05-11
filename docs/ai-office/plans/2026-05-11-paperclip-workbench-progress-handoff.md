@@ -139,15 +139,73 @@ git clean -nd
 - Paperclip remains an Office workbench/source projection, not a top-level always-visible app and not a mutation surface.
 - MacBook/WSL remain the intended privacy-sensitive producers for future safe manifests.
 
+## CLI manifest slice — 2026-05-11T10:47:58Z
+
+Completed after the frontend workbench projection commit `b5473237 feat(office): add safe Paperclip workbench projection`.
+
+Files added:
+- `docs/ai-office/paperclip-safe-manifest.md`
+- `docs/ai-office/examples/paperclip-source.example.yaml`
+- `docs/ai-office/paperclip-source-tag-projection.md`
+- `scripts/ai_office/validate_paperclip_manifest.py`
+- `scripts/ai_office/generate_paperclip_manifest.py`
+- `tests/test_paperclip_manifest_validator.py`
+- `tests/test_paperclip_manifest_generator.py`
+
+Implemented:
+- Paperclip safe manifest schema documentation and valid example manifest.
+- Recursive validator that rejects forbidden keys, invalid source tags, invalid relay/source types, private path patterns, and secret-like values.
+- Validator error output reports only field path + category and does not echo suspicious values.
+- Source-tag projection bridge documentation for joining AI Office work state to safe Paperclip/shared-context manifests.
+- Metadata-only dry-run manifest generator:
+  - requires explicit `--input-dir`;
+  - counts visible files only;
+  - buckets extensions into `markdown`, `pdf`, `image`, `other`;
+  - skips hidden dotfiles/directories;
+  - rejects symlinks by default;
+  - emits stdout or an explicit output YAML;
+  - never emits full input paths or file body content.
+
+Verification already run for this slice:
+
+```bash
+cd /Users/lidises/dev/hermes-agent
+.venv/bin/python -m pytest tests/test_paperclip_manifest_generator.py tests/test_paperclip_manifest_validator.py -q -o 'addopts='
+.venv/bin/python scripts/ai_office/validate_paperclip_manifest.py docs/ai-office/examples/paperclip-source.example.yaml
+```
+
+Result:
+
+```text
+11 passed in 0.59s
+OK: safe Paperclip manifest
+```
+
+TDD RED checks observed before implementation:
+- Validator tests failed because `scripts/ai_office/validate_paperclip_manifest.py` was missing.
+- Generator tests failed because `scripts/ai_office/generate_paperclip_manifest.py` was missing.
+
+## Remaining verification before commit
+
+Run from `/Users/lidises/dev/hermes-agent`:
+
+```bash
+.venv/bin/python -m pytest tests/test_paperclip_manifest_generator.py tests/test_paperclip_manifest_validator.py -q -o 'addopts='
+.venv/bin/python scripts/ai_office/validate_paperclip_manifest.py docs/ai-office/examples/paperclip-source.example.yaml
+git diff --check
+git status --short --branch
+git clean -nd
+```
+
+Then inspect staged diff for accidental raw-string/path leakage and commit the manifest slice if clean.
+
 ## Recommended next work
 
-1. Run remaining verification block.
-2. Inspect `git diff` for accidental raw-string leakage.
-3. Commit the frontend work as one implementation slice if verification passes.
-4. Then continue the canonical plan with fixture/source manifest documentation and validator phases:
-   - `docs/ai-office/paperclip-safe-manifest.md`
-   - safe example manifest
-   - manifest validator and focused pytest
+1. Run remaining verification block above.
+2. Commit the CLI manifest slice, likely as:
+   - `feat(office): add safe Paperclip manifest tooling`
+3. Continue the canonical plan with backend adapter integration only if the next phase can remain read-only and browser-facing DTOs stay sanitized.
+4. Keep MacBook/WSL as privacy-sensitive producers; do not add VPS NAS credentials, NAS RW mounts, watchers, queues, or mutation controls without explicit approval.
 
 ## Notes for a fresh session
 
