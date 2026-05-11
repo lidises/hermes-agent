@@ -33,6 +33,7 @@ import {
   buildOfficePaperclipWorkbench,
   buildOfficePaperclipInspector,
   buildOfficePaperclipMapProjection,
+  buildOfficePageSectionPlan,
   buildOfficeMapJumpTargets,
   buildOfficeMapPolishPlan,
   buildOfficeResponsiveReadabilityPlan,
@@ -82,6 +83,7 @@ import {
   type OfficeMapFlow,
   type OfficeMapNode,
   type OfficePaperclipWorkbenchSource,
+  type OfficePageSectionPlan,
   type OfficeRecentChange,
   type OfficeSceneObject,
   type OfficeStateDelta,
@@ -1135,6 +1137,25 @@ function OfficeMap({
   );
 }
 
+function OfficeSectionDrawer({ plan, children }: { plan: OfficePageSectionPlan; children: React.ReactNode }) {
+  return (
+    <details
+      className="border border-current/15 bg-black/10 p-3"
+      data-office-section-drawer={plan.id}
+      open={plan.defaultOpen}
+    >
+      <summary className="flex cursor-pointer list-none flex-col gap-1 outline-none focus:ring-2 focus:ring-emerald-200/70 sm:flex-row sm:items-center sm:justify-between">
+        <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <span className="text-[10px] uppercase tracking-[0.18em] text-emerald-300">{plan.label}</span>
+          <span className="border border-current/15 px-2 py-0.5 text-[10px] text-midground/70">{plan.count}</span>
+        </span>
+        <span className="text-xs text-midground/65">{plan.summary}</span>
+      </summary>
+      <div className="mt-4 border-t border-current/10 pt-4" aria-label={plan.ariaLabel}>{children}</div>
+    </details>
+  );
+}
+
 function GroupBlock({ title, count, children }: { title: string; count: number; children: React.ReactNode }) {
   return (
     <div className="border border-current/10 bg-black/10 p-3">
@@ -1440,6 +1461,8 @@ export default function OfficePage() {
   const emptyHints = useMemo(() => buildOfficeEmptyStateHints(), []);
   const emptySourceCopy = useMemo(() => buildOfficeEmptySourceCopyPlan(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const paperclipWorkbench = useMemo(() => buildOfficePaperclipWorkbench(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
+  const sectionPlan = useMemo(() => buildOfficePageSectionPlan(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
+  const sectionById = useMemo(() => Object.fromEntries(sectionPlan.map((section) => [section.id, section])) as Record<OfficePageSectionPlan["id"], OfficePageSectionPlan>, [sectionPlan]);
   const paperclipMapProjection = useMemo(() => buildOfficePaperclipMapProjection(paperclipWorkbench.sources), [paperclipWorkbench]);
   const liveOperationsLayer = useMemo(() => buildOfficeLiveOperationsLayer(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const safeMissionClock = useMemo(
@@ -1589,7 +1612,7 @@ export default function OfficePage() {
             </div>
             <h1 className="mt-3 text-3xl font-semibold uppercase tracking-wide text-foreground md:text-4xl">Hermes AI 오피스</h1>
             <p className="mt-3 text-sm leading-6 text-midground/80">
-              이 Mac에서 도는 Hermes 상태를 가려서 보여주는 운영 지도입니다. 원문 세션, 프롬프트, 로그, 비밀값을 노출하지 않고 상태·건강도·출처 공백만 보여줍니다.
+              이 Hermes 인스턴스의 상태를 가려서 보여주는 운영 지도입니다. 원문 세션, 프롬프트, 로그, 비밀값을 노출하지 않고 상태·건강도·출처 공백만 보여줍니다.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               {FOCUS_OPTIONS.map((option) => (
@@ -1793,7 +1816,8 @@ export default function OfficePage() {
         <StatCard label="가림 처리" value={state.redactions.redacted_field_count} detail={`정책 v${state.redactions.policy_version}; 민감 원문 필드 제외`} />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+      <OfficeSectionDrawer plan={sectionById.sources}>
+        <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
@@ -1870,9 +1894,11 @@ export default function OfficePage() {
             )}
           </CardContent>
         </Card>
-      </div>
+        </div>
+      </OfficeSectionDrawer>
 
       {showOverview ? (
+        <OfficeSectionDrawer plan={sectionById.paperclip}>
         <Card data-office-paperclip-workbench="true">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
@@ -1924,11 +1950,13 @@ export default function OfficePage() {
             )}
           </CardContent>
         </Card>
+        </OfficeSectionDrawer>
       ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[1fr_24rem]">
         <div className="flex flex-col gap-6">
           {showWork ? (
+            <OfficeSectionDrawer plan={sectionById.work}>
             <div className="grid gap-6 xl:grid-cols-2">
               <MiniList title="방 / 작업 흐름" icon={<Building2 className="h-4 w-4" />} meta="묶어서 보기 위한 화면일 뿐, 방이 원본 데이터는 아닙니다.">
                 {state.rooms.length === 0 ? (
@@ -1975,9 +2003,6 @@ export default function OfficePage() {
                 )}
               </MiniList>
             </div>
-          ) : null}
-
-          {showWork ? (
             <MiniList title="작업 항목" icon={<MapPinned className="h-4 w-4" />} meta="안전 상태별로 묶어 보여줍니다. 본문/결과/댓글/로그는 제외합니다.">
               {state.work_items.length === 0 ? (
                 <EmptyLine label="작업 항목" hint={emptyHints.workItems} />
@@ -2002,9 +2027,11 @@ export default function OfficePage() {
                 </GroupBlock>
               ))}
             </MiniList>
+            </OfficeSectionDrawer>
           ) : null}
 
           {showAutomation ? (
+            <OfficeSectionDrawer plan={sectionById.automation}>
             <MiniList title="자동화" icon={<Clock className="h-4 w-4" />} meta="작업 상태별로 묶어 보여줍니다. 실행/일시정지/재개/삭제 제어는 없습니다.">
               {state.automations.length === 0 ? (
                 <EmptyLine label="자동화" hint={emptyHints.automations} />
@@ -2031,9 +2058,11 @@ export default function OfficePage() {
                 </GroupBlock>
               ))}
             </MiniList>
+            </OfficeSectionDrawer>
           ) : null}
 
           {showRouting ? (
+            <OfficeSectionDrawer plan={sectionById.routing}>
             <div className="grid gap-6 xl:grid-cols-2">
               <MiniList title="토픽 라우팅" icon={<Route className="h-4 w-4" />} meta="읽기 전용 라우팅 투영입니다. 모르는 출처는 그대로 명시합니다.">
                 {state.topics.length === 0 ? (
@@ -2091,9 +2120,11 @@ export default function OfficePage() {
                 </div>
               </MiniList>
             </div>
+            </OfficeSectionDrawer>
           ) : null}
 
           {showOverview ? (
+            <OfficeSectionDrawer plan={sectionById.events}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">최근 안전 이벤트</CardTitle>
@@ -2124,6 +2155,7 @@ export default function OfficePage() {
                 )}
               </CardContent>
             </Card>
+            </OfficeSectionDrawer>
           ) : null}
         </div>
 

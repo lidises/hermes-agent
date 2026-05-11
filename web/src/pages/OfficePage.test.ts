@@ -42,6 +42,7 @@ import {
   buildOfficePaperclipWorkbench,
   buildOfficePaperclipInspector,
   buildOfficePaperclipMapProjection,
+  buildOfficePageSectionPlan,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -107,6 +108,30 @@ describe("OfficePage view helpers", () => {
 
     expect(visibleRows(rows, 6, false)).toHaveLength(6);
     expect(visibleRows(rows, 6, true)).toHaveLength(8);
+  });
+
+  it("summarizes lower Office sections so details can stay collapsed by default", () => {
+    const plan = buildOfficePageSectionPlan(officeFixture({
+      data_sources: [
+        { id: "sessions", status: "ok", checked_at: "2026-05-11T08:00:00Z", item_count: 12, warning_count: 0 },
+        { id: "topics", status: "missing", checked_at: "2026-05-11T08:00:00Z", item_count: 0, warning_count: 0 },
+        { id: "paperclip:safe", status: "ok", checked_at: "2026-05-11T08:00:00Z", item_count: 1, warning_count: 0, source_type: "paperclip", tags: ["source:safe", "secret tag ignored"] } as unknown as OfficeState["data_sources"][number],
+      ],
+      agents: [{ id: "session-1", status: "active", source_platform: "cli" }],
+      work_items: [{ id: "w1", status: "blocked", title: "raw body should not appear", body: "secret task body" } as unknown as OfficeState["work_items"][number]],
+      automations: [{ id: "a1", state: "scheduled", last_status: "ok", script: "secret script" } as unknown as OfficeState["automations"][number]],
+      topics: [],
+      provenance: [{ source: "paperclip:safe", label: "safe source", detail: "raw path must not appear" } as unknown as OfficeState["provenance"][number]],
+      events: [{ id: "e1", kind: "safe_event", source: "office", created_at: "2026-05-11T08:00:00Z" } as unknown as OfficeState["events"][number]],
+      redactions: { policy_version: 1, redacted_field_count: 3, omitted_sections: ["prompt"], warnings: [] },
+    }));
+
+    expect(plan.map((section) => section.id)).toEqual(["sources", "paperclip", "work", "automation", "routing", "events"]);
+    expect(plan.find((section) => section.id === "sources")).toMatchObject({ label: "소스 상태", count: 3, defaultOpen: false });
+    expect(plan.find((section) => section.id === "paperclip")?.summary).toContain("출처 1개");
+    expect(plan.find((section) => section.id === "work")?.summary).toContain("세션 1개");
+    expect(plan.find((section) => section.id === "routing")?.summary).toContain("출처 기록 1개");
+    expect(JSON.stringify(plan)).not.toMatch(/raw|secret|body|script|path/i);
   });
 
   it("builds a safe Paperclip workbench projection from source tags without raw content", () => {

@@ -476,6 +476,17 @@ export type OfficeStateDelta = {
   recentChanges: OfficeRecentChange[];
 };
 
+export type OfficePageSectionId = "sources" | "paperclip" | "work" | "automation" | "routing" | "events";
+
+export type OfficePageSectionPlan = {
+  id: OfficePageSectionId;
+  label: string;
+  summary: string;
+  count: number;
+  defaultOpen: boolean;
+  ariaLabel: string;
+};
+
 export type OfficeSourceHealthSummary = {
   counts: Record<OfficeSourceStatus, number>;
   label: string;
@@ -1299,6 +1310,64 @@ function buildPaperclipTimingBucket(checkedAt: string | undefined, generatedAt: 
   if (ageMs <= 24 * 60 * 60 * 1000) return "fresh";
   if (ageMs <= 7 * 24 * 60 * 60 * 1000) return "recent";
   return "stale";
+}
+
+export function buildOfficePageSectionPlan(state: OfficeState): OfficePageSectionPlan[] {
+  const paperclipSourceCount = buildOfficePaperclipWorkbench(state).sources.length;
+  const sourceIssueCount = state.data_sources.filter((source) => source.status !== "ok" || (source.warning_count ?? 0) > 0).length;
+  const workAttentionCount = state.work_items.filter((item) => textField(item, "status") === "blocked").length;
+  const automationIssueCount = state.automations.filter((job) => textField(job, "last_status") === "error" || textField(job, "state") === "error").length;
+
+  return [
+    {
+      id: "sources",
+      label: "소스 상태",
+      summary: `소스 ${state.data_sources.length}개 · 확인 필요 ${sourceIssueCount}개`,
+      count: state.data_sources.length,
+      defaultOpen: false,
+      ariaLabel: "소스 상태 상세 접기/펼치기",
+    },
+    {
+      id: "paperclip",
+      label: "Paperclip 작업대",
+      summary: `출처 ${paperclipSourceCount}개 · 안전 source-tag 투영`,
+      count: paperclipSourceCount,
+      defaultOpen: false,
+      ariaLabel: "Paperclip 작업대 상세 접기/펼치기",
+    },
+    {
+      id: "work",
+      label: "작업·세션",
+      summary: `세션 ${state.agents.length}개 · 작업 ${state.work_items.length}개 · 확인 필요 ${workAttentionCount}개`,
+      count: state.agents.length + state.work_items.length,
+      defaultOpen: false,
+      ariaLabel: "작업과 세션 상세 접기/펼치기",
+    },
+    {
+      id: "automation",
+      label: "자동화",
+      summary: `자동화 ${state.automations.length}개 · 확인 필요 ${automationIssueCount}개 · 상태별 묶음`,
+      count: state.automations.length,
+      defaultOpen: false,
+      ariaLabel: "자동화 상세 접기/펼치기",
+    },
+    {
+      id: "routing",
+      label: "라우팅·가림",
+      summary: `토픽 ${state.topics.length}개 · 출처 기록 ${state.provenance.length}개 · 가림 ${state.redactions.redacted_field_count}개`,
+      count: state.topics.length + state.provenance.length,
+      defaultOpen: false,
+      ariaLabel: "라우팅과 가림 처리 상세 접기/펼치기",
+    },
+    {
+      id: "events",
+      label: "최근 이벤트",
+      summary: `이벤트 ${state.events.length}개 · 안전 메타데이터`,
+      count: state.events.length,
+      defaultOpen: false,
+      ariaLabel: "최근 이벤트 상세 접기/펼치기",
+    },
+  ];
 }
 
 export function buildOfficePaperclipWorkbench(state: OfficeState): OfficePaperclipWorkbench {
