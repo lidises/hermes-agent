@@ -57,6 +57,9 @@ class OfficeDataSource:
     item_count: int = 0
     warning_count: int = 0
     error_summary: str | None = None
+    source_type: str | None = None
+    relay: str | None = None
+    tags: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, object]:
         payload: dict[str, object] = {
@@ -68,6 +71,12 @@ class OfficeDataSource:
         }
         if self.error_summary:
             payload["error_summary"] = self.error_summary
+        if self.source_type:
+            payload["source_type"] = self.source_type
+        if self.relay:
+            payload["relay"] = self.relay
+        if self.tags:
+            payload["tags"] = list(self.tags[:8])
         return payload
 
 
@@ -312,6 +321,7 @@ def build_office_state(
     include_cron: bool = True,
     include_sessions: bool = True,
     include_topics: bool = True,
+    include_paperclip: bool = True,
 ) -> OfficeState:
     """Build the read-only OfficeState projection from approved adapters."""
 
@@ -332,6 +342,10 @@ def build_office_state(
         from hermes_cli.office_adapters import collect_topic_registry_office_state
 
         _merge_adapter_result(state, collect_topic_registry_office_state())
+    if include_paperclip:
+        from hermes_cli.office_adapters import collect_paperclip_manifest_office_state
+
+        _merge_adapter_result(state, collect_paperclip_manifest_office_state())
     _refresh_topic_source(state)
     _refresh_provenance_source(state)
     state.summary = _compute_summary(state)
