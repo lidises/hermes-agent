@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-12 19:07 KST
+Last updated: 2026-05-12 19:20 KST
 
 ## Current phase
 
@@ -99,9 +99,19 @@ Verification 2026-05-12 19:07 KST:
 - `git diff --check` and added-line static security scan passed.
 - Local browser smoke on `http://127.0.0.1:8765/office?projection-orchestration=1` confirmed orchestration hook, four nodes, three flows, CSS motion hooks, raw leak false, and no console JS errors.
 
+Deployment/smoke completed 2026-05-12 19:20 KST:
+
+- Commit `f287192a` was pushed to the existing draft PR #4 and deployed to the dedicated VPS dashboard worktree `/home/hermes/.hermes/ai-office-dashboard`.
+- VPS dashboard service was restarted only for `hermes-agent-dashboard.service`; `hermes-gateway.service` remained active and was not restarted.
+- VPS focused backend tests passed after reset: `tests/test_office_projection_validator.py`, `tests/hermes_cli/test_office_state_adapters.py`, `tests/hermes_cli/test_office_api.py` → 32 passed.
+- VPS service smoke: dashboard active, gateway active, dashboard HEAD `f287192a`, worktree clean, `/office` GET 200, and listener bound to `100.122.57.85:8765` only.
+- Deployed asset hashes matched the verified local build: JS `096ca7e160d4b43097da764cc1da065d83e82940f03a3218b5f89704a8f58bcf`, CSS `dcdcaba5c205f3b0e05ba142feb0beea6a59eac80849f337caf033e4cfddd70a`.
+- Browser smoke on `http://100.122.57.85:8765/office?projection-orchestration=1&v=f287192a` confirmed active projection orchestration hooks, 4 active nodes, 3 active flows, no mutation controls, raw-leak probe false, and no console JS errors.
+- Public negative probes against the VPS IPv4/IPv6 public addresses on port 8765 timed out (`http_code=000`), preserving private/Tailscale-only exposure.
+
 Next operational step:
 
-- Commit/push this frontend orchestration slice, update the existing PR, then deploy only the dashboard worktree/service on the private VPS endpoint.
+- Keep PR #4 as draft/reviewable unless the user explicitly asks to mark ready or merge. The next implementation track should be manual Mac/WSL safe-bundle relay production before any watcher/cron/NAS mount automation.
 
 ## Office Release Hardening 1 — local frontend guardrails in progress
 

@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-12 19:07 KST
+Last updated: 2026-05-12 19:20 KST
 
 ## Start here after `/new`
 
@@ -90,8 +90,8 @@ Verification completed for Paperclip Workbench 2:
 Immediate next recommended track:
 
 - `Projection Orchestration 1` is implemented locally: `/office` now shows relay → validator → active cache → dashboard projection as a read-only, CSS-motion strip derived from safe `OfficeState.projection_cache` and redacted source posture only.
-- Current approved continuation is temporary/task-scoped only: commit/push/PR update, then deploy the dedicated VPS dashboard worktree/service on the existing private Tailscale listener. Do not add public exposure, NAS mount/direct credentials, watcher/cron automation, dashboard mutation controls, gateway restart, or core checkout mutation.
-- After deployment smoke, the next recommended implementation track is a manual Mac/WSL relay producer that emits validator-passing safe bundles; keep first operation manual transfer/manual ingest before any automation.
+- Deployment is complete at VPS dashboard worktree HEAD `f287192a` on the existing private Tailscale listener. PR #4 is updated and remains draft/reviewable. Do not mark ready, merge, add public exposure, NAS mount/direct credentials, watcher/cron automation, dashboard mutation controls, gateway restart, or core checkout mutation without separate approval.
+- Next recommended implementation track: manual Mac/WSL relay producer that emits validator-passing safe bundles; keep first operation manual transfer/manual ingest before any automation.
 
 Stage 16-E current implementation:
 
