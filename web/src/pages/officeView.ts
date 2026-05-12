@@ -1500,6 +1500,14 @@ export function visibleRows<T>(rows: T[], limit: number, expanded: boolean): T[]
   return expanded ? rows : rows.slice(0, limit);
 }
 
+export function buildOfficeTimeDisplayPolicy() {
+  return {
+    label: "시간 표시",
+    value: "브라우저 로컬 시간대",
+    detail: "브라우저 locale/timezone 기준으로 표시합니다. KST 고정 변환은 하지 않습니다.",
+  };
+}
+
 const EXPECTED_OFFICE_SOURCE_IDS = ["sessions", "kanban", "cron", "topics", "provenance"] as const;
 
 export function buildOfficeSourceHealthSummary(state: OfficeState): OfficeSourceHealthSummary {

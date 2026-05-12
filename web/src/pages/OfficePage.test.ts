@@ -62,6 +62,7 @@ import {
   resolveOfficeLiveTrackingInterval,
   groupByText,
   visibleRows,
+  buildOfficeTimeDisplayPolicy,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
@@ -112,6 +113,14 @@ describe("OfficePage view helpers", () => {
 
     expect(visibleRows(rows, 6, false)).toHaveLength(6);
     expect(visibleRows(rows, 6, true)).toHaveLength(8);
+  });
+
+  it("documents browser-local timezone formatting for office timestamps", () => {
+    expect(buildOfficeTimeDisplayPolicy()).toEqual({
+      label: "시간 표시",
+      value: "브라우저 로컬 시간대",
+      detail: "브라우저 locale/timezone 기준으로 표시합니다. KST 고정 변환은 하지 않습니다.",
+    });
   });
 
   it("builds a safe Source Health 1 rail across Kanban, Paperclip, automation, routing, and redaction", () => {

@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-12 13:35 KST
+Last updated: 2026-05-12 15:38 KST
 
 ## Start here after `/new`
 
@@ -89,6 +89,7 @@ Verification completed for Paperclip Workbench 2:
 
 Immediate next recommended track:
 
+- `Office Release Hardening 1` is now in progress after user approval for local file modifications and previously permission-blocked commands. Scope is frontend-only release hardening for the already deployed/private `/office` dashboard: hide mutation-capable sidebar system actions on the read-only Office route, explicitly label timestamp timezone policy as browser-local, and keep all changes raw-free/read-only. This does not deploy to VPS, restart services, copy manifests, mount NAS, add watchers, add mutation controls, or change dependencies.
 - Paperclip Workbench 2 is already committed as `1321c136 feat: add Paperclip manifest visibility`; branch is ahead of origin and not yet pushed/PR'd from this session.
 - Prefer `Paperclip Workbench 3` only if the user explicitly wants actual VPS/private-dashboard deployment of sanitized projection files. Keep it restricted: copy only validator-passing safe manifests to a VPS-local directory, never raw NAS/Paperclip material; do not mount NAS on VPS, add watchers, expose public routes, restart unrelated services, add mutation controls, or add a renderer/dependency without a separate approval gate.
 - Alternative if not deploying: continue `Office Source Health 3` for another frontend-only readability consolidation pass across Kanban/Paperclip/source-health summaries.

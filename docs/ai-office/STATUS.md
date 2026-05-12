@@ -1,10 +1,10 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-12 13:25 KST
+Last updated: 2026-05-12 15:38 KST
 
 ## Current phase
 
-Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, Stage 14-A through Stage 14-Q safe dynamic-tracking/readability layers, Stage 16-B through Stage 16-E safe realtime/motion layers, Stage 17-A sidebar simplification/Paperclip bridge planning, Paperclip Workbench 1 safe source-tag/manifest projection, Paperclip Workbench 2 manifest visibility, Kanban Observability 1 read-only projection, Kanban Observability 2 stale/blocked/workload summaries, Office Source Health 1 consolidated source-health rail, and Office Source Health 2 compact diagnostics/readability summary are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Kanban, Paperclip, and Office Source Health are tracked as independent work tracks, not continuations of the legacy stage number sequence. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
+Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, Stage 14-A through Stage 14-Q safe dynamic-tracking/readability layers, Stage 16-B through Stage 16-E safe realtime/motion layers, Stage 17-A sidebar simplification/Paperclip bridge planning, Paperclip Workbench 1 safe source-tag/manifest projection, Paperclip Workbench 2 manifest visibility, Kanban Observability 1 read-only projection, Kanban Observability 2 stale/blocked/workload summaries, Office Source Health 1 consolidated source-health rail, Office Source Health 2 compact diagnostics/readability summary, and Office Release Hardening 1 local frontend guardrails are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Kanban, Paperclip, Office Source Health, and Office Release Hardening are tracked as independent work tracks, not continuations of the legacy stage number sequence. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
 
 Current Stage 9-E result: the `/office` page now uses Korean for primary headings, buttons, helper text, safety copy, status labels, inspector field labels, and office-map room/zone labels while keeping stable technical identifiers such as DTO, OfficeState, source IDs, cron, and enum-like adapter values visible for debugging.
 
@@ -72,6 +72,32 @@ Paperclip Workbench 1 is complete as a folded/read-only/source-tag and safe-mani
 
 Stage 6 slices were approved by the user, including proceeding through the recommended remaining slices. Stage 7 was approved with testing deferred until the end. Stage 8-A was approved as the next safe step by the user saying to proceed in order, and the user then requested items 1 through 3 to run automatically in sequence. The user also approved installing missing test/runtime extras as needed in earlier setup. No gateway restart, cron change, Kanban mutation, NAS/Obsidian write, service/config mutation, memory/skill update, pixel dependency, or mutation-control implementation has been performed. The local dashboard process was restarted only to smoke-test the newly built local frontend bundle.
 
+
+## Office Release Hardening 1 — local frontend guardrails in progress
+
+Branch: `ai-office-stage16e-safe-spatial-choreography-20260510`
+
+Implementation summary:
+
+- Added a small route-level guard so mutation-capable sidebar system actions are hidden on `/office`; the sidebar shows read-only guard copy instead of `게이트웨이 재시작` / `Hermes 업데이트` while the user is on the Office page.
+- Added explicit timestamp policy copy in the Office diagnostics drawer: Office timestamps are shown using the browser locale/timezone, not a fixed KST conversion.
+- Added focused tests for the Office route system-action guard and browser-local timezone policy helper.
+
+Safety posture:
+
+- Frontend-only/read-only release hardening. No backend schema/API change, service restart, VPS deploy, safe-manifest copy, NAS mount, watcher, mutation control, renderer/dependency, credential change, or public route exposure.
+- Existing live VPS internal verification remains blocked until an SSH identity is available; do not commit/push/deploy/restart until the user explicitly approves that next release step.
+
+Verification 2026-05-12 15:41 KST:
+
+- RED verified before implementation: focused tests failed first because `shouldShowSidebarSystemActions` / `buildOfficeTimeDisplayPolicy` did not exist yet.
+- Focused frontend tests passed: `npm test -- --run src/App.test.ts src/pages/OfficePage.test.ts` → 2 files passed, 69 tests passed.
+- Focused ESLint passed: `./node_modules/.bin/eslint src/App.tsx src/App.test.ts src/appNav.ts src/pages/OfficePage.tsx src/pages/officeView.ts src/pages/OfficePage.test.ts`.
+- Production build passed: `npm run build` → `tsc -b && vite build`, with the existing Vite large chunk warning only.
+- Whitespace check passed: `git diff --check`.
+- Added-line static security scan passed.
+- Local production-preview smoke on `http://127.0.0.1:4178/office?release-hardening=1` confirmed the `/office` sidebar guard is visible, `게이트웨이 재시작` and `Hermes 업데이트` are absent, backend-less API fallback shows the safe retry/error state, and browser console JS errors are none.
+- SSH read-only verification was retried after approval but still failed because the agent has no loaded identities: `ssh-add -l` → `The agent has no identities`; `hermes@100.122.57.85` and `lidises@100.122.57.85` → `Permission denied (publickey)`.
 
 ## Paperclip Workbench 2 — safe manifest visibility completed
 

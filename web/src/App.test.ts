@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildSidebarNavGroups, type NavItem } from "./appNav";
+import { buildSidebarNavGroups, shouldShowSidebarSystemActions, type NavItem } from "./appNav";
 
 const icon = () => null;
 
@@ -61,5 +61,11 @@ describe("buildSidebarNavGroups", () => {
     expect(groups.find((group) => group.id === "other")?.items.map((navItem) => navItem.path)).toEqual([
       "/paperclip",
     ]);
+  });
+
+  it("hides mutation-capable system actions on the read-only office route", () => {
+    expect(shouldShowSidebarSystemActions("/sessions")).toBe(true);
+    expect(shouldShowSidebarSystemActions("/office")).toBe(false);
+    expect(shouldShowSidebarSystemActions("/office?density=detail")).toBe(false);
   });
 });

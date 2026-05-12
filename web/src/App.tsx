@@ -78,7 +78,7 @@ import { PluginPage, PluginSlot, usePlugins } from "@/plugins";
 import type { PluginManifest } from "@/plugins";
 import { useTheme } from "@/themes";
 import { isDashboardEmbeddedChatEnabled } from "@/lib/dashboard-flags";
-import { buildSidebarNavGroups, type NavItem, type SidebarNavGroup } from "@/appNav";
+import { buildSidebarNavGroups, shouldShowSidebarSystemActions, type NavItem, type SidebarNavGroup } from "@/appNav";
 
 function RootRedirect() {
   return <Navigate to="/sessions" replace />;
@@ -764,9 +764,18 @@ function SidebarNavLink({ closeMobile, item, t }: SidebarNavLinkProps) {
 
 function SidebarSystemActions({ onNavigate }: { onNavigate: () => void }) {
   const { t } = useI18n();
+  const location = useLocation();
   const navigate = useNavigate();
   const { activeAction, isBusy, isRunning, pendingAction, runAction } =
     useSystemActions();
+
+  if (!shouldShowSidebarSystemActions(location.pathname)) {
+    return (
+      <div className="shrink-0 border-t border-current/10 px-5 py-3 text-[0.65rem] leading-4 text-midground/55" data-office-system-actions-guard="true">
+        오피스는 읽기 전용 화면입니다. 재시작/업데이트 작업은 다른 운영 화면에서만 실행할 수 있습니다.
+      </div>
+    );
+  }
 
   const items: SystemActionItem[] = [
     {

@@ -74,6 +74,7 @@ import {
   buildOfficeSourceHealthRail,
   buildOfficeSourceHealthCompactDiagnostics,
   buildOfficeStateDelta,
+  buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
   groupByText,
   mergeOfficeRecentChanges,
@@ -1538,6 +1539,7 @@ export default function OfficePage() {
   );
 
   const sourceCounts = sourceHealth.counts;
+  const timeDisplayPolicy = buildOfficeTimeDisplayPolicy();
 
   const workGroups = useMemo(() => (state ? groupByText(state.work_items, "status", "unknown") : {}), [state]);
   const automationGroups = useMemo(() => (state ? groupByText(state.automations, "state", "unknown") : {}), [state]);
@@ -1641,6 +1643,8 @@ export default function OfficePage() {
             </summary>
             <div className="mt-2 grid gap-1">
               <div>생성 시각: {fmt(state.generated_at)}</div>
+              <div data-office-time-display-policy="browser-local">{timeDisplayPolicy.label}: {timeDisplayPolicy.value}</div>
+              <div className="text-midground/50">{timeDisplayPolicy.detail}</div>
               <div>표시 모드: {state.display_mode}</div>
               <div>원격 모드: {state.capabilities.remote_mode}</div>
               <div>변경 기능: {state.capabilities.mutations_enabled ? "켜짐" : "없음"}</div>

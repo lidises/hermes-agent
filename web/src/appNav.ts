@@ -23,6 +23,10 @@ const SIDEBAR_NAV_GROUP_PATHS: Record<SidebarNavGroupId, string[]> = {
   other: [],
 };
 
+export function shouldShowSidebarSystemActions(pathname: string): boolean {
+  return pathname.split(/[?#]/, 1)[0] !== "/office";
+}
+
 export function buildSidebarNavGroups(items: NavItem[]): SidebarNavGroup[] {
   const used = new Set<string>();
   const byPath = new Map(items.map((item) => [item.path, item]));
