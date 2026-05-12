@@ -73,6 +73,7 @@ import {
   buildOfficeSourceHealthSummary,
   buildOfficeSourceHealthRail,
   buildOfficeSourceHealthCompactDiagnostics,
+  buildOfficeProjectionCacheSummary,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -174,6 +175,14 @@ const EMPTY_OFFICE_STATE: OfficeState = {
   events: [],
   provenance: [],
   redactions: { policy_version: 1, redacted_field_count: 0, omitted_sections: [], warnings: [] },
+  projection_cache: {
+    schema_version: 1,
+    status: "missing",
+    redacted: true,
+    cache_layout: { incoming: "incoming", active: "active", archive: "archive", rejected: "rejected" },
+    active: null,
+    rejected: { count: 0, recent: [] },
+  },
 };
 
 function StatusPill({ status }: { status: OfficeSourceStatus | string }) {
@@ -1423,6 +1432,7 @@ export default function OfficePage() {
   const sourceHealth = useMemo(() => (state ? buildOfficeSourceHealthSummary(state) : buildOfficeSourceHealthSummary({ ...EMPTY_OFFICE_STATE })), [state]);
   const sourceHealthRail = useMemo(() => buildOfficeSourceHealthRail(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const sourceHealthCompactDiagnostics = useMemo(() => buildOfficeSourceHealthCompactDiagnostics(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
+  const projectionCacheSummary = useMemo(() => buildOfficeProjectionCacheSummary(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const selectedCharacter = useMemo(() => officeCharacters.find((character) => character.id === selectedCharacterId) ?? null, [officeCharacters, selectedCharacterId]);
   const selectedCharacterFocus = useMemo(() => buildOfficeSelectedCharacterFocus(selectedCharacter, latestDelta), [latestDelta, selectedCharacter]);
   const layoutPlan = useMemo(
@@ -1929,6 +1939,24 @@ export default function OfficePage() {
               {sourceHealth.missingSourceIds.length > 0 ? (
                 <span className="border border-sky-400/25 px-2 py-1 text-sky-200">미보고 소스 {sourceHealth.missingSourceIds.join(" · ")}</span>
               ) : null}
+            </div>
+            <div className="mb-4 border border-violet-300/20 bg-violet-950/10 p-3" data-office-projection-cache="true" data-office-projection-cache-status={projectionCacheSummary.status}>
+              <div className="mb-3 flex flex-col gap-1 text-xs md:flex-row md:items-center md:justify-between">
+                <span className="font-semibold uppercase tracking-[0.16em] text-violet-100">{projectionCacheSummary.stageLabel}</span>
+                <span className="text-midground/60">{projectionCacheSummary.detail}</span>
+              </div>
+              <div className="grid gap-2 md:grid-cols-3">
+                {projectionCacheSummary.cards.map((card) => (
+                  <div key={card.id} className={`border px-3 py-2 text-xs ${changeToneClass(card.tone)}`} data-office-projection-cache-card={card.id}>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-semibold">{card.title}</span>
+                      <span className="font-semibold tabular-nums">{card.value}</span>
+                    </div>
+                    <div className="mt-1 leading-4 opacity-75">{card.detail}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-2 text-[11px] leading-4 text-violet-100/60">last-known-good safe projection만 표시합니다. rejected는 값 echo 없이 집계만 표시합니다.</div>
             </div>
             <div className="mb-4 border border-cyan-300/15 bg-cyan-950/10 p-3" data-office-source-health-compact="true">
               <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-xs">

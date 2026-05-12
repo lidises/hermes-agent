@@ -63,6 +63,7 @@ import {
   groupByText,
   visibleRows,
   buildOfficeTimeDisplayPolicy,
+  buildOfficeProjectionCacheSummary,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
@@ -92,11 +93,55 @@ function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
       omitted_sections: [],
       warnings: [],
     },
+    projection_cache: {
+      schema_version: 1,
+      status: "missing",
+      redacted: true,
+      cache_layout: { incoming: "incoming", active: "active", archive: "archive", rejected: "rejected" },
+      active: null,
+      rejected: { count: 0, recent: [] },
+    },
     ...overrides,
   };
 }
 
 describe("OfficePage view helpers", () => {
+  it("summarizes Office Projection Pipeline cache without leaking rejected raw values", () => {
+    const summary = buildOfficeProjectionCacheSummary(officeFixture({
+      projection_cache: {
+        schema_version: 1,
+        status: "active",
+        redacted: true,
+        cache_layout: { incoming: "incoming", active: "active", archive: "archive", rejected: "rejected" },
+        active: {
+          bundle_id: "pcwb-safe-001",
+          generated_at: "2026-05-12T07:15:00Z",
+          generated_by: "mac",
+          source_kind: "paperclip",
+          source_tags: ["paperclip", "clinic-growth"],
+          freshness: { stale_after: "2026-05-13T07:15:00Z", hard_expire_after: "2026-05-19T07:15:00Z", policy: "show-last-known-good-with-stale-label" },
+          validator: { result: "pass", checked_at: "2026-05-12T07:15:05Z", safe_summary: "safe summary only" },
+          redaction: { raw_excluded: true, guarantee: "raw_excluded_and_allowlisted_fields_only" },
+          payload_summary: { safe_item_count: 3, attention_count: 0 },
+          display: { cards: ["manifests", "privateDashboard"] },
+          bundle_path: "pcwb-safe-001",
+        },
+        rejected: {
+          count: 1,
+          recent: [{ bundle_path: "bad-raw", status: "rejected", reason_count: 2, reasons: ["private path pattern", "secret-like value"], field_paths: ["payload.summary.note"], checked_at: "2026-05-12T07:16:00Z" }],
+        },
+      },
+    }));
+
+    expect(summary.stageLabel).toBe("Office Projection Pipeline 1");
+    expect(summary.status).toBe("active");
+    expect(summary.cards.map((card) => card.id)).toEqual(["active", "freshness", "rejected"]);
+    expect(summary.cards.find((card) => card.id === "active")).toMatchObject({ title: "활성 projection", value: "pcwb-safe-001", tone: "positive" });
+    expect(summary.cards.find((card) => card.id === "freshness")?.detail).toContain("mac · paperclip");
+    expect(summary.cards.find((card) => card.id === "rejected")).toMatchObject({ title: "최근 거부", value: "1개", tone: "warning" });
+    expect(JSON.stringify(summary)).not.toMatch(/\/Users\/|token=|secret|raw prompt|raw transcript/i);
+  });
+
   it("groups unknown work safely without reading sensitive body fields", () => {
     const grouped = groupByText([
       { id: "1", status: "blocked", title: "safe title", body: "raw body must not matter" },

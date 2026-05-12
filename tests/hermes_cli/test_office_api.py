@@ -44,6 +44,19 @@ def test_office_state_is_protected_builtin_route_and_returns_read_only_dto():
     assert payload["capabilities"]["mutations_enabled"] is False
     assert payload["capabilities"]["remote_mode"] == "unsupported"
     assert payload["redactions"]["policy_version"] == 1
+    assert payload["projection_cache"] == {
+        "schema_version": 1,
+        "status": "missing",
+        "redacted": True,
+        "cache_layout": {
+            "incoming": "incoming",
+            "active": "active",
+            "archive": "archive",
+            "rejected": "rejected",
+        },
+        "active": None,
+        "rejected": {"count": 0, "recent": []},
+    }
     assert {source["status"] for source in payload["data_sources"]} == {"missing"}
 
 

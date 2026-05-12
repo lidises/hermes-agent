@@ -3376,6 +3376,21 @@ export function buildOfficeSceneMotionTrack(object: OfficeSceneObject): OfficeSc
   };
 }
 
+export type OfficeProjectionCacheCard = {
+  id: "active" | "freshness" | "rejected";
+  title: string;
+  value: string;
+  detail: string;
+  tone: "positive" | "warning" | "neutral";
+};
+
+export type OfficeProjectionCacheSummary = {
+  stageLabel: string;
+  status: string;
+  detail: string;
+  cards: OfficeProjectionCacheCard[];
+};
+
 export function buildOfficeSceneObjects(state: OfficeState, nodes: OfficeMapNode[]): OfficeSceneObject[] {
   return nodes.flatMap((node) => {
     const config = SCENE_ROOM_CONFIG[node.id];
@@ -3425,6 +3440,49 @@ export function buildOfficeSceneObjects(state: OfficeState, nodes: OfficeMapNode
 
     return objects;
   });
+}
+
+export function buildOfficeProjectionCacheSummary(state: OfficeState): OfficeProjectionCacheSummary {
+  const cache = state.projection_cache;
+  const active = cache?.active ?? null;
+  const rejectedCount = cache?.rejected?.count ?? 0;
+  const sourceTags = active?.source_tags?.slice(0, 3).join(", ") || "safe DTO 없음";
+  const activeTone: OfficeProjectionCacheCard["tone"] = active ? "positive" : "neutral";
+  const activeValue = active?.bundle_id || "last-known-good 없음";
+  const freshnessDetail = active
+    ? `${active.generated_by} · ${active.source_kind} · stale ${active.freshness?.stale_after || "미정"}`
+    : "active cache가 없으면 /office는 기존 안전 DTO와 빈 projection 상태만 표시합니다.";
+  const rejectionTone: OfficeProjectionCacheCard["tone"] = rejectedCount > 0 ? "warning" : "neutral";
+  return {
+    stageLabel: "Office Projection Pipeline 1",
+    status: cache?.status ?? "missing",
+    detail: active
+      ? `활성 safe projection: ${activeValue} · ${sourceTags}`
+      : "아직 promote된 safe projection bundle이 없습니다.",
+    cards: [
+      {
+        id: "active",
+        title: "활성 projection",
+        value: activeValue,
+        detail: active ? `validator ${active.validator?.result || "unknown"} · raw_excluded ${active.redaction?.raw_excluded ? "true" : "unknown"}` : "VPS active/ 비어 있음",
+        tone: activeTone,
+      },
+      {
+        id: "freshness",
+        title: "신선도",
+        value: active?.freshness?.stale_after || "stale 기준 없음",
+        detail: freshnessDetail,
+        tone: activeTone,
+      },
+      {
+        id: "rejected",
+        title: "최근 거부",
+        value: `${rejectedCount}개`,
+        detail: rejectedCount > 0 ? "값을 echo하지 않고 reason/path 집계만 표시" : "거부된 incoming bundle 없음",
+        tone: rejectionTone,
+      },
+    ],
+  };
 }
 
 export function buildOfficeAttentionItems(state: OfficeState): AttentionItem[] {

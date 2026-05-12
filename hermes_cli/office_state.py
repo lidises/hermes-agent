@@ -109,6 +109,7 @@ class OfficeState:
     topics: list[dict[str, object]] = field(default_factory=list)
     events: list[dict[str, object]] = field(default_factory=list)
     provenance: list[dict[str, object]] = field(default_factory=list)
+    projection_cache: dict[str, object] = field(default_factory=dict)
     redactions: RedactionReport = field(default_factory=RedactionReport)
     capabilities: OfficeCapabilities = field(default_factory=OfficeCapabilities)
 
@@ -127,6 +128,7 @@ class OfficeState:
             "topics": list(self.topics),
             "events": list(self.events),
             "provenance": list(self.provenance),
+            "projection_cache": dict(self.projection_cache),
             "redactions": self.redactions.to_dict(),
             "capabilities": self.capabilities.to_dict(),
         }
@@ -348,5 +350,8 @@ def build_office_state(
         _merge_adapter_result(state, collect_paperclip_manifest_office_state())
     _refresh_topic_source(state)
     _refresh_provenance_source(state)
+    from hermes_cli.office_projection import read_office_projection_cache
+
+    state.projection_cache = read_office_projection_cache()
     state.summary = _compute_summary(state)
     return state

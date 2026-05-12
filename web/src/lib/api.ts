@@ -418,6 +418,38 @@ export interface OfficeKanbanWorkItem {
   provenance?: Record<string, unknown>;
 }
 
+export interface OfficeProjectionCacheActive {
+  bundle_id: string;
+  generated_at: string;
+  generated_by: string;
+  source_kind: string;
+  source_tags: string[];
+  freshness: Record<string, string>;
+  validator: Record<string, string>;
+  redaction: { raw_excluded: boolean; guarantee: string };
+  payload_summary: Record<string, number | string | null>;
+  display: Record<string, unknown>;
+  bundle_path: string;
+}
+
+export interface OfficeProjectionCacheRejection {
+  bundle_path: string;
+  status: "rejected";
+  reason_count: number;
+  reasons: string[];
+  field_paths: string[];
+  checked_at: string;
+}
+
+export interface OfficeProjectionCache {
+  schema_version: number;
+  status: "active" | "missing" | "stale" | "rejected" | string;
+  redacted: true;
+  cache_layout: { incoming: string; active: string; archive: string; rejected: string };
+  active: OfficeProjectionCacheActive | null;
+  rejected: { count: number; recent: OfficeProjectionCacheRejection[] };
+}
+
 export interface OfficeState {
   schema_version: number;
   generated_at: string;
@@ -443,6 +475,7 @@ export interface OfficeState {
     omitted_sections: string[];
     warnings: string[];
   };
+  projection_cache: OfficeProjectionCache;
 }
 
 export interface OfficeSafeEventDTO {
