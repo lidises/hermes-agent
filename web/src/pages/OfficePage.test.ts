@@ -64,6 +64,7 @@ import {
   visibleRows,
   buildOfficeTimeDisplayPolicy,
   buildOfficeProjectionCacheSummary,
+  buildOfficeProjectionOrchestration,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
@@ -106,6 +107,43 @@ function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
 }
 
 describe("OfficePage view helpers", () => {
+  it("builds a dynamic projection orchestration view from safe cache and source posture", () => {
+    const orchestration = buildOfficeProjectionOrchestration(officeFixture({
+      data_sources: [
+        { id: "kanban", status: "ok", checked_at: "2026-05-12T08:00:00Z", item_count: 15, warning_count: 0 },
+        { id: "paperclip:private-source", status: "missing", checked_at: "2026-05-12T08:00:00Z", item_count: 0, warning_count: 1, error_summary: "raw prompt token secret path must not leak" } as unknown as OfficeState["data_sources"][number],
+      ],
+      projection_cache: {
+        schema_version: 1,
+        status: "active",
+        redacted: true,
+        cache_layout: { incoming: "incoming", active: "active", archive: "archive", rejected: "rejected" },
+        active: {
+          bundle_id: "pcwb-safe-001",
+          generated_at: "2026-05-12T07:15:00Z",
+          generated_by: "mac",
+          source_kind: "paperclip",
+          source_tags: ["paperclip", "clinic-growth"],
+          freshness: { stale_after: "2026-05-13T07:15:00Z", hard_expire_after: "2026-05-19T07:15:00Z", policy: "show-last-known-good-with-stale-label" },
+          validator: { result: "pass", checked_at: "2026-05-12T07:15:05Z", safe_summary: "safe only" },
+          redaction: { raw_excluded: true, guarantee: "raw_excluded_and_allowlisted_fields_only" },
+          payload_summary: { safe_item_count: 3, attention_count: 0 },
+          display: { cards: ["manifests"] },
+          bundle_path: "pcwb-safe-001",
+        },
+        rejected: { count: 0, recent: [] },
+      },
+    }));
+
+    expect(orchestration.stageLabel).toBe("Projection Orchestration");
+    expect(orchestration.nodes.map((node) => node.id)).toEqual(["relay", "validator", "cache", "dashboard"]);
+    expect(orchestration.nodes.find((node) => node.id === "relay")).toMatchObject({ value: "mac · paperclip", motion: "active" });
+    expect(orchestration.nodes.find((node) => node.id === "validator")).toMatchObject({ value: "pass", tone: "positive" });
+    expect(orchestration.flows.map((flow) => [flow.id, flow.active])).toEqual([["relay-validator", true], ["validator-cache", true], ["cache-dashboard", true]]);
+    expect(orchestration.safetyNote).toContain("직접 원천 접근이 아니라");
+    expect(JSON.stringify(orchestration)).not.toMatch(/\/Users\/|raw prompt|token|secret|clinic-growth/i);
+  });
+
   it("summarizes Office Projection Pipeline cache without leaking rejected raw values", () => {
     const summary = buildOfficeProjectionCacheSummary(officeFixture({
       projection_cache: {

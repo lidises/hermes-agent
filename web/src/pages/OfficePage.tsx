@@ -74,6 +74,7 @@ import {
   buildOfficeSourceHealthRail,
   buildOfficeSourceHealthCompactDiagnostics,
   buildOfficeProjectionCacheSummary,
+  buildOfficeProjectionOrchestration,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -1433,6 +1434,7 @@ export default function OfficePage() {
   const sourceHealthRail = useMemo(() => buildOfficeSourceHealthRail(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const sourceHealthCompactDiagnostics = useMemo(() => buildOfficeSourceHealthCompactDiagnostics(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const projectionCacheSummary = useMemo(() => buildOfficeProjectionCacheSummary(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
+  const projectionOrchestration = useMemo(() => buildOfficeProjectionOrchestration(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const selectedCharacter = useMemo(() => officeCharacters.find((character) => character.id === selectedCharacterId) ?? null, [officeCharacters, selectedCharacterId]);
   const selectedCharacterFocus = useMemo(() => buildOfficeSelectedCharacterFocus(selectedCharacter, latestDelta), [latestDelta, selectedCharacter]);
   const layoutPlan = useMemo(
@@ -1957,6 +1959,36 @@ export default function OfficePage() {
                 ))}
               </div>
               <div className="mt-2 text-[11px] leading-4 text-violet-100/60">last-known-good safe projection만 표시합니다. rejected는 값 echo 없이 집계만 표시합니다.</div>
+              <div className="mt-4 border border-violet-200/15 bg-black/15 p-3" data-office-projection-orchestration="true" data-office-projection-orchestration-status={projectionOrchestration.status}>
+                <div className="mb-3 flex flex-col gap-1 text-xs md:flex-row md:items-center md:justify-between">
+                  <span className="font-semibold uppercase tracking-[0.16em] text-violet-100">{projectionOrchestration.stageLabel}</span>
+                  <span className="text-violet-100/65">{projectionOrchestration.detail}</span>
+                </div>
+                <div className="grid gap-2 md:grid-cols-4">
+                  {projectionOrchestration.nodes.map((node) => (
+                    <div key={node.id} className={`office-projection-orchestration__node border p-2 text-xs ${changeToneClass(node.tone)}`} data-office-projection-node={node.id} data-office-projection-node-motion={node.motion}>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-semibold">{node.label}</span>
+                        <span className="tabular-nums">{node.value}</span>
+                      </div>
+                      <div className="mt-1 text-current/75">{node.detail}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 grid gap-2 md:grid-cols-3">
+                  {projectionOrchestration.flows.map((flow) => (
+                    <div key={flow.id} className={`office-projection-orchestration__flow border px-3 py-2 text-xs ${changeToneClass(flow.tone)}`} data-office-projection-flow={flow.id} data-office-projection-flow-active={flow.active ? "true" : "false"}>
+                      <span className="office-projection-orchestration__packet" aria-hidden="true" />
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-semibold">{flow.label}</span>
+                        <span>{flow.from} → {flow.to}</span>
+                      </div>
+                      <div className="mt-1 text-current/75">{flow.detail}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-2 text-[11px] leading-4 text-violet-100/60">{projectionOrchestration.safetyNote}</div>
+              </div>
             </div>
             <div className="mb-4 border border-cyan-300/15 bg-cyan-950/10 p-3" data-office-source-health-compact="true">
               <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-xs">

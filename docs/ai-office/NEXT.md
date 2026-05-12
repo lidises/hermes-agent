@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-12 15:38 KST
+Last updated: 2026-05-12 19:07 KST
 
 ## Start here after `/new`
 
@@ -89,10 +89,9 @@ Verification completed for Paperclip Workbench 2:
 
 Immediate next recommended track:
 
-- `Office Release Hardening 1` is now in progress after user approval for local file modifications and previously permission-blocked commands. Scope is frontend-only release hardening for the already deployed/private `/office` dashboard: hide mutation-capable sidebar system actions on the read-only Office route, explicitly label timestamp timezone policy as browser-local, and keep all changes raw-free/read-only. This does not deploy to VPS, restart services, copy manifests, mount NAS, add watchers, add mutation controls, or change dependencies.
-- Paperclip Workbench 2 is already committed as `1321c136 feat: add Paperclip manifest visibility`; branch is ahead of origin and not yet pushed/PR'd from this session.
-- Prefer `Paperclip Workbench 3` only if the user explicitly wants actual VPS/private-dashboard deployment of sanitized projection files. Keep it restricted: copy only validator-passing safe manifests to a VPS-local directory, never raw NAS/Paperclip material; do not mount NAS on VPS, add watchers, expose public routes, restart unrelated services, add mutation controls, or add a renderer/dependency without a separate approval gate.
-- Alternative if not deploying: continue `Office Source Health 3` for another frontend-only readability consolidation pass across Kanban/Paperclip/source-health summaries.
+- `Projection Orchestration 1` is implemented locally: `/office` now shows relay → validator → active cache → dashboard projection as a read-only, CSS-motion strip derived from safe `OfficeState.projection_cache` and redacted source posture only.
+- Current approved continuation is temporary/task-scoped only: commit/push/PR update, then deploy the dedicated VPS dashboard worktree/service on the existing private Tailscale listener. Do not add public exposure, NAS mount/direct credentials, watcher/cron automation, dashboard mutation controls, gateway restart, or core checkout mutation.
+- After deployment smoke, the next recommended implementation track is a manual Mac/WSL relay producer that emits validator-passing safe bundles; keep first operation manual transfer/manual ingest before any automation.
 
 Stage 16-E current implementation:
 

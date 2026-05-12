@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-12 15:38 KST
+Last updated: 2026-05-12 19:07 KST
 
 ## Current phase
 
@@ -72,6 +72,36 @@ Paperclip Workbench 1 is complete as a folded/read-only/source-tag and safe-mani
 
 Stage 6 slices were approved by the user, including proceeding through the recommended remaining slices. Stage 7 was approved with testing deferred until the end. Stage 8-A was approved as the next safe step by the user saying to proceed in order, and the user then requested items 1 through 3 to run automatically in sequence. The user also approved installing missing test/runtime extras as needed in earlier setup. No gateway restart, cron change, Kanban mutation, NAS/Obsidian write, service/config mutation, memory/skill update, pixel dependency, or mutation-control implementation has been performed. The local dashboard process was restarted only to smoke-test the newly built local frontend bundle.
 
+
+## Projection Orchestration 1 — live safe projection flow visibility completed
+
+Branch: `ai-office-stage16e-safe-spatial-choreography-20260510`
+
+Implementation summary:
+
+- Added a `Projection Orchestration` strip inside `/office` source status so the dashboard shows the safe pipeline as relay → validator → active cache → dashboard projection.
+- The strip is derived only from `OfficeState.projection_cache` and already-redacted `data_sources`; it does not directly access NAS/Paperclip/raw sources from the browser or VPS UI.
+- Added node/flow hooks and CSS-only packet motion so the orchestration feels live while remaining read-only and reduced-motion aware.
+- The copy distinguishes active cache, waiting relay, validator gate, rejected aggregate, and live safe DTO fallback so smoke/sample/missing posture is not confused with raw source access.
+
+Safety posture:
+
+- Frontend-only/read-only. No public exposure change, no NAS mount, no watcher/cron automation, no gateway/core mutation, no dashboard mutation controls, and no credential expansion.
+- VPS deploy/restart, if performed, is limited to the dedicated dashboard worktree/service and private Tailscale listener.
+
+Verification 2026-05-12 19:07 KST:
+
+- Focused RED/GREEN: `npm test -- --run OfficePage.test.ts -t "projection orchestration"` passed after helper/UI implementation.
+- Frontend tests: `npm test -- --run OfficePage.test.ts App.test.ts` → 2 files passed, 71 tests passed.
+- Focused ESLint passed for `OfficePage.tsx`, `officeView.ts`, and `OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large chunk warning only.
+- Backend focused tests passed: `tests/test_office_projection_validator.py`, `tests/hermes_cli/test_office_state_adapters.py`, `tests/hermes_cli/test_office_api.py` → 32 passed.
+- `git diff --check` and added-line static security scan passed.
+- Local browser smoke on `http://127.0.0.1:8765/office?projection-orchestration=1` confirmed orchestration hook, four nodes, three flows, CSS motion hooks, raw leak false, and no console JS errors.
+
+Next operational step:
+
+- Commit/push this frontend orchestration slice, update the existing PR, then deploy only the dashboard worktree/service on the private VPS endpoint.
 
 ## Office Release Hardening 1 — local frontend guardrails in progress
 

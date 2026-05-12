@@ -3391,6 +3391,34 @@ export type OfficeProjectionCacheSummary = {
   cards: OfficeProjectionCacheCard[];
 };
 
+export type OfficeProjectionOrchestrationNode = {
+  id: "relay" | "validator" | "cache" | "dashboard";
+  label: string;
+  value: string;
+  detail: string;
+  tone: "positive" | "warning" | "neutral";
+  motion: "active" | "waiting" | "blocked";
+};
+
+export type OfficeProjectionOrchestrationFlow = {
+  id: "relay-validator" | "validator-cache" | "cache-dashboard";
+  from: OfficeProjectionOrchestrationNode["id"];
+  to: OfficeProjectionOrchestrationNode["id"];
+  label: string;
+  detail: string;
+  tone: "positive" | "warning" | "neutral";
+  active: boolean;
+};
+
+export type OfficeProjectionOrchestration = {
+  stageLabel: string;
+  status: string;
+  detail: string;
+  safetyNote: string;
+  nodes: OfficeProjectionOrchestrationNode[];
+  flows: OfficeProjectionOrchestrationFlow[];
+};
+
 export function buildOfficeSceneObjects(state: OfficeState, nodes: OfficeMapNode[]): OfficeSceneObject[] {
   return nodes.flatMap((node) => {
     const config = SCENE_ROOM_CONFIG[node.id];
@@ -3480,6 +3508,92 @@ export function buildOfficeProjectionCacheSummary(state: OfficeState): OfficePro
         value: `${rejectedCount}개`,
         detail: rejectedCount > 0 ? "값을 echo하지 않고 reason/path 집계만 표시" : "거부된 incoming bundle 없음",
         tone: rejectionTone,
+      },
+    ],
+  };
+}
+
+export function buildOfficeProjectionOrchestration(state: OfficeState): OfficeProjectionOrchestration {
+  const cache = state.projection_cache;
+  const active = cache?.active ?? null;
+  const rejectedCount = cache?.rejected?.count ?? 0;
+  const liveSourceCount = state.data_sources.filter((source) => source.status === "ok" || source.status === "partial").length;
+  const missingSourceCount = state.data_sources.filter((source) => source.status === "missing" || source.status === "unavailable" || source.status === "error").length;
+  const validatorResult = String(active?.validator?.result ?? "waiting");
+  const validatorPassed = validatorResult === "pass";
+  const relayValue = active ? `${active.generated_by} · ${active.source_kind}` : `${liveSourceCount}개 safe DTO`;
+  const cacheStatus = cache?.status ?? "missing";
+  const hasDashboardProjection = Boolean(active) || liveSourceCount > 0;
+  const validatorTone: OfficeProjectionOrchestrationNode["tone"] = validatorPassed ? "positive" : rejectedCount > 0 ? "warning" : "neutral";
+  const cacheTone: OfficeProjectionOrchestrationNode["tone"] = active ? "positive" : rejectedCount > 0 ? "warning" : "neutral";
+  return {
+    stageLabel: "Projection Orchestration",
+    status: cacheStatus,
+    detail: active
+      ? `실제 active cache ${active.bundle_id}를 relay → validator → active cache → /office 순서로 투사 중`
+      : "active projection은 대기 중이며, 현재는 live safe DTO와 missing 상태를 그대로 표시합니다.",
+    safetyNote: "직접 원천 접근이 아니라 validator-passing safe bundle과 이미 가려진 DTO만 /office에 투사합니다.",
+    nodes: [
+      {
+        id: "relay",
+        label: "Relay 생산",
+        value: relayValue,
+        detail: active ? "Mac/WSL/manual relay가 만든 safe bundle 후보" : "relay bundle 대기 · live DTO만 표시",
+        tone: active || liveSourceCount > 0 ? "positive" : "neutral",
+        motion: active ? "active" : "waiting",
+      },
+      {
+        id: "validator",
+        label: "검증 게이트",
+        value: validatorPassed ? "pass" : rejectedCount > 0 ? `${rejectedCount} rejected` : "대기",
+        detail: "민감값 sentinel을 통과한 요약만 허용",
+        tone: validatorTone,
+        motion: validatorPassed ? "active" : rejectedCount > 0 ? "blocked" : "waiting",
+      },
+      {
+        id: "cache",
+        label: "Active cache",
+        value: active ? "last-known-good" : "비어 있음",
+        detail: active ? `${active.generated_at} 생성 · stale ${active.freshness?.stale_after ?? "미정"}` : "promotion 전이면 기존 DTO/빈 projection posture 유지",
+        tone: cacheTone,
+        motion: active ? "active" : "waiting",
+      },
+      {
+        id: "dashboard",
+        label: "/office 투사",
+        value: hasDashboardProjection ? "동적 표시" : "빈 상태",
+        detail: `${liveSourceCount}개 연결/부분 source, ${missingSourceCount}개 missing/degraded source를 안전 집계로 표시`,
+        tone: hasDashboardProjection ? "positive" : "neutral",
+        motion: hasDashboardProjection ? "active" : "waiting",
+      },
+    ],
+    flows: [
+      {
+        id: "relay-validator",
+        from: "relay",
+        to: "validator",
+        label: "safe bundle 후보",
+        detail: "원천 값을 직접 보여주지 않고 allowlisted manifest/payload만 이동",
+        tone: active ? "positive" : "neutral",
+        active: Boolean(active),
+      },
+      {
+        id: "validator-cache",
+        from: "validator",
+        to: "cache",
+        label: validatorPassed ? "promoted" : rejectedCount > 0 ? "rejected" : "대기",
+        detail: validatorPassed ? "검증 통과 bundle만 active cache로 승격" : "검증 실패는 값 echo 없이 rejection 집계만 남김",
+        tone: validatorPassed ? "positive" : rejectedCount > 0 ? "warning" : "neutral",
+        active: validatorPassed,
+      },
+      {
+        id: "cache-dashboard",
+        from: "cache",
+        to: "dashboard",
+        label: "last-known-good 투사",
+        detail: "브라우저에는 cache/source posture와 안전 count/status만 전달",
+        tone: hasDashboardProjection ? "positive" : "neutral",
+        active: hasDashboardProjection,
       },
     ],
   };
