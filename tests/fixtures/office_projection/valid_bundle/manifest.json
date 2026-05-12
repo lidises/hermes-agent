@@ -1,0 +1,49 @@
+{
+  "schema_version": "office_projection_manifest.v1",
+  "bundle_id": "pcwb-safe-001",
+  "generated_at": "2026-05-12T07:15:00Z",
+  "generated_by": "mac",
+  "source_kind": "paperclip",
+  "source_tags": [
+    "paperclip",
+    "clinic-growth",
+    "safe-manifest"
+  ],
+  "freshness": {
+    "valid_for_seconds": 86400,
+    "stale_after": "2026-05-13T07:15:00Z",
+    "hard_expire_after": "2026-05-19T07:15:00Z",
+    "policy": "show-last-known-good-with-stale-label"
+  },
+  "redaction": {
+    "guarantee": "raw_excluded_and_allowlisted_fields_only",
+    "raw_excluded": true,
+    "excluded_classes": [
+      "prompts",
+      "transcripts",
+      "task_bodies",
+      "logs",
+      "credentials",
+      "tokens"
+    ]
+  },
+  "validator": {
+    "name": "office_projection_validator",
+    "version": "v1",
+    "result": "pass",
+    "checked_at": "2026-05-12T07:15:05Z",
+    "safe_summary": "3 safe display cards, 0 raw fields, 0 secret sentinels"
+  },
+  "payload": {
+    "file": "payload.json",
+    "content_type": "application/json",
+    "summary": {
+      "safe_item_count": 3,
+      "attention_count": 0,
+      "rooms": [
+        "sources",
+        "work"
+      ]
+    }
+  }
+}
