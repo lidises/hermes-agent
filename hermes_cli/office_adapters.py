@@ -115,6 +115,19 @@ def _dependency_counts(conn: sqlite3.Connection, task_id: str) -> dict[str, int]
     return {"parents": int(parents or 0), "children": int(children or 0)}
 
 
+def _dependency_refs(conn: sqlite3.Connection, task_id: str) -> dict[str, list[str]]:
+    parent_rows = conn.execute(
+        "SELECT parent_id FROM task_links WHERE child_id = ? ORDER BY parent_id ASC", (task_id,)
+    ).fetchall()
+    child_rows = conn.execute(
+        "SELECT child_id FROM task_links WHERE parent_id = ? ORDER BY child_id ASC", (task_id,)
+    ).fetchall()
+    return {
+        "parents": [str(row["parent_id"]) for row in parent_rows if row["parent_id"]],
+        "children": [str(row["child_id"]) for row in child_rows if row["child_id"]],
+    }
+
+
 def _safe_display(value: object, report: RedactionReport) -> str:
     text, redactions = redact_display_text(value)
     report.merge(redactions)
@@ -127,23 +140,30 @@ def _kanban_work_item(
     task: Any,
     conn: sqlite3.Connection,
     index: int,
+    redactions: RedactionReport,
 ) -> dict[str, object]:
+    dependency_counts = _dependency_counts(conn, task.id)
+    dependency_refs = _dependency_refs(conn, task.id)
     item: dict[str, object] = {
         "id": f"kanban:{board_slug}:item:{index}",
         "kind": "kanban_task",
         "source": "kanban",
         "room_id": f"kanban:{board_slug}",
         "board_id": board_slug,
+        "task_ref": str(task.id),
         "title": "Kanban task",
         "status": task.status,
-        "assignee": None,
+        "assignee": _safe_display(task.assignee, redactions),
+        "tenant": _safe_display(task.tenant, redactions),
         "priority": task.priority,
         "created_at": task.created_at,
         "started_at": task.started_at,
         "completed_at": task.completed_at,
         "updated_at": getattr(task, "updated_at", None),
         "last_heartbeat_at": task.last_heartbeat_at,
-        "dependency_counts": _dependency_counts(conn, task.id),
+        "dependency_counts": dependency_counts,
+        "parent_task_refs": dependency_refs["parents"],
+        "child_task_refs": dependency_refs["children"],
         "badges": [],
         "provenance": {
             "status": "unknown",
@@ -158,6 +178,10 @@ def _kanban_work_item(
             badges.append("failure_history")
         if task.status == "running":
             badges.append("active")
+        if dependency_counts["parents"]:
+            badges.append("graph_child")
+        if dependency_counts["children"]:
+            badges.append("graph_parent")
     return item
 
 
@@ -251,6 +275,7 @@ def collect_kanban_office_state() -> OfficeAdapterResult:
                             task=task,
                             conn=conn,
                             index=len(work_items),
+                            redactions=redactions,
                         )
                     )
                 events.extend(_kanban_events(slug, conn))

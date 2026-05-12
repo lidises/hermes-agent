@@ -97,3 +97,56 @@ def test_office_state_rejects_common_mutation_methods():
     for method in (client.post, client.put, client.patch, client.delete):
         resp = method("/api/office/state", headers=headers)
         assert resp.status_code in {404, 405}
+
+
+def test_kanban_office_state_exposes_only_safe_renderer_fields(tmp_path, monkeypatch):
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
+
+    from hermes_cli import kanban_db as kb
+    from hermes_cli.office_adapters import collect_kanban_office_state
+
+    kb.create_board("ai-office", name="AI Office")
+    with kb.connect(board="ai-office") as conn:
+        parent_id = kb.create_task(
+            conn,
+            title="secret parent title",
+            body="raw body token must not leak",
+            assignee="ai-office-orchestrator",
+            tenant="ai-office",
+            priority=7,
+        )
+        child_id = kb.create_task(
+            conn,
+            title="secret child title",
+            body="raw prompt transcript must not leak",
+            assignee="renderer-worker sk-testsecret123",
+            tenant="/Users/lidises/nas/private-ai-office",
+            parents=[parent_id],
+        )
+        kb.complete_task(conn, parent_id, result="raw result secret must not leak")
+
+    result = collect_kanban_office_state()
+
+    assert result.source.status in {"ok", "partial"}
+    tasks = {item["task_ref"]: item for item in result.work_items if item.get("board_id") == "ai-office"}
+    assert set(tasks) == {parent_id, child_id}
+    assert tasks[parent_id]["assignee"] == "ai-office-orchestrator"
+    assert tasks[parent_id]["tenant"] == "ai-office"
+    assert tasks[parent_id]["dependency_counts"] == {"parents": 0, "children": 1}
+    assert tasks[parent_id]["child_task_refs"] == [child_id]
+    assert tasks[parent_id]["parent_task_refs"] == []
+    assert "graph_parent" in tasks[parent_id]["badges"]
+    assert tasks[child_id]["parent_task_refs"] == [parent_id]
+    assert tasks[child_id]["assignee"] == "renderer-worker [REDACTED]"
+    assert tasks[child_id]["tenant"] == "[REDACTED]"
+    assert "graph_child" in tasks[child_id]["badges"]
+    assert result.redactions.redacted_field_count >= 2
+    serialized = str(result.to_payload()).lower()
+    assert "secret parent title" not in serialized
+    assert "secret child title" not in serialized
+    assert "raw body" not in serialized
+    assert "raw result" not in serialized
+    assert "prompt" not in serialized
+    assert "transcript" not in serialized
+    assert "sk-testsecret123" not in serialized
+    assert "/users/lidises/nas" not in serialized

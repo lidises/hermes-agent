@@ -41,6 +41,7 @@ import {
   buildOfficeSafeSpatialChoreography,
   buildOfficePaperclipWorkbench,
   buildOfficePaperclipInspector,
+  buildOfficeKanbanProjection,
   buildOfficePaperclipMapProjection,
   buildOfficePageSectionPlan,
   buildOfficeMapFlows,
@@ -171,6 +172,61 @@ describe("OfficePage view helpers", () => {
     });
     expect(workbench.sources[0].tags).toEqual(["source:koreandeer-shoulder"]);
     expect(JSON.stringify(workbench)).not.toMatch(/raw|prompt|transcript|secret|\/Users\/lidises\/nas/i);
+  });
+
+  it("builds a safe Kanban operations projection with graph refs and no raw task content", () => {
+    const projection = buildOfficeKanbanProjection(officeFixture({
+      rooms: [
+        { id: "kanban:ai-office", kind: "kanban_board", source: "kanban", display_name: "AI Office", counts: { done: 1, running: 1, blocked: 0 } },
+      ],
+      work_items: [
+        {
+          id: "kanban:ai-office:item:0",
+          source: "kanban",
+          kind: "kanban_task",
+          board_id: "ai-office",
+          task_ref: "t_72c99902",
+          title: "Kanban task",
+          body: "raw body must not appear",
+          result: "raw result must not appear",
+          prompt: "raw prompt must not appear",
+          transcript: "raw transcript must not appear",
+          status: "done",
+          assignee: "ai-office-orchestrator",
+          tenant: "ai-office",
+          priority: 7,
+          parent_task_refs: [],
+          child_task_refs: ["t_86deef15"],
+          dependency_counts: { parents: 0, children: 1 },
+          badges: ["graph_parent"],
+        },
+        {
+          id: "kanban:ai-office:item:1",
+          source: "kanban",
+          kind: "kanban_task",
+          board_id: "ai-office",
+          task_ref: "t_86deef15",
+          title: "Kanban task",
+          status: "running",
+          assignee: "office-reporter",
+          tenant: "ai-office",
+          priority: 0,
+          parent_task_refs: ["t_72c99902"],
+          child_task_refs: [],
+          dependency_counts: { parents: 1, children: 0 },
+          badges: ["active", "graph_child"],
+        },
+      ],
+    }));
+
+    expect(projection.stageLabel).toBe("칸반 운영실");
+    expect(projection.readOnly).toBe(true);
+    expect(projection.boards[0]).toMatchObject({ boardId: "ai-office", displayName: "AI Office", taskCount: 2 });
+    expect(projection.assignees.map((assignee) => assignee.id)).toEqual(["ai-office-orchestrator", "office-reporter"]);
+    expect(projection.tenants).toEqual([{ id: "ai-office", count: 2 }]);
+    expect(projection.graphEdges).toEqual([{ parent: "t_72c99902", child: "t_86deef15", boardId: "ai-office" }]);
+    expect(projection.cards[0]).toMatchObject({ taskRef: "t_72c99902", boardId: "ai-office", childTaskRefs: ["t_86deef15"] });
+    expect(JSON.stringify(projection)).not.toMatch(/raw|body|result|prompt|transcript|secret/i);
   });
 
   it("builds safe Paperclip inspector fields and CSS map slots from the sanitized workbench only", () => {

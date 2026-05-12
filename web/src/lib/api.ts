@@ -394,6 +394,30 @@ export interface OfficeDataSource {
   error_summary?: string | null;
 }
 
+export interface OfficeKanbanWorkItem {
+  id: string;
+  kind: "kanban_task";
+  source: "kanban";
+  room_id: string;
+  board_id: string;
+  task_ref: string;
+  title: "Kanban task";
+  status: string;
+  assignee: string | null;
+  tenant: string | null;
+  priority: number;
+  created_at?: number | string | null;
+  started_at?: number | string | null;
+  completed_at?: number | string | null;
+  updated_at?: number | string | null;
+  last_heartbeat_at?: number | string | null;
+  dependency_counts: { parents: number; children: number };
+  parent_task_refs: string[];
+  child_task_refs: string[];
+  badges: string[];
+  provenance?: Record<string, unknown>;
+}
+
 export interface OfficeState {
   schema_version: number;
   generated_at: string;

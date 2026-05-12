@@ -778,6 +778,111 @@ export function textField(row: Record<string, unknown>, key: string): string {
   return typeof value === "string" && value.length > 0 ? value : "—";
 }
 
+export type OfficeKanbanProjectionCard = {
+  id: string;
+  boardId: string;
+  taskRef: string;
+  status: string;
+  assignee: string;
+  tenant: string;
+  priority: number;
+  parentTaskRefs: string[];
+  childTaskRefs: string[];
+  badges: string[];
+};
+
+export type OfficeKanbanProjection = {
+  stageLabel: "칸반 운영실";
+  readOnly: true;
+  redactionNote: string;
+  boards: Array<{ boardId: string; displayName: string; taskCount: number; counts: Record<string, number> }>;
+  assignees: Array<{ id: string; count: number }>;
+  tenants: Array<{ id: string; count: number }>;
+  graphEdges: Array<{ parent: string; child: string; boardId: string }>;
+  cards: OfficeKanbanProjectionCard[];
+};
+
+function safeStringList(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string" && item.length > 0) : [];
+}
+
+function safeCountRecord(value: unknown): Record<string, number> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>)
+      .filter(([, count]) => typeof count === "number")
+      .map(([key, count]) => [key, count as number]),
+  );
+}
+
+function incrementCount(map: Map<string, number>, key: string): void {
+  map.set(key, (map.get(key) ?? 0) + 1);
+}
+
+export function buildOfficeKanbanProjection(state: OfficeState): OfficeKanbanProjection {
+  const boardRooms = state.rooms.filter((room) => textField(room, "source") === "kanban" && textField(room, "kind") === "kanban_board");
+  const cards = state.work_items
+    .filter((item) => textField(item, "source") === "kanban" && textField(item, "kind") === "kanban_task")
+    .map((item): OfficeKanbanProjectionCard => ({
+      id: textField(item, "id"),
+      boardId: textField(item, "board_id"),
+      taskRef: textField(item, "task_ref"),
+      status: textField(item, "status"),
+      assignee: textField(item, "assignee"),
+      tenant: textField(item, "tenant"),
+      priority: numberField(item, "priority") ?? 0,
+      parentTaskRefs: safeStringList(item.parent_task_refs),
+      childTaskRefs: safeStringList(item.child_task_refs),
+      badges: safeStringList(item.badges),
+    }));
+
+  const boardTaskCounts = new Map<string, number>();
+  const assigneeCounts = new Map<string, number>();
+  const tenantCounts = new Map<string, number>();
+  const graphEdges: OfficeKanbanProjection["graphEdges"] = [];
+  const seenEdges = new Set<string>();
+
+  for (const card of cards) {
+    incrementCount(boardTaskCounts, card.boardId);
+    if (card.assignee !== "—") incrementCount(assigneeCounts, card.assignee);
+    if (card.tenant !== "—") incrementCount(tenantCounts, card.tenant);
+    for (const child of card.childTaskRefs) {
+      const edgeKey = `${card.taskRef}->${child}`;
+      if (!seenEdges.has(edgeKey)) {
+        seenEdges.add(edgeKey);
+        graphEdges.push({ parent: card.taskRef, child, boardId: card.boardId });
+      }
+    }
+  }
+
+  const boards = boardRooms.map((room) => {
+    const boardId = String(textField(room, "id")).replace(/^kanban:/, "");
+    return {
+      boardId,
+      displayName: textField(room, "display_name"),
+      taskCount: boardTaskCounts.get(boardId) ?? 0,
+      counts: safeCountRecord(room.counts),
+    };
+  });
+
+  for (const boardId of boardTaskCounts.keys()) {
+    if (!boards.some((board) => board.boardId === boardId)) {
+      boards.push({ boardId, displayName: boardId, taskCount: boardTaskCounts.get(boardId) ?? 0, counts: {} });
+    }
+  }
+
+  return {
+    stageLabel: "칸반 운영실",
+    readOnly: true,
+    redactionNote: "Kanban DB의 allowlist DTO만 사용합니다. 본문, 결과, 댓글, 로그, 프롬프트, 비밀값은 제외합니다.",
+    boards,
+    assignees: Array.from(assigneeCounts, ([id, count]) => ({ id, count })).sort((a, b) => a.id.localeCompare(b.id)),
+    tenants: Array.from(tenantCounts, ([id, count]) => ({ id, count })).sort((a, b) => a.id.localeCompare(b.id)),
+    graphEdges,
+    cards,
+  };
+}
+
 export function buildOfficeFirstLayoutPlan(options: {
   visibleCharacterCount: number;
   diagnosticPanelCount: number;
