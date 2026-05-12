@@ -229,6 +229,107 @@ describe("OfficePage view helpers", () => {
     expect(JSON.stringify(projection)).not.toMatch(/raw|body|result|prompt|transcript|secret/i);
   });
 
+  it("summarizes Kanban stale, blocked, and workload signals without raw task fields", () => {
+    const projection = buildOfficeKanbanProjection(officeFixture({
+      generated_at: "2026-05-12T00:00:00Z",
+      rooms: [
+        { id: "kanban:ai-office", kind: "kanban_board", source: "kanban", display_name: "AI Office", counts: { running: 2, blocked: 1, open: 1 } },
+      ],
+      work_items: [
+        {
+          id: "kanban:ai-office:item:0",
+          source: "kanban",
+          kind: "kanban_task",
+          board_id: "ai-office",
+          task_ref: "t_running_old",
+          title: "Kanban task",
+          status: "running",
+          assignee: "office-runner",
+          tenant: "ai-office",
+          priority: 3,
+          updated_at: "2026-05-11T22:30:00Z",
+          last_heartbeat_at: "2026-05-11T22:30:00Z",
+          parent_task_refs: [],
+          child_task_refs: [],
+          badges: ["active"],
+          body: "raw body must not appear",
+        },
+        {
+          id: "kanban:ai-office:item:1",
+          source: "kanban",
+          kind: "kanban_task",
+          board_id: "ai-office",
+          task_ref: "t_blocked",
+          title: "Kanban task",
+          status: "blocked",
+          assignee: "office-runner",
+          tenant: "ai-office",
+          priority: 9,
+          updated_at: { path: "/Users/lidises/nas/private" },
+          last_heartbeat_at: "raw secret timestamp must not appear",
+          parent_task_refs: ["t_running_old"],
+          child_task_refs: [],
+          badges: ["needs_attention", "graph_child"],
+          result: "raw result must not appear",
+        },
+        {
+          id: "kanban:ai-office:item:2",
+          source: "kanban",
+          kind: "kanban_task",
+          board_id: "ai-office",
+          task_ref: "t_recent",
+          title: "Kanban task",
+          status: "running",
+          assignee: "reviewer",
+          tenant: "ai-office",
+          priority: 1,
+          updated_at: "2026-05-11T23:58:00Z",
+          last_heartbeat_at: "2026-05-11T23:58:00Z",
+          parent_task_refs: [],
+          child_task_refs: [],
+          badges: ["active"],
+        },
+      ],
+    }));
+
+    expect(projection.observability.stageLabel).toBe("Kanban Observability 2");
+    expect(projection.observability.summaryCards).toEqual([
+      { id: "workload", label: "작업량", value: 3, detail: "보드 1개 · 실행 중 2개", tone: "neutral" },
+      { id: "blocked", label: "막힘", value: 1, detail: "확인 필요 task_ref 1개", tone: "negative" },
+      { id: "stale", label: "정체", value: 1, detail: "최근 heartbeat/update 60분 초과 1개", tone: "warning" },
+    ]);
+    expect(projection.observability.workloadByBoard).toEqual([{ boardId: "ai-office", total: 3, running: 2, blocked: 1, stale: 1 }]);
+    expect(projection.observability.attentionRefs).toEqual(["t_blocked", "t_running_old"]);
+    expect(JSON.stringify(projection.observability)).not.toMatch(/raw|body|result|prompt|transcript|secret|\/Users\/lidises\/nas/i);
+    expect(JSON.stringify(projection.cards)).not.toMatch(/raw|secret|timestamp|\/Users\/lidises\/nas/i);
+  });
+
+  it("caps Kanban observability attention refs before exposing the browser projection", () => {
+    const projection = buildOfficeKanbanProjection(officeFixture({
+      generated_at: "2026-05-12T00:00:00Z",
+      rooms: [{ id: "kanban:ai-office", kind: "kanban_board", source: "kanban", display_name: "AI Office", counts: { blocked: 8 } }],
+      work_items: Array.from({ length: 8 }, (_, index) => ({
+        id: `kanban:ai-office:item:${index}`,
+        source: "kanban",
+        kind: "kanban_task",
+        board_id: "ai-office",
+        task_ref: `t_blocked_${index}`,
+        title: "Kanban task",
+        status: "blocked",
+        assignee: "office-runner",
+        tenant: "ai-office",
+        priority: index,
+        parent_task_refs: [],
+        child_task_refs: [],
+        badges: ["needs_attention"],
+        body: "raw body must not appear",
+      })),
+    }));
+
+    expect(projection.observability.attentionRefs).toEqual(["t_blocked_0", "t_blocked_1", "t_blocked_2", "t_blocked_3", "t_blocked_4", "t_blocked_5"]);
+    expect(JSON.stringify(projection.observability)).not.toMatch(/raw|body|secret/i);
+  });
+
   it("builds safe Paperclip inspector fields and CSS map slots from the sanitized workbench only", () => {
     const state = officeFixture({
       generated_at: "2026-05-11T09:00:00Z",

@@ -786,9 +786,33 @@ export type OfficeKanbanProjectionCard = {
   assignee: string;
   tenant: string;
   priority: number;
+  latestSafeAtMs: number | null;
   parentTaskRefs: string[];
   childTaskRefs: string[];
   badges: string[];
+};
+
+export type OfficeKanbanObservabilitySummaryCard = {
+  id: "workload" | "blocked" | "stale";
+  label: string;
+  value: number;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+};
+
+export type OfficeKanbanObservabilityBoardWorkload = {
+  boardId: string;
+  total: number;
+  running: number;
+  blocked: number;
+  stale: number;
+};
+
+export type OfficeKanbanObservability = {
+  stageLabel: "Kanban Observability 2";
+  summaryCards: OfficeKanbanObservabilitySummaryCard[];
+  workloadByBoard: OfficeKanbanObservabilityBoardWorkload[];
+  attentionRefs: string[];
 };
 
 export type OfficeKanbanProjection = {
@@ -800,6 +824,7 @@ export type OfficeKanbanProjection = {
   tenants: Array<{ id: string; count: number }>;
   graphEdges: Array<{ parent: string; child: string; boardId: string }>;
   cards: OfficeKanbanProjectionCard[];
+  observability: OfficeKanbanObservability;
 };
 
 function safeStringList(value: unknown): string[] {
@@ -819,6 +844,73 @@ function incrementCount(map: Map<string, number>, key: string): void {
   map.set(key, (map.get(key) ?? 0) + 1);
 }
 
+function parseKanbanTimestamp(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value < 1_000_000_000_000 ? value * 1000 : value;
+  }
+  if (typeof value !== "string" || value.length === 0) return null;
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function isKanbanRunningStatus(status: string): boolean {
+  return status === "running" || status === "in_progress" || status === "active";
+}
+
+function isKanbanBlockedCard(card: OfficeKanbanProjectionCard): boolean {
+  return card.status === "blocked" || card.badges.includes("needs_attention");
+}
+
+function isKanbanStaleCard(card: OfficeKanbanProjectionCard, referenceTime: number): boolean {
+  if (!isKanbanRunningStatus(card.status)) return false;
+  if (card.latestSafeAtMs === null) return false;
+  return referenceTime - card.latestSafeAtMs > 60 * 60 * 1000;
+}
+
+function buildOfficeKanbanObservability(state: OfficeState, boards: OfficeKanbanProjection["boards"], cards: OfficeKanbanProjectionCard[]): OfficeKanbanObservability {
+  const referenceTime = parseKanbanTimestamp(state.generated_at) ?? Date.now();
+  const boardWorkloads = new Map<string, OfficeKanbanObservabilityBoardWorkload>();
+  const attentionRefs = new Set<string>();
+  let runningCount = 0;
+  let blockedCount = 0;
+  let staleCount = 0;
+
+  for (const board of boards) {
+    boardWorkloads.set(board.boardId, { boardId: board.boardId, total: 0, running: 0, blocked: 0, stale: 0 });
+  }
+
+  for (const card of cards) {
+    const workload = boardWorkloads.get(card.boardId) ?? { boardId: card.boardId, total: 0, running: 0, blocked: 0, stale: 0 };
+    workload.total += 1;
+    if (isKanbanRunningStatus(card.status)) {
+      workload.running += 1;
+      runningCount += 1;
+    }
+    if (isKanbanBlockedCard(card)) {
+      workload.blocked += 1;
+      blockedCount += 1;
+      attentionRefs.add(card.taskRef);
+    }
+    if (isKanbanStaleCard(card, referenceTime)) {
+      workload.stale += 1;
+      staleCount += 1;
+      attentionRefs.add(card.taskRef);
+    }
+    boardWorkloads.set(card.boardId, workload);
+  }
+
+  return {
+    stageLabel: "Kanban Observability 2",
+    summaryCards: [
+      { id: "workload", label: "작업량", value: cards.length, detail: `보드 ${boards.length}개 · 실행 중 ${runningCount}개`, tone: "neutral" },
+      { id: "blocked", label: "막힘", value: blockedCount, detail: `확인 필요 task_ref ${blockedCount}개`, tone: blockedCount > 0 ? "negative" : "positive" },
+      { id: "stale", label: "정체", value: staleCount, detail: `최근 heartbeat/update 60분 초과 ${staleCount}개`, tone: staleCount > 0 ? "warning" : "positive" },
+    ],
+    workloadByBoard: Array.from(boardWorkloads.values()).sort((a, b) => a.boardId.localeCompare(b.boardId)),
+    attentionRefs: Array.from(attentionRefs).sort((a, b) => a.localeCompare(b)).slice(0, 6),
+  };
+}
+
 export function buildOfficeKanbanProjection(state: OfficeState): OfficeKanbanProjection {
   const boardRooms = state.rooms.filter((room) => textField(room, "source") === "kanban" && textField(room, "kind") === "kanban_board");
   const cards = state.work_items
@@ -831,6 +923,7 @@ export function buildOfficeKanbanProjection(state: OfficeState): OfficeKanbanPro
       assignee: textField(item, "assignee"),
       tenant: textField(item, "tenant"),
       priority: numberField(item, "priority") ?? 0,
+      latestSafeAtMs: parseKanbanTimestamp(item.last_heartbeat_at) ?? parseKanbanTimestamp(item.updated_at),
       parentTaskRefs: safeStringList(item.parent_task_refs),
       childTaskRefs: safeStringList(item.child_task_refs),
       badges: safeStringList(item.badges),
@@ -865,11 +958,13 @@ export function buildOfficeKanbanProjection(state: OfficeState): OfficeKanbanPro
     };
   });
 
-  for (const boardId of boardTaskCounts.keys()) {
+  for (const boardId of Array.from(boardTaskCounts.keys())) {
     if (!boards.some((board) => board.boardId === boardId)) {
       boards.push({ boardId, displayName: boardId, taskCount: boardTaskCounts.get(boardId) ?? 0, counts: {} });
     }
   }
+
+  const observability = buildOfficeKanbanObservability(state, boards, cards);
 
   return {
     stageLabel: "칸반 운영실",
@@ -880,6 +975,7 @@ export function buildOfficeKanbanProjection(state: OfficeState): OfficeKanbanPro
     tenants: Array.from(tenantCounts, ([id, count]) => ({ id, count })).sort((a, b) => a.id.localeCompare(b.id)),
     graphEdges,
     cards,
+    observability,
   };
 }
 

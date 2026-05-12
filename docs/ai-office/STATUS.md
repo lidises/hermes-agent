@@ -1,10 +1,10 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-12 11:34 KST
+Last updated: 2026-05-12 12:06 KST
 
 ## Current phase
 
-Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, Stage 14-A through Stage 14-Q safe dynamic-tracking/readability layers, Stage 16-B through Stage 16-E safe realtime/motion layers, and Stage 17-A sidebar simplification/Paperclip bridge planning are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Kanban is now tracked as its own independent work track starting at `Kanban Observability 1`, not as a continuation of the legacy stage number sequence. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
+Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, Stage 14-A through Stage 14-Q safe dynamic-tracking/readability layers, Stage 16-B through Stage 16-E safe realtime/motion layers, Stage 17-A sidebar simplification/Paperclip bridge planning, Kanban Observability 1 read-only projection, and Kanban Observability 2 stale/blocked/workload summaries are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Kanban is now tracked as its own independent work track starting at `Kanban Observability 1`, not as a continuation of the legacy stage number sequence. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
 
 Current Stage 9-E result: the `/office` page now uses Korean for primary headings, buttons, helper text, safety copy, status labels, inspector field labels, and office-map room/zone labels while keeping stable technical identifiers such as DTO, OfficeState, source IDs, cron, and enum-like adapter values visible for debugging.
 
@@ -68,9 +68,45 @@ Current Stage 14-Q result: `/office` now adds a safe HUD readability strip in th
 
 Current Stage 16-D result in progress: Stage 16-D now adds a browser-local safe motion heartbeat on branch `ai-office-stage16d-safe-motion-heartbeat-20260510`. `buildOfficeSafeMotionHeartbeat(...)` maps the Stage 16-C stream posture plus local polling tick/failure metadata into generated Korean heartbeat labels, phase (`idle|scan|pulse|hold`), intensity (`low|medium|high`), and decorative/read-only flags. `/office` polls `/api/office/events` while the tab is visible, increments a local safe tick on successful safe-event fetches, and renders `data-office-safe-motion-heartbeat` with mode/phase/intensity/enabled hooks plus CSS-only pulse/scan cues. This keeps Stage 16-C backend-safe stream/local fallback behavior and still excludes raw prompts, transcripts, task bodies, scripts, logs, provider/model identity, secrets, tokens, adapter errors, and task identity.
 
-Next independent tracks: Kanban should continue as `Kanban Observability 2` for read-only stale/blocked/workload summaries. Paperclip should start as its own `Paperclip Workbench 1` track before implementing any read-only adapter/plugin. Keep first passes folded/read-only/raw-free; do not expose a new always-visible top-level menu or mutation controls without a separate approval model.
+Next independent track: Paperclip should start as its own `Paperclip Workbench 1` track before implementing any read-only adapter/plugin. Keep first passes folded/read-only/raw-free; do not expose a new always-visible top-level menu or mutation controls without a separate approval model.
 
 Stage 6 slices were approved by the user, including proceeding through the recommended remaining slices. Stage 7 was approved with testing deferred until the end. Stage 8-A was approved as the next safe step by the user saying to proceed in order, and the user then requested items 1 through 3 to run automatically in sequence. The user also approved installing missing test/runtime extras as needed in earlier setup. No gateway restart, cron change, Kanban mutation, NAS/Obsidian write, service/config mutation, memory/skill update, pixel dependency, or mutation-control implementation has been performed. The local dashboard process was restarted only to smoke-test the newly built local frontend bundle.
+
+## Kanban Observability 2 — stale/blocked/workload summaries completed
+
+Branch: `ai-office-stage16e-safe-spatial-choreography-20260510`
+
+Implementation summary:
+
+- Extended `buildOfficeKanbanProjection(state)` with an `observability` block labelled `Kanban Observability 2`.
+- Added read-only summary cards for workload, blocked tasks, and stale running tasks using only allowlisted Kanban DTO fields: `task_ref`, `board_id`, `status`, `badges`, and safe timestamps.
+- Added per-board workload summaries (`total`, `running`, `blocked`, `stale`) and capped `attentionRefs` from safe `task_ref` values only.
+- `/office` now renders the folded/read-only Kanban observability rail with stable smoke hooks:
+  - `data-office-kanban-observability="true"`
+  - `data-office-kanban-observability-card="workload|blocked|stale"`
+  - `data-office-kanban-workload-board`
+  - `data-office-kanban-attention-refs`
+
+Safety posture:
+
+- Frontend read-only projection only; no Kanban mutation controls, backend mutation endpoints, schema expansion, service exposure changes, NAS dependency, or Telegram topic ID rendering.
+- No task title/body/result/comments/logs/prompts/transcripts/secrets/provider identity/raw adapter errors are consumed for the observability summary.
+- Stale detection is generated from safe heartbeat/update timestamps relative to `OfficeState.generated_at`; missing/invalid timestamps do not fabricate stale state.
+
+Verification 2026-05-12 12:06 KST:
+
+- RED verified: new `projection.observability` test failed before implementation with `Cannot read properties of undefined (reading 'stageLabel')`.
+- Focused frontend test: `OfficePage.test.ts` 62 passed.
+- ESLint passed for `OfficePage.tsx`, `officeView.ts`, and `OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large chunk warning only.
+- Backend focused office API test: `test_office_api.py` 7 passed.
+- `git diff --check` passed.
+- Browser smoke on `http://127.0.0.1:8765/office?kanban-observability=2` confirmed Kanban Observability 2 hooks, summary cards `workload|blocked|stale`, workload board hook, raw leak false, and no JS console errors.
+
+Next recommended track slice:
+
+- `Paperclip Workbench 1` — start a separate planning/adapter-readiness track for a folded, read-only, source-tag workbench before adding any Paperclip runtime adapter/plugin.
+- Keep mutation controls as a separate approval-gated plan.
 
 ## Kanban Observability 1 — read-only projection completed
 

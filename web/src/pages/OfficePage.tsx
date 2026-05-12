@@ -1844,6 +1844,35 @@ export default function OfficePage() {
                 <div className="mt-1 text-xs text-midground/65">parent → child ref만 표시</div>
               </div>
             </div>
+            <div className="border border-amber-300/15 bg-amber-950/10 p-3" data-office-kanban-observability="true">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <SectionLabel>{kanbanProjection.observability.stageLabel}</SectionLabel>
+                <span className="text-xs text-midground/55">정체·막힘·작업량 safe summary</span>
+              </div>
+              <div className="mt-3 grid gap-2 md:grid-cols-3">
+                {kanbanProjection.observability.summaryCards.map((card) => (
+                  <div key={card.id} className={`border p-3 ${changeToneClass(card.tone)}`} data-office-kanban-observability-card={card.id}>
+                    <div className="text-xs uppercase tracking-[0.18em] text-current/70">{card.label}</div>
+                    <div className="mt-1 text-xl font-semibold">{card.value}</div>
+                    <div className="mt-1 text-xs text-current/70">{card.detail}</div>
+                  </div>
+                ))}
+              </div>
+              {kanbanProjection.observability.workloadByBoard.length > 0 ? (
+                <div className="mt-3 flex flex-wrap gap-2 text-xs" aria-label="Kanban workload by board">
+                  {kanbanProjection.observability.workloadByBoard.slice(0, 6).map((board) => (
+                    <span key={board.boardId} className="border border-current/15 px-2 py-1" data-office-kanban-workload-board={board.boardId}>
+                      {board.boardId}: 전체 {board.total} · 실행 {board.running} · 막힘 {board.blocked} · 정체 {board.stale}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+              {kanbanProjection.observability.attentionRefs.length > 0 ? (
+                <div className="mt-2 text-xs text-amber-100/75" data-office-kanban-attention-refs="true">
+                  확인 ref {kanbanProjection.observability.attentionRefs.slice(0, 6).join(" · ")}
+                </div>
+              ) : null}
+            </div>
             {kanbanProjection.boards.length === 0 ? (
               <div className="border border-dashed border-current/15 bg-black/10 p-4 text-sm text-midground/65">Kanban 보드 DTO가 아직 없습니다. 이 영역은 원문을 추론하지 않고 빈 상태만 표시합니다.</div>
             ) : (

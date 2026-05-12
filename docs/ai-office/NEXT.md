@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-11 17:01 KST
+Last updated: 2026-05-12 12:06 KST
 
 ## Start here after `/new`
 
@@ -64,8 +64,36 @@ When not to rely on `/goal` alone:
 
 ## Current next stage
 
-Stage 17-A is now implemented on `ai-office-stage16e-safe-spatial-choreography-20260510`: the dashboard sidebar keeps primary routes visible and folds secondary built-in routes into 운영/도구함/설정·도움말 groups, with a documented Paperclip bridge direction. Immediate next action is verification, then push the branch if the smoke checks pass.
+Kanban Observability 2 is implemented and verified on `ai-office-stage16e-safe-spatial-choreography-20260510`. The dashboard now adds a read-only Kanban observability rail for stale/blocked/workload summaries using only allowlisted safe DTO fields.
 
+Kanban Observability 2 implementation:
+
+- `buildOfficeKanbanProjection(state)` now includes `observability.stageLabel = "Kanban Observability 2"`.
+- Summary cards cover `workload`, `blocked`, and `stale` counts.
+- Per-board workload summaries expose only `boardId`, `total`, `running`, `blocked`, and `stale`.
+- Attention refs are capped safe `task_ref` values only.
+- New smoke hooks:
+  - `data-office-kanban-observability="true"`
+  - `data-office-kanban-observability-card="workload|blocked|stale"`
+  - `data-office-kanban-workload-board`
+  - `data-office-kanban-attention-refs`
+
+Verification completed:
+
+- RED verified before implementation: `projection.observability` was undefined.
+- Focused frontend test: `OfficePage.test.ts` 62 passed.
+- ESLint passed for `OfficePage.tsx`, `officeView.ts`, and `OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large chunk warning only.
+- Backend focused office API test: `test_office_api.py` 7 passed.
+- `git diff --check` passed.
+- Browser smoke `/office?kanban-observability=2` passed: observability hooks present, cards `workload|blocked|stale`, raw leak false, and console JS errors none.
+
+Immediate next recommended track: `Paperclip Workbench 1`.
+
+- Start it as its own independent track, not Stage 18 and not another Kanban Observability slice.
+- First pass should be planning/adapter-readiness or a folded read-only projection, depending on user approval.
+- Keep it source-tag/DTO only: no raw Paperclip prompts, transcripts, tool args, task bodies, logs, secrets, provider identity, local paths, or mutation controls.
+- Do not create a new always-visible top-level Paperclip sidebar item by default; keep it folded under Office/workbench unless a separate IA decision approves otherwise.
 
 Stage 16-E current implementation:
 
