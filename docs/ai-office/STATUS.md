@@ -135,6 +135,7 @@ Verification 2026-05-13 08:31 KST:
 - GREEN focused test passed: `.venv/bin/python -m pytest tests/test_office_projection_generator.py -q -o addopts=` → 4 passed.
 - Focused projection/Paperclip safety regression passed: `.venv/bin/python -m pytest tests/test_office_projection_generator.py tests/test_office_projection_validator.py tests/hermes_cli/test_office_projection_cache.py tests/test_paperclip_manifest_generator.py tests/test_paperclip_manifest_validator.py -q -o addopts=` → 28 passed.
 - Manual dry-run/write smoke passed: generated a local bundle from `docs/ai-office/examples/paperclip-source.example.yaml`, then `validate_office_projection.py` returned `OK: safe Office projection bundle`.
+- VPS dashboard worktree was fast-forwarded to `e43e2795` for code/docs availability only; no service restart was performed. VPS generator smoke with the shared Hermes venv passed, and both `hermes-agent-dashboard.service` and `hermes-gateway.service` remained active.
 - `git diff --check` passed; changed files are docs plus the new generator/test only, with no `web/` frontend files changed.
 
 Next operational step:
