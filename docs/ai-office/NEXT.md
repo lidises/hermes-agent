@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-12 12:53 KST
+Last updated: 2026-05-12 13:35 KST
 
 ## Start here after `/new`
 
@@ -89,8 +89,8 @@ Verification completed for Paperclip Workbench 2:
 
 Immediate next recommended track:
 
-- Commit Paperclip Workbench 2 after the verification/review pass.
-- Then prefer `Paperclip Workbench 3` only if the user explicitly wants actual VPS/private-dashboard deployment of sanitized projection files. Keep it restricted: copy only validator-passing safe manifests to a VPS-local directory, never raw NAS/Paperclip material; do not mount NAS on VPS, add watchers, expose public routes, restart unrelated services, add mutation controls, or add a renderer/dependency without a separate approval gate.
+- Paperclip Workbench 2 is already committed as `1321c136 feat: add Paperclip manifest visibility`; branch is ahead of origin and not yet pushed/PR'd from this session.
+- Prefer `Paperclip Workbench 3` only if the user explicitly wants actual VPS/private-dashboard deployment of sanitized projection files. Keep it restricted: copy only validator-passing safe manifests to a VPS-local directory, never raw NAS/Paperclip material; do not mount NAS on VPS, add watchers, expose public routes, restart unrelated services, add mutation controls, or add a renderer/dependency without a separate approval gate.
 - Alternative if not deploying: continue `Office Source Health 3` for another frontend-only readability consolidation pass across Kanban/Paperclip/source-health summaries.
 
 Stage 16-E current implementation:
