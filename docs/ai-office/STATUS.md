@@ -1,10 +1,10 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-12 12:25 KST
+Last updated: 2026-05-12 12:53 KST
 
 ## Current phase
 
-Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, Stage 14-A through Stage 14-Q safe dynamic-tracking/readability layers, Stage 16-B through Stage 16-E safe realtime/motion layers, Stage 17-A sidebar simplification/Paperclip bridge planning, Paperclip Workbench 1 safe source-tag/manifest projection, Kanban Observability 1 read-only projection, and Kanban Observability 2 stale/blocked/workload summaries are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Kanban and Paperclip are tracked as independent work tracks, not continuations of the legacy stage number sequence. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
+Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, Stage 14-A through Stage 14-Q safe dynamic-tracking/readability layers, Stage 16-B through Stage 16-E safe realtime/motion layers, Stage 17-A sidebar simplification/Paperclip bridge planning, Paperclip Workbench 1 safe source-tag/manifest projection, Kanban Observability 1 read-only projection, Kanban Observability 2 stale/blocked/workload summaries, and Office Source Health 1 consolidated source-health rail are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Kanban, Paperclip, and Office Source Health are tracked as independent work tracks, not continuations of the legacy stage number sequence. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
 
 Current Stage 9-E result: the `/office` page now uses Korean for primary headings, buttons, helper text, safety copy, status labels, inspector field labels, and office-map room/zone labels while keeping stable technical identifiers such as DTO, OfficeState, source IDs, cron, and enum-like adapter values visible for debugging.
 
@@ -72,6 +72,38 @@ Paperclip Workbench 1 is complete as a folded/read-only/source-tag and safe-mani
 
 Stage 6 slices were approved by the user, including proceeding through the recommended remaining slices. Stage 7 was approved with testing deferred until the end. Stage 8-A was approved as the next safe step by the user saying to proceed in order, and the user then requested items 1 through 3 to run automatically in sequence. The user also approved installing missing test/runtime extras as needed in earlier setup. No gateway restart, cron change, Kanban mutation, NAS/Obsidian write, service/config mutation, memory/skill update, pixel dependency, or mutation-control implementation has been performed. The local dashboard process was restarted only to smoke-test the newly built local frontend bundle.
 
+
+## Office Source Health 1 — consolidated read-only source-health rail completed
+
+Branch: `ai-office-stage16e-safe-spatial-choreography-20260510`
+
+Implementation summary:
+
+- Added `buildOfficeSourceHealthRail(state)` for a safe six-item source-health rail: sessions, Kanban, Paperclip, automation, routing, and redaction.
+- Rendered the rail inside the existing source status card with `data-office-source-health-rail="true"` and per-item `data-office-source-health-rail-item` hooks.
+- Kept the rail frontend-only and read-only, using only safe DTO status/count/warning/redaction aggregates.
+- Added sentinel coverage to ensure raw paths, prompt/script/error-summary text, token-shaped strings, and raw warning bodies do not appear in the rail model.
+
+Safety posture:
+
+- No backend schema/API change, storage, watcher, mutation control, service restart, renderer/dependency, Paperclip/NAS raw browsing, Kanban mutation, cron mutation, or topic-registry write.
+- Browser-facing copy remains Korean-first and excludes prompts, transcripts, task bodies/results, raw logs, cron scripts, credentials/tokens, full private filesystem paths, provider/model identity, and raw adapter errors.
+
+Verification 2026-05-12 12:53 KST:
+
+- `npm test -- --run OfficePage.test.ts -t "Source Health 1"` → passed.
+- `npm test -- --run OfficePage.test.ts` → 63 passed.
+- `npm test -- --run App.test.ts` → 2 passed.
+- `npm run lint` → passed with existing unrelated warnings only.
+- `npm run build` → passed with existing Vite large chunk warning only.
+- `.venv/bin/python -m pytest tests/hermes_cli/test_office_state_adapters.py tests/hermes_cli/test_office_api.py -q -o addopts=` → 22 passed.
+- Browser smoke on `http://127.0.0.1:8765/office?source-health=1` confirmed source-health rail, six rail item hooks, raw leak false, and no JS console errors.
+- Independent pre-commit review passed with no security concerns or logic errors.
+
+Next recommended track slice:
+
+- `Office Source Health 2` only if a compact diagnostics/readability follow-up is desired; otherwise `Paperclip Workbench 2` for VPS/private-dashboard visibility of validator-passing safe manifests.
+- Keep the next slice read-only/raw-free and gate any VPS deploy, service restart, NAS mount, source watcher, mutation control, or renderer/dependency separately.
 
 ## Paperclip Workbench 1 — safe source-tag/manifest workbench completed
 

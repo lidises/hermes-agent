@@ -54,6 +54,7 @@ import {
   buildOfficeEmptySourceCopyPlan,
   buildOfficeEmptyStateHints,
   buildOfficeSourceHealthSummary,
+  buildOfficeSourceHealthRail,
   buildOfficeUsabilitySummary,
   mergeOfficeRecentChanges,
   resolveOfficeLiveTrackingInterval,
@@ -109,6 +110,33 @@ describe("OfficePage view helpers", () => {
 
     expect(visibleRows(rows, 6, false)).toHaveLength(6);
     expect(visibleRows(rows, 6, true)).toHaveLength(8);
+  });
+
+  it("builds a safe Source Health 1 rail across Kanban, Paperclip, automation, routing, and redaction", () => {
+    const rail = buildOfficeSourceHealthRail(officeFixture({
+      data_sources: [
+        { id: "sessions", status: "ok", checked_at: "2026-05-11T08:00:00Z", item_count: 3, warning_count: 0 },
+        { id: "kanban", status: "partial", checked_at: "2026-05-11T08:00:00Z", item_count: 8, warning_count: 2, error_summary: "raw /Users/lidises/nas path must not appear" },
+        { id: "paperclip:/Users/lidises/nas/raw", status: "missing", checked_at: "2026-05-11T08:00:00Z", item_count: 0, warning_count: 1, source_type: "paperclip", tags: ["source:safe", "raw prompt"] } as unknown as OfficeState["data_sources"][number],
+        { id: "cron", status: "unavailable", checked_at: "2026-05-11T08:00:00Z", item_count: 1, warning_count: 0, error_summary: "secret script must not appear" },
+        { id: "topics", status: "error", checked_at: "2026-05-11T08:00:00Z", item_count: 0, warning_count: 1, error_summary: "token sk-office-redaction-sentinel" },
+      ],
+      redactions: { policy_version: 1, redacted_field_count: 4, omitted_sections: ["prompt"], warnings: ["raw warning must not appear"] },
+    }));
+
+    expect(rail.stageLabel).toBe("Office Source Health 1");
+    expect(rail.items.map((item) => item.id)).toEqual(["sessions", "kanban", "paperclip", "automation", "routing", "redaction"]);
+    expect(rail.items.find((item) => item.id === "kanban")).toMatchObject({ label: "Kanban", status: "partial", tone: "warning", sourceCount: 1, itemCount: 8, warningCount: 2 });
+    expect(rail.items.find((item) => item.id === "paperclip")).toMatchObject({ label: "Paperclip", status: "missing", tone: "warning", sourceCount: 1, itemCount: 0, warningCount: 1 });
+    expect(rail.items.find((item) => item.id === "automation")).toMatchObject({ label: "자동화", status: "unavailable", tone: "neutral" });
+    expect(rail.items.find((item) => item.id === "routing")).toMatchObject({ label: "라우팅", status: "error", tone: "negative" });
+    expect(rail.items.find((item) => item.id === "redaction")).toMatchObject({ label: "가림", status: "partial", tone: "warning", warningCount: 4 });
+    expect(JSON.stringify(rail)).not.toMatch(/\/Users\/lidises|raw|prompt|secret|token|script|sk-office-redaction-sentinel/i);
+    const warningOnlyRail = buildOfficeSourceHealthRail(officeFixture({
+      redactions: { policy_version: 1, redacted_field_count: 0, omitted_sections: [], warnings: ["raw warning body must not appear"] },
+    }));
+    expect(warningOnlyRail.items.find((item) => item.id === "redaction")).toMatchObject({ status: "partial", tone: "warning", warningCount: 1 });
+    expect(JSON.stringify(warningOnlyRail)).not.toMatch(/raw warning body/i);
   });
 
   it("summarizes lower Office sections so details can stay collapsed by default", () => {

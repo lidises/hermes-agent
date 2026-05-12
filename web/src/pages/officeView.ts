@@ -496,6 +496,27 @@ export type OfficeSourceHealthSummary = {
   tone: OfficeDeltaBadge["tone"];
 };
 
+export type OfficeSourceHealthRailItemId = "sessions" | "kanban" | "paperclip" | "automation" | "routing" | "redaction";
+
+export type OfficeSourceHealthRailItem = {
+  id: OfficeSourceHealthRailItemId;
+  label: string;
+  status: OfficeSourceStatus;
+  tone: OfficeDeltaBadge["tone"];
+  sourceCount: number;
+  itemCount: number;
+  warningCount: number;
+  detail: string;
+  redactionNote: string;
+};
+
+export type OfficeSourceHealthRail = {
+  stageLabel: "Office Source Health 1";
+  detail: string;
+  items: OfficeSourceHealthRailItem[];
+  redactionNote: string;
+};
+
 export type OfficePaperclipSourceType = "paperclip" | "nas_manifest" | "session_tag" | "relay_projection" | "unknown";
 
 export type OfficePaperclipRelay = "MacBook" | "WSL" | "VPS" | "unknown";
@@ -1475,6 +1496,90 @@ export function buildOfficeSourceHealthSummary(state: OfficeState): OfficeSource
     totalWarningCount,
     missingSourceIds,
     tone,
+  };
+}
+
+const SOURCE_HEALTH_STATUS_WEIGHT: Record<OfficeSourceStatus, number> = { ok: 0, missing: 1, unavailable: 2, partial: 3, error: 4 };
+const SOURCE_HEALTH_STATUS_LABEL: Record<OfficeSourceStatus, string> = {
+  ok: "정상",
+  partial: "부분 연결",
+  missing: "미보고",
+  unavailable: "사용 불가",
+  error: "오류",
+};
+
+function worstSourceStatus(sources: OfficeState["data_sources"]): OfficeSourceStatus {
+  return sources.reduce<OfficeSourceStatus>((worst, source) => (SOURCE_HEALTH_STATUS_WEIGHT[source.status] > SOURCE_HEALTH_STATUS_WEIGHT[worst] ? source.status : worst), "ok");
+}
+
+function sourceStatusTone(status: OfficeSourceStatus, warningCount = 0): OfficeDeltaBadge["tone"] {
+  if (status === "error") return "negative";
+  if (status === "partial" || warningCount > 0) return "warning";
+  if (status === "missing" || status === "unavailable") return "neutral";
+  return "positive";
+}
+
+function sourceCount(sources: OfficeState["data_sources"], field: "item_count" | "warning_count"): number {
+  return sources.reduce((total, source) => total + Math.max(0, typeof source[field] === "number" ? source[field] ?? 0 : 0), 0);
+}
+
+function isPaperclipSource(source: OfficeState["data_sources"][number]): boolean {
+  const row = source as unknown as Record<string, unknown>;
+  return source.id.startsWith("paperclip:") || PAPERCLIP_SOURCE_TYPES.has(safePaperclipSourceType(row.source_type));
+}
+
+function buildSourceHealthRailItem(
+  id: OfficeSourceHealthRailItemId,
+  label: string,
+  sources: OfficeState["data_sources"],
+  fallbackStatus: OfficeSourceStatus = "missing",
+): OfficeSourceHealthRailItem {
+  const status = sources.length > 0 ? worstSourceStatus(sources) : fallbackStatus;
+  const itemCount = sourceCount(sources, "item_count");
+  const warningCount = sourceCount(sources, "warning_count");
+  return {
+    id,
+    label,
+    status,
+    tone: sourceStatusTone(status, warningCount),
+    sourceCount: sources.length,
+    itemCount,
+    warningCount,
+    detail: sources.length > 0 ? `소스 ${sources.length} · 항목 ${itemCount} · 경고 ${warningCount} · 상태 ${SOURCE_HEALTH_STATUS_LABEL[status]}` : `보고 없음 · 상태 ${SOURCE_HEALTH_STATUS_LABEL[status]}`,
+    redactionNote: "상태·개수·경고 합계만 표시하며 원문·경로·로그·토큰은 제외합니다.",
+  };
+}
+
+export function buildOfficeSourceHealthRail(state: OfficeState): OfficeSourceHealthRail {
+  const paperclipSources = state.data_sources.filter(isPaperclipSource);
+  const byId = (ids: string[]) => state.data_sources.filter((source) => ids.includes(source.id));
+  const redactionWarningCount = Math.max(0, state.redactions.redacted_field_count ?? 0, state.redactions.warnings.length);
+  const redactionStatus: OfficeSourceStatus = redactionWarningCount > 0 || state.redactions.omitted_sections.length > 0 ? "partial" : "ok";
+  const items: OfficeSourceHealthRailItem[] = [
+    buildSourceHealthRailItem("sessions", "세션", byId(["sessions"])),
+    buildSourceHealthRailItem("kanban", "Kanban", byId(["kanban"])),
+    buildSourceHealthRailItem("paperclip", "Paperclip", paperclipSources),
+    buildSourceHealthRailItem("automation", "자동화", byId(["cron"])),
+    buildSourceHealthRailItem("routing", "라우팅", byId(["topics", "provenance"])),
+    {
+      id: "redaction",
+      label: "가림",
+      status: redactionStatus,
+      tone: sourceStatusTone(redactionStatus, redactionWarningCount),
+      sourceCount: 1,
+      itemCount: state.redactions.omitted_sections.length,
+      warningCount: redactionWarningCount,
+      detail: `가림 ${redactionWarningCount} · 생략 섹션 ${state.redactions.omitted_sections.length} · 상태 ${SOURCE_HEALTH_STATUS_LABEL[redactionStatus]}`,
+      redactionNote: "가림 정책 개수만 표시하며 생략된 원문 이름이나 경고 본문은 표시하지 않습니다.",
+    },
+  ];
+  const attentionCount = items.filter((item) => item.status === "partial" || item.status === "error" || item.warningCount > 0).length;
+  const gapCount = items.filter((item) => item.status === "missing" || item.status === "unavailable").length;
+  return {
+    stageLabel: "Office Source Health 1",
+    detail: `확인 필요 ${attentionCount} · 공백/미연결 ${gapCount} · 통합 소스 ${items.length}`,
+    items,
+    redactionNote: "Kanban/Paperclip/자동화/라우팅/가림 상태를 safe DTO 집계만으로 통합합니다.",
   };
 }
 

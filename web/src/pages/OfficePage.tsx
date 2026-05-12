@@ -70,6 +70,7 @@ import {
   buildOfficeSceneObjectView,
   buildOfficeSceneObjects,
   buildOfficeSourceHealthSummary,
+  buildOfficeSourceHealthRail,
   buildOfficeStateDelta,
   buildOfficeUsabilitySummary,
   groupByText,
@@ -1417,6 +1418,7 @@ export default function OfficePage() {
     return characterSceneObjects.length > 0 ? characterSceneObjects : fallbackSceneObjects;
   }, [fallbackSceneObjects, officeCharacters]);
   const sourceHealth = useMemo(() => (state ? buildOfficeSourceHealthSummary(state) : buildOfficeSourceHealthSummary({ ...EMPTY_OFFICE_STATE })), [state]);
+  const sourceHealthRail = useMemo(() => buildOfficeSourceHealthRail(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const selectedCharacter = useMemo(() => officeCharacters.find((character) => character.id === selectedCharacterId) ?? null, [officeCharacters, selectedCharacterId]);
   const selectedCharacterFocus = useMemo(() => buildOfficeSelectedCharacterFocus(selectedCharacter, latestDelta), [latestDelta, selectedCharacter]);
   const layoutPlan = useMemo(
@@ -1919,6 +1921,24 @@ export default function OfficePage() {
               {sourceHealth.missingSourceIds.length > 0 ? (
                 <span className="border border-sky-400/25 px-2 py-1 text-sky-200">미보고 소스 {sourceHealth.missingSourceIds.join(" · ")}</span>
               ) : null}
+            </div>
+            <div className="mb-4 border border-cyan-300/15 bg-cyan-950/10 p-3" data-office-source-health-rail="true">
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <span className="font-semibold uppercase tracking-[0.16em] text-cyan-100">{sourceHealthRail.stageLabel}</span>
+                <span className="text-midground/55">{sourceHealthRail.detail}</span>
+              </div>
+              <div className="grid gap-2 md:grid-cols-3 xl:grid-cols-6">
+                {sourceHealthRail.items.map((item) => (
+                  <div key={item.id} className={`border p-2 text-xs ${changeToneClass(item.tone)}`} data-office-source-health-rail-item={item.id} title={item.redactionNote}>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-semibold">{item.label}</span>
+                      <span>{SOURCE_LABEL[item.status]}</span>
+                    </div>
+                    <div className="mt-1 text-current/75">{item.detail}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-2 text-[11px] leading-5 text-cyan-100/65">{sourceHealthRail.redactionNote}</div>
             </div>
             <div className="mb-4 flex flex-wrap gap-2 text-xs">
               <span className="border border-emerald-400/30 px-2 py-1 text-emerald-300">정상 {sourceCounts.ok}</span>

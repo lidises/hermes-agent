@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-12 12:25 KST
+Last updated: 2026-05-12 12:53 KST
 
 ## Start here after `/new`
 
@@ -64,30 +64,30 @@ When not to rely on `/goal` alone:
 
 ## Current next stage
 
-Paperclip Workbench 1 is implemented and verified on `ai-office-stage16e-safe-spatial-choreography-20260510`. The dashboard now has a folded, read-only Paperclip/shared-context workbench inside `/office`, plus safe manifest docs/tooling and a local read-only adapter for validator-passing projection files.
+`Office Source Health 1` is implemented on `ai-office-stage16e-safe-spatial-choreography-20260510` as a read-only/raw-free consolidation rail for Kanban, Paperclip, automation, routing, and redaction health. It reuses safe `OfficeState.data_sources`/redaction counts only and does not read or display raw adapter errors, prompts, transcripts, task bodies, scripts, logs, tokens, provider/model identity, or private filesystem paths.
 
-Paperclip Workbench 1 implementation:
+Office Source Health 1 implementation:
 
-- Frontend helpers: `buildOfficePaperclipWorkbench`, `buildOfficePaperclipInspector`, `buildOfficePaperclipMapProjection`, and folded section planning for `paperclip`.
-- UI hooks: `data-office-paperclip-workbench` and `data-office-paperclip-source`.
-- Manifest/tooling: `paperclip-safe-manifest.md`, example YAML, validator, source-tag projection doc, and dry-run generator.
-- Backend adapter: local read-only load from `~/.hermes/office/paperclip-manifests/*.y*ml`, only after validator success; missing directory stays missing and is not created.
-- Handoff: `docs/ai-office/plans/2026-05-11-paperclip-workbench-handoff.md`.
+- Frontend helper: `buildOfficeSourceHealthRail(state)` returns stable rail items for `sessions`, `kanban`, `paperclip`, `automation`, `routing`, and `redaction`.
+- UI hook: `data-office-source-health-rail="true"` plus per-item `data-office-source-health-rail-item` values.
+- Safety: sentinel test covers raw path/token/prompt/script/error-summary strings and asserts they do not appear in the rail output.
+- Scope: frontend-only read-only summary rail; no backend schema/API change, storage, watcher, mutation control, renderer/dependency, service restart, or raw source projection.
 
-Verification completed:
+Verification completed for Office Source Health 1:
 
-- `OfficePage.test.ts` 62 passed.
-- `App.test.ts` 2 passed.
-- ESLint for touched Office/App frontend files passed.
+- `npm test -- --run OfficePage.test.ts -t "Source Health 1"` passed.
+- `npm test -- --run OfficePage.test.ts` passed: 63 passed.
+- `npm test -- --run App.test.ts` passed: 2 passed.
+- `npm run lint` passed with existing unrelated warnings only.
 - `npm run build` passed with the existing Vite large chunk warning only.
-- Paperclip manifest generator/validator + Office adapter/API focused backend tests: 33 passed.
-- Example manifest validator returned `OK: safe Paperclip manifest`.
-- Browser smoke `/office?paperclip-workbench=1` passed: workbench/source hooks present, Office map present, no top-level Paperclip nav link, raw leak false, console JS errors none.
+- `.venv/bin/python -m pytest tests/hermes_cli/test_office_state_adapters.py tests/hermes_cli/test_office_api.py -q -o addopts=` passed: 22 passed.
+- Browser smoke `/office?source-health=1` passed: source-health rail and six rail item hooks present, raw leak false, console JS errors none.
+- Independent pre-commit review passed with no security concerns or logic errors.
 
 Immediate next recommended track:
 
-- `Paperclip Workbench 2` if VPS/private-dashboard visibility is desired: copy only validator-passing safe manifests to a VPS-local projection directory and keep the restricted VPS boundary. Do not mount NAS, copy raw Paperclip/NAS material, add watchers, expose public routes, or restart services without an explicit deployment gate.
-- Alternative: `Office Source Health 1` to consolidate Kanban/Paperclip/source-health summaries now that both Kanban Observability and Paperclip Workbench 1 exist. Keep it read-only/raw-free.
+- Finish and commit the Office Source Health 1 verification pass if not already committed.
+- Then choose one next slice explicitly: `Paperclip Workbench 2` for VPS/private-dashboard visibility of validator-passing safe manifests, or `Office Source Health 2` for a compact diagnostics/readability pass. Keep both read-only/raw-free and do not mount NAS on VPS, copy raw Paperclip/NAS material, add watchers, expose public routes, restart services, add mutation controls, or add a renderer/dependency without a separate approval gate.
 
 Stage 16-E current implementation:
 
