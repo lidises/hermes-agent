@@ -1616,7 +1616,7 @@ export default function OfficePage() {
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div className="max-w-3xl">
             <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.22em] text-emerald-300">
-              <ShieldCheck className="h-4 w-4" /> 읽기 전용 MVP · 로컬호스트 우선
+              <ShieldCheck className="h-4 w-4" /> 읽기 전용 MVP · 비공개 접근 우선
             </div>
             <h1 className="mt-3 text-3xl font-semibold uppercase tracking-wide text-foreground md:text-4xl">Hermes AI 오피스</h1>
             <p className="mt-3 text-sm leading-6 text-midground/80">
