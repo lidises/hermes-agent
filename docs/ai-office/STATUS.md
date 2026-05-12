@@ -1,10 +1,10 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-12 13:10 KST
+Last updated: 2026-05-12 13:25 KST
 
 ## Current phase
 
-Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, Stage 14-A through Stage 14-Q safe dynamic-tracking/readability layers, Stage 16-B through Stage 16-E safe realtime/motion layers, Stage 17-A sidebar simplification/Paperclip bridge planning, Paperclip Workbench 1 safe source-tag/manifest projection, Kanban Observability 1 read-only projection, Kanban Observability 2 stale/blocked/workload summaries, Office Source Health 1 consolidated source-health rail, and Office Source Health 2 compact diagnostics/readability summary are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Kanban, Paperclip, and Office Source Health are tracked as independent work tracks, not continuations of the legacy stage number sequence. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
+Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, Stage 14-A through Stage 14-Q safe dynamic-tracking/readability layers, Stage 16-B through Stage 16-E safe realtime/motion layers, Stage 17-A sidebar simplification/Paperclip bridge planning, Paperclip Workbench 1 safe source-tag/manifest projection, Paperclip Workbench 2 manifest visibility, Kanban Observability 1 read-only projection, Kanban Observability 2 stale/blocked/workload summaries, Office Source Health 1 consolidated source-health rail, and Office Source Health 2 compact diagnostics/readability summary are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Kanban, Paperclip, and Office Source Health are tracked as independent work tracks, not continuations of the legacy stage number sequence. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
 
 Current Stage 9-E result: the `/office` page now uses Korean for primary headings, buttons, helper text, safety copy, status labels, inspector field labels, and office-map room/zone labels while keeping stable technical identifiers such as DTO, OfficeState, source IDs, cron, and enum-like adapter values visible for debugging.
 
@@ -68,10 +68,39 @@ Current Stage 14-Q result: `/office` now adds a safe HUD readability strip in th
 
 Current Stage 16-D result in progress: Stage 16-D now adds a browser-local safe motion heartbeat on branch `ai-office-stage16d-safe-motion-heartbeat-20260510`. `buildOfficeSafeMotionHeartbeat(...)` maps the Stage 16-C stream posture plus local polling tick/failure metadata into generated Korean heartbeat labels, phase (`idle|scan|pulse|hold`), intensity (`low|medium|high`), and decorative/read-only flags. `/office` polls `/api/office/events` while the tab is visible, increments a local safe tick on successful safe-event fetches, and renders `data-office-safe-motion-heartbeat` with mode/phase/intensity/enabled hooks plus CSS-only pulse/scan cues. This keeps Stage 16-C backend-safe stream/local fallback behavior and still excludes raw prompts, transcripts, task bodies, scripts, logs, provider/model identity, secrets, tokens, adapter errors, and task identity.
 
-Paperclip Workbench 1 is complete as a folded/read-only/source-tag and safe-manifest workbench inside `/office`. It includes frontend projection, safe inspector/map slots, manifest docs, validator/generator tooling, a local read-only manifest adapter, browser/raw-leak verification, and handoff `docs/ai-office/plans/2026-05-11-paperclip-workbench-handoff.md`. Do not add mutation controls, raw Paperclip/NAS browsing, VPS NAS credentials, or a top-level Paperclip menu without a separate approval model.
+Paperclip Workbench 1 is complete as a folded/read-only/source-tag and safe-manifest workbench inside `/office`. It includes frontend projection, safe inspector/map slots, manifest docs, validator/generator tooling, a local read-only manifest adapter, browser/raw-leak verification, and handoff `docs/ai-office/plans/2026-05-11-paperclip-workbench-handoff.md`. Paperclip Workbench 2 adds a frontend-only manifest visibility strip inside the existing folded workbench: `buildOfficePaperclipManifestVisibility(state)` returns three safe cards (`manifests`, `privateDashboard`, `relayPosture`) and `/office` renders `data-office-paperclip-manifest-visibility="true"` with per-card hooks. It remains read-only and does not deploy to VPS, copy projection files, mount NAS, add watchers, expose public routes, or add mutation controls.
 
 Stage 6 slices were approved by the user, including proceeding through the recommended remaining slices. Stage 7 was approved with testing deferred until the end. Stage 8-A was approved as the next safe step by the user saying to proceed in order, and the user then requested items 1 through 3 to run automatically in sequence. The user also approved installing missing test/runtime extras as needed in earlier setup. No gateway restart, cron change, Kanban mutation, NAS/Obsidian write, service/config mutation, memory/skill update, pixel dependency, or mutation-control implementation has been performed. The local dashboard process was restarted only to smoke-test the newly built local frontend bundle.
 
+
+## Paperclip Workbench 2 — safe manifest visibility completed
+
+Branch: `ai-office-stage16e-safe-spatial-choreography-20260510`
+
+Implementation summary:
+
+- Added `buildOfficePaperclipManifestVisibility(state)` to summarize validator-passing Paperclip safe manifests into three safe cards: manifest count/attention, VPS/private-dashboard visibility posture, and allowlisted relay production posture.
+- Rendered the strip inside the existing folded Paperclip workbench with `data-office-paperclip-manifest-visibility="true"` and `data-office-paperclip-manifest-card="manifests|privateDashboard|relayPosture"` hooks.
+- Kept the slice frontend-only/read-only; it consumes the already-sanitized Paperclip workbench/source DTOs only and does not read raw manifest bodies, paths, adapter errors, prompts, transcripts, scripts, logs, tokens, credentials, or provider/model identity.
+
+Safety posture:
+
+- No backend schema/API change, storage, watcher, mutation control, service restart, renderer/dependency, VPS deploy, safe-manifest file copy, NAS mount, public route, Paperclip API integration, or raw source projection.
+- VPS/private-dashboard wording is posture visibility only: actual VPS sanitized projection-file deployment remains a separate approval/deploy step.
+
+Verification 2026-05-12 13:25 KST:
+
+- RED verified: `npm test -- --run OfficePage.test.ts -t "Paperclip Workbench 2"` failed first with `buildOfficePaperclipManifestVisibility is not a function`.
+- GREEN focused test passed: `npm test -- --run OfficePage.test.ts -t "Paperclip Workbench 2"`.
+- `npm test -- --run OfficePage.test.ts` passed: 65 passed.
+- `npm test -- --run App.test.ts` passed: 2 passed.
+- `./node_modules/.bin/eslint src/pages/OfficePage.tsx src/pages/officeView.ts src/pages/OfficePage.test.ts src/App.tsx src/App.test.ts` passed.
+- `npm run build` passed with the existing Vite large chunk warning only.
+- `.venv/bin/python -m pytest tests/test_paperclip_manifest_generator.py tests/test_paperclip_manifest_validator.py tests/hermes_cli/test_office_state_adapters.py tests/hermes_cli/test_office_api.py -q -o 'addopts='` passed: 33 passed.
+- `.venv/bin/python scripts/ai_office/validate_paperclip_manifest.py docs/ai-office/examples/paperclip-source.example.yaml` passed.
+- `git diff --check`, `git diff --cached --check`, and added-line static security scan passed.
+- Browser smoke `/office?paperclip-workbench=2&verify=1` passed: Paperclip workbench, manifest visibility strip, three card hooks, map summary, scene markers, raw leak false, console JS errors none.
+- Independent pre-commit review passed with no security concerns or logic errors.
 
 ## Office Source Health 2 — compact diagnostics/readability summary completed
 

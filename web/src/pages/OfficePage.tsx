@@ -32,6 +32,7 @@ import {
   buildOfficeMapDensityPlan,
   buildOfficePaperclipWorkbench,
   buildOfficePaperclipInspector,
+  buildOfficePaperclipManifestVisibility,
   buildOfficePaperclipMapProjection,
   buildOfficeKanbanProjection,
   buildOfficePageSectionPlan,
@@ -1466,6 +1467,7 @@ export default function OfficePage() {
   const emptyHints = useMemo(() => buildOfficeEmptyStateHints(), []);
   const emptySourceCopy = useMemo(() => buildOfficeEmptySourceCopyPlan(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const paperclipWorkbench = useMemo(() => buildOfficePaperclipWorkbench(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
+  const paperclipManifestVisibility = useMemo(() => buildOfficePaperclipManifestVisibility(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const kanbanProjection = useMemo(() => buildOfficeKanbanProjection(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const sectionPlan = useMemo(() => buildOfficePageSectionPlan(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const sectionById = useMemo(() => Object.fromEntries(sectionPlan.map((section) => [section.id, section])) as Record<OfficePageSectionPlan["id"], OfficePageSectionPlan>, [sectionPlan]);
@@ -2036,6 +2038,24 @@ export default function OfficePage() {
             <div className="text-xs leading-5 text-midground/55">{paperclipWorkbench.detail} · {paperclipWorkbench.redactionNote}</div>
           </CardHeader>
           <CardContent>
+            <div className="mb-4 border border-cyan-300/15 bg-cyan-950/10 p-3" data-office-paperclip-manifest-visibility="true">
+              <div className="mb-3 flex flex-col gap-1 text-xs md:flex-row md:items-center md:justify-between">
+                <span className="font-semibold uppercase tracking-[0.16em] text-cyan-100">{paperclipManifestVisibility.stageLabel}</span>
+                <span className="text-midground/60">{paperclipManifestVisibility.detail}</span>
+              </div>
+              <div className="grid gap-2 md:grid-cols-3">
+                {paperclipManifestVisibility.cards.map((card) => (
+                  <div key={card.id} className={`border px-3 py-2 ${changeToneClass(card.tone)}`} data-office-paperclip-manifest-card={card.id}>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-xs font-semibold">{card.title}</span>
+                      <span className="text-lg font-semibold tabular-nums">{card.count}</span>
+                    </div>
+                    <div className="mt-1 text-[11px] leading-4 opacity-75">{card.detail}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-2 text-[11px] leading-4 text-midground/50">{paperclipManifestVisibility.redactionNote}</div>
+            </div>
             {paperclipMapProjection.slots.length > 0 ? (
               <div className="mb-4 border border-cyan-300/15 bg-black/20 p-3" aria-label={paperclipMapProjection.ariaLabel} data-office-paperclip-map-projection="true">
                 <div className="mb-2 flex items-center justify-between gap-3 text-xs">

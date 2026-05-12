@@ -64,31 +64,34 @@ When not to rely on `/goal` alone:
 
 ## Current next stage
 
-`Office Source Health 2` is implemented on `ai-office-stage16e-safe-spatial-choreography-20260510` as a frontend-only compact diagnostics/readability summary above the existing source-health rail. It reuses `buildOfficeSourceHealthRail(state)` safe aggregates only and does not read or display raw adapter errors, prompts, transcripts, task bodies, scripts, logs, tokens, provider/model identity, source-tag bodies, warning bodies, or private filesystem paths.
+`Paperclip Workbench 2` is implemented on `ai-office-stage16e-safe-spatial-choreography-20260510` as a frontend-only safe manifest visibility strip inside the existing folded Paperclip workbench. It summarizes validator-passing safe manifests and VPS/private-dashboard posture from already-sanitized Paperclip workbench/source DTOs only; it does not deploy to VPS, copy projection files, mount NAS, add watchers, expose public routes, restart services, add mutation controls, or read/display raw Paperclip/NAS material.
 
-Office Source Health 2 implementation:
+Paperclip Workbench 2 implementation:
 
-- Frontend helper: `buildOfficeSourceHealthCompactDiagnostics(state)` returns three top-glance cards: `coverage`, `attention`, and `readability`.
-- UI hook: `data-office-source-health-compact="true"` plus per-card `data-office-source-health-compact-card="coverage|attention|readability"` values.
-- Safety: sentinel test covers raw path/token/prompt/script/error-summary/warning strings and asserts they do not appear in the compact diagnostics output.
-- Scope: frontend-only read-only summary; no backend schema/API change, storage, watcher, mutation control, renderer/dependency, service restart, or raw source projection.
+- Frontend helper: `buildOfficePaperclipManifestVisibility(state)` returns three safe cards: `manifests`, `privateDashboard`, and `relayPosture`.
+- UI hook: `data-office-paperclip-manifest-visibility="true"` plus per-card `data-office-paperclip-manifest-card="manifests|privateDashboard|relayPosture"` values.
+- Safety: sentinel test covers raw path/token/prompt/body/error-summary strings and asserts they do not appear in the manifest visibility output.
+- Scope: frontend-only read-only summary; no backend schema/API change, storage, watcher, mutation control, renderer/dependency, service restart, VPS deployment, safe-manifest transfer, or raw source projection.
 
-Verification completed for Office Source Health 2:
+Verification completed for Paperclip Workbench 2:
 
-- `npm test -- --run OfficePage.test.ts -t "Source Health 2"` passed.
-- `npm test -- --run OfficePage.test.ts` passed: 64 passed.
+- RED verified: `npm test -- --run OfficePage.test.ts -t "Paperclip Workbench 2"` failed first with `buildOfficePaperclipManifestVisibility is not a function`.
+- GREEN focused test passed: `npm test -- --run OfficePage.test.ts -t "Paperclip Workbench 2"`.
+- `npm test -- --run OfficePage.test.ts` passed: 65 passed.
 - `npm test -- --run App.test.ts` passed: 2 passed.
-- `npm run lint` passed with existing unrelated warnings only.
+- Focused ESLint passed for touched Office/App frontend files.
 - `npm run build` passed with the existing Vite large chunk warning only.
-- `.venv/bin/python -m pytest tests/hermes_cli/test_office_state_adapters.py tests/hermes_cli/test_office_api.py -q -o addopts=` passed: 22 passed.
-- `git diff --check` and added-line static security scan passed.
-- Browser smoke `/office?source-health=2&verify=1` passed: compact diagnostics, three compact card hooks, source-health rail, raw leak false, console JS errors none.
+- `.venv/bin/python -m pytest tests/test_paperclip_manifest_generator.py tests/test_paperclip_manifest_validator.py tests/hermes_cli/test_office_state_adapters.py tests/hermes_cli/test_office_api.py -q -o 'addopts='` passed: 33 passed.
+- `validate_paperclip_manifest.py docs/ai-office/examples/paperclip-source.example.yaml` passed.
+- `git diff --check`, `git diff --cached --check`, and added-line static security scan passed.
+- Browser smoke `/office?paperclip-workbench=2&verify=1` passed: Paperclip workbench, manifest visibility strip, three card hooks, map summary, scene markers, raw leak false, console JS errors none.
 - Independent pre-commit review passed with no security concerns or logic errors.
 
 Immediate next recommended track:
 
-- Finish the Office Source Health 2 verification pass and commit it.
-- Then prefer `Paperclip Workbench 2` for VPS/private-dashboard visibility of validator-passing safe manifests, unless source-health readability still needs another frontend-only pass. Keep both read-only/raw-free and do not mount NAS on VPS, copy raw Paperclip/NAS material, add watchers, expose public routes, restart services, add mutation controls, or add a renderer/dependency without a separate approval gate.
+- Commit Paperclip Workbench 2 after the verification/review pass.
+- Then prefer `Paperclip Workbench 3` only if the user explicitly wants actual VPS/private-dashboard deployment of sanitized projection files. Keep it restricted: copy only validator-passing safe manifests to a VPS-local directory, never raw NAS/Paperclip material; do not mount NAS on VPS, add watchers, expose public routes, restart unrelated services, add mutation controls, or add a renderer/dependency without a separate approval gate.
+- Alternative if not deploying: continue `Office Source Health 3` for another frontend-only readability consolidation pass across Kanban/Paperclip/source-health summaries.
 
 Stage 16-E current implementation:
 

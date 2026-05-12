@@ -41,6 +41,7 @@ import {
   buildOfficeSafeSpatialChoreography,
   buildOfficePaperclipWorkbench,
   buildOfficePaperclipInspector,
+  buildOfficePaperclipManifestVisibility,
   buildOfficeKanbanProjection,
   buildOfficePaperclipMapProjection,
   buildOfficePageSectionPlan,
@@ -222,6 +223,45 @@ describe("OfficePage view helpers", () => {
     });
     expect(workbench.sources[0].tags).toEqual(["source:koreandeer-shoulder"]);
     expect(JSON.stringify(workbench)).not.toMatch(/raw|prompt|transcript|secret|\/Users\/lidises\/nas/i);
+  });
+
+  it("builds Paperclip Workbench 2 manifest visibility without leaking raw manifest details", () => {
+    const visibility = buildOfficePaperclipManifestVisibility(officeFixture({
+      data_sources: [
+        {
+          id: "paperclip:clinic-safe-shelf",
+          status: "ok",
+          checked_at: "2026-05-11T23:30:00Z",
+          item_count: 3,
+          warning_count: 0,
+          source_type: "relay_projection",
+          relay: "VPS",
+          tags: ["source:koreandeer-shoulder", "raw prompt must not appear"],
+          path: "/home/hermes/.hermes/office/paperclip-manifests/private.yaml",
+          body: "raw manifest body must not appear",
+          token: "sk-" + "paperclip-visibility-sentinel",
+        } as unknown as OfficeState["data_sources"][number],
+        {
+          id: "paperclip:/Users/lidises/nas/raw-second",
+          status: "partial",
+          checked_at: "2026-05-08T00:00:00Z",
+          item_count: 9,
+          warning_count: 2,
+          source_type: "nas_manifest",
+          relay: "MacBook",
+          tags: ["source:clinic-notes"],
+          error_summary: "raw /Users/lidises/nas error should not appear",
+        } as unknown as OfficeState["data_sources"][number],
+      ],
+    }));
+
+    expect(visibility.stageLabel).toBe("Paperclip Workbench 2");
+    expect(visibility.cards.map((card) => card.id)).toEqual(["manifests", "privateDashboard", "relayPosture"]);
+    expect(visibility.cards.find((card) => card.id === "manifests")).toMatchObject({ title: "안전 manifest", count: 2, tone: "warning" });
+    expect(visibility.cards.find((card) => card.id === "privateDashboard")).toMatchObject({ title: "VPS 표시", count: 1, tone: "positive" });
+    expect(visibility.cards.find((card) => card.id === "relayPosture")).toMatchObject({ title: "릴레이 생산", count: 2, tone: "neutral" });
+    expect(visibility.detail).toContain("validator-passing");
+    expect(JSON.stringify(visibility)).not.toMatch(/\/home\/hermes|\/Users\/lidises|raw|prompt|body|token|sk-paperclip|private\.yaml/i);
   });
 
   it("builds a safe Kanban operations projection with graph refs and no raw task content", () => {

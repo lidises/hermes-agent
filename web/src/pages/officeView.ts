@@ -579,6 +579,21 @@ export type OfficePaperclipMapSlot = {
   interactive: false;
 };
 
+export type OfficePaperclipVisibilityCard = {
+  id: "manifests" | "privateDashboard" | "relayPosture";
+  title: string;
+  detail: string;
+  count: number;
+  tone: OfficeDeltaBadge["tone"];
+};
+
+export type OfficePaperclipManifestVisibility = {
+  stageLabel: string;
+  detail: string;
+  cards: OfficePaperclipVisibilityCard[];
+  redactionNote: string;
+};
+
 export type OfficePaperclipMapProjection = {
   stageLabel: string;
   detail: string;
@@ -1755,6 +1770,47 @@ export function buildOfficePaperclipWorkbench(state: OfficeState): OfficePapercl
     detail: sources.length > 0 ? `안전 source-tag 투영 ${sources.length}개` : "연결된 Paperclip/source-tag 투영이 아직 없습니다.",
     sources,
     redactionNote: "브라우저에는 source id, 안전 태그, 개수, 건강도, 릴레이 allowlist, coarse timing bucket만 표시합니다.",
+  };
+}
+
+export function buildOfficePaperclipManifestVisibility(state: OfficeState): OfficePaperclipManifestVisibility {
+  const workbench = buildOfficePaperclipWorkbench(state);
+  const manifestCount = workbench.sources.length;
+  const warningCount = workbench.sources.reduce((sum, source) => sum + source.warningCount, 0);
+  const needsAttention = workbench.sources.filter((source) => source.health !== "ok" || source.warningCount > 0).length;
+  const vpsVisibleCount = workbench.sources.filter((source) => source.relay === "VPS").length;
+  const relayCount = new Set(workbench.sources.map((source) => source.relay).filter((relay) => relay !== "unknown")).size;
+
+  return {
+    stageLabel: "Paperclip Workbench 2",
+    detail:
+      manifestCount > 0
+        ? `validator-passing safe manifest ${manifestCount}개 · 확인 필요 ${needsAttention}개 · VPS 표시 ${vpsVisibleCount}개`
+        : "validator-passing safe manifest가 아직 이 Hermes 인스턴스에 보고되지 않았습니다.",
+    cards: [
+      {
+        id: "manifests",
+        title: "안전 manifest",
+        count: manifestCount,
+        detail: warningCount > 0 ? `경고 집계 ${warningCount}개 · 원문 본문 없음` : "validator-passing manifest 집계",
+        tone: needsAttention > 0 ? "warning" : manifestCount > 0 ? "positive" : "neutral",
+      },
+      {
+        id: "privateDashboard",
+        title: "VPS 표시",
+        count: vpsVisibleCount,
+        detail: vpsVisibleCount > 0 ? "VPS-local safe projection 감지" : "VPS에는 복사된 safe projection만 표시",
+        tone: vpsVisibleCount > 0 ? "positive" : "neutral",
+      },
+      {
+        id: "relayPosture",
+        title: "릴레이 생산",
+        count: relayCount,
+        detail: relayCount > 0 ? "MacBook/WSL/VPS allowlist 릴레이 집계" : "릴레이 정보 없음",
+        tone: "neutral",
+      },
+    ],
+    redactionNote: "safe manifest 개수·상태·릴레이 allowlist만 표시하며 원문 NAS/Paperclip 자료, 경로, 토큰, 로그, 프롬프트는 표시하지 않습니다.",
   };
 }
 
