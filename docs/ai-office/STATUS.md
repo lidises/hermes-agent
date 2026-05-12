@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-11 17:01 KST
+Last updated: 2026-05-12 11:30 KST
 
 ## Current phase
 
@@ -71,6 +71,49 @@ Current Stage 16-D result in progress: Stage 16-D now adds a browser-local safe 
 Next phase after Stage 17-A: verify/push the sidebar simplification branch, then decide the Paperclip bridge connection surface before implementing any read-only adapter/plugin. Keep Paperclip first pass folded/read-only/raw-free; do not expose a new always-visible top-level menu or mutation controls without a separate approval model.
 
 Stage 6 slices were approved by the user, including proceeding through the recommended remaining slices. Stage 7 was approved with testing deferred until the end. Stage 8-A was approved as the next safe step by the user saying to proceed in order, and the user then requested items 1 through 3 to run automatically in sequence. The user also approved installing missing test/runtime extras as needed in earlier setup. No gateway restart, cron change, Kanban mutation, NAS/Obsidian write, service/config mutation, memory/skill update, pixel dependency, or mutation-control implementation has been performed. The local dashboard process was restarted only to smoke-test the newly built local frontend bundle.
+
+## Stage 17-B read-only Kanban projection completed
+
+Branch: `ai-office-stage16e-safe-spatial-choreography-20260510`
+
+Commit:
+
+- `abea462a feat: add read-only office kanban projection`
+
+Implementation summary:
+
+- Added a browser-facing, read-only Kanban operations projection for `/office`.
+- Backend Kanban work item DTO now allowlists safe metadata only: `task_ref`, `board_id`, redacted `assignee`, redacted `tenant`, status/priority/timestamps, dependency counts, parent/child task refs, and generated badges.
+- Explicitly excluded task title/body/result/comments/logs/prompts/transcripts/secrets and raw Telegram topic IDs.
+- Frontend adds `buildOfficeKanbanProjection(state)` plus `/office` UI section `칸반 운영실` with board counts, assignee/tenant summaries, and parent-child graph edges.
+- Stable smoke hooks: `data-office-kanban-projection`, `data-office-kanban-graph`, and `data-office-readonly-kanban`.
+
+Safety posture:
+
+- Read-only projection only; no Kanban mutation controls, no backend mutation endpoints, no service exposure changes, no NAS dependency, and no Telegram topic ID rendering.
+- Independent pre-commit review initially flagged `assignee`/`tenant` as free-form leak paths; backend now routes both through `_safe_display(..., redactions)` and regression tests include secret/path sentinels.
+
+Verification 2026-05-12 11:30 KST:
+
+- Local backend focused test: `test_office_api.py` 7 passed.
+- Local frontend focused test: `OfficePage.test.ts` 60 passed.
+- Local `npm run build` passed with existing Vite large chunk warning only.
+- Local `git diff --check` passed.
+- Independent re-review passed.
+- VPS `/home/hermes/.hermes/ai-office-dashboard` patched and verified: backend 7 passed, frontend 60 passed, build passed with existing Vite warning only.
+- VPS `hermes-agent-dashboard.service` restarted and is active.
+- Browser smoke on `http://100.122.57.85:8765/office` confirmed Kanban projection/graph/read-only hooks, 15 Kanban items, graph parent badges, no JS console errors, and no raw body/result/secret/local-path sentinel leaks.
+
+Operational notes:
+
+- VPS worktree still has the pre-existing `web/src/pages/LifeCompassPage.tsx` local modification; it was intentionally preserved.
+- VPS service restart still logs the known stop-sigterm timeout/SIGKILL behavior, but post-restart service health and browser/API smoke passed.
+- For VPS non-login SSH sessions, Node tooling may require `PATH=$HOME/.local/bin:$PATH` before `npm` commands in the dashboard web directory.
+
+Next recommended phase:
+
+- Continue with read-only observability only: stale/blocked/workload summaries for Kanban projection.
+- Keep mutation controls as a separate approval-gated plan.
 
 ## Stage 17-A sidebar simplification and Paperclip bridge planning completed
 
