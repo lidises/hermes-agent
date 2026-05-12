@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-12 19:20 KST
+Last updated: 2026-05-13 08:31 KST
 
 ## Start here after `/new`
 
@@ -89,9 +89,10 @@ Verification completed for Paperclip Workbench 2:
 
 Immediate next recommended track:
 
-- `Projection Orchestration 1` is implemented locally: `/office` now shows relay → validator → active cache → dashboard projection as a read-only, CSS-motion strip derived from safe `OfficeState.projection_cache` and redacted source posture only.
-- Deployment is complete at VPS dashboard worktree HEAD `f287192a` on the existing private Tailscale listener. PR #4 is updated and remains draft/reviewable. Do not mark ready, merge, add public exposure, NAS mount/direct credentials, watcher/cron automation, dashboard mutation controls, gateway restart, or core checkout mutation without separate approval.
-- Next recommended implementation track: manual Mac/WSL relay producer that emits validator-passing safe bundles; keep first operation manual transfer/manual ingest before any automation.
+- `Projection Orchestration 1` is implemented locally and deployed privately: `/office` shows relay → validator → active cache → dashboard projection as a read-only, CSS-motion strip derived from safe `OfficeState.projection_cache` and redacted source posture only.
+- `Projection Relay Producer 1` is implemented locally: `scripts/ai_office/generate_office_projection.py` creates manual Mac/WSL safe Office projection bundles from already-validated Paperclip safe manifests, validates the generated `manifest.json`/`payload.json`, supports `--dry-run`, and does not transfer files, start watchers, touch VPS, or read raw source bodies.
+- Deployment remains at VPS dashboard worktree HEAD `6bafef3a` on the existing private Tailscale listener from the previous Projection Orchestration deploy/docs sync. PR #4 is updated and remains draft/reviewable. Do not mark ready, merge, add public exposure, NAS mount/direct credentials, watcher/cron automation, dashboard mutation controls, gateway restart, or core checkout mutation without separate approval.
+- Next recommended implementation track: approved manual transfer + VPS ingest of one validator-passing safe bundle into `incoming/`/`active/` using the existing private path. Keep it manual before any automation; do not add watchers/cron/NAS mount.
 
 Stage 16-E current implementation:
 

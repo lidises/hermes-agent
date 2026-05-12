@@ -1,10 +1,10 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-12 19:20 KST
+Last updated: 2026-05-13 08:31 KST
 
 ## Current phase
 
-Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, Stage 14-A through Stage 14-Q safe dynamic-tracking/readability layers, Stage 16-B through Stage 16-E safe realtime/motion layers, Stage 17-A sidebar simplification/Paperclip bridge planning, Paperclip Workbench 1 safe source-tag/manifest projection, Paperclip Workbench 2 manifest visibility, Kanban Observability 1 read-only projection, Kanban Observability 2 stale/blocked/workload summaries, Office Source Health 1 consolidated source-health rail, Office Source Health 2 compact diagnostics/readability summary, and Office Release Hardening 1 local frontend guardrails are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Kanban, Paperclip, Office Source Health, and Office Release Hardening are tracked as independent work tracks, not continuations of the legacy stage number sequence. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
+Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, Stage 14-A through Stage 14-Q safe dynamic-tracking/readability layers, Stage 16-B through Stage 16-E safe realtime/motion layers, Stage 17-A sidebar simplification/Paperclip bridge planning, Paperclip Workbench 1 safe source-tag/manifest projection, Paperclip Workbench 2 manifest visibility, Kanban Observability 1 read-only projection, Kanban Observability 2 stale/blocked/workload summaries, Office Source Health 1 consolidated source-health rail, Office Source Health 2 compact diagnostics/readability summary, Office Release Hardening 1 local frontend guardrails, Projection Orchestration 1 live safe projection flow visibility, and Projection Relay Producer 1 manual safe-bundle generation are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Kanban, Paperclip, Office Source Health, Office Release Hardening, Projection Orchestration, and Projection Relay Producer are tracked as independent work tracks, not continuations of the legacy stage number sequence. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
 
 Current Stage 9-E result: the `/office` page now uses Korean for primary headings, buttons, helper text, safety copy, status labels, inspector field labels, and office-map room/zone labels while keeping stable technical identifiers such as DTO, OfficeState, source IDs, cron, and enum-like adapter values visible for debugging.
 
@@ -112,6 +112,34 @@ Deployment/smoke completed 2026-05-12 19:20 KST:
 Next operational step:
 
 - Keep PR #4 as draft/reviewable unless the user explicitly asks to mark ready or merge. The next implementation track should be manual Mac/WSL safe-bundle relay production before any watcher/cron/NAS mount automation.
+
+## Projection Relay Producer 1 — manual Mac/WSL safe-bundle generator completed
+
+Branch: `ai-office-stage16e-safe-spatial-choreography-20260510`
+
+Implementation summary:
+
+- Added `scripts/ai_office/generate_office_projection.py`, a manual/dry-run producer for MacBook/WSL relay use.
+- The producer reads already-validated Paperclip safe manifest YAML, then emits an Office projection bundle with `manifest.json` and `payload.json` only.
+- It validates generated bundles through the existing Office projection validator, supports `--dry-run` JSON stdout, and keeps stdout/error output free of private paths, raw manifest values, token-shaped values, prompts, transcripts, raw document bodies, and omitted-section labels.
+- It does not transfer bundles, create VPS directories, run VPS ingest, restart services, start watchers/cron, mount NAS, mutate Kanban/cron/Telegram, or add dashboard controls.
+
+Safety posture:
+
+- Local manual producer only. Output is validator-passing safe DTO material intended for a separately approved manual transfer/ingest step.
+- Source material remains on the relay machine; the generated Office bundle includes only safe counts, statuses, source tags, relay/path bucket posture, freshness, validation, and redaction metadata.
+
+Verification 2026-05-13 08:31 KST:
+
+- RED verified: `tests/test_office_projection_generator.py` failed first because `scripts/ai_office/generate_office_projection.py` did not exist.
+- GREEN focused test passed: `.venv/bin/python -m pytest tests/test_office_projection_generator.py -q -o addopts=` → 4 passed.
+- Focused projection/Paperclip safety regression passed: `.venv/bin/python -m pytest tests/test_office_projection_generator.py tests/test_office_projection_validator.py tests/hermes_cli/test_office_projection_cache.py tests/test_paperclip_manifest_generator.py tests/test_paperclip_manifest_validator.py -q -o addopts=` → 28 passed.
+- Manual dry-run/write smoke passed: generated a local bundle from `docs/ai-office/examples/paperclip-source.example.yaml`, then `validate_office_projection.py` returned `OK: safe Office projection bundle`.
+- `git diff --check` passed; changed files are docs plus the new generator/test only, with no `web/` frontend files changed.
+
+Next operational step:
+
+- If approved, manually generate one safe bundle from a relay-side Paperclip safe manifest, copy only that validator-passing bundle to VPS `incoming/`, run manual VPS ingest, and verify `/office` reads it without restarting the Telegram gateway. Keep watcher/cron automation and NAS-on-VPS out of scope.
 
 ## Office Release Hardening 1 — local frontend guardrails in progress
 
