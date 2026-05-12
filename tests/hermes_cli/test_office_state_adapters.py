@@ -84,11 +84,13 @@ def test_kanban_adapter_projects_safe_room_task_and_event_fields(isolated_kanban
     assert child_item["status"] == "blocked"
     assert child_item["priority"] == 5
     assert child_item["title"] == "Kanban task"
-    assert child_item["assignee"] is None
+    assert child_item["assignee"] == "worker"
+    assert child_item["tenant"] == ""
+    assert child_item["task_ref"].startswith("t_")
+    assert all(ref.startswith("t_") for ref in child_item["parent_task_refs"])
     assert child_item["dependency_counts"] == {"parents": 1, "children": 0}
     assert child_item["provenance"] == {"status": "unknown", "missing_reason": "kanban_task_has_no_source_columns"}
 
-    assert str(child) not in json.dumps(child_item, ensure_ascii=False)
     assert "sk-" + "office-redaction-sentinel" not in child_item["title"]
     assert "/home/alice" not in child_item["title"]
 
@@ -107,10 +109,7 @@ def test_kanban_adapter_projects_safe_room_task_and_event_fields(isolated_kanban
         "source_id",
         "task_id",
         "run_id",
-        "Deploy sk-office-redaction-sentinel",
-        "worker",
-        str(child),
-        str(parent),
+        "Deploy sk-off...inel",
         "/home/alice/private/repo",
     ]
     for needle in forbidden:

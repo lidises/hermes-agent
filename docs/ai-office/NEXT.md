@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-12 12:06 KST
+Last updated: 2026-05-12 12:25 KST
 
 ## Start here after `/new`
 
@@ -64,67 +64,42 @@ When not to rely on `/goal` alone:
 
 ## Current next stage
 
-Kanban Observability 2 is implemented and verified on `ai-office-stage16e-safe-spatial-choreography-20260510`. The dashboard now adds a read-only Kanban observability rail for stale/blocked/workload summaries using only allowlisted safe DTO fields.
+Paperclip Workbench 1 is implemented and verified on `ai-office-stage16e-safe-spatial-choreography-20260510`. The dashboard now has a folded, read-only Paperclip/shared-context workbench inside `/office`, plus safe manifest docs/tooling and a local read-only adapter for validator-passing projection files.
 
-Kanban Observability 2 implementation:
+Paperclip Workbench 1 implementation:
 
-- `buildOfficeKanbanProjection(state)` now includes `observability.stageLabel = "Kanban Observability 2"`.
-- Summary cards cover `workload`, `blocked`, and `stale` counts.
-- Per-board workload summaries expose only `boardId`, `total`, `running`, `blocked`, and `stale`.
-- Attention refs are capped safe `task_ref` values only.
-- New smoke hooks:
-  - `data-office-kanban-observability="true"`
-  - `data-office-kanban-observability-card="workload|blocked|stale"`
-  - `data-office-kanban-workload-board`
-  - `data-office-kanban-attention-refs`
+- Frontend helpers: `buildOfficePaperclipWorkbench`, `buildOfficePaperclipInspector`, `buildOfficePaperclipMapProjection`, and folded section planning for `paperclip`.
+- UI hooks: `data-office-paperclip-workbench` and `data-office-paperclip-source`.
+- Manifest/tooling: `paperclip-safe-manifest.md`, example YAML, validator, source-tag projection doc, and dry-run generator.
+- Backend adapter: local read-only load from `~/.hermes/office/paperclip-manifests/*.y*ml`, only after validator success; missing directory stays missing and is not created.
+- Handoff: `docs/ai-office/plans/2026-05-11-paperclip-workbench-handoff.md`.
 
 Verification completed:
 
-- RED verified before implementation: `projection.observability` was undefined.
-- Focused frontend test: `OfficePage.test.ts` 62 passed.
-- ESLint passed for `OfficePage.tsx`, `officeView.ts`, and `OfficePage.test.ts`.
+- `OfficePage.test.ts` 62 passed.
+- `App.test.ts` 2 passed.
+- ESLint for touched Office/App frontend files passed.
 - `npm run build` passed with the existing Vite large chunk warning only.
-- Backend focused office API test: `test_office_api.py` 7 passed.
-- `git diff --check` passed.
-- Browser smoke `/office?kanban-observability=2` passed: observability hooks present, cards `workload|blocked|stale`, raw leak false, and console JS errors none.
+- Paperclip manifest generator/validator + Office adapter/API focused backend tests: 33 passed.
+- Example manifest validator returned `OK: safe Paperclip manifest`.
+- Browser smoke `/office?paperclip-workbench=1` passed: workbench/source hooks present, Office map present, no top-level Paperclip nav link, raw leak false, console JS errors none.
 
-Immediate next recommended track: `Paperclip Workbench 1`.
+Immediate next recommended track:
 
-- Start it as its own independent track, not Stage 18 and not another Kanban Observability slice.
-- First pass should be planning/adapter-readiness or a folded read-only projection, depending on user approval.
-- Keep it source-tag/DTO only: no raw Paperclip prompts, transcripts, tool args, task bodies, logs, secrets, provider identity, local paths, or mutation controls.
-- Do not create a new always-visible top-level Paperclip sidebar item by default; keep it folded under Office/workbench unless a separate IA decision approves otherwise.
+- `Paperclip Workbench 2` if VPS/private-dashboard visibility is desired: copy only validator-passing safe manifests to a VPS-local projection directory and keep the restricted VPS boundary. Do not mount NAS, copy raw Paperclip/NAS material, add watchers, expose public routes, or restart services without an explicit deployment gate.
+- Alternative: `Office Source Health 1` to consolidate Kanban/Paperclip/source-health summaries now that both Kanban Observability and Paperclip Workbench 1 exist. Keep it read-only/raw-free.
 
 Stage 16-E current implementation:
 
 - `buildOfficeSafeSpatialChoreography(events, heartbeat)` maps safe events to generated `room-pulse` and `route-sweep` items.
 - `/office` renders the spatial choreography overlay inside the existing CSS/SVG map.
-- New smoke hooks:
+- Smoke hooks remain:
   - `data-office-safe-spatial-choreography="true"`
   - `data-office-safe-spatial-choreography-mode`
   - `data-office-safe-spatial-choreography-item="room-pulse|route-sweep"`
   - `data-office-safe-spatial-choreography-room`
   - `data-office-safe-spatial-choreography-intensity`
 - First/static snapshots remain `safe-spatial-idle`; no fabricated route movement is shown without safe event activity.
-
-Verification completed:
-
-- Focused frontend test: `OfficePage.test.ts` 55 passed.
-- ESLint passed for `OfficePage.tsx`, `officeView.ts`, `OfficePage.test.ts`, and `api.ts`.
-- `npm run build` passed with the existing Vite large chunk warning only.
-- Backend focused office tests passed: 21 passed in 1.34s.
-- `git diff --check` passed.
-- Browser smoke `/office?stage16e=safe-spatial-choreography` passed: safe motion heartbeat, safe spatial choreography container, idle first/static posture, motion lane, raw leak false, and console JS errors none.
-
-Immediate next action: verify and push Stage 17-A:
-
-- `cd web && npm test -- --run App.test.ts`
-- `cd web && ./node_modules/.bin/eslint src/App.tsx src/App.test.ts src/i18n/en.ts src/i18n/ko.ts src/i18n/zh.ts src/i18n/types.ts`
-- `cd web && npm run build`
-- Browser smoke `/office`: sidebar shows 세션/오피스 plus folded 운영/도구함/설정·도움말 groups; Office scene still renders; raw leak false; console errors none.
-- `git push origin ai-office-stage16e-safe-spatial-choreography-20260510`
-
-Recommended next implementation/design stage after Stage 17-A: decide the Paperclip bridge connection surface before writing runtime code. First Paperclip pass should be read-only, folded into the existing Office/source/plugin model, and safe DTO-only. Do not expose raw Paperclip prompts/transcripts/tool args/task bodies/logs/secrets/provider identity, do not add mutation controls, and do not create a new always-visible top-level Paperclip sidebar item by default.
 
 Stage 16-D current implementation:
 

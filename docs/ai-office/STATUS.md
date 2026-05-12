@@ -1,10 +1,10 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-12 12:06 KST
+Last updated: 2026-05-12 12:25 KST
 
 ## Current phase
 
-Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, Stage 14-A through Stage 14-Q safe dynamic-tracking/readability layers, Stage 16-B through Stage 16-E safe realtime/motion layers, Stage 17-A sidebar simplification/Paperclip bridge planning, Kanban Observability 1 read-only projection, and Kanban Observability 2 stale/blocked/workload summaries are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Kanban is now tracked as its own independent work track starting at `Kanban Observability 1`, not as a continuation of the legacy stage number sequence. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
+Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, Stage 14-A through Stage 14-Q safe dynamic-tracking/readability layers, Stage 16-B through Stage 16-E safe realtime/motion layers, Stage 17-A sidebar simplification/Paperclip bridge planning, Paperclip Workbench 1 safe source-tag/manifest projection, Kanban Observability 1 read-only projection, and Kanban Observability 2 stale/blocked/workload summaries are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Kanban and Paperclip are tracked as independent work tracks, not continuations of the legacy stage number sequence. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
 
 Current Stage 9-E result: the `/office` page now uses Korean for primary headings, buttons, helper text, safety copy, status labels, inspector field labels, and office-map room/zone labels while keeping stable technical identifiers such as DTO, OfficeState, source IDs, cron, and enum-like adapter values visible for debugging.
 
@@ -68,9 +68,43 @@ Current Stage 14-Q result: `/office` now adds a safe HUD readability strip in th
 
 Current Stage 16-D result in progress: Stage 16-D now adds a browser-local safe motion heartbeat on branch `ai-office-stage16d-safe-motion-heartbeat-20260510`. `buildOfficeSafeMotionHeartbeat(...)` maps the Stage 16-C stream posture plus local polling tick/failure metadata into generated Korean heartbeat labels, phase (`idle|scan|pulse|hold`), intensity (`low|medium|high`), and decorative/read-only flags. `/office` polls `/api/office/events` while the tab is visible, increments a local safe tick on successful safe-event fetches, and renders `data-office-safe-motion-heartbeat` with mode/phase/intensity/enabled hooks plus CSS-only pulse/scan cues. This keeps Stage 16-C backend-safe stream/local fallback behavior and still excludes raw prompts, transcripts, task bodies, scripts, logs, provider/model identity, secrets, tokens, adapter errors, and task identity.
 
-Next independent track: Paperclip should start as its own `Paperclip Workbench 1` track before implementing any read-only adapter/plugin. Keep first passes folded/read-only/raw-free; do not expose a new always-visible top-level menu or mutation controls without a separate approval model.
+Paperclip Workbench 1 is complete as a folded/read-only/source-tag and safe-manifest workbench inside `/office`. It includes frontend projection, safe inspector/map slots, manifest docs, validator/generator tooling, a local read-only manifest adapter, browser/raw-leak verification, and handoff `docs/ai-office/plans/2026-05-11-paperclip-workbench-handoff.md`. Do not add mutation controls, raw Paperclip/NAS browsing, VPS NAS credentials, or a top-level Paperclip menu without a separate approval model.
 
 Stage 6 slices were approved by the user, including proceeding through the recommended remaining slices. Stage 7 was approved with testing deferred until the end. Stage 8-A was approved as the next safe step by the user saying to proceed in order, and the user then requested items 1 through 3 to run automatically in sequence. The user also approved installing missing test/runtime extras as needed in earlier setup. No gateway restart, cron change, Kanban mutation, NAS/Obsidian write, service/config mutation, memory/skill update, pixel dependency, or mutation-control implementation has been performed. The local dashboard process was restarted only to smoke-test the newly built local frontend bundle.
+
+
+## Paperclip Workbench 1 — safe source-tag/manifest workbench completed
+
+Branch: `ai-office-stage16e-safe-spatial-choreography-20260510`
+
+Implementation summary:
+
+- Added a folded/read-only `Paperclip · 공유 컨텍스트 작업대` inside `/office`, not a top-level app route.
+- Added safe frontend helpers for Paperclip workbench sources, safe inspector fields, and CSS/SVG-style map shelf slots.
+- Added safe manifest documentation, example YAML, validator, source-tag bridge documentation, and MacBook/WSL-local dry-run generator.
+- Added a backend read-only adapter that loads only validator-passing local manifests from `~/.hermes/office/paperclip-manifests/*.y*ml`, does not create storage when absent, caps tags/manifests, and projects only safe `OfficeDataSource` metadata.
+- Added final handoff: `docs/ai-office/plans/2026-05-11-paperclip-workbench-handoff.md`.
+
+Safety posture:
+
+- No Paperclip API, NAS watcher/queue, raw document browser, mutation controls, VPS NAS credentials, direct NAS RW mount, service restart, or top-level Paperclip sidebar item.
+- Browser-facing DTO/UI excludes prompts, transcripts, tool args, task bodies/results, raw logs, cron scripts, credentials/tokens, full private filesystem paths, provider/model identity, and raw NAS/Paperclip document bodies.
+
+Verification 2026-05-12 12:25 KST:
+
+- `npm test -- --run OfficePage.test.ts` → 62 passed.
+- `npm test -- --run App.test.ts` → 2 passed.
+- ESLint for touched Office/App frontend files passed.
+- `npm run build` passed with existing Vite large chunk warning only.
+- `.venv/bin/python -m pytest tests/test_paperclip_manifest_generator.py tests/test_paperclip_manifest_validator.py tests/hermes_cli/test_office_state_adapters.py tests/hermes_cli/test_office_api.py -q -o addopts=` → 33 passed.
+- Safe manifest validator example check passed: `OK: safe Paperclip manifest`.
+- Browser smoke on `http://127.0.0.1:8765/office?paperclip-workbench=1` confirmed workbench hook, source hook, Office map, no top-level Paperclip nav link, raw leak false, and no JS console errors.
+- Corrected a stale Kanban adapter test expectation so the focused backend regression suite now matches the implemented safe Kanban DTO contract.
+
+Next recommended track slice:
+
+- `Paperclip Workbench 2` only if the user wants VPS/private-dashboard deployment of sanitized projection files. Keep it read-only and transfer only validator-passing safe manifests; do not mount NAS on VPS.
+- Alternative: `Office Source Health 1` to consolidate Kanban/Paperclip/source-health summaries without new mutation controls or raw projection.
 
 ## Kanban Observability 2 — stale/blocked/workload summaries completed
 
@@ -103,9 +137,9 @@ Verification 2026-05-12 12:06 KST:
 - `git diff --check` passed.
 - Browser smoke on `http://127.0.0.1:8765/office?kanban-observability=2` confirmed Kanban Observability 2 hooks, summary cards `workload|blocked|stale`, workload board hook, raw leak false, and no JS console errors.
 
-Next recommended track slice:
+Next track status:
 
-- `Paperclip Workbench 1` — start a separate planning/adapter-readiness track for a folded, read-only, source-tag workbench before adding any Paperclip runtime adapter/plugin.
+- The previously recommended `Paperclip Workbench 1` track is now complete and documented above.
 - Keep mutation controls as a separate approval-gated plan.
 
 ## Kanban Observability 1 — read-only projection completed
