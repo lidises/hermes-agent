@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-13 08:31 KST
+Last updated: 2026-05-13 08:45 KST
 
 ## Start here after `/new`
 
@@ -92,7 +92,9 @@ Immediate next recommended track:
 - `Projection Orchestration 1` is implemented locally and deployed privately: `/office` shows relay → validator → active cache → dashboard projection as a read-only, CSS-motion strip derived from safe `OfficeState.projection_cache` and redacted source posture only.
 - `Projection Relay Producer 1` is implemented locally: `scripts/ai_office/generate_office_projection.py` creates manual Mac/WSL safe Office projection bundles from already-validated Paperclip safe manifests, validates the generated `manifest.json`/`payload.json`, supports `--dry-run`, and does not transfer files, start watchers, touch VPS, or read raw source bodies.
 - VPS dashboard worktree has been fast-forwarded to the current pushed branch head for code/docs availability only; no service restart was performed, and both dashboard and gateway services remained active. PR #4 is updated and remains draft/reviewable. Do not mark ready, merge, add public exposure, NAS mount/direct credentials, watcher/cron automation, dashboard mutation controls, gateway restart, or core checkout mutation without separate approval.
-- Next recommended implementation track: approved manual transfer + VPS ingest of one validator-passing safe bundle into `incoming/`/`active/` using the existing private path. Keep it manual before any automation; do not add watchers/cron/NAS mount.
+- Recovery check 2026-05-13 08:45 KST found the previously recommended manual transfer + VPS ingest step already complete: `incoming/pcwb-vps-smoke-001` and `active/pcwb-vps-smoke-001` exist on the VPS, the active bundle validates with `OK: safe Office projection bundle`, and `read_office_projection_cache()` reports `status=active`, `active.bundle_id=pcwb-vps-smoke-001`, `rejected.count=0`.
+- Completion evidence and unfinished/deferred classification are in `docs/ai-office/plans/2026-05-13-projection-vps-manual-ingest-completion.md`.
+- Next recommended track is no longer another manual ingest. Keep PR #4 draft/reviewable, then choose one separately approved next track: review/mark-ready/merge PR #4, or design projection automation. Do not start watcher/cron automation, NAS mount/direct credentials, public exposure, dashboard mutation controls, gateway restart, or core checkout mutation without separate approval.
 
 Stage 16-E current implementation:
 
