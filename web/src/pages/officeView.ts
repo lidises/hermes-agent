@@ -517,6 +517,23 @@ export type OfficeSourceHealthRail = {
   redactionNote: string;
 };
 
+export type OfficeSourceHealthDiagnosticCardId = "coverage" | "attention" | "readability";
+
+export type OfficeSourceHealthDiagnosticCard = {
+  id: OfficeSourceHealthDiagnosticCardId;
+  title: string;
+  count: number;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+};
+
+export type OfficeSourceHealthCompactDiagnostics = {
+  stageLabel: "Office Source Health 2";
+  detail: string;
+  cards: OfficeSourceHealthDiagnosticCard[];
+  redactionNote: string;
+};
+
 export type OfficePaperclipSourceType = "paperclip" | "nas_manifest" | "session_tag" | "relay_projection" | "unknown";
 
 export type OfficePaperclipRelay = "MacBook" | "WSL" | "VPS" | "unknown";
@@ -1580,6 +1597,44 @@ export function buildOfficeSourceHealthRail(state: OfficeState): OfficeSourceHea
     detail: `확인 필요 ${attentionCount} · 공백/미연결 ${gapCount} · 통합 소스 ${items.length}`,
     items,
     redactionNote: "Kanban/Paperclip/자동화/라우팅/가림 상태를 safe DTO 집계만으로 통합합니다.",
+  };
+}
+
+export function buildOfficeSourceHealthCompactDiagnostics(state: OfficeState): OfficeSourceHealthCompactDiagnostics {
+  const rail = buildOfficeSourceHealthRail(state);
+  const attentionItems = rail.items.filter((item) => item.status === "partial" || item.status === "error" || item.warningCount > 0);
+  const gapItems = rail.items.filter((item) => item.status === "missing" || item.status === "unavailable");
+  const errorCount = rail.items.filter((item) => item.status === "error").length;
+  const warningTotal = rail.items.reduce((total, item) => total + item.warningCount, 0);
+  const connectedCount = rail.items.length - gapItems.length;
+
+  return {
+    stageLabel: "Office Source Health 2",
+    detail: `상단 3장 요약 · 연결 ${connectedCount}/${rail.items.length} · 확인 ${attentionItems.length} · 경고 ${warningTotal}`,
+    cards: [
+      {
+        id: "coverage",
+        title: "소스 커버리지",
+        count: rail.items.length,
+        detail: `연결 ${connectedCount} · 공백/미연결 ${gapItems.length}`,
+        tone: gapItems.length > 0 ? "warning" : "positive",
+      },
+      {
+        id: "attention",
+        title: "확인 필요",
+        count: attentionItems.length,
+        detail: `오류 ${errorCount} · 경고 합계 ${warningTotal}`,
+        tone: errorCount > 0 ? "negative" : attentionItems.length > 0 ? "warning" : "positive",
+      },
+      {
+        id: "readability",
+        title: "읽기 밀도",
+        count: 3,
+        detail: "세부 소스 카드는 접고 커버리지·확인·읽기 밀도만 먼저 봅니다.",
+        tone: attentionItems.length > 0 || gapItems.length > 0 ? "warning" : "positive",
+      },
+    ],
+    redactionNote: "Source Health 2는 Source Health 1의 safe 집계만 재요약하며 원문·경로·로그·토큰을 표시하지 않습니다.",
   };
 }
 

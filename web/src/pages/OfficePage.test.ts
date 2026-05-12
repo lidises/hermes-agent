@@ -55,6 +55,7 @@ import {
   buildOfficeEmptyStateHints,
   buildOfficeSourceHealthSummary,
   buildOfficeSourceHealthRail,
+  buildOfficeSourceHealthCompactDiagnostics,
   buildOfficeUsabilitySummary,
   mergeOfficeRecentChanges,
   resolveOfficeLiveTrackingInterval,
@@ -137,6 +138,27 @@ describe("OfficePage view helpers", () => {
     }));
     expect(warningOnlyRail.items.find((item) => item.id === "redaction")).toMatchObject({ status: "partial", tone: "warning", warningCount: 1 });
     expect(JSON.stringify(warningOnlyRail)).not.toMatch(/raw warning body/i);
+  });
+
+  it("builds compact Source Health 2 diagnostics without leaking raw source details", () => {
+    const diagnostics = buildOfficeSourceHealthCompactDiagnostics(officeFixture({
+      data_sources: [
+        { id: "sessions", status: "ok", checked_at: "2026-05-11T08:00:00Z", item_count: 3, warning_count: 0 },
+        { id: "kanban", status: "partial", checked_at: "2026-05-11T08:00:00Z", item_count: 8, warning_count: 2, error_summary: "raw /Users/lidises/nas path must not appear" },
+        { id: "paperclip:/Users/lidises/nas/raw", status: "missing", checked_at: "2026-05-11T08:00:00Z", item_count: 0, warning_count: 1, source_type: "paperclip", tags: ["source:safe", "raw prompt"] } as unknown as OfficeState["data_sources"][number],
+        { id: "cron", status: "unavailable", checked_at: "2026-05-11T08:00:00Z", item_count: 1, warning_count: 0, error_summary: "secret script must not appear" },
+        { id: "topics", status: "error", checked_at: "2026-05-11T08:00:00Z", item_count: 0, warning_count: 1, error_summary: "token sk-office-redaction-sentinel" },
+      ],
+      redactions: { policy_version: 1, redacted_field_count: 4, omitted_sections: ["prompt"], warnings: ["raw warning must not appear"] },
+    }));
+
+    expect(diagnostics.stageLabel).toBe("Office Source Health 2");
+    expect(diagnostics.cards.map((card) => card.id)).toEqual(["coverage", "attention", "readability"]);
+    expect(diagnostics.cards.find((card) => card.id === "coverage")).toMatchObject({ title: "소스 커버리지", count: 6, tone: "warning" });
+    expect(diagnostics.cards.find((card) => card.id === "attention")).toMatchObject({ title: "확인 필요", count: 4, tone: "negative" });
+    expect(diagnostics.cards.find((card) => card.id === "readability")).toMatchObject({ title: "읽기 밀도", count: 3, tone: "warning" });
+    expect(diagnostics.detail).toContain("상단 3장 요약");
+    expect(JSON.stringify(diagnostics)).not.toMatch(/\/Users\/lidises|raw|prompt|secret|token|script|sk-office-redaction-sentinel/i);
   });
 
   it("summarizes lower Office sections so details can stay collapsed by default", () => {

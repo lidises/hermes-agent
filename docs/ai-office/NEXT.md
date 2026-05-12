@@ -64,30 +64,31 @@ When not to rely on `/goal` alone:
 
 ## Current next stage
 
-`Office Source Health 1` is implemented on `ai-office-stage16e-safe-spatial-choreography-20260510` as a read-only/raw-free consolidation rail for Kanban, Paperclip, automation, routing, and redaction health. It reuses safe `OfficeState.data_sources`/redaction counts only and does not read or display raw adapter errors, prompts, transcripts, task bodies, scripts, logs, tokens, provider/model identity, or private filesystem paths.
+`Office Source Health 2` is implemented on `ai-office-stage16e-safe-spatial-choreography-20260510` as a frontend-only compact diagnostics/readability summary above the existing source-health rail. It reuses `buildOfficeSourceHealthRail(state)` safe aggregates only and does not read or display raw adapter errors, prompts, transcripts, task bodies, scripts, logs, tokens, provider/model identity, source-tag bodies, warning bodies, or private filesystem paths.
 
-Office Source Health 1 implementation:
+Office Source Health 2 implementation:
 
-- Frontend helper: `buildOfficeSourceHealthRail(state)` returns stable rail items for `sessions`, `kanban`, `paperclip`, `automation`, `routing`, and `redaction`.
-- UI hook: `data-office-source-health-rail="true"` plus per-item `data-office-source-health-rail-item` values.
-- Safety: sentinel test covers raw path/token/prompt/script/error-summary strings and asserts they do not appear in the rail output.
-- Scope: frontend-only read-only summary rail; no backend schema/API change, storage, watcher, mutation control, renderer/dependency, service restart, or raw source projection.
+- Frontend helper: `buildOfficeSourceHealthCompactDiagnostics(state)` returns three top-glance cards: `coverage`, `attention`, and `readability`.
+- UI hook: `data-office-source-health-compact="true"` plus per-card `data-office-source-health-compact-card="coverage|attention|readability"` values.
+- Safety: sentinel test covers raw path/token/prompt/script/error-summary/warning strings and asserts they do not appear in the compact diagnostics output.
+- Scope: frontend-only read-only summary; no backend schema/API change, storage, watcher, mutation control, renderer/dependency, service restart, or raw source projection.
 
-Verification completed for Office Source Health 1:
+Verification completed for Office Source Health 2:
 
-- `npm test -- --run OfficePage.test.ts -t "Source Health 1"` passed.
-- `npm test -- --run OfficePage.test.ts` passed: 63 passed.
+- `npm test -- --run OfficePage.test.ts -t "Source Health 2"` passed.
+- `npm test -- --run OfficePage.test.ts` passed: 64 passed.
 - `npm test -- --run App.test.ts` passed: 2 passed.
 - `npm run lint` passed with existing unrelated warnings only.
 - `npm run build` passed with the existing Vite large chunk warning only.
 - `.venv/bin/python -m pytest tests/hermes_cli/test_office_state_adapters.py tests/hermes_cli/test_office_api.py -q -o addopts=` passed: 22 passed.
-- Browser smoke `/office?source-health=1` passed: source-health rail and six rail item hooks present, raw leak false, console JS errors none.
+- `git diff --check` and added-line static security scan passed.
+- Browser smoke `/office?source-health=2&verify=1` passed: compact diagnostics, three compact card hooks, source-health rail, raw leak false, console JS errors none.
 - Independent pre-commit review passed with no security concerns or logic errors.
 
 Immediate next recommended track:
 
-- Finish and commit the Office Source Health 1 verification pass if not already committed.
-- Then choose one next slice explicitly: `Paperclip Workbench 2` for VPS/private-dashboard visibility of validator-passing safe manifests, or `Office Source Health 2` for a compact diagnostics/readability pass. Keep both read-only/raw-free and do not mount NAS on VPS, copy raw Paperclip/NAS material, add watchers, expose public routes, restart services, add mutation controls, or add a renderer/dependency without a separate approval gate.
+- Finish the Office Source Health 2 verification pass and commit it.
+- Then prefer `Paperclip Workbench 2` for VPS/private-dashboard visibility of validator-passing safe manifests, unless source-health readability still needs another frontend-only pass. Keep both read-only/raw-free and do not mount NAS on VPS, copy raw Paperclip/NAS material, add watchers, expose public routes, restart services, add mutation controls, or add a renderer/dependency without a separate approval gate.
 
 Stage 16-E current implementation:
 

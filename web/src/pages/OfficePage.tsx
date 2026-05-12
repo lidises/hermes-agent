@@ -71,6 +71,7 @@ import {
   buildOfficeSceneObjects,
   buildOfficeSourceHealthSummary,
   buildOfficeSourceHealthRail,
+  buildOfficeSourceHealthCompactDiagnostics,
   buildOfficeStateDelta,
   buildOfficeUsabilitySummary,
   groupByText,
@@ -1419,6 +1420,7 @@ export default function OfficePage() {
   }, [fallbackSceneObjects, officeCharacters]);
   const sourceHealth = useMemo(() => (state ? buildOfficeSourceHealthSummary(state) : buildOfficeSourceHealthSummary({ ...EMPTY_OFFICE_STATE })), [state]);
   const sourceHealthRail = useMemo(() => buildOfficeSourceHealthRail(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
+  const sourceHealthCompactDiagnostics = useMemo(() => buildOfficeSourceHealthCompactDiagnostics(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const selectedCharacter = useMemo(() => officeCharacters.find((character) => character.id === selectedCharacterId) ?? null, [officeCharacters, selectedCharacterId]);
   const selectedCharacterFocus = useMemo(() => buildOfficeSelectedCharacterFocus(selectedCharacter, latestDelta), [latestDelta, selectedCharacter]);
   const layoutPlan = useMemo(
@@ -1921,6 +1923,24 @@ export default function OfficePage() {
               {sourceHealth.missingSourceIds.length > 0 ? (
                 <span className="border border-sky-400/25 px-2 py-1 text-sky-200">미보고 소스 {sourceHealth.missingSourceIds.join(" · ")}</span>
               ) : null}
+            </div>
+            <div className="mb-4 border border-cyan-300/15 bg-cyan-950/10 p-3" data-office-source-health-compact="true">
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <span className="font-semibold uppercase tracking-[0.16em] text-cyan-100">{sourceHealthCompactDiagnostics.stageLabel}</span>
+                <span className="text-midground/55">{sourceHealthCompactDiagnostics.detail}</span>
+              </div>
+              <div className="grid gap-2 md:grid-cols-3">
+                {sourceHealthCompactDiagnostics.cards.map((card) => (
+                  <div key={card.id} className={`border p-2 text-xs ${changeToneClass(card.tone)}`} data-office-source-health-compact-card={card.id} title={sourceHealthCompactDiagnostics.redactionNote}>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-semibold">{card.title}</span>
+                      <span className="text-lg font-semibold leading-none">{card.count}</span>
+                    </div>
+                    <div className="mt-1 text-current/75">{card.detail}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-2 text-[11px] leading-5 text-cyan-100/65">{sourceHealthCompactDiagnostics.redactionNote}</div>
             </div>
             <div className="mb-4 border border-cyan-300/15 bg-cyan-950/10 p-3" data-office-source-health-rail="true">
               <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-xs">
