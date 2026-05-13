@@ -1,6 +1,10 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-13 15:14 KST
+Last updated: 2026-05-13 15:23 KST
+
+## Fresh-session /goal A+B docs-only sync completed
+
+The fresh `/goal` preflight found no single implementation task beyond the completed Mutation Control Readiness 2 / projection dry-run baseline, so the user selected A+B: docs-only VPS dashboard worktree fast-forward plus private smoke and evidence commit/push. The dedicated VPS dashboard worktree was fast-forwarded from `7246cd37` to `29265fc1` with no dashboard service restart; `hermes-agent-dashboard.service` and `hermes-gateway.service` remained active, listener stayed private at `100.122.57.85:8765`, private `/office?goal-docsync=29265fc1` returned HTTP 200, browser smoke found 4 dry-run-only disabled mutation controls, 0 forms, raw leak false, and 0 console/JS errors. Evidence: `docs/ai-office/plans/2026-05-13-goal-docsync-vps-dashboard-smoke.md`.
 
 ## Fresh-session /goal approval posture
 

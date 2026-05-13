@@ -458,12 +458,13 @@ Next recommended Stage 14-E direction: compact safe route compass or room heartb
 
 Keep constraints: no renderer/dependency, no backend/API/schema changes, no mutation controls, no persistent storage, no raw record projection.
 
-## Current handoff — Mutation Control Readiness 2 dry-run baseline (2026-05-13 14:54 KST)
+## Current handoff — Mutation Control Readiness 2 dry-run baseline + goal docs sync (2026-05-13 15:23 KST)
 
 - PR #4 is merged; main now includes the prior dashboard/gateway evidence and mutation readiness baseline.
 - Approved low-risk follow-up completed locally: Mutation Control Readiness 2, dry-run mutation API design, and safe projection ingest/promote dry-run helper.
 - Dashboard mutation panel remains non-executable: all controls disabled, dry-run-only metadata shown, no browser mutation route/form/fetch added.
 - Safe helper baseline: `ingest_office_projection_bundle(..., dry_run=True)` returns would-promote/would-reject metadata without active/archive/rejected cache mutation or raw value echo.
 - Evidence: `docs/ai-office/plans/2026-05-13-mutation-control-v2-dry-run-evidence.md`.
-- Deployment/smoke complete: `origin/main` and VPS dashboard worktree are at `2d29d13a`; only `hermes-agent-dashboard.service` was restarted; private `/office?v=2d29d13a` returned HTTP 200 with console/js errors 0 and no enabled mutation controls.
+- Deployment/smoke complete: `origin/main` and VPS dashboard worktree were at `2d29d13a`; only `hermes-agent-dashboard.service` was restarted; private `/office?v=2d29d13a` returned HTTP 200 with console/js errors 0 and no enabled mutation controls.
+- Fresh `/goal` A+B selection completed a docs-only fast-forward of the dedicated VPS dashboard worktree from `7246cd37` to `29265fc1` with no service restart. Private `/office?goal-docsync=29265fc1` returned HTTP 200; browser smoke found 4 dry-run-only disabled mutation controls, 0 forms, raw leak false, and 0 console/JS errors. Evidence: `docs/ai-office/plans/2026-05-13-goal-docsync-vps-dashboard-smoke.md`.
 - Next gate: any executable browser mutation route, non-dry-run projection promote, Kanban write, automation/cron, public exposure, NAS credentials, or gateway/core runtime change remains out of scope unless separately approved.
