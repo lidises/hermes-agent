@@ -826,6 +826,306 @@ export type OfficeSafeSpatialChoreography = {
   interactive: false;
 };
 
+export type OfficeRpgRoomId = "command" | "agent_desks" | "task_board" | "cron_room" | "source_archive" | "incident_corner";
+
+export type OfficeRpgStatus = "idle" | "working" | "waiting" | "blocked" | "failed" | "completed" | "warning" | "unknown";
+
+export type OfficeRpgEntityKind = "agent" | "session" | "work_item" | "cron_job" | "source" | "incident" | "report";
+
+export type OfficeRpgSeverity = "normal" | "info" | "warning" | "danger";
+
+export type OfficeRpgSceneEntity = {
+  id: string;
+  kind: OfficeRpgEntityKind;
+  label: string;
+  status: OfficeRpgStatus;
+  room: OfficeRpgRoomId;
+  positionHint: { x: number; y: number; lane?: string };
+  severity: OfficeRpgSeverity;
+  lastEventAt: string | null;
+  summary: string;
+  linkTarget: {
+    type: "inspector" | "filter" | "safe_ref";
+    ref: string;
+  };
+};
+
+export type OfficeRpgScene = {
+  schemaVersion: 1;
+  generatedAt: string;
+  mode: "read_only";
+  rooms: Array<{
+    id: OfficeRpgRoomId;
+    label: string;
+    summary: string;
+    severity: OfficeRpgSeverity;
+    counts: Record<string, number>;
+  }>;
+  entities: OfficeRpgSceneEntity[];
+  recentEvents: Array<{
+    id: string;
+    label: string;
+    room: OfficeRpgRoomId;
+    severity: OfficeRpgSeverity;
+    at: string | null;
+  }>;
+  safety: {
+    factual: true;
+    readOnly: true;
+    source: "OfficeState" | "OfficeState+SafeEvents";
+    omittedRawSections: string[];
+  };
+};
+
+const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
+  { id: "command", label: "Command Room" },
+  { id: "agent_desks", label: "Agent Desks" },
+  { id: "task_board", label: "Task Board" },
+  { id: "cron_room", label: "Cron Room" },
+  { id: "source_archive", label: "Source Archive" },
+  { id: "incident_corner", label: "Incident Corner" },
+];
+
+function rpgPosition(index: number, room: OfficeRpgRoomId): OfficeRpgSceneEntity["positionHint"] {
+  const anchors: Record<OfficeRpgRoomId, { x: number; y: number; lane: string }> = {
+    command: { x: 14, y: 14, lane: "north" },
+    agent_desks: { x: 26, y: 30, lane: "agent" },
+    task_board: { x: 68, y: 30, lane: "task" },
+    cron_room: { x: 26, y: 68, lane: "cron" },
+    source_archive: { x: 68, y: 68, lane: "source" },
+    incident_corner: { x: 86, y: 18, lane: "incident" },
+  };
+  const anchor = anchors[room];
+  return {
+    x: Math.min(92, anchor.x + (index % 3) * 6),
+    y: Math.min(88, anchor.y + Math.floor(index / 3) * 7),
+    lane: anchor.lane,
+  };
+}
+
+function rpgSeverityRank(severity: OfficeRpgSeverity): number {
+  if (severity === "danger") return 4;
+  if (severity === "warning") return 3;
+  if (severity === "info") return 2;
+  return 1;
+}
+
+function maxRpgSeverity(values: OfficeRpgSeverity[]): OfficeRpgSeverity {
+  return values.reduce<OfficeRpgSeverity>((selected, value) => (rpgSeverityRank(value) > rpgSeverityRank(selected) ? value : selected), "normal");
+}
+
+function rpgStatusFromWorkStatus(value: unknown): OfficeRpgStatus {
+  const status = String(value ?? "").toLowerCase();
+  if (status.includes("block")) return "blocked";
+  if (status.includes("fail") || status.includes("error")) return "failed";
+  if (status.includes("done") || status.includes("complete") || status.includes("archive")) return "completed";
+  if (status.includes("run") || status.includes("progress") || status.includes("active")) return "working";
+  if (status.includes("review") || status.includes("ready") || status.includes("todo") || status.includes("triage") || status.includes("open")) return "waiting";
+  return "unknown";
+}
+
+function rpgStatusFromAutomation(row: Record<string, unknown>): OfficeRpgStatus {
+  const text = `${String(row.state ?? "")} ${String(row.last_status ?? "")}`.toLowerCase();
+  if (text.includes("error") || text.includes("fail")) return "failed";
+  if (text.includes("run") || text.includes("active")) return "working";
+  if (text.includes("sched") || text.includes("ready")) return "waiting";
+  if (text.includes("done") || text.includes("complete")) return "completed";
+  return "idle";
+}
+
+function rpgSeverityFromStatus(status: OfficeRpgStatus): OfficeRpgSeverity {
+  if (status === "blocked" || status === "failed") return "danger";
+  if (status === "warning" || status === "waiting") return "warning";
+  if (status === "working" || status === "completed") return "info";
+  return "normal";
+}
+
+function rpgStatusFromSourceStatus(status: OfficeSourceStatus): OfficeRpgStatus {
+  if (status === "error") return "failed";
+  if (status === "partial" || status === "missing" || status === "unavailable") return "warning";
+  return "idle";
+}
+
+function rpgSeverityFromSourceStatus(status: OfficeSourceStatus, warningCount = 0): OfficeRpgSeverity {
+  if (status === "error") return "danger";
+  if (status === "partial" || status === "missing" || status === "unavailable" || warningCount > 0) return "warning";
+  return "normal";
+}
+
+function rpgRoomFromEventRoom(value: unknown): OfficeRpgRoomId {
+  if (value === "work" || value === "task_board") return "task_board";
+  if (value === "automation" || value === "cron_room") return "cron_room";
+  if (value === "routing" || value === "source_archive") return "source_archive";
+  if (value === "sessions" || value === "agent_desks") return "agent_desks";
+  return "command";
+}
+
+function rpgSeverityFromTone(value: unknown): OfficeRpgSeverity {
+  if (value === "negative" || value === "danger" || value === "error") return "danger";
+  if (value === "warning") return "warning";
+  if (value === "positive" || value === "info") return "info";
+  return "normal";
+}
+
+function rpgTimestamp(value: unknown): string | null {
+  return typeof value === "string" && value.length > 0 && Number.isFinite(Date.parse(value)) ? value : null;
+}
+
+export function buildOfficeRpgScene(state: OfficeState): OfficeRpgScene {
+  const entities: OfficeRpgSceneEntity[] = [];
+  const incidentSeverities: OfficeRpgSeverity[] = [];
+
+  state.agents.slice(0, 12).forEach((agent, index) => {
+    const statusText = String(agent.status ?? "").toLowerCase();
+    const status: OfficeRpgStatus = statusText.includes("active") || statusText.includes("run") ? "working" : statusText.includes("idle") ? "idle" : statusText.length > 0 ? "waiting" : "unknown";
+    entities.push({
+      id: `agent-${index}`,
+      kind: "agent",
+      label: `직원 ${index + 1}`,
+      status,
+      room: "agent_desks",
+      positionHint: rpgPosition(index, "agent_desks"),
+      severity: rpgSeverityFromStatus(status),
+      lastEventAt: null,
+      summary: `세션/에이전트 안전 상태 ${status}`,
+      linkTarget: { type: "inspector", ref: `agents:${index}` },
+    });
+  });
+
+  state.work_items.slice(0, 12).forEach((item, index) => {
+    const status = rpgStatusFromWorkStatus(item.status);
+    const severity = rpgSeverityFromStatus(status);
+    if (severity === "danger") incidentSeverities.push(severity);
+    entities.push({
+      id: `work-${index}`,
+      kind: "work_item",
+      label: `업무 ${index + 1}`,
+      status,
+      room: "task_board",
+      positionHint: rpgPosition(index, "task_board"),
+      severity,
+      lastEventAt: rpgTimestamp(item.updated_at) ?? rpgTimestamp(item.last_heartbeat_at),
+      summary: `업무 안전 상태 ${status}`,
+      linkTarget: { type: "inspector", ref: `work_items:${index}` },
+    });
+    if (status === "completed") {
+      entities.push({
+        id: `report-${entities.filter((entity) => entity.kind === "report").length}`,
+        kind: "report",
+        label: "완료 보고",
+        status: "completed",
+        room: "task_board",
+        positionHint: rpgPosition(index + 6, "task_board"),
+        severity: "info",
+        lastEventAt: rpgTimestamp(item.updated_at),
+        summary: "완료 상태 업무의 안전 보고 표시",
+        linkTarget: { type: "filter", ref: "work_items:completed" },
+      });
+    }
+  });
+
+  state.automations.slice(0, 8).forEach((job, index) => {
+    const status = rpgStatusFromAutomation(job);
+    const severity = rpgSeverityFromStatus(status);
+    if (severity === "danger") incidentSeverities.push(severity);
+    entities.push({
+      id: `cron-${index}`,
+      kind: "cron_job",
+      label: `자동화 ${index + 1}`,
+      status,
+      room: "cron_room",
+      positionHint: rpgPosition(index, "cron_room"),
+      severity,
+      lastEventAt: rpgTimestamp(job.next_run_at) ?? rpgTimestamp(job.last_run_at),
+      summary: `자동화 안전 상태 ${status}`,
+      linkTarget: { type: "inspector", ref: `automations:${index}` },
+    });
+  });
+
+  state.data_sources.slice(0, 10).forEach((source, index) => {
+    const warningCount = Math.max(0, source.warning_count ?? 0);
+    const status = rpgStatusFromSourceStatus(source.status);
+    const severity = rpgSeverityFromSourceStatus(source.status, warningCount);
+    if (severity === "danger" || severity === "warning") incidentSeverities.push(severity);
+    entities.push({
+      id: `source-${index}`,
+      kind: "source",
+      label: `소스 ${index + 1}`,
+      status,
+      room: "source_archive",
+      positionHint: rpgPosition(index, "source_archive"),
+      severity,
+      lastEventAt: rpgTimestamp(source.checked_at),
+      summary: `소스 상태 ${source.status} · 경고 ${warningCount}`,
+      linkTarget: { type: "safe_ref", ref: `data_sources:${index}` },
+    });
+  });
+
+  const incidentCount = incidentSeverities.length;
+  if (incidentCount > 0) {
+    entities.push({
+      id: "incident-summary",
+      kind: "incident",
+      label: "확인 필요",
+      status: incidentSeverities.some((severity) => severity === "danger") ? "blocked" : "warning",
+      room: "incident_corner",
+      positionHint: rpgPosition(0, "incident_corner"),
+      severity: maxRpgSeverity(incidentSeverities),
+      lastEventAt: null,
+      summary: `확인 필요 안전 신호 ${incidentCount}개`,
+      linkTarget: { type: "filter", ref: "incidents" },
+    });
+  }
+
+  const recentEvents = state.events.slice(0, 6).map((event, index) => ({
+    id: `event-${index}`,
+    label: "최근 안전 이벤트",
+    room: rpgRoomFromEventRoom(event.room_id ?? event.roomId),
+    severity: rpgSeverityFromTone(event.tone),
+    at: rpgTimestamp(event.generated_at) ?? rpgTimestamp(event.created_at),
+  }));
+
+  const workStatuses = state.work_items.map((item) => rpgStatusFromWorkStatus(item.status));
+  const cronStatuses = state.automations.map((job) => rpgStatusFromAutomation(job));
+  const rooms: OfficeRpgScene["rooms"] = OFFICE_RPG_ROOMS.map((room): OfficeRpgScene["rooms"][number] => {
+    if (room.id === "command") {
+      return { id: room.id, label: room.label, summary: `${state.mode} · 안전 DTO 관측`, severity: maxRpgSeverity([...incidentSeverities, recentEvents.length > 0 ? "info" : "normal"]), counts: { entities: entities.length, events: recentEvents.length } };
+    }
+    if (room.id === "agent_desks") {
+      return { id: room.id, label: room.label, summary: `에이전트 ${state.agents.length}개`, severity: state.agents.length > 0 ? "info" : "normal", counts: { agents: state.agents.length } };
+    }
+    if (room.id === "task_board") {
+      const blocked = workStatuses.filter((status) => status === "blocked" || status === "failed").length;
+      const completed = workStatuses.filter((status) => status === "completed").length;
+      return { id: room.id, label: room.label, summary: `업무 ${state.work_items.length}개 · 막힘 ${blocked}개`, severity: blocked > 0 ? "danger" : state.work_items.length > 0 ? "info" : "normal", counts: { work_items: state.work_items.length, blocked, completed } };
+    }
+    if (room.id === "cron_room") {
+      const failed = cronStatuses.filter((status) => status === "failed").length;
+      return { id: room.id, label: room.label, summary: `자동화 ${state.automations.length}개 · 실패 ${failed}개`, severity: failed > 0 ? "danger" : state.automations.length > 0 ? "info" : "normal", counts: { automations: state.automations.length, failed } };
+    }
+    if (room.id === "source_archive") {
+      const warnings = state.data_sources.filter((source) => rpgSeverityFromSourceStatus(source.status, source.warning_count ?? 0) !== "normal").length;
+      return { id: room.id, label: room.label, summary: `소스 ${state.data_sources.length}개 · 확인 ${warnings}개`, severity: warnings > 0 ? "warning" : state.data_sources.length > 0 ? "info" : "normal", counts: { sources: state.data_sources.length, warnings } };
+    }
+    return { id: room.id, label: room.label, summary: `확인 필요 ${incidentCount}개`, severity: incidentCount > 0 ? maxRpgSeverity(incidentSeverities) : "normal", counts: { incidents: incidentCount } };
+  });
+
+  return {
+    schemaVersion: 1,
+    generatedAt: state.generated_at,
+    mode: "read_only",
+    rooms,
+    entities,
+    recentEvents,
+    safety: {
+      factual: true,
+      readOnly: true,
+      source: "OfficeState",
+      omittedRawSections: state.redactions.omitted_sections.filter((section) => typeof section === "string" && section.length > 0).map((_, index) => `omitted-${index + 1}`),
+    },
+  };
+}
+
 export function textField(row: Record<string, unknown>, key: string): string {
   const value = row[key];
   return typeof value === "string" && value.length > 0 ? value : "—";

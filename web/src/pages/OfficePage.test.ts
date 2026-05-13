@@ -66,6 +66,7 @@ import {
   buildOfficeProjectionCacheSummary,
   buildOfficeProjectionOrchestration,
   buildOfficeMutationControlReadiness,
+  buildOfficeRpgScene,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
@@ -108,6 +109,55 @@ function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
 }
 
 describe("OfficePage view helpers", () => {
+  it("builds Phase 1 RPG scene adapter from safe OfficeState without raw projection", () => {
+    const scene = buildOfficeRpgScene(officeFixture({
+      generated_at: "2026-05-13T10:00:00Z",
+      data_sources: [
+        { id: "kanban", status: "ok", checked_at: "2026-05-13T09:59:00Z", item_count: 4, warning_count: 0 },
+        { id: "cron", status: "partial", checked_at: "2026-05-13T09:58:00Z", item_count: 2, warning_count: 1, error_summary: "raw /Users/lidises/nas token must not leak" },
+      ],
+      agents: [
+        { id: "agent-1", status: "active", model: "private-model", prompt: "raw prompt must not leak" },
+        { id: "session-2", status: "idle", provider: "private-provider", transcript: "raw transcript must not leak" },
+      ],
+      work_items: [
+        { id: "task-1", status: "running", title: "raw task title", body: "secret body" } as unknown as OfficeState["work_items"][number],
+        { id: "task-2", status: "blocked", title: "raw blocked title", result: "raw result token" } as unknown as OfficeState["work_items"][number],
+        { id: "task-3", status: "done", title: "raw done title", transcript: "raw done transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      automations: [
+        { id: "job-1", state: "scheduled", last_status: "ok", next_run_at: "2026-05-13T11:00:00Z", script: "/Users/lidises/private.py" } as unknown as OfficeState["automations"][number],
+        { id: "job-2", state: "error", last_status: "error", script: "secret script" } as unknown as OfficeState["automations"][number],
+      ],
+      events: [
+        { id: "event-1", category: "workload_changed", room_id: "work", tone: "warning", generated_at: "2026-05-13T09:55:00Z", detail: "raw token detail" } as unknown as OfficeState["events"][number],
+      ],
+      redactions: { policy_version: 1, redacted_field_count: 3, omitted_sections: ["prompt", "transcript"], warnings: ["raw warning"] },
+    }));
+
+    expect(scene).toMatchObject({
+      schemaVersion: 1,
+      generatedAt: "2026-05-13T10:00:00Z",
+      mode: "read_only",
+      safety: {
+        factual: true,
+        readOnly: true,
+        source: "OfficeState",
+        omittedRawSections: ["omitted-1", "omitted-2"],
+      },
+    });
+    expect(scene.rooms.map((room) => room.id)).toEqual(["command", "agent_desks", "task_board", "cron_room", "source_archive", "incident_corner"]);
+    expect(scene.rooms.find((room) => room.id === "agent_desks")).toMatchObject({ label: "Agent Desks", counts: { agents: 2 }, severity: "info" });
+    expect(scene.rooms.find((room) => room.id === "task_board")).toMatchObject({ counts: { work_items: 3, blocked: 1, completed: 1 }, severity: "danger" });
+    expect(scene.rooms.find((room) => room.id === "incident_corner")).toMatchObject({ counts: { incidents: 3 }, severity: "danger" });
+    expect(scene.entities.map((entity) => entity.kind)).toEqual(expect.arrayContaining(["agent", "work_item", "cron_job", "source", "incident", "report"]));
+    expect(scene.entities.find((entity) => entity.id === "work-1")).toMatchObject({ kind: "work_item", room: "task_board", status: "blocked", severity: "danger", linkTarget: { type: "inspector", ref: "work_items:1" } });
+    expect(scene.entities.find((entity) => entity.id === "report-0")).toMatchObject({ kind: "report", room: "task_board", status: "completed", severity: "info" });
+    expect(scene.recentEvents).toEqual([{ id: "event-0", label: "최근 안전 이벤트", room: "task_board", severity: "warning", at: "2026-05-13T09:55:00Z" }]);
+    expect(scene.entities.every((entity) => entity.positionHint.x >= 8 && entity.positionHint.x <= 92 && entity.positionHint.y >= 10 && entity.positionHint.y <= 88)).toBe(true);
+    expect(JSON.stringify(scene)).not.toMatch(/raw prompt|raw transcript|raw task|raw blocked|raw done|raw result|secret body|secret script|raw token|raw warning|\/Users\/lidises|private-model|private-provider/i);
+  });
+
   it("builds a dynamic projection orchestration view from safe cache and source posture", () => {
     const orchestration = buildOfficeProjectionOrchestration(officeFixture({
       data_sources: [
