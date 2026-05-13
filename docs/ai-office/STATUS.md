@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-13 14:09 KST
+Last updated: 2026-05-13 14:23 KST
 
 ## Current phase
 
@@ -72,6 +72,29 @@ Paperclip Workbench 1 is complete as a folded/read-only/source-tag and safe-mani
 
 Stage 6 slices were approved by the user, including proceeding through the recommended remaining slices. Stage 7 was approved with testing deferred until the end. Stage 8-A was approved as the next safe step by the user saying to proceed in order, and the user then requested items 1 through 3 to run automatically in sequence. The user also approved installing missing test/runtime extras as needed in earlier setup. No gateway restart, cron change, Kanban mutation, NAS/Obsidian write, service/config mutation, memory/skill update, pixel dependency, or mutation-control implementation has been performed. The local dashboard process was restarted only to smoke-test the newly built local frontend bundle.
 
+
+## PR #4 ready + VPS gateway sync completed
+
+Branch: `ai-office-stage16e-safe-spatial-choreography-20260510`
+
+Operational summary:
+
+- Marked PR #4 ready for review; it remains open and unmerged.
+- Created VPS core rollback branch `backup/vps-core-main-before-pr4-gateway-20260513T052142Z` before changing the gateway runtime checkout.
+- Switched `/home/hermes/.hermes/hermes-agent` to PR head `5903922e` and restarted only `hermes-gateway.service`.
+- Confirmed gateway active after wait with no post-restart errors.
+- Confirmed dashboard service stayed active and was not restarted during this gateway pass.
+- Confirmed private `/office` still returns 200.
+
+Safety posture:
+
+- No PR merge, public exposure change, NAS mount/direct credentials, watcher/cron automation, Kanban mutation, or dashboard mutation controls.
+- The dashboard worktree remains at the earlier smoked code commit `d9ac5fae`; PR head `5903922e` and this follow-up evidence are docs-only after that dashboard smoke.
+- Evidence: `docs/ai-office/plans/2026-05-13-pr4-ready-gateway-sync.md`.
+
+Next operational step:
+
+- Merge PR #4 only if separately approved. Public/NAS/watcher/Kanban/mutation-control changes remain separately approval-gated.
 
 ## PR #4 d9ac5fae VPS dashboard sync/private smoke completed
 
