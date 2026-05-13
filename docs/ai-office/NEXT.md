@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-13 13:39 KST
+Last updated: 2026-05-13 14:09 KST
 
 ## Start here after `/new`
 
@@ -96,6 +96,7 @@ Immediate next recommended track:
 - Completion evidence and unfinished/deferred classification are in `docs/ai-office/plans/2026-05-13-projection-vps-manual-ingest-completion.md`.
 - Next recommended track is no longer another manual ingest. Keep PR #4 draft/reviewable, then choose one separately approved next track: review/mark-ready/merge PR #4, or design projection automation. Do not start watcher/cron automation, NAS mount/direct credentials, public exposure, dashboard mutation controls, gateway restart, or core checkout mutation without separate approval.
 - Recovery check 2026-05-13 13:39 KST for session `20260512_181306_8d90ac` completed the unfinished local test-hardening handoff: gateway approval blocking tests are deterministic, Tencent TokenHub `hy3-preview` context resolves provider-aware to 256000, and focused verification/security checks passed. Evidence: `docs/ai-office/plans/2026-05-13-session-20260512-181306-recovery.md`. Remaining full-suite failures are classified there as host/optional-dependency or unrelated integration issues; PR #4 should still remain draft/reviewable unless separately approved.
+- VPS dashboard sync/smoke check 2026-05-13 14:09 KST fast-forwarded the dedicated VPS dashboard worktree `/home/hermes/.hermes/ai-office-dashboard` to latest PR #4 commit `d9ac5fae` and restarted only `hermes-agent-dashboard.service`; `hermes-gateway.service` stayed active and was not restarted. Private `/office?v=d9ac5fae` on `100.122.57.85:8765` returned 200, browser smoke found no JS console errors, mutation controls were absent, raw leak probes were false, listener stayed private/Tailscale-bound, and public IPv4/IPv6 probes did not serve port 8765. Evidence: `docs/ai-office/plans/2026-05-13-pr4-d9ac5fae-vps-dashboard-smoke.md`. PR #4 remains draft/open; mark-ready/merge and any gateway/core/public/NAS/watcher/Kanban/mutation-control changes still need separate approval.
 
 Stage 16-E current implementation:
 

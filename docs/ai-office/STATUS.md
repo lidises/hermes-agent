@@ -1,10 +1,10 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-13 13:39 KST
+Last updated: 2026-05-13 14:09 KST
 
 ## Current phase
 
-Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, Stage 14-A through Stage 14-Q safe dynamic-tracking/readability layers, Stage 16-B through Stage 16-E safe realtime/motion layers, Stage 17-A sidebar simplification/Paperclip bridge planning, Paperclip Workbench 1 safe source-tag/manifest projection, Paperclip Workbench 2 manifest visibility, Kanban Observability 1 read-only projection, Kanban Observability 2 stale/blocked/workload summaries, Office Source Health 1 consolidated source-health rail, Office Source Health 2 compact diagnostics/readability summary, Office Release Hardening 1 local frontend guardrails, Projection Orchestration 1 live safe projection flow visibility, Projection Relay Producer 1 manual safe-bundle generation, Projection VPS Manual Ingest Recovery 1, and Session `20260512_181306_8d90ac` local test-hardening recovery are implemented/verified on top of the Stage 9-D polished CSS/SVG 2D office map. Kanban, Paperclip, Office Source Health, Office Release Hardening, Projection Orchestration, Projection Relay Producer, Projection VPS Manual Ingest Recovery, and local test-hardening recovery are tracked as independent work tracks, not continuations of the legacy stage number sequence. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
+Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, Stage 14-A through Stage 14-Q safe dynamic-tracking/readability layers, Stage 16-B through Stage 16-E safe realtime/motion layers, Stage 17-A sidebar simplification/Paperclip bridge planning, Paperclip Workbench 1 safe source-tag/manifest projection, Paperclip Workbench 2 manifest visibility, Kanban Observability 1 read-only projection, Kanban Observability 2 stale/blocked/workload summaries, Office Source Health 1 consolidated source-health rail, Office Source Health 2 compact diagnostics/readability summary, Office Release Hardening 1 local frontend guardrails, Projection Orchestration 1 live safe projection flow visibility, Projection Relay Producer 1 manual safe-bundle generation, Projection VPS Manual Ingest Recovery 1, Session `20260512_181306_8d90ac` local test-hardening recovery, and PR #4 `d9ac5fae` VPS dashboard sync/private smoke are implemented/verified on top of the Stage 9-D polished CSS/SVG 2D office map. Kanban, Paperclip, Office Source Health, Office Release Hardening, Projection Orchestration, Projection Relay Producer, Projection VPS Manual Ingest Recovery, local test-hardening recovery, and PR #4 VPS dashboard sync/private smoke are tracked as independent work tracks, not continuations of the legacy stage number sequence. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
 
 Current Stage 9-E result: the `/office` page now uses Korean for primary headings, buttons, helper text, safety copy, status labels, inspector field labels, and office-map room/zone labels while keeping stable technical identifiers such as DTO, OfficeState, source IDs, cron, and enum-like adapter values visible for debugging.
 
@@ -72,6 +72,38 @@ Paperclip Workbench 1 is complete as a folded/read-only/source-tag and safe-mani
 
 Stage 6 slices were approved by the user, including proceeding through the recommended remaining slices. Stage 7 was approved with testing deferred until the end. Stage 8-A was approved as the next safe step by the user saying to proceed in order, and the user then requested items 1 through 3 to run automatically in sequence. The user also approved installing missing test/runtime extras as needed in earlier setup. No gateway restart, cron change, Kanban mutation, NAS/Obsidian write, service/config mutation, memory/skill update, pixel dependency, or mutation-control implementation has been performed. The local dashboard process was restarted only to smoke-test the newly built local frontend bundle.
 
+
+## PR #4 d9ac5fae VPS dashboard sync/private smoke completed
+
+Branch: `ai-office-stage16e-safe-spatial-choreography-20260510`
+
+Commit synced:
+
+- `d9ac5fae` — `Stabilize recovered test hardening`
+
+Operational summary:
+
+- Fast-forwarded the dedicated VPS dashboard worktree `/home/hermes/.hermes/ai-office-dashboard` from `7c22a76e` to `d9ac5fae`.
+- Restarted only `hermes-agent-dashboard.service` so the dashboard process used the updated worktree.
+- Did not mutate the gateway/core checkout and did not restart `hermes-gateway.service`.
+- Confirmed post-sync worktree is clean, dashboard service is active, gateway service is active, and the listener remains bound to `100.122.57.85:8765`.
+
+Smoke evidence 2026-05-13 14:09 KST:
+
+- Private `GET http://100.122.57.85:8765/office?v=d9ac5fae` returned 200.
+- Browser smoke found zero console messages/JS errors.
+- `/office` showed read-only guard copy, no restart/update/delete/approve/merge/ready style mutation controls, projection orchestration and Paperclip manifest visibility hooks, and raw leak probe `false`.
+- Protected `/api/office` without auth returned 401.
+- Public IPv4/IPv6 port 8765 probes returned `http_code=000`/unreachable, preserving private-only exposure.
+
+Safety posture:
+
+- No gateway restart, core checkout mutation, public exposure change, NAS mount/direct credentials, watcher/cron automation, Kanban mutation, PR mark-ready/merge, or dashboard mutation controls.
+- Evidence: `docs/ai-office/plans/2026-05-13-pr4-d9ac5fae-vps-dashboard-smoke.md`.
+
+Next operational step:
+
+- Keep PR #4 draft/open unless the user separately approves mark-ready or merge. Any gateway/core/public/NAS/watcher/Kanban/mutation-control change remains separately approval-gated.
 
 ## Projection Orchestration 1 — live safe projection flow visibility completed
 
