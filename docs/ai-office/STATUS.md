@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-13 14:54 KST
+Last updated: 2026-05-13 14:56 KST
 
 ## Current phase
 
@@ -3333,4 +3333,5 @@ Next Stage 14-E candidate: compact safe route compass or room heartbeat legend t
 - Dry-run returns safe would-promote/would-reject metadata only; it does not create active/archive/rejected cache directories, copy bundles, promote bundles, or write rejection metadata.
 - Verification passed: OfficePage focused test, OfficePage full test (69 passed), web build, lint exit 0 with existing non-Office warnings, projection cache/validator tests (15 passed), and `git diff --check`.
 - Evidence: `docs/ai-office/plans/2026-05-13-mutation-control-v2-dry-run-evidence.md`.
+- Deployed to VPS dashboard worktree at `2d29d13a`; restarted only `hermes-agent-dashboard.service`; private `/office?v=2d29d13a` returned HTTP 200; browser smoke found 4 gates, 4 disabled dry-run-only controls, 0 enabled controls, 0 forms, raw leak false, console/js errors 0.
 - Not performed: gateway restart, gateway/core checkout mutation, public exposure change, NAS mount/direct credentials, Kanban write, cron/watcher automation, executable browser mutation controls, non-dry-run projection promote.

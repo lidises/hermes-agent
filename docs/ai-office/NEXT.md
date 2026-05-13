@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-13 14:54 KST
+Last updated: 2026-05-13 14:56 KST
 
 ## Start here after `/new`
 
@@ -461,4 +461,5 @@ Keep constraints: no renderer/dependency, no backend/API/schema changes, no muta
 - Dashboard mutation panel remains non-executable: all controls disabled, dry-run-only metadata shown, no browser mutation route/form/fetch added.
 - Safe helper baseline: `ingest_office_projection_bundle(..., dry_run=True)` returns would-promote/would-reject metadata without active/archive/rejected cache mutation or raw value echo.
 - Evidence: `docs/ai-office/plans/2026-05-13-mutation-control-v2-dry-run-evidence.md`.
-- Next gate: commit/push and VPS dashboard worktree smoke only; gateway restart, public exposure, NAS credentials, Kanban write, cron/watcher automation, and non-dry-run promotion remain out of scope unless separately approved.
+- Deployment/smoke complete: `origin/main` and VPS dashboard worktree are at `2d29d13a`; only `hermes-agent-dashboard.service` was restarted; private `/office?v=2d29d13a` returned HTTP 200 with console/js errors 0 and no enabled mutation controls.
+- Next gate: any executable browser mutation route, non-dry-run projection promote, Kanban write, automation/cron, public exposure, NAS credentials, or gateway/core runtime change remains out of scope unless separately approved.

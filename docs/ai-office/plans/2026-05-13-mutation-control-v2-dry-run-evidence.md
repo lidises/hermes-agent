@@ -105,3 +105,32 @@ Commands run from `/Users/lidises/dev/hermes-agent` or `/Users/lidises/dev/herme
 - No Kanban mutation.
 - No cron/watcher automation.
 - No raw bundle value, private path, token-like value, prompt, transcript, or log value is returned by the dry-run helper.
+
+
+## VPS dashboard deployment smoke
+
+Date: 2026-05-13 14:56 KST
+
+- Local commit pushed to `origin/main`: `2d29d13a feat(office): add mutation dry-run readiness`.
+- VPS dashboard worktree `/home/hermes/.hermes/ai-office-dashboard` fast-forwarded from `e7d53984` to `2d29d13a`.
+- Restarted only `hermes-agent-dashboard.service`.
+- Did not restart `hermes-gateway.service`.
+- Final VPS checks:
+  - dashboard worktree HEAD: `2d29d13a`
+  - worktree status entries: `0`
+  - `hermes-agent-dashboard.service`: active
+  - `hermes-gateway.service`: active
+  - listener: `100.122.57.85:8765`
+  - private `/office?v=2d29d13a`: HTTP 200
+- Browser smoke:
+  - mutation panel present: true
+  - gate count: 4
+  - controls: projection/low/dry-run-only, kanban/medium/dry-run-only, automation/high/dry-run-only, service/high/dry-run-only
+  - enabled controls: none
+  - forms: 0
+  - raw leak probe: false
+  - console messages: 0
+  - JS errors: 0
+- Public negative probe:
+  - IPv4 `178.105.83.210:8765`: timeout / no HTTP served
+  - IPv6 `[2a01:4f8:1c18:b821::1]:8765`: no route to host
