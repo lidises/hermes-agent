@@ -100,7 +100,7 @@ def _build_paperclip_payload_items(manifests: list[dict[str, Any]]) -> list[dict
     return items
 
 
-def build_projection_bundle(args: argparse.Namespace) -> dict[str, dict[str, Any]]:
+def _validate_generation_args(args: argparse.Namespace) -> None:
     if args.source_kind not in ALLOWED_SOURCE_KINDS:
         raise ProjectionGeneratorError("invalid source kind")
     if args.generated_by not in ALLOWED_GENERATED_BY:
@@ -114,6 +114,9 @@ def build_projection_bundle(args: argparse.Namespace) -> dict[str, dict[str, Any
     if not args.paperclip_manifest:
         raise ProjectionGeneratorError("at least one --paperclip-manifest is required")
 
+
+def build_projection_bundle(args: argparse.Namespace) -> dict[str, dict[str, Any]]:
+    _validate_generation_args(args)
     paperclip_manifests = [_load_valid_paperclip_manifest(path) for path in args.paperclip_manifest]
     now = _utc_now()
     stale_after = now + timedelta(seconds=args.valid_for_seconds)
@@ -217,6 +220,18 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def _write_projection_bundle(output_dir: Path, bundle: dict[str, dict[str, Any]]) -> None:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / "manifest.json").write_text(
+        json.dumps(bundle["manifest"], ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    (output_dir / "payload.json").write_text(
+        json.dumps(bundle["payload"], ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     try:
@@ -231,15 +246,7 @@ def main(argv: list[str] | None = None) -> int:
 
     output_dir = args.output_dir
     try:
-        output_dir.mkdir(parents=True, exist_ok=True)
-        (output_dir / "manifest.json").write_text(
-            json.dumps(bundle["manifest"], ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-            encoding="utf-8",
-        )
-        (output_dir / "payload.json").write_text(
-            json.dumps(bundle["payload"], ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-            encoding="utf-8",
-        )
+        _write_projection_bundle(output_dir, bundle)
     except OSError as exc:
         print(f"ERROR: failed to write projection bundle ({exc.__class__.__name__})", file=sys.stderr)
         return 1

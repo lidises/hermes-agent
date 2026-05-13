@@ -261,6 +261,62 @@ Checklist-relevant classification after this pass:
 - i18n: no new browser-facing UI string was added. New CLI errors are English, consistent with the existing script/validator messages.
 - Config/hardcoding: no environment-specific path was added; output path remains a CLI argument and internal file names remain the fixed projection bundle contract (`manifest.json`, `payload.json`).
 
+## Evidence extension pass 2026-05-13 09:20 KST
+
+This pass focused on the remaining checklist areas that can be advanced without broad repo rewrites or security-sensitive operations.
+
+Code responsibility / duplication:
+
+- Refactored `scripts/ai_office/generate_office_projection.py` to separate concerns:
+  - `_validate_generation_args()` handles CLI argument policy checks.
+  - `build_projection_bundle()` builds and validates the safe in-memory bundle.
+  - `_write_projection_bundle()` performs the two-file bundle write.
+  - `main()` now coordinates parse/build/dry-run/write/validate/report only.
+- This is a behavior-preserving refactor guarded by the existing generator tests; no new dependency, config value, file name, schema, or public API was introduced.
+
+Additional backend/API evidence:
+
+- Existing `tests/hermes_cli/test_office_api.py` covers protected Office endpoints, read-only DTO shape, mutation method rejection, and safe Kanban renderer fields.
+- Rerun result: `.venv/bin/python -m pytest tests/hermes_cli/test_office_api.py -q -o addopts=` → `7 passed`.
+- Manual TestClient probe for invalid `mode` inputs:
+  - `/api/office/state?mode=remote` → 400 `Unsupported office display mode`
+  - `/api/office/state?mode=` → 400 `Unsupported office display mode`
+  - `/api/office/state?mode=../secret` → 400 `Unsupported office display mode`
+  - `/api/office/events?mode=remote` → 400 `Unsupported office display mode`
+  - `/api/office/events?mode=` → 400 `Unsupported office display mode`
+  - `/api/office/events?mode=../secret` → 400 `Unsupported office display mode`
+  - unauthenticated `/api/office/state` and `/api/office/events` → 401.
+- No database/schema/migration changed in this pass; projection cache remains filesystem JSON bundle layout only.
+
+Additional UI flow and layout evidence:
+
+- Full current web test suite rerun from `web/`: `npm test -- --run` → `2 files passed, 71 tests passed`.
+- `npm run lint && npm run build` → exit 0; lint still reports 20 existing warnings in unrelated dashboard files, and build still reports only the known Vite large chunk warning.
+- Browser smoke on temporary local dashboard port `8878` exercised more than static render:
+  - `/office?evidence=3` loaded with navigation and Office map visible.
+  - Density controls were clicked (`요약`, then `상세`) and the page reflected detailed mode text.
+  - A character inspect button was clicked and inspector copy remained visible.
+  - The `라우팅` filter button was clicked and the page reflected routing filter text.
+  - DOM probe after interactions: viewport `1280x633`, body chars `2502`, 61 focusable controls, 0 unnamed controls, raw leak regex false, horizontal overflow false, console JS errors 0.
+- Static responsive CSS evidence remains in `web/src/index.css`:
+  - `.office-map--mobile-readable` uses `overflow-x: auto` and bounded labels.
+  - `.office-map--responsive` receives a `min-width: 34rem` under `@media (max-width: 640px)`.
+  - The browser smoke confirmed no desktop horizontal overflow; a true mobile/tablet visual screenshot was not available with the current browser tool because it exposes no viewport-resize control.
+
+Typecheck / runtime exception evidence:
+
+- Touched Python files passed focused `ty` checks after refactor: `.venv/bin/python -m ty check scripts/ai_office/generate_office_projection.py tests/test_office_projection_generator.py` → `All checks passed!`.
+- Full repo ty was attempted: `.venv/bin/python -m ty check .` exited 101 with a `ty` panic while checking `tools/checkpoint_manager.py` plus 6557 diagnostics. Because `ty` itself reported `This indicates a bug in ty` and `Not all project files were analyzed`, this cannot currently serve as an authoritative full-repo typecheck gate in this environment.
+- Representative full-repo ty diagnostics are outside the touched projection path: missing optional `acp` imports, broad nullable argument typing drift, TUI gateway dynamic config typing, and utility path type drift.
+- Touched frontend TypeScript remains covered by `npm run build` (`tsc -b && vite build`) passing.
+
+External service / async / performance / logging classification:
+
+- This pass added no external service call, network request, watcher, queue, cron, daemon, retry loop, or background worker.
+- The projection producer remains bounded: load already-safe manifests, build in-memory DTOs, write exactly `manifest.json` and `payload.json`, then run the canonical validator.
+- Error reporting remains safe: CLI errors include category/action information but do not echo manifest values, private paths, token-like strings, raw prompts, transcripts, logs, provider/model IDs, or shell args.
+- Because automation is approval-gated, duplicate execution, partial failure, and restart behavior remain documented design work rather than implemented runtime behavior.
+
 ## Conclusion
 
 The previously listed next operational step, manual safe-bundle transfer plus VPS ingest, is complete and verified on the VPS for bundle `pcwb-vps-smoke-001`.
