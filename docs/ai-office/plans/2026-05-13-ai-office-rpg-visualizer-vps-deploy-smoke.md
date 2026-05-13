@@ -4,7 +4,7 @@ Date: 2026-05-13 20:58 KST
 
 ## Summary
 
-The RPG Visualizer commit `ebca3a3c` was deployed to the dedicated VPS dashboard worktree and `hermes-agent-dashboard.service` was restarted. Gateway/core runtime was not changed or restarted.
+The RPG Visualizer code commit `ebca3a3c` was deployed to the dedicated VPS dashboard worktree and `hermes-agent-dashboard.service` was restarted. After recording this evidence, the dashboard worktree can be fast-forwarded to the latest docs-only main commit without another restart. Gateway/core runtime was not changed or restarted.
 
 ## Scope
 
@@ -43,7 +43,7 @@ git diff --check
 VPS post-deploy verification:
 
 ```text
-Dashboard worktree HEAD: ebca3a3c
+Dashboard code deploy commit: ebca3a3c
 Dashboard worktree status: clean on main
 hermes-agent-dashboard.service: active
 hermes-gateway.service: active
