@@ -1,6 +1,12 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-13 16:28 KST
+Last updated: 2026-05-13 20:33 KST
+
+## AI Office RPG Visualizer Phase 2-5 completed locally
+
+The approved Phase 2 through Phase 5 RPG Visualizer work is implemented locally. `/office` now renders a read-only `OfficeRpgMap` above the existing office map, derived from safe `OfficeState` through `buildOfficeRpgScene(state)`. The map uses DOM/CSS only, exposes room/status/severity/role filters, keyboard/browser jump targets for map/attention/source archive/inspector/fallback, clickable/keyboard RPG entities connected to the existing safe inspector, and a text fallback row for every visible entity. CSS-only entity pulse motion is reduced-motion aware. Focused RPG tests cover the fallback mirror and raw-leak sentinels. Evidence: `docs/ai-office/plans/2026-05-13-ai-office-rpg-visualizer-implementation-evidence.md`.
+
+Safety/non-actions: frontend/read-only only; no backend schema/API change, mutation endpoint/control, service/gateway/systemd/cron/watcher change, public exposure, NAS mount/direct credential path, Phaser/Pixi/canvas renderer, sprite asset, DeskRPG code/asset copy, or external renderer dependency was added.
 
 ## Kanban-first operating conversion completed
 

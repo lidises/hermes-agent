@@ -1537,6 +1537,143 @@ code { font-size: 0.875rem; }
   }
 }
 
+.office-rpg-map__floor {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(8rem, 1fr));
+  grid-auto-rows: minmax(10rem, 1fr);
+  gap: 0.5rem;
+  min-height: 30rem;
+  overflow-x: auto;
+  border: 1px solid rgba(110, 231, 183, 0.18);
+  background:
+    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px),
+    radial-gradient(circle at 12% 18%, rgba(16, 185, 129, 0.18), transparent 30%),
+    radial-gradient(circle at 82% 22%, rgba(250, 204, 21, 0.12), transparent 24%),
+    rgba(0, 0, 0, 0.22);
+  background-size: 18px 18px, 18px 18px, auto, auto, auto;
+  padding: 0.75rem;
+}
+.office-rpg-room {
+  position: relative;
+  min-width: 10rem;
+  min-height: 11rem;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(4, 28, 28, 0.72);
+}
+.office-rpg-room--command { grid-column: span 2; }
+.office-rpg-room--agent_desks { grid-column: span 2; }
+.office-rpg-room--task_board { grid-column: span 2; }
+.office-rpg-room--cron_room { grid-column: span 2; }
+.office-rpg-room--source_archive { grid-column: span 3; }
+.office-rpg-room--incident_corner { grid-column: span 1; }
+.office-rpg-room--info { box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.16); }
+.office-rpg-room--warning { box-shadow: inset 0 0 0 1px rgba(250, 204, 21, 0.22); }
+.office-rpg-room--danger { box-shadow: inset 0 0 0 1px rgba(248, 113, 113, 0.28); }
+.office-rpg-room__label {
+  position: absolute;
+  inset: 0.45rem auto auto 0.45rem;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  max-width: calc(100% - 0.9rem);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 230, 203, 0.72);
+}
+.office-rpg-room__label span:first-child {
+  color: #d1fae5;
+  font-weight: 800;
+}
+.office-rpg-room::after {
+  content: '';
+  position: absolute;
+  inset: auto 0.5rem 0.5rem 0.5rem;
+  height: 0.18rem;
+  background: repeating-linear-gradient(90deg, rgba(255,255,255,0.15) 0 0.4rem, transparent 0.4rem 0.8rem);
+  opacity: 0.35;
+}
+.office-rpg-entity {
+  position: absolute;
+  z-index: 3;
+  display: inline-flex;
+  min-width: 4.2rem;
+  transform: translate(-50%, -50%);
+  align-items: center;
+  gap: 0.28rem;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 999px;
+  background: rgba(0,0,0,0.54);
+  padding: 0.16rem 0.38rem;
+  color: #d1fae5;
+  font-size: 0.58rem;
+  line-height: 1;
+  text-align: left;
+  box-shadow: 0 0 14px rgba(16,185,129,0.12);
+}
+.office-rpg-entity:hover,
+.office-rpg-entity--selected {
+  border-color: rgba(110, 231, 183, 0.72);
+  background: rgba(6, 78, 59, 0.72);
+  color: #ecfdf5;
+}
+.office-rpg-entity__sprite {
+  width: 0.78rem;
+  height: 0.78rem;
+  flex: 0 0 auto;
+  border-radius: 0.18rem 0.18rem 0.28rem 0.28rem;
+  background: currentColor;
+  box-shadow: 0 -0.18rem 0 rgba(255,255,255,0.5) inset;
+}
+.office-rpg-entity__label {
+  max-width: 5.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.office-rpg-entity--agent .office-rpg-entity__sprite { border-radius: 999px 999px 0.28rem 0.28rem; }
+.office-rpg-entity--cron_job .office-rpg-entity__sprite { border-radius: 0.12rem; }
+.office-rpg-entity--source .office-rpg-entity__sprite { width: 0.95rem; height: 0.6rem; }
+.office-rpg-entity--incident,
+.office-rpg-entity--danger { color: #fecaca; box-shadow: 0 0 16px rgba(248,113,113,0.2); }
+.office-rpg-entity--warning { color: #fef3c7; box-shadow: 0 0 16px rgba(250,204,21,0.18); }
+.office-rpg-entity--info { color: #bae6fd; }
+@media (prefers-reduced-motion: no-preference) {
+  .office-rpg-entity--info,
+  .office-rpg-entity--warning,
+  .office-rpg-entity--danger {
+    animation: office-rpg-entity-pulse 2.8s ease-in-out infinite;
+  }
+}
+@keyframes office-rpg-entity-pulse {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.2); }
+}
+@media (max-width: 900px) {
+  .office-rpg-map__floor {
+    grid-template-columns: repeat(2, minmax(10rem, 1fr));
+  }
+  .office-rpg-room,
+  .office-rpg-room--command,
+  .office-rpg-room--agent_desks,
+  .office-rpg-room--task_board,
+  .office-rpg-room--cron_room,
+  .office-rpg-room--source_archive,
+  .office-rpg-room--incident_corner {
+    grid-column: span 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .office-rpg-entity {
+    animation: none;
+    transition: none;
+  }
+}
+
 /* Hide scrollbar utility — used by the header's overflow-x nav row. */
 .scrollbar-none {
   -ms-overflow-style: none;

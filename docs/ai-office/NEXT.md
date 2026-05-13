@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-13 15:14 KST
+Last updated: 2026-05-13 20:33 KST
 
 ## Start here after `/new`
 
@@ -67,6 +67,8 @@ When not to rely on `/goal` alone:
 The user approved A-G approval buckets for future AI Office work while excluding H public exposure changes and permanently excluding VPS NAS mounts/direct NAS credentials/VPS direct NAS raw reads. Use the prepared prompt and guardrails in `docs/ai-office/plans/2026-05-13-goal-a-g-approval-handoff.md` for the next `/goal` session. A-G are permission buckets, not standalone tasks: the next session must first identify the exact concrete task list from current NEXT/STATUS/evidence before implementing.
 
 ## Current next stage
+
+AI Office RPG Visualizer Phase 2-5 is implemented locally and ready for commit/push/deployment decision. `/office` now has a read-only DOM/CSS RPG map derived from safe `OfficeState`, with filters, jump targets, inspector integration, text fallback, reduced-motion-aware CSS motion, focused tests, and local browser smoke evidence. Evidence: `docs/ai-office/plans/2026-05-13-ai-office-rpg-visualizer-implementation-evidence.md`. Next operational choice after commit/push is whether to deploy/smoke on the private VPS dashboard worktree; keep gateway/core restart, public exposure, NAS mount/direct credentials, active watcher/cron automation, and executable mutation controls separately approval-gated.
 
 Kanban-first operating conversion completed on 2026-05-13: canonical VPS `ai-office` is now the operating source of truth, three real operating cards were created/completed (`t_83f3ff90`, `t_0fced671`, `t_49757d89`), Mac has `/Users/lidises/.local/bin/ai-office-kanban` for safe canonical board access, and `/office` now includes a read-only Kanban-first operating posture panel. Evidence: `docs/ai-office/plans/2026-05-13-kanban-first-operating-conversion.md`. Next AI Office work should create/route durable tasks on the VPS `ai-office` board by default; keep dashboard mutation controls, cron/watcher automation, public exposure, NAS mount/direct credentials, and gateway/core restarts separately approval-gated.
 

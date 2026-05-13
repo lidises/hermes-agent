@@ -76,6 +76,7 @@ import {
   buildOfficeProjectionCacheSummary,
   buildOfficeProjectionOrchestration,
   buildOfficeMutationControlReadiness,
+  buildOfficeRpgScene,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -93,6 +94,8 @@ import {
   type OfficePaperclipWorkbenchSource,
   type OfficePageSectionPlan,
   type OfficeRecentChange,
+  type OfficeRpgScene,
+  type OfficeRpgSceneEntity,
   type OfficeSceneObject,
   type OfficeStateDelta,
 } from "./officeView";
@@ -1214,6 +1217,180 @@ function LimitedRows<T>({
   );
 }
 
+const RPG_SEVERITY_CLASS: Record<OfficeRpgSceneEntity["severity"], string> = {
+  normal: "border-cyan-200/20 text-cyan-100",
+  info: "border-sky-300/35 text-sky-100",
+  warning: "border-yellow-300/45 text-yellow-100",
+  danger: "border-red-300/45 text-red-100",
+};
+
+const RPG_KIND_LABEL: Record<OfficeRpgSceneEntity["kind"], string> = {
+  agent: "직원",
+  session: "세션",
+  work_item: "업무",
+  cron_job: "자동화",
+  source: "자료실",
+  incident: "확인",
+  report: "보고",
+};
+
+export function OfficeRpgMap({
+  scene,
+  selectedEntityId,
+  onInspectEntity,
+}: {
+  scene: OfficeRpgScene;
+  selectedEntityId: string | null;
+  onInspectEntity: (entity: OfficeRpgSceneEntity) => void;
+}) {
+  const [roomFilter, setRoomFilter] = useState<OfficeRpgSceneEntity["room"] | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<OfficeRpgSceneEntity["status"] | "all">("all");
+  const [severityFilter, setSeverityFilter] = useState<OfficeRpgSceneEntity["severity"] | "all">("all");
+  const [roleFilter, setRoleFilter] = useState<OfficeRpgSceneEntity["kind"] | "all">("all");
+  const visibleEntities = scene.entities.filter((entity) => (
+    (roomFilter === "all" || entity.room === roomFilter)
+    && (statusFilter === "all" || entity.status === statusFilter)
+    && (severityFilter === "all" || entity.severity === severityFilter)
+    && (roleFilter === "all" || entity.kind === roleFilter)
+  ));
+  const roomOptions = scene.rooms.map((room) => room.id);
+  const statusOptions = Array.from(new Set(scene.entities.map((entity) => entity.status)));
+  const severityOptions = Array.from(new Set(scene.entities.map((entity) => entity.severity)));
+  const roleOptions = Array.from(new Set(scene.entities.map((entity) => entity.kind)));
+
+  return (
+    <Card className="overflow-hidden border-emerald-300/25 bg-black/25" data-office-rpg-map="true">
+      <CardHeader>
+        <CardTitle className="flex flex-col gap-2 text-base sm:flex-row sm:items-center sm:justify-between">
+          <span className="flex items-center gap-2">
+            <Building2 className="h-4 w-4 text-emerald-300" /> AI Office RPG Visualizer
+          </span>
+          <span className="border border-emerald-300/25 px-2 py-1 text-[10px] uppercase tracking-[0.18em] text-emerald-200">읽기 전용 · OfficeState</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid gap-2 text-xs text-midground/70 sm:grid-cols-3" data-office-rpg-truth="true">
+          <div>생성 시각: {fmt(scene.generatedAt)}</div>
+          <div>엔티티: {scene.entities.length}개 · 표시 {visibleEntities.length}개</div>
+          <div>원문 제외 섹션: {scene.safety.omittedRawSections.length}개</div>
+        </div>
+        <nav className="flex flex-wrap gap-2 text-xs" aria-label="RPG 지도 이동">
+          {[
+            ["map", "지도"],
+            ["attention", "주의"],
+            ["source_archive", "자료실"],
+            ["inspector", "검사"],
+            ["fallback", "대체 목록"],
+          ].map(([id, label]) => (
+            <a key={id} href={id === "inspector" ? "#office-safe-inspector" : `#office-rpg-${id}`} className="border border-current/20 px-2 py-1 text-midground/70 hover:text-foreground" data-office-rpg-jump-target={id}>{label}</a>
+          ))}
+        </nav>
+        <div className="grid gap-2 text-xs md:grid-cols-4" data-office-rpg-filters="true">
+          <label className="grid gap-1 text-midground/65">
+            <span>방</span>
+            <select value={roomFilter} onChange={(event) => setRoomFilter(event.target.value as typeof roomFilter)} className="border border-current/20 bg-black/40 p-2 text-foreground" data-office-rpg-filter="room">
+              <option value="all">전체</option>
+              {roomOptions.map((room) => <option key={room} value={room}>{room}</option>)}
+            </select>
+          </label>
+          <label className="grid gap-1 text-midground/65">
+            <span>상태</span>
+            <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)} className="border border-current/20 bg-black/40 p-2 text-foreground" data-office-rpg-filter="status">
+              <option value="all">전체</option>
+              {statusOptions.map((status) => <option key={status} value={status}>{status}</option>)}
+            </select>
+          </label>
+          <label className="grid gap-1 text-midground/65">
+            <span>심각도</span>
+            <select value={severityFilter} onChange={(event) => setSeverityFilter(event.target.value as typeof severityFilter)} className="border border-current/20 bg-black/40 p-2 text-foreground" data-office-rpg-filter="severity">
+              <option value="all">전체</option>
+              {severityOptions.map((severity) => <option key={severity} value={severity}>{severity}</option>)}
+            </select>
+          </label>
+          <label className="grid gap-1 text-midground/65">
+            <span>역할</span>
+            <select value={roleFilter} onChange={(event) => setRoleFilter(event.target.value as typeof roleFilter)} className="border border-current/20 bg-black/40 p-2 text-foreground" data-office-rpg-filter="role">
+              <option value="all">전체</option>
+              {roleOptions.map((role) => <option key={role} value={role}>{RPG_KIND_LABEL[role]}</option>)}
+            </select>
+          </label>
+        </div>
+        <div id="office-rpg-map" className="office-rpg-map__floor" role="region" aria-label="읽기 전용 AI Office RPG 2D 지도">
+          {scene.rooms.map((room) => {
+            const roomEntities = visibleEntities.filter((entity) => entity.room === room.id);
+            return (
+              <section
+                key={room.id}
+                id={room.id === "source_archive" ? "office-rpg-source_archive" : undefined}
+                className={`office-rpg-room office-rpg-room--${room.id} office-rpg-room--${room.severity}`}
+                data-office-rpg-room={room.id}
+                aria-label={`${room.label}: ${room.summary}`}
+              >
+                <div className="office-rpg-room__label">
+                  <span>{room.label}</span>
+                  <span>{room.summary}</span>
+                </div>
+                {roomEntities.map((entity) => (
+                  <button
+                    key={entity.id}
+                    type="button"
+                    className={`office-rpg-entity office-rpg-entity--${entity.kind} office-rpg-entity--${entity.severity} ${selectedEntityId === entity.id ? "office-rpg-entity--selected" : ""}`}
+                    style={{ left: `${entity.positionHint.x}%`, top: `${entity.positionHint.y}%` }}
+                    onClick={() => onInspectEntity(entity)}
+                    data-office-rpg-entity={entity.id}
+                    data-office-rpg-kind={entity.kind}
+                    data-office-rpg-status={entity.status}
+                    data-office-rpg-severity={entity.severity}
+                    aria-label={`${RPG_KIND_LABEL[entity.kind]} ${entity.label}: ${entity.status}`}
+                    title={`${entity.summary} · ${entity.linkTarget.ref}`}
+                  >
+                    <span className="office-rpg-entity__sprite" aria-hidden="true" />
+                    <span className="office-rpg-entity__label">{entity.label}</span>
+                  </button>
+                ))}
+              </section>
+            );
+          })}
+        </div>
+        <div className="grid gap-3 lg:grid-cols-[1.2fr_0.8fr]">
+          <div id="office-rpg-fallback" className="border border-current/15 bg-black/15 p-3" data-office-rpg-fallback="true">
+            <div className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-midground/65">텍스트 대체 목록</div>
+            <div className="grid gap-2">
+              {visibleEntities.map((entity) => (
+                <button
+                  key={`fallback-${entity.id}`}
+                  type="button"
+                  className={`flex flex-col gap-1 border bg-black/15 p-2 text-left text-xs hover:bg-white/5 ${RPG_SEVERITY_CLASS[entity.severity]}`}
+                  onClick={() => onInspectEntity(entity)}
+                  data-office-rpg-fallback-row={entity.id}
+                >
+                  <span className="font-semibold">{RPG_KIND_LABEL[entity.kind]} · {entity.label}</span>
+                  <span className="text-midground/65">{entity.room} · {entity.status} · {entity.summary}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div id="office-rpg-attention" className="border border-current/15 bg-black/15 p-3" data-office-rpg-events="true">
+            <div className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-midground/65">최근 안전 이벤트</div>
+            {scene.recentEvents.length > 0 ? (
+              <div className="grid gap-2">
+                {scene.recentEvents.map((event) => (
+                  <div key={event.id} className={`border p-2 text-xs ${RPG_SEVERITY_CLASS[event.severity]}`} data-office-rpg-event={event.id}>
+                    <div className="font-semibold">{event.label}</div>
+                    <div className="text-midground/65">{event.room} · {fmt(event.at)}</div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="border border-dashed border-current/15 p-3 text-xs text-midground/55">최근 안전 이벤트가 없습니다. 임의 진행도나 가짜 움직임은 만들지 않습니다.</div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function InspectorPanel({ selection }: { selection: InspectorSelection | null }) {
   return (
     <Card id="office-safe-inspector" tabIndex={-1} className="scroll-mt-24 focus:outline-none focus:ring-2 focus:ring-emerald-200/70">
@@ -1262,6 +1439,7 @@ export default function OfficePage() {
   const [safeMotionFailures, setSafeMotionFailures] = useState(0);
   const [focus, setFocus] = useState<FocusOption>("overview");
   const [selection, setSelection] = useState<InspectorSelection | null>(null);
+  const [selectedRpgEntityId, setSelectedRpgEntityId] = useState<string | null>(null);
   const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
   const [latestDelta, setLatestDelta] = useState<OfficeStateDelta>(EMPTY_STATE_DELTA);
   const [recentChanges, setRecentChanges] = useState<OfficeRecentChange[]>([]);
@@ -1420,6 +1598,7 @@ export default function OfficePage() {
   }, []);
 
   const needsAttention = useMemo(() => (state ? buildOfficeAttentionItems(state) : []), [state]);
+  const rpgScene = useMemo(() => buildOfficeRpgScene(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -1593,6 +1772,26 @@ export default function OfficePage() {
 
   return (
     <div className="flex flex-col gap-6 normal-case">
+      {showOverview ? (
+        <OfficeRpgMap
+          scene={rpgScene}
+          selectedEntityId={selectedRpgEntityId}
+          onInspectEntity={(entity) => {
+            setSelectedRpgEntityId(entity.id);
+            inspectRecord("RPG 안전 엔티티", entity.label, [
+              ["종류", entity.kind],
+              ["안전 참조", entity.linkTarget.ref],
+              ["방", entity.room],
+              ["상태", entity.status],
+              ["심각도", entity.severity],
+              ["요약", entity.summary],
+              ["마지막 이벤트", fmt(entity.lastEventAt)],
+              ["출처 범주", entity.linkTarget.type],
+            ]);
+          }}
+        />
+      ) : null}
+
       {showOverview ? (
         <OfficeMap
           nodes={mapNodes}
