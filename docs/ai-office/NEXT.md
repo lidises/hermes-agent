@@ -68,6 +68,8 @@ The user approved A-G approval buckets for future AI Office work while excluding
 
 ## Current next stage
 
+Fresh-session `/goal` C-G execution is in progress/completing evidence: protected projection ingest dry-run API is implemented, pushed, deployed to the private VPS dashboard, and smoked; validator-passing safe bundle `pcwb-vps-smoke-001` was promoted non-dry-run with archive rollback evidence; canonical VPS `ai-office` Kanban checkpoint `t_bd4fe848` was created/completed; disabled-by-default dry-run watcher script `scripts/ai_office/office_projection_watchdog.py` and tests were added. Evidence: `docs/ai-office/plans/2026-05-13-goal-c-g-execution-evidence.md`. Final pending step from this handoff is to commit/push the evidence/G script/NEXT/STATUS updates, fast-forward the VPS dashboard worktree to that final commit for code/docs availability, run focused tests/script check plus private `/office` smoke, and leave gateway/public/NAS/active cron unchanged.
+
 `Paperclip Workbench 2` is implemented on `ai-office-stage16e-safe-spatial-choreography-20260510` as a frontend-only safe manifest visibility strip inside the existing folded Paperclip workbench. It summarizes validator-passing safe manifests and VPS/private-dashboard posture from already-sanitized Paperclip workbench/source DTOs only; it does not deploy to VPS, copy projection files, mount NAS, add watchers, expose public routes, restart services, add mutation controls, or read/display raw Paperclip/NAS material.
 
 Paperclip Workbench 2 implementation:

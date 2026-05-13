@@ -1,6 +1,12 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-13 15:23 KST
+Last updated: 2026-05-13 15:49 KST
+
+## Fresh-session /goal C-G execution completed
+
+After the user approved C-G, the concrete continuation was executed in order: C protected/private projection ingest dry-run API/helper, D validator-passing safe-bundle promote, F canonical VPS `ai-office` Kanban checkpoint, and G disabled-by-default dry-run watcher baseline. C is implemented in `hermes_cli/web_server.py` as protected POST `/api/office/projection/ingest-dry-run`; it accepts only safe incoming bundle names, requires the dashboard session token, performs dry-run only, and rejects path traversal with constant non-echoing errors. The code commit `bfe9c8f0` was pushed, the VPS dashboard worktree was fast-forwarded to it, focused tests and web build passed on VPS, only `hermes-agent-dashboard.service` was restarted, and private browser/API smoke on `/office?dryrunapi=bfe9c8f0` passed with unauth 401, valid dry-run 200 `would_promote`, traversal 400 non-echoing, and zero console/JS errors. D promoted safe bundle `pcwb-vps-smoke-001` non-dry-run after a successful dry-run; active cache remained `active.bundle_id=pcwb-vps-smoke-001`, rejected count stayed 0, and rollback/archive evidence exists as `20260513T064603Z__pcwb-vps-smoke-001`. F created/completed canonical Kanban checkpoint `t_bd4fe848`. G added disabled-by-default dry-run script `scripts/ai_office/office_projection_watchdog.py` plus tests; no active cron/watcher was enabled. Evidence: `docs/ai-office/plans/2026-05-13-goal-c-g-execution-evidence.md`.
+
+Safety/non-actions: `hermes-gateway.service` was not restarted, gateway/core checkout was not synced in this pass, public exposure was not changed, VPS NAS mount/direct NAS credentials/VPS direct raw-source reads remain excluded, and no active watcher/cron was enabled.
 
 ## Fresh-session /goal A+B docs-only sync completed
 
