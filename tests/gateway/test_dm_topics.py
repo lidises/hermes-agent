@@ -533,11 +533,9 @@ def test_build_message_event_no_auto_skill_without_thread():
 
 # ── _build_message_event: group_topics skill binding ──
 
-# The telegram mock sets sys.modules["telegram.constants"] = telegram_mod (root mock),
-# so `from telegram.constants import ChatType` in telegram.py resolves to
-# telegram_mod.ChatType — not telegram_mod.constants.ChatType.  We must use
-# the same ChatType object the production code sees so equality checks work.
-from telegram.constants import ChatType as _ChatType  # noqa: E402
+# Use literal Telegram chat type values for group-topic tests. Several gateway
+# suites install different lightweight telegram mocks during collection; using
+# mock-derived ChatType objects here makes these tests order-dependent.
 
 
 def test_group_topic_skill_binding():
@@ -555,7 +553,7 @@ def test_group_topic_skill_binding():
     ])
 
     msg = _make_mock_message(
-        chat_id=-1001234567890, chat_type=_ChatType.SUPERGROUP, thread_id=5, text="hello"
+        chat_id=-1001234567890, chat_type="supergroup", thread_id=5, text="hello"
     )
     event = adapter._build_message_event(msg, MessageType.TEXT)
 
@@ -578,7 +576,7 @@ def test_group_topic_skill_binding_second_topic():
     ])
 
     msg = _make_mock_message(
-        chat_id=-1001234567890, chat_type=_ChatType.SUPERGROUP, thread_id=12, text="deal update"
+        chat_id=-1001234567890, chat_type="supergroup", thread_id=12, text="deal update"
     )
     event = adapter._build_message_event(msg, MessageType.TEXT)
 
@@ -600,7 +598,7 @@ def test_group_topic_no_skill_binding():
     ])
 
     msg = _make_mock_message(
-        chat_id=-1001234567890, chat_type=_ChatType.SUPERGROUP, thread_id=1, text="hey"
+        chat_id=-1001234567890, chat_type="supergroup", thread_id=1, text="hey"
     )
     event = adapter._build_message_event(msg, MessageType.TEXT)
 
@@ -622,7 +620,7 @@ def test_group_topic_unmapped_thread_id():
     ])
 
     msg = _make_mock_message(
-        chat_id=-1001234567890, chat_type=_ChatType.SUPERGROUP, thread_id=999, text="random"
+        chat_id=-1001234567890, chat_type="supergroup", thread_id=999, text="random"
     )
     event = adapter._build_message_event(msg, MessageType.TEXT)
 
@@ -644,7 +642,7 @@ def test_group_topic_unmapped_chat_id():
     ])
 
     msg = _make_mock_message(
-        chat_id=-1009999999999, chat_type=_ChatType.SUPERGROUP, thread_id=5, text="wrong group"
+        chat_id=-1009999999999, chat_type="supergroup", thread_id=5, text="wrong group"
     )
     event = adapter._build_message_event(msg, MessageType.TEXT)
 
@@ -659,7 +657,7 @@ def test_group_topic_no_config():
     adapter = _make_adapter()  # no group_topics_config
 
     msg = _make_mock_message(
-        chat_id=-1001234567890, chat_type=_ChatType.GROUP, thread_id=5, text="hi"
+        chat_id=-1001234567890, chat_type="group", thread_id=5, text="hi"
     )
     event = adapter._build_message_event(msg, MessageType.TEXT)
 
@@ -681,7 +679,7 @@ def test_group_topic_chat_id_int_string_coercion():
     ])
 
     msg = _make_mock_message(
-        chat_id=-1001234567890, chat_type=_ChatType.SUPERGROUP, thread_id=7, text="test"
+        chat_id=-1001234567890, chat_type="supergroup", thread_id=7, text="test"
     )
     event = adapter._build_message_event(msg, MessageType.TEXT)
 
@@ -714,7 +712,7 @@ def test_build_message_event_group_from_user_none_stays_none():
 
     adapter = _make_adapter()
     msg = _make_mock_message(
-        chat_id=-1001234567890, chat_type=_ChatType.SUPERGROUP,
+        chat_id=-1001234567890, chat_type="supergroup",
         user_id=42, user_name="Alice"
     )
     msg.from_user = None

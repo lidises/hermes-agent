@@ -13,11 +13,20 @@ behavior on missing role data so the parity cannot regress.
 """
 
 from types import SimpleNamespace
+import importlib
+import sys
 
 import pytest
 
-# Trigger the shared discord mock from tests/gateway/conftest.py before
-# importing the production module.
+# Force the shared Discord mock, then reload the production module if another
+# test imported it earlier with a partial per-file mock. Otherwise the view
+# classes can be bound to MagicMock bases and instantiate as MagicMocks.
+from tests.gateway.conftest import _ensure_discord_mock  # noqa: E402
+
+_ensure_discord_mock()
+if "gateway.platforms.discord" in sys.modules:
+    importlib.reload(sys.modules["gateway.platforms.discord"])
+
 from gateway.platforms.discord import (  # noqa: E402
     ExecApprovalView,
     ModelPickerView,

@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-13 08:45 KST
+Last updated: 2026-05-13 13:39 KST
 
 ## Start here after `/new`
 
@@ -95,6 +95,7 @@ Immediate next recommended track:
 - Recovery check 2026-05-13 08:45 KST found the previously recommended manual transfer + VPS ingest step already complete: `incoming/pcwb-vps-smoke-001` and `active/pcwb-vps-smoke-001` exist on the VPS, the active bundle validates with `OK: safe Office projection bundle`, and `read_office_projection_cache()` reports `status=active`, `active.bundle_id=pcwb-vps-smoke-001`, `rejected.count=0`.
 - Completion evidence and unfinished/deferred classification are in `docs/ai-office/plans/2026-05-13-projection-vps-manual-ingest-completion.md`.
 - Next recommended track is no longer another manual ingest. Keep PR #4 draft/reviewable, then choose one separately approved next track: review/mark-ready/merge PR #4, or design projection automation. Do not start watcher/cron automation, NAS mount/direct credentials, public exposure, dashboard mutation controls, gateway restart, or core checkout mutation without separate approval.
+- Recovery check 2026-05-13 13:39 KST for session `20260512_181306_8d90ac` completed the unfinished local test-hardening handoff: gateway approval blocking tests are deterministic, Tencent TokenHub `hy3-preview` context resolves provider-aware to 256000, and focused verification/security checks passed. Evidence: `docs/ai-office/plans/2026-05-13-session-20260512-181306-recovery.md`. Remaining full-suite failures are classified there as host/optional-dependency or unrelated integration issues; PR #4 should still remain draft/reviewable unless separately approved.
 
 Stage 16-E current implementation:
 

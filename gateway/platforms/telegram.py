@@ -3613,11 +3613,18 @@ class TelegramAdapter(BasePlatformAdapter):
         chat = message.chat
         user = message.from_user
         
-        # Determine chat type
+        # Determine chat type.  Tests and some lightweight gateway harnesses use
+        # literal Telegram type strings while production uses ChatType constants;
+        # accept both so forum-topic binding does not depend on one mock object.
+        raw_chat_type = chat.type
+        raw_chat_type_str = str(raw_chat_type).lower()
         chat_type = "dm"
-        if chat.type in (ChatType.GROUP, ChatType.SUPERGROUP):
+        if (
+            raw_chat_type in (ChatType.GROUP, ChatType.SUPERGROUP)
+            or raw_chat_type_str in {"group", "supergroup"}
+        ):
             chat_type = "group"
-        elif chat.type == ChatType.CHANNEL:
+        elif raw_chat_type == ChatType.CHANNEL or raw_chat_type_str == "channel":
             chat_type = "channel"
 
         # Resolve DM topic name and skill binding

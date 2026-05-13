@@ -360,6 +360,20 @@ class TestBareTextNoLongerApproves:
 class TestBlockingApprovalE2E:
     """Test the full blocking flow: agent thread blocks → user approves → agent resumes."""
 
+    @pytest.fixture(autouse=True)
+    def _tirith_allows_commands(self, monkeypatch):
+        # These tests exercise the gateway approval queue mechanics, not the
+        # optional external tirith binary/download path.  Keep the security
+        # scanner deterministic so approval notifications are emitted before
+        # the polling assertions time out.
+        import tools.tirith_security as tirith_security
+
+        monkeypatch.setattr(
+            tirith_security,
+            "check_command_security",
+            lambda _command: {"action": "allow", "findings": [], "summary": ""},
+        )
+
     def setup_method(self):
         _clear_approval_state()
         os.environ.pop("HERMES_YOLO_MODE", None)
