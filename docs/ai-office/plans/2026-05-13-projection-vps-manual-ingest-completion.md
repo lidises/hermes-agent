@@ -575,6 +575,35 @@ Remaining full-suite status after this pass:
 - A second full-suite run was attempted before the final cache adjustment and still reported broad repo-wide failures; the terminal availability failures from that run were then reproduced and fixed with the focused tests above.
 - The remaining full-suite failures are still non-fatal for the Office/Paperclip PR path and belong to the existing repo-wide test-health track: Discord gateway compatibility/mocks, process checkpoint/notify-on-complete state, ACP/MCP/TTS optional import paths, MCP OAuth metadata/import shape, provider parity, gateway service/systemd/macOS/WSL expectations, PTY websocket timing, file-tool state/staleness expectations, and timing-sensitive local interrupt cleanup.
 
+## Evidence extension pass 2026-05-13 11:00 KST
+
+This pass targeted another remaining full-suite/runtime-import failure from the non-fatal repo-wide test-health list: `tests/tools/test_mcp_oauth.py::test_build_oauth_auth_preserves_server_url_path` failed when the optional MCP SDK was not installed in the local venv.
+
+TDD MCP OAuth optional-import hardening:
+
+- Existing failing regression test used as RED: `tests/tools/test_mcp_oauth.py::test_build_oauth_auth_preserves_server_url_path`.
+- RED command: `.venv/bin/python -m pytest tests/tools/test_mcp_oauth.py::test_build_oauth_auth_preserves_server_url_path -q -o addopts=`.
+- RED result: failed with `AttributeError: <module 'tools.mcp_oauth' ...> does not have the attribute 'OAuthClientProvider'` because the optional MCP import failed and the module never bound patchable OAuth SDK symbol names.
+- After adding explicit `None` placeholders for optional OAuth SDK symbols, the same focused test exposed the second part of the same import-shape issue: the path-preservation test patched `_OAUTH_AVAILABLE` and `OAuthClientProvider`, but not `OAuthClientMetadata`, so `_build_client_metadata()` dereferenced `None.model_validate(...)`.
+- Root cause: the module's optional-import boundary did not provide stable symbol names when MCP OAuth extras were absent, and the regression test for URL path forwarding was coupled to real SDK metadata availability even though it only needed to assert the `server_url` passed to the provider.
+- GREEN implementation/test adjustment:
+  - `tools/mcp_oauth.py` now defines `OAuthClientProvider`, `OAuthClientInformationFull`, `OAuthClientMetadata`, `OAuthMetadata`, and `OAuthToken` as `None` before the optional import, preserving stable module attributes when the MCP SDK is absent;
+  - `tests/tools/test_mcp_oauth.py::test_build_oauth_auth_preserves_server_url_path` now patches a tiny fake `OAuthClientMetadata` so the test remains about provider construction and `server_url` path preservation rather than the optional SDK being installed.
+
+Verification after this pass:
+
+- Focused MCP OAuth suite without xdist/addopts: `.venv/bin/python -m pytest tests/tools/test_mcp_oauth.py -q -o addopts=` → `29 passed, 9 skipped`.
+- Related terminal/schema cache suite: `.venv/bin/python -m pytest tests/tools/test_terminal_tool_requirements.py tests/tools/test_registry.py -q` → `38 passed`.
+- Focused Office/projection/API Python suite: `.venv/bin/python -m pytest tests/hermes_cli/test_office_api.py tests/test_office_projection_generator.py tests/test_office_projection_validator.py tests/hermes_cli/test_office_projection_cache.py tests/test_paperclip_manifest_generator.py tests/test_paperclip_manifest_validator.py -q -o addopts=` → `39 passed`.
+- Focused frontend tests/build: `node --test scripts/sync-assets.test.mjs && npm test -- --run src/lib/api.test.ts OfficePage.test.ts App.test.ts && npm run build` → asset test passed, `73 passed`, `tsc -b` and Vite build passed with only the known large chunk warning.
+- Frontend lint: `npm run lint` → exit 0 with the same 20 pre-existing warnings; no new errors.
+- Diff hygiene: `git diff --check` passed.
+
+Remaining full-suite status after this pass:
+
+- This removes one concrete optional-import/runtime failure from the repo-wide full-suite list while keeping the no-broad-install policy intact; no dependency or lockfile change was needed.
+- Remaining non-fatal repo-wide test-health categories still include ACP/MCP/TTS optional import paths outside this specific OAuth helper, Discord gateway compatibility/mocks, process checkpoint/notify-on-complete state, provider parity, gateway service/systemd/macOS/WSL expectations, PTY websocket timing, file-tool state/staleness expectations, and timing-sensitive local interrupt cleanup.
+
 ## Conclusion
 
 The previously listed next operational step, manual safe-bundle transfer plus VPS ingest, is complete and verified on the VPS for bundle `pcwb-vps-smoke-001`.

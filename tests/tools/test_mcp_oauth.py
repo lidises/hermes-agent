@@ -545,8 +545,19 @@ def test_build_oauth_auth_preserves_server_url_path():
         def __init__(self, **kwargs):
             captured.update(kwargs)
 
+    class _FakeMetadata:
+        @classmethod
+        def model_validate(cls, data):
+            metadata = MagicMock()
+            metadata.model_dump.return_value = data
+            metadata.grant_types = data.get("grant_types")
+            metadata.response_types = data.get("response_types")
+            metadata.token_endpoint_auth_method = data.get("token_endpoint_auth_method")
+            return metadata
+
     with patch.object(mcp_oauth, "_OAUTH_AVAILABLE", True), \
          patch.object(mcp_oauth, "OAuthClientProvider", _FakeProvider), \
+         patch.object(mcp_oauth, "OAuthClientMetadata", _FakeMetadata), \
          patch.object(mcp_oauth, "_is_interactive", return_value=True), \
          patch.object(mcp_oauth, "_maybe_preregister_client"), \
          patch.object(mcp_oauth, "HermesTokenStorage") as mock_storage_cls:
