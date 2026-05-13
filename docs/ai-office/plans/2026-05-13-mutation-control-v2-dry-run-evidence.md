@@ -134,3 +134,8 @@ Date: 2026-05-13 14:56 KST
 - Public negative probe:
   - IPv4 `178.105.83.210:8765`: timeout / no HTTP served
   - IPv6 `[2a01:4f8:1c18:b821::1]:8765`: no route to host
+
+
+## Final docs-only fast-forward note
+
+After recording deployment smoke, the VPS dashboard worktree was fast-forwarded once more to include the evidence/docs commit. No service restart was needed for this docs-only update; `hermes-agent-dashboard.service` and `hermes-gateway.service` remained active, worktree stayed clean, and private `/office` continued to return HTTP 200. The running dashboard bundle remains the Mutation Control Readiness 2 build from `2d29d13a` until the next dashboard service restart.
