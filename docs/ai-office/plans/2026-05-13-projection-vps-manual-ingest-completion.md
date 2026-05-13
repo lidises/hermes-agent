@@ -472,6 +472,13 @@ Verification after this pass:
 - Frontend lint: `npm run lint` → exit 0 with the same 20 pre-existing warnings; no new errors.
 - Focused Office/projection/API Python suite: `.venv/bin/python -m pytest tests/hermes_cli/test_office_api.py tests/test_office_projection_generator.py tests/test_office_projection_validator.py tests/hermes_cli/test_office_projection_cache.py tests/test_paperclip_manifest_generator.py tests/test_paperclip_manifest_validator.py -q -o addopts=` → `39 passed`.
 - Diff hygiene: `git diff --check` passed; working-tree added-line secret scan passed.
+- VPS deployment/smoke after commit `62289d22`:
+  - dashboard worktree reset to `62289d22` and stayed clean/tracking origin;
+  - VPS `hermes` shell still has no `npm` in PATH for server-side frontend build, so the locally verified `hermes_cli/web_dist/` output was deployed with `rsync --delete` to the dashboard worktree runtime dist directory;
+  - deployed JS asset changed to `index-Cef-HZfM.js`;
+  - `systemctl --user restart hermes-agent-dashboard.service` was run because the served frontend bundle changed;
+  - `hermes-agent-dashboard.service` and `hermes-gateway.service` were active after restart;
+  - active projection validator remained `OK: safe Office projection bundle`.
 
 ## Conclusion
 
