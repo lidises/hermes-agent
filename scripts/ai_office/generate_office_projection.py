@@ -24,6 +24,7 @@ if str(SCRIPT_DIR) not in sys.path:
 from validate_office_projection import (  # noqa: E402
     BUNDLE_ID_RE,
     MANIFEST_SCHEMA,
+    MAX_PAYLOAD_ITEMS,
     PAYLOAD_SCHEMA,
     error_report,
     validate_bundle,
@@ -39,6 +40,8 @@ from validate_paperclip_manifest import (  # noqa: E402
 ALLOWED_GENERATED_BY = {"mac", "wsl", "manual", "scheduler"}
 ALLOWED_SOURCE_KINDS = {"paperclip"}
 SAFE_ROOM_IDS = ["sources", "work"]
+MANIFEST_FILE_NAME = "manifest.json"
+PAYLOAD_FILE_NAME = "payload.json"
 SOURCE_TAG_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{1,40}$")
 
 
@@ -113,6 +116,8 @@ def _validate_generation_args(args: argparse.Namespace) -> None:
         raise ProjectionGeneratorError("hard expire seconds must be positive")
     if not args.paperclip_manifest:
         raise ProjectionGeneratorError("at least one --paperclip-manifest is required")
+    if len(args.paperclip_manifest) > MAX_PAYLOAD_ITEMS:
+        raise ProjectionGeneratorError(f"too many paperclip manifests; maximum is {MAX_PAYLOAD_ITEMS}")
 
 
 def build_projection_bundle(args: argparse.Namespace) -> dict[str, dict[str, Any]]:
@@ -194,7 +199,7 @@ def build_projection_bundle(args: argparse.Namespace) -> dict[str, dict[str, Any
             "safe_summary": f"{len(items)} safe paperclip manifest cards, raw fields excluded",
         },
         "payload": {
-            "file": "payload.json",
+            "file": PAYLOAD_FILE_NAME,
             "content_type": "application/json",
             "summary": {**summary, "display_cards": display["cards"]},
         },
@@ -222,11 +227,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def _write_projection_bundle(output_dir: Path, bundle: dict[str, dict[str, Any]]) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
-    (output_dir / "manifest.json").write_text(
+    (output_dir / MANIFEST_FILE_NAME).write_text(
         json.dumps(bundle["manifest"], ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    (output_dir / "payload.json").write_text(
+    (output_dir / PAYLOAD_FILE_NAME).write_text(
         json.dumps(bundle["payload"], ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )

@@ -317,6 +317,42 @@ External service / async / performance / logging classification:
 - Error reporting remains safe: CLI errors include category/action information but do not echo manifest values, private paths, token-like strings, raw prompts, transcripts, logs, provider/model IDs, or shell args.
 - Because automation is approval-gated, duplicate execution, partial failure, and restart behavior remain documented design work rather than implemented runtime behavior.
 
+## Evidence extension pass 2026-05-13 09:35 KST
+
+This pass converted another unchecked area into a small TDD hardening change instead of adding only prose.
+
+TDD hardening added:
+
+- New failing test first: `test_projection_generator_bounds_manifest_count_before_reading_or_writing`.
+- RED result: the generator attempted to read the first missing manifest and returned `cannot read file (FileNotFoundError)` instead of rejecting an oversized manifest list up front.
+- GREEN implementation:
+  - import the validator's `MAX_PAYLOAD_ITEMS` and use it as the single producer-side manifest-count bound;
+  - reject more than `MAX_PAYLOAD_ITEMS` `--paperclip-manifest` inputs before reading any manifest or writing output;
+  - keep the error safe: `too many paperclip manifests; maximum is 100`, with no private path, raw value, or traceback;
+  - introduce `MANIFEST_FILE_NAME` and `PAYLOAD_FILE_NAME` constants so the output file contract is centralized instead of duplicated string literals.
+
+Checklist-relevant evidence from this pass:
+
+- Runtime/input failure path: oversized manifest input is now bounded before file I/O and cannot degrade into repeated filesystem reads or path-echoing errors.
+- Performance/bounds: the producer's manifest count now matches the validator's bounded payload item limit (`MAX_PAYLOAD_ITEMS`); no unbounded manifest fan-in path remains in the touched producer.
+- Config vs hardcoding: schema limits continue to come from the canonical validator; bundle file names are still fixed by the projection contract but now centralized in producer constants.
+- Cross-platform path behavior: input and output paths remain `pathlib.Path` arguments; the new rejection path does not depend on platform path formatting and deliberately avoids echoing local paths.
+- Responsibility/duplication: `_validate_generation_args()` now owns both scalar argument policy and manifest-count policy; `_write_projection_bundle()` owns the centralized two-file write.
+
+Verification after this pass:
+
+- RED command: `.venv/bin/python -m pytest tests/test_office_projection_generator.py::test_projection_generator_bounds_manifest_count_before_reading_or_writing -q -o addopts= --tb=short` initially failed with `cannot read file (FileNotFoundError)`.
+- GREEN command: same targeted test → `1 passed`.
+- Focused Office/projection/API suite: `.venv/bin/python -m pytest tests/test_office_projection_generator.py tests/test_office_projection_validator.py tests/hermes_cli/test_office_projection_cache.py tests/test_paperclip_manifest_generator.py tests/test_paperclip_manifest_validator.py tests/hermes_cli/test_office_api.py -q -o addopts=` → `38 passed`.
+- Focused Python typecheck: `.venv/bin/python -m ty check scripts/ai_office/generate_office_projection.py tests/test_office_projection_generator.py` → `All checks passed!`.
+- Focused Python lint: `.venv/bin/python -m ruff check scripts/ai_office/generate_office_projection.py tests/test_office_projection_generator.py` → `All checks passed!`, with only the existing top-level `select` deprecation warning from `pyproject.toml`.
+- Frontend focused tests/build: `npm test -- --run OfficePage.test.ts App.test.ts && npm run build` → `71 tests passed`; `tsc -b` and Vite build passed with the existing large chunk warning.
+- API probe with `starlette.testclient`:
+  - authenticated `/api/office/state` and `/api/office/events` → 200 dict responses;
+  - invalid `mode` values `remote`, empty string, and `../secret` on both endpoints → 400 `Unsupported office display mode`;
+  - unauthenticated `/api/office/state` and `/api/office/events` → 401.
+- Full Python suite rerun after this pass: `.venv/bin/python -m pytest -q --tb=short` → `104 failed, 20372 passed, 234 skipped, 218 warnings, 16 errors`. This confirms the touched projection/API tests continue to pass while repo-wide unrelated failures remain. Representative remaining domains are Discord slash/auth/send mocks, ACP/MCP/TTS import/optional dependency errors, provider parity expectation drift, gateway systemd/WSL service routing tests on macOS, PTY websocket tests, file-tool state/staleness tests, Vercel terminal requirement expectations, and timing-sensitive local interrupt cleanup.
+
 ## Conclusion
 
 The previously listed next operational step, manual safe-bundle transfer plus VPS ingest, is complete and verified on the VPS for bundle `pcwb-vps-smoke-001`.

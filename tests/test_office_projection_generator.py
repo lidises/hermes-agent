@@ -219,3 +219,29 @@ def test_projection_generator_reports_output_write_errors_without_private_paths(
     assert "FileExistsError" in result.stderr
     assert str(tmp_path) not in result.stderr
     assert "Traceback" not in result.stderr
+
+
+def test_projection_generator_bounds_manifest_count_before_reading_or_writing(tmp_path: Path) -> None:
+    output_dir = tmp_path / "projection"
+    args: list[str] = ["--source-kind", "paperclip"]
+    for index in range(101):
+        args.extend(["--paperclip-manifest", str(tmp_path / f"missing-{index}.yaml")])
+    args.extend(
+        [
+            "--bundle-id",
+            "pcwb-safe-test-006",
+            "--generated-by",
+            "mac",
+            "--output-dir",
+            str(output_dir),
+        ]
+    )
+
+    result = run_generator(*args)
+
+    assert result.returncode != 0
+    assert not output_dir.exists()
+    assert "too many paperclip manifests" in result.stderr
+    assert str(tmp_path) not in result.stderr
+    assert "cannot read file" not in result.stderr
+    assert "Traceback" not in result.stderr
