@@ -678,7 +678,7 @@ export type OfficeMapPolishPlan = {
 
 export type OfficeResponsiveReadabilityPlan = {
   stageLabel: string;
-  viewportMode: "narrow" | "desktop";
+  viewportMode: "narrow" | "tablet" | "desktop";
   recommendedDensityMode: OfficeMapDensityMode;
   mapClassName: string;
   railClassName: string;
@@ -2070,15 +2070,19 @@ export function buildOfficeResponsiveReadabilityPlan(
   options: { viewportWidth?: number } = {},
 ): OfficeResponsiveReadabilityPlan {
   const isNarrow = typeof options.viewportWidth === "number" && options.viewportWidth < 640;
+  const isTablet = typeof options.viewportWidth === "number" && options.viewportWidth >= 640 && options.viewportWidth < 1024;
+  const viewportMode: OfficeResponsiveReadabilityPlan["viewportMode"] = isNarrow ? "narrow" : isTablet ? "tablet" : "desktop";
   return {
     stageLabel: "Stage 12-A 반응형",
-    viewportMode: isNarrow ? "narrow" : "desktop",
-    recommendedDensityMode: isNarrow ? "summary" : densityPlan.mode,
-    mapClassName: `office-map--responsive${isNarrow ? " office-map--mobile-readable" : ""}`,
-    railClassName: isNarrow ? "office-map-rail--mobile-stack" : "office-map-rail--desktop",
+    viewportMode,
+    recommendedDensityMode: isNarrow ? "summary" : isTablet ? "standard" : densityPlan.mode,
+    mapClassName: `office-map--responsive${isNarrow ? " office-map--mobile-readable" : isTablet ? " office-map--tablet-readable" : ""}`,
+    railClassName: isNarrow ? "office-map-rail--mobile-stack" : isTablet ? "office-map-rail--tablet-stack" : "office-map-rail--desktop",
     notes: isNarrow
       ? ["좁은 화면에서는 요약 모드 권장", "맵 rail은 세로 흐름으로 읽힘"]
-      : ["데스크톱에서는 현재 밀도 모드 유지", "맵과 rail은 분리된 영역으로 읽힘"],
+      : isTablet
+        ? ["태블릿 화면에서는 표준 모드 권장", "rail은 접힘 없이 세로 보조 영역으로 읽힘"]
+        : ["데스크톱에서는 현재 밀도 모드 유지", "맵과 rail은 분리된 영역으로 읽힘"],
   };
 }
 

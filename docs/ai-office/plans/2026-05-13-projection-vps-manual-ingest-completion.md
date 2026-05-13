@@ -353,6 +353,48 @@ Verification after this pass:
   - unauthenticated `/api/office/state` and `/api/office/events` → 401.
 - Full Python suite rerun after this pass: `.venv/bin/python -m pytest -q --tb=short` → `104 failed, 20372 passed, 234 skipped, 218 warnings, 16 errors`. This confirms the touched projection/API tests continue to pass while repo-wide unrelated failures remain. Representative remaining domains are Discord slash/auth/send mocks, ACP/MCP/TTS import/optional dependency errors, provider parity expectation drift, gateway systemd/WSL service routing tests on macOS, PTY websocket tests, file-tool state/staleness tests, Vercel terminal requirement expectations, and timing-sensitive local interrupt cleanup.
 
+## Evidence extension pass 2026-05-13 09:46 KST
+
+This pass targeted the unchecked multi-viewport UI evidence with a small TDD slice in the existing Office responsive view-model instead of claiming visual coverage from a fixed desktop browser only.
+
+TDD UI responsive hardening:
+
+- New failing assertion first in `builds Stage 12-A responsive readability plans from viewport width only`:
+  - `viewportWidth: 820` should produce an explicit `tablet` plan;
+  - expected `office-map--tablet-readable` and `office-map-rail--tablet-stack` classes;
+  - expected Korean tablet notes explaining standard density and stacked auxiliary rail behavior.
+- RED result: the 820px case was treated as `desktop`, with `office-map--responsive` and `office-map-rail--desktop`.
+- GREEN implementation:
+  - `OfficeResponsiveReadabilityPlan.viewportMode` now supports `narrow | tablet | desktop`;
+  - widths `<640` remain mobile/narrow summary mode;
+  - widths `640..1023` now receive tablet/standard mode and tablet-specific class names;
+  - widths `>=1024` or unknown widths remain desktop/current density mode;
+  - CSS adds tablet-readable nameplate sizing plus a two-column rail stack under `@media (min-width: 641px) and (max-width: 1023px)`.
+
+Checklist-relevant evidence from this pass:
+
+- UI flow/viewport: the existing helper now distinguishes mobile, tablet, and desktop view-model states instead of collapsing tablet into desktop.
+- i18n/localization: the newly added user-facing tablet notes are Korean, consistent with the page's Korean-first Office UI copy. This repo does not currently route these Office helper strings through a separate translation-key table.
+- Performance: the change is a pure width-threshold branch and CSS class selection; no new network request, renderer, dependency, loop, or expensive recomputation was added.
+- Config/hardcoding: the breakpoints mirror the existing CSS media boundaries already present around `640px`; `1024px` is the new tablet/desktop boundary used only for view-model class selection and documented by test.
+- Cross-platform: the viewport classifier uses numeric browser width only and does not depend on OS paths or platform APIs.
+
+Verification after this pass:
+
+- RED command: `npm test -- --run OfficePage.test.ts -t "Stage 12-A responsive"` initially failed because 820px returned `desktop` classes.
+- GREEN command: same targeted test → `1 passed | 67 skipped`.
+- Frontend focused tests/build: `npm test -- --run OfficePage.test.ts App.test.ts && npm run build` → `71 passed`; `tsc -b` and Vite build passed with only the known large chunk warning.
+- Frontend lint: `npm run lint` → exit 0 with the same existing 20 warnings in unrelated files; no new OfficePage/officeView warning.
+- Focused backend/projection suite: `.venv/bin/python -m pytest tests/test_office_projection_generator.py tests/test_office_projection_validator.py tests/hermes_cli/test_office_projection_cache.py tests/test_paperclip_manifest_generator.py tests/test_paperclip_manifest_validator.py tests/hermes_cli/test_office_api.py -q -o addopts=` → `38 passed`.
+- Focused Python typecheck for touched projection files remains green: `.venv/bin/python -m ty check scripts/ai_office/generate_office_projection.py tests/test_office_projection_generator.py` → `All checks passed!`.
+- Browser smoke on temporary local dashboard port `8879`:
+  - `/office?responsive=tablet-evidence` rendered the Office page;
+  - desktop viewport `1280x633` retained desktop classes (`office-map--responsive`, `office-map-rail--desktop`), no tablet/mobile class was incorrectly applied;
+  - horizontal overflow false;
+  - unnamed buttons 0;
+  - raw leak regex false;
+  - console JS errors 0.
+
 ## Conclusion
 
 The previously listed next operational step, manual safe-bundle transfer plus VPS ingest, is complete and verified on the VPS for bundle `pcwb-vps-smoke-001`.

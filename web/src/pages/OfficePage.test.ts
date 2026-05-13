@@ -1178,6 +1178,7 @@ describe("OfficePage view helpers", () => {
 
     const standardPlan = buildOfficeMapDensityPlan("standard", characters);
     const narrow = buildOfficeResponsiveReadabilityPlan(standardPlan, { viewportWidth: 430 });
+    const tablet = buildOfficeResponsiveReadabilityPlan(standardPlan, { viewportWidth: 820 });
     const desktop = buildOfficeResponsiveReadabilityPlan(standardPlan, { viewportWidth: 1280 });
 
     expect(narrow).toMatchObject({
@@ -1188,6 +1189,13 @@ describe("OfficePage view helpers", () => {
       railClassName: "office-map-rail--mobile-stack",
     });
     expect(narrow.notes).toEqual(expect.arrayContaining(["좁은 화면에서는 요약 모드 권장", "맵 rail은 세로 흐름으로 읽힘"]));
+    expect(tablet).toMatchObject({
+      viewportMode: "tablet",
+      recommendedDensityMode: "standard",
+      mapClassName: "office-map--responsive office-map--tablet-readable",
+      railClassName: "office-map-rail--tablet-stack",
+    });
+    expect(tablet.notes).toEqual(expect.arrayContaining(["태블릿 화면에서는 표준 모드 권장", "rail은 접힘 없이 세로 보조 영역으로 읽힘"]));
     expect(desktop.viewportMode).toBe("desktop");
     expect(desktop.recommendedDensityMode).toBe("standard");
     expect(`${narrow.stageLabel} ${narrow.notes.join(" ")} ${narrow.mapClassName}`).not.toMatch(/raw|prompt|transcript|body|script|secret/i);
