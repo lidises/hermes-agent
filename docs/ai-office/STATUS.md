@@ -1,6 +1,12 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-13 20:33 KST
+Last updated: 2026-05-13 20:58 KST
+
+## AI Office RPG Visualizer deployed to private VPS dashboard
+
+The RPG Visualizer commit `ebca3a3c` is deployed to the dedicated VPS dashboard worktree `/home/hermes/.hermes/ai-office-dashboard`, and `hermes-agent-dashboard.service` was restarted. Private `/office?v=ebca3a3c` returned HTTP 200 and browser smoke confirmed RPG map true, 42 RPG entities, 42 fallback rows, 4 filters, 5 jump targets, inspector present, 0 forms, no mutation-capable controls, raw-leak probe false, and no console/JS errors. Gateway remained active and was not restarted; the dashboard listener remained private/Tailscale-bound and public :8765 probes returned 000. Evidence: `docs/ai-office/plans/2026-05-13-ai-office-rpg-visualizer-vps-deploy-smoke.md`.
+
+Safety/non-actions: dashboard worktree/service only; no core checkout mutation, gateway restart, public exposure change, NAS mount/direct credentials, cron/watcher automation, executable mutation controls, or backend schema/API change.
 
 ## AI Office RPG Visualizer Phase 2-5 completed locally
 
