@@ -508,6 +508,37 @@ Verification after this pass:
 - Focused Office/projection/API Python suite: `.venv/bin/python -m pytest tests/hermes_cli/test_office_api.py tests/test_office_projection_generator.py tests/test_office_projection_validator.py tests/hermes_cli/test_office_projection_cache.py tests/test_paperclip_manifest_generator.py tests/test_paperclip_manifest_validator.py -q -o addopts=` → `39 passed`.
 - Diff hygiene: `git diff --check` passed.
 
+## Evidence extension pass 2026-05-13 10:31 KST
+
+This pass targeted cross-platform build/runtime setup for the dashboard frontend. The existing `web/package.json` `sync-assets` command used POSIX shell commands (`rm -rf` and `cp -r`) in the prebuild/predev path, so the dashboard build depended on Unix shell semantics even though the rest of the frontend tooling is Node-based.
+
+TDD cross-platform asset sync hardening:
+
+- New failing test first: `web/scripts/sync-assets.test.mjs` / `syncAssets copies design-system assets with Node fs APIs`.
+- RED command: `node --test scripts/sync-assets.test.mjs` initially failed with `ERR_MODULE_NOT_FOUND` because no Node asset-sync module existed and the package script was still shell-specific.
+- Root cause: asset synchronization was embedded as a package.json shell snippet instead of a portable Node script that can be tested and reused.
+- GREEN implementation:
+  - added `web/scripts/sync-assets.mjs` with a single exported `syncAssets(webRoot)` responsibility;
+  - uses Node `fs.promises.rm`, `mkdir`, and `cp` instead of shell `rm`/`cp`;
+  - keeps the same source/destination asset pairs: `@nous-research/ui/dist/fonts -> public/fonts` and `@nous-research/ui/dist/assets -> public/ds-assets`;
+  - updates `web/package.json` `sync-assets` to `node scripts/sync-assets.mjs` without dependency or lockfile changes.
+
+Checklist-relevant evidence from this pass:
+
+- Build asset preparation no longer depends on POSIX shell commands, reducing OS-specific assumptions for local development/builds.
+- The script has one explicit responsibility and is covered by a deterministic temp-directory Node test that checks copy and stale-file removal behavior.
+- File I/O failures are still surfaced to npm with a non-zero exit and a bounded contextual message (`Failed to sync dashboard assets: ...`) rather than being silently ignored.
+- No package version or lockfile change was needed.
+
+Verification after this pass:
+
+- RED: `node --test scripts/sync-assets.test.mjs` → failed with missing `sync-assets.mjs` module.
+- GREEN: `node --test scripts/sync-assets.test.mjs && npm run sync-assets` → Node test passed and the actual package command completed.
+- Focused frontend tests/build: `node --test scripts/sync-assets.test.mjs && npm test -- --run src/lib/api.test.ts OfficePage.test.ts App.test.ts && npm run build` → asset test passed, `73 passed`, `tsc -b` and Vite build passed with only the known large chunk warning.
+- Frontend lint: `npm run lint` → exit 0 with the same 20 pre-existing warnings; no new errors.
+- Focused Office/projection/API Python suite: `.venv/bin/python -m pytest tests/hermes_cli/test_office_api.py tests/test_office_projection_generator.py tests/test_office_projection_validator.py tests/hermes_cli/test_office_projection_cache.py tests/test_paperclip_manifest_generator.py tests/test_paperclip_manifest_validator.py -q -o addopts=` → `39 passed`.
+- Diff hygiene: `git diff --check` passed.
+
 ## Conclusion
 
 The previously listed next operational step, manual safe-bundle transfer plus VPS ingest, is complete and verified on the VPS for bundle `pcwb-vps-smoke-001`.
