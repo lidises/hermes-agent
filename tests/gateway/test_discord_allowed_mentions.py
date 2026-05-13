@@ -81,6 +81,7 @@ def _ensure_discord_mock():
 
 _ensure_discord_mock()
 
+from gateway.platforms import discord as discord_platform  # noqa: E402
 from gateway.platforms.discord import _build_allowed_mentions  # noqa: E402
 
 
@@ -96,6 +97,10 @@ _ENV_VARS = (
 
 @pytest.fixture(autouse=True)
 def _clear_allowed_mention_env(monkeypatch):
+    _ensure_discord_mock()
+    discord_platform.DISCORD_AVAILABLE = True
+    discord_platform.discord = sys.modules["discord"]
+    discord_platform.discord.AllowedMentions = _FakeAllowedMentions
     for name in _ENV_VARS:
         monkeypatch.delenv(name, raising=False)
 

@@ -11,6 +11,7 @@ from hermes_cli import kanban_db as kb
 from hermes_cli.office_adapters import (
     collect_cron_office_state,
     collect_kanban_office_state,
+    collect_paperclip_manifest_office_state,
     collect_session_office_state,
     collect_topic_registry_office_state,
 )
@@ -83,11 +84,13 @@ def test_kanban_adapter_projects_safe_room_task_and_event_fields(isolated_kanban
     assert child_item["status"] == "blocked"
     assert child_item["priority"] == 5
     assert child_item["title"] == "Kanban task"
-    assert child_item["assignee"] is None
+    assert child_item["assignee"] == "worker"
+    assert child_item["tenant"] == ""
+    assert child_item["task_ref"].startswith("t_")
+    assert all(ref.startswith("t_") for ref in child_item["parent_task_refs"])
     assert child_item["dependency_counts"] == {"parents": 1, "children": 0}
     assert child_item["provenance"] == {"status": "unknown", "missing_reason": "kanban_task_has_no_source_columns"}
 
-    assert str(child) not in json.dumps(child_item, ensure_ascii=False)
     assert "sk-" + "office-redaction-sentinel" not in child_item["title"]
     assert "/home/alice" not in child_item["title"]
 
@@ -106,10 +109,7 @@ def test_kanban_adapter_projects_safe_room_task_and_event_fields(isolated_kanban
         "source_id",
         "task_id",
         "run_id",
-        "Deploy sk-office-redaction-sentinel",
-        "worker",
-        str(child),
-        str(parent),
+        "Deploy sk-off...inel",
         "/home/alice/private/repo",
     ]
     for needle in forbidden:
@@ -423,6 +423,81 @@ def test_build_office_state_marks_derived_topics_partial_when_registry_missing(i
     assert _source(payload, "topics")["warning_count"] == 1
     assert payload["topics"][0]["source"] == "cron_delivery"
     assert _source(payload, "provenance")["status"] == "ok"
+
+
+def test_paperclip_manifest_adapter_reports_missing_without_creating_storage(isolated_kanban_home):
+    manifest_dir = isolated_kanban_home / "office" / "paperclip-manifests"
+    assert not manifest_dir.exists()
+
+    result = collect_paperclip_manifest_office_state()
+
+    assert result.source.id == "paperclip:manifest-shelf"
+    assert result.source.status == "missing"
+    assert result.source.item_count == 0
+    assert not manifest_dir.exists(), "read-only adapter must not initialize Paperclip manifest storage"
+
+
+def test_paperclip_manifest_adapter_projects_safe_source_fields(isolated_kanban_home):
+    manifest_dir = isolated_kanban_home / "office" / "paperclip-manifests"
+    manifest_dir.mkdir(parents=True)
+    (manifest_dir / "office-roadmap.yaml").write_text(
+        """
+schema_version: 1
+id: paperclip:office-runtime-roadmap
+source_type: paperclip
+relay: MacBook
+status: ok
+checked_at: '2026-05-11T11:08:22Z'
+item_count: 9
+warning_count: 0
+tags:
+  - source:ai-office-runtime
+  - source:paperclip-workbench
+redaction:
+  policy_version: 1
+  omitted_sections:
+    - raw_documents
+    - raw_paths
+assignment_summary:
+  owner: planner
+  reviewer: qa
+""".strip(),
+        encoding="utf-8",
+    )
+    (manifest_dir / "unsafe.yaml").write_text(
+        """
+schema_version: 1
+id: paperclip:unsafe
+source_type: paperclip
+relay: MacBook
+status: ok
+checked_at: '2026-05-11T11:08:22Z'
+item_count: 1
+warning_count: 0
+tags:
+  - source:unsafe
+redaction:
+  policy_version: 1
+  omitted_sections:
+    - raw_documents
+full_path: private
+""".strip(),
+        encoding="utf-8",
+    )
+
+    result = collect_paperclip_manifest_office_state()
+    payload = result.to_payload()
+    serialized = json.dumps(payload, ensure_ascii=False)
+
+    assert result.source.id == "paperclip:office-runtime-roadmap"
+    assert result.source.status == "partial"
+    assert result.source.item_count == 9
+    assert result.source.warning_count == 1
+    assert payload["source"]["source_type"] == "paperclip"
+    assert payload["source"]["relay"] == "MacBook"
+    assert payload["source"]["tags"] == ["source:ai-office-runtime", "source:paperclip-workbench"]
+    assert "full_path" not in serialized
+    assert "private" not in serialized
 
 
 def test_session_adapter_projects_metadata_without_transcripts(isolated_kanban_home):

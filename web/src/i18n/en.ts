@@ -81,6 +81,13 @@ export const en: Translations = {
       sessions: "Sessions",
       skills: "Skills",
     },
+    navGroups: {
+      library: "Library",
+      operations: "Operations",
+      other: "More",
+      primary: "Primary",
+      settings: "Settings & Help",
+    },
     modelToolsSheetSubtitle: "& tools",
     modelToolsSheetTitle: "Model",
     navigation: "Navigation",

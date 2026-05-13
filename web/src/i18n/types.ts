@@ -81,6 +81,13 @@ export interface Translations {
       sessions: string;
       skills: string;
     };
+    navGroups: {
+      library: string;
+      operations: string;
+      other: string;
+      primary: string;
+      settings: string;
+    };
     modelToolsSheetSubtitle: string;
     modelToolsSheetTitle: string;
     navigation: string;

@@ -36,6 +36,16 @@ function setSessionHeader(headers: Headers, token: string): void {
   }
 }
 
+const UNSAFE_ERROR_BODY_PATTERN = /traceback|\/Users\/|\/home\/|token\s*=|sk-[A-Za-z0-9_-]+|secret|password|private key/i;
+
+function safeErrorDetail(text: string, statusText: string): string {
+  const fallback = statusText || "request failed";
+  const trimmed = text.trim();
+  if (!trimmed) return fallback;
+  if (UNSAFE_ERROR_BODY_PATTERN.test(trimmed) || trimmed.includes("\n")) return "request failed";
+  return trimmed;
+}
+
 export async function fetchJSON<T>(url: string, init?: RequestInit): Promise<T> {
   // Inject the session token into all /api/ requests.
   const headers = new Headers(init?.headers);
@@ -43,10 +53,15 @@ export async function fetchJSON<T>(url: string, init?: RequestInit): Promise<T> 
   if (token) {
     setSessionHeader(headers, token);
   }
-  const res = await fetch(`${BASE}${url}`, { ...init, headers });
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}${url}`, { ...init, headers });
+  } catch {
+    throw new Error("Network request failed");
+  }
   if (!res.ok) {
     const text = await res.text().catch(() => res.statusText);
-    throw new Error(`${res.status}: ${text}`);
+    throw new Error(`${res.status}: ${safeErrorDetail(text, res.statusText)}`);
   }
   return res.json();
 }
@@ -64,6 +79,7 @@ async function getSessionToken(): Promise<string> {
 export const api = {
   getStatus: () => fetchJSON<StatusResponse>("/api/status"),
   getOfficeState: () => fetchJSON<OfficeState>("/api/office/state"),
+  getOfficeEvents: () => fetchJSON<OfficeSafeEventsResponse>("/api/office/events"),
   getSessions: (limit = 20, offset = 0) =>
     fetchJSON<PaginatedSessions>(`/api/sessions?limit=${limit}&offset=${offset}`),
   getSessionMessages: (id: string) =>
@@ -393,6 +409,62 @@ export interface OfficeDataSource {
   error_summary?: string | null;
 }
 
+export interface OfficeKanbanWorkItem {
+  id: string;
+  kind: "kanban_task";
+  source: "kanban";
+  room_id: string;
+  board_id: string;
+  task_ref: string;
+  title: "Kanban task";
+  status: string;
+  assignee: string | null;
+  tenant: string | null;
+  priority: number;
+  created_at?: number | string | null;
+  started_at?: number | string | null;
+  completed_at?: number | string | null;
+  updated_at?: number | string | null;
+  last_heartbeat_at?: number | string | null;
+  dependency_counts: { parents: number; children: number };
+  parent_task_refs: string[];
+  child_task_refs: string[];
+  badges: string[];
+  provenance?: Record<string, unknown>;
+}
+
+export interface OfficeProjectionCacheActive {
+  bundle_id: string;
+  generated_at: string;
+  generated_by: string;
+  source_kind: string;
+  source_tags: string[];
+  freshness: Record<string, string>;
+  validator: Record<string, string>;
+  redaction: { raw_excluded: boolean; guarantee: string };
+  payload_summary: Record<string, number | string | null>;
+  display: Record<string, unknown>;
+  bundle_path: string;
+}
+
+export interface OfficeProjectionCacheRejection {
+  bundle_path: string;
+  status: "rejected";
+  reason_count: number;
+  reasons: string[];
+  field_paths: string[];
+  checked_at: string;
+}
+
+export interface OfficeProjectionCache {
+  schema_version: number;
+  status: "active" | "missing" | "stale" | "rejected" | string;
+  redacted: true;
+  cache_layout: { incoming: string; active: string; archive: string; rejected: string };
+  active: OfficeProjectionCacheActive | null;
+  rejected: { count: number; recent: OfficeProjectionCacheRejection[] };
+}
+
 export interface OfficeState {
   schema_version: number;
   generated_at: string;
@@ -418,6 +490,27 @@ export interface OfficeState {
     omitted_sections: string[];
     warnings: string[];
   };
+  projection_cache: OfficeProjectionCache;
+}
+
+export interface OfficeSafeEventDTO {
+  id: string;
+  category: "snapshot_static" | "source_health_changed" | "workload_changed" | "attention_changed" | "room_density_changed" | "flow_changed";
+  room_id: "sessions" | "work" | "automation" | "routing";
+  tone: "neutral" | "positive" | "warning" | "negative";
+  count: number;
+  generated_at: string;
+  redacted: true;
+}
+
+export interface OfficeSafeEventsResponse {
+  schema_version: number;
+  generated_at: string;
+  mode: "read_only";
+  stream: "safe_snapshot_events";
+  redacted: true;
+  fallback: "frontend_safe_projection";
+  events: OfficeSafeEventDTO[];
 }
 
 export interface SessionInfo {

@@ -14,6 +14,7 @@ import {
   buildOfficeMapPolishPlan,
   buildOfficeResponsiveReadabilityPlan,
   buildOfficeRoomActivityMeters,
+  buildOfficeLiveOperationsLayer,
   buildOfficeSafePulseTimeline,
   buildOfficeSafeBreadcrumbTrail,
   buildOfficeSafeRouteCompass,
@@ -30,6 +31,20 @@ import {
   buildOfficeSafeScanIndex,
   buildOfficeSafeHudReadabilityPlan,
   buildOfficeSafeHudHierarchy,
+  buildOfficeFirstLayoutPlan,
+  buildOfficeTrackingTruthPlan,
+  buildOfficeSelectedCharacterFocus,
+  buildOfficeSafeEventSubstrate,
+  buildOfficeSafeMotionCommands,
+  buildOfficeSafeStreamPosture,
+  buildOfficeSafeMotionHeartbeat,
+  buildOfficeSafeSpatialChoreography,
+  buildOfficePaperclipWorkbench,
+  buildOfficePaperclipInspector,
+  buildOfficePaperclipManifestVisibility,
+  buildOfficeKanbanProjection,
+  buildOfficePaperclipMapProjection,
+  buildOfficePageSectionPlan,
   buildOfficeMapFlows,
   buildOfficeMapNodes,
   buildOfficeSceneMotionTrack,
@@ -40,11 +55,16 @@ import {
   buildOfficeEmptySourceCopyPlan,
   buildOfficeEmptyStateHints,
   buildOfficeSourceHealthSummary,
+  buildOfficeSourceHealthRail,
+  buildOfficeSourceHealthCompactDiagnostics,
   buildOfficeUsabilitySummary,
   mergeOfficeRecentChanges,
   resolveOfficeLiveTrackingInterval,
   groupByText,
   visibleRows,
+  buildOfficeTimeDisplayPolicy,
+  buildOfficeProjectionCacheSummary,
+  buildOfficeProjectionOrchestration,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
@@ -74,11 +94,92 @@ function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
       omitted_sections: [],
       warnings: [],
     },
+    projection_cache: {
+      schema_version: 1,
+      status: "missing",
+      redacted: true,
+      cache_layout: { incoming: "incoming", active: "active", archive: "archive", rejected: "rejected" },
+      active: null,
+      rejected: { count: 0, recent: [] },
+    },
     ...overrides,
   };
 }
 
 describe("OfficePage view helpers", () => {
+  it("builds a dynamic projection orchestration view from safe cache and source posture", () => {
+    const orchestration = buildOfficeProjectionOrchestration(officeFixture({
+      data_sources: [
+        { id: "kanban", status: "ok", checked_at: "2026-05-12T08:00:00Z", item_count: 15, warning_count: 0 },
+        { id: "paperclip:private-source", status: "missing", checked_at: "2026-05-12T08:00:00Z", item_count: 0, warning_count: 1, error_summary: "raw prompt token secret path must not leak" } as unknown as OfficeState["data_sources"][number],
+      ],
+      projection_cache: {
+        schema_version: 1,
+        status: "active",
+        redacted: true,
+        cache_layout: { incoming: "incoming", active: "active", archive: "archive", rejected: "rejected" },
+        active: {
+          bundle_id: "pcwb-safe-001",
+          generated_at: "2026-05-12T07:15:00Z",
+          generated_by: "mac",
+          source_kind: "paperclip",
+          source_tags: ["paperclip", "clinic-growth"],
+          freshness: { stale_after: "2026-05-13T07:15:00Z", hard_expire_after: "2026-05-19T07:15:00Z", policy: "show-last-known-good-with-stale-label" },
+          validator: { result: "pass", checked_at: "2026-05-12T07:15:05Z", safe_summary: "safe only" },
+          redaction: { raw_excluded: true, guarantee: "raw_excluded_and_allowlisted_fields_only" },
+          payload_summary: { safe_item_count: 3, attention_count: 0 },
+          display: { cards: ["manifests"] },
+          bundle_path: "pcwb-safe-001",
+        },
+        rejected: { count: 0, recent: [] },
+      },
+    }));
+
+    expect(orchestration.stageLabel).toBe("Projection Orchestration");
+    expect(orchestration.nodes.map((node) => node.id)).toEqual(["relay", "validator", "cache", "dashboard"]);
+    expect(orchestration.nodes.find((node) => node.id === "relay")).toMatchObject({ value: "mac · paperclip", motion: "active" });
+    expect(orchestration.nodes.find((node) => node.id === "validator")).toMatchObject({ value: "pass", tone: "positive" });
+    expect(orchestration.flows.map((flow) => [flow.id, flow.active])).toEqual([["relay-validator", true], ["validator-cache", true], ["cache-dashboard", true]]);
+    expect(orchestration.safetyNote).toContain("직접 원천 접근이 아니라");
+    expect(JSON.stringify(orchestration)).not.toMatch(/\/Users\/|raw prompt|token|secret|clinic-growth/i);
+  });
+
+  it("summarizes Office Projection Pipeline cache without leaking rejected raw values", () => {
+    const summary = buildOfficeProjectionCacheSummary(officeFixture({
+      projection_cache: {
+        schema_version: 1,
+        status: "active",
+        redacted: true,
+        cache_layout: { incoming: "incoming", active: "active", archive: "archive", rejected: "rejected" },
+        active: {
+          bundle_id: "pcwb-safe-001",
+          generated_at: "2026-05-12T07:15:00Z",
+          generated_by: "mac",
+          source_kind: "paperclip",
+          source_tags: ["paperclip", "clinic-growth"],
+          freshness: { stale_after: "2026-05-13T07:15:00Z", hard_expire_after: "2026-05-19T07:15:00Z", policy: "show-last-known-good-with-stale-label" },
+          validator: { result: "pass", checked_at: "2026-05-12T07:15:05Z", safe_summary: "safe summary only" },
+          redaction: { raw_excluded: true, guarantee: "raw_excluded_and_allowlisted_fields_only" },
+          payload_summary: { safe_item_count: 3, attention_count: 0 },
+          display: { cards: ["manifests", "privateDashboard"] },
+          bundle_path: "pcwb-safe-001",
+        },
+        rejected: {
+          count: 1,
+          recent: [{ bundle_path: "bad-raw", status: "rejected", reason_count: 2, reasons: ["private path pattern", "secret-like value"], field_paths: ["payload.summary.note"], checked_at: "2026-05-12T07:16:00Z" }],
+        },
+      },
+    }));
+
+    expect(summary.stageLabel).toBe("Office Projection Pipeline 1");
+    expect(summary.status).toBe("active");
+    expect(summary.cards.map((card) => card.id)).toEqual(["active", "freshness", "rejected"]);
+    expect(summary.cards.find((card) => card.id === "active")).toMatchObject({ title: "활성 projection", value: "pcwb-safe-001", tone: "positive" });
+    expect(summary.cards.find((card) => card.id === "freshness")?.detail).toContain("mac · paperclip");
+    expect(summary.cards.find((card) => card.id === "rejected")).toMatchObject({ title: "최근 거부", value: "1개", tone: "warning" });
+    expect(JSON.stringify(summary)).not.toMatch(/\/Users\/|token=|secret|raw prompt|raw transcript/i);
+  });
+
   it("groups unknown work safely without reading sensitive body fields", () => {
     const grouped = groupByText([
       { id: "1", status: "blocked", title: "safe title", body: "raw body must not matter" },
@@ -95,6 +196,372 @@ describe("OfficePage view helpers", () => {
 
     expect(visibleRows(rows, 6, false)).toHaveLength(6);
     expect(visibleRows(rows, 6, true)).toHaveLength(8);
+  });
+
+  it("documents browser-local timezone formatting for office timestamps", () => {
+    expect(buildOfficeTimeDisplayPolicy()).toEqual({
+      label: "시간 표시",
+      value: "브라우저 로컬 시간대",
+      detail: "브라우저 locale/timezone 기준으로 표시합니다. KST 고정 변환은 하지 않습니다.",
+    });
+  });
+
+  it("builds a safe Source Health 1 rail across Kanban, Paperclip, automation, routing, and redaction", () => {
+    const rail = buildOfficeSourceHealthRail(officeFixture({
+      data_sources: [
+        { id: "sessions", status: "ok", checked_at: "2026-05-11T08:00:00Z", item_count: 3, warning_count: 0 },
+        { id: "kanban", status: "partial", checked_at: "2026-05-11T08:00:00Z", item_count: 8, warning_count: 2, error_summary: "raw /Users/lidises/nas path must not appear" },
+        { id: "paperclip:/Users/lidises/nas/raw", status: "missing", checked_at: "2026-05-11T08:00:00Z", item_count: 0, warning_count: 1, source_type: "paperclip", tags: ["source:safe", "raw prompt"] } as unknown as OfficeState["data_sources"][number],
+        { id: "cron", status: "unavailable", checked_at: "2026-05-11T08:00:00Z", item_count: 1, warning_count: 0, error_summary: "secret script must not appear" },
+        { id: "topics", status: "error", checked_at: "2026-05-11T08:00:00Z", item_count: 0, warning_count: 1, error_summary: "token sk-office-redaction-sentinel" },
+      ],
+      redactions: { policy_version: 1, redacted_field_count: 4, omitted_sections: ["prompt"], warnings: ["raw warning must not appear"] },
+    }));
+
+    expect(rail.stageLabel).toBe("Office Source Health 1");
+    expect(rail.items.map((item) => item.id)).toEqual(["sessions", "kanban", "paperclip", "automation", "routing", "redaction"]);
+    expect(rail.items.find((item) => item.id === "kanban")).toMatchObject({ label: "Kanban", status: "partial", tone: "warning", sourceCount: 1, itemCount: 8, warningCount: 2 });
+    expect(rail.items.find((item) => item.id === "paperclip")).toMatchObject({ label: "Paperclip", status: "missing", tone: "warning", sourceCount: 1, itemCount: 0, warningCount: 1 });
+    expect(rail.items.find((item) => item.id === "automation")).toMatchObject({ label: "자동화", status: "unavailable", tone: "neutral" });
+    expect(rail.items.find((item) => item.id === "routing")).toMatchObject({ label: "라우팅", status: "error", tone: "negative" });
+    expect(rail.items.find((item) => item.id === "redaction")).toMatchObject({ label: "가림", status: "partial", tone: "warning", warningCount: 4 });
+    expect(JSON.stringify(rail)).not.toMatch(/\/Users\/lidises|raw|prompt|secret|token|script|sk-office-redaction-sentinel/i);
+    const warningOnlyRail = buildOfficeSourceHealthRail(officeFixture({
+      redactions: { policy_version: 1, redacted_field_count: 0, omitted_sections: [], warnings: ["raw warning body must not appear"] },
+    }));
+    expect(warningOnlyRail.items.find((item) => item.id === "redaction")).toMatchObject({ status: "partial", tone: "warning", warningCount: 1 });
+    expect(JSON.stringify(warningOnlyRail)).not.toMatch(/raw warning body/i);
+  });
+
+  it("builds compact Source Health 2 diagnostics without leaking raw source details", () => {
+    const diagnostics = buildOfficeSourceHealthCompactDiagnostics(officeFixture({
+      data_sources: [
+        { id: "sessions", status: "ok", checked_at: "2026-05-11T08:00:00Z", item_count: 3, warning_count: 0 },
+        { id: "kanban", status: "partial", checked_at: "2026-05-11T08:00:00Z", item_count: 8, warning_count: 2, error_summary: "raw /Users/lidises/nas path must not appear" },
+        { id: "paperclip:/Users/lidises/nas/raw", status: "missing", checked_at: "2026-05-11T08:00:00Z", item_count: 0, warning_count: 1, source_type: "paperclip", tags: ["source:safe", "raw prompt"] } as unknown as OfficeState["data_sources"][number],
+        { id: "cron", status: "unavailable", checked_at: "2026-05-11T08:00:00Z", item_count: 1, warning_count: 0, error_summary: "secret script must not appear" },
+        { id: "topics", status: "error", checked_at: "2026-05-11T08:00:00Z", item_count: 0, warning_count: 1, error_summary: "token sk-office-redaction-sentinel" },
+      ],
+      redactions: { policy_version: 1, redacted_field_count: 4, omitted_sections: ["prompt"], warnings: ["raw warning must not appear"] },
+    }));
+
+    expect(diagnostics.stageLabel).toBe("Office Source Health 2");
+    expect(diagnostics.cards.map((card) => card.id)).toEqual(["coverage", "attention", "readability"]);
+    expect(diagnostics.cards.find((card) => card.id === "coverage")).toMatchObject({ title: "소스 커버리지", count: 6, tone: "warning" });
+    expect(diagnostics.cards.find((card) => card.id === "attention")).toMatchObject({ title: "확인 필요", count: 4, tone: "negative" });
+    expect(diagnostics.cards.find((card) => card.id === "readability")).toMatchObject({ title: "읽기 밀도", count: 3, tone: "warning" });
+    expect(diagnostics.detail).toContain("상단 3장 요약");
+    expect(JSON.stringify(diagnostics)).not.toMatch(/\/Users\/lidises|raw|prompt|secret|token|script|sk-office-redaction-sentinel/i);
+  });
+
+  it("summarizes lower Office sections so details can stay collapsed by default", () => {
+    const plan = buildOfficePageSectionPlan(officeFixture({
+      data_sources: [
+        { id: "sessions", status: "ok", checked_at: "2026-05-11T08:00:00Z", item_count: 12, warning_count: 0 },
+        { id: "topics", status: "missing", checked_at: "2026-05-11T08:00:00Z", item_count: 0, warning_count: 0 },
+        { id: "paperclip:safe", status: "ok", checked_at: "2026-05-11T08:00:00Z", item_count: 1, warning_count: 0, source_type: "paperclip", tags: ["source:safe", "secret tag ignored"] } as unknown as OfficeState["data_sources"][number],
+      ],
+      agents: [{ id: "session-1", status: "active", source_platform: "cli" }],
+      work_items: [{ id: "w1", status: "blocked", title: "raw body should not appear", body: "secret task body" } as unknown as OfficeState["work_items"][number]],
+      automations: [{ id: "a1", state: "scheduled", last_status: "ok", script: "secret script" } as unknown as OfficeState["automations"][number]],
+      topics: [],
+      provenance: [{ source: "paperclip:safe", label: "safe source", detail: "raw path must not appear" } as unknown as OfficeState["provenance"][number]],
+      events: [{ id: "e1", kind: "safe_event", source: "office", created_at: "2026-05-11T08:00:00Z" } as unknown as OfficeState["events"][number]],
+      redactions: { policy_version: 1, redacted_field_count: 3, omitted_sections: ["prompt"], warnings: [] },
+    }));
+
+    expect(plan.map((section) => section.id)).toEqual(["sources", "paperclip", "work", "automation", "routing", "events"]);
+    expect(plan.find((section) => section.id === "sources")).toMatchObject({ label: "소스 상태", count: 3, defaultOpen: false });
+    expect(plan.find((section) => section.id === "paperclip")?.summary).toContain("출처 1개");
+    expect(plan.find((section) => section.id === "work")?.summary).toContain("세션 1개");
+    expect(plan.find((section) => section.id === "routing")?.summary).toContain("출처 기록 1개");
+    expect(JSON.stringify(plan)).not.toMatch(/raw|secret|body|script|path/i);
+  });
+
+  it("builds a safe Paperclip workbench projection from source tags without raw content", () => {
+    const state = officeFixture({
+      data_sources: [
+        {
+          id: "paperclip:clinic-blog",
+          status: "partial",
+          checked_at: "2026-05-11T08:00:00Z",
+          item_count: 12,
+          warning_count: 1,
+          error_summary: "1 stale manifest",
+          source_type: "paperclip",
+          relay: "MacBook",
+          tags: ["source:koreandeer-shoulder", "raw prompt must not appear"],
+          path: "/Users/lidises/nas/secret/raw/path",
+          prompt: "raw prompt must not appear",
+          transcript: "raw transcript must not appear",
+        } as unknown as OfficeState["data_sources"][number],
+      ],
+      provenance: [
+        { source: "paperclip:clinic-blog", label: "Paperclip safe manifest", detail: "raw path must not appear" } as unknown as OfficeState["provenance"][number],
+      ],
+    });
+
+    const workbench = buildOfficePaperclipWorkbench(state);
+
+    expect(workbench.sources).toHaveLength(1);
+    expect(workbench.sources[0]).toMatchObject({
+      id: "paperclip:clinic-blog",
+      label: "clinic-blog",
+      health: "partial",
+      sourceType: "paperclip",
+      itemCount: 12,
+      warningCount: 1,
+      relay: "MacBook",
+    });
+    expect(workbench.sources[0].tags).toEqual(["source:koreandeer-shoulder"]);
+    expect(JSON.stringify(workbench)).not.toMatch(/raw|prompt|transcript|secret|\/Users\/lidises\/nas/i);
+  });
+
+  it("builds Paperclip Workbench 2 manifest visibility without leaking raw manifest details", () => {
+    const visibility = buildOfficePaperclipManifestVisibility(officeFixture({
+      data_sources: [
+        {
+          id: "paperclip:clinic-safe-shelf",
+          status: "ok",
+          checked_at: "2026-05-11T23:30:00Z",
+          item_count: 3,
+          warning_count: 0,
+          source_type: "relay_projection",
+          relay: "VPS",
+          tags: ["source:koreandeer-shoulder", "raw prompt must not appear"],
+          path: "/home/hermes/.hermes/office/paperclip-manifests/private.yaml",
+          body: "raw manifest body must not appear",
+          token: "sk-" + "paperclip-visibility-sentinel",
+        } as unknown as OfficeState["data_sources"][number],
+        {
+          id: "paperclip:/Users/lidises/nas/raw-second",
+          status: "partial",
+          checked_at: "2026-05-08T00:00:00Z",
+          item_count: 9,
+          warning_count: 2,
+          source_type: "nas_manifest",
+          relay: "MacBook",
+          tags: ["source:clinic-notes"],
+          error_summary: "raw /Users/lidises/nas error should not appear",
+        } as unknown as OfficeState["data_sources"][number],
+      ],
+    }));
+
+    expect(visibility.stageLabel).toBe("Paperclip Workbench 2");
+    expect(visibility.cards.map((card) => card.id)).toEqual(["manifests", "privateDashboard", "relayPosture"]);
+    expect(visibility.cards.find((card) => card.id === "manifests")).toMatchObject({ title: "안전 manifest", count: 2, tone: "warning" });
+    expect(visibility.cards.find((card) => card.id === "privateDashboard")).toMatchObject({ title: "VPS 표시", count: 1, tone: "positive" });
+    expect(visibility.cards.find((card) => card.id === "relayPosture")).toMatchObject({ title: "릴레이 생산", count: 2, tone: "neutral" });
+    expect(visibility.detail).toContain("validator-passing");
+    expect(JSON.stringify(visibility)).not.toMatch(/\/home\/hermes|\/Users\/lidises|raw|prompt|body|token|sk-paperclip|private\.yaml/i);
+  });
+
+  it("builds a safe Kanban operations projection with graph refs and no raw task content", () => {
+    const projection = buildOfficeKanbanProjection(officeFixture({
+      rooms: [
+        { id: "kanban:ai-office", kind: "kanban_board", source: "kanban", display_name: "AI Office", counts: { done: 1, running: 1, blocked: 0 } },
+      ],
+      work_items: [
+        {
+          id: "kanban:ai-office:item:0",
+          source: "kanban",
+          kind: "kanban_task",
+          board_id: "ai-office",
+          task_ref: "t_72c99902",
+          title: "Kanban task",
+          body: "raw body must not appear",
+          result: "raw result must not appear",
+          prompt: "raw prompt must not appear",
+          transcript: "raw transcript must not appear",
+          status: "done",
+          assignee: "ai-office-orchestrator",
+          tenant: "ai-office",
+          priority: 7,
+          parent_task_refs: [],
+          child_task_refs: ["t_86deef15"],
+          dependency_counts: { parents: 0, children: 1 },
+          badges: ["graph_parent"],
+        },
+        {
+          id: "kanban:ai-office:item:1",
+          source: "kanban",
+          kind: "kanban_task",
+          board_id: "ai-office",
+          task_ref: "t_86deef15",
+          title: "Kanban task",
+          status: "running",
+          assignee: "office-reporter",
+          tenant: "ai-office",
+          priority: 0,
+          parent_task_refs: ["t_72c99902"],
+          child_task_refs: [],
+          dependency_counts: { parents: 1, children: 0 },
+          badges: ["active", "graph_child"],
+        },
+      ],
+    }));
+
+    expect(projection.stageLabel).toBe("칸반 운영실");
+    expect(projection.readOnly).toBe(true);
+    expect(projection.boards[0]).toMatchObject({ boardId: "ai-office", displayName: "AI Office", taskCount: 2 });
+    expect(projection.assignees.map((assignee) => assignee.id)).toEqual(["ai-office-orchestrator", "office-reporter"]);
+    expect(projection.tenants).toEqual([{ id: "ai-office", count: 2 }]);
+    expect(projection.graphEdges).toEqual([{ parent: "t_72c99902", child: "t_86deef15", boardId: "ai-office" }]);
+    expect(projection.cards[0]).toMatchObject({ taskRef: "t_72c99902", boardId: "ai-office", childTaskRefs: ["t_86deef15"] });
+    expect(JSON.stringify(projection)).not.toMatch(/raw|body|result|prompt|transcript|secret/i);
+  });
+
+  it("summarizes Kanban stale, blocked, and workload signals without raw task fields", () => {
+    const projection = buildOfficeKanbanProjection(officeFixture({
+      generated_at: "2026-05-12T00:00:00Z",
+      rooms: [
+        { id: "kanban:ai-office", kind: "kanban_board", source: "kanban", display_name: "AI Office", counts: { running: 2, blocked: 1, open: 1 } },
+      ],
+      work_items: [
+        {
+          id: "kanban:ai-office:item:0",
+          source: "kanban",
+          kind: "kanban_task",
+          board_id: "ai-office",
+          task_ref: "t_running_old",
+          title: "Kanban task",
+          status: "running",
+          assignee: "office-runner",
+          tenant: "ai-office",
+          priority: 3,
+          updated_at: "2026-05-11T22:30:00Z",
+          last_heartbeat_at: "2026-05-11T22:30:00Z",
+          parent_task_refs: [],
+          child_task_refs: [],
+          badges: ["active"],
+          body: "raw body must not appear",
+        },
+        {
+          id: "kanban:ai-office:item:1",
+          source: "kanban",
+          kind: "kanban_task",
+          board_id: "ai-office",
+          task_ref: "t_blocked",
+          title: "Kanban task",
+          status: "blocked",
+          assignee: "office-runner",
+          tenant: "ai-office",
+          priority: 9,
+          updated_at: { path: "/Users/lidises/nas/private" },
+          last_heartbeat_at: "raw secret timestamp must not appear",
+          parent_task_refs: ["t_running_old"],
+          child_task_refs: [],
+          badges: ["needs_attention", "graph_child"],
+          result: "raw result must not appear",
+        },
+        {
+          id: "kanban:ai-office:item:2",
+          source: "kanban",
+          kind: "kanban_task",
+          board_id: "ai-office",
+          task_ref: "t_recent",
+          title: "Kanban task",
+          status: "running",
+          assignee: "reviewer",
+          tenant: "ai-office",
+          priority: 1,
+          updated_at: "2026-05-11T23:58:00Z",
+          last_heartbeat_at: "2026-05-11T23:58:00Z",
+          parent_task_refs: [],
+          child_task_refs: [],
+          badges: ["active"],
+        },
+      ],
+    }));
+
+    expect(projection.observability.stageLabel).toBe("Kanban Observability 2");
+    expect(projection.observability.summaryCards).toEqual([
+      { id: "workload", label: "작업량", value: 3, detail: "보드 1개 · 실행 중 2개", tone: "neutral" },
+      { id: "blocked", label: "막힘", value: 1, detail: "확인 필요 task_ref 1개", tone: "negative" },
+      { id: "stale", label: "정체", value: 1, detail: "최근 heartbeat/update 60분 초과 1개", tone: "warning" },
+    ]);
+    expect(projection.observability.workloadByBoard).toEqual([{ boardId: "ai-office", total: 3, running: 2, blocked: 1, stale: 1 }]);
+    expect(projection.observability.attentionRefs).toEqual(["t_blocked", "t_running_old"]);
+    expect(JSON.stringify(projection.observability)).not.toMatch(/raw|body|result|prompt|transcript|secret|\/Users\/lidises\/nas/i);
+    expect(JSON.stringify(projection.cards)).not.toMatch(/raw|secret|timestamp|\/Users\/lidises\/nas/i);
+  });
+
+  it("caps Kanban observability attention refs before exposing the browser projection", () => {
+    const projection = buildOfficeKanbanProjection(officeFixture({
+      generated_at: "2026-05-12T00:00:00Z",
+      rooms: [{ id: "kanban:ai-office", kind: "kanban_board", source: "kanban", display_name: "AI Office", counts: { blocked: 8 } }],
+      work_items: Array.from({ length: 8 }, (_, index) => ({
+        id: `kanban:ai-office:item:${index}`,
+        source: "kanban",
+        kind: "kanban_task",
+        board_id: "ai-office",
+        task_ref: `t_blocked_${index}`,
+        title: "Kanban task",
+        status: "blocked",
+        assignee: "office-runner",
+        tenant: "ai-office",
+        priority: index,
+        parent_task_refs: [],
+        child_task_refs: [],
+        badges: ["needs_attention"],
+        body: "raw body must not appear",
+      })),
+    }));
+
+    expect(projection.observability.attentionRefs).toEqual(["t_blocked_0", "t_blocked_1", "t_blocked_2", "t_blocked_3", "t_blocked_4", "t_blocked_5"]);
+    expect(JSON.stringify(projection.observability)).not.toMatch(/raw|body|secret/i);
+  });
+
+  it("builds safe Paperclip inspector fields and CSS map slots from the sanitized workbench only", () => {
+    const state = officeFixture({
+      generated_at: "2026-05-11T09:00:00Z",
+      data_sources: [
+        {
+          id: "paperclip:clinic-blog",
+          status: "ok",
+          checked_at: "2026-05-11T08:00:00Z",
+          item_count: 3,
+          warning_count: 0,
+          source_type: "paperclip",
+          relay: "MacBook",
+          tags: ["source:koreandeer-shoulder", "token must not appear"],
+          path: "/Users/lidises/nas/private/full/path",
+          body: "secret body must not appear",
+        } as unknown as OfficeState["data_sources"][number],
+      ],
+    });
+    const source = buildOfficePaperclipWorkbench(state).sources[0];
+    const inspector = buildOfficePaperclipInspector(source);
+    const projection = buildOfficePaperclipMapProjection([source]);
+
+    expect(inspector.kind).toBe("Paperclip 안전 작업대");
+    expect(inspector.fields.map(([label]) => label)).toEqual(["id", "종류", "상태", "항목", "경고", "릴레이", "상태 시점", "태그", "가림"]);
+    expect(projection.slots[0]).toMatchObject({ id: "paperclip:clinic-blog", label: "clinic-blog", health: "ok", x: 18, y: 50 });
+    expect(JSON.stringify({ inspector, projection })).not.toMatch(/raw|prompt|transcript|secret|token|\/Users\/lidises\/nas|body/i);
+  });
+
+  it("builds live operations layer from safe aggregate state without raw work details", () => {
+    const layer = buildOfficeLiveOperationsLayer(officeFixture({
+      generated_at: "2026-05-11T09:00:00Z",
+      work_items: [
+        { id: "w1", status: "running", title: "raw task body must not appear", body: "secret body" } as unknown as OfficeState["work_items"][number],
+        { id: "w2", status: "blocked", title: "blocked private title", result: "raw result" } as unknown as OfficeState["work_items"][number],
+        { id: "w3", status: "reviewing", prompt: "raw prompt" } as unknown as OfficeState["work_items"][number],
+        { id: "w4", status: "report_ready", transcript: "raw transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      automations: [
+        { id: "a1", state: "scheduled", last_status: "ok", script: "/Users/lidises/private.py" } as unknown as OfficeState["automations"][number],
+        { id: "a2", state: "done", last_status: "ok", script: "/Users/lidises/private-done.py" } as unknown as OfficeState["automations"][number],
+      ],
+      data_sources: [{ id: "paperclip:rpg-office-runtime-roadmap", status: "ok", checked_at: "2026-05-11T08:00:00Z", item_count: 9, warning_count: 0 }],
+    }));
+
+    expect(layer.stageLabel).toBe("Live operations layer");
+    expect(layer.summary).toBe("작업 중 1 · 리뷰 1 · 보고 1 · 주의 1 · 자동화 1");
+    expect(layer.cues.map((cue) => cue.id)).toEqual(["working", "reviewing", "report-ready", "blocked", "automation-running"]);
+    expect(layer.cues.find((cue) => cue.id === "report-ready")).toMatchObject({ label: "보고 대기", count: 1, roomId: "work", tone: "positive" });
+    expect(layer.cues.every((cue) => cue.ariaHidden && cue.interactive === false)).toBe(true);
+    expect(JSON.stringify(layer)).not.toMatch(/raw|prompt|transcript|secret|body|result|\/Users\/lidises|private/i);
   });
 
   it("builds attention rail from blocked work, failed automations, and unhealthy sources", () => {
@@ -427,6 +894,185 @@ describe("OfficePage view helpers", () => {
     expect(`${inspector.title} ${inspector.ariaLabel} ${inspector.fields.flat().join(" ")}`).not.toMatch(/raw|prompt|transcript|body|script|secret|model provider/i);
   });
 
+  it("builds safe Stage 16-A tracking truth and selected-character focus copy", () => {
+    const delta = {
+      ...buildOfficeStateDelta(null, officeFixture()),
+      nodeBadges: {
+        sessions: [{ label: "+2", tone: "positive" as const }],
+        work: [],
+        automation: [],
+        routing: [],
+      },
+      changedFlows: [{ from: "sessions" as const, to: "work" as const, label: "raw prompt transcript body script secret must not matter", tone: "warning" as const }],
+    };
+    const character = {
+      id: "model-1",
+      role: "model" as const,
+      roomId: "sessions" as const,
+      label: "raw model provider prompt must not matter",
+      status: "active" as const,
+      detail: "raw transcript body script secret must not matter",
+      redactionNote: "안전 DTO 역할/상태/개수만 반영 · 원문 제외",
+      x: 20,
+      y: 20,
+    };
+
+    const truth = buildOfficeTrackingTruthPlan(delta, { hasEventStream: false, visibleCharacterCount: 12 });
+    const focus = buildOfficeSelectedCharacterFocus(character, delta);
+
+    expect(truth.stageLabel).toBe("Stage 16-A tracking truth");
+    expect(truth.mode).toBe("snapshot-delta");
+    expect(truth.label).toBe("스냅샷 변화 기반");
+    expect(truth.detail).toBe("캐릭터 12개 · 최근 안전 변화 2개 · 실시간 이벤트 스트림 없음");
+    expect(truth.caveats).toEqual(["움직임은 CSS 장식입니다", "실제 작업 추적은 안전 이벤트 스트림 승인 후 분리 구현"]);
+    expect(focus).toEqual({
+      selectedCharacterId: "model-1",
+      title: "모델 캐릭터 선택됨",
+      summary: "세션 · 활성 · 생각 중",
+      roomLabel: "세션",
+      actionLabel: "생각 중",
+      highlightSelector: '[data-office-character-id="model-1"]',
+      fields: [
+        ["역할", "모델"],
+        ["방", "세션"],
+        ["상태", "활성"],
+        ["액션", "생각 중"],
+        ["추적", "스냅샷 변화 기반 · 원문 제외"],
+      ],
+    });
+    expect(`${truth.label} ${truth.detail} ${truth.caveats.join(" ")} ${focus.title} ${focus.summary} ${focus.fields.flat().join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|body|script|secret|token|provider|model provider|sk-/i);
+  });
+
+  it("builds safe Stage 16-B event substrate and motion commands", () => {
+    const delta = {
+      ...buildOfficeStateDelta(null, officeFixture()),
+      nodeBadges: {
+        sessions: [{ label: "raw prompt +3 token must not matter", tone: "positive" as const }],
+        work: [{ label: "raw task_body warning secret must not matter", tone: "warning" as const }],
+        automation: [],
+        routing: [],
+      },
+      changedFlows: [{ from: "sessions" as const, to: "work" as const, label: "raw transcript script provider must not matter", tone: "warning" as const }],
+    };
+
+    const substrate = buildOfficeSafeEventSubstrate(delta, { visibleCharacterCount: 11, hasEventStream: false });
+    const commands = buildOfficeSafeMotionCommands(substrate.events);
+
+    expect(substrate.stageLabel).toBe("Stage 16-B safe event substrate");
+    expect(substrate.mode).toBe("projected-events");
+    expect(substrate.summary).toBe("안전 이벤트 4개 · snapshot/delta 투영");
+    expect(substrate.events.map((event) => event.category)).toEqual(["room_density_changed", "room_density_changed", "flow_changed", "attention_changed"]);
+    expect(substrate.events.map((event) => event.roomId)).toEqual(["sessions", "work", "sessions", "work"]);
+    expect(substrate.events.every((event) => event.redacted && event.safeLabel.length > 0 && event.rawSource === false)).toBe(true);
+    expect(commands.map((command) => command.kind)).toEqual(["pulse-room", "pulse-room", "route-lane", "attention-spark"]);
+    expect(commands.find((command) => command.kind === "route-lane")?.lane).toBe("sessions-work");
+    expect(`${substrate.summary} ${substrate.events.map((event) => `${event.safeLabel} ${event.detail}`).join(" ")} ${commands.map((command) => `${command.label} ${command.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|body|script|secret|token|provider|model|api_key|password|sk-/i);
+  });
+
+  it("keeps Stage 16-B first snapshot static without fabricated movement", () => {
+    const substrate = buildOfficeSafeEventSubstrate(buildOfficeStateDelta(null, officeFixture()), { visibleCharacterCount: 11, hasEventStream: false });
+    const commands = buildOfficeSafeMotionCommands(substrate.events);
+
+    expect(substrate.mode).toBe("static-posture");
+    expect(substrate.events).toEqual([
+      expect.objectContaining({
+        category: "snapshot_static",
+        roomId: "sessions",
+        tone: "neutral",
+        count: 11,
+        safeLabel: "정적 안전 스냅샷",
+        redacted: true,
+        rawSource: false,
+      }),
+    ]);
+    expect(commands).toEqual([
+      expect.objectContaining({
+        kind: "idle-glow",
+        roomId: "sessions",
+        label: "대기 광원",
+      }),
+    ]);
+  });
+
+  it("builds safe Stage 16-C stream posture from backend events with local fallback", () => {
+    const local = buildOfficeSafeEventSubstrate(buildOfficeStateDelta(null, officeFixture()), { visibleCharacterCount: 11, hasEventStream: false });
+    const loaded = buildOfficeSafeStreamPosture({
+      status: "loaded",
+      events: [
+        {
+          id: "backend-1",
+          category: "source_health_changed",
+          room_id: "routing",
+          tone: "warning",
+          count: 2,
+          generated_at: "2026-05-10T00:00:00Z",
+          redacted: true,
+          raw_label: "raw prompt provider model token must not leak",
+        },
+      ],
+      generated_at: "2026-05-10T00:00:00Z",
+    }, local);
+    const unavailable = buildOfficeSafeStreamPosture({ status: "unavailable", events: [], error: "raw transcript secret token" }, local);
+
+    expect(loaded.mode).toBe("backend-safe-stream");
+    expect(loaded.label).toBe("백엔드 안전 이벤트 연결");
+    expect(loaded.events.map((event) => event.category)).toEqual(["source_health_changed"]);
+    expect(loaded.events[0]).toEqual(expect.objectContaining({ roomId: "routing", tone: "warning", count: 2, rawSource: false, redacted: true }));
+    expect(unavailable.mode).toBe("local-fallback");
+    expect(unavailable.events.map((event) => event.category)).toEqual(["snapshot_static"]);
+    expect(`${loaded.summary} ${loaded.events[0].safeLabel} ${loaded.events[0].detail} ${unavailable.summary}`).not.toMatch(/raw|prompt|transcript|secret|token|provider|model|api_key|password|sk-/i);
+  });
+
+  it("builds safe Stage 16-D motion heartbeat from safe stream posture", () => {
+    const local = buildOfficeSafeEventSubstrate(buildOfficeStateDelta(null, officeFixture()), { visibleCharacterCount: 11, hasEventStream: false });
+    const stream = buildOfficeSafeStreamPosture({
+      status: "loaded",
+      events: [
+        { id: "event-1", category: "workload_changed", room_id: "work", tone: "negative", count: 4, generated_at: "2026-05-10T00:00:00Z", redacted: true },
+        { id: "event-2", category: "source_health_changed", room_id: "routing", tone: "warning", count: 2, generated_at: "2026-05-10T00:00:00Z", redacted: true },
+      ],
+      generated_at: "2026-05-10T00:00:00Z",
+    }, local);
+
+    const heartbeat = buildOfficeSafeMotionHeartbeat(stream, { pollStatus: "active", tick: 7, failureCount: 0, reducedMotion: false });
+    const reduced = buildOfficeSafeMotionHeartbeat(stream, { pollStatus: "active", tick: 8, failureCount: 0, reducedMotion: true });
+    const fallback = buildOfficeSafeMotionHeartbeat(local, { pollStatus: "unavailable", tick: 0, failureCount: 2, reducedMotion: false });
+
+    expect(heartbeat.stageLabel).toBe("Stage 16-D 안전 motion heartbeat");
+    expect(heartbeat.mode).toBe("safe-polling");
+    expect(heartbeat.phase).toBe("pulse");
+    expect(heartbeat.intensity).toBe("high");
+    expect(heartbeat.items.map((item) => item.id)).toEqual(["stream", "cadence", "motion"]);
+    expect(heartbeat.items[0].detail).toContain("백엔드 안전 이벤트");
+    expect(reduced.motionEnabled).toBe(false);
+    expect(fallback.mode).toBe("local-fallback");
+    expect(fallback.intensity).toBe("low");
+    expect(`${heartbeat.summary} ${heartbeat.items.map((item) => item.detail).join(" ")} ${fallback.summary}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|api_key|password|sk-/i);
+  });
+
+  it("builds safe Stage 16-E spatial choreography from heartbeat events", () => {
+    const local = buildOfficeSafeEventSubstrate(buildOfficeStateDelta(null, officeFixture()), { visibleCharacterCount: 11, hasEventStream: false });
+    const stream = buildOfficeSafeStreamPosture({
+      status: "loaded",
+      events: [
+        { id: "event-1", category: "workload_changed", room_id: "work", tone: "negative", count: 4, generated_at: "2026-05-10T00:00:00Z", redacted: true },
+        { id: "event-2", category: "flow_changed", room_id: "work", to_room_id: "automation", tone: "warning", count: 1, generated_at: "2026-05-10T00:00:00Z", redacted: true },
+        { id: "event-3", category: "source_health_changed", room_id: "routing", tone: "warning", count: 2, generated_at: "2026-05-10T00:00:00Z", redacted: true, detail: "raw provider token must not leak" },
+      ],
+      generated_at: "2026-05-10T00:00:00Z",
+    }, local);
+    const heartbeat = buildOfficeSafeMotionHeartbeat(stream, { pollStatus: "active", tick: 9, failureCount: 0, reducedMotion: false });
+
+    const choreography = buildOfficeSafeSpatialChoreography(stream.events, heartbeat);
+
+    expect(choreography.stageLabel).toBe("Stage 16-E 안전 spatial choreography");
+    expect(choreography.mode).toBe("safe-spatial-motion");
+    expect(choreography.items.map((item) => item.kind)).toEqual(["room-pulse", "route-sweep", "room-pulse"]);
+    expect(choreography.items[0]).toEqual(expect.objectContaining({ roomId: "work", x: 70, y: 30, intensity: "high", interactive: false, ariaHidden: true }));
+    expect(choreography.items[1]).toEqual(expect.objectContaining({ roomId: "work", toRoomId: "automation", x: 70, y: 30, x2: 24, y2: 67 }));
+    expect(`${choreography.summary} ${choreography.items.map((item) => `${item.label} ${item.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|api_key|password|sk-/i);
+  });
+
   it("builds Stage 10-F usability summary for dense, missing-source, reduced-motion, and responsive states", () => {
     const state = officeFixture({
       data_sources: [
@@ -532,6 +1178,7 @@ describe("OfficePage view helpers", () => {
 
     const standardPlan = buildOfficeMapDensityPlan("standard", characters);
     const narrow = buildOfficeResponsiveReadabilityPlan(standardPlan, { viewportWidth: 430 });
+    const tablet = buildOfficeResponsiveReadabilityPlan(standardPlan, { viewportWidth: 820 });
     const desktop = buildOfficeResponsiveReadabilityPlan(standardPlan, { viewportWidth: 1280 });
 
     expect(narrow).toMatchObject({
@@ -542,6 +1189,13 @@ describe("OfficePage view helpers", () => {
       railClassName: "office-map-rail--mobile-stack",
     });
     expect(narrow.notes).toEqual(expect.arrayContaining(["좁은 화면에서는 요약 모드 권장", "맵 rail은 세로 흐름으로 읽힘"]));
+    expect(tablet).toMatchObject({
+      viewportMode: "tablet",
+      recommendedDensityMode: "standard",
+      mapClassName: "office-map--responsive office-map--tablet-readable",
+      railClassName: "office-map-rail--tablet-stack",
+    });
+    expect(tablet.notes).toEqual(expect.arrayContaining(["태블릿 화면에서는 표준 모드 권장", "rail은 접힘 없이 세로 보조 영역으로 읽힘"]));
     expect(desktop.viewportMode).toBe("desktop");
     expect(desktop.recommendedDensityMode).toBe("standard");
     expect(`${narrow.stageLabel} ${narrow.notes.join(" ")} ${narrow.mapClassName}`).not.toMatch(/raw|prompt|transcript|body|script|secret/i);
@@ -1156,6 +1810,28 @@ describe("OfficePage view helpers", () => {
     expect(index.headline).not.toContain("활성");
     expect(index.headline).not.toContain("흐름");
     expect(`${index.headline} ${index.items.map((item) => `${item.label} ${item.detail}`).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
+  });
+
+  it("builds safe Stage 16-A AI Office-first layout plan", () => {
+    const layout = buildOfficeFirstLayoutPlan({
+      visibleCharacterCount: 12,
+      diagnosticPanelCount: 11,
+      hasSelectedCharacter: false,
+    });
+
+    expect(layout.stageLabel).toBe("Stage 16-A AI Office-first reset");
+    expect(layout.heading).toBe("AI Office 먼저 보기");
+    expect(layout.primarySurface).toBe("scene");
+    expect(layout.diagnosticsMode).toBe("secondary-collapsed");
+    expect(layout.sections.map((section) => [section.id, section.label, section.priority])).toEqual([
+      ["scene", "오피스 현장", 1],
+      ["inspector", "선택 정보", 2],
+      ["timeline", "최근 변화", 3],
+      ["diagnostics", "진단 HUD", 4],
+    ]);
+    expect(layout.summary).toBe("캐릭터 12개 · 진단 11개는 보조로 정리");
+    expect(layout.sections.every((section) => section.detail.length > 0)).toBe(true);
+    expect(`${layout.heading} ${layout.summary} ${layout.sections.map((section) => section.detail).join(" ")}`).not.toMatch(/raw|prompt|transcript|task_body|script|secret|token|provider|model|sk-/i);
   });
 
   it("builds Korean empty-source copy without exposing raw adapter data", () => {

@@ -68,6 +68,40 @@ class TestTerminalRequirements:
         assert "terminal" in names
         assert "execute_code" in names
 
+    def test_quiet_tool_cache_rechecks_vercel_terminal_requirements(self, monkeypatch):
+        import model_tools
+        from tools.registry import invalidate_check_fn_cache
+
+        model_tools._clear_tool_defs_cache()
+        invalidate_check_fn_cache()
+        monkeypatch.setenv("VERCEL_OIDC_TOKEN", "oidc-token")
+        monkeypatch.setattr(
+            terminal_tool_module.importlib.util,
+            "find_spec",
+            lambda _name: object(),
+        )
+        monkeypatch.setattr(
+            terminal_tool_module,
+            "_get_env_config",
+            lambda: {"env_type": "vercel_sandbox", "container_disk": 51200},
+        )
+        valid_tools = get_tool_definitions(enabled_toolsets=["terminal", "code_execution"], quiet_mode=True)
+        assert "terminal" in {tool["function"]["name"] for tool in valid_tools}
+
+        monkeypatch.setattr(
+            terminal_tool_module,
+            "_get_env_config",
+            lambda: {
+                "env_type": "vercel_sandbox",
+                "container_disk": 51200,
+                "vercel_runtime": "node20",
+            },
+        )
+        invalid_tools = get_tool_definitions(enabled_toolsets=["terminal", "code_execution"], quiet_mode=True)
+        invalid_names = {tool["function"]["name"] for tool in invalid_tools}
+        assert "terminal" not in invalid_names
+        assert "execute_code" not in invalid_names
+
     def test_terminal_and_execute_code_tools_hide_for_unsupported_vercel_runtime(self, monkeypatch):
         monkeypatch.setenv("VERCEL_OIDC_TOKEN", "oidc-token")
         monkeypatch.setattr(

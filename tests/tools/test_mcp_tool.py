@@ -2133,9 +2133,13 @@ except ImportError:
     ToolUseContent = _CompatType
 
 from tools.mcp_tool import (
+    CreateMessageResult,
     CreateMessageResultWithTools,
+    ErrorData,
+    SamplingCapability,
     SamplingHandler,
     SamplingToolsCapability,
+    TextContent,
     ToolUseContent,
     _safe_numeric,
 )

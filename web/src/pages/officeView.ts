@@ -476,6 +476,17 @@ export type OfficeStateDelta = {
   recentChanges: OfficeRecentChange[];
 };
 
+export type OfficePageSectionId = "sources" | "paperclip" | "work" | "automation" | "routing" | "events";
+
+export type OfficePageSectionPlan = {
+  id: OfficePageSectionId;
+  label: string;
+  summary: string;
+  count: number;
+  defaultOpen: boolean;
+  ariaLabel: string;
+};
+
 export type OfficeSourceHealthSummary = {
   counts: Record<OfficeSourceStatus, number>;
   label: string;
@@ -483,6 +494,111 @@ export type OfficeSourceHealthSummary = {
   totalWarningCount: number;
   missingSourceIds: string[];
   tone: OfficeDeltaBadge["tone"];
+};
+
+export type OfficeSourceHealthRailItemId = "sessions" | "kanban" | "paperclip" | "automation" | "routing" | "redaction";
+
+export type OfficeSourceHealthRailItem = {
+  id: OfficeSourceHealthRailItemId;
+  label: string;
+  status: OfficeSourceStatus;
+  tone: OfficeDeltaBadge["tone"];
+  sourceCount: number;
+  itemCount: number;
+  warningCount: number;
+  detail: string;
+  redactionNote: string;
+};
+
+export type OfficeSourceHealthRail = {
+  stageLabel: "Office Source Health 1";
+  detail: string;
+  items: OfficeSourceHealthRailItem[];
+  redactionNote: string;
+};
+
+export type OfficeSourceHealthDiagnosticCardId = "coverage" | "attention" | "readability";
+
+export type OfficeSourceHealthDiagnosticCard = {
+  id: OfficeSourceHealthDiagnosticCardId;
+  title: string;
+  count: number;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+};
+
+export type OfficeSourceHealthCompactDiagnostics = {
+  stageLabel: "Office Source Health 2";
+  detail: string;
+  cards: OfficeSourceHealthDiagnosticCard[];
+  redactionNote: string;
+};
+
+export type OfficePaperclipSourceType = "paperclip" | "nas_manifest" | "session_tag" | "relay_projection" | "unknown";
+
+export type OfficePaperclipRelay = "MacBook" | "WSL" | "VPS" | "unknown";
+
+export type OfficePaperclipTimingBucket = "fresh" | "recent" | "stale" | "unknown";
+
+export type OfficePaperclipWorkbenchSource = {
+  id: string;
+  label: string;
+  health: OfficeSourceStatus;
+  sourceType: OfficePaperclipSourceType;
+  itemCount: number;
+  warningCount: number;
+  relay: OfficePaperclipRelay;
+  tags: string[];
+  timingBucket: OfficePaperclipTimingBucket;
+  redactionNote: string;
+};
+
+export type OfficePaperclipWorkbench = {
+  stageLabel: string;
+  detail: string;
+  sources: OfficePaperclipWorkbenchSource[];
+  redactionNote: string;
+};
+
+export type OfficePaperclipInspector = {
+  kind: "Paperclip 안전 작업대";
+  title: string;
+  fields: Array<[string, string]>;
+};
+
+export type OfficePaperclipMapSlot = {
+  id: string;
+  label: string;
+  health: OfficeSourceStatus;
+  sourceType: OfficePaperclipSourceType;
+  x: number;
+  y: number;
+  itemCount: number;
+  warningCount: number;
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficePaperclipVisibilityCard = {
+  id: "manifests" | "privateDashboard" | "relayPosture";
+  title: string;
+  detail: string;
+  count: number;
+  tone: OfficeDeltaBadge["tone"];
+};
+
+export type OfficePaperclipManifestVisibility = {
+  stageLabel: string;
+  detail: string;
+  cards: OfficePaperclipVisibilityCard[];
+  redactionNote: string;
+};
+
+export type OfficePaperclipMapProjection = {
+  stageLabel: string;
+  detail: string;
+  slots: OfficePaperclipMapSlot[];
+  ariaLabel: string;
 };
 
 export type OfficeEmptySourceCopyItem = {
@@ -498,6 +614,27 @@ export type OfficeEmptySourceCopyPlan = {
 };
 
 export type OfficeEmptyStateHints = Record<"rooms" | "agents" | "workItems" | "automations" | "topics" | "events", string>;
+
+export type OfficeLiveOperationsCueId = "working" | "reviewing" | "report-ready" | "blocked" | "automation-running";
+
+export type OfficeLiveOperationsCue = {
+  id: OfficeLiveOperationsCueId;
+  label: string;
+  detail: string;
+  count: number;
+  roomId: OfficeMapNode["id"];
+  tone: OfficeDeltaBadge["tone"];
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeLiveOperationsLayer = {
+  stageLabel: string;
+  summary: string;
+  detail: string;
+  cues: OfficeLiveOperationsCue[];
+  redactionNote: string;
+};
 
 export type OfficeUsabilityItem = {
   id: "density" | "source-fallback" | "motion" | "responsive" | "korean-copy";
@@ -541,16 +678,807 @@ export type OfficeMapPolishPlan = {
 
 export type OfficeResponsiveReadabilityPlan = {
   stageLabel: string;
-  viewportMode: "narrow" | "desktop";
+  viewportMode: "narrow" | "tablet" | "desktop";
   recommendedDensityMode: OfficeMapDensityMode;
   mapClassName: string;
   railClassName: string;
   notes: string[];
 };
 
+export type OfficeFirstLayoutSection = {
+  id: "scene" | "inspector" | "timeline" | "diagnostics";
+  label: string;
+  detail: string;
+  priority: number;
+};
+
+export type OfficeFirstLayoutPlan = {
+  stageLabel: string;
+  heading: string;
+  primarySurface: "scene";
+  diagnosticsMode: "secondary-collapsed" | "secondary-visible";
+  summary: string;
+  sections: OfficeFirstLayoutSection[];
+};
+
+export type OfficeTrackingTruthPlan = {
+  stageLabel: string;
+  mode: "snapshot-delta" | "event-stream" | "static";
+  label: string;
+  detail: string;
+  caveats: string[];
+};
+
+export type OfficeSelectedCharacterFocus = {
+  selectedCharacterId: OfficeCharacter["id"] | null;
+  title: string;
+  summary: string;
+  roomLabel: string;
+  actionLabel: string;
+  highlightSelector: string;
+  fields: Array<[string, string]>;
+};
+
+export type OfficeSafeEventCategory = "snapshot_static" | "room_density_changed" | "flow_changed" | "attention_changed" | "source_health_changed" | "workload_changed";
+
+export type OfficeSafeEvent = {
+  id: string;
+  category: OfficeSafeEventCategory;
+  roomId: OfficeMapNode["id"];
+  toRoomId?: OfficeMapNode["id"];
+  tone: OfficeDeltaBadge["tone"];
+  count: number;
+  lane?: string;
+  safeLabel: string;
+  detail: string;
+  redacted: true;
+  rawSource: false;
+};
+
+export type OfficeSafeEventSubstrate = {
+  stageLabel: string;
+  mode: "static-posture" | "projected-events" | "event-stream";
+  summary: string;
+  events: OfficeSafeEvent[];
+};
+
+export type OfficeSafeStreamPosture = {
+  stageLabel: string;
+  mode: "backend-safe-stream" | "local-fallback" | "loading";
+  label: string;
+  summary: string;
+  generatedAt?: string;
+  events: OfficeSafeEvent[];
+};
+
+export type OfficeSafeStreamInput = {
+  status: "idle" | "loading" | "loaded" | "unavailable";
+  generated_at?: unknown;
+  events?: Array<Record<string, unknown>>;
+  error?: unknown;
+};
+
+export type OfficeSafeMotionCommand = {
+  id: string;
+  kind: "idle-glow" | "pulse-room" | "route-lane" | "attention-spark";
+  roomId: OfficeMapNode["id"];
+  toRoomId?: OfficeMapNode["id"];
+  lane?: string;
+  tone: OfficeDeltaBadge["tone"];
+  count: number;
+  label: string;
+  detail: string;
+  className: string;
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeMotionHeartbeatItem = {
+  id: "stream" | "cadence" | "motion";
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+};
+
+export type OfficeSafeMotionHeartbeat = {
+  stageLabel: string;
+  mode: "safe-polling" | "local-fallback" | "checking";
+  phase: "idle" | "scan" | "pulse" | "hold";
+  intensity: "low" | "medium" | "high";
+  summary: string;
+  motionEnabled: boolean;
+  items: OfficeSafeMotionHeartbeatItem[];
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeMotionHeartbeatOptions = {
+  pollStatus: "idle" | "active" | "loading" | "unavailable";
+  tick: number;
+  failureCount: number;
+  reducedMotion: boolean;
+};
+
+export type OfficeSafeSpatialChoreographyItem = {
+  id: string;
+  kind: "room-pulse" | "route-sweep";
+  roomId: OfficeMapNode["id"];
+  toRoomId?: OfficeMapNode["id"];
+  label: string;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+  intensity: OfficeSafeRoomBeaconIntensity;
+  x: number;
+  y: number;
+  x2?: number;
+  y2?: number;
+  className: string;
+  ariaHidden: true;
+  interactive: false;
+};
+
+export type OfficeSafeSpatialChoreography = {
+  stageLabel: string;
+  mode: "safe-spatial-motion" | "safe-spatial-idle";
+  summary: string;
+  items: OfficeSafeSpatialChoreographyItem[];
+  ariaHidden: true;
+  interactive: false;
+};
+
 export function textField(row: Record<string, unknown>, key: string): string {
   const value = row[key];
   return typeof value === "string" && value.length > 0 ? value : "—";
+}
+
+export type OfficeKanbanProjectionCard = {
+  id: string;
+  boardId: string;
+  taskRef: string;
+  status: string;
+  assignee: string;
+  tenant: string;
+  priority: number;
+  latestSafeAtMs: number | null;
+  parentTaskRefs: string[];
+  childTaskRefs: string[];
+  badges: string[];
+};
+
+export type OfficeKanbanObservabilitySummaryCard = {
+  id: "workload" | "blocked" | "stale";
+  label: string;
+  value: number;
+  detail: string;
+  tone: OfficeDeltaBadge["tone"];
+};
+
+export type OfficeKanbanObservabilityBoardWorkload = {
+  boardId: string;
+  total: number;
+  running: number;
+  blocked: number;
+  stale: number;
+};
+
+export type OfficeKanbanObservability = {
+  stageLabel: "Kanban Observability 2";
+  summaryCards: OfficeKanbanObservabilitySummaryCard[];
+  workloadByBoard: OfficeKanbanObservabilityBoardWorkload[];
+  attentionRefs: string[];
+};
+
+export type OfficeKanbanProjection = {
+  stageLabel: "칸반 운영실";
+  readOnly: true;
+  redactionNote: string;
+  boards: Array<{ boardId: string; displayName: string; taskCount: number; counts: Record<string, number> }>;
+  assignees: Array<{ id: string; count: number }>;
+  tenants: Array<{ id: string; count: number }>;
+  graphEdges: Array<{ parent: string; child: string; boardId: string }>;
+  cards: OfficeKanbanProjectionCard[];
+  observability: OfficeKanbanObservability;
+};
+
+function safeStringList(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string" && item.length > 0) : [];
+}
+
+function safeCountRecord(value: unknown): Record<string, number> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>)
+      .filter(([, count]) => typeof count === "number")
+      .map(([key, count]) => [key, count as number]),
+  );
+}
+
+function incrementCount(map: Map<string, number>, key: string): void {
+  map.set(key, (map.get(key) ?? 0) + 1);
+}
+
+function parseKanbanTimestamp(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value < 1_000_000_000_000 ? value * 1000 : value;
+  }
+  if (typeof value !== "string" || value.length === 0) return null;
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function isKanbanRunningStatus(status: string): boolean {
+  return status === "running" || status === "in_progress" || status === "active";
+}
+
+function isKanbanBlockedCard(card: OfficeKanbanProjectionCard): boolean {
+  return card.status === "blocked" || card.badges.includes("needs_attention");
+}
+
+function isKanbanStaleCard(card: OfficeKanbanProjectionCard, referenceTime: number): boolean {
+  if (!isKanbanRunningStatus(card.status)) return false;
+  if (card.latestSafeAtMs === null) return false;
+  return referenceTime - card.latestSafeAtMs > 60 * 60 * 1000;
+}
+
+function buildOfficeKanbanObservability(state: OfficeState, boards: OfficeKanbanProjection["boards"], cards: OfficeKanbanProjectionCard[]): OfficeKanbanObservability {
+  const referenceTime = parseKanbanTimestamp(state.generated_at) ?? Date.now();
+  const boardWorkloads = new Map<string, OfficeKanbanObservabilityBoardWorkload>();
+  const attentionRefs = new Set<string>();
+  let runningCount = 0;
+  let blockedCount = 0;
+  let staleCount = 0;
+
+  for (const board of boards) {
+    boardWorkloads.set(board.boardId, { boardId: board.boardId, total: 0, running: 0, blocked: 0, stale: 0 });
+  }
+
+  for (const card of cards) {
+    const workload = boardWorkloads.get(card.boardId) ?? { boardId: card.boardId, total: 0, running: 0, blocked: 0, stale: 0 };
+    workload.total += 1;
+    if (isKanbanRunningStatus(card.status)) {
+      workload.running += 1;
+      runningCount += 1;
+    }
+    if (isKanbanBlockedCard(card)) {
+      workload.blocked += 1;
+      blockedCount += 1;
+      attentionRefs.add(card.taskRef);
+    }
+    if (isKanbanStaleCard(card, referenceTime)) {
+      workload.stale += 1;
+      staleCount += 1;
+      attentionRefs.add(card.taskRef);
+    }
+    boardWorkloads.set(card.boardId, workload);
+  }
+
+  return {
+    stageLabel: "Kanban Observability 2",
+    summaryCards: [
+      { id: "workload", label: "작업량", value: cards.length, detail: `보드 ${boards.length}개 · 실행 중 ${runningCount}개`, tone: "neutral" },
+      { id: "blocked", label: "막힘", value: blockedCount, detail: `확인 필요 task_ref ${blockedCount}개`, tone: blockedCount > 0 ? "negative" : "positive" },
+      { id: "stale", label: "정체", value: staleCount, detail: `최근 heartbeat/update 60분 초과 ${staleCount}개`, tone: staleCount > 0 ? "warning" : "positive" },
+    ],
+    workloadByBoard: Array.from(boardWorkloads.values()).sort((a, b) => a.boardId.localeCompare(b.boardId)),
+    attentionRefs: Array.from(attentionRefs).sort((a, b) => a.localeCompare(b)).slice(0, 6),
+  };
+}
+
+export function buildOfficeKanbanProjection(state: OfficeState): OfficeKanbanProjection {
+  const boardRooms = state.rooms.filter((room) => textField(room, "source") === "kanban" && textField(room, "kind") === "kanban_board");
+  const cards = state.work_items
+    .filter((item) => textField(item, "source") === "kanban" && textField(item, "kind") === "kanban_task")
+    .map((item): OfficeKanbanProjectionCard => ({
+      id: textField(item, "id"),
+      boardId: textField(item, "board_id"),
+      taskRef: textField(item, "task_ref"),
+      status: textField(item, "status"),
+      assignee: textField(item, "assignee"),
+      tenant: textField(item, "tenant"),
+      priority: numberField(item, "priority") ?? 0,
+      latestSafeAtMs: parseKanbanTimestamp(item.last_heartbeat_at) ?? parseKanbanTimestamp(item.updated_at),
+      parentTaskRefs: safeStringList(item.parent_task_refs),
+      childTaskRefs: safeStringList(item.child_task_refs),
+      badges: safeStringList(item.badges),
+    }));
+
+  const boardTaskCounts = new Map<string, number>();
+  const assigneeCounts = new Map<string, number>();
+  const tenantCounts = new Map<string, number>();
+  const graphEdges: OfficeKanbanProjection["graphEdges"] = [];
+  const seenEdges = new Set<string>();
+
+  for (const card of cards) {
+    incrementCount(boardTaskCounts, card.boardId);
+    if (card.assignee !== "—") incrementCount(assigneeCounts, card.assignee);
+    if (card.tenant !== "—") incrementCount(tenantCounts, card.tenant);
+    for (const child of card.childTaskRefs) {
+      const edgeKey = `${card.taskRef}->${child}`;
+      if (!seenEdges.has(edgeKey)) {
+        seenEdges.add(edgeKey);
+        graphEdges.push({ parent: card.taskRef, child, boardId: card.boardId });
+      }
+    }
+  }
+
+  const boards = boardRooms.map((room) => {
+    const boardId = String(textField(room, "id")).replace(/^kanban:/, "");
+    return {
+      boardId,
+      displayName: textField(room, "display_name"),
+      taskCount: boardTaskCounts.get(boardId) ?? 0,
+      counts: safeCountRecord(room.counts),
+    };
+  });
+
+  for (const boardId of Array.from(boardTaskCounts.keys())) {
+    if (!boards.some((board) => board.boardId === boardId)) {
+      boards.push({ boardId, displayName: boardId, taskCount: boardTaskCounts.get(boardId) ?? 0, counts: {} });
+    }
+  }
+
+  const observability = buildOfficeKanbanObservability(state, boards, cards);
+
+  return {
+    stageLabel: "칸반 운영실",
+    readOnly: true,
+    redactionNote: "Kanban DB의 allowlist DTO만 사용합니다. 본문, 결과, 댓글, 로그, 프롬프트, 비밀값은 제외합니다.",
+    boards,
+    assignees: Array.from(assigneeCounts, ([id, count]) => ({ id, count })).sort((a, b) => a.id.localeCompare(b.id)),
+    tenants: Array.from(tenantCounts, ([id, count]) => ({ id, count })).sort((a, b) => a.id.localeCompare(b.id)),
+    graphEdges,
+    cards,
+    observability,
+  };
+}
+
+export function buildOfficeFirstLayoutPlan(options: {
+  visibleCharacterCount: number;
+  diagnosticPanelCount: number;
+  hasSelectedCharacter: boolean;
+}): OfficeFirstLayoutPlan {
+  const diagnosticsMode: OfficeFirstLayoutPlan["diagnosticsMode"] = options.diagnosticPanelCount > 4 ? "secondary-collapsed" : "secondary-visible";
+  return {
+    stageLabel: "Stage 16-A AI Office-first reset",
+    heading: "AI Office 먼저 보기",
+    primarySurface: "scene",
+    diagnosticsMode,
+    summary: `캐릭터 ${options.visibleCharacterCount}개 · 진단 ${options.diagnosticPanelCount}개는 보조로 정리`,
+    sections: [
+      {
+        id: "scene",
+        label: "오피스 현장",
+        detail: `역할 캐릭터 ${options.visibleCharacterCount}개를 첫 화면 중심에 둡니다`,
+        priority: 1,
+      },
+      {
+        id: "inspector",
+        label: "선택 정보",
+        detail: options.hasSelectedCharacter ? "선택한 캐릭터의 안전 요약을 고정 표시합니다" : "캐릭터를 클릭하면 안전 요약이 이 위치에 고정됩니다",
+        priority: 2,
+      },
+      {
+        id: "timeline",
+        label: "최근 변화",
+        detail: "브라우저 메모리의 안전 변화만 짧게 이어서 보여줍니다",
+        priority: 3,
+      },
+      {
+        id: "diagnostics",
+        label: "진단 HUD",
+        detail: diagnosticsMode === "secondary-collapsed" ? "세부 진단은 보조 영역에서 접어 과밀을 줄입니다" : "세부 진단은 보조 영역에 낮은 우선순위로 둡니다",
+        priority: 4,
+      },
+    ],
+  };
+}
+
+export function buildOfficeTrackingTruthPlan(
+  delta: OfficeStateDelta,
+  options: { hasEventStream?: boolean; visibleCharacterCount: number },
+): OfficeTrackingTruthPlan {
+  const recentChangeCount = Object.values(delta.nodeBadges).reduce((total, badges) => total + badges.length, 0) + delta.changedFlows.length;
+  if (options.hasEventStream) {
+    return {
+      stageLabel: "Stage 16-A tracking truth",
+      mode: "event-stream",
+      label: "안전 이벤트 기반",
+      detail: `캐릭터 ${options.visibleCharacterCount}개 · 최근 안전 변화 ${recentChangeCount}개 · 안전 이벤트 스트림 사용`,
+      caveats: ["이벤트는 가림 처리된 범주만 사용합니다"],
+    };
+  }
+  return {
+    stageLabel: "Stage 16-A tracking truth",
+    mode: recentChangeCount > 0 ? "snapshot-delta" : "static",
+    label: recentChangeCount > 0 ? "스냅샷 변화 기반" : "정적 안전 스냅샷",
+    detail: `캐릭터 ${options.visibleCharacterCount}개 · 최근 안전 변화 ${recentChangeCount}개 · 실시간 이벤트 스트림 없음`,
+    caveats: ["움직임은 CSS 장식입니다", "실제 작업 추적은 안전 이벤트 스트림 승인 후 분리 구현"],
+  };
+}
+
+export function buildOfficeSelectedCharacterFocus(character: OfficeCharacter | null, delta: OfficeStateDelta): OfficeSelectedCharacterFocus {
+  if (!character) {
+    return {
+      selectedCharacterId: null,
+      title: "캐릭터를 선택하세요",
+      summary: "오피스 캐릭터를 클릭하면 안전 요약이 고정됩니다",
+      roomLabel: "미선택",
+      actionLabel: "대기",
+      highlightSelector: "",
+      fields: [["추적", "스냅샷 변화 기반 · 원문 제외"]],
+    };
+  }
+  const activity = buildOfficeCharacterActivity(character, delta);
+  const roleLabel = CHARACTER_ROLE_LABEL[character.role];
+  const roomLabel = CHARACTER_ROOM_LABEL[character.roomId];
+  const statusLabel = CHARACTER_STATUS_LABEL[character.status];
+  return {
+    selectedCharacterId: character.id,
+    title: `${roleLabel} 선택됨`,
+    summary: `${roomLabel} · ${statusLabel} · ${activity.label}`,
+    roomLabel,
+    actionLabel: activity.label,
+    highlightSelector: `[data-office-character-id="${character.id}"]`,
+    fields: [
+      ["역할", CHARACTER_ROLE_NAMEPLATE[character.role]],
+      ["방", roomLabel],
+      ["상태", statusLabel],
+      ["액션", activity.label],
+      ["추적", "스냅샷 변화 기반 · 원문 제외"],
+    ],
+  };
+}
+
+const OFFICE_SAFE_EVENT_ROOM_ORDER: OfficeMapNode["id"][] = ["sessions", "work", "automation", "routing"];
+
+function safeEventToneRank(tone: OfficeDeltaBadge["tone"]): number {
+  if (tone === "negative") return 4;
+  if (tone === "warning") return 3;
+  if (tone === "positive") return 2;
+  return 1;
+}
+
+function safeEventToneLabel(tone: OfficeDeltaBadge["tone"]): string {
+  if (tone === "negative") return "긴급";
+  if (tone === "warning") return "주의";
+  if (tone === "positive") return "증가";
+  return "변화";
+}
+
+function safeEventDetail(roomId: OfficeMapNode["id"], tone: OfficeDeltaBadge["tone"], count: number): string {
+  return `${CHARACTER_ROOM_LABEL[roomId]} · ${safeEventToneLabel(tone)} · 안전 변화 ${count}개`;
+}
+
+function parseSafeEventRoom(value: unknown): OfficeMapNode["id"] | null {
+  return typeof value === "string" && OFFICE_SAFE_EVENT_ROOM_ORDER.includes(value as OfficeMapNode["id"]) ? (value as OfficeMapNode["id"]) : null;
+}
+
+function parseSafeEventTone(value: unknown): OfficeDeltaBadge["tone"] | null {
+  return value === "neutral" || value === "positive" || value === "warning" || value === "negative" ? value : null;
+}
+
+function parseSafeEventCategory(value: unknown): OfficeSafeEventCategory | null {
+  if (
+    value === "snapshot_static" ||
+    value === "room_density_changed" ||
+    value === "flow_changed" ||
+    value === "attention_changed" ||
+    value === "source_health_changed" ||
+    value === "workload_changed"
+  ) {
+    return value;
+  }
+  return null;
+}
+
+function safeEventLabel(category: OfficeSafeEventCategory, roomId: OfficeMapNode["id"]): string {
+  if (category === "snapshot_static") return "정적 안전 스냅샷";
+  if (category === "source_health_changed") return "소스 상태 신호";
+  if (category === "workload_changed") return `${CHARACTER_ROOM_LABEL[roomId]} 작업량`;
+  if (category === "flow_changed") return "방 이동 신호";
+  if (category === "attention_changed") return `${CHARACTER_ROOM_LABEL[roomId]} 주의`;
+  return `${CHARACTER_ROOM_LABEL[roomId]} 변화`;
+}
+
+function normalizeBackendSafeEvent(row: Record<string, unknown>, index: number): OfficeSafeEvent | null {
+  if (row.redacted !== true) return null;
+  const category = parseSafeEventCategory(row.category);
+  const roomId = parseSafeEventRoom(row.room_id ?? row.roomId);
+  const tone = parseSafeEventTone(row.tone);
+  if (!category || !roomId || !tone) return null;
+  const count = typeof row.count === "number" && Number.isFinite(row.count) ? Math.max(0, Math.trunc(row.count)) : 0;
+  const toRoomId = parseSafeEventRoom(row.to_room_id ?? row.toRoomId) ?? undefined;
+  const lane = category === "flow_changed" && toRoomId ? `${roomId}-${toRoomId}` : undefined;
+  return {
+    id: typeof row.id === "string" && row.id.length > 0 ? `backend-${index}` : `backend-${index}`,
+    category,
+    roomId,
+    toRoomId,
+    tone,
+    count,
+    lane,
+    safeLabel: safeEventLabel(category, roomId),
+    detail: category === "flow_changed" && toRoomId ? `${CHARACTER_ROOM_LABEL[roomId]}에서 ${CHARACTER_ROOM_LABEL[toRoomId]}로 · 백엔드 안전 이벤트` : safeEventDetail(roomId, tone, count),
+    redacted: true,
+    rawSource: false,
+  };
+}
+
+export function buildOfficeSafeStreamPosture(input: OfficeSafeStreamInput, fallback: OfficeSafeEventSubstrate): OfficeSafeStreamPosture {
+  if (input.status === "loading" || input.status === "idle") {
+    return {
+      stageLabel: "Stage 16-C safe event stream",
+      mode: "loading",
+      label: "안전 이벤트 연결 확인",
+      summary: "백엔드 안전 이벤트 확인 중 · 로컬 투영 유지",
+      events: fallback.events,
+    };
+  }
+  const backendEvents = input.status === "loaded" ? (input.events ?? []).map(normalizeBackendSafeEvent).filter((event): event is OfficeSafeEvent => Boolean(event)).slice(0, 8) : [];
+  if (backendEvents.length > 0) {
+    const generatedAt = typeof input.generated_at === "string" ? input.generated_at : undefined;
+    return {
+      stageLabel: "Stage 16-C safe event stream",
+      mode: "backend-safe-stream",
+      label: "백엔드 안전 이벤트 연결",
+      summary: `백엔드 안전 이벤트 ${backendEvents.length}개 · 원문 제외`,
+      generatedAt,
+      events: backendEvents,
+    };
+  }
+  return {
+    stageLabel: "Stage 16-C safe event stream",
+    mode: "local-fallback",
+    label: "로컬 안전 투영 유지",
+    summary: `백엔드 이벤트 없음 · ${fallback.summary}`,
+    events: fallback.events,
+  };
+}
+
+export function buildOfficeSafeEventSubstrate(
+  delta: OfficeStateDelta,
+  options: { visibleCharacterCount: number; hasEventStream?: boolean },
+): OfficeSafeEventSubstrate {
+  const events: OfficeSafeEvent[] = [];
+  for (const roomId of OFFICE_SAFE_EVENT_ROOM_ORDER) {
+    const badges = delta.nodeBadges[roomId] ?? [];
+    if (badges.length === 0) continue;
+    const tone = badges.reduce<OfficeDeltaBadge["tone"]>((selected, badge) => (safeEventToneRank(badge.tone) > safeEventToneRank(selected) ? badge.tone : selected), "neutral");
+    events.push({
+      id: `room-${roomId}-${events.length}`,
+      category: "room_density_changed",
+      roomId,
+      tone,
+      count: badges.length,
+      safeLabel: `${CHARACTER_ROOM_LABEL[roomId]} 변화`,
+      detail: safeEventDetail(roomId, tone, badges.length),
+      redacted: true,
+      rawSource: false,
+    });
+  }
+
+  for (const flow of delta.changedFlows) {
+    const lane = `${flow.from}-${flow.to}`;
+    events.push({
+      id: `flow-${lane}-${events.length}`,
+      category: "flow_changed",
+      roomId: flow.from,
+      toRoomId: flow.to,
+      tone: flow.tone,
+      count: 1,
+      lane,
+      safeLabel: "방 이동 신호",
+      detail: `${CHARACTER_ROOM_LABEL[flow.from]}에서 ${CHARACTER_ROOM_LABEL[flow.to]}로 · 안전 흐름 변화`,
+      redacted: true,
+      rawSource: false,
+    });
+  }
+
+  const attentionRooms = OFFICE_SAFE_EVENT_ROOM_ORDER.filter((roomId) => (delta.nodeBadges[roomId] ?? []).some((badge) => badge.tone === "warning" || badge.tone === "negative"));
+  for (const roomId of attentionRooms) {
+    const badges = delta.nodeBadges[roomId] ?? [];
+    const tone = badges.some((badge) => badge.tone === "negative") ? "negative" : "warning";
+    events.push({
+      id: `attention-${roomId}-${events.length}`,
+      category: "attention_changed",
+      roomId,
+      tone,
+      count: badges.length || 1,
+      safeLabel: `${CHARACTER_ROOM_LABEL[roomId]} 주의`,
+      detail: `${CHARACTER_ROOM_LABEL[roomId]} · 주의 우선 · 원문 제외`,
+      redacted: true,
+      rawSource: false,
+    });
+  }
+
+  if (events.length === 0) {
+    return {
+      stageLabel: "Stage 16-B safe event substrate",
+      mode: "static-posture",
+      summary: "안전 이벤트 1개 · 정적 posture",
+      events: [
+        {
+          id: "snapshot-static",
+          category: "snapshot_static",
+          roomId: "sessions",
+          tone: "neutral",
+          count: options.visibleCharacterCount,
+          safeLabel: "정적 안전 스냅샷",
+          detail: `캐릭터 ${options.visibleCharacterCount}개 · fabricated movement 없음`,
+          redacted: true,
+          rawSource: false,
+        },
+      ],
+    };
+  }
+
+  return {
+    stageLabel: "Stage 16-B safe event substrate",
+    mode: options.hasEventStream ? "event-stream" : "projected-events",
+    summary: `안전 이벤트 ${events.length}개 · ${options.hasEventStream ? "event stream" : "snapshot/delta 투영"}`,
+    events,
+  };
+}
+
+export function buildOfficeSafeMotionCommands(events: OfficeSafeEvent[]): OfficeSafeMotionCommand[] {
+  return events.map((event): OfficeSafeMotionCommand => {
+    if (event.category === "snapshot_static") {
+      return {
+        id: `motion-${event.id}`,
+        kind: "idle-glow",
+        roomId: event.roomId,
+        tone: "neutral",
+        count: event.count,
+        label: "대기 광원",
+        detail: `${CHARACTER_ROOM_LABEL[event.roomId]} 정적 posture`,
+        className: "office-safe-motion-command office-safe-motion-command--idle",
+        ariaHidden: true,
+        interactive: false,
+      };
+    }
+    if (event.category === "flow_changed") {
+      return {
+        id: `motion-${event.id}`,
+        kind: "route-lane",
+        roomId: event.roomId,
+        toRoomId: event.toRoomId,
+        lane: event.lane,
+        tone: event.tone,
+        count: event.count,
+        label: "흐름 이동",
+        detail: event.toRoomId ? `${CHARACTER_ROOM_LABEL[event.roomId]}에서 ${CHARACTER_ROOM_LABEL[event.toRoomId]}로` : CHARACTER_ROOM_LABEL[event.roomId],
+        className: "office-safe-motion-command office-safe-motion-command--route",
+        ariaHidden: true,
+        interactive: false,
+      };
+    }
+    if (event.category === "attention_changed") {
+      return {
+        id: `motion-${event.id}`,
+        kind: "attention-spark",
+        roomId: event.roomId,
+        tone: event.tone,
+        count: event.count,
+        label: "주의 반응",
+        detail: `${CHARACTER_ROOM_LABEL[event.roomId]} attention spark`,
+        className: "office-safe-motion-command office-safe-motion-command--attention",
+        ariaHidden: true,
+        interactive: false,
+      };
+    }
+    return {
+      id: `motion-${event.id}`,
+      kind: "pulse-room",
+      roomId: event.roomId,
+      tone: event.tone,
+      count: event.count,
+      label: "방 pulse",
+      detail: `${CHARACTER_ROOM_LABEL[event.roomId]} safe pulse`,
+      className: "office-safe-motion-command office-safe-motion-command--pulse",
+      ariaHidden: true,
+      interactive: false,
+    };
+  });
+}
+
+function safeHeartbeatIntensity(events: OfficeSafeEvent[]): OfficeSafeMotionHeartbeat["intensity"] {
+  const weight = events.reduce((total, event) => total + event.count + (event.tone === "negative" ? 4 : event.tone === "warning" ? 2 : 0), 0);
+  if (weight >= 8) return "high";
+  if (weight >= 3) return "medium";
+  return "low";
+}
+
+function safeHeartbeatPhase(options: OfficeSafeMotionHeartbeatOptions, mode: OfficeSafeMotionHeartbeat["mode"]): OfficeSafeMotionHeartbeat["phase"] {
+  if (mode === "checking") return "scan";
+  if (options.pollStatus === "unavailable") return "hold";
+  if (options.tick <= 0) return "idle";
+  return options.tick % 2 === 1 ? "pulse" : "scan";
+}
+
+export function buildOfficeSafeMotionHeartbeat(posture: OfficeSafeStreamPosture | OfficeSafeEventSubstrate, options: OfficeSafeMotionHeartbeatOptions): OfficeSafeMotionHeartbeat {
+  const postureMode = "label" in posture ? posture.mode : posture.mode === "event-stream" ? "backend-safe-stream" : "local-fallback";
+  const mode: OfficeSafeMotionHeartbeat["mode"] = options.pollStatus === "loading" || postureMode === "loading" ? "checking" : postureMode === "backend-safe-stream" && options.pollStatus === "active" ? "safe-polling" : "local-fallback";
+  const eventCount = posture.events.length;
+  const intensity = mode === "local-fallback" ? "low" : safeHeartbeatIntensity(posture.events);
+  const phase = safeHeartbeatPhase(options, mode);
+  const motionEnabled = !options.reducedMotion && phase !== "hold";
+  const streamDetail = mode === "safe-polling" ? `백엔드 안전 이벤트 ${eventCount}개` : mode === "checking" ? "안전 endpoint 확인 중" : `로컬 안전 투영 ${eventCount}개`;
+  const cadenceDetail = options.failureCount > 0 ? `poll 보류 ${options.failureCount}회 · fallback 유지` : `tick ${Math.max(0, options.tick)} · ${phase}`;
+  const motionDetail = motionEnabled ? `${intensity} heartbeat · CSS safe motion` : "정지/감속 · reduced/fallback posture";
+  return {
+    stageLabel: "Stage 16-D 안전 motion heartbeat",
+    mode,
+    phase,
+    intensity,
+    summary: `${streamDetail} · ${cadenceDetail} · ${motionEnabled ? "움직임 켜짐" : "움직임 제한"}`,
+    motionEnabled,
+    items: [
+      { id: "stream", label: "스트림", detail: streamDetail, tone: mode === "safe-polling" ? "positive" : mode === "checking" ? "warning" : "neutral" },
+      { id: "cadence", label: "박자", detail: cadenceDetail, tone: options.failureCount > 0 ? "warning" : "positive" },
+      { id: "motion", label: "움직임", detail: motionDetail, tone: intensity === "high" ? "negative" : intensity === "medium" ? "warning" : "neutral" },
+    ],
+    ariaHidden: true,
+    interactive: false,
+  };
+}
+
+function spatialChoreographyIntensity(event: OfficeSafeEvent, heartbeat: OfficeSafeMotionHeartbeat): OfficeSafeRoomBeaconIntensity {
+  if (!heartbeat.motionEnabled) return "idle";
+  if (heartbeat.intensity === "high" || event.tone === "negative" || event.count >= 4) return "high";
+  if (heartbeat.intensity === "medium" || event.tone === "warning" || event.count >= 2) return "medium";
+  return "low";
+}
+
+export function buildOfficeSafeSpatialChoreography(events: OfficeSafeEvent[], heartbeat: OfficeSafeMotionHeartbeat): OfficeSafeSpatialChoreography {
+  const items = events
+    .filter((event) => event.category !== "snapshot_static")
+    .slice(0, 6)
+    .map((event): OfficeSafeSpatialChoreographyItem => {
+      const from = ROOM_BEACON_POSITION[event.roomId];
+      const to = event.toRoomId ? ROOM_BEACON_POSITION[event.toRoomId] : undefined;
+      const intensity = spatialChoreographyIntensity(event, heartbeat);
+      if (event.category === "flow_changed" && event.toRoomId && to) {
+        return {
+          id: `spatial-${event.id}`,
+          kind: "route-sweep",
+          roomId: event.roomId,
+          toRoomId: event.toRoomId,
+          label: "안전 route sweep",
+          detail: `${CHARACTER_ROOM_LABEL[event.roomId]}에서 ${CHARACTER_ROOM_LABEL[event.toRoomId]}로 · 안전 흐름`,
+          tone: event.tone,
+          intensity,
+          x: from.x,
+          y: from.y,
+          x2: to.x,
+          y2: to.y,
+          className: `office-safe-spatial-choreography__item office-safe-spatial-choreography__item--route office-safe-spatial-choreography__item--${intensity}`,
+          ariaHidden: true,
+          interactive: false,
+        };
+      }
+      return {
+        id: `spatial-${event.id}`,
+        kind: "room-pulse",
+        roomId: event.roomId,
+        label: `${CHARACTER_ROOM_LABEL[event.roomId]} 안전 pulse`,
+        detail: `${safeEventToneLabel(event.tone)} · 안전 이벤트 ${event.count}개`,
+        tone: event.tone,
+        intensity,
+        x: from.x,
+        y: from.y,
+        className: `office-safe-spatial-choreography__item office-safe-spatial-choreography__item--room office-safe-spatial-choreography__item--${intensity}`,
+        ariaHidden: true,
+        interactive: false,
+      };
+    });
+  return {
+    stageLabel: "Stage 16-E 안전 spatial choreography",
+    mode: items.length > 0 && heartbeat.motionEnabled ? "safe-spatial-motion" : "safe-spatial-idle",
+    summary: items.length > 0 ? `안전 공간 움직임 ${items.length}개 · ${heartbeat.phase}` : "안전 공간 움직임 대기 · 정적 posture",
+    items,
+    ariaHidden: true,
+    interactive: false,
+  };
 }
 
 export function numberField(row: Record<string, unknown>, key: string): number | null {
@@ -570,6 +1498,14 @@ export function groupByText(rows: Array<Record<string, unknown>>, key: string, f
 
 export function visibleRows<T>(rows: T[], limit: number, expanded: boolean): T[] {
   return expanded ? rows : rows.slice(0, limit);
+}
+
+export function buildOfficeTimeDisplayPolicy() {
+  return {
+    label: "시간 표시",
+    value: "브라우저 로컬 시간대",
+    detail: "브라우저 locale/timezone 기준으로 표시합니다. KST 고정 변환은 하지 않습니다.",
+  };
 }
 
 const EXPECTED_OFFICE_SOURCE_IDS = ["sessions", "kanban", "cron", "topics", "provenance"] as const;
@@ -600,6 +1536,381 @@ export function buildOfficeSourceHealthSummary(state: OfficeState): OfficeSource
     totalWarningCount,
     missingSourceIds,
     tone,
+  };
+}
+
+const SOURCE_HEALTH_STATUS_WEIGHT: Record<OfficeSourceStatus, number> = { ok: 0, missing: 1, unavailable: 2, partial: 3, error: 4 };
+const SOURCE_HEALTH_STATUS_LABEL: Record<OfficeSourceStatus, string> = {
+  ok: "정상",
+  partial: "부분 연결",
+  missing: "미보고",
+  unavailable: "사용 불가",
+  error: "오류",
+};
+
+function worstSourceStatus(sources: OfficeState["data_sources"]): OfficeSourceStatus {
+  return sources.reduce<OfficeSourceStatus>((worst, source) => (SOURCE_HEALTH_STATUS_WEIGHT[source.status] > SOURCE_HEALTH_STATUS_WEIGHT[worst] ? source.status : worst), "ok");
+}
+
+function sourceStatusTone(status: OfficeSourceStatus, warningCount = 0): OfficeDeltaBadge["tone"] {
+  if (status === "error") return "negative";
+  if (status === "partial" || warningCount > 0) return "warning";
+  if (status === "missing" || status === "unavailable") return "neutral";
+  return "positive";
+}
+
+function sourceCount(sources: OfficeState["data_sources"], field: "item_count" | "warning_count"): number {
+  return sources.reduce((total, source) => total + Math.max(0, typeof source[field] === "number" ? source[field] ?? 0 : 0), 0);
+}
+
+function isPaperclipSource(source: OfficeState["data_sources"][number]): boolean {
+  const row = source as unknown as Record<string, unknown>;
+  return source.id.startsWith("paperclip:") || PAPERCLIP_SOURCE_TYPES.has(safePaperclipSourceType(row.source_type));
+}
+
+function buildSourceHealthRailItem(
+  id: OfficeSourceHealthRailItemId,
+  label: string,
+  sources: OfficeState["data_sources"],
+  fallbackStatus: OfficeSourceStatus = "missing",
+): OfficeSourceHealthRailItem {
+  const status = sources.length > 0 ? worstSourceStatus(sources) : fallbackStatus;
+  const itemCount = sourceCount(sources, "item_count");
+  const warningCount = sourceCount(sources, "warning_count");
+  return {
+    id,
+    label,
+    status,
+    tone: sourceStatusTone(status, warningCount),
+    sourceCount: sources.length,
+    itemCount,
+    warningCount,
+    detail: sources.length > 0 ? `소스 ${sources.length} · 항목 ${itemCount} · 경고 ${warningCount} · 상태 ${SOURCE_HEALTH_STATUS_LABEL[status]}` : `보고 없음 · 상태 ${SOURCE_HEALTH_STATUS_LABEL[status]}`,
+    redactionNote: "상태·개수·경고 합계만 표시하며 원문·경로·로그·토큰은 제외합니다.",
+  };
+}
+
+export function buildOfficeSourceHealthRail(state: OfficeState): OfficeSourceHealthRail {
+  const paperclipSources = state.data_sources.filter(isPaperclipSource);
+  const byId = (ids: string[]) => state.data_sources.filter((source) => ids.includes(source.id));
+  const redactionWarningCount = Math.max(0, state.redactions.redacted_field_count ?? 0, state.redactions.warnings.length);
+  const redactionStatus: OfficeSourceStatus = redactionWarningCount > 0 || state.redactions.omitted_sections.length > 0 ? "partial" : "ok";
+  const items: OfficeSourceHealthRailItem[] = [
+    buildSourceHealthRailItem("sessions", "세션", byId(["sessions"])),
+    buildSourceHealthRailItem("kanban", "Kanban", byId(["kanban"])),
+    buildSourceHealthRailItem("paperclip", "Paperclip", paperclipSources),
+    buildSourceHealthRailItem("automation", "자동화", byId(["cron"])),
+    buildSourceHealthRailItem("routing", "라우팅", byId(["topics", "provenance"])),
+    {
+      id: "redaction",
+      label: "가림",
+      status: redactionStatus,
+      tone: sourceStatusTone(redactionStatus, redactionWarningCount),
+      sourceCount: 1,
+      itemCount: state.redactions.omitted_sections.length,
+      warningCount: redactionWarningCount,
+      detail: `가림 ${redactionWarningCount} · 생략 섹션 ${state.redactions.omitted_sections.length} · 상태 ${SOURCE_HEALTH_STATUS_LABEL[redactionStatus]}`,
+      redactionNote: "가림 정책 개수만 표시하며 생략된 원문 이름이나 경고 본문은 표시하지 않습니다.",
+    },
+  ];
+  const attentionCount = items.filter((item) => item.status === "partial" || item.status === "error" || item.warningCount > 0).length;
+  const gapCount = items.filter((item) => item.status === "missing" || item.status === "unavailable").length;
+  return {
+    stageLabel: "Office Source Health 1",
+    detail: `확인 필요 ${attentionCount} · 공백/미연결 ${gapCount} · 통합 소스 ${items.length}`,
+    items,
+    redactionNote: "Kanban/Paperclip/자동화/라우팅/가림 상태를 safe DTO 집계만으로 통합합니다.",
+  };
+}
+
+export function buildOfficeSourceHealthCompactDiagnostics(state: OfficeState): OfficeSourceHealthCompactDiagnostics {
+  const rail = buildOfficeSourceHealthRail(state);
+  const attentionItems = rail.items.filter((item) => item.status === "partial" || item.status === "error" || item.warningCount > 0);
+  const gapItems = rail.items.filter((item) => item.status === "missing" || item.status === "unavailable");
+  const errorCount = rail.items.filter((item) => item.status === "error").length;
+  const warningTotal = rail.items.reduce((total, item) => total + item.warningCount, 0);
+  const connectedCount = rail.items.length - gapItems.length;
+
+  return {
+    stageLabel: "Office Source Health 2",
+    detail: `상단 3장 요약 · 연결 ${connectedCount}/${rail.items.length} · 확인 ${attentionItems.length} · 경고 ${warningTotal}`,
+    cards: [
+      {
+        id: "coverage",
+        title: "소스 커버리지",
+        count: rail.items.length,
+        detail: `연결 ${connectedCount} · 공백/미연결 ${gapItems.length}`,
+        tone: gapItems.length > 0 ? "warning" : "positive",
+      },
+      {
+        id: "attention",
+        title: "확인 필요",
+        count: attentionItems.length,
+        detail: `오류 ${errorCount} · 경고 합계 ${warningTotal}`,
+        tone: errorCount > 0 ? "negative" : attentionItems.length > 0 ? "warning" : "positive",
+      },
+      {
+        id: "readability",
+        title: "읽기 밀도",
+        count: 3,
+        detail: "세부 소스 카드는 접고 커버리지·확인·읽기 밀도만 먼저 봅니다.",
+        tone: attentionItems.length > 0 || gapItems.length > 0 ? "warning" : "positive",
+      },
+    ],
+    redactionNote: "Source Health 2는 Source Health 1의 safe 집계만 재요약하며 원문·경로·로그·토큰을 표시하지 않습니다.",
+  };
+}
+
+const PAPERCLIP_SOURCE_TYPES = new Set<OfficePaperclipSourceType>(["paperclip", "nas_manifest", "session_tag", "relay_projection"]);
+const PAPERCLIP_RELAYS = new Set<OfficePaperclipRelay>(["MacBook", "WSL", "VPS"]);
+const PAPERCLIP_TAG_PATTERN = /^source:[a-z0-9][a-z0-9_-]{1,80}$/;
+
+function safePaperclipSourceType(value: unknown): OfficePaperclipSourceType {
+  return typeof value === "string" && PAPERCLIP_SOURCE_TYPES.has(value as OfficePaperclipSourceType) ? (value as OfficePaperclipSourceType) : "unknown";
+}
+
+function safePaperclipRelay(value: unknown): OfficePaperclipRelay {
+  return typeof value === "string" && PAPERCLIP_RELAYS.has(value as OfficePaperclipRelay) ? (value as OfficePaperclipRelay) : "unknown";
+}
+
+function safePaperclipLabel(id: string): string {
+  const withoutPrefix = id.replace(/^paperclip:/, "");
+  const basename = withoutPrefix.split(/[\\/]/).filter(Boolean).pop() ?? withoutPrefix;
+  const safe = basename.replace(/[^a-zA-Z0-9가-힣._:-]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+  return (safe || "paperclip-source").slice(0, 48);
+}
+
+function safePaperclipTags(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return Array.from(new Set(value.filter((tag): tag is string => typeof tag === "string" && PAPERCLIP_TAG_PATTERN.test(tag)))).slice(0, 8);
+}
+
+function buildPaperclipTimingBucket(checkedAt: string | undefined, generatedAt: string): OfficePaperclipTimingBucket {
+  if (!checkedAt) return "unknown";
+  const checked = Date.parse(checkedAt);
+  const reference = Date.parse(generatedAt);
+  if (!Number.isFinite(checked) || !Number.isFinite(reference)) return "unknown";
+  const ageMs = Math.max(reference - checked, 0);
+  if (ageMs <= 24 * 60 * 60 * 1000) return "fresh";
+  if (ageMs <= 7 * 24 * 60 * 60 * 1000) return "recent";
+  return "stale";
+}
+
+export function buildOfficePageSectionPlan(state: OfficeState): OfficePageSectionPlan[] {
+  const paperclipSourceCount = buildOfficePaperclipWorkbench(state).sources.length;
+  const sourceIssueCount = state.data_sources.filter((source) => source.status !== "ok" || (source.warning_count ?? 0) > 0).length;
+  const workAttentionCount = state.work_items.filter((item) => textField(item, "status") === "blocked").length;
+  const automationIssueCount = state.automations.filter((job) => textField(job, "last_status") === "error" || textField(job, "state") === "error").length;
+
+  return [
+    {
+      id: "sources",
+      label: "소스 상태",
+      summary: `소스 ${state.data_sources.length}개 · 확인 필요 ${sourceIssueCount}개`,
+      count: state.data_sources.length,
+      defaultOpen: false,
+      ariaLabel: "소스 상태 상세 접기/펼치기",
+    },
+    {
+      id: "paperclip",
+      label: "Paperclip 작업대",
+      summary: `출처 ${paperclipSourceCount}개 · 안전 source-tag 투영`,
+      count: paperclipSourceCount,
+      defaultOpen: false,
+      ariaLabel: "Paperclip 작업대 상세 접기/펼치기",
+    },
+    {
+      id: "work",
+      label: "작업·세션",
+      summary: `세션 ${state.agents.length}개 · 작업 ${state.work_items.length}개 · 확인 필요 ${workAttentionCount}개`,
+      count: state.agents.length + state.work_items.length,
+      defaultOpen: false,
+      ariaLabel: "작업과 세션 상세 접기/펼치기",
+    },
+    {
+      id: "automation",
+      label: "자동화",
+      summary: `자동화 ${state.automations.length}개 · 확인 필요 ${automationIssueCount}개 · 상태별 묶음`,
+      count: state.automations.length,
+      defaultOpen: false,
+      ariaLabel: "자동화 상세 접기/펼치기",
+    },
+    {
+      id: "routing",
+      label: "라우팅·가림",
+      summary: `토픽 ${state.topics.length}개 · 출처 기록 ${state.provenance.length}개 · 가림 ${state.redactions.redacted_field_count}개`,
+      count: state.topics.length + state.provenance.length,
+      defaultOpen: false,
+      ariaLabel: "라우팅과 가림 처리 상세 접기/펼치기",
+    },
+    {
+      id: "events",
+      label: "최근 이벤트",
+      summary: `이벤트 ${state.events.length}개 · 안전 메타데이터`,
+      count: state.events.length,
+      defaultOpen: false,
+      ariaLabel: "최근 이벤트 상세 접기/펼치기",
+    },
+  ];
+}
+
+export function buildOfficePaperclipWorkbench(state: OfficeState): OfficePaperclipWorkbench {
+  const sources = state.data_sources
+    .filter((source) => source.id.startsWith("paperclip:") || PAPERCLIP_SOURCE_TYPES.has(safePaperclipSourceType((source as unknown as Record<string, unknown>).source_type)))
+    .map<OfficePaperclipWorkbenchSource>((source) => {
+      const row = source as unknown as Record<string, unknown>;
+      return {
+        id: source.id,
+        label: safePaperclipLabel(source.id),
+        health: source.status,
+        sourceType: source.id.startsWith("paperclip:") ? "paperclip" : safePaperclipSourceType(row.source_type),
+        itemCount: typeof source.item_count === "number" ? Math.max(0, source.item_count) : 0,
+        warningCount: typeof source.warning_count === "number" ? Math.max(0, source.warning_count) : 0,
+        relay: safePaperclipRelay(row.relay),
+        tags: safePaperclipTags(row.tags),
+        timingBucket: buildPaperclipTimingBucket(source.checked_at, state.generated_at),
+        redactionNote: "민감 원문·실행 인자·로그·경로·비밀값은 Paperclip 작업대 DTO에 포함하지 않습니다.",
+      };
+    });
+
+  return {
+    stageLabel: "Paperclip / 공유 컨텍스트 작업대",
+    detail: sources.length > 0 ? `안전 source-tag 투영 ${sources.length}개` : "연결된 Paperclip/source-tag 투영이 아직 없습니다.",
+    sources,
+    redactionNote: "브라우저에는 source id, 안전 태그, 개수, 건강도, 릴레이 allowlist, coarse timing bucket만 표시합니다.",
+  };
+}
+
+export function buildOfficePaperclipManifestVisibility(state: OfficeState): OfficePaperclipManifestVisibility {
+  const workbench = buildOfficePaperclipWorkbench(state);
+  const manifestCount = workbench.sources.length;
+  const warningCount = workbench.sources.reduce((sum, source) => sum + source.warningCount, 0);
+  const needsAttention = workbench.sources.filter((source) => source.health !== "ok" || source.warningCount > 0).length;
+  const vpsVisibleCount = workbench.sources.filter((source) => source.relay === "VPS").length;
+  const relayCount = new Set(workbench.sources.map((source) => source.relay).filter((relay) => relay !== "unknown")).size;
+
+  return {
+    stageLabel: "Paperclip Workbench 2",
+    detail:
+      manifestCount > 0
+        ? `validator-passing safe manifest ${manifestCount}개 · 확인 필요 ${needsAttention}개 · VPS 표시 ${vpsVisibleCount}개`
+        : "validator-passing safe manifest가 아직 이 Hermes 인스턴스에 보고되지 않았습니다.",
+    cards: [
+      {
+        id: "manifests",
+        title: "안전 manifest",
+        count: manifestCount,
+        detail: warningCount > 0 ? `경고 집계 ${warningCount}개 · 원문 본문 없음` : "validator-passing manifest 집계",
+        tone: needsAttention > 0 ? "warning" : manifestCount > 0 ? "positive" : "neutral",
+      },
+      {
+        id: "privateDashboard",
+        title: "VPS 표시",
+        count: vpsVisibleCount,
+        detail: vpsVisibleCount > 0 ? "VPS-local safe projection 감지" : "VPS에는 복사된 safe projection만 표시",
+        tone: vpsVisibleCount > 0 ? "positive" : "neutral",
+      },
+      {
+        id: "relayPosture",
+        title: "릴레이 생산",
+        count: relayCount,
+        detail: relayCount > 0 ? "MacBook/WSL/VPS allowlist 릴레이 집계" : "릴레이 정보 없음",
+        tone: "neutral",
+      },
+    ],
+    redactionNote: "safe manifest 개수·상태·릴레이 allowlist만 표시하며 원문 NAS/Paperclip 자료, 경로, 토큰, 로그, 프롬프트는 표시하지 않습니다.",
+  };
+}
+
+export function buildOfficePaperclipInspector(source: OfficePaperclipWorkbenchSource): OfficePaperclipInspector {
+  return {
+    kind: "Paperclip 안전 작업대",
+    title: source.label,
+    fields: [
+      ["id", source.id],
+      ["종류", source.sourceType],
+      ["상태", source.health],
+      ["항목", String(source.itemCount)],
+      ["경고", String(source.warningCount)],
+      ["릴레이", source.relay],
+      ["상태 시점", source.timingBucket],
+      ["태그", source.tags.length === 0 ? "—" : source.tags.join(" · ")],
+      ["가림", source.redactionNote],
+    ],
+  };
+}
+
+export function buildOfficePaperclipMapProjection(sources: OfficePaperclipWorkbenchSource[]): OfficePaperclipMapProjection {
+  const slots = sources.slice(0, 8).map<OfficePaperclipMapSlot>((source, index) => ({
+    id: source.id,
+    label: source.label,
+    health: source.health,
+    sourceType: source.sourceType,
+    x: 18 + (index % 4) * 21,
+    y: 50 + Math.floor(index / 4) * 24,
+    itemCount: source.itemCount,
+    warningCount: source.warningCount,
+    ariaHidden: true,
+    interactive: false,
+  }));
+
+  return {
+    stageLabel: "Paperclip archive shelf",
+    detail: slots.length > 0 ? `CSS/SVG 보관함 슬롯 ${slots.length}개` : "표시할 안전 source 슬롯이 없습니다.",
+    slots,
+    ariaLabel: "안전 Paperclip source-tag 보관함 투영",
+  };
+}
+
+function liveWorkStatus(value: unknown): OfficeLiveOperationsCueId | "done" | "unknown" {
+  const text = typeof value === "string" ? value.toLowerCase() : "";
+  if (text.includes("block")) return "blocked";
+  if (text.includes("report") || text.includes("summary") || text.includes("done")) return "report-ready";
+  if (text.includes("review")) return "reviewing";
+  if (text.includes("run") || text.includes("progress") || text.includes("active") || text.includes("ready") || text.includes("todo") || text.includes("triage")) return "working";
+  if (text.includes("archive")) return "done";
+  return "unknown";
+}
+
+function liveAutomationActive(job: Record<string, unknown>): boolean {
+  const state = String(job.state ?? "").toLowerCase();
+  const lastStatus = String(job.last_status ?? "").toLowerCase();
+  const scheduledOrRunning = state.includes("run") || state.includes("sched") || state.includes("active");
+  return scheduledOrRunning || ((lastStatus.includes("run") || lastStatus.includes("active")) && !state.includes("done") && !state.includes("idle"));
+}
+
+export function buildOfficeLiveOperationsLayer(state: OfficeState): OfficeLiveOperationsLayer {
+  const counts: Record<OfficeLiveOperationsCueId, number> = {
+    working: 0,
+    reviewing: 0,
+    "report-ready": 0,
+    blocked: 0,
+    "automation-running": 0,
+  };
+
+  state.work_items.forEach((item) => {
+    const status = liveWorkStatus(item.status);
+    if (status === "working" || status === "reviewing" || status === "report-ready" || status === "blocked") counts[status] += 1;
+  });
+  counts["automation-running"] = state.automations.filter((job) => liveAutomationActive(job)).length;
+
+  const cueSpecs: Array<Omit<OfficeLiveOperationsCue, "count" | "ariaHidden" | "interactive">> = [
+    { id: "working", label: "작업 중", detail: "safe work item 상태 집계", roomId: "work", tone: "positive" },
+    { id: "reviewing", label: "리뷰 중", detail: "review 상태 항목 집계", roomId: "work", tone: "neutral" },
+    { id: "report-ready", label: "보고 대기", detail: "보고/요약 준비 상태 집계", roomId: "work", tone: "positive" },
+    { id: "blocked", label: "주의 필요", detail: "차단된 work item 집계", roomId: "work", tone: "negative" },
+    { id: "automation-running", label: "자동화", detail: "예약/실행 중 자동화 집계", roomId: "automation", tone: "neutral" },
+  ];
+  const cues = cueSpecs
+    .map<OfficeLiveOperationsCue>((cue) => ({ ...cue, count: counts[cue.id], ariaHidden: true, interactive: false }))
+    .filter((cue) => cue.count > 0);
+
+  return {
+    stageLabel: "Live operations layer",
+    summary: `작업 중 ${counts.working} · 리뷰 ${counts.reviewing} · 보고 ${counts["report-ready"]} · 주의 ${counts.blocked} · 자동화 ${counts["automation-running"]}`,
+    detail: "safe DTO의 상태 문자열을 allowlist 집계로 바꿔 오피스 운영감을 표시합니다.",
+    cues,
+    redactionNote: "원문 업무 제목·본문·프롬프트·로그·경로·비밀값은 live operations layer에 포함하지 않습니다.",
   };
 }
 
@@ -759,15 +2070,19 @@ export function buildOfficeResponsiveReadabilityPlan(
   options: { viewportWidth?: number } = {},
 ): OfficeResponsiveReadabilityPlan {
   const isNarrow = typeof options.viewportWidth === "number" && options.viewportWidth < 640;
+  const isTablet = typeof options.viewportWidth === "number" && options.viewportWidth >= 640 && options.viewportWidth < 1024;
+  const viewportMode: OfficeResponsiveReadabilityPlan["viewportMode"] = isNarrow ? "narrow" : isTablet ? "tablet" : "desktop";
   return {
     stageLabel: "Stage 12-A 반응형",
-    viewportMode: isNarrow ? "narrow" : "desktop",
-    recommendedDensityMode: isNarrow ? "summary" : densityPlan.mode,
-    mapClassName: `office-map--responsive${isNarrow ? " office-map--mobile-readable" : ""}`,
-    railClassName: isNarrow ? "office-map-rail--mobile-stack" : "office-map-rail--desktop",
+    viewportMode,
+    recommendedDensityMode: isNarrow ? "summary" : isTablet ? "standard" : densityPlan.mode,
+    mapClassName: `office-map--responsive${isNarrow ? " office-map--mobile-readable" : isTablet ? " office-map--tablet-readable" : ""}`,
+    railClassName: isNarrow ? "office-map-rail--mobile-stack" : isTablet ? "office-map-rail--tablet-stack" : "office-map-rail--desktop",
     notes: isNarrow
       ? ["좁은 화면에서는 요약 모드 권장", "맵 rail은 세로 흐름으로 읽힘"]
-      : ["데스크톱에서는 현재 밀도 모드 유지", "맵과 rail은 분리된 영역으로 읽힘"],
+      : isTablet
+        ? ["태블릿 화면에서는 표준 모드 권장", "rail은 접힘 없이 세로 보조 영역으로 읽힘"]
+        : ["데스크톱에서는 현재 밀도 모드 유지", "맵과 rail은 분리된 영역으로 읽힘"],
   };
 }
 
@@ -2065,6 +3380,49 @@ export function buildOfficeSceneMotionTrack(object: OfficeSceneObject): OfficeSc
   };
 }
 
+export type OfficeProjectionCacheCard = {
+  id: "active" | "freshness" | "rejected";
+  title: string;
+  value: string;
+  detail: string;
+  tone: "positive" | "warning" | "neutral";
+};
+
+export type OfficeProjectionCacheSummary = {
+  stageLabel: string;
+  status: string;
+  detail: string;
+  cards: OfficeProjectionCacheCard[];
+};
+
+export type OfficeProjectionOrchestrationNode = {
+  id: "relay" | "validator" | "cache" | "dashboard";
+  label: string;
+  value: string;
+  detail: string;
+  tone: "positive" | "warning" | "neutral";
+  motion: "active" | "waiting" | "blocked";
+};
+
+export type OfficeProjectionOrchestrationFlow = {
+  id: "relay-validator" | "validator-cache" | "cache-dashboard";
+  from: OfficeProjectionOrchestrationNode["id"];
+  to: OfficeProjectionOrchestrationNode["id"];
+  label: string;
+  detail: string;
+  tone: "positive" | "warning" | "neutral";
+  active: boolean;
+};
+
+export type OfficeProjectionOrchestration = {
+  stageLabel: string;
+  status: string;
+  detail: string;
+  safetyNote: string;
+  nodes: OfficeProjectionOrchestrationNode[];
+  flows: OfficeProjectionOrchestrationFlow[];
+};
+
 export function buildOfficeSceneObjects(state: OfficeState, nodes: OfficeMapNode[]): OfficeSceneObject[] {
   return nodes.flatMap((node) => {
     const config = SCENE_ROOM_CONFIG[node.id];
@@ -2114,6 +3472,135 @@ export function buildOfficeSceneObjects(state: OfficeState, nodes: OfficeMapNode
 
     return objects;
   });
+}
+
+export function buildOfficeProjectionCacheSummary(state: OfficeState): OfficeProjectionCacheSummary {
+  const cache = state.projection_cache;
+  const active = cache?.active ?? null;
+  const rejectedCount = cache?.rejected?.count ?? 0;
+  const sourceTags = active?.source_tags?.slice(0, 3).join(", ") || "safe DTO 없음";
+  const activeTone: OfficeProjectionCacheCard["tone"] = active ? "positive" : "neutral";
+  const activeValue = active?.bundle_id || "last-known-good 없음";
+  const freshnessDetail = active
+    ? `${active.generated_by} · ${active.source_kind} · stale ${active.freshness?.stale_after || "미정"}`
+    : "active cache가 없으면 /office는 기존 안전 DTO와 빈 projection 상태만 표시합니다.";
+  const rejectionTone: OfficeProjectionCacheCard["tone"] = rejectedCount > 0 ? "warning" : "neutral";
+  return {
+    stageLabel: "Office Projection Pipeline 1",
+    status: cache?.status ?? "missing",
+    detail: active
+      ? `활성 safe projection: ${activeValue} · ${sourceTags}`
+      : "아직 promote된 safe projection bundle이 없습니다.",
+    cards: [
+      {
+        id: "active",
+        title: "활성 projection",
+        value: activeValue,
+        detail: active ? `validator ${active.validator?.result || "unknown"} · raw_excluded ${active.redaction?.raw_excluded ? "true" : "unknown"}` : "VPS active/ 비어 있음",
+        tone: activeTone,
+      },
+      {
+        id: "freshness",
+        title: "신선도",
+        value: active?.freshness?.stale_after || "stale 기준 없음",
+        detail: freshnessDetail,
+        tone: activeTone,
+      },
+      {
+        id: "rejected",
+        title: "최근 거부",
+        value: `${rejectedCount}개`,
+        detail: rejectedCount > 0 ? "값을 echo하지 않고 reason/path 집계만 표시" : "거부된 incoming bundle 없음",
+        tone: rejectionTone,
+      },
+    ],
+  };
+}
+
+export function buildOfficeProjectionOrchestration(state: OfficeState): OfficeProjectionOrchestration {
+  const cache = state.projection_cache;
+  const active = cache?.active ?? null;
+  const rejectedCount = cache?.rejected?.count ?? 0;
+  const liveSourceCount = state.data_sources.filter((source) => source.status === "ok" || source.status === "partial").length;
+  const missingSourceCount = state.data_sources.filter((source) => source.status === "missing" || source.status === "unavailable" || source.status === "error").length;
+  const validatorResult = String(active?.validator?.result ?? "waiting");
+  const validatorPassed = validatorResult === "pass";
+  const relayValue = active ? `${active.generated_by} · ${active.source_kind}` : `${liveSourceCount}개 safe DTO`;
+  const cacheStatus = cache?.status ?? "missing";
+  const hasDashboardProjection = Boolean(active) || liveSourceCount > 0;
+  const validatorTone: OfficeProjectionOrchestrationNode["tone"] = validatorPassed ? "positive" : rejectedCount > 0 ? "warning" : "neutral";
+  const cacheTone: OfficeProjectionOrchestrationNode["tone"] = active ? "positive" : rejectedCount > 0 ? "warning" : "neutral";
+  return {
+    stageLabel: "Projection Orchestration",
+    status: cacheStatus,
+    detail: active
+      ? `실제 active cache ${active.bundle_id}를 relay → validator → active cache → /office 순서로 투사 중`
+      : "active projection은 대기 중이며, 현재는 live safe DTO와 missing 상태를 그대로 표시합니다.",
+    safetyNote: "직접 원천 접근이 아니라 validator-passing safe bundle과 이미 가려진 DTO만 /office에 투사합니다.",
+    nodes: [
+      {
+        id: "relay",
+        label: "Relay 생산",
+        value: relayValue,
+        detail: active ? "Mac/WSL/manual relay가 만든 safe bundle 후보" : "relay bundle 대기 · live DTO만 표시",
+        tone: active || liveSourceCount > 0 ? "positive" : "neutral",
+        motion: active ? "active" : "waiting",
+      },
+      {
+        id: "validator",
+        label: "검증 게이트",
+        value: validatorPassed ? "pass" : rejectedCount > 0 ? `${rejectedCount} rejected` : "대기",
+        detail: "민감값 sentinel을 통과한 요약만 허용",
+        tone: validatorTone,
+        motion: validatorPassed ? "active" : rejectedCount > 0 ? "blocked" : "waiting",
+      },
+      {
+        id: "cache",
+        label: "Active cache",
+        value: active ? "last-known-good" : "비어 있음",
+        detail: active ? `${active.generated_at} 생성 · stale ${active.freshness?.stale_after ?? "미정"}` : "promotion 전이면 기존 DTO/빈 projection posture 유지",
+        tone: cacheTone,
+        motion: active ? "active" : "waiting",
+      },
+      {
+        id: "dashboard",
+        label: "/office 투사",
+        value: hasDashboardProjection ? "동적 표시" : "빈 상태",
+        detail: `${liveSourceCount}개 연결/부분 source, ${missingSourceCount}개 missing/degraded source를 안전 집계로 표시`,
+        tone: hasDashboardProjection ? "positive" : "neutral",
+        motion: hasDashboardProjection ? "active" : "waiting",
+      },
+    ],
+    flows: [
+      {
+        id: "relay-validator",
+        from: "relay",
+        to: "validator",
+        label: "safe bundle 후보",
+        detail: "원천 값을 직접 보여주지 않고 allowlisted manifest/payload만 이동",
+        tone: active ? "positive" : "neutral",
+        active: Boolean(active),
+      },
+      {
+        id: "validator-cache",
+        from: "validator",
+        to: "cache",
+        label: validatorPassed ? "promoted" : rejectedCount > 0 ? "rejected" : "대기",
+        detail: validatorPassed ? "검증 통과 bundle만 active cache로 승격" : "검증 실패는 값 echo 없이 rejection 집계만 남김",
+        tone: validatorPassed ? "positive" : rejectedCount > 0 ? "warning" : "neutral",
+        active: validatorPassed,
+      },
+      {
+        id: "cache-dashboard",
+        from: "cache",
+        to: "dashboard",
+        label: "last-known-good 투사",
+        detail: "브라우저에는 cache/source posture와 안전 count/status만 전달",
+        tone: hasDashboardProjection ? "positive" : "neutral",
+        active: hasDashboardProjection,
+      },
+    ],
+  };
 }
 
 export function buildOfficeAttentionItems(state: OfficeState): AttentionItem[] {

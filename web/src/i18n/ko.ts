@@ -79,6 +79,13 @@ export const ko: Translations = {
       sessions: "세션",
       skills: "스킬",
     },
+    navGroups: {
+      library: "도구함",
+      operations: "운영",
+      other: "더 보기",
+      primary: "주요",
+      settings: "설정 · 도움말",
+    },
     modelToolsSheetSubtitle: "및 도구",
     modelToolsSheetTitle: "모델",
     navigation: "내비게이션",

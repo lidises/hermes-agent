@@ -1,10 +1,10 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-09 22:26 KST
+Last updated: 2026-05-13 14:23 KST
 
 ## Current phase
 
-Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, and Stage 14-A through Stage 14-Q safe dynamic-tracking/readability layers are implemented on top of the Stage 9-D polished CSS/SVG 2D office map. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
+Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, Stage 14-A through Stage 14-Q safe dynamic-tracking/readability layers, Stage 16-B through Stage 16-E safe realtime/motion layers, Stage 17-A sidebar simplification/Paperclip bridge planning, Paperclip Workbench 1 safe source-tag/manifest projection, Paperclip Workbench 2 manifest visibility, Kanban Observability 1 read-only projection, Kanban Observability 2 stale/blocked/workload summaries, Office Source Health 1 consolidated source-health rail, Office Source Health 2 compact diagnostics/readability summary, Office Release Hardening 1 local frontend guardrails, Projection Orchestration 1 live safe projection flow visibility, Projection Relay Producer 1 manual safe-bundle generation, Projection VPS Manual Ingest Recovery 1, Session `20260512_181306_8d90ac` local test-hardening recovery, and PR #4 `d9ac5fae` VPS dashboard sync/private smoke are implemented/verified on top of the Stage 9-D polished CSS/SVG 2D office map. Kanban, Paperclip, Office Source Health, Office Release Hardening, Projection Orchestration, Projection Relay Producer, Projection VPS Manual Ingest Recovery, local test-hardening recovery, and PR #4 VPS dashboard sync/private smoke are tracked as independent work tracks, not continuations of the legacy stage number sequence. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
 
 Current Stage 9-E result: the `/office` page now uses Korean for primary headings, buttons, helper text, safety copy, status labels, inspector field labels, and office-map room/zone labels while keeping stable technical identifiers such as DTO, OfficeState, source IDs, cron, and enum-like adapter values visible for debugging.
 
@@ -66,15 +66,610 @@ Current Stage 14-P result: `/office` now adds a safe scan index in the safety pa
 
 Current Stage 14-Q result: `/office` now adds a safe HUD readability strip in the safety panel. `OfficeSafeHudReadabilityPlanOptions`, `OfficeSafeHudReadabilityPlanItem`, `OfficeSafeHudReadabilityPlan`, and `buildOfficeSafeHudReadabilityPlan(options)` derive only from browser-local viewport width, reduced-motion preference, safe panel count, and live/manual tracking posture, then render generated `layout|motion|density|tracking` items.
 
-Next phase: Stage 14 is closed at 14-Q. Proceed with PR/merge, then start Stage 15 consolidation from `main` or a fresh branch off `main`. Stage 15 starts with HUD hierarchy audit, duplicate signal reduction, and PR/readiness checklist refresh; it should not add another decorative HUD layer by default. Still no individual task identity, generated content-like speech bubbles, sprite assets, Phaser, PixiJS, canvas renderer, backend/API changes, mutation controls, persistent storage, or raw record projection.
+Current Stage 16-D result in progress: Stage 16-D now adds a browser-local safe motion heartbeat on branch `ai-office-stage16d-safe-motion-heartbeat-20260510`. `buildOfficeSafeMotionHeartbeat(...)` maps the Stage 16-C stream posture plus local polling tick/failure metadata into generated Korean heartbeat labels, phase (`idle|scan|pulse|hold`), intensity (`low|medium|high`), and decorative/read-only flags. `/office` polls `/api/office/events` while the tab is visible, increments a local safe tick on successful safe-event fetches, and renders `data-office-safe-motion-heartbeat` with mode/phase/intensity/enabled hooks plus CSS-only pulse/scan cues. This keeps Stage 16-C backend-safe stream/local fallback behavior and still excludes raw prompts, transcripts, task bodies, scripts, logs, provider/model identity, secrets, tokens, adapter errors, and task identity.
+
+Paperclip Workbench 1 is complete as a folded/read-only/source-tag and safe-manifest workbench inside `/office`. It includes frontend projection, safe inspector/map slots, manifest docs, validator/generator tooling, a local read-only manifest adapter, browser/raw-leak verification, and handoff `docs/ai-office/plans/2026-05-11-paperclip-workbench-handoff.md`. Paperclip Workbench 2 adds a frontend-only manifest visibility strip inside the existing folded workbench: `buildOfficePaperclipManifestVisibility(state)` returns three safe cards (`manifests`, `privateDashboard`, `relayPosture`) and `/office` renders `data-office-paperclip-manifest-visibility="true"` with per-card hooks. It remains read-only and does not deploy to VPS, copy projection files, mount NAS, add watchers, expose public routes, or add mutation controls.
 
 Stage 6 slices were approved by the user, including proceeding through the recommended remaining slices. Stage 7 was approved with testing deferred until the end. Stage 8-A was approved as the next safe step by the user saying to proceed in order, and the user then requested items 1 through 3 to run automatically in sequence. The user also approved installing missing test/runtime extras as needed in earlier setup. No gateway restart, cron change, Kanban mutation, NAS/Obsidian write, service/config mutation, memory/skill update, pixel dependency, or mutation-control implementation has been performed. The local dashboard process was restarted only to smoke-test the newly built local frontend bundle.
 
 
+## PR #4 ready + VPS gateway sync completed
 
+Branch: `ai-office-stage16e-safe-spatial-choreography-20260510`
 
+Operational summary:
 
+- Marked PR #4 ready for review; it remains open and unmerged.
+- Created VPS core rollback branch `backup/vps-core-main-before-pr4-gateway-20260513T052142Z` before changing the gateway runtime checkout.
+- Switched `/home/hermes/.hermes/hermes-agent` to PR head `5903922e` and restarted only `hermes-gateway.service`.
+- Confirmed gateway active after wait with no post-restart errors.
+- Confirmed dashboard service stayed active and was not restarted during this gateway pass.
+- Confirmed private `/office` still returns 200.
 
+Safety posture:
+
+- No PR merge, public exposure change, NAS mount/direct credentials, watcher/cron automation, Kanban mutation, or dashboard mutation controls.
+- The dashboard worktree remains at the earlier smoked code commit `d9ac5fae`; PR head `5903922e` and this follow-up evidence are docs-only after that dashboard smoke.
+- Evidence: `docs/ai-office/plans/2026-05-13-pr4-ready-gateway-sync.md`.
+
+Next operational step:
+
+- Merge PR #4 only if separately approved. Public/NAS/watcher/Kanban/mutation-control changes remain separately approval-gated.
+
+## PR #4 d9ac5fae VPS dashboard sync/private smoke completed
+
+Branch: `ai-office-stage16e-safe-spatial-choreography-20260510`
+
+Commit synced:
+
+- `d9ac5fae` — `Stabilize recovered test hardening`
+
+Operational summary:
+
+- Fast-forwarded the dedicated VPS dashboard worktree `/home/hermes/.hermes/ai-office-dashboard` from `7c22a76e` to `d9ac5fae`.
+- Restarted only `hermes-agent-dashboard.service` so the dashboard process used the updated worktree.
+- Did not mutate the gateway/core checkout and did not restart `hermes-gateway.service`.
+- Confirmed post-sync worktree is clean, dashboard service is active, gateway service is active, and the listener remains bound to `100.122.57.85:8765`.
+
+Smoke evidence 2026-05-13 14:09 KST:
+
+- Private `GET http://100.122.57.85:8765/office?v=d9ac5fae` returned 200.
+- Browser smoke found zero console messages/JS errors.
+- `/office` showed read-only guard copy, no restart/update/delete/approve/merge/ready style mutation controls, projection orchestration and Paperclip manifest visibility hooks, and raw leak probe `false`.
+- Protected `/api/office` without auth returned 401.
+- Public IPv4/IPv6 port 8765 probes returned `http_code=000`/unreachable, preserving private-only exposure.
+
+Safety posture:
+
+- No gateway restart, core checkout mutation, public exposure change, NAS mount/direct credentials, watcher/cron automation, Kanban mutation, PR mark-ready/merge, or dashboard mutation controls.
+- Evidence: `docs/ai-office/plans/2026-05-13-pr4-d9ac5fae-vps-dashboard-smoke.md`.
+
+Next operational step:
+
+- Keep PR #4 draft/open unless the user separately approves mark-ready or merge. Any gateway/core/public/NAS/watcher/Kanban/mutation-control change remains separately approval-gated.
+
+## Projection Orchestration 1 — live safe projection flow visibility completed
+
+Branch: `ai-office-stage16e-safe-spatial-choreography-20260510`
+
+Implementation summary:
+
+- Added a `Projection Orchestration` strip inside `/office` source status so the dashboard shows the safe pipeline as relay → validator → active cache → dashboard projection.
+- The strip is derived only from `OfficeState.projection_cache` and already-redacted `data_sources`; it does not directly access NAS/Paperclip/raw sources from the browser or VPS UI.
+- Added node/flow hooks and CSS-only packet motion so the orchestration feels live while remaining read-only and reduced-motion aware.
+- The copy distinguishes active cache, waiting relay, validator gate, rejected aggregate, and live safe DTO fallback so smoke/sample/missing posture is not confused with raw source access.
+
+Safety posture:
+
+- Frontend-only/read-only. No public exposure change, no NAS mount, no watcher/cron automation, no gateway/core mutation, no dashboard mutation controls, and no credential expansion.
+- VPS deploy/restart, if performed, is limited to the dedicated dashboard worktree/service and private Tailscale listener.
+
+Verification 2026-05-12 19:07 KST:
+
+- Focused RED/GREEN: `npm test -- --run OfficePage.test.ts -t "projection orchestration"` passed after helper/UI implementation.
+- Frontend tests: `npm test -- --run OfficePage.test.ts App.test.ts` → 2 files passed, 71 tests passed.
+- Focused ESLint passed for `OfficePage.tsx`, `officeView.ts`, and `OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large chunk warning only.
+- Backend focused tests passed: `tests/test_office_projection_validator.py`, `tests/hermes_cli/test_office_state_adapters.py`, `tests/hermes_cli/test_office_api.py` → 32 passed.
+- `git diff --check` and added-line static security scan passed.
+- Local browser smoke on `http://127.0.0.1:8765/office?projection-orchestration=1` confirmed orchestration hook, four nodes, three flows, CSS motion hooks, raw leak false, and no console JS errors.
+
+Deployment/smoke completed 2026-05-12 19:20 KST:
+
+- Commit `f287192a` was pushed to the existing draft PR #4 and deployed to the dedicated VPS dashboard worktree `/home/hermes/.hermes/ai-office-dashboard`.
+- VPS dashboard service was restarted only for `hermes-agent-dashboard.service`; `hermes-gateway.service` remained active and was not restarted.
+- VPS focused backend tests passed after reset: `tests/test_office_projection_validator.py`, `tests/hermes_cli/test_office_state_adapters.py`, `tests/hermes_cli/test_office_api.py` → 32 passed.
+- VPS service smoke: dashboard active, gateway active, dashboard HEAD `f287192a`, worktree clean, `/office` GET 200, and listener bound to `100.122.57.85:8765` only.
+- Deployed asset hashes matched the verified local build: JS `096ca7e160d4b43097da764cc1da065d83e82940f03a3218b5f89704a8f58bcf`, CSS `dcdcaba5c205f3b0e05ba142feb0beea6a59eac80849f337caf033e4cfddd70a`.
+- Browser smoke on `http://100.122.57.85:8765/office?projection-orchestration=1&v=f287192a` confirmed active projection orchestration hooks, 4 active nodes, 3 active flows, no mutation controls, raw-leak probe false, and no console JS errors.
+- Public negative probes against the VPS IPv4/IPv6 public addresses on port 8765 timed out (`http_code=000`), preserving private/Tailscale-only exposure.
+
+Next operational step:
+
+- Keep PR #4 as draft/reviewable unless the user explicitly asks to mark ready or merge. The next implementation track should be manual Mac/WSL safe-bundle relay production before any watcher/cron/NAS mount automation.
+
+## Projection Relay Producer 1 — manual Mac/WSL safe-bundle generator completed
+
+Branch: `ai-office-stage16e-safe-spatial-choreography-20260510`
+
+Implementation summary:
+
+- Added `scripts/ai_office/generate_office_projection.py`, a manual/dry-run producer for MacBook/WSL relay use.
+- The producer reads already-validated Paperclip safe manifest YAML, then emits an Office projection bundle with `manifest.json` and `payload.json` only.
+- It validates generated bundles through the existing Office projection validator, supports `--dry-run` JSON stdout, and keeps stdout/error output free of private paths, raw manifest values, token-shaped values, prompts, transcripts, raw document bodies, and omitted-section labels.
+- It does not transfer bundles, create VPS directories, run VPS ingest, restart services, start watchers/cron, mount NAS, mutate Kanban/cron/Telegram, or add dashboard controls.
+
+Safety posture:
+
+- Local manual producer only. Output is validator-passing safe DTO material intended for a separately approved manual transfer/ingest step.
+- Source material remains on the relay machine; the generated Office bundle includes only safe counts, statuses, source tags, relay/path bucket posture, freshness, validation, and redaction metadata.
+
+Verification 2026-05-13 08:31 KST:
+
+- RED verified: `tests/test_office_projection_generator.py` failed first because `scripts/ai_office/generate_office_projection.py` did not exist.
+- GREEN focused test passed: `.venv/bin/python -m pytest tests/test_office_projection_generator.py -q -o addopts=` → 4 passed.
+- Focused projection/Paperclip safety regression passed: `.venv/bin/python -m pytest tests/test_office_projection_generator.py tests/test_office_projection_validator.py tests/hermes_cli/test_office_projection_cache.py tests/test_paperclip_manifest_generator.py tests/test_paperclip_manifest_validator.py -q -o addopts=` → 28 passed.
+- Manual dry-run/write smoke passed: generated a local bundle from `docs/ai-office/examples/paperclip-source.example.yaml`, then `validate_office_projection.py` returned `OK: safe Office projection bundle`.
+- VPS dashboard worktree was fast-forwarded to the current pushed branch head for code/docs availability only; no service restart was performed. VPS generator smoke with the shared Hermes venv passed, and both `hermes-agent-dashboard.service` and `hermes-gateway.service` remained active.
+- `git diff --check` passed; changed files are docs plus the new generator/test only, with no `web/` frontend files changed.
+
+Next operational step:
+
+- Recovery check 2026-05-13 08:45 KST found the manual transfer + VPS ingest step already complete for `pcwb-vps-smoke-001`; see `Projection VPS Manual Ingest Recovery 1` below.
+- Keep PR #4 as draft/reviewable unless the user explicitly asks to mark ready or merge. Watcher/cron automation and NAS-on-VPS remain separate security-sensitive design tracks, not unfinished items in this manual path.
+
+## Projection VPS Manual Ingest Recovery 1 — active safe bundle verified
+
+Branch: `ai-office-stage16e-safe-spatial-choreography-20260510`
+
+Recovery summary:
+
+- Confirmed VPS dashboard worktree `/home/hermes/.hermes/ai-office-dashboard` is on head `05a0ee44`, matching the pushed branch head from Projection Relay Producer 1.
+- Confirmed projection cache directories exist under `/home/hermes/.hermes/office/projections/` with `incoming/pcwb-vps-smoke-001` and `active/pcwb-vps-smoke-001` present.
+- Validated the active bundle on the VPS with `python3 scripts/ai_office/validate_office_projection.py ~/.hermes/office/projections/active/pcwb-vps-smoke-001` → `OK: safe Office projection bundle`.
+- Confirmed `read_office_projection_cache()` reports safe metadata only: `status=active`, `active.bundle_id=pcwb-vps-smoke-001`, `active.bundle_path=pcwb-vps-smoke-001`, and `rejected.count=0`.
+- Confirmed `hermes-agent-dashboard.service` remained active/running and `hermes-gateway.service` remained active; this recovery pass did not restart either service.
+- Unauthenticated `/api/office` curl returned `401`, so the protected API did not become anonymously readable during this pass.
+
+Safety posture:
+
+- Recovery/check/docs-only local update plus read-only VPS validation. No new bundle was copied because a validator-passing active bundle was already present.
+- No NAS mount, direct NAS credentials, watcher/cron automation, public exposure, dashboard mutation controls, gateway restart, core checkout mutation, PR mark-ready, or merge was performed.
+- Completion evidence and unfinished/deferred classification: `docs/ai-office/plans/2026-05-13-projection-vps-manual-ingest-completion.md`.
+
+Next operational step:
+
+- Keep PR #4 draft/reviewable. Any automation, NAS mount, public exposure, service restart, or PR ready/merge step needs separate approval.
+
+## Office Release Hardening 1 — local frontend guardrails in progress
+
+Branch: `ai-office-stage16e-safe-spatial-choreography-20260510`
+
+Implementation summary:
+
+- Added a small route-level guard so mutation-capable sidebar system actions are hidden on `/office`; the sidebar shows read-only guard copy instead of `게이트웨이 재시작` / `Hermes 업데이트` while the user is on the Office page.
+- Added explicit timestamp policy copy in the Office diagnostics drawer: Office timestamps are shown using the browser locale/timezone, not a fixed KST conversion.
+- Added focused tests for the Office route system-action guard and browser-local timezone policy helper.
+
+Safety posture:
+
+- Frontend-only/read-only release hardening. No backend schema/API change, service restart, VPS deploy, safe-manifest copy, NAS mount, watcher, mutation control, renderer/dependency, credential change, or public route exposure.
+- Existing live VPS internal verification remains blocked until an SSH identity is available; do not commit/push/deploy/restart until the user explicitly approves that next release step.
+
+Verification 2026-05-12 15:41 KST:
+
+- RED verified before implementation: focused tests failed first because `shouldShowSidebarSystemActions` / `buildOfficeTimeDisplayPolicy` did not exist yet.
+- Focused frontend tests passed: `npm test -- --run src/App.test.ts src/pages/OfficePage.test.ts` → 2 files passed, 69 tests passed.
+- Focused ESLint passed: `./node_modules/.bin/eslint src/App.tsx src/App.test.ts src/appNav.ts src/pages/OfficePage.tsx src/pages/officeView.ts src/pages/OfficePage.test.ts`.
+- Production build passed: `npm run build` → `tsc -b && vite build`, with the existing Vite large chunk warning only.
+- Whitespace check passed: `git diff --check`.
+- Added-line static security scan passed.
+- Local production-preview smoke on `http://127.0.0.1:4178/office?release-hardening=1` confirmed the `/office` sidebar guard is visible, `게이트웨이 재시작` and `Hermes 업데이트` are absent, backend-less API fallback shows the safe retry/error state, and browser console JS errors are none.
+- SSH read-only verification was retried after approval but still failed because the agent has no loaded identities: `ssh-add -l` → `The agent has no identities`; `hermes@100.122.57.85` and `lidises@100.122.57.85` → `Permission denied (publickey)`.
+
+## Paperclip Workbench 2 — safe manifest visibility completed
+
+Branch: `ai-office-stage16e-safe-spatial-choreography-20260510`
+
+Implementation summary:
+
+- Added `buildOfficePaperclipManifestVisibility(state)` to summarize validator-passing Paperclip safe manifests into three safe cards: manifest count/attention, VPS/private-dashboard visibility posture, and allowlisted relay production posture.
+- Rendered the strip inside the existing folded Paperclip workbench with `data-office-paperclip-manifest-visibility="true"` and `data-office-paperclip-manifest-card="manifests|privateDashboard|relayPosture"` hooks.
+- Kept the slice frontend-only/read-only; it consumes the already-sanitized Paperclip workbench/source DTOs only and does not read raw manifest bodies, paths, adapter errors, prompts, transcripts, scripts, logs, tokens, credentials, or provider/model identity.
+
+Safety posture:
+
+- No backend schema/API change, storage, watcher, mutation control, service restart, renderer/dependency, VPS deploy, safe-manifest file copy, NAS mount, public route, Paperclip API integration, or raw source projection.
+- VPS/private-dashboard wording is posture visibility only: actual VPS sanitized projection-file deployment remains a separate approval/deploy step.
+
+Verification 2026-05-12 13:25 KST:
+
+- RED verified: `npm test -- --run OfficePage.test.ts -t "Paperclip Workbench 2"` failed first with `buildOfficePaperclipManifestVisibility is not a function`.
+- GREEN focused test passed: `npm test -- --run OfficePage.test.ts -t "Paperclip Workbench 2"`.
+- `npm test -- --run OfficePage.test.ts` passed: 65 passed.
+- `npm test -- --run App.test.ts` passed: 2 passed.
+- `./node_modules/.bin/eslint src/pages/OfficePage.tsx src/pages/officeView.ts src/pages/OfficePage.test.ts src/App.tsx src/App.test.ts` passed.
+- `npm run build` passed with the existing Vite large chunk warning only.
+- `.venv/bin/python -m pytest tests/test_paperclip_manifest_generator.py tests/test_paperclip_manifest_validator.py tests/hermes_cli/test_office_state_adapters.py tests/hermes_cli/test_office_api.py -q -o 'addopts='` passed: 33 passed.
+- `.venv/bin/python scripts/ai_office/validate_paperclip_manifest.py docs/ai-office/examples/paperclip-source.example.yaml` passed.
+- `git diff --check`, `git diff --cached --check`, and added-line static security scan passed.
+- Browser smoke `/office?paperclip-workbench=2&verify=1` passed: Paperclip workbench, manifest visibility strip, three card hooks, map summary, scene markers, raw leak false, console JS errors none.
+- Independent pre-commit review passed with no security concerns or logic errors.
+
+## Office Source Health 2 — compact diagnostics/readability summary completed
+
+Branch: `ai-office-stage16e-safe-spatial-choreography-20260510`
+
+Implementation summary:
+
+- Added `buildOfficeSourceHealthCompactDiagnostics(state)` to compress Source Health 1 into three safe top-glance cards: source coverage, attention needed, and reading density.
+- Rendered the compact diagnostics above the existing rail with `data-office-source-health-compact="true"` and per-card `data-office-source-health-compact-card="coverage|attention|readability"` hooks.
+- Kept the slice frontend-only/read-only and derived only from Source Health 1 safe aggregates; it does not read raw adapter errors, prompts, scripts, logs, tokens, paths, source tags, or warning bodies.
+- Added sentinel test coverage for raw path/token/prompt/script/error-summary/warning-body exclusion.
+
+Safety posture:
+
+- No backend schema/API change, storage, watcher, mutation control, service restart, renderer/dependency, Paperclip/NAS raw browsing, Kanban mutation, cron mutation, or topic-registry write.
+- Browser-facing copy remains Korean-first and excludes prompts, transcripts, task bodies/results, raw logs, cron scripts, credentials/tokens, full private filesystem paths, provider/model identity, and raw adapter errors.
+
+Verification 2026-05-12 13:10 KST:
+
+- `npm test -- --run OfficePage.test.ts -t "Source Health 2"` → passed.
+- `npm test -- --run OfficePage.test.ts` → 64 passed.
+- `npm test -- --run App.test.ts` → 2 passed.
+- `npm run lint` → passed with existing unrelated warnings only.
+- `npm run build` → passed with existing Vite large chunk warning only.
+- `.venv/bin/python -m pytest tests/hermes_cli/test_office_state_adapters.py tests/hermes_cli/test_office_api.py -q -o addopts=` → 22 passed.
+- `git diff --check` and added-line static security scan → passed.
+- Browser smoke on `http://127.0.0.1:8765/office?source-health=2&verify=1` confirmed compact diagnostics, three compact card hooks, source-health rail, raw leak false, and no JS console errors.
+- Independent pre-commit review passed with no security concerns or logic errors.
+
+Next recommended track slice:
+
+- After final verification/commit, prefer `Paperclip Workbench 2` for VPS/private-dashboard visibility of validator-passing safe manifests, unless source-health readability still needs another small frontend-only pass.
+- Keep the next slice read-only/raw-free and gate any VPS deploy, service restart, NAS mount, source watcher, mutation control, or renderer/dependency separately.
+
+## Office Source Health 1 — consolidated read-only source-health rail completed
+
+Branch: `ai-office-stage16e-safe-spatial-choreography-20260510`
+
+Implementation summary:
+
+- Added `buildOfficeSourceHealthRail(state)` for a safe six-item source-health rail: sessions, Kanban, Paperclip, automation, routing, and redaction.
+- Rendered the rail inside the existing source status card with `data-office-source-health-rail="true"` and per-item `data-office-source-health-rail-item` hooks.
+- Kept the rail frontend-only and read-only, using only safe DTO status/count/warning/redaction aggregates.
+- Added sentinel coverage to ensure raw paths, prompt/script/error-summary text, token-shaped strings, and raw warning bodies do not appear in the rail model.
+
+Safety posture:
+
+- No backend schema/API change, storage, watcher, mutation control, service restart, renderer/dependency, Paperclip/NAS raw browsing, Kanban mutation, cron mutation, or topic-registry write.
+- Browser-facing copy remains Korean-first and excludes prompts, transcripts, task bodies/results, raw logs, cron scripts, credentials/tokens, full private filesystem paths, provider/model identity, and raw adapter errors.
+
+Verification 2026-05-12 12:53 KST:
+
+- `npm test -- --run OfficePage.test.ts -t "Source Health 1"` → passed.
+- `npm test -- --run OfficePage.test.ts` → 63 passed.
+- `npm test -- --run App.test.ts` → 2 passed.
+- `npm run lint` → passed with existing unrelated warnings only.
+- `npm run build` → passed with existing Vite large chunk warning only.
+- `.venv/bin/python -m pytest tests/hermes_cli/test_office_state_adapters.py tests/hermes_cli/test_office_api.py -q -o addopts=` → 22 passed.
+- Browser smoke on `http://127.0.0.1:8765/office?source-health=1` confirmed source-health rail, six rail item hooks, raw leak false, and no JS console errors.
+- Independent pre-commit review passed with no security concerns or logic errors.
+
+Next recommended track slice:
+
+- `Office Source Health 2` only if a compact diagnostics/readability follow-up is desired; otherwise `Paperclip Workbench 2` for VPS/private-dashboard visibility of validator-passing safe manifests.
+- Keep the next slice read-only/raw-free and gate any VPS deploy, service restart, NAS mount, source watcher, mutation control, or renderer/dependency separately.
+
+## Paperclip Workbench 1 — safe source-tag/manifest workbench completed
+
+Branch: `ai-office-stage16e-safe-spatial-choreography-20260510`
+
+Implementation summary:
+
+- Added a folded/read-only `Paperclip · 공유 컨텍스트 작업대` inside `/office`, not a top-level app route.
+- Added safe frontend helpers for Paperclip workbench sources, safe inspector fields, and CSS/SVG-style map shelf slots.
+- Added safe manifest documentation, example YAML, validator, source-tag bridge documentation, and MacBook/WSL-local dry-run generator.
+- Added a backend read-only adapter that loads only validator-passing local manifests from `~/.hermes/office/paperclip-manifests/*.y*ml`, does not create storage when absent, caps tags/manifests, and projects only safe `OfficeDataSource` metadata.
+- Added final handoff: `docs/ai-office/plans/2026-05-11-paperclip-workbench-handoff.md`.
+
+Safety posture:
+
+- No Paperclip API, NAS watcher/queue, raw document browser, mutation controls, VPS NAS credentials, direct NAS RW mount, service restart, or top-level Paperclip sidebar item.
+- Browser-facing DTO/UI excludes prompts, transcripts, tool args, task bodies/results, raw logs, cron scripts, credentials/tokens, full private filesystem paths, provider/model identity, and raw NAS/Paperclip document bodies.
+
+Verification 2026-05-12 12:25 KST:
+
+- `npm test -- --run OfficePage.test.ts` → 62 passed.
+- `npm test -- --run App.test.ts` → 2 passed.
+- ESLint for touched Office/App frontend files passed.
+- `npm run build` passed with existing Vite large chunk warning only.
+- `.venv/bin/python -m pytest tests/test_paperclip_manifest_generator.py tests/test_paperclip_manifest_validator.py tests/hermes_cli/test_office_state_adapters.py tests/hermes_cli/test_office_api.py -q -o addopts=` → 33 passed.
+- Safe manifest validator example check passed: `OK: safe Paperclip manifest`.
+- Browser smoke on `http://127.0.0.1:8765/office?paperclip-workbench=1` confirmed workbench hook, source hook, Office map, no top-level Paperclip nav link, raw leak false, and no JS console errors.
+- Corrected a stale Kanban adapter test expectation so the focused backend regression suite now matches the implemented safe Kanban DTO contract.
+
+Next recommended track slice:
+
+- `Paperclip Workbench 2` only if the user wants VPS/private-dashboard deployment of sanitized projection files. Keep it read-only and transfer only validator-passing safe manifests; do not mount NAS on VPS.
+- Alternative: `Office Source Health 1` to consolidate Kanban/Paperclip/source-health summaries without new mutation controls or raw projection.
+
+## Kanban Observability 2 — stale/blocked/workload summaries completed
+
+Branch: `ai-office-stage16e-safe-spatial-choreography-20260510`
+
+Implementation summary:
+
+- Extended `buildOfficeKanbanProjection(state)` with an `observability` block labelled `Kanban Observability 2`.
+- Added read-only summary cards for workload, blocked tasks, and stale running tasks using only allowlisted Kanban DTO fields: `task_ref`, `board_id`, `status`, `badges`, and safe timestamps.
+- Added per-board workload summaries (`total`, `running`, `blocked`, `stale`) and capped `attentionRefs` from safe `task_ref` values only.
+- `/office` now renders the folded/read-only Kanban observability rail with stable smoke hooks:
+  - `data-office-kanban-observability="true"`
+  - `data-office-kanban-observability-card="workload|blocked|stale"`
+  - `data-office-kanban-workload-board`
+  - `data-office-kanban-attention-refs`
+
+Safety posture:
+
+- Frontend read-only projection only; no Kanban mutation controls, backend mutation endpoints, schema expansion, service exposure changes, NAS dependency, or Telegram topic ID rendering.
+- No task title/body/result/comments/logs/prompts/transcripts/secrets/provider identity/raw adapter errors are consumed for the observability summary.
+- Stale detection is generated from safe heartbeat/update timestamps relative to `OfficeState.generated_at`; missing/invalid timestamps do not fabricate stale state.
+
+Verification 2026-05-12 12:06 KST:
+
+- RED verified: new `projection.observability` test failed before implementation with `Cannot read properties of undefined (reading 'stageLabel')`.
+- Focused frontend test: `OfficePage.test.ts` 62 passed.
+- ESLint passed for `OfficePage.tsx`, `officeView.ts`, and `OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large chunk warning only.
+- Backend focused office API test: `test_office_api.py` 7 passed.
+- `git diff --check` passed.
+- Browser smoke on `http://127.0.0.1:8765/office?kanban-observability=2` confirmed Kanban Observability 2 hooks, summary cards `workload|blocked|stale`, workload board hook, raw leak false, and no JS console errors.
+
+Next track status:
+
+- The previously recommended `Paperclip Workbench 1` track is now complete and documented above.
+- Keep mutation controls as a separate approval-gated plan.
+
+## Kanban Observability 1 — read-only projection completed
+
+Branch: `ai-office-stage16e-safe-spatial-choreography-20260510`
+
+Commit:
+
+- `abea462a feat: add read-only office kanban projection`
+
+Implementation summary:
+
+- Added a browser-facing, read-only Kanban operations projection for `/office`.
+- Backend Kanban work item DTO now allowlists safe metadata only: `task_ref`, `board_id`, redacted `assignee`, redacted `tenant`, status/priority/timestamps, dependency counts, parent/child task refs, and generated badges.
+- Explicitly excluded task title/body/result/comments/logs/prompts/transcripts/secrets and raw Telegram topic IDs.
+- Frontend adds `buildOfficeKanbanProjection(state)` plus `/office` UI section `칸반 운영실` with board counts, assignee/tenant summaries, and parent-child graph edges.
+- Stable smoke hooks: `data-office-kanban-projection`, `data-office-kanban-graph`, and `data-office-readonly-kanban`.
+
+Safety posture:
+
+- Read-only projection only; no Kanban mutation controls, no backend mutation endpoints, no service exposure changes, no NAS dependency, and no Telegram topic ID rendering.
+- Independent pre-commit review initially flagged `assignee`/`tenant` as free-form leak paths; backend now routes both through `_safe_display(..., redactions)` and regression tests include secret/path sentinels.
+
+Verification 2026-05-12 11:30 KST:
+
+- Local backend focused test: `test_office_api.py` 7 passed.
+- Local frontend focused test: `OfficePage.test.ts` 60 passed.
+- Local `npm run build` passed with existing Vite large chunk warning only.
+- Local `git diff --check` passed.
+- Independent re-review passed.
+- VPS `/home/hermes/.hermes/ai-office-dashboard` patched and verified: backend 7 passed, frontend 60 passed, build passed with existing Vite warning only.
+- VPS `hermes-agent-dashboard.service` restarted and is active.
+- Browser smoke on `http://100.122.57.85:8765/office` confirmed Kanban projection/graph/read-only hooks, 15 Kanban items, graph parent badges, no JS console errors, and no raw body/result/secret/local-path sentinel leaks.
+
+Operational notes:
+
+- VPS worktree still has the pre-existing `web/src/pages/LifeCompassPage.tsx` local modification; it was intentionally preserved.
+- VPS service restart still logs the known stop-sigterm timeout/SIGKILL behavior, but post-restart service health and browser/API smoke passed.
+- For VPS non-login SSH sessions, Node tooling may require `PATH=$HOME/.local/bin:$PATH` before `npm` commands in the dashboard web directory.
+
+Next recommended track slice:
+
+- `Kanban Observability 2` — continue with read-only stale/blocked/workload summaries for the Kanban projection.
+- Keep mutation controls as a separate approval-gated plan, e.g. `Kanban Mutation Controls 1` only after explicit approval.
+
+## Stage 17-A sidebar simplification and Paperclip bridge planning completed
+
+Branch: `ai-office-stage16e-safe-spatial-choreography-20260510`
+
+Plan:
+
+- `docs/ai-office/plans/2026-05-11-sidebar-simplification-paperclip-bridge.md`
+
+Implementation summary:
+
+- Added `buildSidebarNavGroups(items)` in `web/src/App.tsx`.
+- Left sidebar now keeps primary routes visible and folds secondary built-in routes into Korean-first groups:
+  - `운영`: analytics/models/logs/cron
+  - `도구함`: skills/plugins/profiles
+  - `설정 · 도움말`: config/keys/docs
+  - `더 보기`: future unknown built-in entries
+- Active child routes auto-open their folded group.
+- Plugin tabs remain in the existing plugin section instead of becoming permanent top-level clutter.
+- Added `web/src/App.test.ts` coverage so sidebar grouping remains stable.
+- Documented a Paperclip bridge direction: read-only, folded, safe DTO/source projection first; no raw prompts/transcripts/tool args/task bodies/logs/secrets/provider identity, no mutation controls, and no new always-visible top-level Paperclip menu by default.
+
+Safety posture:
+
+- Frontend/sidebar organization and docs only.
+- No backend/API/schema changes, Paperclip runtime connection, service/config mutation, persistent browser storage, or mutation controls.
+
+## Stage 16-E safe spatial choreography completed
+
+Branch: `ai-office-stage16e-safe-spatial-choreography-20260510`
+
+Plan:
+
+- `docs/ai-office/plans/2026-05-10-stage-16e-safe-spatial-choreography.md`
+
+Implementation summary:
+
+- Added `OfficeSafeSpatialChoreography`, `OfficeSafeSpatialChoreographyItem`, and `buildOfficeSafeSpatialChoreography(events, heartbeat)`.
+- The helper derives only from Stage 16-C safe events plus Stage 16-D heartbeat posture: known room coordinates, safe event category, safe tone, safe count, and generated Korean copy.
+- `/office` now renders a CSS/SVG-only Stage 16-E spatial overlay above the existing map:
+  - `data-office-safe-spatial-choreography="true"`
+  - `data-office-safe-spatial-choreography-mode`
+  - `data-office-safe-spatial-choreography-item="room-pulse|route-sweep"`
+  - `data-office-safe-spatial-choreography-room`
+  - `data-office-safe-spatial-choreography-intensity`
+- First/static snapshots stay honest: when only `snapshot_static` is available, the overlay remains in `safe-spatial-idle` and does not fabricate route/room movement.
+
+Safety posture:
+
+- CSS/SVG/DOM only; no renderer dependency, canvas engine, sprite assets, persistent browser storage, mutation controls, SSE/WebSocket, or service/config changes.
+- No raw prompt/transcript/task_body/script/log/provider/model/secret/token/adapter error/task identity rendered; backend event `detail` is ignored by the helper.
+
+Verification 2026-05-10 01:05 KST:
+
+- Focused frontend test: `OfficePage.test.ts` 55 passed.
+- ESLint passed for `OfficePage.tsx`, `officeView.ts`, `OfficePage.test.ts`, and `api.ts`.
+- `npm run build` passed with the existing Vite large chunk warning only.
+- Backend focused office tests passed: 21 passed in 1.34s.
+- `git diff --check` passed.
+- Browser smoke `/office?stage16e=safe-spatial-choreography` passed: office-first layout, safe motion heartbeat, safe spatial choreography container in `safe-spatial-idle` for first/static snapshot, motion lane, raw leak false, console JS errors none.
+
+## Stage 16-D safe motion heartbeat completed
+
+Branch: `ai-office-stage16d-safe-motion-heartbeat-20260510`
+
+Plan:
+
+- `docs/ai-office/plans/2026-05-10-stage-16d-safe-motion-heartbeat.md`
+
+Implementation summary:
+
+- Added `OfficeSafeMotionHeartbeat`, `OfficeSafeMotionHeartbeatItem`, and `buildOfficeSafeMotionHeartbeat(...)`.
+- The heartbeat derives only from Stage 16-C safe stream posture plus browser-local poll status, tick count, failure count, and reduced-motion preference.
+- `/office` performs safe visible-tab polling for `/api/office/events` and keeps local fallback if unavailable.
+- Added a compact heartbeat rail near the safe event substrate:
+  - `data-office-safe-motion-heartbeat="true"`
+  - `data-office-safe-motion-heartbeat-mode`
+  - `data-office-safe-motion-heartbeat-phase`
+  - `data-office-safe-motion-heartbeat-intensity`
+  - `data-office-safe-motion-heartbeat-enabled`
+  - `data-office-safe-motion-heartbeat-item="stream|cadence|motion"`
+- Added CSS-only heartbeat/scan cues with reduced-motion fallback.
+
+Safety posture:
+
+- read-only endpoint polling only.
+- no SSE/WebSocket, renderer dependency, persistent browser storage, mutation controls, or service/config change.
+- no raw prompt/transcript/task_body/script/log/provider/model/secret/token/adapter error/task identity rendered.
+
+Verification 2026-05-10 00:52 KST:
+
+- RED verified: `buildOfficeSafeMotionHeartbeat` missing test failed.
+- GREEN verified: `OfficePage.test.ts` 54 passed after helper implementation.
+- Final frontend focused test: `OfficePage.test.ts` 54 passed.
+- ESLint passed for `OfficePage.tsx`, `officeView.ts`, `OfficePage.test.ts`, and `api.ts`.
+- `npm run build` passed with the existing Vite large chunk warning only.
+- Backend focused office tests passed: 21 passed in 1.02s.
+- `git diff --check` passed.
+- Browser smoke `/office?stage16d=safe-motion-heartbeat` passed: office-first layout, safe event substrate, stream status `local-fallback`, heartbeat present, heartbeat mode/phase/intensity/enabled hooks present, heartbeat items `stream|cadence|motion`, motion lane, tracking truth, diagnostics drawer, raw leak false, console JS errors none.
+
+## Stage 16-C read-only safe event stream completed
+
+Branch: `ai-office-stage16c-safe-event-stream-20260510`
+
+Plan:
+
+- `docs/ai-office/plans/2026-05-10-stage-16c-read-only-safe-event-stream.md`
+
+Implementation summary:
+
+- Added protected read-only `GET /api/office/events`.
+- Added backend safe event projection from already-redacted `OfficeState` summary/source posture only.
+- Event payload is allowlisted to schema/generation metadata plus events with `id`, `category`, `room_id`, `tone`, `count`, `generated_at`, and `redacted`.
+- Added frontend `api.getOfficeEvents()` and `OfficeSafeEventsResponse` DTO types.
+- Added `OfficeSafeStreamPosture` and `buildOfficeSafeStreamPosture(...)` to accept backend-safe events and fall back to the Stage 16-B local projection if unavailable or invalid.
+- `/office` renders `data-office-safe-stream-status` next to the safe event substrate and uses backend-safe events for the motion lane when available.
+
+Safety posture:
+
+- read-only endpoint only; mutation methods rejected.
+- no long-lived SSE/WebSocket yet; Stage 16-C is the minimal verified backend safe event endpoint.
+- no persistent browser storage, no renderer dependency, no mutation controls.
+- no raw prompt/transcript/task_body/script/log/provider/model/secret/token/adapter error/task identity emitted or rendered.
+
+Verification 2026-05-10 00:39 KST:
+
+- Backend RED verified: `/api/office/events` safe-shape test failed before implementation.
+- Backend GREEN verified: `test_office_api.py` 6 passed.
+- Frontend RED verified: `buildOfficeSafeStreamPosture` missing test failed.
+- Frontend GREEN verified: `OfficePage.test.ts` 53 passed.
+- Final frontend focused test: `OfficePage.test.ts` 53 passed.
+- ESLint passed for `OfficePage.tsx`, `officeView.ts`, `OfficePage.test.ts`, and `api.ts`.
+- `npm run build` passed with the existing Vite large chunk warning only.
+- Backend focused office tests passed: 21 passed in 1.68s.
+- `git diff --check` passed.
+- Browser smoke `/office?stage16c=safe-event-stream` passed: office-first layout, safe event substrate, stream status `local-fallback`, safe event item `snapshot_static`, motion lane command `idle-glow`, tracking truth, diagnostics drawer, prior route/focus/breadcrumb/pulse hooks, raw leak false, console JS errors none.
+
+## Stage 16-B safe event substrate motion completed
+
+Branch: `ai-office-stage16-safe-realtime-motion-20260509`
+
+Plan:
+
+- `docs/ai-office/plans/2026-05-09-stage-16b-safe-event-substrate-motion.md`
+
+Implementation summary:
+
+- Added safe event substrate helper/view-models:
+  - `OfficeSafeEvent` / `OfficeSafeEventSubstrate` / `buildOfficeSafeEventSubstrate(...)`
+  - `OfficeSafeMotionCommand` / `buildOfficeSafeMotionCommands(...)`
+- Safe events are generated from existing safe `OfficeStateDelta` only:
+  - `snapshot_static` for first/static snapshots with no fabricated movement.
+  - `room_density_changed` for safe room badge density.
+  - `flow_changed` for known room-to-room flow deltas.
+  - `attention_changed` for warning/negative room posture.
+- `/office` renders a compact Stage 16-B event substrate strip and movement lane near Stage 16-A tracking truth:
+  - `data-office-safe-event-substrate="true"`
+  - `data-office-safe-event-item`
+  - `data-office-safe-motion-lane="true"`
+  - `data-office-safe-motion-command`
+- CSS adds subtle scan/pulse effects for generated motion commands, with reduced-motion fallback.
+
+Safety posture:
+
+- frontend-only, read-only, CSS/DOM/SVG-only.
+- no backend/API/schema changes, no SSE/WebSocket yet.
+- no mutation controls, no persistent browser storage, no renderer dependency.
+- no raw prompt/transcript/task_body/script/log/provider/model/secret/token/task identity projection.
+- this stage creates the safe visual/event contract that a later Stage 16-C backend stream can feed.
+
+Verification 2026-05-09 23:20 KST:
+
+- RED verified for missing `buildOfficeSafeEventSubstrate`.
+- GREEN focused helper/UI test: `OfficePage.test.ts` 52 passed.
+- Final frontend focused test: `OfficePage.test.ts` 52 passed.
+- ESLint passed for `OfficePage.tsx`, `officeView.ts`, and `OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large chunk warning only.
+- Backend focused office tests passed: 18 passed in 0.98s.
+- `git diff --check` passed.
+- Browser smoke `/office?stage16b=safe-event-substrate-motion`: office-first layout present, tracking truth present, safe event substrate present, static first-snapshot event item present, safe motion lane present with `idle-glow`, selected-character click still works, diagnostics drawer present, prior route compass/focus lane/breadcrumb/pulse timeline hooks present, raw leak false, console JS errors none.
+
+## Stage 16-A AI Office-first reset completed
+
+Branch: `ai-office-stage16a-office-first-reset-20260509`
+
+Plan:
+
+- `docs/ai-office/plans/2026-05-09-stage-16a-ai-office-first-reset.md`
+
+Implementation summary:
+
+- Added safe Stage 16-A helper/view-models:
+  - `OfficeFirstLayoutPlan` / `buildOfficeFirstLayoutPlan(...)`
+  - `OfficeTrackingTruthPlan` / `buildOfficeTrackingTruthPlan(...)`
+  - `OfficeSelectedCharacterFocus` / `buildOfficeSelectedCharacterFocus(...)`
+- `/office` now puts the AI Office scene/map before the generic dashboard summary and diagnostic HUD stack.
+- Character inspection is click-first: clicking a character sets browser-local selected-character state, highlights the marker with `data-office-character-selected`, and updates a persistent safe selected-character panel.
+- Hover/title copy is shortened to generated role/nameplate, status, and safe action only.
+- The tracking truth strip makes the current substrate explicit: snapshot/delta based unless a real safe event stream is added later.
+- Stage 14/15 HUD remains available but is moved into a secondary diagnostics drawer posture.
+
+Safety posture:
+
+- frontend-only, read-only, CSS/DOM/SVG-only.
+- no backend/API/schema changes, no mutation controls, no persistent browser storage, no renderer dependency.
+- no raw prompt/transcript/task_body/script/log/provider/model/secret/token/task identity projection.
+- safe event substrate is documented as a future boundary, not implemented in Stage 16-A.
+
+Verification 2026-05-09 22:58 KST:
+
+- RED verified for `buildOfficeFirstLayoutPlan` before implementation.
+- GREEN helper/UI focused test: `OfficePage.test.ts` 50 passed.
+- Final frontend focused test: `OfficePage.test.ts` 50 passed.
+- ESLint passed for `OfficePage.tsx`, `officeView.ts`, and `OfficePage.test.ts`.
+- `npm run build` passed with the existing Vite large chunk warning only.
+- Backend focused office tests passed: 18 passed in 1.05s.
+- `git diff --check` passed.
+- Browser smoke `/office?stage16a=office-first-reset`: office-first layout present, tracking truth present, selected character click sets `data-office-character-selected="true"`, selected-character panel updates, diagnostics drawer present, prior route compass/focus lane/breadcrumb/pulse timeline hooks present, raw leak false, console JS errors none.
 
 ## Stage 15-C readiness checklist in progress
 

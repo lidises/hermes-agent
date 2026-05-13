@@ -1,0 +1,26 @@
+schema_version: 1
+id: paperclip:demo-shared-context
+label: demo-shared-context
+source_type: paperclip
+relay: MacBook
+status: partial
+checked_at: '2026-05-11T09:00:00Z'
+item_count: 12
+warning_count: 1
+tags:
+  - source:koreandeer-shoulder
+  - source:paperclip-demo
+path_bucket: nas-personal-ledger
+extension_buckets:
+  markdown: 6
+  pdf: 2
+  image: 1
+  other: 3
+provenance_summary: relay-generated safe manifest
+staleness_note: checked within 24h
+redaction:
+  policy_version: 1
+  omitted_sections:
+    - raw_documents
+    - raw_paths
+    - credentials

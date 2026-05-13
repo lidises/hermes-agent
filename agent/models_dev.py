@@ -172,6 +172,11 @@ PROVIDER_TO_MODELS_DEV: Dict[str, str] = {
     "perplexity": "perplexity",
     "cohere": "cohere",
     "ollama-cloud": "ollama-cloud",
+    "tencent-tokenhub": "tencent-tokenhub",
+    "tencent": "tencent-tokenhub",
+    "tokenhub": "tencent-tokenhub",
+    "tencent-cloud": "tencent-tokenhub",
+    "tencentmaas": "tencent-tokenhub",
 }
 
 # Reverse mapping: models.dev → Hermes (built lazily)

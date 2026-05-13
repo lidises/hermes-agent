@@ -19,6 +19,7 @@ import {
   BarChart3,
   BookOpen,
   Clock,
+  ChevronDown,
   Code,
   Cpu,
   Database,
@@ -77,6 +78,7 @@ import { PluginPage, PluginSlot, usePlugins } from "@/plugins";
 import type { PluginManifest } from "@/plugins";
 import { useTheme } from "@/themes";
 import { isDashboardEmbeddedChatEnabled } from "@/lib/dashboard-flags";
+import { buildSidebarNavGroups, shouldShowSidebarSystemActions, type NavItem, type SidebarNavGroup } from "@/appNav";
 
 function RootRedirect() {
   return <Navigate to="/sessions" replace />;
@@ -365,6 +367,10 @@ export default function App() {
     () => partitionSidebarNav(builtinNav, manifests),
     [builtinNav, manifests],
   );
+  const sidebarNavGroups = useMemo(
+    () => buildSidebarNavGroups(sidebarNav.coreItems),
+    [sidebarNav.coreItems],
+  );
   const routes = useMemo(
     () => buildRoutes(builtinRoutes, manifests),
     [builtinRoutes, manifests],
@@ -515,11 +521,12 @@ export default function App() {
               aria-label={t.app.navigation}
             >
               <ul className="flex flex-col">
-                {sidebarNav.coreItems.map((item) => (
-                  <SidebarNavLink
+                {sidebarNavGroups.map((group) => (
+                  <SidebarNavGroup
                     closeMobile={closeMobile}
-                    item={item}
-                    key={item.path}
+                    group={group}
+                    key={group.id}
+                    pathname={normalizedPath}
                     t={t}
                   />
                 ))}
@@ -644,6 +651,66 @@ export default function App() {
   );
 }
 
+function SidebarNavGroup({ closeMobile, group, pathname, t }: SidebarNavGroupProps) {
+  const groupLabel = (t.app.navGroups as Record<string, string>)[group.id] ?? group.id;
+  const containsActive = group.items.some((item) => item.path === pathname);
+  const [isOpen, setIsOpen] = useState(false);
+
+  if (!group.collapsible) {
+    return (
+      <>
+        {group.items.map((item) => (
+          <SidebarNavLink
+            closeMobile={closeMobile}
+            item={item}
+            key={item.path}
+            t={t}
+          />
+        ))}
+      </>
+    );
+  }
+
+  return (
+    <li data-sidebar-nav-group={group.id}>
+      <details
+        className="group/sidebar-nav border-t border-current/10 py-1"
+        open={containsActive || isOpen}
+        onToggle={(event) => setIsOpen(event.currentTarget.open)}
+      >
+        <summary
+          className={cn(
+            "flex cursor-pointer list-none items-center justify-between gap-2",
+            "px-5 py-2",
+            "font-mondwest text-[0.68rem] tracking-[0.16em] uppercase",
+            containsActive ? "text-midground opacity-90" : "text-midground/45 hover:text-midground/75",
+            "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-midground",
+          )}
+        >
+          <span>{groupLabel}</span>
+          <ChevronDown
+            className={cn(
+              "h-3 w-3 shrink-0 transition-transform",
+              isOpen && "rotate-180",
+            )}
+            aria-hidden
+          />
+        </summary>
+        <ul className="flex flex-col pb-1" data-sidebar-nav-group-items={group.id}>
+          {group.items.map((item) => (
+            <SidebarNavLink
+              closeMobile={closeMobile}
+              item={item}
+              key={item.path}
+              t={t}
+            />
+          ))}
+        </ul>
+      </details>
+    </li>
+  );
+}
+
 function SidebarNavLink({ closeMobile, item, t }: SidebarNavLinkProps) {
   const { path, label, labelKey, icon: Icon } = item;
 
@@ -697,9 +764,18 @@ function SidebarNavLink({ closeMobile, item, t }: SidebarNavLinkProps) {
 
 function SidebarSystemActions({ onNavigate }: { onNavigate: () => void }) {
   const { t } = useI18n();
+  const location = useLocation();
   const navigate = useNavigate();
   const { activeAction, isBusy, isRunning, pendingAction, runAction } =
     useSystemActions();
+
+  if (!shouldShowSidebarSystemActions(location.pathname)) {
+    return (
+      <div className="shrink-0 border-t border-current/10 px-5 py-3 text-[0.65rem] leading-4 text-midground/55" data-office-system-actions-guard="true">
+        오피스는 읽기 전용 화면입니다. 재시작/업데이트 작업은 다른 운영 화면에서만 실행할 수 있습니다.
+      </div>
+    );
+  }
 
   const items: SystemActionItem[] = [
     {
@@ -806,11 +882,11 @@ function SidebarSystemActions({ onNavigate }: { onNavigate: () => void }) {
   );
 }
 
-interface NavItem {
-  icon: ComponentType<{ className?: string }>;
-  label: string;
-  labelKey?: string;
-  path: string;
+interface SidebarNavGroupProps {
+  closeMobile: () => void;
+  group: SidebarNavGroup;
+  pathname: string;
+  t: Translations;
 }
 
 interface SidebarNavLinkProps {

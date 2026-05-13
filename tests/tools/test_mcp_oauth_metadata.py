@@ -24,6 +24,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+pytest.importorskip("mcp", reason="MCP optional dependency is not installed")
+
 from mcp.shared.auth import OAuthMetadata
 
 from tools.mcp_oauth import HermesTokenStorage

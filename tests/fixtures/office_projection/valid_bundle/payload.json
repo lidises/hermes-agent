@@ -1,0 +1,41 @@
+{
+  "schema_version": "office_projection_payload.v1",
+  "bundle_id": "pcwb-safe-001",
+  "source_kind": "paperclip",
+  "generated_at": "2026-05-12T07:15:00Z",
+  "redacted": true,
+  "items": [
+    {
+      "id": "manifest-card",
+      "kind": "summary_card",
+      "label": "검증된 매니페스트",
+      "status": "ok",
+      "count": 3
+    },
+    {
+      "id": "private-dashboard-card",
+      "kind": "summary_card",
+      "label": "비공개 대시보드",
+      "status": "ok",
+      "count": 1
+    },
+    {
+      "id": "relay-posture-card",
+      "kind": "summary_card",
+      "label": "릴레이 준비",
+      "status": "partial",
+      "count": 2
+    }
+  ],
+  "summary": {
+    "safe_item_count": 3,
+    "attention_count": 0
+  },
+  "display": {
+    "cards": [
+      "manifests",
+      "privateDashboard",
+      "relayPosture"
+    ]
+  }
+}

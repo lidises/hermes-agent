@@ -1413,6 +1413,20 @@ def get_model_context_length(
         ctx = lookup_models_dev_context(effective_provider, model)
         if ctx:
             return ctx
+        if effective_provider in (
+            "tencent-tokenhub", "tencent", "tokenhub", "tencent-cloud", "tencentmaas"
+        ):
+            # TokenHub uses the same bare model IDs as other Hunyuan catalogs.
+            # If models.dev is unavailable in tests/offline mode, keep the
+            # provider-specific fallback before the provider-unaware OpenRouter
+            # cache so hy3-preview does not inherit OpenRouter's binary 256K
+            # limit for Tencent TokenHub's decimal 256K contract.
+            model_lower = model.lower()
+            for default_model, length in sorted(
+                DEFAULT_CONTEXT_LENGTHS.items(), key=lambda x: len(x[0]), reverse=True
+            ):
+                if default_model in model_lower:
+                    return length
 
     # 6. OpenRouter live API metadata (provider-unaware fallback)
     metadata = fetch_model_metadata()

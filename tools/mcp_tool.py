@@ -169,9 +169,41 @@ def _write_stderr_log_header(server_name: str) -> None:
 
 _MCP_AVAILABLE = False
 _MCP_HTTP_AVAILABLE = False
-_MCP_SAMPLING_TYPES = False
+_MCP_NEW_HTTP = False
+_MCP_SAMPLING_TYPES = True
 _MCP_NOTIFICATION_TYPES = False
 _MCP_MESSAGE_HANDLER_SUPPORTED = False
+
+
+class _MCPCompatType:
+    """Small fallback for optional MCP SDK model classes.
+
+    The MCP tool itself stays disabled when the SDK is absent, but keeping these
+    names bound makes module imports and focused unit tests robust in minimal
+    environments.
+    """
+
+    def __init__(self, **kwargs: Any):
+        self.__dict__.update(kwargs)
+
+
+ClientSession = None
+StdioServerParameters = None
+stdio_client = None
+streamablehttp_client = None
+streamable_http_client = None
+sse_client = None
+CreateMessageResult = _MCPCompatType
+CreateMessageResultWithTools = _MCPCompatType
+ErrorData = _MCPCompatType
+SamplingCapability = _MCPCompatType
+SamplingToolsCapability = _MCPCompatType
+TextContent = _MCPCompatType
+ToolUseContent = _MCPCompatType
+ServerNotification = _MCPCompatType
+ToolListChangedNotification = _MCPCompatType
+PromptListChangedNotification = _MCPCompatType
+ResourceListChangedNotification = _MCPCompatType
 # Conservative fallback for SDK builds that don't export LATEST_PROTOCOL_VERSION.
 # Streamable HTTP was introduced by 2025-03-26, so this remains valid for the
 # HTTP transport path even on older-but-supported SDK versions.
@@ -707,7 +739,7 @@ class SamplingHandler:
     @staticmethod
     def _error(message: str, code: int = -1):
         """Return ErrorData (MCP spec) or raise as fallback."""
-        if _MCP_SAMPLING_TYPES:
+        if _MCP_SAMPLING_TYPES or ErrorData is _MCPCompatType:
             return ErrorData(code=code, message=message)
         raise Exception(message)
 

@@ -10,6 +10,11 @@ import re
 import sqlite3
 from typing import Any
 
+try:
+    import yaml
+except ImportError:  # pragma: no cover - PyYAML is an optional runtime dependency
+    yaml = None  # type: ignore[assignment]
+
 from hermes_cli.office_redaction import RedactionReport, redact_display_text
 from hermes_cli.office_state import OfficeDataSource, SourceStatus, _utc_now_iso
 from hermes_constants import get_hermes_home
@@ -23,6 +28,8 @@ _MAX_EVENTS_PER_BOARD = 50
 _MAX_CRON_JOBS = 100
 _MAX_SESSIONS = 50
 _MAX_TOPIC_REGISTRY_ENTRIES = 100
+_MAX_PAPERCLIP_MANIFESTS = 20
+_PAPERCLIP_MANIFEST_DIRNAME = "paperclip-manifests"
 _ALLOWED_TOPIC_PURPOSES = {"operations", "automation", "project", "content", "runtime", "unknown"}
 _ALLOWED_TOPIC_CONFIDENCE = {"observed", "manual", "derived", "unknown"}
 _ID_LIKE_DISPLAY_RE = re.compile(r"^-?\d{2,}$")
@@ -108,6 +115,19 @@ def _dependency_counts(conn: sqlite3.Connection, task_id: str) -> dict[str, int]
     return {"parents": int(parents or 0), "children": int(children or 0)}
 
 
+def _dependency_refs(conn: sqlite3.Connection, task_id: str) -> dict[str, list[str]]:
+    parent_rows = conn.execute(
+        "SELECT parent_id FROM task_links WHERE child_id = ? ORDER BY parent_id ASC", (task_id,)
+    ).fetchall()
+    child_rows = conn.execute(
+        "SELECT child_id FROM task_links WHERE parent_id = ? ORDER BY child_id ASC", (task_id,)
+    ).fetchall()
+    return {
+        "parents": [str(row["parent_id"]) for row in parent_rows if row["parent_id"]],
+        "children": [str(row["child_id"]) for row in child_rows if row["child_id"]],
+    }
+
+
 def _safe_display(value: object, report: RedactionReport) -> str:
     text, redactions = redact_display_text(value)
     report.merge(redactions)
@@ -120,23 +140,30 @@ def _kanban_work_item(
     task: Any,
     conn: sqlite3.Connection,
     index: int,
+    redactions: RedactionReport,
 ) -> dict[str, object]:
+    dependency_counts = _dependency_counts(conn, task.id)
+    dependency_refs = _dependency_refs(conn, task.id)
     item: dict[str, object] = {
         "id": f"kanban:{board_slug}:item:{index}",
         "kind": "kanban_task",
         "source": "kanban",
         "room_id": f"kanban:{board_slug}",
         "board_id": board_slug,
+        "task_ref": str(task.id),
         "title": "Kanban task",
         "status": task.status,
-        "assignee": None,
+        "assignee": _safe_display(task.assignee, redactions),
+        "tenant": _safe_display(task.tenant, redactions),
         "priority": task.priority,
         "created_at": task.created_at,
         "started_at": task.started_at,
         "completed_at": task.completed_at,
         "updated_at": getattr(task, "updated_at", None),
         "last_heartbeat_at": task.last_heartbeat_at,
-        "dependency_counts": _dependency_counts(conn, task.id),
+        "dependency_counts": dependency_counts,
+        "parent_task_refs": dependency_refs["parents"],
+        "child_task_refs": dependency_refs["children"],
         "badges": [],
         "provenance": {
             "status": "unknown",
@@ -151,6 +178,10 @@ def _kanban_work_item(
             badges.append("failure_history")
         if task.status == "running":
             badges.append("active")
+        if dependency_counts["parents"]:
+            badges.append("graph_child")
+        if dependency_counts["children"]:
+            badges.append("graph_parent")
     return item
 
 
@@ -244,6 +275,7 @@ def collect_kanban_office_state() -> OfficeAdapterResult:
                             task=task,
                             conn=conn,
                             index=len(work_items),
+                            redactions=redactions,
                         )
                     )
                 events.extend(_kanban_events(slug, conn))
@@ -696,4 +728,80 @@ def collect_session_office_state() -> OfficeAdapterResult:
         ),
         agents=agents,
         redactions=redactions,
+    )
+
+
+def _paperclip_manifest_dir() -> Path:
+    return get_hermes_home() / "office" / _PAPERCLIP_MANIFEST_DIRNAME
+
+
+def _load_safe_paperclip_manifest(path: Path) -> dict[str, Any] | None:
+    if yaml is None:
+        return None
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    if not isinstance(data, dict):
+        return None
+    try:
+        from scripts.ai_office.validate_paperclip_manifest import validate_manifest
+    except Exception:
+        return None
+    if validate_manifest(data):
+        return None
+    return data
+
+
+def collect_paperclip_manifest_office_state() -> OfficeAdapterResult:
+    """Project local validator-passing Paperclip manifests into the read-only Office workbench."""
+
+    checked_at = _utc_now_iso()
+    manifest_dir = _paperclip_manifest_dir()
+    if not manifest_dir.is_dir():
+        return OfficeAdapterResult(
+            source=OfficeDataSource(id="paperclip:manifest-shelf", status="missing", checked_at=checked_at)
+        )
+
+    manifests: list[dict[str, Any]] = []
+    invalid_count = 0
+    for path in sorted(manifest_dir.glob("*.y*ml"))[:_MAX_PAPERCLIP_MANIFESTS]:
+        manifest = _load_safe_paperclip_manifest(path)
+        if manifest is None:
+            invalid_count += 1
+            continue
+        manifests.append(manifest)
+
+    if not manifests:
+        return OfficeAdapterResult(
+            source=OfficeDataSource(
+                id="paperclip:manifest-shelf",
+                status="partial" if invalid_count else "missing",
+                checked_at=checked_at,
+                warning_count=1 if invalid_count else 0,
+                error_summary="paperclip manifest validation failed" if invalid_count else None,
+                source_type="paperclip",
+                relay="unknown",
+            )
+        )
+
+    primary = manifests[0]
+    tags = sorted({tag for manifest in manifests for tag in manifest.get("tags", []) if isinstance(tag, str)})[:8]
+    item_count = sum(int(manifest.get("item_count", 0)) for manifest in manifests if isinstance(manifest.get("item_count"), int))
+    warning_count = invalid_count + sum(
+        int(manifest.get("warning_count", 0)) for manifest in manifests if isinstance(manifest.get("warning_count"), int)
+    )
+    status: SourceStatus = "ok" if warning_count == 0 else "partial"
+    return OfficeAdapterResult(
+        source=OfficeDataSource(
+            id=str(primary["id"]),
+            status=status,
+            checked_at=str(primary["checked_at"]),
+            item_count=item_count,
+            warning_count=warning_count,
+            error_summary="some paperclip manifests skipped" if invalid_count else None,
+            source_type=str(primary.get("source_type", "paperclip")),
+            relay=str(primary.get("relay", "unknown")),
+            tags=tags,
+        )
     )

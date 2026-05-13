@@ -330,15 +330,19 @@ def make_fake_text_channel(channel_id: int = CHANNEL_ID, name: str = "general", 
 
 
 def make_fake_dm_channel(channel_id: int = 55555):
+    from gateway.platforms import discord as discord_platform
+
     ch = MagicMock(spec=[])
     ch.id = channel_id
     ch.name = "DM"
     ch.topic = None
-    ch.__class__ = discord.DMChannel
+    ch.__class__ = discord_platform.discord.DMChannel
     return ch
 
 
 def make_fake_thread(thread_id: int = THREAD_ID, name: str = "test-thread", parent=None):
+    from gateway.platforms import discord as discord_platform
+
     th = MagicMock(spec=[])
     th.id = thread_id
     th.name = name
@@ -347,7 +351,7 @@ def make_fake_thread(thread_id: int = THREAD_ID, name: str = "test-thread", pare
     th.guild = th.parent.guild
     th.topic = None
     th.type = 11
-    th.__class__ = discord.Thread
+    th.__class__ = discord_platform.discord.Thread
     return th
 
 

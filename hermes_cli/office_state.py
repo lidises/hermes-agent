@@ -17,6 +17,36 @@ from hermes_cli.office_redaction import RedactionReport
 OFFICE_STATE_SCHEMA_VERSION = 1
 _OFFICE_SOURCE_IDS = ("kanban", "cron", "sessions", "topics", "provenance")
 SourceStatus = Literal["ok", "partial", "missing", "unavailable", "error"]
+OfficeSafeEventCategory = Literal[
+    "snapshot_static",
+    "source_health_changed",
+    "workload_changed",
+    "attention_changed",
+]
+OfficeSafeEventRoom = Literal["sessions", "work", "automation", "routing"]
+OfficeSafeEventTone = Literal["neutral", "positive", "warning", "negative"]
+
+
+@dataclass(frozen=True)
+class OfficeSafeEvent:
+    id: str
+    category: OfficeSafeEventCategory
+    room_id: OfficeSafeEventRoom
+    tone: OfficeSafeEventTone
+    count: int
+    generated_at: str
+    redacted: bool = True
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "id": self.id,
+            "category": self.category,
+            "room_id": self.room_id,
+            "tone": self.tone,
+            "count": self.count,
+            "generated_at": self.generated_at,
+            "redacted": self.redacted,
+        }
 
 
 @dataclass(frozen=True)
@@ -27,6 +57,9 @@ class OfficeDataSource:
     item_count: int = 0
     warning_count: int = 0
     error_summary: str | None = None
+    source_type: str | None = None
+    relay: str | None = None
+    tags: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, object]:
         payload: dict[str, object] = {
@@ -38,6 +71,12 @@ class OfficeDataSource:
         }
         if self.error_summary:
             payload["error_summary"] = self.error_summary
+        if self.source_type:
+            payload["source_type"] = self.source_type
+        if self.relay:
+            payload["relay"] = self.relay
+        if self.tags:
+            payload["tags"] = list(self.tags[:8])
         return payload
 
 
@@ -70,6 +109,7 @@ class OfficeState:
     topics: list[dict[str, object]] = field(default_factory=list)
     events: list[dict[str, object]] = field(default_factory=list)
     provenance: list[dict[str, object]] = field(default_factory=list)
+    projection_cache: dict[str, object] = field(default_factory=dict)
     redactions: RedactionReport = field(default_factory=RedactionReport)
     capabilities: OfficeCapabilities = field(default_factory=OfficeCapabilities)
 
@@ -88,6 +128,7 @@ class OfficeState:
             "topics": list(self.topics),
             "events": list(self.events),
             "provenance": list(self.provenance),
+            "projection_cache": dict(self.projection_cache),
             "redactions": self.redactions.to_dict(),
             "capabilities": self.capabilities.to_dict(),
         }
@@ -195,6 +236,86 @@ def _refresh_provenance_source(state: OfficeState) -> None:
     )
 
 
+def build_office_safe_event_payload(state: OfficeState) -> dict[str, object]:
+    """Build an allowlisted read-only event payload from redacted OfficeState."""
+
+    generated_at = state.generated_at
+    events: list[OfficeSafeEvent] = []
+    warning_count = int(state.summary.get("warning_count") or 0)
+    active_work_count = int(state.summary.get("active_work_count") or 0)
+    needs_attention_count = int(state.summary.get("needs_attention_count") or 0)
+    automation_count = int(state.summary.get("automation_count") or 0)
+    source_attention_count = sum(
+        1 for source in state.data_sources if source.status in {"partial", "unavailable", "error"} or source.warning_count > 0
+    )
+
+    if source_attention_count:
+        events.append(
+            OfficeSafeEvent(
+                id="source-health-1",
+                category="source_health_changed",
+                room_id="routing",
+                tone="warning",
+                count=source_attention_count,
+                generated_at=generated_at,
+            )
+        )
+    if active_work_count:
+        events.append(
+            OfficeSafeEvent(
+                id="workload-1",
+                category="workload_changed",
+                room_id="work",
+                tone="positive",
+                count=active_work_count,
+                generated_at=generated_at,
+            )
+        )
+    if automation_count:
+        events.append(
+            OfficeSafeEvent(
+                id="automation-1",
+                category="workload_changed",
+                room_id="automation",
+                tone="neutral",
+                count=automation_count,
+                generated_at=generated_at,
+            )
+        )
+    attention_count = max(needs_attention_count, warning_count)
+    if attention_count:
+        events.append(
+            OfficeSafeEvent(
+                id="attention-1",
+                category="attention_changed",
+                room_id="work" if needs_attention_count else "routing",
+                tone="negative" if needs_attention_count else "warning",
+                count=attention_count,
+                generated_at=generated_at,
+            )
+        )
+    if not events:
+        events.append(
+            OfficeSafeEvent(
+                id="snapshot-static-1",
+                category="snapshot_static",
+                room_id="sessions",
+                tone="neutral",
+                count=len(state.agents) + len(state.work_items) + len(state.automations),
+                generated_at=generated_at,
+            )
+        )
+
+    return {
+        "schema_version": OFFICE_STATE_SCHEMA_VERSION,
+        "generated_at": generated_at,
+        "mode": "read_only",
+        "stream": "safe_snapshot_events",
+        "redacted": True,
+        "fallback": "frontend_safe_projection",
+        "events": [event.to_dict() for event in events[:8]],
+    }
+
 def build_office_state(
     *,
     display_mode: str = "localhost",
@@ -202,6 +323,7 @@ def build_office_state(
     include_cron: bool = True,
     include_sessions: bool = True,
     include_topics: bool = True,
+    include_paperclip: bool = True,
 ) -> OfficeState:
     """Build the read-only OfficeState projection from approved adapters."""
 
@@ -222,7 +344,14 @@ def build_office_state(
         from hermes_cli.office_adapters import collect_topic_registry_office_state
 
         _merge_adapter_result(state, collect_topic_registry_office_state())
+    if include_paperclip:
+        from hermes_cli.office_adapters import collect_paperclip_manifest_office_state
+
+        _merge_adapter_result(state, collect_paperclip_manifest_office_state())
     _refresh_topic_source(state)
     _refresh_provenance_source(state)
+    from hermes_cli.office_projection import read_office_projection_cache
+
+    state.projection_cache = read_office_projection_cache()
     state.summary = _compute_summary(state)
     return state
