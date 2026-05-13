@@ -123,6 +123,31 @@ Verification:
 
 No cron job was enabled in this pass. This leaves G at a safe disabled/dry-run automation design + script baseline.
 
+## Final VPS sync and smoke after evidence commit
+
+Final commit pushed:
+
+- `009c57f3 feat(office): add projection watchdog dry-run baseline`
+
+Final VPS dashboard worktree sync:
+
+- `/home/hermes/.hermes/ai-office-dashboard` moved from `bfe9c8f0` to `009c57f3`.
+- Worktree status count: 0.
+- No dashboard restart was needed for this final docs/script/test-only commit; the earlier C backend route restart remains the only dashboard restart in this C-G pass.
+- `hermes-agent-dashboard.service=active`.
+- `hermes-gateway.service=active`; gateway was not restarted.
+- Private listener remained `100.122.57.85:8765`.
+
+Final VPS verification:
+
+- `/home/hermes/.hermes/hermes-agent/venv/bin/python -m pytest tests/scripts/test_office_projection_watchdog.py tests/hermes_cli/test_office_api.py tests/hermes_cli/test_office_projection_cache.py -q -o addopts=` passed: 19 passed.
+- `scripts/ai_office/office_projection_watchdog.py` returned disabled JSON with `promotion_allowed=false`, `mode=dry-run-only`, `active_bundle_id=pcwb-vps-smoke-001`, `incoming_count=1`, and no result scan.
+- `scripts/ai_office/office_projection_watchdog.py --enabled --limit 5` returned dry-run checked JSON with one `would_promote` result for `pcwb-vps-smoke-001`; no active/cache mutation was performed.
+- Private `/office?goal-cg=009c57f3` returned HTTP 200.
+- Browser smoke found title `Hermes Agent - Dashboard`, Office content present, forms 0, raw leak false, dry-run API 200 `would_promote`, and console/JS errors 0.
+- Public IPv4/IPv6 port 8765 probes returned HTTP code `000` (IPv4 timeout, IPv6 connection failed), so public HTTP exposure was not served.
+- VPS cron list was checked; no new Office projection watcher cron job was created/enabled in this pass.
+
 ## Final safety/non-actions
 
 Not performed:
@@ -138,6 +163,4 @@ Not performed:
 
 Pending after this evidence commit:
 
-- Commit/push this evidence plus G script/tests and NEXT/STATUS updates.
-- Fast-forward VPS dashboard worktree to the final commit for code/docs availability.
-- Run final focused tests/script check and private `/office` smoke.
+- None for C-G baseline. Future work requires a new concrete task/approval: active cron enablement, additional watcher behavior, gateway/core sync, public exposure changes, or a new projection bundle source/relay track.
