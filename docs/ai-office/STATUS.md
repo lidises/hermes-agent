@@ -1,10 +1,10 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-13 14:23 KST
+Last updated: 2026-05-13 14:36 KST
 
 ## Current phase
 
-Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, Stage 14-A through Stage 14-Q safe dynamic-tracking/readability layers, Stage 16-B through Stage 16-E safe realtime/motion layers, Stage 17-A sidebar simplification/Paperclip bridge planning, Paperclip Workbench 1 safe source-tag/manifest projection, Paperclip Workbench 2 manifest visibility, Kanban Observability 1 read-only projection, Kanban Observability 2 stale/blocked/workload summaries, Office Source Health 1 consolidated source-health rail, Office Source Health 2 compact diagnostics/readability summary, Office Release Hardening 1 local frontend guardrails, Projection Orchestration 1 live safe projection flow visibility, Projection Relay Producer 1 manual safe-bundle generation, Projection VPS Manual Ingest Recovery 1, Session `20260512_181306_8d90ac` local test-hardening recovery, and PR #4 `d9ac5fae` VPS dashboard sync/private smoke are implemented/verified on top of the Stage 9-D polished CSS/SVG 2D office map. Kanban, Paperclip, Office Source Health, Office Release Hardening, Projection Orchestration, Projection Relay Producer, Projection VPS Manual Ingest Recovery, local test-hardening recovery, and PR #4 VPS dashboard sync/private smoke are tracked as independent work tracks, not continuations of the legacy stage number sequence. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
+Stage 9-E Korean-first readability pass, Stage 9-F browser-local dynamic tracking through Stage 9-F4, Stage 9-G fixture/source-health hardening, Stage 9-I DeskRPG-like CSS marker motion, Stage 10-A through Stage 10-H RPG/readability/accessibility slices, Stage 11 renderer decision closure, Stage 12 product polish, Stage 13 PR handoff, Stage 14-A through Stage 14-Q safe dynamic-tracking/readability layers, Stage 16-B through Stage 16-E safe realtime/motion layers, Stage 17-A sidebar simplification/Paperclip bridge planning, Paperclip Workbench 1 safe source-tag/manifest projection, Paperclip Workbench 2 manifest visibility, Kanban Observability 1 read-only projection, Kanban Observability 2 stale/blocked/workload summaries, Office Source Health 1 consolidated source-health rail, Office Source Health 2 compact diagnostics/readability summary, Office Release Hardening 1 local frontend guardrails, Projection Orchestration 1 live safe projection flow visibility, Projection Relay Producer 1 manual safe-bundle generation, Projection VPS Manual Ingest Recovery 1, Session `20260512_181306_8d90ac` local test-hardening recovery, and PR #4 `d9ac5fae` VPS dashboard sync/private smoke, PR #4 merge, and Mutation Control Readiness 1 are implemented/verified on top of the Stage 9-D polished CSS/SVG 2D office map. Kanban, Paperclip, Office Source Health, Office Release Hardening, Projection Orchestration, Projection Relay Producer, Projection VPS Manual Ingest Recovery, local test-hardening recovery, and PR #4 VPS dashboard sync/private smoke are tracked as independent work tracks, not continuations of the legacy stage number sequence. Stage 8-A/B/C and Stage 9-A/B/C/D remain completed and verified.
 
 Current Stage 9-E result: the `/office` page now uses Korean for primary headings, buttons, helper text, safety copy, status labels, inspector field labels, and office-map room/zone labels while keeping stable technical identifiers such as DTO, OfficeState, source IDs, cron, and enum-like adapter values visible for debugging.
 
@@ -72,6 +72,37 @@ Paperclip Workbench 1 is complete as a folded/read-only/source-tag and safe-mani
 
 Stage 6 slices were approved by the user, including proceeding through the recommended remaining slices. Stage 7 was approved with testing deferred until the end. Stage 8-A was approved as the next safe step by the user saying to proceed in order, and the user then requested items 1 through 3 to run automatically in sequence. The user also approved installing missing test/runtime extras as needed in earlier setup. No gateway restart, cron change, Kanban mutation, NAS/Obsidian write, service/config mutation, memory/skill update, pixel dependency, or mutation-control implementation has been performed. The local dashboard process was restarted only to smoke-test the newly built local frontend bundle.
 
+
+
+## PR #4 merge + Mutation Control Readiness 1 completed
+
+Merge/deploy summary:
+
+- PR #4 was merged into `main` with merge commit `e7d2d4306937af095f170b0d1a315925ac74d5a7`.
+- Follow-up commit `30bbfd4c feat(office): add gated mutation control readiness` was pushed to `main`.
+- VPS dashboard worktree `/home/hermes/.hermes/ai-office-dashboard` was moved from PR branch `d9ac5fae` to `main` at `30bbfd4c`.
+- Restarted only `hermes-agent-dashboard.service`; `hermes-gateway.service` remained active and was not restarted.
+
+Implementation summary:
+
+- Added `buildOfficeMutationControlReadiness(state)` and a diagnostics drawer readiness panel.
+- The panel shows disabled candidates for `kanban`, `automation`, `service`, and `projection` only.
+- No executable mutation backend, service action, Kanban write, cron/write path, public route, NAS credential path, or gateway action was added.
+
+Verification 2026-05-13 14:36 KST:
+
+- TDD RED/GREEN: focused readiness test failed first for missing helper, then passed after implementation.
+- `npm test -- --run OfficePage.test.ts` passed: 69 tests.
+- `npm run build` passed with existing Vite large chunk warning only.
+- `npm run lint` exited 0 with pre-existing warnings outside touched Office files.
+- VPS worktree clean at `30bbfd4c`; dashboard active; gateway active; listener private on `100.122.57.85:8765`; private `/office?v=30bbfd4c` returned 200.
+- Browser smoke found mutation readiness panel present, all four candidates disabled, enabled mutation controls `0`, forms `0`, raw leak `false`, and no console/JS errors.
+- Public IPv4/IPv6 port 8765 probes did not serve HTTP.
+
+Safety posture:
+
+- Remaining approval gates: executable dashboard mutation endpoints/actions, Kanban writes, cron/watcher automation, public exposure, NAS mount/direct credentials, and further gateway/core runtime changes.
+- Evidence: `docs/ai-office/plans/2026-05-13-pr4-merge-mutation-control-readiness.md`.
 
 ## PR #4 ready + VPS gateway sync completed
 
