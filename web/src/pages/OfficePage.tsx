@@ -75,6 +75,7 @@ import {
   buildOfficeSourceHealthCompactDiagnostics,
   buildOfficeProjectionCacheSummary,
   buildOfficeProjectionOrchestration,
+  buildOfficeMutationControlReadiness,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -1435,6 +1436,7 @@ export default function OfficePage() {
   const sourceHealthCompactDiagnostics = useMemo(() => buildOfficeSourceHealthCompactDiagnostics(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const projectionCacheSummary = useMemo(() => buildOfficeProjectionCacheSummary(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const projectionOrchestration = useMemo(() => buildOfficeProjectionOrchestration(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
+  const mutationControlReadiness = useMemo(() => buildOfficeMutationControlReadiness(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const selectedCharacter = useMemo(() => officeCharacters.find((character) => character.id === selectedCharacterId) ?? null, [officeCharacters, selectedCharacterId]);
   const selectedCharacterFocus = useMemo(() => buildOfficeSelectedCharacterFocus(selectedCharacter, latestDelta), [latestDelta, selectedCharacter]);
   const layoutPlan = useMemo(
@@ -1659,7 +1661,32 @@ export default function OfficePage() {
               <div className="text-midground/50">{timeDisplayPolicy.detail}</div>
               <div>표시 모드: {state.display_mode}</div>
               <div>원격 모드: {state.capabilities.remote_mode}</div>
-              <div>변경 기능: {state.capabilities.mutations_enabled ? "켜짐" : "없음"}</div>
+              <div>변경 기능: {state.capabilities.mutations_enabled ? "검토 게이트" : "없음"}</div>
+            </div>
+            <div
+              className="mt-3 border border-amber-300/20 bg-amber-950/10 p-3"
+              data-office-mutation-control-readiness="true"
+              data-office-mutation-control-status={mutationControlReadiness.status}
+            >
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-100">{mutationControlReadiness.stageLabel}</div>
+              <div className="mt-1 text-[11px] leading-4 text-midground/70" data-office-mutation-control-summary="true">{mutationControlReadiness.summary}</div>
+              <div className="mt-2 grid gap-1">
+                {mutationControlReadiness.controls.map((control) => (
+                  <button
+                    key={control.id}
+                    type="button"
+                    disabled
+                    className="flex cursor-not-allowed items-center justify-between gap-2 border border-current/15 bg-black/15 px-2 py-1 text-left text-[10px] text-midground/60"
+                    data-office-mutation-control-item={control.id}
+                    data-office-mutation-control-enabled={control.enabled ? "true" : "false"}
+                    title={`${control.detail} · ${control.requires.join(" · ")}`}
+                  >
+                    <span>{control.label}</span>
+                    <span>{control.posture}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="mt-2 text-[10px] leading-4 text-midground/45">{mutationControlReadiness.safetyNote}</div>
             </div>
             <div className={`office-safe-mission-clock mt-3 ${safePulseToneClass(safeMissionClock.tone)}`} aria-label="Stage 14-L 안전 mission clock" data-office-safe-mission-clock="true">
               <div className="office-safe-mission-clock__header">

@@ -65,6 +65,7 @@ import {
   buildOfficeTimeDisplayPolicy,
   buildOfficeProjectionCacheSummary,
   buildOfficeProjectionOrchestration,
+  buildOfficeMutationControlReadiness,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
@@ -178,6 +179,21 @@ describe("OfficePage view helpers", () => {
     expect(summary.cards.find((card) => card.id === "freshness")?.detail).toContain("mac · paperclip");
     expect(summary.cards.find((card) => card.id === "rejected")).toMatchObject({ title: "최근 거부", value: "1개", tone: "warning" });
     expect(JSON.stringify(summary)).not.toMatch(/\/Users\/|token=|secret|raw prompt|raw transcript/i);
+  });
+
+
+  it("builds a gated mutation-control readiness plan without executable browser actions", () => {
+    const plan = buildOfficeMutationControlReadiness(officeFixture({
+      capabilities: { read_only: false, mutations_enabled: true, remote_mode: "tailscale" },
+    }));
+
+    expect(plan.stageLabel).toBe("Mutation Control Readiness 1");
+    expect(plan.status).toBe("armed-review-only");
+    expect(plan.summary).toContain("승인된 변경도 대시보드에서 바로 실행하지 않습니다");
+    expect(plan.controls.map((control) => control.id)).toEqual(["kanban", "automation", "service", "projection"]);
+    expect(plan.controls.every((control) => control.enabled === false)).toBe(true);
+    expect(plan.controls.find((control) => control.id === "service")?.requires).toContain("service-specific approval");
+    expect(JSON.stringify(plan)).not.toMatch(/restart|delete|merge|ready|token|secret|\/Users\//i);
   });
 
   it("groups unknown work safely without reading sensitive body fields", () => {

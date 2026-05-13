@@ -3423,6 +3423,74 @@ export type OfficeProjectionOrchestration = {
   flows: OfficeProjectionOrchestrationFlow[];
 };
 
+
+export type OfficeMutationControlId = "kanban" | "automation" | "service" | "projection";
+
+export type OfficeMutationControlReadinessControl = {
+  id: OfficeMutationControlId;
+  label: string;
+  detail: string;
+  requires: string[];
+  enabled: false;
+  posture: "design-gated" | "approval-gated" | "runtime-unwired";
+};
+
+export type OfficeMutationControlReadiness = {
+  stageLabel: string;
+  status: "blocked-read-only" | "armed-review-only";
+  summary: string;
+  safetyNote: string;
+  controls: OfficeMutationControlReadinessControl[];
+};
+
+export function buildOfficeMutationControlReadiness(state: OfficeState): OfficeMutationControlReadiness {
+  const approvedByCapability = state.capabilities.mutations_enabled === true && state.capabilities.read_only === false;
+  const status: OfficeMutationControlReadiness["status"] = approvedByCapability ? "armed-review-only" : "blocked-read-only";
+  const sharedRequires = ["explicit user approval", "audited backend endpoint", "confirmation UX", "safe audit trail"];
+  return {
+    stageLabel: "Mutation Control Readiness 1",
+    status,
+    summary: approvedByCapability
+      ? "승인된 변경도 대시보드에서 바로 실행하지 않습니다. 먼저 제어 후보와 게이트만 보이게 합니다."
+      : "현재 OfficeState는 읽기 전용이므로 제어 후보는 모두 잠겨 있습니다.",
+    safetyNote: "이 패널은 실행 버튼이 아니라 설계/승인/감사 조건을 표시하는 안전 게이트입니다.",
+    controls: [
+      {
+        id: "kanban",
+        label: "Kanban 작업 제어",
+        detail: "작업 생성·상태 변경·배정 후보는 별도 엔드포인트와 감사 설계 전까지 비활성입니다.",
+        requires: [...sharedRequires, "kanban action allowlist"],
+        enabled: false,
+        posture: "design-gated",
+      },
+      {
+        id: "automation",
+        label: "자동화 제어",
+        detail: "cron 실행·중지·일정 변경 후보는 스크립트/출력 비노출 조건 전까지 비활성입니다.",
+        requires: [...sharedRequires, "cron action allowlist"],
+        enabled: false,
+        posture: "approval-gated",
+      },
+      {
+        id: "service",
+        label: "서비스 제어",
+        detail: "gateway/dashboard/systemd 계층은 서비스별 승인과 롤백 문서 전까지 UI에서 실행하지 않습니다.",
+        requires: [...sharedRequires, "service-specific approval", "rollback handle"],
+        enabled: false,
+        posture: "runtime-unwired",
+      },
+      {
+        id: "projection",
+        label: "Projection ingest 제어",
+        detail: "safe bundle 검증/승격 후보는 validator-passing bundle과 값 echo 금지 조건 전까지 비활성입니다.",
+        requires: [...sharedRequires, "validator-passing bundle", "no raw value echo"],
+        enabled: false,
+        posture: "approval-gated",
+      },
+    ],
+  };
+}
+
 export function buildOfficeSceneObjects(state: OfficeState, nodes: OfficeMapNode[]): OfficeSceneObject[] {
   return nodes.flatMap((node) => {
     const config = SCENE_ROOM_CONFIG[node.id];
