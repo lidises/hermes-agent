@@ -107,6 +107,10 @@ def build_projection_bundle(args: argparse.Namespace) -> dict[str, dict[str, Any
         raise ProjectionGeneratorError("invalid generated_by")
     if not BUNDLE_ID_RE.match(args.bundle_id):
         raise ProjectionGeneratorError("invalid bundle id")
+    if args.valid_for_seconds <= 0:
+        raise ProjectionGeneratorError("valid seconds must be positive")
+    if args.hard_expire_seconds <= 0:
+        raise ProjectionGeneratorError("hard expire seconds must be positive")
     if not args.paperclip_manifest:
         raise ProjectionGeneratorError("at least one --paperclip-manifest is required")
 
@@ -226,15 +230,20 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     output_dir = args.output_dir
-    output_dir.mkdir(parents=True, exist_ok=True)
-    (output_dir / "manifest.json").write_text(
-        json.dumps(bundle["manifest"], ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
-    (output_dir / "payload.json").write_text(
-        json.dumps(bundle["payload"], ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
+    try:
+        output_dir.mkdir(parents=True, exist_ok=True)
+        (output_dir / "manifest.json").write_text(
+            json.dumps(bundle["manifest"], ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        (output_dir / "payload.json").write_text(
+            json.dumps(bundle["payload"], ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+    except OSError as exc:
+        print(f"ERROR: failed to write projection bundle ({exc.__class__.__name__})", file=sys.stderr)
+        return 1
+
     errors = validate_bundle(output_dir)
     report = error_report(errors)
     if not report["ok"]:

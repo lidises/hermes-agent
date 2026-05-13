@@ -203,6 +203,64 @@ If the next standing goal is to reduce the full repository failure count, the re
 4. Re-run Discord/gateway subsets serially to identify xdist/environment isolation failures.
 5. Address existing React lint warnings in small UI-specific PRs, because they predate this Office projection recovery and are not caused by the current changes.
 
+## Implementation hardening pass 2026-05-13 09:05 KST
+
+A small code hardening slice was added for the manual Office projection producer because it directly addresses the remaining checklist items about implemented code paths, file I/O failures, user-facing errors, typechecking, and function responsibility.
+
+Changed files:
+
+- `scripts/ai_office/generate_office_projection.py`
+- `tests/test_office_projection_generator.py`
+
+TDD evidence:
+
+1. Added failing tests first:
+   - `test_projection_generator_rejects_non_positive_freshness_without_writing`
+   - `test_projection_generator_reports_output_write_errors_without_private_paths`
+2. RED result:
+   - freshness test failed because the generator only failed later through the projection validator with a less direct message;
+   - output write error test failed with an unhandled `FileExistsError` traceback that included private temporary paths.
+3. GREEN implementation:
+   - reject non-positive `--valid-for-seconds` and `--hard-expire-seconds` before building/writing a bundle;
+   - catch `OSError` around output directory creation and JSON writes;
+   - return a safe actionable error shape `ERROR: failed to write projection bundle (<ExceptionClass>)` without echoing the private path and without a Python traceback.
+4. Regression evidence:
+   - new focused tests passed;
+   - full generator test file passed with 6 tests;
+   - projection/Paperclip focused suite now passed with 30 tests.
+
+Additional command outcomes after code hardening:
+
+- `.venv/bin/python -m pip install 'ruff' 'ty>=0.0.1a29,<0.0.22'` installed project-declared dev tools into the local venv only; no lockfile or source dependency change was made.
+- `.venv/bin/python -m ty check scripts/ai_office/generate_office_projection.py tests/test_office_projection_generator.py` initially found a test helper typing issue at `manifest.update(overrides)`; fixed by annotating the helper manifest as `dict[str, object]`; rerun passed.
+- `.venv/bin/python -m ruff check scripts/ai_office/generate_office_projection.py tests/test_office_projection_generator.py` passed; ruff emitted the existing project config deprecation warning about top-level `select` moving to `lint.select`.
+- `.venv/bin/python -m pytest tests/test_office_projection_generator.py -q -o addopts=` → `6 passed`.
+- `.venv/bin/python -m pytest tests/test_office_projection_generator.py tests/test_office_projection_validator.py tests/hermes_cli/test_office_projection_cache.py tests/test_paperclip_manifest_generator.py tests/test_paperclip_manifest_validator.py -q -o addopts=` → `30 passed`.
+- Full Python suite rerun after the code change: `.venv/bin/python -m pytest -q --tb=short` → `104 failed, 20371 passed, 234 skipped, 216 warnings, 16 errors`. This is still outside the projection path, but the count improved after installing declared dev tools; remaining examples are Discord/gateway isolation, provider parity drift, ACP/MCP/TTS optional dependency/import issues, PTY websocket behavior, file-tool state/staleness tests, Vercel terminal tool expectation drift, and macOS process timing.
+- Frontend focused tests plus build rerun: `npm test -- --run OfficePage.test.ts App.test.ts && npm run build` → `71 tests passed`; `tsc -b` and Vite build passed with the existing large chunk warning.
+- Browser smoke rerun on temporary local dashboard port `8877`:
+  - `/office?checklist=2` rendered with navigation and Office projection map;
+  - raw leak regex false;
+  - no loading/error terminal state left on the page;
+  - no `lorem ipsum`, `TODO`, or `FIXME` in visible body text;
+  - 50 interactive controls, 0 controls without accessible text;
+  - first character inspection click succeeded and remained raw-leak false;
+  - `/sessions` route rendered a non-blank sessions screen and raw-leak false;
+  - console JS errors after smoke were zero.
+
+Checklist-relevant classification after this pass:
+
+- Implemented code path: the projection producer is executable code, not a stub; its new file I/O and freshness failure paths are covered by tests.
+- Runtime exceptions: known projection-producer output write errors now return a controlled error instead of a traceback. Broad repo runtime exceptions remain in unrelated full-suite failures and are classified separately above.
+- Typecheck: project-declared `ty` was installed in the local venv and passed for the touched producer/tests. Full-repo typecheck was not attempted because this pass changed only the projection producer/tests and the repo has many unrelated optional/runtime domains.
+- UI coverage: Office and Sessions routes were smoke-tested locally. This is route-level evidence, not a claim of exhaustive mobile/tablet/WCAG coverage for every dashboard plugin.
+- API/backend: no public endpoint contract changed. The existing protected `/api/office` 401 evidence and projection validator/cache tests remain the backend evidence for this slice.
+- External services/async/cron: no new integration, watcher, queue, or daemon was added; automation remains approval-gated.
+- Performance: the changed producer path processes bounded manifest lists and writes two JSON files once; no loop, polling, or network call was introduced.
+- Logging/errors: the producer now reports safe error categories without secret/path echoing and without swallowing errors silently.
+- i18n: no new browser-facing UI string was added. New CLI errors are English, consistent with the existing script/validator messages.
+- Config/hardcoding: no environment-specific path was added; output path remains a CLI argument and internal file names remain the fixed projection bundle contract (`manifest.json`, `payload.json`).
+
 ## Conclusion
 
 The previously listed next operational step, manual safe-bundle transfer plus VPS ingest, is complete and verified on the VPS for bundle `pcwb-vps-smoke-001`.

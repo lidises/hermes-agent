@@ -35,7 +35,7 @@ def run_validator(bundle_path: Path) -> subprocess.CompletedProcess[str]:
 
 
 def write_paperclip_manifest(path: Path, **overrides: object) -> Path:
-    manifest = {
+    manifest: dict[str, object] = {
         "schema_version": 1,
         "id": "paperclip:test-source",
         "label": "테스트 소스",
@@ -169,3 +169,53 @@ def test_projection_generator_rejects_invalid_bundle_id_without_echoing_args(tmp
     assert "raw prompt" not in result.stderr
     assert "/Users/example" not in result.stderr
     assert "abc123456789SECRET" not in result.stderr
+
+
+def test_projection_generator_rejects_non_positive_freshness_without_writing(tmp_path: Path) -> None:
+    paperclip_manifest = write_paperclip_manifest(tmp_path / "paperclip.yaml")
+    output_dir = tmp_path / "projection"
+
+    result = run_generator(
+        "--source-kind",
+        "paperclip",
+        "--paperclip-manifest",
+        str(paperclip_manifest),
+        "--bundle-id",
+        "pcwb-safe-test-004",
+        "--generated-by",
+        "mac",
+        "--output-dir",
+        str(output_dir),
+        "--valid-for-seconds",
+        "0",
+    )
+
+    assert result.returncode != 0
+    assert not output_dir.exists()
+    assert "valid seconds must be positive" in result.stderr
+    assert "Traceback" not in result.stderr
+
+
+def test_projection_generator_reports_output_write_errors_without_private_paths(tmp_path: Path) -> None:
+    paperclip_manifest = write_paperclip_manifest(tmp_path / "paperclip.yaml")
+    output_dir = tmp_path / "projection"
+    output_dir.write_text("not a directory", encoding="utf-8")
+
+    result = run_generator(
+        "--source-kind",
+        "paperclip",
+        "--paperclip-manifest",
+        str(paperclip_manifest),
+        "--bundle-id",
+        "pcwb-safe-test-005",
+        "--generated-by",
+        "mac",
+        "--output-dir",
+        str(output_dir),
+    )
+
+    assert result.returncode != 0
+    assert "failed to write projection bundle" in result.stderr
+    assert "FileExistsError" in result.stderr
+    assert str(tmp_path) not in result.stderr
+    assert "Traceback" not in result.stderr
