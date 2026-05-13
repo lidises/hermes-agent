@@ -434,6 +434,13 @@ Verification after this pass:
   - unauthenticated calls → 401.
 - Frontend focused tests/build: `npm test -- --run OfficePage.test.ts App.test.ts && npm run build` → `71 passed`; `tsc -b` and Vite build passed with only the known large chunk warning.
 - Full Python suite was rerun after this pass: `.venv/bin/python -m pytest -q --tb=short` → `104 failed, 20373 passed, 234 skipped, 218 warnings, 16 errors`. The new focused Office/API test is green; the remaining failures/errors are the same unrelated repo-wide domains previously classified (Discord gateway mocks/compat, ACP/MCP/TTS optional import paths, provider parity expectation drift, gateway systemd/WSL/macOS service tests, PTY websocket tests, file-tool temp-path guard/staleness expectations, OAuth metadata, Vercel terminal requirement expectations, and timing-sensitive local interrupt cleanup).
+- VPS deployment/smoke after commit `0da55ab1`:
+  - dashboard worktree reset to `0da55ab1` and stayed clean/tracking origin;
+  - `python3 -m py_compile hermes_cli/web_server.py tests/hermes_cli/test_office_api.py` passed on VPS;
+  - VPS `hermes` shell has no pytest-installed Python environment (`python3: No module named pytest`), so VPS-side pytest was not available;
+  - `systemctl --user restart hermes-agent-dashboard.service` was run because this pass changed backend API runtime code;
+  - `hermes-agent-dashboard.service` and `hermes-gateway.service` were active after restart;
+  - active projection validator remained `OK: safe Office projection bundle`.
 
 ## Conclusion
 
