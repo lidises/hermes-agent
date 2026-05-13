@@ -442,6 +442,37 @@ Verification after this pass:
   - `hermes-agent-dashboard.service` and `hermes-gateway.service` were active after restart;
   - active projection validator remained `OK: safe Office projection bundle`.
 
+## Evidence extension pass 2026-05-13 10:12 KST
+
+This pass targeted user-facing/runtime error leakage on the frontend API flow. The Office page and several other pages render `String(err)` from `fetchJSON`; before this pass, a backend or proxy failure body containing a traceback, local path, or token-shaped text could become visible in the UI.
+
+TDD frontend error hardening:
+
+- New failing test first: `web/src/lib/api.test.ts` / `fetchJSON does not surface raw response bodies with paths, tokens, or stack traces in thrown errors`.
+- RED command: `npm test -- --run src/lib/api.test.ts` initially failed because the thrown error included `Traceback raw /Users/lidises/nas token=... sk-...`.
+- Root cause: `fetchJSON` threw `new Error(`${status}: ${text}`)` for every non-2xx response and therefore trusted the raw response body as user-facing copy.
+- GREEN implementation:
+  - added a narrowly-scoped `safeErrorDetail(text, statusText)` helper in `web/src/lib/api.ts`;
+  - keeps short safe response details when they do not match sensitive patterns;
+  - converts traceback, local path, token/secret/password/private-key-like, or multiline response bodies into constant `request failed`;
+  - keeps status code for actionability without echoing raw body content.
+
+Checklist-relevant evidence from this pass:
+
+- User-facing API error strings now avoid obvious raw trace/path/token leakage from failed network/API responses.
+- New helper has a single responsibility and is reused by the central frontend API client instead of being duplicated across Office/Logs/Models/etc. pages.
+- Frontend type/build coverage includes the new test file; an initial test-file TypeScript issue was found by `tsc -b` and fixed before commit.
+- No source dependency or lockfile change was needed.
+
+Verification after this pass:
+
+- RED: `npm test -- --run src/lib/api.test.ts` → failed with raw response body included in thrown error.
+- GREEN: `npm test -- --run src/lib/api.test.ts` → `1 passed`.
+- Focused frontend tests/build: `npm test -- --run src/lib/api.test.ts OfficePage.test.ts App.test.ts && npm run build` → `72 passed`; `tsc -b` and Vite build passed with only the known large chunk warning.
+- Frontend lint: `npm run lint` → exit 0 with the same 20 pre-existing warnings; no new errors.
+- Focused Office/projection/API Python suite: `.venv/bin/python -m pytest tests/hermes_cli/test_office_api.py tests/test_office_projection_generator.py tests/test_office_projection_validator.py tests/hermes_cli/test_office_projection_cache.py tests/test_paperclip_manifest_generator.py tests/test_paperclip_manifest_validator.py -q -o addopts=` → `39 passed`.
+- Diff hygiene: `git diff --check` passed; working-tree added-line secret scan passed.
+
 ## Conclusion
 
 The previously listed next operational step, manual safe-bundle transfer plus VPS ingest, is complete and verified on the VPS for bundle `pcwb-vps-smoke-001`.

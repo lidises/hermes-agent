@@ -36,6 +36,16 @@ function setSessionHeader(headers: Headers, token: string): void {
   }
 }
 
+const UNSAFE_ERROR_BODY_PATTERN = /traceback|\/Users\/|\/home\/|token\s*=|sk-[A-Za-z0-9_-]+|secret|password|private key/i;
+
+function safeErrorDetail(text: string, statusText: string): string {
+  const fallback = statusText || "request failed";
+  const trimmed = text.trim();
+  if (!trimmed) return fallback;
+  if (UNSAFE_ERROR_BODY_PATTERN.test(trimmed) || trimmed.includes("\n")) return "request failed";
+  return trimmed;
+}
+
 export async function fetchJSON<T>(url: string, init?: RequestInit): Promise<T> {
   // Inject the session token into all /api/ requests.
   const headers = new Headers(init?.headers);
@@ -46,7 +56,7 @@ export async function fetchJSON<T>(url: string, init?: RequestInit): Promise<T> 
   const res = await fetch(`${BASE}${url}`, { ...init, headers });
   if (!res.ok) {
     const text = await res.text().catch(() => res.statusText);
-    throw new Error(`${res.status}: ${text}`);
+    throw new Error(`${res.status}: ${safeErrorDetail(text, res.statusText)}`);
   }
   return res.json();
 }
