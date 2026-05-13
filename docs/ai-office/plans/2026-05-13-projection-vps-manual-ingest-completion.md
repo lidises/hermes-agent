@@ -480,6 +480,34 @@ Verification after this pass:
   - `hermes-agent-dashboard.service` and `hermes-gateway.service` were active after restart;
   - active projection validator remained `OK: safe Office projection bundle`.
 
+## Evidence extension pass 2026-05-13 10:22 KST
+
+This pass extended the previous frontend API error hardening from unsafe non-2xx response bodies to rejected network-level failures. This covers browser fetch failures such as connection resets, aborted requests, proxy/network interruptions, and opaque transport exceptions where the thrown `Error.message` can contain environment paths or token-shaped text.
+
+TDD frontend network-failure hardening:
+
+- New failing test first: `web/src/lib/api.test.ts` / `fetchJSON turns rejected network failures into a constant safe error`.
+- RED command: `npm test -- --run src/lib/api.test.ts -t "rejected network"` initially failed because a rejected fetch error message containing `ECONNRESET raw /home/hermes/.env token=...` was propagated to the caller.
+- Root cause: the central `fetchJSON` helper only sanitized HTTP response bodies after a `Response` object existed; it did not catch transport-level `fetch(...)` rejections.
+- GREEN implementation: wrap the `fetch` call in a narrow `try/catch` and throw a constant `Network request failed` error for transport-level failures, while preserving the existing HTTP status/body handling path for actual responses.
+
+Checklist-relevant evidence from this pass:
+
+- External service/network/proxy failures now produce a bounded user-facing error string instead of surfacing raw exception messages.
+- The implementation is centralized in the existing `fetchJSON` helper and avoids duplicating catch logic in Office/Logs/Models/Sessions/etc. pages.
+- The new behavior does not change successful responses, session header injection, or HTTP 4xx/5xx status handling.
+- No dependency or lockfile change was needed.
+
+Verification after this pass:
+
+- RED: `npm test -- --run src/lib/api.test.ts -t "rejected network"` → failed with raw rejected fetch message included in the thrown error.
+- GREEN: same targeted command → `1 passed | 1 skipped`.
+- Full frontend Vitest suite: `npm test -- --run` → `73 passed`.
+- Focused frontend tests/build: `npm test -- --run src/lib/api.test.ts OfficePage.test.ts App.test.ts && npm run build` → `73 passed`; `tsc -b` and Vite build passed with only the known large chunk warning.
+- Frontend lint: `npm run lint` → exit 0 with the same 20 pre-existing warnings; no new errors.
+- Focused Office/projection/API Python suite: `.venv/bin/python -m pytest tests/hermes_cli/test_office_api.py tests/test_office_projection_generator.py tests/test_office_projection_validator.py tests/hermes_cli/test_office_projection_cache.py tests/test_paperclip_manifest_generator.py tests/test_paperclip_manifest_validator.py -q -o addopts=` → `39 passed`.
+- Diff hygiene: `git diff --check` passed.
+
 ## Conclusion
 
 The previously listed next operational step, manual safe-bundle transfer plus VPS ingest, is complete and verified on the VPS for bundle `pcwb-vps-smoke-001`.

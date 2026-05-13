@@ -53,7 +53,12 @@ export async function fetchJSON<T>(url: string, init?: RequestInit): Promise<T> 
   if (token) {
     setSessionHeader(headers, token);
   }
-  const res = await fetch(`${BASE}${url}`, { ...init, headers });
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}${url}`, { ...init, headers });
+  } catch {
+    throw new Error("Network request failed");
+  }
   if (!res.ok) {
     const text = await res.text().catch(() => res.statusText);
     throw new Error(`${res.status}: ${safeErrorDetail(text, res.statusText)}`);

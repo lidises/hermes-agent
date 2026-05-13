@@ -27,4 +27,18 @@ describe("fetchJSON", () => {
     await expect(fetchJSON("/api/office/state")).rejects.not.toThrow(/Traceback|\/Users\/lidises|token=secret|sk-office/i);
     expect(fetchMock).toHaveBeenCalledWith("/api/office/state", expect.objectContaining({ headers: expect.any(Headers) }));
   });
+
+  it("turns rejected network failures into a constant safe error", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        __HERMES_SESSION_TOKEN__: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("ECONNRESET raw /home/hermes/.env token=secret"));
+
+    await expect(fetchJSON("/api/office/events")).rejects.toThrow("Network request failed");
+    await expect(fetchJSON("/api/office/events")).rejects.not.toThrow(/\/home\/hermes|token=secret|ECONNRESET/i);
+  });
 });
