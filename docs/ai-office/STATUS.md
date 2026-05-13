@@ -1,6 +1,10 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-13 14:58 KST
+Last updated: 2026-05-13 15:14 KST
+
+## Fresh-session /goal approval posture
+
+Prepared `docs/ai-office/plans/2026-05-13-goal-a-g-approval-handoff.md` for the next `/goal` session. Approved buckets: A dashboard-only update/restart/smoke, B PR commit/push/update, C projection dry-run API/helper, D safe-bundle non-dry-run projection promote, E gateway/core sync + gateway restart with rollback, F canonical VPS Kanban write, G cron/watcher automation with safe design. Excluded: H public exposure mutation. Permanently excluded: VPS NAS mount, direct NAS credentials, and VPS direct NAS/raw-source reads.
 
 ## Current phase
 

@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-13 14:58 KST
+Last updated: 2026-05-13 15:14 KST
 
 ## Start here after `/new`
 
@@ -61,6 +61,10 @@ When not to rely on `/goal` alone:
 2. Fine-grained coding task tracking: use a written plan and, after approval, Kanban/subagent workflow.
 3. Background scheduled monitoring: use cron, not `/goal`.
 4. Any mutation approval: `/goal` does not replace explicit user approval for code/config/service/Kanban/cron changes.
+
+## Fresh-session /goal approval handoff
+
+The user approved A-G approval buckets for future AI Office work while excluding H public exposure changes and permanently excluding VPS NAS mounts/direct NAS credentials/VPS direct NAS raw reads. Use the prepared prompt and guardrails in `docs/ai-office/plans/2026-05-13-goal-a-g-approval-handoff.md` for the next `/goal` session. A-G are permission buckets, not standalone tasks: the next session must first identify the exact concrete task list from current NEXT/STATUS/evidence before implementing.
 
 ## Current next stage
 
