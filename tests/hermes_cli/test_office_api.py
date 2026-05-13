@@ -90,6 +90,21 @@ def test_office_events_is_protected_builtin_route_and_returns_safe_stream_shape(
     assert "model" not in str(payload).lower()
 
 
+def test_office_api_rejects_ambiguous_repeated_display_mode_values():
+    from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+
+    client = TestClient(app)
+    headers = {_SESSION_HEADER_NAME: _SESSION_TOKEN}
+
+    for path in ("/api/office/state", "/api/office/events"):
+        resp = client.get(f"{path}?mode=remote&mode=localhost", headers=headers)
+        assert resp.status_code == 400
+        payload = resp.json()
+        assert payload == {"detail": "Unsupported office display mode"}
+        assert "remote" not in str(payload).lower()
+        assert "localhost" not in str(payload).lower()
+
+
 def test_office_events_rejects_common_mutation_methods():
     from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
 

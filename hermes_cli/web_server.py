@@ -521,19 +521,26 @@ def _probe_gateway_health() -> tuple[bool, dict | None]:
     return False, None
 
 
-@app.get("/api/office/state")
-async def get_office_state(mode: str = "localhost"):
-    """Return the redacted read-only AI OfficeState projection."""
-    if mode != "localhost":
+def _validate_office_display_mode(request: Request) -> str:
+    modes = request.query_params.getlist("mode")
+    if not modes:
+        return "localhost"
+    if len(modes) != 1 or modes[0] != "localhost":
         raise HTTPException(status_code=400, detail="Unsupported office display mode")
+    return modes[0]
+
+
+@app.get("/api/office/state")
+async def get_office_state(request: Request):
+    """Return the redacted read-only AI OfficeState projection."""
+    mode = _validate_office_display_mode(request)
     return build_office_state(display_mode=mode).to_dict()
 
 
 @app.get("/api/office/events")
-async def get_office_events(mode: str = "localhost"):
+async def get_office_events(request: Request):
     """Return allowlisted read-only AI Office safe events."""
-    if mode != "localhost":
-        raise HTTPException(status_code=400, detail="Unsupported office display mode")
+    mode = _validate_office_display_mode(request)
     return build_office_safe_event_payload(build_office_state(display_mode=mode))
 
 

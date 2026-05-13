@@ -395,6 +395,46 @@ Verification after this pass:
   - raw leak regex false;
   - console JS errors 0.
 
+## Evidence extension pass 2026-05-13 09:59 KST
+
+This pass targeted the unchecked Office API validation/error-response evidence with a small TDD slice in the existing protected read-only endpoints.
+
+TDD API hardening:
+
+- New failing test first: `test_office_api_rejects_ambiguous_repeated_display_mode_values`.
+- Reproduction/RED: `GET /api/office/state?mode=remote&mode=localhost` with a valid dashboard session token returned `200` because FastAPI collapsed repeated query parameters to the last value.
+- Root cause: the endpoint accepted a single `mode: str = "localhost"` argument and therefore could not distinguish a single valid mode from ambiguous repeated `mode` query parameters.
+- GREEN implementation:
+  - added `_validate_office_display_mode(request: Request) -> str` with one responsibility: normalize/validate the Office display-mode query contract;
+  - missing `mode` defaults to `localhost`;
+  - exactly one `mode=localhost` remains accepted;
+  - empty, unsupported, path-like, or repeated `mode` values are rejected with the same constant 400 response;
+  - both `/api/office/state` and `/api/office/events` call the shared helper, removing duplicated endpoint validation.
+
+Checklist-relevant evidence from this pass:
+
+- Public API input validation/error response: authenticated state/events endpoints now reject ambiguous repeated query values instead of accidentally accepting the last value.
+- Unauthorized access remains 401 for both endpoints.
+- Wrong/empty/path-like modes remain 400 with constant `Unsupported office display mode`; the response does not echo supplied values such as `remote`, `localhost`, or `../secret`.
+- Responsibility boundary: new helper is narrowly scoped to display-mode validation and avoids endpoint-specific DTO construction.
+- Runtime/import evidence: `py_compile` passes for touched Python files.
+- Typecheck caveat: focused `ty check hermes_cli/web_server.py tests/hermes_cli/test_office_api.py` still fails on pre-existing broad `web_server.py` diagnostics outside this change (`CORSMiddleware` typing, credential pool optional attribute, analytics `db._conn` optional access) plus existing test object-narrowing diagnostics. The new helper itself is covered by runtime tests, ruff, and `py_compile`.
+
+Verification after this pass:
+
+- RED command: `.venv/bin/python -m pytest tests/hermes_cli/test_office_api.py::test_office_api_rejects_ambiguous_repeated_display_mode_values -q -o addopts= --tb=short` initially failed with `200 == 400`.
+- GREEN command: same targeted test → `1 passed`.
+- Focused Office/projection/API suite: `.venv/bin/python -m pytest tests/hermes_cli/test_office_api.py tests/test_office_projection_generator.py tests/test_office_projection_validator.py tests/hermes_cli/test_office_projection_cache.py tests/test_paperclip_manifest_generator.py tests/test_paperclip_manifest_validator.py -q -o addopts=` → `39 passed`.
+- Python lint: `.venv/bin/python -m ruff check hermes_cli/web_server.py tests/hermes_cli/test_office_api.py` → `All checks passed!` with the known pyproject top-level linter setting deprecation warning.
+- Runtime syntax/import guard: `.venv/bin/python -m py_compile hermes_cli/web_server.py tests/hermes_cli/test_office_api.py` → exit 0.
+- API probe with `starlette.testclient`:
+  - `/api/office/state` and `/api/office/events` → 200;
+  - `?mode=localhost` → 200;
+  - `?mode=remote`, `?mode=`, `?mode=remote&mode=localhost`, `?mode=localhost&mode=remote`, `?mode=../secret` → 400 constant detail;
+  - unauthenticated calls → 401.
+- Frontend focused tests/build: `npm test -- --run OfficePage.test.ts App.test.ts && npm run build` → `71 passed`; `tsc -b` and Vite build passed with only the known large chunk warning.
+- Full Python suite was rerun after this pass: `.venv/bin/python -m pytest -q --tb=short` → `104 failed, 20373 passed, 234 skipped, 218 warnings, 16 errors`. The new focused Office/API test is green; the remaining failures/errors are the same unrelated repo-wide domains previously classified (Discord gateway mocks/compat, ACP/MCP/TTS optional import paths, provider parity expectation drift, gateway systemd/WSL/macOS service tests, PTY websocket tests, file-tool temp-path guard/staleness expectations, OAuth metadata, Vercel terminal requirement expectations, and timing-sensitive local interrupt cleanup).
+
 ## Conclusion
 
 The previously listed next operational step, manual safe-bundle transfer plus VPS ingest, is complete and verified on the VPS for bundle `pcwb-vps-smoke-001`.
