@@ -26,6 +26,60 @@ def test_office_events_requires_dashboard_session_token():
     assert resp.status_code == 401
 
 
+def test_office_projection_dry_run_requires_dashboard_session_token():
+    from hermes_cli.web_server import app
+
+    unauth_client = TestClient(app)
+
+    resp = unauth_client.post("/api/office/projection/ingest-dry-run", json={"bundle_path": "pcwb-safe-001"})
+
+    assert resp.status_code == 401
+
+
+def test_office_projection_dry_run_is_protected_and_does_not_mutate_cache(tmp_path, monkeypatch):
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
+    from tests.hermes_cli.test_office_projection_cache import write_bundle
+    from hermes_cli.office_projection import read_office_projection_cache
+    from hermes_cli.web_server import app, _PUBLIC_API_PATHS, _SESSION_HEADER_NAME, _SESSION_TOKEN
+
+    home = tmp_path / "hermes"
+    write_bundle(home / "office" / "projections" / "incoming", "pcwb-safe-dryrun")
+    assert "/api/office/projection/ingest-dry-run" not in _PUBLIC_API_PATHS
+
+    client = TestClient(app)
+    resp = client.post(
+        "/api/office/projection/ingest-dry-run",
+        headers={_SESSION_HEADER_NAME: _SESSION_TOKEN},
+        json={"bundle_path": "pcwb-safe-dryrun"},
+    )
+
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert payload["status"] == "would_promote"
+    assert payload["dry_run"] is True
+    assert payload["action"] == "projection_ingest_promote"
+    assert payload["bundle_path"] == "pcwb-safe-dryrun"
+    assert read_office_projection_cache()["status"] == "missing"
+    assert not (home / "office" / "projections" / "active" / "pcwb-safe-dryrun").exists()
+
+
+def test_office_projection_dry_run_rejects_path_traversal_without_echoing_value(tmp_path, monkeypatch):
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
+    from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+
+    client = TestClient(app)
+    resp = client.post(
+        "/api/office/projection/ingest-dry-run",
+        headers={_SESSION_HEADER_NAME: _SESSION_TOKEN},
+        json={"bundle_path": "../secret/.env"},
+    )
+
+    assert resp.status_code == 400
+    assert resp.json() == {"detail": "Unsupported office projection bundle"}
+    assert "secret" not in str(resp.json()).lower()
+    assert ".env" not in str(resp.json()).lower()
+
+
 def test_office_state_is_protected_builtin_route_and_returns_read_only_dto():
     from hermes_cli.web_server import app, _PUBLIC_API_PATHS, _SESSION_HEADER_NAME, _SESSION_TOKEN
 

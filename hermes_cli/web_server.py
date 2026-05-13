@@ -434,7 +434,12 @@ class ConfigUpdate(BaseModel):
     config: dict
 
 
+class OfficeProjectionDryRunRequest(BaseModel):
+    bundle_path: str
+
+
 class EnvVarUpdate(BaseModel):
+
     key: str
     value: str
 
@@ -542,6 +547,32 @@ async def get_office_events(request: Request):
     """Return allowlisted read-only AI Office safe events."""
     mode = _validate_office_display_mode(request)
     return build_office_safe_event_payload(build_office_state(display_mode=mode))
+
+
+def _resolve_office_projection_incoming_bundle(bundle_path: str) -> Path:
+    """Resolve a safe incoming projection bundle name without echoing bad input."""
+
+    name = str(bundle_path or "")
+    if not name or len(name) > 120 or Path(name).name != name or name in {".", ".."}:
+        raise HTTPException(status_code=400, detail="Unsupported office projection bundle")
+    if any(char not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-" for char in name):
+        raise HTTPException(status_code=400, detail="Unsupported office projection bundle")
+    bundle = get_hermes_home().joinpath("office", "projections", "incoming", name)
+    try:
+        bundle.relative_to(get_hermes_home().joinpath("office", "projections", "incoming"))
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Unsupported office projection bundle") from None
+    return bundle
+
+
+@app.post("/api/office/projection/ingest-dry-run")
+async def dry_run_office_projection_ingest(payload: OfficeProjectionDryRunRequest):
+    """Validate an incoming safe projection bundle without mutating cache state."""
+
+    from hermes_cli.office_projection import ingest_office_projection_bundle
+
+    bundle = _resolve_office_projection_incoming_bundle(payload.bundle_path)
+    return ingest_office_projection_bundle(bundle, dry_run=True)
 
 
 @app.get("/api/status")
