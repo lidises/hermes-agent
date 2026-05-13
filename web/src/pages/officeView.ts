@@ -3433,6 +3433,16 @@ export type OfficeMutationControlReadinessControl = {
   requires: string[];
   enabled: false;
   posture: "design-gated" | "approval-gated" | "runtime-unwired";
+  risk: "low" | "medium" | "high";
+  recommendedOrder: number;
+  dryRunOnly: boolean;
+};
+
+export type OfficeMutationControlGate = {
+  id: "session" | "dryRun" | "audit" | "rollback";
+  label: string;
+  detail: string;
+  satisfied: false;
 };
 
 export type OfficeMutationControlReadiness = {
@@ -3440,6 +3450,7 @@ export type OfficeMutationControlReadiness = {
   status: "blocked-read-only" | "armed-review-only";
   summary: string;
   safetyNote: string;
+  gates: OfficeMutationControlGate[];
   controls: OfficeMutationControlReadinessControl[];
 };
 
@@ -3448,13 +3459,50 @@ export function buildOfficeMutationControlReadiness(state: OfficeState): OfficeM
   const status: OfficeMutationControlReadiness["status"] = approvedByCapability ? "armed-review-only" : "blocked-read-only";
   const sharedRequires = ["explicit user approval", "audited backend endpoint", "confirmation UX", "safe audit trail"];
   return {
-    stageLabel: "Mutation Control Readiness 1",
+    stageLabel: "Mutation Control Readiness 2",
     status,
     summary: approvedByCapability
-      ? "승인된 변경도 대시보드에서 바로 실행하지 않습니다. 먼저 제어 후보와 게이트만 보이게 합니다."
+      ? "가장 낮은 위험 후보는 safe projection dry-run입니다. UI는 계속 실행 불가 상태로 두고 설계·감사·롤백 게이트만 표시합니다."
       : "현재 OfficeState는 읽기 전용이므로 제어 후보는 모두 잠겨 있습니다.",
     safetyNote: "이 패널은 실행 버튼이 아니라 설계/승인/감사 조건을 표시하는 안전 게이트입니다.",
+    gates: [
+      {
+        id: "session",
+        label: "세션 승인",
+        detail: "작업 단위 승인과 범위가 문서에 남아야 합니다.",
+        satisfied: false,
+      },
+      {
+        id: "dryRun",
+        label: "Dry-run 우선",
+        detail: "첫 mutation 후보는 캐시를 바꾸지 않는 dry-run 결과만 반환해야 합니다.",
+        satisfied: false,
+      },
+      {
+        id: "audit",
+        label: "감사 기록",
+        detail: "결과는 safe metadata만 남기고 raw value를 echo하지 않아야 합니다.",
+        satisfied: false,
+      },
+      {
+        id: "rollback",
+        label: "롤백 핸들",
+        detail: "실제 승격 전 active/archive 복구 경로가 확인되어야 합니다.",
+        satisfied: false,
+      },
+    ],
     controls: [
+      {
+        id: "projection",
+        label: "Projection ingest dry-run",
+        detail: "validator-passing safe bundle을 실제 active cache 변경 없이 승격 가능 여부만 계산합니다.",
+        requires: [...sharedRequires, "validator-passing bundle", "no raw value echo", "dry-run response first"],
+        enabled: false,
+        posture: "approval-gated",
+        risk: "low",
+        recommendedOrder: 1,
+        dryRunOnly: true,
+      },
       {
         id: "kanban",
         label: "Kanban 작업 제어",
@@ -3462,6 +3510,9 @@ export function buildOfficeMutationControlReadiness(state: OfficeState): OfficeM
         requires: [...sharedRequires, "kanban action allowlist"],
         enabled: false,
         posture: "design-gated",
+        risk: "medium",
+        recommendedOrder: 2,
+        dryRunOnly: true,
       },
       {
         id: "automation",
@@ -3470,6 +3521,9 @@ export function buildOfficeMutationControlReadiness(state: OfficeState): OfficeM
         requires: [...sharedRequires, "cron action allowlist"],
         enabled: false,
         posture: "approval-gated",
+        risk: "high",
+        recommendedOrder: 3,
+        dryRunOnly: true,
       },
       {
         id: "service",
@@ -3478,14 +3532,9 @@ export function buildOfficeMutationControlReadiness(state: OfficeState): OfficeM
         requires: [...sharedRequires, "service-specific approval", "rollback handle"],
         enabled: false,
         posture: "runtime-unwired",
-      },
-      {
-        id: "projection",
-        label: "Projection ingest 제어",
-        detail: "safe bundle 검증/승격 후보는 validator-passing bundle과 값 echo 금지 조건 전까지 비활성입니다.",
-        requires: [...sharedRequires, "validator-passing bundle", "no raw value echo"],
-        enabled: false,
-        posture: "approval-gated",
+        risk: "high",
+        recommendedOrder: 4,
+        dryRunOnly: true,
       },
     ],
   };

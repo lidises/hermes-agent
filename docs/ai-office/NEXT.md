@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-13 14:36 KST
+Last updated: 2026-05-13 14:54 KST
 
 ## Start here after `/new`
 
@@ -453,3 +453,12 @@ Stage 14-D implemented a safe breadcrumb rail from browser-local `OfficeStateDel
 Next recommended Stage 14-E direction: compact safe route compass or room heartbeat legend that ties Stage 14-B meters, Stage 14-C pulse, and Stage 14-D breadcrumb together without adding renderer dependencies or backend schema changes.
 
 Keep constraints: no renderer/dependency, no backend/API/schema changes, no mutation controls, no persistent storage, no raw record projection.
+
+## Current handoff — Mutation Control Readiness 2 dry-run baseline (2026-05-13 14:54 KST)
+
+- PR #4 is merged; main now includes the prior dashboard/gateway evidence and mutation readiness baseline.
+- Approved low-risk follow-up completed locally: Mutation Control Readiness 2, dry-run mutation API design, and safe projection ingest/promote dry-run helper.
+- Dashboard mutation panel remains non-executable: all controls disabled, dry-run-only metadata shown, no browser mutation route/form/fetch added.
+- Safe helper baseline: `ingest_office_projection_bundle(..., dry_run=True)` returns would-promote/would-reject metadata without active/archive/rejected cache mutation or raw value echo.
+- Evidence: `docs/ai-office/plans/2026-05-13-mutation-control-v2-dry-run-evidence.md`.
+- Next gate: commit/push and VPS dashboard worktree smoke only; gateway restart, public exposure, NAS credentials, Kanban write, cron/watcher automation, and non-dry-run promotion remain out of scope unless separately approved.

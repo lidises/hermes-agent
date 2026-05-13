@@ -187,11 +187,14 @@ describe("OfficePage view helpers", () => {
       capabilities: { read_only: false, mutations_enabled: true, remote_mode: "tailscale" },
     }));
 
-    expect(plan.stageLabel).toBe("Mutation Control Readiness 1");
+    expect(plan.stageLabel).toBe("Mutation Control Readiness 2");
     expect(plan.status).toBe("armed-review-only");
-    expect(plan.summary).toContain("승인된 변경도 대시보드에서 바로 실행하지 않습니다");
-    expect(plan.controls.map((control) => control.id)).toEqual(["kanban", "automation", "service", "projection"]);
+    expect(plan.summary).toContain("가장 낮은 위험 후보는 safe projection dry-run입니다");
+    expect(plan.gates.map((gate) => gate.id)).toEqual(["session", "dryRun", "audit", "rollback"]);
+    expect(plan.gates.every((gate) => gate.satisfied === false)).toBe(true);
+    expect(plan.controls.map((control) => control.id)).toEqual(["projection", "kanban", "automation", "service"]);
     expect(plan.controls.every((control) => control.enabled === false)).toBe(true);
+    expect(plan.controls.find((control) => control.id === "projection")).toMatchObject({ risk: "low", recommendedOrder: 1, dryRunOnly: true });
     expect(plan.controls.find((control) => control.id === "service")?.requires).toContain("service-specific approval");
     expect(JSON.stringify(plan)).not.toMatch(/restart|delete|merge|ready|token|secret|\/Users\//i);
   });

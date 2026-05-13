@@ -1670,6 +1670,20 @@ export default function OfficePage() {
             >
               <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-100">{mutationControlReadiness.stageLabel}</div>
               <div className="mt-1 text-[11px] leading-4 text-midground/70" data-office-mutation-control-summary="true">{mutationControlReadiness.summary}</div>
+              <div className="mt-2 grid gap-1" data-office-mutation-control-gates="true">
+                {mutationControlReadiness.gates.map((gate) => (
+                  <div
+                    key={gate.id}
+                    className="flex items-center justify-between gap-2 border border-amber-200/10 bg-black/10 px-2 py-1 text-[10px] text-midground/60"
+                    data-office-mutation-control-gate={gate.id}
+                    data-office-mutation-control-gate-satisfied={gate.satisfied ? "true" : "false"}
+                    title={gate.detail}
+                  >
+                    <span>{gate.label}</span>
+                    <span className="uppercase tracking-[0.14em]">required</span>
+                  </div>
+                ))}
+              </div>
               <div className="mt-2 grid gap-1">
                 {mutationControlReadiness.controls.map((control) => (
                   <button
@@ -1679,10 +1693,12 @@ export default function OfficePage() {
                     className="flex cursor-not-allowed items-center justify-between gap-2 border border-current/15 bg-black/15 px-2 py-1 text-left text-[10px] text-midground/60"
                     data-office-mutation-control-item={control.id}
                     data-office-mutation-control-enabled={control.enabled ? "true" : "false"}
+                    data-office-mutation-control-risk={control.risk}
+                    data-office-mutation-control-dry-run-only={control.dryRunOnly ? "true" : "false"}
                     title={`${control.detail} · ${control.requires.join(" · ")}`}
                   >
-                    <span>{control.label}</span>
-                    <span>{control.posture}</span>
+                    <span>{control.recommendedOrder}. {control.label}</span>
+                    <span className="uppercase tracking-[0.14em]">{control.risk} · {control.posture}</span>
                   </button>
                 ))}
               </div>

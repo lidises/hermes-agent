@@ -139,24 +139,36 @@ def _copy_bundle(src: Path, dst: Path) -> None:
     shutil.copytree(src, dst)
 
 
-def ingest_office_projection_bundle(bundle_dir: str | Path, root: Path | None = None) -> dict[str, object]:
-    """Validate and manually promote/reject one candidate projection bundle."""
+def ingest_office_projection_bundle(bundle_dir: str | Path, root: Path | None = None, *, dry_run: bool = False) -> dict[str, object]:
+    """Validate and manually promote/reject one candidate projection bundle.
+
+    When ``dry_run`` is true, return the safe action outcome without copying,
+    archiving, promoting, or writing rejection metadata.
+    """
 
     src = Path(bundle_dir)
     cache_root = root or projection_root()
     active_root = cache_root / "active"
     archive_root = cache_root / "archive"
     rejected_root = cache_root / "rejected"
-    for directory in (active_root, archive_root, rejected_root):
-        directory.mkdir(parents=True, exist_ok=True)
-
     errors = validate_bundle(src)
     report = error_report(errors)
     stamp = _utc_now_compact()
     safe_name = _safe_bundle_dir_name(src)
 
     if report["ok"]:
+        if dry_run:
+            return {
+                "status": "would_promote",
+                "bundle_path": safe_name,
+                "ok": True,
+                "dry_run": True,
+                "action": "projection_ingest_promote",
+                "gates": ["validator_pass", "safe_metadata_only", "active_cache_atomic", "rollback_archive"],
+            }
         target_name = safe_name
+        for directory in (active_root, archive_root):
+            directory.mkdir(parents=True, exist_ok=True)
         active_target = active_root / target_name
         if active_target.exists():
             archive_target = archive_root / f"{stamp}__{target_name}"
@@ -167,6 +179,16 @@ def ingest_office_projection_bundle(bundle_dir: str | Path, root: Path | None = 
         return {"status": "promoted", "bundle_path": target_name, "ok": True}
 
     rejection = report.get("rejection") or {"status": "rejected", "reason_count": 0, "reasons": [], "field_paths": []}
+    if dry_run:
+        return {
+            "status": "would_reject",
+            "bundle_path": safe_name,
+            "ok": False,
+            "dry_run": True,
+            "action": "projection_ingest_promote",
+            "rejection": rejection,
+        }
+    rejected_root.mkdir(parents=True, exist_ok=True)
     rejected_target = rejected_root / f"{stamp}__{safe_name}"
     _copy_bundle(src, rejected_target)
     rejection_meta = dict(rejection)

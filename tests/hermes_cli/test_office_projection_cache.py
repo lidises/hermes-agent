@@ -120,3 +120,54 @@ def test_ingest_promotes_valid_bundle_and_preserves_safe_rejection_metadata(tmp_
     assert "secret-like value" in rejection_json
     assert "/Users/example" not in rejection_json
     assert "abc123456789SECRET" not in rejection_json
+
+
+
+def test_projection_ingest_dry_run_reports_promote_plan_without_mutating_cache(tmp_path, monkeypatch):
+    home = tmp_path / "hermes"
+    monkeypatch.setenv("HERMES_HOME", str(home))
+    incoming = home / "office" / "projections" / "incoming"
+    valid = write_bundle(incoming, "pcwb-safe-dryrun")
+
+    from hermes_cli.office_projection import ingest_office_projection_bundle, read_office_projection_cache
+
+    result = ingest_office_projection_bundle(valid, dry_run=True)
+    projection = read_office_projection_cache()
+
+    assert result == {
+        "status": "would_promote",
+        "bundle_path": "pcwb-safe-dryrun",
+        "ok": True,
+        "dry_run": True,
+        "action": "projection_ingest_promote",
+        "gates": ["validator_pass", "safe_metadata_only", "active_cache_atomic", "rollback_archive"],
+    }
+    assert projection["status"] == "missing"
+    assert not (home / "office" / "projections" / "active" / "pcwb-safe-dryrun").exists()
+
+
+def test_projection_ingest_dry_run_reports_safe_rejection_without_copying_raw_bundle(tmp_path, monkeypatch):
+    home = tmp_path / "hermes"
+    monkeypatch.setenv("HERMES_HOME", str(home))
+    incoming = home / "office" / "projections" / "incoming"
+    invalid = write_bundle(incoming, "pcwb-safe-raw")
+    payload = valid_payload("pcwb-safe-raw")
+    payload["summary"]["note"] = "/Users/example/raw token=abc123456789SECRET"
+    (invalid / "payload.json").write_text(json.dumps(payload), encoding="utf-8")
+
+    from hermes_cli.office_projection import ingest_office_projection_bundle, read_office_projection_cache
+
+    result = ingest_office_projection_bundle(invalid, dry_run=True)
+    projection = read_office_projection_cache()
+    rendered = json.dumps(result, ensure_ascii=False)
+
+    assert result["status"] == "would_reject"
+    assert result["ok"] is False
+    assert result["dry_run"] is True
+    assert result["action"] == "projection_ingest_promote"
+    assert "private path pattern" in rendered
+    assert "secret-like value" in rendered
+    assert "/Users/example" not in rendered
+    assert "abc123456789SECRET" not in rendered
+    assert projection["rejected"] == {"count": 0, "recent": []}
+    assert not (home / "office" / "projections" / "rejected").exists()

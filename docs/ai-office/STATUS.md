@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-13 14:36 KST
+Last updated: 2026-05-13 14:54 KST
 
 ## Current phase
 
@@ -3324,3 +3324,13 @@ Final verification before commit:
 - Browser smoke `/office?stage14d=safe-breadcrumb-trail`: breadcrumb exists, segments 1, Stage 14-C pulse timeline exists, pulse items 1, Stage 14-A tracking cues 11, Stage 14-B room activity meters 4, raw leak regex false, raw HTML sentinel leak false, console JS errors none.
 
 Next Stage 14-E candidate: compact safe route compass or room heartbeat legend tying Stage 14-B room meters, Stage 14-C pulse timeline, and Stage 14-D breadcrumb together without backend/schema/renderer changes.
+
+## 2026-05-13 14:54 KST — Mutation Control Readiness 2 + projection dry-run baseline
+
+- Upgraded `/office` mutation-control readiness panel to v2 with explicit session/dry-run/audit/rollback gates and risk-ranked disabled candidates.
+- Added dry-run-only design doc: `docs/ai-office/product/mutation-control-dry-run-api.md`.
+- Added safe projection ingest/promote dry-run helper: `ingest_office_projection_bundle(..., dry_run=True)`.
+- Dry-run returns safe would-promote/would-reject metadata only; it does not create active/archive/rejected cache directories, copy bundles, promote bundles, or write rejection metadata.
+- Verification passed: OfficePage focused test, OfficePage full test (69 passed), web build, lint exit 0 with existing non-Office warnings, projection cache/validator tests (15 passed), and `git diff --check`.
+- Evidence: `docs/ai-office/plans/2026-05-13-mutation-control-v2-dry-run-evidence.md`.
+- Not performed: gateway restart, gateway/core checkout mutation, public exposure change, NAS mount/direct credentials, Kanban write, cron/watcher automation, executable browser mutation controls, non-dry-run projection promote.
