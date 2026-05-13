@@ -1909,6 +1909,38 @@ export default function OfficePage() {
                 <div className="mt-1 text-xs text-midground/65">parent → child ref만 표시</div>
               </div>
             </div>
+            <div className="border border-sky-300/15 bg-sky-950/10 p-3" data-office-kanban-operating-posture="true">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <SectionLabel>{kanbanProjection.operatingPosture.stageLabel}</SectionLabel>
+                <span className="text-xs text-midground/55">source of truth: {kanbanProjection.operatingPosture.sourceOfTruth}</span>
+              </div>
+              <div className="mt-3 grid gap-2 md:grid-cols-4">
+                <div className="border border-current/15 p-3 text-xs" data-office-kanban-operating-count="open">
+                  <div className="uppercase tracking-[0.18em] text-current/60">열린 작업</div>
+                  <div className="mt-1 text-xl font-semibold tabular-nums">{kanbanProjection.operatingPosture.openTaskCount}</div>
+                </div>
+                <div className="border border-current/15 p-3 text-xs" data-office-kanban-operating-count="active">
+                  <div className="uppercase tracking-[0.18em] text-current/60">진행/대기</div>
+                  <div className="mt-1 text-xl font-semibold tabular-nums">{kanbanProjection.operatingPosture.activeTaskCount}</div>
+                </div>
+                <div className="border border-current/15 p-3 text-xs" data-office-kanban-operating-count="blocked">
+                  <div className="uppercase tracking-[0.18em] text-current/60">막힘</div>
+                  <div className="mt-1 text-xl font-semibold tabular-nums">{kanbanProjection.operatingPosture.blockedTaskCount}</div>
+                </div>
+                <div className="border border-current/15 p-3 text-xs" data-office-kanban-operating-count="done">
+                  <div className="uppercase tracking-[0.18em] text-current/60">완료 기록</div>
+                  <div className="mt-1 text-xl font-semibold tabular-nums">{kanbanProjection.operatingPosture.doneTaskCount}</div>
+                </div>
+              </div>
+              <div className="mt-3 grid gap-2 md:grid-cols-2">
+                {kanbanProjection.operatingPosture.guidanceCards.map((card) => (
+                  <div key={card.id} className={`border p-3 text-xs ${changeToneClass(card.tone)}`} data-office-kanban-operating-card={card.id}>
+                    <div className="font-semibold">{card.label}</div>
+                    <div className="mt-1 text-current/70">{card.detail}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
             <div className="border border-amber-300/15 bg-amber-950/10 p-3" data-office-kanban-observability="true">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <SectionLabel>{kanbanProjection.observability.stageLabel}</SectionLabel>

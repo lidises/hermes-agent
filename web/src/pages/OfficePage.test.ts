@@ -427,6 +427,15 @@ describe("OfficePage view helpers", () => {
     expect(projection.tenants).toEqual([{ id: "ai-office", count: 2 }]);
     expect(projection.graphEdges).toEqual([{ parent: "t_72c99902", child: "t_86deef15", boardId: "ai-office" }]);
     expect(projection.cards[0]).toMatchObject({ taskRef: "t_72c99902", boardId: "ai-office", childTaskRefs: ["t_86deef15"] });
+    expect(projection.operatingPosture).toMatchObject({
+      stageLabel: "Kanban-first 운영 v1",
+      sourceOfTruth: "VPS ai-office",
+      openTaskCount: 1,
+      activeTaskCount: 1,
+      blockedTaskCount: 0,
+      doneTaskCount: 1,
+    });
+    expect(projection.operatingPosture.guidanceCards.map((card) => card.id)).toEqual(["intake", "orchestrate", "review", "local"]);
     expect(JSON.stringify(projection)).not.toMatch(/raw|body|result|prompt|transcript|secret/i);
   });
 

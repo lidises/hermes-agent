@@ -868,6 +868,21 @@ export type OfficeKanbanObservability = {
   attentionRefs: string[];
 };
 
+export type OfficeKanbanOperatingPosture = {
+  stageLabel: "Kanban-first 운영 v1";
+  sourceOfTruth: "VPS ai-office";
+  openTaskCount: number;
+  activeTaskCount: number;
+  blockedTaskCount: number;
+  doneTaskCount: number;
+  guidanceCards: Array<{
+    id: "intake" | "orchestrate" | "review" | "local";
+    label: string;
+    detail: string;
+    tone: OfficeDeltaBadge["tone"];
+  }>;
+};
+
 export type OfficeKanbanProjection = {
   stageLabel: "칸반 운영실";
   readOnly: true;
@@ -878,6 +893,7 @@ export type OfficeKanbanProjection = {
   graphEdges: Array<{ parent: string; child: string; boardId: string }>;
   cards: OfficeKanbanProjectionCard[];
   observability: OfficeKanbanObservability;
+  operatingPosture: OfficeKanbanOperatingPosture;
 };
 
 function safeStringList(value: unknown): string[] {
@@ -964,6 +980,48 @@ function buildOfficeKanbanObservability(state: OfficeState, boards: OfficeKanban
   };
 }
 
+function buildOfficeKanbanOperatingPosture(cards: OfficeKanbanProjectionCard[]): OfficeKanbanOperatingPosture {
+  const activeTaskCount = cards.filter((card) => isKanbanRunningStatus(card.status) || card.status === "ready" || card.status === "todo" || card.status === "triage").length;
+  const blockedTaskCount = cards.filter((card) => isKanbanBlockedCard(card)).length;
+  const doneTaskCount = cards.filter((card) => card.status === "done" || card.status === "archived").length;
+  const openTaskCount = Math.max(0, cards.length - doneTaskCount);
+
+  return {
+    stageLabel: "Kanban-first 운영 v1",
+    sourceOfTruth: "VPS ai-office",
+    openTaskCount,
+    activeTaskCount,
+    blockedTaskCount,
+    doneTaskCount,
+    guidanceCards: [
+      {
+        id: "intake",
+        label: "입구 통일",
+        detail: "간단 답변은 직접 처리하고, 파일·서비스·장기 작업은 canonical board 카드로 보냅니다.",
+        tone: openTaskCount > 0 ? "positive" : "neutral",
+      },
+      {
+        id: "orchestrate",
+        label: "오케스트레이터 우선",
+        detail: "여러 역할·리뷰·승인·노드 작업은 ai-office-orchestrator가 graph로 나눕니다.",
+        tone: "neutral",
+      },
+      {
+        id: "review",
+        label: "승인/리뷰 게이트",
+        detail: "review-required·approval-required·input-required·credential-required·blocked-by-node prefix를 사용합니다.",
+        tone: blockedTaskCount > 0 ? "warning" : "positive",
+      },
+      {
+        id: "local",
+        label: "Mac은 미러",
+        detail: "Mac/WSL은 상태·릴레이 노드이고 canonical 작업 상태는 VPS ai-office board입니다.",
+        tone: "neutral",
+      },
+    ],
+  };
+}
+
 export function buildOfficeKanbanProjection(state: OfficeState): OfficeKanbanProjection {
   const boardRooms = state.rooms.filter((room) => textField(room, "source") === "kanban" && textField(room, "kind") === "kanban_board");
   const cards = state.work_items
@@ -1018,6 +1076,7 @@ export function buildOfficeKanbanProjection(state: OfficeState): OfficeKanbanPro
   }
 
   const observability = buildOfficeKanbanObservability(state, boards, cards);
+  const operatingPosture = buildOfficeKanbanOperatingPosture(cards);
 
   return {
     stageLabel: "칸반 운영실",
@@ -1029,6 +1088,7 @@ export function buildOfficeKanbanProjection(state: OfficeState): OfficeKanbanPro
     graphEdges,
     cards,
     observability,
+    operatingPosture,
   };
 }
 

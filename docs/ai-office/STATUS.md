@@ -1,6 +1,12 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-13 15:49 KST
+Last updated: 2026-05-13 16:28 KST
+
+## Kanban-first operating conversion completed
+
+The canonical VPS `ai-office` board is now being used as the operating source of truth rather than only as historical/checkpoint storage. Three real operating cards were created and completed/verified on the board: `t_83f3ff90` operating rules, `t_0fced671` live operating-room report, and `t_49757d89` safety review. A Mac convenience wrapper `/Users/lidises/.local/bin/ai-office-kanban` now queries the VPS canonical board without creating a second local board. `/office` gained a read-only Kanban-first operating posture panel showing VPS `ai-office` as source of truth, open/active/blocked/done counts, and guidance cards for intake, orchestration, review gates, and Mac relay status. Evidence: `docs/ai-office/plans/2026-05-13-kanban-first-operating-conversion.md`.
+
+Safety/non-actions: `/office` remains read-only; no mutation controls, cron/watcher enablement, public exposure, NAS mount/direct credentials, gateway restart, or raw task body/result projection were added.
 
 ## Fresh-session /goal C-G execution completed
 
