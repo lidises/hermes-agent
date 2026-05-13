@@ -539,6 +539,42 @@ Verification after this pass:
 - Focused Office/projection/API Python suite: `.venv/bin/python -m pytest tests/hermes_cli/test_office_api.py tests/test_office_projection_generator.py tests/test_office_projection_validator.py tests/hermes_cli/test_office_projection_cache.py tests/test_paperclip_manifest_generator.py tests/test_paperclip_manifest_validator.py -q -o addopts=` → `39 passed`.
 - Diff hygiene: `git diff --check` passed.
 
+## Evidence extension pass 2026-05-13 10:51 KST
+
+This pass targeted the remaining repo-wide automatic-test evidence gap by running the full Python suite, isolating a non-fatal cache invalidation failure in terminal/code-execution tool availability, and fixing that failure with a focused regression test.
+
+Full-suite evidence before the fix:
+
+- Command: `.venv/bin/python -m pytest -q`.
+- Result after the previous pass: `111 failed, 20367 passed, 234 skipped, 214 warnings, 16 errors in 238.16s`.
+- The run still showed the known repo-wide failure classes, but also exposed a specific actionable regression in `tests/tools/test_terminal_tool_requirements.py` where unavailable Vercel Sandbox terminal/code-execution tools could remain visible after a prior quiet-mode tool-definition cache hit.
+
+TDD terminal availability cache hardening:
+
+- New failing test first: `tests/tools/test_terminal_tool_requirements.py::TestTerminalRequirements::test_quiet_tool_cache_rechecks_vercel_terminal_requirements`.
+- RED command: `.venv/bin/python -m pytest tests/tools/test_terminal_tool_requirements.py::TestTerminalRequirements::test_quiet_tool_cache_rechecks_vercel_terminal_requirements -q -o addopts=`.
+- RED result: failed because `get_tool_definitions(..., quiet_mode=True)` returned `terminal`/`execute_code` from a cached valid Vercel state after `_get_env_config()` changed to unsupported `vercel_runtime=node20`.
+- Root cause: the outer `model_tools.get_tool_definitions()` quiet-mode cache was keyed by requested toolsets, registry generation, and config file fingerprint, but not by process-local backend/auth availability state. The registry-level check_fn TTL could also retain a prior True result while tests or long-lived processes changed terminal backend/auth state.
+- GREEN implementation:
+  - added `_tool_availability_fingerprint()` in `model_tools.py` for terminal/backend availability inputs that affect quiet tool schemas;
+  - added `_uses_availability_sensitive_toolsets()` to scope extra invalidation to `terminal`/`code_execution` or default all-tool calls;
+  - invalidates registry check_fn cache and outer tool-definition cache when availability-sensitive terminal/code-execution tool definitions are resolved, preventing stale terminal schemas from surviving backend/auth changes.
+
+Verification after this pass:
+
+- Focused RED/GREEN regression: `.venv/bin/python -m pytest tests/tools/test_terminal_tool_requirements.py::TestTerminalRequirements::test_quiet_tool_cache_rechecks_vercel_terminal_requirements tests/tools/test_terminal_tool_requirements.py::TestTerminalRequirements::test_terminal_and_execute_code_tools_hide_for_unsupported_vercel_runtime tests/tools/test_terminal_tool_requirements.py::TestTerminalRequirements::test_terminal_and_execute_code_tools_hide_for_vercel_without_auth -q -o addopts=` → `3 passed`.
+- Full terminal requirements file under project xdist defaults: `.venv/bin/python -m pytest tests/tools/test_terminal_tool_requirements.py -q` → `7 passed`.
+- Related registry/tool focused suite: `.venv/bin/python -m pytest tests/tools/test_terminal_tool_requirements.py tests/tools/test_registry.py -q` → `38 passed`.
+- Focused Office/projection/API Python suite: `.venv/bin/python -m pytest tests/hermes_cli/test_office_api.py tests/test_office_projection_generator.py tests/test_office_projection_validator.py tests/hermes_cli/test_office_projection_cache.py tests/test_paperclip_manifest_generator.py tests/test_paperclip_manifest_validator.py -q -o addopts=` → `39 passed`.
+- Focused frontend tests/build: `node --test scripts/sync-assets.test.mjs && npm test -- --run src/lib/api.test.ts OfficePage.test.ts App.test.ts && npm run build` → asset test passed, `73 passed`, `tsc -b` and Vite build passed with only the known large chunk warning.
+- Frontend lint: `npm run lint` → exit 0 with the same 20 pre-existing warnings; no new errors.
+- Diff hygiene and added-line secret scan passed.
+
+Remaining full-suite status after this pass:
+
+- A second full-suite run was attempted before the final cache adjustment and still reported broad repo-wide failures; the terminal availability failures from that run were then reproduced and fixed with the focused tests above.
+- The remaining full-suite failures are still non-fatal for the Office/Paperclip PR path and belong to the existing repo-wide test-health track: Discord gateway compatibility/mocks, process checkpoint/notify-on-complete state, ACP/MCP/TTS optional import paths, MCP OAuth metadata/import shape, provider parity, gateway service/systemd/macOS/WSL expectations, PTY websocket timing, file-tool state/staleness expectations, and timing-sensitive local interrupt cleanup.
+
 ## Conclusion
 
 The previously listed next operational step, manual safe-bundle transfer plus VPS ingest, is complete and verified on the VPS for bundle `pcwb-vps-smoke-001`.

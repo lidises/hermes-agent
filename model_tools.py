@@ -23,6 +23,7 @@ Public API (signatures preserved from the original 2,400-line version):
 import json
 import asyncio
 import logging
+import os
 import threading
 import time
 from typing import Dict, Any, List, Optional, Tuple
@@ -259,6 +260,7 @@ _LEGACY_TOOLSET_MAP = {
 # inner check_fn TTL cache in registry.py handles environment drift (Docker
 # daemon start/stop, env var changes, etc.) on a 30 s horizon.
 _tool_defs_cache: Dict[tuple, List[Dict[str, Any]]] = {}
+_last_tool_availability_fingerprint: tuple | None = None
 
 
 def _clear_tool_defs_cache() -> None:
@@ -266,6 +268,56 @@ def _clear_tool_defs_cache() -> None:
     schema dependencies change (e.g. discord capability cache reset,
     execute_code sandbox reconfigured)."""
     _tool_defs_cache.clear()
+
+
+def _tool_availability_fingerprint() -> tuple:
+    """Return process-local state that affects quiet tool availability.
+
+    The outer get_tool_definitions cache can otherwise outlive a registry
+    check_fn result after tests or long-lived processes change terminal backend
+    environment/configuration. Keep this fingerprint small and side-effect-free;
+    expensive probes still belong in registry check_fn caching.
+    """
+    terminal_cfg: tuple = ()
+    vercel_sdk_available: bool | None = None
+    try:
+        from tools import terminal_tool
+
+        cfg = terminal_tool._get_env_config()
+        terminal_cfg = tuple(
+            sorted(
+                (str(key), str(value))
+                for key, value in cfg.items()
+                if key
+                in {
+                    "env_type",
+                    "modal_mode",
+                    "container_disk",
+                    "vercel_runtime",
+                }
+            )
+        )
+        if cfg.get("env_type") == "vercel_sandbox":
+            vercel_sdk_available = terminal_tool.importlib.util.find_spec("vercel") is not None
+    except Exception:
+        terminal_cfg = (("terminal_config", "unavailable"),)
+
+    return (
+        terminal_cfg,
+        vercel_sdk_available,
+        bool(os.getenv("VERCEL_OIDC_TOKEN")),
+        bool(os.getenv("VERCEL_TOKEN")),
+        bool(os.getenv("VERCEL_PROJECT_ID")),
+        bool(os.getenv("VERCEL_TEAM_ID")),
+        bool(os.getenv("MODAL_TOKEN_ID")),
+        bool(os.getenv("MODAL_TOKEN_SECRET")),
+    )
+
+
+def _uses_availability_sensitive_toolsets(enabled_toolsets: List[str] | None) -> bool:
+    if enabled_toolsets is None:
+        return True
+    return bool({"terminal", "code_execution"}.intersection(enabled_toolsets))
 
 
 def get_tool_definitions(
@@ -302,11 +354,22 @@ def get_tool_definitions(
             cfg_fp = (cfg_stat.st_mtime_ns, cfg_stat.st_size)
         except (FileNotFoundError, OSError, ImportError):
             cfg_fp = None
+        availability_fp = _tool_availability_fingerprint()
+        availability_sensitive = _uses_availability_sensitive_toolsets(enabled_toolsets)
+        global _last_tool_availability_fingerprint
+        if availability_sensitive or availability_fp != _last_tool_availability_fingerprint:
+            from tools.registry import invalidate_check_fn_cache
+
+            invalidate_check_fn_cache()
+            if availability_sensitive or availability_fp != _last_tool_availability_fingerprint:
+                _tool_defs_cache.clear()
+            _last_tool_availability_fingerprint = availability_fp
         cache_key = (
             frozenset(enabled_toolsets) if enabled_toolsets is not None else None,
             frozenset(disabled_toolsets) if disabled_toolsets else None,
             registry._generation,
             cfg_fp,
+            availability_fp,
         )
         cached = _tool_defs_cache.get(cache_key)
         if cached is not None:
