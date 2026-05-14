@@ -966,6 +966,31 @@ export type OfficeDeskRpgProjectionModel = {
   rawExcluded: true;
 };
 
+export type OfficeDeskRpgWorkerRoleVisibilityRole = {
+  role: Extract<OfficeDeskRpgProjectionActorRole, "search_worker" | "reviewer" | "wiki_writer" | "nas_keeper">;
+  label: string;
+  status: OfficeDeskRpgProjectionActor["status"];
+  facilityId: OfficeDeskRpgProjectionFacilityId;
+  visibleInstances: number;
+  lane: "research" | "review" | "writing" | "vault";
+  safeSummary: string;
+  assignmentEnabled: false;
+  dispatchEnabled: false;
+};
+
+export type OfficeDeskRpgWorkerRoleVisibility = {
+  stageLabel: "Desk RPG Worker Role Visibility 1";
+  title: string;
+  roles: OfficeDeskRpgWorkerRoleVisibilityRole[];
+  suppressedRuntimeInstances: number;
+  assignmentEnabled: false;
+  requestCreationEnabled: false;
+  dispatchEnabled: false;
+  enabledControls: 0;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeRpgMissionStoryboardStep = {
   id: "request" | "orchestrate" | "board" | "evidence" | "review" | "approval";
   label: string;
@@ -1900,6 +1925,43 @@ export function buildOfficeDeskRpgProjectionModel(state: OfficeState): OfficeDes
     },
     safeProjectionOnly: true,
     enabledControls: 0,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeDeskRpgWorkerRoleVisibility(projection: OfficeDeskRpgProjectionModel): OfficeDeskRpgWorkerRoleVisibility {
+  const laneByRole: Record<OfficeDeskRpgWorkerRoleVisibilityRole["role"], OfficeDeskRpgWorkerRoleVisibilityRole["lane"]> = {
+    search_worker: "research",
+    reviewer: "review",
+    wiki_writer: "writing",
+    nas_keeper: "vault",
+  };
+  const roleOrder: OfficeDeskRpgWorkerRoleVisibilityRole["role"][] = ["search_worker", "reviewer", "wiki_writer", "nas_keeper"];
+  const roles = roleOrder.flatMap((role) => {
+    const actor = projection.actors.find((candidate) => candidate.role === role);
+    if (!actor) return [];
+    return [{
+      role,
+      label: actor.label,
+      status: actor.status,
+      facilityId: actor.facilityId,
+      visibleInstances: actor.visibleInstances,
+      lane: laneByRole[role],
+      safeSummary: actor.safeSummary,
+      assignmentEnabled: false as const,
+      dispatchEnabled: false as const,
+    }];
+  });
+  return {
+    stageLabel: "Desk RPG Worker Role Visibility 1",
+    title: "Worker role visibility",
+    roles,
+    suppressedRuntimeInstances: projection.suppressedCounts.worker_runtime_instances,
+    assignmentEnabled: false,
+    requestCreationEnabled: false,
+    dispatchEnabled: false,
+    enabledControls: 0,
+    safeProjectionOnly: true,
     rawExcluded: true,
   };
 }

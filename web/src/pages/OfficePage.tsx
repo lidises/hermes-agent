@@ -13,6 +13,7 @@ import {
   RefreshCw,
   Route,
   ShieldCheck,
+  Users,
 } from "lucide-react";
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
@@ -107,6 +108,7 @@ import {
   buildOfficeControlledMutationHumanApprovalPlan,
   buildOfficeControlledMutationAuthoritySummary,
   buildOfficeControlledMutationExecutionReadinessSummary,
+  buildOfficeDeskRpgWorkerRoleVisibility,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -118,6 +120,7 @@ import {
   textField,
   visibleRows,
   type OfficeDeskRpgProjectionModel,
+  type OfficeDeskRpgWorkerRoleVisibility,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -1646,6 +1649,53 @@ export function OfficeRpgMap({
   );
 }
 
+export function OfficeDeskRpgWorkerRoleVisibilityPanel({ visibility }: { visibility: OfficeDeskRpgWorkerRoleVisibility }) {
+  return (
+    <Card
+      data-office-desk-rpg-worker-roles="true"
+      data-office-desk-rpg-worker-roles-enabled-controls={visibility.enabledControls}
+      data-office-desk-rpg-worker-roles-assignment-enabled={String(visibility.assignmentEnabled)}
+      data-office-desk-rpg-worker-roles-request-creation-enabled={String(visibility.requestCreationEnabled)}
+      data-office-desk-rpg-worker-roles-dispatch-enabled={String(visibility.dispatchEnabled)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Users className="h-4 w-4" /> Worker role visibility
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-sky-300/20 bg-sky-950/10 p-3">
+            <div className="font-semibold text-sky-100">역할 가시성 · assignment/dispatch disabled</div>
+            <div className="mt-1 leading-5">
+              Search Worker, Reviewer, Wiki Writer, NAS Keeper는 현재 읽기 전용 역할 posture로만 표시됩니다. 작업 배정, 요청 생성, adapter dispatch, NAS 저장은 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-4">
+            {visibility.roles.map((role) => (
+              <div
+                key={role.role}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-desk-rpg-worker-role={role.role}
+                data-office-desk-rpg-worker-role-lane={role.lane}
+                data-office-desk-rpg-worker-role-assignment-enabled={String(role.assignmentEnabled)}
+                data-office-desk-rpg-worker-role-dispatch-enabled={String(role.dispatchEnabled)}
+              >
+                <div className="font-semibold text-foreground">{role.label}</div>
+                <div className="mt-1 text-midground/60">{role.lane} · {role.status} · visible {role.visibleInstances}</div>
+                <div className="mt-2 leading-5">{role.safeSummary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-desk-rpg-worker-roles-boundary="true">
+            suppressed runtime instances: {visibility.suppressedRuntimeInstances} · enabled controls: {visibility.enabledControls} · raw excluded: {String(visibility.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -2039,6 +2089,7 @@ export default function OfficePage() {
   const controlledMutationAuthoritySummary = useMemo(() => buildOfficeControlledMutationAuthoritySummary(controlledMutationHumanApprovalPlan), [controlledMutationHumanApprovalPlan]);
   const controlledMutationExecutionReadinessSummary = useMemo(() => buildOfficeControlledMutationExecutionReadinessSummary(controlledMutationAuthoritySummary), [controlledMutationAuthoritySummary]);
   const deskRpgProjection = useMemo(() => buildOfficeDeskRpgProjectionModel(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
+  const deskRpgWorkerRoleVisibility = useMemo(() => buildOfficeDeskRpgWorkerRoleVisibility(deskRpgProjection), [deskRpgProjection]);
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -2255,6 +2306,8 @@ export default function OfficePage() {
       <OfficeDeskRpgRoomShell projection={deskRpgProjection} />
 
       <OfficeDeskRpgBossCommandConsolePanel projection={deskRpgProjection} />
+
+      <OfficeDeskRpgWorkerRoleVisibilityPanel visibility={deskRpgWorkerRoleVisibility} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 

@@ -18,7 +18,7 @@ vi.mock("@/lib/api", () => ({
 
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
-import { buildOfficeDeskRpgProjectionModel, buildOfficeRpgScene } from "./officeView";
+import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeRpgScene } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
@@ -238,6 +238,47 @@ describe("OfficeDeskRpgBoardEvidencePanel", () => {
     expect(markup).not.toContain("<form");
     expect(markup).not.toContain("<button");
     expect(markup).not.toMatch(/raw board prompt|raw board task title|raw board done title|raw board transcript|Traceback|\/Users\/lidises|token-shaped-inspector-sentinel|\*\*\*|private-board-provider/i);
+  });
+});
+
+describe("OfficeDeskRpgWorkerRoleVisibilityPanel", () => {
+  it("Desk RPG Worker Role Visibility 1 renders safe worker roles without assignment controls", () => {
+    const OfficeDeskRpgWorkerRoleVisibilityPanel = (OfficePageModule as unknown as {
+      OfficeDeskRpgWorkerRoleVisibilityPanel: React.ComponentType<{ visibility: ReturnType<typeof buildOfficeDeskRpgWorkerRoleVisibility> }>;
+    }).OfficeDeskRpgWorkerRoleVisibilityPanel;
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [
+        { id: "agent-1", status: "active", prompt: "raw worker prompt", provider: "private-worker-provider", api_key: "token-shaped-worker-sentinel" },
+        { id: "agent-2", status: "active" },
+        { id: "agent-3", status: "active" },
+        { id: "agent-4", status: "active" },
+      ],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw worker task title", body: "/Users/lidises/private/worker.md" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 3, warning_count: 1, error_summary: "Traceback worker source" },
+      ],
+    }));
+    const visibility = buildOfficeDeskRpgWorkerRoleVisibility(projection);
+
+    const markup = renderToStaticMarkup(<OfficeDeskRpgWorkerRoleVisibilityPanel visibility={visibility} />);
+
+    expect(markup).toContain("data-office-desk-rpg-worker-roles=\"true\"");
+    expect(markup).toContain("data-office-desk-rpg-worker-roles-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-desk-rpg-worker-roles-assignment-enabled=\"false\"");
+    expect(markup).toContain("data-office-desk-rpg-worker-roles-request-creation-enabled=\"false\"");
+    expect(markup).toContain("data-office-desk-rpg-worker-roles-dispatch-enabled=\"false\"");
+    expect(markup).toContain("data-office-desk-rpg-worker-role=\"search_worker\"");
+    expect(markup).toContain("data-office-desk-rpg-worker-role=\"reviewer\"");
+    expect(markup).toContain("data-office-desk-rpg-worker-role=\"wiki_writer\"");
+    expect(markup).toContain("data-office-desk-rpg-worker-role=\"nas_keeper\"");
+    expect(markup).toContain("Worker role visibility");
+    expect(markup).toContain("역할 가시성");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toMatch(/raw worker prompt|raw worker task title|Traceback|\/Users\/lidises|token-shaped-worker-sentinel|private-worker-provider/i);
   });
 });
 

@@ -97,6 +97,8 @@ import {
   buildOfficeControlledMutationAuthoritySummary,
   buildOfficeControlledMutationExecutionReadinessSummary,
   buildOfficeRpgScene,
+  buildOfficeDeskRpgProjectionModel,
+  buildOfficeDeskRpgWorkerRoleVisibility,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -140,7 +142,42 @@ function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
 }
 
 describe("OfficePage view helpers", () => {
-  it("Desk RPG Projection ViewModel Helper 1", () => {
+describe("Desk RPG Worker Role Visibility 1", () => {
+  it("builds safe worker role visibility without assignment or dispatch authority", () => {
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [
+        { id: "agent-1", status: "active", prompt: "raw worker prompt", provider: "private-worker-provider", api_key: "token-shaped-worker-sentinel" },
+        { id: "agent-2", status: "active", prompt: "raw worker prompt 2" },
+        { id: "agent-3", status: "active" },
+        { id: "agent-4", status: "active" },
+      ],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw worker task title", body: "/Users/lidises/private/worker.md" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 2, warning_count: 1, error_summary: "Traceback worker source" },
+      ],
+    }));
+
+    const visibility = buildOfficeDeskRpgWorkerRoleVisibility(projection);
+
+    expect(visibility.stageLabel).toBe("Desk RPG Worker Role Visibility 1");
+    expect(visibility.roles.map((role) => role.role)).toEqual(["search_worker", "reviewer", "wiki_writer", "nas_keeper"]);
+    expect(visibility.roles.map((role) => role.facilityId)).toEqual(["worker_cluster", "right_inspector", "central_board", "nas_vault"]);
+    expect(visibility.roles.find((role) => role.role === "search_worker")?.visibleInstances).toBe(3);
+    expect(visibility.suppressedRuntimeInstances).toBe(1);
+    expect(visibility.assignmentEnabled).toBe(false);
+    expect(visibility.requestCreationEnabled).toBe(false);
+    expect(visibility.dispatchEnabled).toBe(false);
+    expect(visibility.enabledControls).toBe(0);
+    expect(visibility.safeProjectionOnly).toBe(true);
+    expect(visibility.rawExcluded).toBe(true);
+    expect(JSON.stringify(visibility)).not.toMatch(/raw worker prompt|raw worker task title|Traceback|\/Users\/lidises|token-shaped-worker-sentinel|private-worker-provider/i);
+  });
+});
+
+describe("Desk RPG Projection ViewModel Helper 1", () => {
+  it("builds a safe RPG operating-room projection without raw task/provider/path material", () => {
     const buildProjection = (officeView as unknown as {
       buildOfficeDeskRpgProjectionModel: (state: OfficeState) => {
         schemaVersion: 1;
@@ -189,6 +226,7 @@ describe("OfficePage view helpers", () => {
     expect(JSON.stringify(projection)).not.toContain("Traceback (most recent call last)");
     expect(JSON.stringify(projection)).not.toContain("private-provider-hidden-id");
   });
+});
 
   it("builds Phase 1 RPG scene adapter from safe OfficeState without raw projection", () => {
     const scene = buildOfficeRpgScene(officeFixture({
