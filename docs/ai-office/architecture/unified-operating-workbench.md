@@ -219,9 +219,9 @@ This architecture document is an index and consolidation point. It does not repl
 
 ## Next architecture step
 
-`Unified Workbench IA/Layout 1`, `Approval Request View 1`, `Approval Audit Timeline 1`, `Approval Execution Gate 1`, `Authority Adapter Contract 1`, `Orchestrator Mediation Queue 1`, and `Worker Intent Routing 1` are now locally implemented as pure safe view-model helpers plus top `/office` display-only sections. The next separately approved architecture/UI task should be `Worker Facility Readiness 1`:
+`Unified Workbench IA/Layout 1`, `Approval Request View 1`, `Approval Audit Timeline 1`, `Approval Execution Gate 1`, `Authority Adapter Contract 1`, `Orchestrator Mediation Queue 1`, `Worker Intent Routing 1`, and `Worker Facility Readiness 1` are now locally implemented as pure safe view-model helpers plus top `/office` display-only sections. The next separately approved architecture/UI task should be `Worker Assignment Candidate Gate 1`:
 
-1. Define a safe facility-readiness posture for the worker routing targets (`orchestrator_desk`, `agent_desks`, `incident_corner`).
-2. Keep readiness display-only; no assignment endpoint, worker dispatch, adapter implementation, request creation, or state write should exist yet.
-3. Add focused tests for facility IDs, readiness/prerequisite labels, zero enabled controls, and no executable browser affordances.
+1. Define a safe candidate-gate posture that joins mediated intent routing, facility readiness, approval execution gate, and authority adapter contract state.
+2. Keep the gate display-only; every candidate should remain blocked until readiness, approval, audit, rollback, human confirmation, and adapter prerequisites exist.
+3. Add focused tests for candidate IDs, blocked reasons, zero enabled controls, no request creation, no assignment, no dispatch, no audit write, and no executable browser affordances.
 4. Do not execute actions, write audit events, create requests, add backend mutation routes, services, cron/watcher automation, VPS restarts, public exposure, NAS access, or renderer dependencies.

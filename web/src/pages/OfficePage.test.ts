@@ -78,6 +78,7 @@ import {
   buildOfficeAuthorityAdapterContract,
   buildOfficeOrchestratorMediationQueue,
   buildOfficeWorkerIntentRouting,
+  buildOfficeWorkerFacilityReadiness,
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
@@ -564,6 +565,39 @@ describe("OfficePage view helpers", () => {
     expect(routing.queueSnapshot).toMatchObject({ enqueueEnabled: false, candidatePromotionEnabled: false });
     expect(routing.safeBoundary).toContain("routing posture only");
     expect(JSON.stringify(routing)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw worker|secret worker|private|token/i);
+  });
+
+  it("builds Worker Facility Readiness 1 as read-only prerequisites for routed facilities", () => {
+    const readiness = buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-14T14:45:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/facility", status: "partial", checked_at: "2026-05-14T14:40:00Z", item_count: 1, warning_count: 1, error_summary: "raw facility token" } as unknown as OfficeState["data_sources"][number]],
+      work_items: [{ id: "w1", status: "blocked", title: "raw facility task", body: "secret facility body" } as unknown as OfficeState["work_items"][number]],
+      events: [{ id: "event-facility-private", category: "approval_needed", room_id: "command", tone: "warning", generated_at: "2026-05-14T14:44:00Z", detail: "raw facility event token" } as unknown as OfficeState["events"][number]],
+    }))))))));
+
+    expect(readiness.stageLabel).toBe("Worker Facility Readiness 1");
+    expect(readiness.enabledControls).toBe(0);
+    expect(readiness.workAssignmentEnabled).toBe(false);
+    expect(readiness.requestCreationEnabled).toBe(false);
+    expect(readiness.dispatchEnabled).toBe(false);
+    expect(readiness.auditWriteEnabled).toBe(false);
+    expect(readiness.facilities.map((facility) => facility.id)).toEqual(["orchestrator_desk", "agent_desks", "incident_corner"]);
+    expect(readiness.facilities.map((facility) => facility.workerRole)).toEqual(["orchestrator", "facility_worker", "safety_reviewer"]);
+    expect(readiness.facilities.every((facility) => facility.status === "prerequisites_missing" && facility.assignmentReady === false && facility.rawExcluded)).toBe(true);
+    expect(readiness.facilities.flatMap((facility) => facility.prerequisites.map((item) => item.id))).toEqual([
+      "orchestrator_mediation_locked",
+      "human_instruction_scope",
+      "assignment_audit_sink",
+      "worker_capacity_snapshot",
+      "request_creation_gate",
+      "dispatch_adapter_disabled",
+      "incident_review_policy",
+      "safe_attention_context",
+      "audit_write_gate",
+    ]);
+    expect(readiness.routingSnapshot).toMatchObject({ workAssignmentEnabled: false, requestCreationEnabled: false, dispatchEnabled: false });
+    expect(readiness.safeBoundary).toContain("facility readiness only");
+    expect(JSON.stringify(readiness)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw facility|secret facility|private|token/i);
   });
 
   it("builds a disabled Authority Adapter Contract 1 before any execution adapter exists", () => {

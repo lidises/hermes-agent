@@ -1158,6 +1158,48 @@ export type OfficeWorkerIntentRouting = {
   safeProjectionOnly: true;
 };
 
+export type OfficeWorkerFacilityReadinessPrerequisite = {
+  id:
+    | "orchestrator_mediation_locked"
+    | "human_instruction_scope"
+    | "assignment_audit_sink"
+    | "worker_capacity_snapshot"
+    | "request_creation_gate"
+    | "dispatch_adapter_disabled"
+    | "incident_review_policy"
+    | "safe_attention_context"
+    | "audit_write_gate";
+  label: string;
+  status: "missing";
+  safeSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeWorkerFacilityReadinessFacility = {
+  id: OfficeWorkerIntentRoutingRoute["targetFacility"];
+  workerRole: OfficeWorkerIntentRoutingRoute["workerRole"];
+  status: "prerequisites_missing";
+  assignmentReady: false;
+  routeCount: number;
+  prerequisites: OfficeWorkerFacilityReadinessPrerequisite[];
+  safeSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeWorkerFacilityReadiness = {
+  stageLabel: "Worker Facility Readiness 1";
+  title: string;
+  enabledControls: 0;
+  workAssignmentEnabled: false;
+  requestCreationEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  facilities: OfficeWorkerFacilityReadinessFacility[];
+  routingSnapshot: Pick<OfficeWorkerIntentRouting, "workAssignmentEnabled" | "requestCreationEnabled" | "dispatchEnabled">;
+  safeBoundary: string;
+  safeProjectionOnly: true;
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -2115,6 +2157,107 @@ export function buildOfficeWorkerIntentRouting(queue: OfficeOrchestratorMediatio
         rawExcluded: true,
       },
     ],
+  };
+}
+
+export function buildOfficeWorkerFacilityReadiness(routing: OfficeWorkerIntentRouting): OfficeWorkerFacilityReadiness {
+  const prerequisiteMap: Record<OfficeWorkerIntentRoutingRoute["targetFacility"], OfficeWorkerFacilityReadinessPrerequisite[]> = {
+    orchestrator_desk: [
+      {
+        id: "orchestrator_mediation_locked",
+        label: "오케스트레이터 중재 고정",
+        status: "missing",
+        safeSummary: "mediated intent must be locked before it can become an assignment candidate",
+        rawExcluded: true,
+      },
+      {
+        id: "human_instruction_scope",
+        label: "사용자 지시 범위",
+        status: "missing",
+        safeSummary: "explicit human scope is required before the desk can prepare work",
+        rawExcluded: true,
+      },
+      {
+        id: "assignment_audit_sink",
+        label: "배정 감사 싱크",
+        status: "missing",
+        safeSummary: "durable audit sink is required before assignment readiness",
+        rawExcluded: true,
+      },
+    ],
+    agent_desks: [
+      {
+        id: "worker_capacity_snapshot",
+        label: "작업자 수용량 스냅샷",
+        status: "missing",
+        safeSummary: "safe worker capacity posture is required before any work assignment",
+        rawExcluded: true,
+      },
+      {
+        id: "request_creation_gate",
+        label: "요청 생성 게이트",
+        status: "missing",
+        safeSummary: "request creation remains blocked until an approved gate exists",
+        rawExcluded: true,
+      },
+      {
+        id: "dispatch_adapter_disabled",
+        label: "디스패치 어댑터 비활성",
+        status: "missing",
+        safeSummary: "dispatch adapter is intentionally absent, so the facility is display-only",
+        rawExcluded: true,
+      },
+    ],
+    incident_corner: [
+      {
+        id: "incident_review_policy",
+        label: "사고 검토 정책",
+        status: "missing",
+        safeSummary: "incident review policy is required before safety review work can be assigned",
+        rawExcluded: true,
+      },
+      {
+        id: "safe_attention_context",
+        label: "안전 주의 컨텍스트",
+        status: "missing",
+        safeSummary: "attention signals must stay safe and bounded before review routing",
+        rawExcluded: true,
+      },
+      {
+        id: "audit_write_gate",
+        label: "감사 기록 쓰기 게이트",
+        status: "missing",
+        safeSummary: "audit writes remain disabled until a separate authority model exists",
+        rawExcluded: true,
+      },
+    ],
+  };
+
+  return {
+    stageLabel: "Worker Facility Readiness 1",
+    title: "작업자 시설 준비도 · 선행조건만 표시",
+    enabledControls: 0,
+    workAssignmentEnabled: false,
+    requestCreationEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    routingSnapshot: {
+      workAssignmentEnabled: routing.workAssignmentEnabled,
+      requestCreationEnabled: routing.requestCreationEnabled,
+      dispatchEnabled: routing.dispatchEnabled,
+    },
+    safeBoundary: "facility readiness only · no assignment · no request creation · no dispatch · no audit write",
+    safeProjectionOnly: true,
+    facilities: routing.routes.map((route) => ({
+      id: route.targetFacility,
+      workerRole: route.workerRole,
+      status: "prerequisites_missing",
+      assignmentReady: false,
+      routeCount: 1,
+      prerequisites: prerequisiteMap[route.targetFacility],
+      safeSummary: `${route.targetFacility} stays visible as a readiness posture only before any ${route.workerRole} assignment exists`,
+      rawExcluded: true,
+    })),
   };
 }
 

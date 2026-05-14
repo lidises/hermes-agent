@@ -90,6 +90,7 @@ import {
   buildOfficeAuthorityAdapterContract,
   buildOfficeOrchestratorMediationQueue,
   buildOfficeWorkerIntentRouting,
+  buildOfficeWorkerFacilityReadiness,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -1758,6 +1759,7 @@ export default function OfficePage() {
   const authorityAdapterContract = useMemo(() => buildOfficeAuthorityAdapterContract(approvalExecutionGate), [approvalExecutionGate]);
   const orchestratorMediationQueue = useMemo(() => buildOfficeOrchestratorMediationQueue(authorityAdapterContract), [authorityAdapterContract]);
   const workerIntentRouting = useMemo(() => buildOfficeWorkerIntentRouting(orchestratorMediationQueue), [orchestratorMediationQueue]);
+  const workerFacilityReadiness = useMemo(() => buildOfficeWorkerFacilityReadiness(workerIntentRouting), [workerIntentRouting]);
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -2128,6 +2130,42 @@ export default function OfficePage() {
               <div className="mt-1 text-sm font-semibold text-foreground">{route.targetFacility}</div>
               <div className="mt-1 text-xs text-midground/60">{route.workerRole} · {route.assignmentStatus}</div>
               <div className="mt-2 text-xs leading-5 text-midground/70">{route.safeSummary}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-teal-300/20 bg-teal-950/10 p-4"
+        data-office-worker-facility-readiness="true"
+        data-office-worker-facility-assignment-enabled={String(workerFacilityReadiness.workAssignmentEnabled)}
+        data-office-worker-facility-request-creation-enabled={String(workerFacilityReadiness.requestCreationEnabled)}
+        data-office-worker-facility-dispatch-enabled={String(workerFacilityReadiness.dispatchEnabled)}
+        data-office-worker-facility-audit-write-enabled={String(workerFacilityReadiness.auditWriteEnabled)}
+        data-office-worker-facility-enabled-controls={workerFacilityReadiness.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-teal-200/70">{workerFacilityReadiness.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{workerFacilityReadiness.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{workerFacilityReadiness.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">enabled controls: {workerFacilityReadiness.enabledControls}</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-worker-facilities="true">
+          {workerFacilityReadiness.facilities.map((facility) => (
+            <div key={facility.id} className="border border-current/15 bg-black/20 p-3" data-office-worker-facility={facility.id} data-office-worker-facility-status={facility.status} data-office-worker-facility-assignment-ready={String(facility.assignmentReady)}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{facility.workerRole}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{facility.id}</div>
+              <div className="mt-1 text-xs text-midground/60">routes: {facility.routeCount} · assignment ready: {facility.assignmentReady ? "true" : "false"}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{facility.safeSummary}</div>
+              <div className="mt-3 space-y-1" data-office-worker-facility-prerequisites="true">
+                {facility.prerequisites.map((item) => (
+                  <div key={item.id} className="border border-current/10 bg-black/20 px-2 py-1 text-xs text-midground/70" data-office-worker-facility-prerequisite={item.id} data-office-worker-facility-prerequisite-status={item.status}>
+                    <span className="font-semibold text-foreground/80">{item.label}</span> · {item.safeSummary}
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>

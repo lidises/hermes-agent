@@ -155,4 +155,4 @@ Preserve these as supporting evidence rather than deleting or rewriting them:
 
 ## Recommended next product step
 
-After `Orchestrator Mediation Queue 1`, the next separately approved work should be `Worker Intent Routing 1`: a read-only routing posture slice that shows how mediated intents would map toward worker roles/facilities, without assigning work, enqueueing real requests, executing actions, writing audit events, creating requests, enabling controls, adding backend mutation routes, or changing services.
+After `Worker Intent Routing 1`, `Worker Facility Readiness 1` is now locally implemented: a read-only readiness posture for routed worker facilities (`orchestrator_desk`, `agent_desks`, `incident_corner`) that shows missing prerequisites before assignment can exist. The next separately approved work should be `Worker Assignment Candidate Gate 1`: a blocked/display-only candidate gate that joins routing, facility readiness, approval, audit, and authority prerequisites without assigning work, creating requests, enqueueing real work, dispatching actions, writing audit events, enabling controls, adding backend mutation routes, or changing services.
