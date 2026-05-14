@@ -97,6 +97,7 @@ import {
   buildOfficeWorkerAuthorityHandoffEnvelope,
   buildOfficeWorkerDispatchDryRunEnvelope,
   buildOfficeWorkerAuditPreviewEnvelope,
+  buildOfficeWorkerRollbackPreviewEnvelope,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -1772,6 +1773,7 @@ export default function OfficePage() {
   const workerAuthorityHandoffEnvelope = useMemo(() => buildOfficeWorkerAuthorityHandoffEnvelope(workerHumanConfirmationEnvelope), [workerHumanConfirmationEnvelope]);
   const workerDispatchDryRunEnvelope = useMemo(() => buildOfficeWorkerDispatchDryRunEnvelope(workerAuthorityHandoffEnvelope), [workerAuthorityHandoffEnvelope]);
   const workerAuditPreviewEnvelope = useMemo(() => buildOfficeWorkerAuditPreviewEnvelope(workerDispatchDryRunEnvelope), [workerDispatchDryRunEnvelope]);
+  const workerRollbackPreviewEnvelope = useMemo(() => buildOfficeWorkerRollbackPreviewEnvelope(workerAuditPreviewEnvelope), [workerAuditPreviewEnvelope]);
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -2391,6 +2393,43 @@ export default function OfficePage() {
               <div className="mt-3 flex flex-wrap gap-1" data-office-worker-audit-preview-fields="true">
                 {preview.requiredFields.map((field) => (
                   <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-worker-audit-preview-field={field}>{field}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-emerald-300/20 bg-emerald-950/10 p-4"
+        data-office-worker-rollback-preview-envelope="true"
+        data-office-worker-rollback-preview-execution-enabled={String(workerRollbackPreviewEnvelope.rollbackExecutionEnabled)}
+        data-office-worker-rollback-preview-audit-write-enabled={String(workerRollbackPreviewEnvelope.auditWriteEnabled)}
+        data-office-worker-rollback-preview-action-execution-enabled={String(workerRollbackPreviewEnvelope.executionEnabled)}
+        data-office-worker-rollback-preview-dispatch-enabled={String(workerRollbackPreviewEnvelope.dispatchEnabled)}
+        data-office-worker-rollback-preview-adapter-installation-enabled={String(workerRollbackPreviewEnvelope.adapterInstallationEnabled)}
+        data-office-worker-rollback-preview-request-creation-enabled={String(workerRollbackPreviewEnvelope.requestCreationEnabled)}
+        data-office-worker-rollback-preview-assignment-enabled={String(workerRollbackPreviewEnvelope.workAssignmentEnabled)}
+        data-office-worker-rollback-preview-enabled-controls={workerRollbackPreviewEnvelope.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">{workerRollbackPreviewEnvelope.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{workerRollbackPreviewEnvelope.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{workerRollbackPreviewEnvelope.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">rollback executions: 0</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-worker-rollback-previews="true">
+          {workerRollbackPreviewEnvelope.previews.map((preview) => (
+            <div key={preview.id} className="border border-current/15 bg-black/20 p-3" data-office-worker-rollback-preview={preview.facilityId} data-office-worker-rollback-preview-status={preview.status} data-office-worker-rollback-preview-state={preview.rollbackState}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{preview.workerRole}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{preview.id}</div>
+              <div className="mt-1 text-xs text-midground/60">audit preview: {preview.auditPreviewRef} · rollback: {preview.rollbackState}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{preview.safeSummary}</div>
+              <div className="mt-3 flex flex-wrap gap-1" data-office-worker-rollback-preview-fields="true">
+                {preview.requiredFields.map((field) => (
+                  <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-worker-rollback-preview-field={field}>{field}</span>
                 ))}
               </div>
             </div>

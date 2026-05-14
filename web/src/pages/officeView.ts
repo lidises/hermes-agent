@@ -1373,6 +1373,35 @@ export type OfficeWorkerAuditPreviewEnvelope = {
   safeProjectionOnly: true;
 };
 
+export type OfficeWorkerRollbackPreview = {
+  id: `rollback_${OfficeWorkerAuditPreview["id"]}`;
+  auditPreviewRef: OfficeWorkerAuditPreview["id"];
+  facilityId: OfficeWorkerAuditPreview["facilityId"];
+  workerRole: OfficeWorkerAuditPreview["workerRole"];
+  status: "not_prepared";
+  rollbackState: "missing";
+  requiredFields: Array<"audit_preview_ref" | "rollback_scope" | "restore_point_ref" | "verification_plan" | "human_reconfirm_ref">;
+  safeSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeWorkerRollbackPreviewEnvelope = {
+  stageLabel: "Worker Rollback Preview Envelope 1";
+  title: string;
+  enabledControls: 0;
+  rollbackExecutionEnabled: false;
+  auditWriteEnabled: false;
+  executionEnabled: false;
+  dispatchEnabled: false;
+  adapterInstallationEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  previews: OfficeWorkerRollbackPreview[];
+  auditPreviewSnapshot: Pick<OfficeWorkerAuditPreviewEnvelope, "auditWriteEnabled" | "executionEnabled" | "dispatchEnabled">;
+  safeBoundary: string;
+  safeProjectionOnly: true;
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -2659,6 +2688,39 @@ export function buildOfficeWorkerAuditPreviewEnvelope(dryRunEnvelope: OfficeWork
       auditSinkState: "missing",
       requiredFields: ["dry_run_ref", "audit_sink_ref", "event_type", "redaction_policy", "rollback_ref"],
       safeSummary: `${dryRun.id} requires an audit preview envelope before any audit event can be written`,
+      rawExcluded: true,
+    })),
+  };
+}
+
+export function buildOfficeWorkerRollbackPreviewEnvelope(auditPreviewEnvelope: OfficeWorkerAuditPreviewEnvelope): OfficeWorkerRollbackPreviewEnvelope {
+  return {
+    stageLabel: "Worker Rollback Preview Envelope 1",
+    title: "롤백 프리뷰 봉투 · 롤백 실행 없음",
+    enabledControls: 0,
+    rollbackExecutionEnabled: false,
+    auditWriteEnabled: false,
+    executionEnabled: false,
+    dispatchEnabled: false,
+    adapterInstallationEnabled: false,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
+    auditPreviewSnapshot: {
+      auditWriteEnabled: auditPreviewEnvelope.auditWriteEnabled,
+      executionEnabled: auditPreviewEnvelope.executionEnabled,
+      dispatchEnabled: auditPreviewEnvelope.dispatchEnabled,
+    },
+    safeBoundary: "rollback preview envelope only · no rollback execution · no audit write · no execution · no dispatch · no adapter installation · no request creation · no assignment",
+    safeProjectionOnly: true,
+    previews: auditPreviewEnvelope.previews.map((preview) => ({
+      id: `rollback_${preview.id}`,
+      auditPreviewRef: preview.id,
+      facilityId: preview.facilityId,
+      workerRole: preview.workerRole,
+      status: "not_prepared",
+      rollbackState: "missing",
+      requiredFields: ["audit_preview_ref", "rollback_scope", "restore_point_ref", "verification_plan", "human_reconfirm_ref"],
+      safeSummary: `${preview.id} requires a rollback preview envelope before any reversible execution can be considered`,
       rawExcluded: true,
     })),
   };

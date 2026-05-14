@@ -85,6 +85,7 @@ import {
   buildOfficeWorkerAuthorityHandoffEnvelope,
   buildOfficeWorkerDispatchDryRunEnvelope,
   buildOfficeWorkerAuditPreviewEnvelope,
+  buildOfficeWorkerRollbackPreviewEnvelope,
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
@@ -761,6 +762,33 @@ describe("OfficePage view helpers", () => {
     expect(auditPreview.dryRunSnapshot).toMatchObject({ dryRunExecutionEnabled: false, dispatchEnabled: false, auditWriteEnabled: false });
     expect(auditPreview.safeBoundary).toContain("audit preview envelope only");
     expect(JSON.stringify(auditPreview)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw audit-preview|secret audit-preview|private|token/i);
+  });
+
+  it("builds Worker Rollback Preview Envelope 1 without executing rollback", () => {
+    const rollbackPreview = buildOfficeWorkerRollbackPreviewEnvelope(buildOfficeWorkerAuditPreviewEnvelope(buildOfficeWorkerDispatchDryRunEnvelope(buildOfficeWorkerAuthorityHandoffEnvelope(buildOfficeWorkerHumanConfirmationEnvelope(buildOfficeWorkerRequestDraftPreview(buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-14T17:05:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/rollback-preview", status: "partial", checked_at: "2026-05-14T17:00:00Z", item_count: 1, warning_count: 1, error_summary: "raw rollback-preview token" } as unknown as OfficeState["data_sources"][number]],
+      work_items: [{ id: "w1", status: "blocked", title: "raw rollback-preview task", body: "secret rollback-preview body" } as unknown as OfficeState["work_items"][number]],
+      events: [{ id: "event-rollback-preview-private", category: "approval_needed", room_id: "review", tone: "warning", generated_at: "2026-05-14T17:04:00Z", detail: "raw rollback-preview event token" } as unknown as OfficeState["events"][number]],
+    })))))))))))))));
+
+    expect(rollbackPreview.stageLabel).toBe("Worker Rollback Preview Envelope 1");
+    expect(rollbackPreview.enabledControls).toBe(0);
+    expect(rollbackPreview.rollbackExecutionEnabled).toBe(false);
+    expect(rollbackPreview.auditWriteEnabled).toBe(false);
+    expect(rollbackPreview.executionEnabled).toBe(false);
+    expect(rollbackPreview.dispatchEnabled).toBe(false);
+    expect(rollbackPreview.adapterInstallationEnabled).toBe(false);
+    expect(rollbackPreview.requestCreationEnabled).toBe(false);
+    expect(rollbackPreview.workAssignmentEnabled).toBe(false);
+    expect(rollbackPreview.previews.map((preview) => preview.id)).toEqual(["rollback_audit_dryrun_handoff_confirm_draft_orchestrator_desk", "rollback_audit_dryrun_handoff_confirm_draft_agent_desks", "rollback_audit_dryrun_handoff_confirm_draft_incident_corner"]);
+    expect(rollbackPreview.previews.every((preview) => preview.status === "not_prepared" && preview.rollbackState === "missing" && preview.rawExcluded)).toBe(true);
+    expect(rollbackPreview.previews.map((preview) => preview.requiredFields)).toEqual(expect.arrayContaining([
+      expect.arrayContaining(["audit_preview_ref", "rollback_scope", "restore_point_ref", "verification_plan", "human_reconfirm_ref"]),
+    ]));
+    expect(rollbackPreview.auditPreviewSnapshot).toMatchObject({ auditWriteEnabled: false, executionEnabled: false, dispatchEnabled: false });
+    expect(rollbackPreview.safeBoundary).toContain("rollback preview envelope only");
+    expect(JSON.stringify(rollbackPreview)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw rollback-preview|secret rollback-preview|private|token/i);
   });
 
   it("builds a disabled Authority Adapter Contract 1 before any execution adapter exists", () => {
