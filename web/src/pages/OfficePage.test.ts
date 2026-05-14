@@ -91,6 +91,7 @@ import {
   buildOfficeControlledMutationDryRunPlan,
   buildOfficeControlledMutationAuditSinkPlan,
   buildOfficeControlledMutationRollbackVerificationPlan,
+  buildOfficeControlledMutationHumanApprovalPlan,
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
@@ -932,6 +933,34 @@ describe("OfficePage view helpers", () => {
     expect(rollbackVerificationPlan.auditSinkPlanSnapshot).toMatchObject({ auditWriteEnabled: false, rollbackExecutionEnabled: false, executionEnabled: false });
     expect(rollbackVerificationPlan.safeBoundary).toContain("rollback verification plan only");
     expect(JSON.stringify(rollbackVerificationPlan)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw rollback-verification|secret rollback-verification|private|token/i);
+  });
+
+  it("builds Controlled Mutation Human Approval Plan 1 without recording approvals", () => {
+    const humanApprovalPlan = buildOfficeControlledMutationHumanApprovalPlan(buildOfficeControlledMutationRollbackVerificationPlan(buildOfficeControlledMutationAuditSinkPlan(buildOfficeControlledMutationDryRunPlan(buildOfficeControlledMutationProposalContract(buildOfficeWorkerFinalGateChecklist(buildOfficeWorkerRollbackPreviewEnvelope(buildOfficeWorkerAuditPreviewEnvelope(buildOfficeWorkerDispatchDryRunEnvelope(buildOfficeWorkerAuthorityHandoffEnvelope(buildOfficeWorkerHumanConfirmationEnvelope(buildOfficeWorkerRequestDraftPreview(buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-14T19:05:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/human-approval", status: "partial", checked_at: "2026-05-14T19:00:00Z", item_count: 1, warning_count: 1, error_summary: "raw human-approval token" } as unknown as OfficeState["data_sources"][number]],
+      work_items: [{ id: "w1", status: "blocked", title: "raw human-approval task", body: "secret human-approval body" } as unknown as OfficeState["work_items"][number]],
+      events: [{ id: "event-human-approval-private", category: "approval_needed", room_id: "review", tone: "warning", generated_at: "2026-05-14T19:04:00Z", detail: "raw human-approval event token" } as unknown as OfficeState["events"][number]],
+    })))))))))))))))))))));
+
+    expect(humanApprovalPlan.stageLabel).toBe("Controlled Mutation Human Approval Plan 1");
+    expect(humanApprovalPlan.enabledControls).toBe(0);
+    expect(humanApprovalPlan.approvalRecordingEnabled).toBe(false);
+    expect(humanApprovalPlan.rollbackExecutionEnabled).toBe(false);
+    expect(humanApprovalPlan.auditWriteEnabled).toBe(false);
+    expect(humanApprovalPlan.dryRunExecutionEnabled).toBe(false);
+    expect(humanApprovalPlan.proposalCreationEnabled).toBe(false);
+    expect(humanApprovalPlan.mutationRouteEnabled).toBe(false);
+    expect(humanApprovalPlan.executionEnabled).toBe(false);
+    expect(humanApprovalPlan.dispatchEnabled).toBe(false);
+    expect(humanApprovalPlan.approvalItems.map((item) => item.id)).toEqual(["approver_identity", "decision_envelope", "consent_scope", "timeout_policy", "audit_linkage"]);
+    expect(humanApprovalPlan.approvalItems.every((item) => item.status === "not_recorded" && item.rawExcluded)).toBe(true);
+    expect(humanApprovalPlan.approvalItems.map((item) => item.requiredFields)).toEqual(expect.arrayContaining([
+      expect.arrayContaining(["approver_identity_ref", "decision_envelope_ref", "consent_scope", "timeout_policy", "audit_linkage_ref"]),
+    ]));
+    expect(humanApprovalPlan.rollbackVerificationPlanSnapshot).toMatchObject({ rollbackExecutionEnabled: false, auditWriteEnabled: false, executionEnabled: false });
+    expect(humanApprovalPlan.safeBoundary).toContain("human approval plan only");
+    expect(JSON.stringify(humanApprovalPlan)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw human-approval|secret human-approval|private|token/i);
   });
 
   it("builds a disabled Authority Adapter Contract 1 before any execution adapter exists", () => {

@@ -1545,6 +1545,35 @@ export type OfficeControlledMutationRollbackVerificationPlan = {
   safeProjectionOnly: true;
 };
 
+export type OfficeControlledMutationHumanApprovalPlanId = "approver_identity" | "decision_envelope" | "consent_scope" | "timeout_policy" | "audit_linkage";
+
+export type OfficeControlledMutationHumanApprovalPlanItem = {
+  id: OfficeControlledMutationHumanApprovalPlanId;
+  label: string;
+  status: "not_recorded";
+  requiredFields: Array<"approver_identity_ref" | "decision_envelope_ref" | "consent_scope" | "timeout_policy" | "audit_linkage_ref">;
+  safeSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeControlledMutationHumanApprovalPlan = {
+  stageLabel: "Controlled Mutation Human Approval Plan 1";
+  title: string;
+  enabledControls: 0;
+  approvalRecordingEnabled: false;
+  rollbackExecutionEnabled: false;
+  auditWriteEnabled: false;
+  dryRunExecutionEnabled: false;
+  proposalCreationEnabled: false;
+  mutationRouteEnabled: false;
+  executionEnabled: false;
+  dispatchEnabled: false;
+  approvalItems: OfficeControlledMutationHumanApprovalPlanItem[];
+  rollbackVerificationPlanSnapshot: Pick<OfficeControlledMutationRollbackVerificationPlan, "rollbackExecutionEnabled" | "auditWriteEnabled" | "executionEnabled">;
+  safeBoundary: string;
+  safeProjectionOnly: true;
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -3059,6 +3088,45 @@ export function buildOfficeControlledMutationRollbackVerificationPlan(auditSinkP
       status: "not_verified",
       requiredFields,
       safeSummary: `${item.label} is required before any future rollback path can be verified`,
+      rawExcluded: true,
+    })),
+  };
+}
+
+export function buildOfficeControlledMutationHumanApprovalPlan(rollbackVerificationPlan: OfficeControlledMutationRollbackVerificationPlan): OfficeControlledMutationHumanApprovalPlan {
+  const requiredFields: OfficeControlledMutationHumanApprovalPlanItem["requiredFields"] = ["approver_identity_ref", "decision_envelope_ref", "consent_scope", "timeout_policy", "audit_linkage_ref"];
+  const approvalItems: Array<{ id: OfficeControlledMutationHumanApprovalPlanId; label: string }> = [
+    { id: "approver_identity", label: "Approver identity" },
+    { id: "decision_envelope", label: "Decision envelope" },
+    { id: "consent_scope", label: "Consent scope" },
+    { id: "timeout_policy", label: "Timeout policy" },
+    { id: "audit_linkage", label: "Audit linkage" },
+  ];
+  return {
+    stageLabel: "Controlled Mutation Human Approval Plan 1",
+    title: "제어형 변경 인간 승인 계획 · 승인 기록 없음",
+    enabledControls: 0,
+    approvalRecordingEnabled: false,
+    rollbackExecutionEnabled: false,
+    auditWriteEnabled: false,
+    dryRunExecutionEnabled: false,
+    proposalCreationEnabled: false,
+    mutationRouteEnabled: false,
+    executionEnabled: false,
+    dispatchEnabled: false,
+    rollbackVerificationPlanSnapshot: {
+      rollbackExecutionEnabled: rollbackVerificationPlan.rollbackExecutionEnabled,
+      auditWriteEnabled: rollbackVerificationPlan.auditWriteEnabled,
+      executionEnabled: rollbackVerificationPlan.executionEnabled,
+    },
+    safeBoundary: "human approval plan only · no approval recording · no rollback execution · no audit write · no dry-run execution · no proposal creation · no mutation route · no executable controls",
+    safeProjectionOnly: true,
+    approvalItems: approvalItems.map((item) => ({
+      id: item.id,
+      label: item.label,
+      status: "not_recorded",
+      requiredFields,
+      safeSummary: `${item.label} is required before any future approval decision can be recorded`,
       rawExcluded: true,
     })),
   };

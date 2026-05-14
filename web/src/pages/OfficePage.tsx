@@ -103,6 +103,7 @@ import {
   buildOfficeControlledMutationDryRunPlan,
   buildOfficeControlledMutationAuditSinkPlan,
   buildOfficeControlledMutationRollbackVerificationPlan,
+  buildOfficeControlledMutationHumanApprovalPlan,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -1784,6 +1785,7 @@ export default function OfficePage() {
   const controlledMutationDryRunPlan = useMemo(() => buildOfficeControlledMutationDryRunPlan(controlledMutationProposalContract), [controlledMutationProposalContract]);
   const controlledMutationAuditSinkPlan = useMemo(() => buildOfficeControlledMutationAuditSinkPlan(controlledMutationDryRunPlan), [controlledMutationDryRunPlan]);
   const controlledMutationRollbackVerificationPlan = useMemo(() => buildOfficeControlledMutationRollbackVerificationPlan(controlledMutationAuditSinkPlan), [controlledMutationAuditSinkPlan]);
+  const controlledMutationHumanApprovalPlan = useMemo(() => buildOfficeControlledMutationHumanApprovalPlan(controlledMutationRollbackVerificationPlan), [controlledMutationRollbackVerificationPlan]);
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -2623,6 +2625,43 @@ export default function OfficePage() {
               <div className="mt-3 flex flex-wrap gap-1" data-office-controlled-mutation-rollback-verification-fields="true">
                 {item.requiredFields.map((field) => (
                   <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-controlled-mutation-rollback-verification-field={field}>{field}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-fuchsia-300/20 bg-fuchsia-950/10 p-4"
+        data-office-controlled-mutation-human-approval-plan="true"
+        data-office-controlled-mutation-human-approval-recording-enabled={String(controlledMutationHumanApprovalPlan.approvalRecordingEnabled)}
+        data-office-controlled-mutation-human-approval-rollback-execution-enabled={String(controlledMutationHumanApprovalPlan.rollbackExecutionEnabled)}
+        data-office-controlled-mutation-human-approval-audit-write-enabled={String(controlledMutationHumanApprovalPlan.auditWriteEnabled)}
+        data-office-controlled-mutation-human-approval-dry-run-execution-enabled={String(controlledMutationHumanApprovalPlan.dryRunExecutionEnabled)}
+        data-office-controlled-mutation-human-approval-proposal-creation-enabled={String(controlledMutationHumanApprovalPlan.proposalCreationEnabled)}
+        data-office-controlled-mutation-human-approval-route-enabled={String(controlledMutationHumanApprovalPlan.mutationRouteEnabled)}
+        data-office-controlled-mutation-human-approval-action-execution-enabled={String(controlledMutationHumanApprovalPlan.executionEnabled)}
+        data-office-controlled-mutation-human-approval-dispatch-enabled={String(controlledMutationHumanApprovalPlan.dispatchEnabled)}
+        data-office-controlled-mutation-human-approval-enabled-controls={controlledMutationHumanApprovalPlan.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-fuchsia-200/70">{controlledMutationHumanApprovalPlan.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{controlledMutationHumanApprovalPlan.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{controlledMutationHumanApprovalPlan.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">approval records: 0</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-controlled-mutation-human-approval-items="true">
+          {controlledMutationHumanApprovalPlan.approvalItems.map((item) => (
+            <div key={item.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-human-approval-item={item.id} data-office-controlled-mutation-human-approval-item-status={item.status}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.status}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{item.safeSummary}</div>
+              <div className="mt-3 flex flex-wrap gap-1" data-office-controlled-mutation-human-approval-fields="true">
+                {item.requiredFields.map((field) => (
+                  <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-controlled-mutation-human-approval-field={field}>{field}</span>
                 ))}
               </div>
             </div>
