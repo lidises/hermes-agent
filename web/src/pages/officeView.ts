@@ -1604,6 +1604,37 @@ export type OfficeControlledMutationAuthoritySummary = {
   safeProjectionOnly: true;
 };
 
+export type OfficeControlledMutationExecutionReadinessSummaryId = "proposal_contract" | "dry_run_plan" | "audit_sink_plan" | "rollback_verification" | "human_approval" | "authority_summary";
+
+export type OfficeControlledMutationExecutionReadinessSummaryItem = {
+  id: OfficeControlledMutationExecutionReadinessSummaryId;
+  label: string;
+  status: "blocked";
+  requiredFields: Array<"proposal_contract_ref" | "dry_run_plan_ref" | "audit_sink_ref" | "rollback_verification_ref" | "human_approval_ref" | "authority_summary_ref">;
+  safeSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeControlledMutationExecutionReadinessSummary = {
+  stageLabel: "Controlled Mutation Execution Readiness Summary 1";
+  title: string;
+  enabledControls: 0;
+  executionReadinessEnabled: false;
+  authorityGrantEnabled: false;
+  approvalRecordingEnabled: false;
+  rollbackExecutionEnabled: false;
+  auditWriteEnabled: false;
+  dryRunExecutionEnabled: false;
+  proposalCreationEnabled: false;
+  mutationRouteEnabled: false;
+  executionEnabled: false;
+  dispatchEnabled: false;
+  readinessItems: OfficeControlledMutationExecutionReadinessSummaryItem[];
+  authoritySummarySnapshot: Pick<OfficeControlledMutationAuthoritySummary, "authorityGrantEnabled" | "approvalRecordingEnabled" | "executionEnabled">;
+  safeBoundary: string;
+  safeProjectionOnly: true;
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -3197,6 +3228,48 @@ export function buildOfficeControlledMutationAuthoritySummary(humanApprovalPlan:
       status: "blocked",
       requiredFields,
       safeSummary: `${item.label} is required before any executable authority can be considered`,
+      rawExcluded: true,
+    })),
+  };
+}
+
+export function buildOfficeControlledMutationExecutionReadinessSummary(authoritySummary: OfficeControlledMutationAuthoritySummary): OfficeControlledMutationExecutionReadinessSummary {
+  const requiredFields: OfficeControlledMutationExecutionReadinessSummaryItem["requiredFields"] = ["proposal_contract_ref", "dry_run_plan_ref", "audit_sink_ref", "rollback_verification_ref", "human_approval_ref", "authority_summary_ref"];
+  const readinessItems: Array<{ id: OfficeControlledMutationExecutionReadinessSummaryId; label: string }> = [
+    { id: "proposal_contract", label: "Proposal contract" },
+    { id: "dry_run_plan", label: "Dry-run plan" },
+    { id: "audit_sink_plan", label: "Audit sink plan" },
+    { id: "rollback_verification", label: "Rollback verification" },
+    { id: "human_approval", label: "Human approval" },
+    { id: "authority_summary", label: "Authority summary" },
+  ];
+  return {
+    stageLabel: "Controlled Mutation Execution Readiness Summary 1",
+    title: "제어형 변경 실행 준비 요약 · 실행 활성화 없음",
+    enabledControls: 0,
+    executionReadinessEnabled: false,
+    authorityGrantEnabled: false,
+    approvalRecordingEnabled: false,
+    rollbackExecutionEnabled: false,
+    auditWriteEnabled: false,
+    dryRunExecutionEnabled: false,
+    proposalCreationEnabled: false,
+    mutationRouteEnabled: false,
+    executionEnabled: false,
+    dispatchEnabled: false,
+    authoritySummarySnapshot: {
+      authorityGrantEnabled: authoritySummary.authorityGrantEnabled,
+      approvalRecordingEnabled: authoritySummary.approvalRecordingEnabled,
+      executionEnabled: authoritySummary.executionEnabled,
+    },
+    safeBoundary: "execution readiness summary only · no execution enablement · no authority grant · no approval recording · no rollback execution · no audit write · no dry-run execution · no proposal creation · no mutation route · no executable controls",
+    safeProjectionOnly: true,
+    readinessItems: readinessItems.map((item) => ({
+      id: item.id,
+      label: item.label,
+      status: "blocked",
+      requiredFields,
+      safeSummary: `${item.label} must remain blocked until every prerequisite is approved and verified`,
       rawExcluded: true,
     })),
   };

@@ -93,6 +93,7 @@ import {
   buildOfficeControlledMutationRollbackVerificationPlan,
   buildOfficeControlledMutationHumanApprovalPlan,
   buildOfficeControlledMutationAuthoritySummary,
+  buildOfficeControlledMutationExecutionReadinessSummary,
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
@@ -991,6 +992,36 @@ describe("OfficePage view helpers", () => {
     expect(authoritySummary.humanApprovalPlanSnapshot).toMatchObject({ approvalRecordingEnabled: false, rollbackExecutionEnabled: false, executionEnabled: false });
     expect(authoritySummary.safeBoundary).toContain("authority summary only");
     expect(JSON.stringify(authoritySummary)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw authority-summary|secret authority-summary|private|token/i);
+  });
+
+  it("builds Controlled Mutation Execution Readiness Summary 1 without enabling execution", () => {
+    const readinessSummary = buildOfficeControlledMutationExecutionReadinessSummary(buildOfficeControlledMutationAuthoritySummary(buildOfficeControlledMutationHumanApprovalPlan(buildOfficeControlledMutationRollbackVerificationPlan(buildOfficeControlledMutationAuditSinkPlan(buildOfficeControlledMutationDryRunPlan(buildOfficeControlledMutationProposalContract(buildOfficeWorkerFinalGateChecklist(buildOfficeWorkerRollbackPreviewEnvelope(buildOfficeWorkerAuditPreviewEnvelope(buildOfficeWorkerDispatchDryRunEnvelope(buildOfficeWorkerAuthorityHandoffEnvelope(buildOfficeWorkerHumanConfirmationEnvelope(buildOfficeWorkerRequestDraftPreview(buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-14T19:45:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/execution-readiness", status: "partial", checked_at: "2026-05-14T19:40:00Z", item_count: 1, warning_count: 1, error_summary: "raw execution-readiness token" } as unknown as OfficeState["data_sources"][number]],
+      work_items: [{ id: "w1", status: "blocked", title: "raw execution-readiness task", body: "secret execution-readiness body" } as unknown as OfficeState["work_items"][number]],
+      events: [{ id: "event-execution-readiness-private", category: "approval_needed", room_id: "review", tone: "warning", generated_at: "2026-05-14T19:44:00Z", detail: "raw execution-readiness event token" } as unknown as OfficeState["events"][number]],
+    })))))))))))))))))))))));
+
+    expect(readinessSummary.stageLabel).toBe("Controlled Mutation Execution Readiness Summary 1");
+    expect(readinessSummary.enabledControls).toBe(0);
+    expect(readinessSummary.executionReadinessEnabled).toBe(false);
+    expect(readinessSummary.authorityGrantEnabled).toBe(false);
+    expect(readinessSummary.approvalRecordingEnabled).toBe(false);
+    expect(readinessSummary.rollbackExecutionEnabled).toBe(false);
+    expect(readinessSummary.auditWriteEnabled).toBe(false);
+    expect(readinessSummary.dryRunExecutionEnabled).toBe(false);
+    expect(readinessSummary.proposalCreationEnabled).toBe(false);
+    expect(readinessSummary.mutationRouteEnabled).toBe(false);
+    expect(readinessSummary.executionEnabled).toBe(false);
+    expect(readinessSummary.dispatchEnabled).toBe(false);
+    expect(readinessSummary.readinessItems.map((item) => item.id)).toEqual(["proposal_contract", "dry_run_plan", "audit_sink_plan", "rollback_verification", "human_approval", "authority_summary"]);
+    expect(readinessSummary.readinessItems.every((item) => item.status === "blocked" && item.rawExcluded)).toBe(true);
+    expect(readinessSummary.readinessItems.map((item) => item.requiredFields)).toEqual(expect.arrayContaining([
+      expect.arrayContaining(["proposal_contract_ref", "dry_run_plan_ref", "audit_sink_ref", "rollback_verification_ref", "human_approval_ref", "authority_summary_ref"]),
+    ]));
+    expect(readinessSummary.authoritySummarySnapshot).toMatchObject({ authorityGrantEnabled: false, approvalRecordingEnabled: false, executionEnabled: false });
+    expect(readinessSummary.safeBoundary).toContain("execution readiness summary only");
+    expect(JSON.stringify(readinessSummary)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw execution-readiness|secret execution-readiness|private|token/i);
   });
 
   it("builds a disabled Authority Adapter Contract 1 before any execution adapter exists", () => {
