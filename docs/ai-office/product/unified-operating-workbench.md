@@ -152,4 +152,4 @@ Preserve these as supporting evidence rather than deleting or rewriting them:
 
 ## Recommended next product step
 
-After `Approval Request View 1`, the next separately approved work should be `Approval Audit Timeline 1`: a read-only safe audit-chain/timeline posture slice that displays how request, dry-run, human decision, and blocked/execution audit events would be ordered, without writing audit events, creating requests, enabling controls, adding backend mutation routes, or changing services.
+After `Approval Audit Timeline 1`, the next separately approved work should be `Approval Execution Gate 1`: a read-only gate/prerequisite posture slice that displays why execution remains blocked and what future authority adapter, audit-write, rollback, and human confirmation prerequisites would be needed, without executing actions, writing audit events, creating requests, enabling controls, adding backend mutation routes, or changing services.

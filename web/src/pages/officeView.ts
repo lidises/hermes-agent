@@ -1052,6 +1052,25 @@ export type OfficeApprovalRequestView = {
   safeProjectionOnly: true;
 };
 
+export type OfficeApprovalAuditTimelineStep = {
+  id: "request" | "dryRun" | "decision" | "execution";
+  eventKind: "action_requested" | "dry_run_completed" | "human_decision_recorded" | "execution_blocked";
+  status: "ready-preview" | "waiting-preview" | "blocked-preview";
+  resultPosture: "info" | "warning" | "blocked" | "success";
+  safeSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeApprovalAuditTimeline = {
+  stageLabel: "Approval Audit Timeline 1";
+  title: string;
+  enabledControls: 0;
+  writesAuditEvents: false;
+  steps: OfficeApprovalAuditTimelineStep[];
+  safeBoundary: string;
+  safeProjectionOnly: true;
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -1768,6 +1787,53 @@ export function buildOfficeApprovalRequestView(state: OfficeState): OfficeApprov
       safeSummary: `request posture only · hypothetical ${requests.length}개 · execution disabled`,
     },
     safeProjectionOnly: true,
+  };
+}
+
+export function buildOfficeApprovalAuditTimeline(requestView: OfficeApprovalRequestView): OfficeApprovalAuditTimeline {
+  const requestCount = requestView.requests.length;
+  const dryRunPosture = requestView.dryRunEvidence.validatorPosture === "fail" ? "blocked" : requestView.dryRunEvidence.validatorPosture === "warning" ? "warning" : "info";
+  return {
+    stageLabel: "Approval Audit Timeline 1",
+    title: "승인 감사 타임라인 · 읽기 전용 미리보기",
+    enabledControls: 0,
+    writesAuditEvents: false,
+    safeBoundary: "timeline posture only · no audit write · no request creation · execution disabled",
+    safeProjectionOnly: true,
+    steps: [
+      {
+        id: "request",
+        eventKind: "action_requested",
+        status: requestCount > 0 ? "ready-preview" : "waiting-preview",
+        resultPosture: requestCount > 0 ? "warning" : "info",
+        safeSummary: `hypothetical request ${requestCount}개 · no event write`,
+        rawExcluded: true,
+      },
+      {
+        id: "dryRun",
+        eventKind: "dry_run_completed",
+        status: requestCount > 0 ? "waiting-preview" : "blocked-preview",
+        resultPosture: dryRunPosture,
+        safeSummary: `dry-run evidence ${requestView.dryRunEvidence.result} · validator ${requestView.dryRunEvidence.validatorPosture}`,
+        rawExcluded: true,
+      },
+      {
+        id: "decision",
+        eventKind: "human_decision_recorded",
+        status: "waiting-preview",
+        resultPosture: "info",
+        safeSummary: `${requestView.humanDecision.status} · ${requestView.humanDecision.scope} · disabled`,
+        rawExcluded: true,
+      },
+      {
+        id: "execution",
+        eventKind: "execution_blocked",
+        status: "blocked-preview",
+        resultPosture: "blocked",
+        safeSummary: "execution remains blocked until a separate approved authority adapter exists",
+        rawExcluded: true,
+      },
+    ],
   };
 }
 

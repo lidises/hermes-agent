@@ -73,6 +73,7 @@ import {
   buildOfficeRpgReviewCornerFacility,
   buildOfficeRpgApprovalConsoleFacility,
   buildOfficeApprovalRequestView,
+  buildOfficeApprovalAuditTimeline,
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
@@ -519,6 +520,32 @@ describe("OfficePage view helpers", () => {
     expect(plan.find((section) => section.id === "work")?.summary).toContain("세션 1개");
     expect(plan.find((section) => section.id === "routing")?.summary).toContain("출처 기록 1개");
     expect(JSON.stringify(plan)).not.toMatch(/raw|secret|body|script|path/i);
+  });
+
+  it("builds a read-only Approval Audit Timeline 1 chain without writing audit events", () => {
+    const timeline = buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-14T13:00:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/private", status: "partial", checked_at: "2026-05-14T12:55:00Z", item_count: 1, warning_count: 1, error_summary: "raw audit source token" } as unknown as OfficeState["data_sources"][number]],
+      work_items: [{ id: "w1", status: "blocked", title: "raw audit work", body: "secret audit body" } as unknown as OfficeState["work_items"][number]],
+      automations: [{ id: "cron-private", state: "error", last_status: "failed", script: "/Users/lidises/audit.sh" } as unknown as OfficeState["automations"][number]],
+      projection_cache: {
+        schema_version: 1,
+        status: "active",
+        redacted: true,
+        cache_layout: { incoming: "incoming", active: "active", archive: "archive", rejected: "rejected" },
+        active: { bundle_id: "raw-audit-bundle-token", generated_at: "2026-05-14T12:50:00Z", generated_by: "relay", source_kind: "safe_manifest", source_tags: ["raw audit tag"], freshness: {}, validator: { result: "warning" }, redaction: { raw_excluded: true } } as unknown as OfficeState["projection_cache"]["active"],
+        rejected: { count: 1, recent: [{ path: "/Users/lidises/audit.json", error: "raw audit error" }] },
+      } as unknown as OfficeState["projection_cache"],
+    })));
+
+    expect(timeline.stageLabel).toBe("Approval Audit Timeline 1");
+    expect(timeline.enabledControls).toBe(0);
+    expect(timeline.writesAuditEvents).toBe(false);
+    expect(timeline.steps.map((step) => step.eventKind)).toEqual(["action_requested", "dry_run_completed", "human_decision_recorded", "execution_blocked"]);
+    expect(timeline.steps.every((step) => step.safeSummary.length > 0 && step.rawExcluded)).toBe(true);
+    expect(timeline.steps.find((step) => step.eventKind === "execution_blocked")).toMatchObject({ resultPosture: "blocked", status: "blocked-preview" });
+    expect(timeline.safeBoundary).toContain("timeline posture only");
+    expect(JSON.stringify(timeline)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw audit|secret audit|private|token/i);
   });
 
   it("builds a read-only Approval Request View 1 posture without creating executable requests", () => {

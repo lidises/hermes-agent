@@ -85,6 +85,7 @@ import {
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
   buildOfficeApprovalRequestView,
+  buildOfficeApprovalAuditTimeline,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -1748,6 +1749,7 @@ export default function OfficePage() {
   const rpgScene = useMemo(() => buildOfficeRpgScene(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const unifiedWorkbenchView = useMemo(() => buildOfficeUnifiedWorkbenchView(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const approvalRequestView = useMemo(() => buildOfficeApprovalRequestView(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
+  const approvalAuditTimeline = useMemo(() => buildOfficeApprovalAuditTimeline(approvalRequestView), [approvalRequestView]);
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -1987,6 +1989,31 @@ export default function OfficePage() {
               <div className="mt-1 font-mono text-xs text-violet-100">{request.targetRef}</div>
               <div className="mt-2 text-xs leading-5 text-midground/70">{request.reasonSummary}</div>
               <div className="mt-2 text-[10px] text-midground/55">evidence {request.evidenceCount} · orchestrator {request.orchestratorRequired ? "required" : "n/a"} · enabled controls 0</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-fuchsia-300/20 bg-fuchsia-950/10 p-4"
+        data-office-approval-audit-timeline="true"
+        data-office-approval-audit-writes={String(approvalAuditTimeline.writesAuditEvents)}
+        data-office-approval-audit-enabled-controls={approvalAuditTimeline.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-fuchsia-200/70">{approvalAuditTimeline.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{approvalAuditTimeline.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{approvalAuditTimeline.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">audit writes: {approvalAuditTimeline.writesAuditEvents ? "true" : "false"}</div>
+        </div>
+        <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-approval-audit-steps="true">
+          {approvalAuditTimeline.steps.map((step) => (
+            <div key={step.id} className="border border-current/15 bg-black/20 p-3" data-office-approval-audit-step={step.eventKind} data-office-approval-audit-status={step.status}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{step.eventKind}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{step.status}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{step.safeSummary}</div>
             </div>
           ))}
         </div>
