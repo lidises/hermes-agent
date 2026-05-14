@@ -72,6 +72,7 @@ import {
   buildOfficeRpgSourceArchiveFacility,
   buildOfficeRpgReviewCornerFacility,
   buildOfficeRpgApprovalConsoleFacility,
+  buildOfficeApprovalRequestView,
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
@@ -518,6 +519,41 @@ describe("OfficePage view helpers", () => {
     expect(plan.find((section) => section.id === "work")?.summary).toContain("세션 1개");
     expect(plan.find((section) => section.id === "routing")?.summary).toContain("출처 기록 1개");
     expect(JSON.stringify(plan)).not.toMatch(/raw|secret|body|script|path/i);
+  });
+
+  it("builds a read-only Approval Request View 1 posture without creating executable requests", () => {
+    const view = buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-14T12:45:00Z",
+      data_sources: [
+        { id: "kanban", status: "ok", checked_at: "2026-05-14T12:00:00Z", item_count: 3, warning_count: 0 },
+        { id: "paperclip:/Users/lidises/nas/private", status: "partial", checked_at: "2026-05-14T11:00:00Z", item_count: 1, warning_count: 2, error_summary: "raw source error token" } as unknown as OfficeState["data_sources"][number],
+      ],
+      work_items: [
+        { id: "w1", status: "blocked", title: "raw blocked title", body: "secret request body" } as unknown as OfficeState["work_items"][number],
+        { id: "w2", status: "review", title: "raw review title", result: "secret result" } as unknown as OfficeState["work_items"][number],
+      ],
+      automations: [{ id: "cron-private", state: "error", last_status: "failed", script: "/Users/lidises/private_restart.sh" } as unknown as OfficeState["automations"][number]],
+      events: [{ id: "event-private", category: "approval_needed", room_id: "incident_corner", tone: "warning", generated_at: "2026-05-14T12:40:00Z", detail: "raw event token" } as unknown as OfficeState["events"][number]],
+      projection_cache: {
+        schema_version: 1,
+        status: "active",
+        redacted: true,
+        cache_layout: { incoming: "incoming", active: "active", archive: "archive", rejected: "rejected" },
+        active: { bundle_id: "bundle-private-token", generated_at: "2026-05-14T12:00:00Z", generated_by: "relay", source_kind: "safe_manifest", source_tags: ["raw path tag"], freshness: {}, validator: { result: "warning" }, redaction: { raw_excluded: true } } as unknown as OfficeState["projection_cache"]["active"],
+        rejected: { count: 4, recent: [{ path: "/Users/lidises/rejected.json", error: "raw validation error" }] },
+      } as unknown as OfficeState["projection_cache"],
+    }));
+
+    expect(view.stageLabel).toBe("Approval Request View 1");
+    expect(view.authorityLevel).toBe("display_only");
+    expect(view.enabledControls).toBe(0);
+    expect(view.requests.map((request) => request.actionKind)).toEqual(["kanban_transition", "projection_promote", "watcher_enable_request"]);
+    expect(view.requests.every((request) => request.hypothetical && request.orchestratorRequired && request.humanApprovalRequired)).toBe(true);
+    expect(view.requests.find((request) => request.actionKind === "kanban_transition")).toMatchObject({ targetKind: "kanban_card", targetRef: "kanban-card:blocked-1", evidenceCount: 2 });
+    expect(view.dryRunEvidence).toMatchObject({ result: "needs_more_evidence", validatorPosture: "fail", rawExcluded: true });
+    expect(view.humanDecision).toMatchObject({ status: "not_requested", scope: "single_action_only", enabled: false });
+    expect(view.auditReadiness.safeSummary).toContain("request posture only");
+    expect(JSON.stringify(view)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw source|raw blocked|secret request|secret result|private_restart|raw event|bundle-private-token|raw path tag|raw validation|token/i);
   });
 
   it("groups the unified operating workbench into four safe layers with disabled approval posture", () => {

@@ -152,4 +152,4 @@ Preserve these as supporting evidence rather than deleting or rewriting them:
 
 ## Recommended next product step
 
-After `Unified Workbench IA/Layout 1`, the next separately approved work should be `Approval Request View 1`: a read-only/hypothetical request posture slice that displays safe request/dry-run/decision/audit readiness from the approval contract without creating requests, enabling controls, adding backend mutation routes, or changing services.
+After `Approval Request View 1`, the next separately approved work should be `Approval Audit Timeline 1`: a read-only safe audit-chain/timeline posture slice that displays how request, dry-run, human decision, and blocked/execution audit events would be ordered, without writing audit events, creating requests, enabling controls, adding backend mutation routes, or changing services.

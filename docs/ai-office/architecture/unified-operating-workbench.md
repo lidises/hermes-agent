@@ -219,9 +219,9 @@ This architecture document is an index and consolidation point. It does not repl
 
 ## Next architecture step
 
-`Unified Workbench IA/Layout 1` is now locally implemented as a pure `OfficeUnifiedWorkbenchView` helper plus a top `/office` four-layer header. The next separately approved architecture/UI task should be `Approval Request View 1`:
+`Unified Workbench IA/Layout 1` and `Approval Request View 1` are now locally implemented as pure safe view-model helpers plus top `/office` display-only sections. The next separately approved architecture/UI task should be `Approval Audit Timeline 1`:
 
-1. Define safe fixture/DTO posture for action-request, dry-run evidence, and human-decision rows from `docs/ai-office/architecture/approval-model-contract.md`.
-2. Render the posture as read-only/hypothetical request visibility only.
-3. Add focused tests including raw-leak sentinels and zero enabled controls.
-4. Do not create real requests, backend mutation routes, services, cron/watcher automation, VPS restarts, public exposure, NAS access, or renderer dependencies.
+1. Define a safe audit-chain/timeline posture from the approval contract event sequence (`action_requested`, `dry_run_completed`, `human_decision_recorded`, blocked/execution placeholders).
+2. Render the posture as read-only/hypothetical audit visibility only.
+3. Add focused tests including raw-leak sentinels, allowlisted event kinds, and zero enabled controls.
+4. Do not write audit events, create requests, add backend mutation routes, services, cron/watcher automation, VPS restarts, public exposure, NAS access, or renderer dependencies.

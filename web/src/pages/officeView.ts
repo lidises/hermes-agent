@@ -1006,6 +1006,52 @@ export type OfficeRpgApprovalConsoleFacility = {
   safeProjectionOnly: true;
 };
 
+export type OfficeApprovalActionKind =
+  | "kanban_transition"
+  | "kanban_comment"
+  | "projection_promote"
+  | "projection_reject"
+  | "nas_save_request"
+  | "watcher_enable_request"
+  | "service_restart_request";
+
+export type OfficeApprovalRequestRow = {
+  requestRef: string;
+  actionKind: OfficeApprovalActionKind;
+  targetKind: "kanban_card" | "projection_bundle" | "nas_save_candidate" | "watcher" | "service";
+  targetRef: string;
+  reasonSummary: string;
+  evidenceCount: number;
+  hypothetical: true;
+  orchestratorRequired: true;
+  humanApprovalRequired: true;
+};
+
+export type OfficeApprovalRequestView = {
+  stageLabel: "Approval Request View 1";
+  title: string;
+  authorityLevel: "display_only";
+  enabledControls: 0;
+  requests: OfficeApprovalRequestRow[];
+  dryRunEvidence: {
+    result: "would_succeed" | "would_fail" | "blocked" | "needs_more_evidence";
+    validatorPosture: "pass" | "warning" | "fail" | "not_applicable";
+    affectedSafeCounts: Record<string, number>;
+    rawExcluded: true;
+  };
+  humanDecision: {
+    status: "not_requested";
+    scope: "single_action_only";
+    enabled: false;
+  };
+  auditReadiness: {
+    eventKind: "action_requested";
+    resultPosture: "info" | "warning" | "blocked" | "success";
+    safeSummary: string;
+  };
+  safeProjectionOnly: true;
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -1625,6 +1671,103 @@ export function buildOfficeRpgApprovalConsoleFacility(scene: OfficeRpgScene): Of
         disabled: true,
       },
     ],
+  };
+}
+
+function approvalValidatorPosture(warningCount: number, failureCount: number): OfficeApprovalRequestView["dryRunEvidence"]["validatorPosture"] {
+  if (failureCount > 0) return "fail";
+  if (warningCount > 0) return "warning";
+  return "pass";
+}
+
+export function buildOfficeApprovalRequestView(state: OfficeState): OfficeApprovalRequestView {
+  const blockedWorkCount = state.work_items.filter((item) => textField(item, "status") === "blocked").length;
+  const reviewWorkCount = state.work_items.filter((item) => textField(item, "status") === "review").length;
+  const sourceWarningCount = state.data_sources.filter((source) => source.status !== "ok" || safeWorkbenchCount(source.warning_count) > 0).length;
+  const failedAutomationCount = state.automations.filter((automation) => {
+    const text = `${textField(automation, "state")} ${textField(automation, "last_status")}`.toLowerCase();
+    return text.includes("error") || text.includes("fail");
+  }).length;
+  const projectionRejectedCount = safeWorkbenchCount(state.projection_cache?.rejected?.count);
+  const projectionValidator = String(state.projection_cache?.active?.validator?.result ?? "").toLowerCase();
+  const projectionNeedsReview = Boolean(state.projection_cache?.active) && (projectionRejectedCount > 0 || projectionValidator === "warning" || projectionValidator === "fail");
+  const requests: OfficeApprovalRequestRow[] = [];
+
+  if (blockedWorkCount > 0) {
+    requests.push({
+      requestRef: "request:kanban-transition-preview",
+      actionKind: "kanban_transition",
+      targetKind: "kanban_card",
+      targetRef: `kanban-card:blocked-${blockedWorkCount}`,
+      reasonSummary: `blocked work ${blockedWorkCount}개를 safe transition 후보로만 표시`,
+      evidenceCount: blockedWorkCount + sourceWarningCount,
+      hypothetical: true,
+      orchestratorRequired: true,
+      humanApprovalRequired: true,
+    });
+  }
+
+  if (projectionNeedsReview) {
+    requests.push({
+      requestRef: "request:projection-promote-preview",
+      actionKind: "projection_promote",
+      targetKind: "projection_bundle",
+      targetRef: "projection-bundle:active",
+      reasonSummary: `projection review ${projectionRejectedCount + sourceWarningCount}개를 safe dry-run 후보로만 표시`,
+      evidenceCount: Math.max(1, projectionRejectedCount + sourceWarningCount),
+      hypothetical: true,
+      orchestratorRequired: true,
+      humanApprovalRequired: true,
+    });
+  }
+
+  if (failedAutomationCount > 0) {
+    requests.push({
+      requestRef: "request:watcher-enable-preview",
+      actionKind: "watcher_enable_request",
+      targetKind: "watcher",
+      targetRef: `watcher:safe-${failedAutomationCount}`,
+      reasonSummary: `automation failure ${failedAutomationCount}개를 watcher request 후보로만 표시`,
+      evidenceCount: failedAutomationCount,
+      hypothetical: true,
+      orchestratorRequired: true,
+      humanApprovalRequired: true,
+    });
+  }
+
+  const warningCount = sourceWarningCount + projectionRejectedCount + reviewWorkCount;
+  const failureCount = failedAutomationCount;
+  const validatorPosture = approvalValidatorPosture(warningCount, failureCount);
+
+  return {
+    stageLabel: "Approval Request View 1",
+    title: "승인 요청 자세 · 읽기 전용 미리보기",
+    authorityLevel: "display_only",
+    enabledControls: 0,
+    requests,
+    dryRunEvidence: {
+      result: requests.length > 0 ? "needs_more_evidence" : "blocked",
+      validatorPosture,
+      affectedSafeCounts: {
+        blockedWork: blockedWorkCount,
+        reviewWork: reviewWorkCount,
+        sourceWarnings: sourceWarningCount,
+        failedAutomations: failedAutomationCount,
+        projectionRejected: projectionRejectedCount,
+      },
+      rawExcluded: true,
+    },
+    humanDecision: {
+      status: "not_requested",
+      scope: "single_action_only",
+      enabled: false,
+    },
+    auditReadiness: {
+      eventKind: "action_requested",
+      resultPosture: requests.length > 0 ? "warning" : "info",
+      safeSummary: `request posture only · hypothetical ${requests.length}개 · execution disabled`,
+    },
+    safeProjectionOnly: true,
   };
 }
 

@@ -84,6 +84,7 @@ import {
   buildOfficeRpgApprovalConsoleFacility,
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
+  buildOfficeApprovalRequestView,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -1746,6 +1747,7 @@ export default function OfficePage() {
   const needsAttention = useMemo(() => (state ? buildOfficeAttentionItems(state) : []), [state]);
   const rpgScene = useMemo(() => buildOfficeRpgScene(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const unifiedWorkbenchView = useMemo(() => buildOfficeUnifiedWorkbenchView(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
+  const approvalRequestView = useMemo(() => buildOfficeApprovalRequestView(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -1954,6 +1956,37 @@ export default function OfficePage() {
                 <div className="font-mono text-xs tabular-nums text-emerald-200">{layer.count}</div>
               </div>
               <div className="mt-2 text-xs leading-5 text-midground/70">{layer.summary}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-violet-300/20 bg-violet-950/10 p-4"
+        data-office-approval-request-view="true"
+        data-office-approval-authority={approvalRequestView.authorityLevel}
+        data-office-approval-enabled-controls={approvalRequestView.enabledControls}
+      >
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-violet-200/70">{approvalRequestView.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{approvalRequestView.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{approvalRequestView.auditReadiness.safeSummary}</p>
+          </div>
+          <div className="grid gap-2 text-xs text-midground/70 sm:grid-cols-3 lg:min-w-[24rem]">
+            <div className="border border-current/15 bg-black/20 p-2">authority: {approvalRequestView.authorityLevel}</div>
+            <div className="border border-current/15 bg-black/20 p-2">dry-run: {approvalRequestView.dryRunEvidence.result}</div>
+            <div className="border border-current/15 bg-black/20 p-2">decision: {approvalRequestView.humanDecision.status}</div>
+          </div>
+        </div>
+        <div className="mt-3 grid gap-2 md:grid-cols-3" data-office-approval-request-list="true">
+          {approvalRequestView.requests.map((request) => (
+            <div key={request.requestRef} className="border border-current/15 bg-black/20 p-3" data-office-approval-request={request.actionKind}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{request.actionKind}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{request.targetKind}</div>
+              <div className="mt-1 font-mono text-xs text-violet-100">{request.targetRef}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{request.reasonSummary}</div>
+              <div className="mt-2 text-[10px] text-midground/55">evidence {request.evidenceCount} · orchestrator {request.orchestratorRequired ? "required" : "n/a"} · enabled controls 0</div>
             </div>
           ))}
         </div>
