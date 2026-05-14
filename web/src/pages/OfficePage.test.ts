@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import * as officeView from "./officeView";
+
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -138,6 +140,56 @@ function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
 }
 
 describe("OfficePage view helpers", () => {
+  it("Desk RPG Projection ViewModel Helper 1", () => {
+    const buildProjection = (officeView as unknown as {
+      buildOfficeDeskRpgProjectionModel: (state: OfficeState) => {
+        schemaVersion: 1;
+        actors: Array<{ role: string }>;
+        facilities: Array<{ id: string }>;
+        suppressedCounts: Record<string, number>;
+        redactionSummary: { rawExcluded: true };
+        safeProjectionOnly: true;
+        enabledControls: 0;
+        rawExcluded: true;
+      };
+    }).buildOfficeDeskRpgProjectionModel;
+
+    const projection = buildProjection(officeFixture({
+      agents: Array.from({ length: 6 }, (_, index) => ({
+        id: `agent-${index}`,
+        status: "active",
+        prompt: "raw prompt: write private note about clinic",
+        transcript: "Traceback (most recent call last): private failure",
+        provider: "private-provider-hidden-id",
+        api_key: "sk-test-1234567890abcdef",
+      })),
+      work_items: [
+        {
+          id: "task-1",
+          title: "Safe evidence task",
+          status: "open",
+          body: "source body at /Users/lidises/private/nas/wiki.md must not leak",
+        },
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 4 },
+      ],
+    }));
+
+    expect(projection.actors.map((actor) => actor.role)).toEqual(expect.arrayContaining(["user_boss", "orchestrator", "search_worker", "reviewer", "wiki_writer", "nas_keeper"]));
+    expect(projection.facilities.map((facility) => facility.id)).toEqual(expect.arrayContaining(["boss_desk", "orchestrator_desk", "worker_cluster", "central_board", "right_inspector", "nas_vault", "security_ops_corner", "calm_activity_lane"]));
+    expect(projection.enabledControls).toBe(0);
+    expect(projection.safeProjectionOnly).toBe(true);
+    expect(projection.rawExcluded).toBe(true);
+    expect(projection.redactionSummary.rawExcluded).toBe(true);
+    expect(projection.suppressedCounts.search_worker).toBeGreaterThanOrEqual(3);
+    expect(JSON.stringify(projection)).not.toContain("raw prompt: write private note about clinic");
+    expect(JSON.stringify(projection)).not.toContain("/Users/lidises/private");
+    expect(JSON.stringify(projection)).not.toContain("sk-test-1234567890abcdef");
+    expect(JSON.stringify(projection)).not.toContain("Traceback (most recent call last)");
+    expect(JSON.stringify(projection)).not.toContain("private-provider-hidden-id");
+  });
+
   it("builds Phase 1 RPG scene adapter from safe OfficeState without raw projection", () => {
     const scene = buildOfficeRpgScene(officeFixture({
       generated_at: "2026-05-13T10:00:00Z",

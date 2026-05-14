@@ -388,16 +388,16 @@ Rules:
 5. It preserves no-backend/no-mutation/no-renderer-dependency/no-VPS/NAS/Kanban/cron/service boundaries.
 6. It defines browser smoke and raw-leak sentinel expectations before UI coding.
 7. It documents deferred waves for controlled mutation backend design, projection dry-run promotion, and VPS deploy.
-8. `NEXT.md`, `STATUS.md`, and unified product/architecture docs point to `Desk RPG Projection ViewModel Helper 1` as the next implementation slice.
+8. `NEXT.md`, `STATUS.md`, and unified product/architecture docs now record `Desk RPG Projection ViewModel Helper 1` completion and point to `Desk RPG Room Shell 1` as the next implementation slice.
 
 ## Next recommended slice
 
-`Desk RPG Projection ViewModel Helper 1`
+`Desk RPG Room Shell 1`
 
 Purpose:
-- write a focused RED test for `buildOfficeDeskRpgProjectionModel`;
-- implement a pure safe DTO helper in `officeView.ts`;
-- assert actors/facilities/read-only posture/raw-exclusion;
-- run focused/full frontend checks;
+- write a focused RED test for the required `data-office-desk-rpg-*` room hooks;
+- render the `buildOfficeDeskRpgProjectionModel` DTO as a read-only DOM/CSS operating-room shell;
+- assert zero forms, zero enabled controls, no mutation/action controls, safe Korean room copy, and private sentinel exclusion;
+- run focused/full frontend checks, build, diff-check, static scan, and local-only browser smoke;
 - update handoff docs;
-- commit before any UI rendering.
+- commit before inspector/tab migration.

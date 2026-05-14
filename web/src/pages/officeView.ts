@@ -906,6 +906,66 @@ export type OfficeRpgScene = {
   };
 };
 
+export type OfficeDeskRpgProjectionActorRole = "user_boss" | "orchestrator" | "search_worker" | "reviewer" | "wiki_writer" | "nas_keeper";
+
+export type OfficeDeskRpgProjectionFacilityId = "boss_desk" | "orchestrator_desk" | "worker_cluster" | "central_board" | "right_inspector" | "nas_vault" | "security_ops_corner" | "calm_activity_lane";
+
+export type OfficeDeskRpgProjectionActor = {
+  role: OfficeDeskRpgProjectionActorRole;
+  label: string;
+  status: "idle" | "working" | "waiting" | "blocked";
+  facilityId: OfficeDeskRpgProjectionFacilityId;
+  visibleInstances: number;
+  safeSummary: string;
+};
+
+export type OfficeDeskRpgProjectionFacility = {
+  id: OfficeDeskRpgProjectionFacilityId;
+  label: string;
+  posture: "read_only" | "blocked" | "watching";
+  safeSummary: string;
+};
+
+export type OfficeDeskRpgProjectionModel = {
+  schemaVersion: 1;
+  sourcePosture: "safe_office_state";
+  actors: OfficeDeskRpgProjectionActor[];
+  facilities: OfficeDeskRpgProjectionFacility[];
+  boardState: {
+    label: string;
+    workItemCount: number;
+    blockedCount: number;
+    safeSummary: string;
+  };
+  evidenceState: {
+    label: string;
+    sourceCount: number;
+    warningCount: number;
+    rawBodiesVisible: false;
+  };
+  vaultState: {
+    label: string;
+    posture: "approval_required";
+    writeEnabled: false;
+  };
+  opsState: {
+    label: string;
+    posture: "watch_only";
+    serviceControlsEnabled: false;
+  };
+  inspectorTargets: Array<{ id: string; label: string; targetType: "actor" | "facility" | "board" | "vault" | "ops" }>;
+  suppressedCounts: Record<"search_worker" | "worker_runtime_instances", number>;
+  redactionSummary: {
+    rawExcluded: true;
+    privatePathExcluded: true;
+    tokenExcluded: true;
+    providerDetailsExcluded: true;
+  };
+  safeProjectionOnly: true;
+  enabledControls: 0;
+  rawExcluded: true;
+};
+
 export type OfficeRpgMissionStoryboardStep = {
   id: "request" | "orchestrate" | "board" | "evidence" | "review" | "approval";
   label: string;
@@ -1727,6 +1787,121 @@ function rpgSeverityFromTone(value: unknown): OfficeRpgSeverity {
 
 function rpgTimestamp(value: unknown): string | null {
   return typeof value === "string" && value.length > 0 && Number.isFinite(Date.parse(value)) ? value : null;
+}
+
+export function buildOfficeDeskRpgProjectionModel(state: OfficeState): OfficeDeskRpgProjectionModel {
+  const blockedCount = state.work_items.filter((item) => String(item.status ?? "").toLowerCase().includes("block")).length;
+  const sourceWarningCount = state.data_sources.filter((source) => source.status !== "ok").length;
+  const visibleSearchWorkers = Math.min(3, Math.max(1, state.agents.length));
+  const suppressedWorkers = Math.max(0, state.agents.length - visibleSearchWorkers);
+  const actors: OfficeDeskRpgProjectionActor[] = [
+    {
+      role: "user_boss",
+      label: "사장 아바타",
+      status: "waiting",
+      facilityId: "boss_desk",
+      visibleInstances: 1,
+      safeSummary: "자연어 지시는 Orchestrator에게 전달되는 표시만 준비됨",
+    },
+    {
+      role: "orchestrator",
+      label: "Orchestrator",
+      status: state.work_items.length > 0 ? "working" : "idle",
+      facilityId: "orchestrator_desk",
+      visibleInstances: 1,
+      safeSummary: "작업을 분해하고 승인 경계를 확인하는 읽기 전용 중재자",
+    },
+    {
+      role: "search_worker",
+      label: "Search Worker",
+      status: state.agents.length > 0 ? "working" : "idle",
+      facilityId: "worker_cluster",
+      visibleInstances: visibleSearchWorkers,
+      safeSummary: "검색/조사 런타임은 최대 3명만 지도에 표시되고 초과분은 집계됨",
+    },
+    {
+      role: "reviewer",
+      label: "Reviewer",
+      status: blockedCount > 0 ? "blocked" : "waiting",
+      facilityId: "right_inspector",
+      visibleInstances: 1,
+      safeSummary: "검토 posture만 표시하며 승인 기록은 만들지 않음",
+    },
+    {
+      role: "wiki_writer",
+      label: "Wiki Writer",
+      status: state.work_items.length > 0 ? "waiting" : "idle",
+      facilityId: "central_board",
+      visibleInstances: 1,
+      safeSummary: "문서화 후보를 보드에 안전 요약으로만 표시",
+    },
+    {
+      role: "nas_keeper",
+      label: "NAS Keeper",
+      status: "blocked",
+      facilityId: "nas_vault",
+      visibleInstances: 1,
+      safeSummary: "최종 저장은 승인/권한/audit/rollback 전까지 차단됨",
+    },
+  ];
+  const facilities: OfficeDeskRpgProjectionFacility[] = [
+    { id: "boss_desk", label: "Boss desk", posture: "read_only", safeSummary: "사용자 의도 시작점" },
+    { id: "orchestrator_desk", label: "Orchestrator desk", posture: "read_only", safeSummary: "중재와 분해 표시" },
+    { id: "worker_cluster", label: "Worker desk cluster", posture: "read_only", safeSummary: "worker runtime 집계 표시" },
+    { id: "central_board", label: "Central Kanban/Paperclip board", posture: "read_only", safeSummary: "업무와 근거를 safe count로 표시" },
+    { id: "right_inspector", label: "Right inspector", posture: "watching", safeSummary: "선택 항목 세부 posture 표시" },
+    { id: "nas_vault", label: "NAS vault entrance", posture: "blocked", safeSummary: "쓰기 금지, 승인 요청 posture만 표시" },
+    { id: "security_ops_corner", label: "Security/ops corner", posture: "watching", safeSummary: "서비스/권한/감사 경계 감시" },
+    { id: "calm_activity_lane", label: "Calm activity lane", posture: "read_only", safeSummary: "저소음 변화 요약" },
+  ];
+  return {
+    schemaVersion: 1,
+    sourcePosture: "safe_office_state",
+    actors,
+    facilities,
+    boardState: {
+      label: "Central board",
+      workItemCount: state.work_items.length,
+      blockedCount,
+      safeSummary: `${state.work_items.length}개 업무 posture, ${blockedCount}개 차단 posture`,
+    },
+    evidenceState: {
+      label: "Evidence posture",
+      sourceCount: state.data_sources.length,
+      warningCount: sourceWarningCount,
+      rawBodiesVisible: false,
+    },
+    vaultState: {
+      label: "NAS vault",
+      posture: "approval_required",
+      writeEnabled: false,
+    },
+    opsState: {
+      label: "Security/ops",
+      posture: "watch_only",
+      serviceControlsEnabled: false,
+    },
+    inspectorTargets: [
+      ...actors.map((actor) => ({ id: `actor:${actor.role}`, label: actor.label, targetType: "actor" as const })),
+      ...facilities.map((facility) => ({ id: `facility:${facility.id}`, label: facility.label, targetType: "facility" as const })),
+      { id: "board:central", label: "Central board", targetType: "board" as const },
+      { id: "vault:nas", label: "NAS vault", targetType: "vault" as const },
+      { id: "ops:security", label: "Security/ops", targetType: "ops" as const },
+    ],
+    suppressedCounts: {
+      search_worker: suppressedWorkers,
+      worker_runtime_instances: suppressedWorkers,
+    },
+    redactionSummary: {
+      rawExcluded: true,
+      privatePathExcluded: true,
+      tokenExcluded: true,
+      providerDetailsExcluded: true,
+    },
+    safeProjectionOnly: true,
+    enabledControls: 0,
+    rawExcluded: true,
+  };
 }
 
 export function buildOfficeRpgScene(state: OfficeState): OfficeRpgScene {
