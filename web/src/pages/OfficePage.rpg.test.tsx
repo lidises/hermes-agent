@@ -18,7 +18,7 @@ vi.mock("@/lib/api", () => ({
 
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
-import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeRpgScene } from "./officeView";
+import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeRpgScene } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
@@ -317,6 +317,45 @@ describe("DisabledApprovalDialoguePosturePanel", () => {
     expect(markup).not.toContain("<button");
     expect(markup).not.toContain("<input");
     expect(markup).not.toMatch(/raw dialogue prompt|raw dialogue task title|Traceback|\/Users\/lidises|token-shaped-dialogue-sentinel|private-dialogue-provider/i);
+  });
+});
+
+describe("ReviewerWikiHandoffPosturePanel", () => {
+  it("Reviewer/Wiki Handoff Posture 1 renders a disabled review-to-wiki handoff without controls", () => {
+    const ReviewerWikiHandoffPosturePanel = (OfficePageModule as unknown as {
+      ReviewerWikiHandoffPosturePanel: React.ComponentType<{ handoff: ReturnType<typeof buildOfficeReviewerWikiHandoffPosture> }>;
+    }).ReviewerWikiHandoffPosturePanel;
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [{ id: "agent-1", status: "active", prompt: "raw handoff prompt", provider: "private-handoff-provider", api_key: "token-shaped-handoff-sentinel" }],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw reviewer wiki task title", body: "/Users/lidises/private/handoff.md" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 4, warning_count: 2, error_summary: "Traceback handoff source" },
+      ],
+    }));
+    const handoff = buildOfficeReviewerWikiHandoffPosture(projection);
+
+    const markup = renderToStaticMarkup(<ReviewerWikiHandoffPosturePanel handoff={handoff} />);
+
+    expect(markup).toContain("data-office-reviewer-wiki-handoff=\"true\"");
+    expect(markup).toContain("data-office-reviewer-wiki-handoff-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-reviewer-wiki-handoff-review-enabled=\"false\"");
+    expect(markup).toContain("data-office-reviewer-wiki-handoff-wiki-draft-enabled=\"false\"");
+    expect(markup).toContain("data-office-reviewer-wiki-handoff-assignment-enabled=\"false\"");
+    expect(markup).toContain("data-office-reviewer-wiki-handoff-request-creation-enabled=\"false\"");
+    expect(markup).toContain("data-office-reviewer-wiki-handoff-dispatch-enabled=\"false\"");
+    expect(markup).toContain("data-office-reviewer-wiki-handoff-nas-save-enabled=\"false\"");
+    expect(markup).toContain("data-office-reviewer-wiki-handoff-step=\"search_evidence\"");
+    expect(markup).toContain("data-office-reviewer-wiki-handoff-step=\"review_gate\"");
+    expect(markup).toContain("data-office-reviewer-wiki-handoff-step=\"wiki_draft\"");
+    expect(markup).toContain("data-office-reviewer-wiki-handoff-step=\"nas_boundary\"");
+    expect(markup).toContain("Reviewer/Wiki handoff posture");
+    expect(markup).toContain("검토 → 위키 작성 handoff");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toMatch(/raw handoff prompt|raw reviewer wiki task title|Traceback|\/Users\/lidises|token-shaped-handoff-sentinel|private-handoff-provider/i);
   });
 });
 

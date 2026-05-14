@@ -110,6 +110,7 @@ import {
   buildOfficeControlledMutationExecutionReadinessSummary,
   buildOfficeDeskRpgWorkerRoleVisibility,
   buildOfficeDisabledApprovalDialoguePosture,
+  buildOfficeReviewerWikiHandoffPosture,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -123,6 +124,7 @@ import {
   type OfficeDeskRpgProjectionModel,
   type OfficeDeskRpgWorkerRoleVisibility,
   type OfficeDisabledApprovalDialoguePosture,
+  type OfficeReviewerWikiHandoffPosture,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -1746,6 +1748,56 @@ export function DisabledApprovalDialoguePosturePanel({ dialogue }: { dialogue: O
   );
 }
 
+export function ReviewerWikiHandoffPosturePanel({ handoff }: { handoff: OfficeReviewerWikiHandoffPosture }) {
+  return (
+    <Card
+      data-office-reviewer-wiki-handoff="true"
+      data-office-reviewer-wiki-handoff-enabled-controls={handoff.enabledControls}
+      data-office-reviewer-wiki-handoff-review-enabled={String(handoff.reviewEnabled)}
+      data-office-reviewer-wiki-handoff-wiki-draft-enabled={String(handoff.wikiDraftEnabled)}
+      data-office-reviewer-wiki-handoff-assignment-enabled={String(handoff.assignmentEnabled)}
+      data-office-reviewer-wiki-handoff-request-creation-enabled={String(handoff.requestCreationEnabled)}
+      data-office-reviewer-wiki-handoff-dispatch-enabled={String(handoff.dispatchEnabled)}
+      data-office-reviewer-wiki-handoff-nas-save-enabled={String(handoff.nasSaveEnabled)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Users className="h-4 w-4" /> Reviewer/Wiki handoff posture
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-emerald-300/20 bg-emerald-950/10 p-3">
+            <div className="font-semibold text-emerald-100">검토 → 위키 작성 handoff · execution disabled</div>
+            <div className="mt-1 leading-5">
+              Search Worker가 모은 근거를 Reviewer와 Wiki Writer가 이어받는 순서만 표시합니다. review 실행, draft 생성, 작업 배정, request creation, dispatch, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {handoff.sequence.map((step) => (
+              <div
+                key={step.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-reviewer-wiki-handoff-step={step.id}
+                data-office-reviewer-wiki-handoff-step-role={step.actorRole}
+                data-office-reviewer-wiki-handoff-step-status={step.status}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{step.actorLabel}</div>
+                <div className="mt-1 font-semibold text-foreground">{step.label}</div>
+                <div className="mt-1 text-midground/60">facility: {step.facilityId} · {step.status}</div>
+                <div className="mt-2 leading-5">{step.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-reviewer-wiki-handoff-boundary="true">
+            evidence {handoff.evidenceCount} · warnings {handoff.warningCount} · blocked {handoff.blockedWorkCount} · enabled controls {handoff.enabledControls} · raw excluded {String(handoff.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -2141,6 +2193,7 @@ export default function OfficePage() {
   const deskRpgProjection = useMemo(() => buildOfficeDeskRpgProjectionModel(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const deskRpgWorkerRoleVisibility = useMemo(() => buildOfficeDeskRpgWorkerRoleVisibility(deskRpgProjection), [deskRpgProjection]);
   const disabledApprovalDialoguePosture = useMemo(() => buildOfficeDisabledApprovalDialoguePosture(deskRpgProjection), [deskRpgProjection]);
+  const reviewerWikiHandoffPosture = useMemo(() => buildOfficeReviewerWikiHandoffPosture(deskRpgProjection), [deskRpgProjection]);
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -2361,6 +2414,8 @@ export default function OfficePage() {
       <OfficeDeskRpgWorkerRoleVisibilityPanel visibility={deskRpgWorkerRoleVisibility} />
 
       <DisabledApprovalDialoguePosturePanel dialogue={disabledApprovalDialoguePosture} />
+
+      <ReviewerWikiHandoffPosturePanel handoff={reviewerWikiHandoffPosture} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 

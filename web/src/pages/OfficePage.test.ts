@@ -100,6 +100,7 @@ import {
   buildOfficeDeskRpgProjectionModel,
   buildOfficeDeskRpgWorkerRoleVisibility,
   buildOfficeDisabledApprovalDialoguePosture,
+  buildOfficeReviewerWikiHandoffPosture,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -208,6 +209,43 @@ describe("Disabled Approval Dialogue Posture 1", () => {
     expect(dialogue.rawExcluded).toBe(true);
     expect(dialogue.dialogueLines.map((line) => line.id)).toEqual(["report", "approval", "boundary"]);
     expect(JSON.stringify(dialogue)).not.toMatch(/raw dialogue prompt|raw dialogue task title|Traceback|\/Users\/lidises|token-shaped-dialogue-sentinel|private-dialogue-provider/i);
+  });
+});
+
+describe("Reviewer/Wiki Handoff Posture 1", () => {
+  it("builds a safe reviewer to wiki handoff posture without assignment, dispatch, or persistence", () => {
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [
+        { id: "agent-1", status: "active", prompt: "raw handoff prompt", provider: "private-handoff-provider", api_key: "token-shaped-handoff-sentinel" },
+        { id: "agent-2", status: "active", transcript: "Traceback handoff transcript" },
+      ],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw reviewer wiki task title", body: "/Users/lidises/private/handoff.md" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 4, warning_count: 2, error_summary: "Traceback handoff source" },
+      ],
+    }));
+
+    const handoff = buildOfficeReviewerWikiHandoffPosture(projection);
+
+    expect(handoff.stageLabel).toBe("Reviewer/Wiki Handoff Posture 1");
+    expect(handoff.handoffKind).toBe("review_to_wiki_posture");
+    expect(handoff.sequence.map((step) => step.id)).toEqual(["search_evidence", "review_gate", "wiki_draft", "nas_boundary"]);
+    expect(handoff.sequence.map((step) => step.actorRole)).toEqual(["search_worker", "reviewer", "wiki_writer", "nas_keeper"]);
+    expect(handoff.evidenceCount).toBe(1);
+    expect(handoff.warningCount).toBe(1);
+    expect(handoff.blockedWorkCount).toBe(1);
+    expect(handoff.reviewEnabled).toBe(false);
+    expect(handoff.wikiDraftEnabled).toBe(false);
+    expect(handoff.assignmentEnabled).toBe(false);
+    expect(handoff.requestCreationEnabled).toBe(false);
+    expect(handoff.dispatchEnabled).toBe(false);
+    expect(handoff.nasSaveEnabled).toBe(false);
+    expect(handoff.enabledControls).toBe(0);
+    expect(handoff.safeProjectionOnly).toBe(true);
+    expect(handoff.rawExcluded).toBe(true);
+    expect(JSON.stringify(handoff)).not.toMatch(/raw handoff prompt|raw reviewer wiki task title|Traceback|\/Users\/lidises|token-shaped-handoff-sentinel|private-handoff-provider/i);
   });
 });
 

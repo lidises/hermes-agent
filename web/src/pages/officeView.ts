@@ -1020,6 +1020,36 @@ export type OfficeDisabledApprovalDialoguePosture = {
   rawExcluded: true;
 };
 
+export type OfficeReviewerWikiHandoffStep = {
+  id: "search_evidence" | "review_gate" | "wiki_draft" | "nas_boundary";
+  actorRole: Extract<OfficeDeskRpgProjectionActorRole, "search_worker" | "reviewer" | "wiki_writer" | "nas_keeper">;
+  actorLabel: string;
+  facilityId: OfficeDeskRpgProjectionFacilityId;
+  label: string;
+  summary: string;
+  status: "waiting" | "blocked";
+  rawExcluded: true;
+};
+
+export type OfficeReviewerWikiHandoffPosture = {
+  stageLabel: "Reviewer/Wiki Handoff Posture 1";
+  title: string;
+  handoffKind: "review_to_wiki_posture";
+  sequence: OfficeReviewerWikiHandoffStep[];
+  evidenceCount: number;
+  warningCount: number;
+  blockedWorkCount: number;
+  reviewEnabled: false;
+  wikiDraftEnabled: false;
+  assignmentEnabled: false;
+  requestCreationEnabled: false;
+  dispatchEnabled: false;
+  nasSaveEnabled: false;
+  enabledControls: 0;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeRpgMissionStoryboardStep = {
   id: "request" | "orchestrate" | "board" | "evidence" | "review" | "approval";
   label: string;
@@ -2035,6 +2065,71 @@ export function buildOfficeDisabledApprovalDialoguePosture(projection: OfficeDes
     approveEnabled: false,
     rejectEnabled: false,
     holdEnabled: false,
+    requestCreationEnabled: false,
+    dispatchEnabled: false,
+    nasSaveEnabled: false,
+    enabledControls: 0,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeReviewerWikiHandoffPosture(projection: OfficeDeskRpgProjectionModel): OfficeReviewerWikiHandoffPosture {
+  const actorByRole = new Map(projection.actors.map((actor) => [actor.role, actor]));
+  const getActor = (role: OfficeReviewerWikiHandoffStep["actorRole"]) => actorByRole.get(role);
+  const sequence: OfficeReviewerWikiHandoffStep[] = [
+    {
+      id: "search_evidence",
+      actorRole: "search_worker",
+      actorLabel: getActor("search_worker")?.label ?? "Search Worker",
+      facilityId: getActor("search_worker")?.facilityId ?? "worker_cluster",
+      label: "근거 수집 handoff",
+      summary: `근거 ${projection.evidenceState.sourceCount}개를 safe count로만 Reviewer에게 넘기는 대기 posture입니다.`,
+      status: "waiting",
+      rawExcluded: true,
+    },
+    {
+      id: "review_gate",
+      actorRole: "reviewer",
+      actorLabel: getActor("reviewer")?.label ?? "Reviewer",
+      facilityId: getActor("reviewer")?.facilityId ?? "right_inspector",
+      label: "Reviewer 검토 gate",
+      summary: `경고 ${projection.evidenceState.warningCount}개와 blocked ${projection.boardState.blockedCount}개를 검토 대상으로만 표시합니다.`,
+      status: projection.boardState.blockedCount > 0 ? "blocked" : "waiting",
+      rawExcluded: true,
+    },
+    {
+      id: "wiki_draft",
+      actorRole: "wiki_writer",
+      actorLabel: getActor("wiki_writer")?.label ?? "Wiki Writer",
+      facilityId: getActor("wiki_writer")?.facilityId ?? "central_board",
+      label: "Wiki Writer draft posture",
+      summary: "검토 통과 후 위키 초안으로 이어질 handoff만 표시하며 draft 생성은 비활성입니다.",
+      status: "waiting",
+      rawExcluded: true,
+    },
+    {
+      id: "nas_boundary",
+      actorRole: "nas_keeper",
+      actorLabel: getActor("nas_keeper")?.label ?? "NAS Keeper",
+      facilityId: getActor("nas_keeper")?.facilityId ?? "nas_vault",
+      label: "NAS Keeper 저장 경계",
+      summary: "최종 저장은 별도 승인 전까지 NAS save posture로만 남고 write는 비활성입니다.",
+      status: "blocked",
+      rawExcluded: true,
+    },
+  ];
+  return {
+    stageLabel: "Reviewer/Wiki Handoff Posture 1",
+    title: "Reviewer/Wiki handoff posture",
+    handoffKind: "review_to_wiki_posture",
+    sequence,
+    evidenceCount: projection.evidenceState.sourceCount,
+    warningCount: projection.evidenceState.warningCount,
+    blockedWorkCount: projection.boardState.blockedCount,
+    reviewEnabled: false,
+    wikiDraftEnabled: false,
+    assignmentEnabled: false,
     requestCreationEnabled: false,
     dispatchEnabled: false,
     nasSaveEnabled: false,
