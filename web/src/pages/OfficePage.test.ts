@@ -103,6 +103,7 @@ import {
   buildOfficeReviewerWikiHandoffPosture,
   buildOfficeApprovalDialogueInspectorDetail,
   buildOfficeReviewerWikiEvidenceDetailPosture,
+  buildOfficeBoardEvidenceInspectorDrilldown,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -328,6 +329,48 @@ describe("Reviewer/Wiki Evidence Detail Posture 1", () => {
     expect(evidenceDetail.safeProjectionOnly).toBe(true);
     expect(evidenceDetail.rawExcluded).toBe(true);
     expect(JSON.stringify(evidenceDetail)).not.toMatch(/raw evidence prompt|raw evidence detail task title|Traceback|\/Users\/lidises|token-shaped-evidence-sentinel|private-evidence-provider/i);
+  });
+});
+
+
+
+describe("Board Evidence-to-Inspector Drill-down 1", () => {
+  it("builds a safe board-to-inspector drill-down posture without opening sources or creating requests", () => {
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [
+        { id: "agent-1", status: "active", prompt: "raw drilldown prompt", provider: "private-drilldown-provider", api_key: "token-shaped-drilldown-sentinel" },
+      ],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw drilldown task title", body: "/Users/lidises/private/drilldown.md", transcript: "Traceback drilldown transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 9, warning_count: 4, error_summary: "Traceback drilldown source" },
+      ],
+    }));
+    const handoff = buildOfficeReviewerWikiHandoffPosture(projection);
+    const evidenceDetail = buildOfficeReviewerWikiEvidenceDetailPosture(projection, handoff);
+
+    const drilldown = buildOfficeBoardEvidenceInspectorDrilldown(projection, evidenceDetail);
+
+    expect(drilldown.stageLabel).toBe("Board Evidence-to-Inspector Drill-down 1");
+    expect(drilldown.drilldownKind).toBe("board_evidence_to_inspector_posture");
+    expect(drilldown.cards.map((card) => card.id)).toEqual(["central_board", "evidence_tab", "right_inspector", "approval_boundary"]);
+    expect(drilldown.boardWorkCount).toBe(1);
+    expect(drilldown.boardBlockedCount).toBe(1);
+    expect(drilldown.evidenceCount).toBe(1);
+    expect(drilldown.warningCount).toBe(1);
+    expect(drilldown.inspectorCardCount).toBe(4);
+    expect(drilldown.enabledControls).toBe(0);
+    expect(drilldown.boardOpenEnabled).toBe(false);
+    expect(drilldown.sourceOpenEnabled).toBe(false);
+    expect(drilldown.inspectorWriteEnabled).toBe(false);
+    expect(drilldown.requestCreationEnabled).toBe(false);
+    expect(drilldown.dispatchEnabled).toBe(false);
+    expect(drilldown.auditWriteEnabled).toBe(false);
+    expect(drilldown.nasSaveEnabled).toBe(false);
+    expect(drilldown.safeProjectionOnly).toBe(true);
+    expect(drilldown.rawExcluded).toBe(true);
+    expect(JSON.stringify(drilldown)).not.toMatch(/raw drilldown prompt|raw drilldown task title|Traceback|\/Users\/lidises|token-shaped-drilldown-sentinel|private-drilldown-provider/i);
   });
 });
 

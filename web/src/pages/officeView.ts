@@ -1111,6 +1111,37 @@ export type OfficeReviewerWikiEvidenceDetailPosture = {
   rawExcluded: true;
 };
 
+
+export type OfficeBoardEvidenceInspectorDrilldownCard = {
+  id: "central_board" | "evidence_tab" | "right_inspector" | "approval_boundary";
+  label: string;
+  summary: string;
+  tone: "info" | "warning" | "blocked";
+  rawExcluded: true;
+};
+
+export type OfficeBoardEvidenceInspectorDrilldown = {
+  stageLabel: "Board Evidence-to-Inspector Drill-down 1";
+  title: string;
+  drilldownKind: "board_evidence_to_inspector_posture";
+  cards: OfficeBoardEvidenceInspectorDrilldownCard[];
+  boardWorkCount: number;
+  boardBlockedCount: number;
+  evidenceCount: number;
+  warningCount: number;
+  inspectorCardCount: number;
+  boardOpenEnabled: false;
+  sourceOpenEnabled: false;
+  inspectorWriteEnabled: false;
+  requestCreationEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  enabledControls: 0;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeRpgMissionStoryboardStep = {
   id: "request" | "orchestrate" | "board" | "evidence" | "review" | "approval";
   label: string;
@@ -2303,6 +2334,63 @@ export function buildOfficeReviewerWikiEvidenceDetailPosture(
     reviewEnabled: false,
     wikiDraftEnabled: false,
     assignmentEnabled: false,
+    requestCreationEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    nasSaveEnabled: false,
+    enabledControls: 0,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+
+export function buildOfficeBoardEvidenceInspectorDrilldown(
+  projection: OfficeDeskRpgProjectionModel,
+  evidenceDetail: OfficeReviewerWikiEvidenceDetailPosture,
+): OfficeBoardEvidenceInspectorDrilldown {
+  return {
+    stageLabel: "Board Evidence-to-Inspector Drill-down 1",
+    title: "Board evidence-to-inspector drill-down",
+    drilldownKind: "board_evidence_to_inspector_posture",
+    cards: [
+      {
+        id: "central_board",
+        label: "central board aggregate",
+        summary: `Central board shows ${projection.boardState.workItemCount} safe work item(s) and ${projection.boardState.blockedCount} blocked signal(s), without opening task bodies.`,
+        tone: projection.boardState.blockedCount > 0 ? "warning" : "info",
+        rawExcluded: true,
+      },
+      {
+        id: "evidence_tab",
+        label: "evidence tab aggregate",
+        summary: `Evidence tab forwards ${projection.evidenceState.sourceCount} safe source aggregate(s) and ${projection.evidenceState.warningCount} warning signal(s) to inspector posture only.`,
+        tone: projection.evidenceState.warningCount > 0 ? "warning" : "info",
+        rawExcluded: true,
+      },
+      {
+        id: "right_inspector",
+        label: "right inspector detail",
+        summary: `${evidenceDetail.cards.length} reviewer/wiki detail card(s) can be inspected as safe counts and boundary copy; no source open or write path is exposed.`,
+        tone: "info",
+        rawExcluded: true,
+      },
+      {
+        id: "approval_boundary",
+        label: "approval boundary",
+        summary: "Board open, source open, inspector write, request creation, dispatch, audit write, and NAS save remain disabled until a separate authority model enables them.",
+        tone: "blocked",
+        rawExcluded: true,
+      },
+    ],
+    boardWorkCount: projection.boardState.workItemCount,
+    boardBlockedCount: projection.boardState.blockedCount,
+    evidenceCount: evidenceDetail.evidenceCount,
+    warningCount: evidenceDetail.warningCount,
+    inspectorCardCount: evidenceDetail.cards.length,
+    boardOpenEnabled: false,
+    sourceOpenEnabled: false,
+    inspectorWriteEnabled: false,
     requestCreationEnabled: false,
     dispatchEnabled: false,
     auditWriteEnabled: false,

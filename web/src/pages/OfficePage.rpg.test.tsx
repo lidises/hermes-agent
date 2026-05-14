@@ -18,7 +18,7 @@ vi.mock("@/lib/api", () => ({
 
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
-import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeRpgScene } from "./officeView";
+import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeRpgScene } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
@@ -434,6 +434,49 @@ describe("ReviewerWikiEvidenceDetailPosturePanel", () => {
     expect(markup).not.toContain("<button");
     expect(markup).not.toContain("<input");
     expect(markup).not.toMatch(/raw evidence prompt|raw evidence detail task title|Traceback|\/Users\/lidises|token-shaped-evidence-sentinel|private-evidence-provider/i);
+  });
+});
+
+
+
+describe("BoardEvidenceInspectorDrilldownPanel", () => {
+  it("Board Evidence-to-Inspector Drill-down 1 renders a disabled board-to-inspector path without controls", () => {
+    const BoardEvidenceInspectorDrilldownPanel = (OfficePageModule as unknown as {
+      BoardEvidenceInspectorDrilldownPanel: React.ComponentType<{ drilldown: ReturnType<typeof buildOfficeBoardEvidenceInspectorDrilldown> }>;
+    }).BoardEvidenceInspectorDrilldownPanel;
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [{ id: "agent-1", status: "active", prompt: "raw drilldown prompt", provider: "private-drilldown-provider", api_key: "token-shaped-drilldown-sentinel" }],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw drilldown task title", body: "/Users/lidises/private/drilldown.md", transcript: "Traceback drilldown transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 9, warning_count: 4, error_summary: "Traceback drilldown source" },
+      ],
+    }));
+    const handoff = buildOfficeReviewerWikiHandoffPosture(projection);
+    const evidenceDetail = buildOfficeReviewerWikiEvidenceDetailPosture(projection, handoff);
+    const drilldown = buildOfficeBoardEvidenceInspectorDrilldown(projection, evidenceDetail);
+
+    const markup = renderToStaticMarkup(<BoardEvidenceInspectorDrilldownPanel drilldown={drilldown} />);
+
+    expect(markup).toContain("data-office-board-evidence-inspector-drilldown=\"true\"");
+    expect(markup).toContain("data-office-board-evidence-inspector-drilldown-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-board-evidence-inspector-drilldown-board-open-enabled=\"false\"");
+    expect(markup).toContain("data-office-board-evidence-inspector-drilldown-source-open-enabled=\"false\"");
+    expect(markup).toContain("data-office-board-evidence-inspector-drilldown-inspector-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-board-evidence-inspector-drilldown-request-creation-enabled=\"false\"");
+    expect(markup).toContain("data-office-board-evidence-inspector-drilldown-audit-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-board-evidence-inspector-drilldown-nas-save-enabled=\"false\"");
+    expect(markup).toContain("data-office-board-evidence-inspector-drilldown-card=\"central_board\"");
+    expect(markup).toContain("data-office-board-evidence-inspector-drilldown-card=\"evidence_tab\"");
+    expect(markup).toContain("data-office-board-evidence-inspector-drilldown-card=\"right_inspector\"");
+    expect(markup).toContain("data-office-board-evidence-inspector-drilldown-card=\"approval_boundary\"");
+    expect(markup).toContain("Board evidence-to-inspector drill-down");
+    expect(markup).toContain("중앙 board → right inspector");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toMatch(/raw drilldown prompt|raw drilldown task title|Traceback|\/Users\/lidises|token-shaped-drilldown-sentinel|private-drilldown-provider/i);
   });
 });
 
