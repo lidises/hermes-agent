@@ -1317,6 +1317,34 @@ export type OfficeWorkerAuthorityHandoffEnvelope = {
   safeProjectionOnly: true;
 };
 
+export type OfficeWorkerDispatchDryRun = {
+  id: `dryrun_${OfficeWorkerAuthorityHandoff["id"]}`;
+  handoffRef: OfficeWorkerAuthorityHandoff["id"];
+  facilityId: OfficeWorkerAuthorityHandoff["facilityId"];
+  workerRole: OfficeWorkerAuthorityHandoff["workerRole"];
+  status: "not_run";
+  executionState: "blocked";
+  requiredFields: Array<"handoff_ref" | "simulation_scope" | "expected_effects" | "rollback_plan" | "audit_preview_ref">;
+  safeSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeWorkerDispatchDryRunEnvelope = {
+  stageLabel: "Worker Dispatch Dry-Run Envelope 1";
+  title: string;
+  enabledControls: 0;
+  dryRunExecutionEnabled: false;
+  dispatchEnabled: false;
+  adapterInstallationEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  auditWriteEnabled: false;
+  dryRuns: OfficeWorkerDispatchDryRun[];
+  handoffSnapshot: Pick<OfficeWorkerAuthorityHandoffEnvelope, "adapterInstallationEnabled" | "dispatchEnabled" | "auditWriteEnabled">;
+  safeBoundary: string;
+  safeProjectionOnly: true;
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -2539,6 +2567,38 @@ export function buildOfficeWorkerAuthorityHandoffEnvelope(confirmationEnvelope: 
       adapterState: "missing",
       requiredFields: ["confirmation_ref", "adapter_contract_ref", "dry_run_result_ref", "audit_sink_ref", "rollback_ref"],
       safeSummary: `${envelope.id} cannot hand off to authority until adapter, dry-run, audit, and rollback references exist`,
+      rawExcluded: true,
+    })),
+  };
+}
+
+export function buildOfficeWorkerDispatchDryRunEnvelope(authorityHandoff: OfficeWorkerAuthorityHandoffEnvelope): OfficeWorkerDispatchDryRunEnvelope {
+  return {
+    stageLabel: "Worker Dispatch Dry-Run Envelope 1",
+    title: "디스패치 드라이런 봉투 · 실행 없음",
+    enabledControls: 0,
+    dryRunExecutionEnabled: false,
+    dispatchEnabled: false,
+    adapterInstallationEnabled: false,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
+    auditWriteEnabled: false,
+    handoffSnapshot: {
+      adapterInstallationEnabled: authorityHandoff.adapterInstallationEnabled,
+      dispatchEnabled: authorityHandoff.dispatchEnabled,
+      auditWriteEnabled: authorityHandoff.auditWriteEnabled,
+    },
+    safeBoundary: "dispatch dry-run envelope only · no dry-run execution · no real dispatch · no adapter installation · no request creation · no assignment · no audit write",
+    safeProjectionOnly: true,
+    dryRuns: authorityHandoff.handoffs.map((handoff) => ({
+      id: `dryrun_${handoff.id}`,
+      handoffRef: handoff.id,
+      facilityId: handoff.facilityId,
+      workerRole: handoff.workerRole,
+      status: "not_run",
+      executionState: "blocked",
+      requiredFields: ["handoff_ref", "simulation_scope", "expected_effects", "rollback_plan", "audit_preview_ref"],
+      safeSummary: `${handoff.id} requires a non-executing dry-run envelope before any dispatch can be considered`,
       rawExcluded: true,
     })),
   };

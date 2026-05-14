@@ -95,6 +95,7 @@ import {
   buildOfficeWorkerRequestDraftPreview,
   buildOfficeWorkerHumanConfirmationEnvelope,
   buildOfficeWorkerAuthorityHandoffEnvelope,
+  buildOfficeWorkerDispatchDryRunEnvelope,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -1768,6 +1769,7 @@ export default function OfficePage() {
   const workerRequestDraftPreview = useMemo(() => buildOfficeWorkerRequestDraftPreview(workerAssignmentCandidateGate), [workerAssignmentCandidateGate]);
   const workerHumanConfirmationEnvelope = useMemo(() => buildOfficeWorkerHumanConfirmationEnvelope(workerRequestDraftPreview), [workerRequestDraftPreview]);
   const workerAuthorityHandoffEnvelope = useMemo(() => buildOfficeWorkerAuthorityHandoffEnvelope(workerHumanConfirmationEnvelope), [workerHumanConfirmationEnvelope]);
+  const workerDispatchDryRunEnvelope = useMemo(() => buildOfficeWorkerDispatchDryRunEnvelope(workerAuthorityHandoffEnvelope), [workerAuthorityHandoffEnvelope]);
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -2315,6 +2317,42 @@ export default function OfficePage() {
               <div className="mt-3 flex flex-wrap gap-1" data-office-worker-handoff-fields="true">
                 {handoff.requiredFields.map((field) => (
                   <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-worker-handoff-field={field}>{field}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-rose-300/20 bg-rose-950/10 p-4"
+        data-office-worker-dispatch-dry-run-envelope="true"
+        data-office-worker-dry-run-execution-enabled={String(workerDispatchDryRunEnvelope.dryRunExecutionEnabled)}
+        data-office-worker-dry-run-dispatch-enabled={String(workerDispatchDryRunEnvelope.dispatchEnabled)}
+        data-office-worker-dry-run-adapter-installation-enabled={String(workerDispatchDryRunEnvelope.adapterInstallationEnabled)}
+        data-office-worker-dry-run-request-creation-enabled={String(workerDispatchDryRunEnvelope.requestCreationEnabled)}
+        data-office-worker-dry-run-assignment-enabled={String(workerDispatchDryRunEnvelope.workAssignmentEnabled)}
+        data-office-worker-dry-run-audit-write-enabled={String(workerDispatchDryRunEnvelope.auditWriteEnabled)}
+        data-office-worker-dry-run-enabled-controls={workerDispatchDryRunEnvelope.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-rose-200/70">{workerDispatchDryRunEnvelope.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{workerDispatchDryRunEnvelope.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{workerDispatchDryRunEnvelope.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">dry runs executed: 0</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-worker-dry-runs="true">
+          {workerDispatchDryRunEnvelope.dryRuns.map((dryRun) => (
+            <div key={dryRun.id} className="border border-current/15 bg-black/20 p-3" data-office-worker-dry-run={dryRun.facilityId} data-office-worker-dry-run-status={dryRun.status} data-office-worker-dry-run-execution-state={dryRun.executionState}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{dryRun.workerRole}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{dryRun.id}</div>
+              <div className="mt-1 text-xs text-midground/60">handoff: {dryRun.handoffRef} · execution: {dryRun.executionState}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{dryRun.safeSummary}</div>
+              <div className="mt-3 flex flex-wrap gap-1" data-office-worker-dry-run-fields="true">
+                {dryRun.requiredFields.map((field) => (
+                  <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-worker-dry-run-field={field}>{field}</span>
                 ))}
               </div>
             </div>

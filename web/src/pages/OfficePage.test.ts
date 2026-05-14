@@ -83,6 +83,7 @@ import {
   buildOfficeWorkerRequestDraftPreview,
   buildOfficeWorkerHumanConfirmationEnvelope,
   buildOfficeWorkerAuthorityHandoffEnvelope,
+  buildOfficeWorkerDispatchDryRunEnvelope,
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
@@ -707,6 +708,32 @@ describe("OfficePage view helpers", () => {
     expect(authorityHandoff.confirmationSnapshot).toMatchObject({ decisionRecordingEnabled: false, dispatchEnabled: false, auditWriteEnabled: false });
     expect(authorityHandoff.safeBoundary).toContain("authority handoff envelope only");
     expect(JSON.stringify(authorityHandoff)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw handoff|secret handoff|private|token/i);
+  });
+
+  it("builds Worker Dispatch Dry-Run Envelope 1 without executing or dispatching", () => {
+    const dryRunEnvelope = buildOfficeWorkerDispatchDryRunEnvelope(buildOfficeWorkerAuthorityHandoffEnvelope(buildOfficeWorkerHumanConfirmationEnvelope(buildOfficeWorkerRequestDraftPreview(buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-14T16:25:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/dry-run", status: "partial", checked_at: "2026-05-14T16:20:00Z", item_count: 1, warning_count: 1, error_summary: "raw dry-run token" } as unknown as OfficeState["data_sources"][number]],
+      work_items: [{ id: "w1", status: "blocked", title: "raw dry-run task", body: "secret dry-run body" } as unknown as OfficeState["work_items"][number]],
+      events: [{ id: "event-dry-run-private", category: "automation_failed", room_id: "automation", tone: "warning", generated_at: "2026-05-14T16:24:00Z", detail: "raw dry-run event token" } as unknown as OfficeState["events"][number]],
+    })))))))))))));
+
+    expect(dryRunEnvelope.stageLabel).toBe("Worker Dispatch Dry-Run Envelope 1");
+    expect(dryRunEnvelope.enabledControls).toBe(0);
+    expect(dryRunEnvelope.dryRunExecutionEnabled).toBe(false);
+    expect(dryRunEnvelope.dispatchEnabled).toBe(false);
+    expect(dryRunEnvelope.adapterInstallationEnabled).toBe(false);
+    expect(dryRunEnvelope.requestCreationEnabled).toBe(false);
+    expect(dryRunEnvelope.workAssignmentEnabled).toBe(false);
+    expect(dryRunEnvelope.auditWriteEnabled).toBe(false);
+    expect(dryRunEnvelope.dryRuns.map((dryRun) => dryRun.id)).toEqual(["dryrun_handoff_confirm_draft_orchestrator_desk", "dryrun_handoff_confirm_draft_agent_desks", "dryrun_handoff_confirm_draft_incident_corner"]);
+    expect(dryRunEnvelope.dryRuns.every((dryRun) => dryRun.status === "not_run" && dryRun.executionState === "blocked" && dryRun.rawExcluded)).toBe(true);
+    expect(dryRunEnvelope.dryRuns.map((dryRun) => dryRun.requiredFields)).toEqual(expect.arrayContaining([
+      expect.arrayContaining(["handoff_ref", "simulation_scope", "expected_effects", "rollback_plan", "audit_preview_ref"]),
+    ]));
+    expect(dryRunEnvelope.handoffSnapshot).toMatchObject({ adapterInstallationEnabled: false, dispatchEnabled: false, auditWriteEnabled: false });
+    expect(dryRunEnvelope.safeBoundary).toContain("dispatch dry-run envelope only");
+    expect(JSON.stringify(dryRunEnvelope)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw dry-run|secret dry-run|private|token/i);
   });
 
   it("builds a disabled Authority Adapter Contract 1 before any execution adapter exists", () => {
