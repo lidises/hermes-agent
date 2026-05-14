@@ -1134,6 +1134,30 @@ export type OfficeOrchestratorMediationQueue = {
   safeProjectionOnly: true;
 };
 
+export type OfficeWorkerIntentRoutingRoute = {
+  id: "routeUserInstruction" | "routeCharacterQuickAction" | "routeSystemAttention";
+  intentKind: OfficeOrchestratorMediationQueueItem["intentKind"];
+  workerRole: "orchestrator" | "facility_worker" | "safety_reviewer";
+  targetFacility: "orchestrator_desk" | "agent_desks" | "incident_corner";
+  status: "routing_posture_only";
+  assignmentStatus: "not_assigned";
+  safeSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeWorkerIntentRouting = {
+  stageLabel: "Worker Intent Routing 1";
+  title: string;
+  enabledControls: 0;
+  workAssignmentEnabled: false;
+  requestCreationEnabled: false;
+  dispatchEnabled: false;
+  routes: OfficeWorkerIntentRoutingRoute[];
+  queueSnapshot: Pick<OfficeOrchestratorMediationQueue, "enqueueEnabled" | "candidatePromotionEnabled">;
+  safeBoundary: string;
+  safeProjectionOnly: true;
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -2039,6 +2063,55 @@ export function buildOfficeOrchestratorMediationQueue(contract: OfficeAuthorityA
         status: "waiting_for_orchestrator",
         safeSummary: "system attention signal can suggest work but cannot promote itself",
         orchestratorRequired: true,
+        rawExcluded: true,
+      },
+    ],
+  };
+}
+
+export function buildOfficeWorkerIntentRouting(queue: OfficeOrchestratorMediationQueue): OfficeWorkerIntentRouting {
+  return {
+    stageLabel: "Worker Intent Routing 1",
+    title: "작업자 의도 라우팅 · 배정 없음",
+    enabledControls: 0,
+    workAssignmentEnabled: false,
+    requestCreationEnabled: false,
+    dispatchEnabled: false,
+    queueSnapshot: {
+      enqueueEnabled: queue.enqueueEnabled,
+      candidatePromotionEnabled: queue.candidatePromotionEnabled,
+    },
+    safeBoundary: "routing posture only · no work assignment · no request creation · no enqueue · no dispatch",
+    safeProjectionOnly: true,
+    routes: [
+      {
+        id: "routeUserInstruction",
+        intentKind: "user_instruction",
+        workerRole: "orchestrator",
+        targetFacility: "orchestrator_desk",
+        status: "routing_posture_only",
+        assignmentStatus: "not_assigned",
+        safeSummary: "user instruction would route to the orchestrator desk for mediation before any worker task exists",
+        rawExcluded: true,
+      },
+      {
+        id: "routeCharacterQuickAction",
+        intentKind: "character_quick_action",
+        workerRole: "facility_worker",
+        targetFacility: "agent_desks",
+        status: "routing_posture_only",
+        assignmentStatus: "not_assigned",
+        safeSummary: "character quick action would map toward worker desks only as a visible routing hint",
+        rawExcluded: true,
+      },
+      {
+        id: "routeSystemAttention",
+        intentKind: "system_attention",
+        workerRole: "safety_reviewer",
+        targetFacility: "incident_corner",
+        status: "routing_posture_only",
+        assignmentStatus: "not_assigned",
+        safeSummary: "system attention would surface at the incident corner before any assignment or request creation",
         rawExcluded: true,
       },
     ],

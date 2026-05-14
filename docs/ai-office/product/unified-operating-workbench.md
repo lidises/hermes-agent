@@ -1,6 +1,6 @@
 # AI Office Unified Operating Workbench — Product Definition
 
-Last updated: 2026-05-14 08:29 KST
+Last updated: 2026-05-14 14:01 KST
 Status: Phase 0 umbrella product consolidation. Documentation-only; no code, service, Kanban, cron, projection, VPS, NAS, or gateway mutation is approved by this document.
 
 ## Product name
@@ -112,7 +112,10 @@ The next product/layout consolidation should move away from a long feature/HUD s
    - sourceTags, safe manifest counts, source health, redaction/provenance posture
 5. Projection cache / freshness
    - relay → validator → active cache → dashboard projection
-6. Safety inspector / diagnostics drawer
+6. Worker intent routing posture
+   - mediated user/character/system intents mapped to worker roles/facilities as read-only hints
+   - no work assignment, request creation, enqueue, dispatch, or audit write
+7. Safety inspector / diagnostics drawer
    - raw exclusions, mutation gates, private posture, reduced-motion/browser-local tracking truth
 
 ## Non-goals and approval gates

@@ -77,6 +77,7 @@ import {
   buildOfficeApprovalExecutionGate,
   buildOfficeAuthorityAdapterContract,
   buildOfficeOrchestratorMediationQueue,
+  buildOfficeWorkerIntentRouting,
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
@@ -542,6 +543,27 @@ describe("OfficePage view helpers", () => {
     expect(queue.contractSnapshot).toMatchObject({ dispatchEnabled: false, adaptersInstalled: false });
     expect(queue.safeBoundary).toContain("queue posture only");
     expect(JSON.stringify(queue)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw mediation|secret mediation|private|token/i);
+  });
+
+  it("builds Worker Intent Routing 1 as read-only routing posture after mediation", () => {
+    const routing = buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-14T14:25:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/routing", status: "partial", checked_at: "2026-05-14T14:20:00Z", item_count: 1, warning_count: 1, error_summary: "raw routing token" } as unknown as OfficeState["data_sources"][number]],
+      work_items: [{ id: "w1", status: "blocked", title: "raw worker route", body: "secret worker routing body" } as unknown as OfficeState["work_items"][number]],
+      events: [{ id: "event-worker-private", category: "approval_needed", room_id: "command", tone: "warning", generated_at: "2026-05-14T14:24:00Z", detail: "raw worker routing event token" } as unknown as OfficeState["events"][number]],
+    })))))));
+
+    expect(routing.stageLabel).toBe("Worker Intent Routing 1");
+    expect(routing.enabledControls).toBe(0);
+    expect(routing.workAssignmentEnabled).toBe(false);
+    expect(routing.requestCreationEnabled).toBe(false);
+    expect(routing.dispatchEnabled).toBe(false);
+    expect(routing.routes.map((route) => route.intentKind)).toEqual(["user_instruction", "character_quick_action", "system_attention"]);
+    expect(routing.routes.map((route) => route.targetFacility)).toEqual(["orchestrator_desk", "agent_desks", "incident_corner"]);
+    expect(routing.routes.every((route) => route.status === "routing_posture_only" && route.assignmentStatus === "not_assigned" && route.rawExcluded)).toBe(true);
+    expect(routing.queueSnapshot).toMatchObject({ enqueueEnabled: false, candidatePromotionEnabled: false });
+    expect(routing.safeBoundary).toContain("routing posture only");
+    expect(JSON.stringify(routing)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw worker|secret worker|private|token/i);
   });
 
   it("builds a disabled Authority Adapter Contract 1 before any execution adapter exists", () => {

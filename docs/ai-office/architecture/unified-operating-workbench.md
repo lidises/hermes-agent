@@ -1,6 +1,6 @@
 # AI Office Unified Operating Workbench — Architecture
 
-Last updated: 2026-05-14 08:29 KST
+Last updated: 2026-05-14 14:01 KST
 Status: Phase 0 architecture consolidation. Documentation-only; no code, runtime, service, Kanban, projection, cron, VPS, NAS, or gateway mutation is approved by this document.
 
 ## Architecture principle
@@ -219,9 +219,9 @@ This architecture document is an index and consolidation point. It does not repl
 
 ## Next architecture step
 
-`Unified Workbench IA/Layout 1`, `Approval Request View 1`, `Approval Audit Timeline 1`, `Approval Execution Gate 1`, `Authority Adapter Contract 1`, and `Orchestrator Mediation Queue 1` are now locally implemented as pure safe view-model helpers plus top `/office` display-only sections. The next separately approved architecture/UI task should be `Worker Intent Routing 1`:
+`Unified Workbench IA/Layout 1`, `Approval Request View 1`, `Approval Audit Timeline 1`, `Approval Execution Gate 1`, `Authority Adapter Contract 1`, `Orchestrator Mediation Queue 1`, and `Worker Intent Routing 1` are now locally implemented as pure safe view-model helpers plus top `/office` display-only sections. The next separately approved architecture/UI task should be `Worker Facility Readiness 1`:
 
-1. Define a safe routing posture from mediated intents to worker roles/facilities.
-2. Keep routing display-only; no assignment endpoint, worker dispatch, adapter implementation, or state write should exist yet.
-3. Add focused tests for route categories, worker-role labels, zero enabled controls, and no executable browser affordances.
+1. Define a safe facility-readiness posture for the worker routing targets (`orchestrator_desk`, `agent_desks`, `incident_corner`).
+2. Keep readiness display-only; no assignment endpoint, worker dispatch, adapter implementation, request creation, or state write should exist yet.
+3. Add focused tests for facility IDs, readiness/prerequisite labels, zero enabled controls, and no executable browser affordances.
 4. Do not execute actions, write audit events, create requests, add backend mutation routes, services, cron/watcher automation, VPS restarts, public exposure, NAS access, or renderer dependencies.

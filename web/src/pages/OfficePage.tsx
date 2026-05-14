@@ -89,6 +89,7 @@ import {
   buildOfficeApprovalExecutionGate,
   buildOfficeAuthorityAdapterContract,
   buildOfficeOrchestratorMediationQueue,
+  buildOfficeWorkerIntentRouting,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -1756,6 +1757,7 @@ export default function OfficePage() {
   const approvalExecutionGate = useMemo(() => buildOfficeApprovalExecutionGate(approvalAuditTimeline), [approvalAuditTimeline]);
   const authorityAdapterContract = useMemo(() => buildOfficeAuthorityAdapterContract(approvalExecutionGate), [approvalExecutionGate]);
   const orchestratorMediationQueue = useMemo(() => buildOfficeOrchestratorMediationQueue(authorityAdapterContract), [authorityAdapterContract]);
+  const workerIntentRouting = useMemo(() => buildOfficeWorkerIntentRouting(orchestratorMediationQueue), [orchestratorMediationQueue]);
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -2098,6 +2100,34 @@ export default function OfficePage() {
               <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.intentKind}</div>
               <div className="mt-1 text-sm font-semibold text-foreground">{item.status}</div>
               <div className="mt-2 text-xs leading-5 text-midground/70">{item.safeSummary}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-cyan-300/20 bg-cyan-950/10 p-4"
+        data-office-worker-intent-routing="true"
+        data-office-worker-routing-assignment-enabled={String(workerIntentRouting.workAssignmentEnabled)}
+        data-office-worker-routing-request-creation-enabled={String(workerIntentRouting.requestCreationEnabled)}
+        data-office-worker-routing-dispatch-enabled={String(workerIntentRouting.dispatchEnabled)}
+        data-office-worker-routing-enabled-controls={workerIntentRouting.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-200/70">{workerIntentRouting.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{workerIntentRouting.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{workerIntentRouting.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">assignment enabled: {workerIntentRouting.workAssignmentEnabled ? "true" : "false"}</div>
+        </div>
+        <div className="mt-3 grid gap-2 md:grid-cols-3" data-office-worker-intent-routes="true">
+          {workerIntentRouting.routes.map((route) => (
+            <div key={route.id} className="border border-current/15 bg-black/20 p-3" data-office-worker-intent-route={route.intentKind} data-office-worker-intent-route-status={route.status} data-office-worker-intent-target-facility={route.targetFacility}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{route.intentKind}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{route.targetFacility}</div>
+              <div className="mt-1 text-xs text-midground/60">{route.workerRole} · {route.assignmentStatus}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{route.safeSummary}</div>
             </div>
           ))}
         </div>
