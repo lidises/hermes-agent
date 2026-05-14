@@ -470,14 +470,10 @@ Implementation requirements when approved:
 7. Safe lifecycle and decision branches are documented.
 8. Browser allowed/forbidden interactions are explicit.
 9. Redaction and future DTO boundary sketch are documented.
-10. `NEXT.md`, `STATUS.md`, and unified product/architecture docs point to the next recommended `Implementation Roadmap 1` slice.
+10. `NEXT.md`, `STATUS.md`, and unified product/architecture docs now record that `Implementation Roadmap 1` followed this contract and point to the next recommended `Desk RPG Projection ViewModel Helper 1` slice.
 
 ## Next recommended slice
 
-`Implementation Roadmap 1`
+`Desk RPG Projection ViewModel Helper 1`
 
-Purpose:
-- convert Product Vision, Projection Model, IA/Layout, and Controlled Mutation & Approval Model into a small implementation roadmap;
-- choose the first safe implementation slice without adding executable controls;
-- likely first implementation: pure Desk RPG projection/view-model helper and read-only DOM/CSS operating-room surface;
-- define tests, browser smoke, raw-leak sentinels, accessibility/reduced-motion checks, and no-backend/no-mutation boundaries before coding.
+`Implementation Roadmap 1` is now documented in `docs/ai-office/plans/2026-05-14-desk-rpg-implementation-roadmap.md`. The next step is the first safe implementation slice: write a focused RED test for `buildOfficeDeskRpgProjectionModel`, implement the pure DTO helper only, and verify actors/facilities/read-only posture/raw-exclusion before any UI rendering.
