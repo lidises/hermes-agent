@@ -1345,6 +1345,34 @@ export type OfficeWorkerDispatchDryRunEnvelope = {
   safeProjectionOnly: true;
 };
 
+export type OfficeWorkerAuditPreview = {
+  id: `audit_${OfficeWorkerDispatchDryRun["id"]}`;
+  dryRunRef: OfficeWorkerDispatchDryRun["id"];
+  facilityId: OfficeWorkerDispatchDryRun["facilityId"];
+  workerRole: OfficeWorkerDispatchDryRun["workerRole"];
+  status: "not_written";
+  auditSinkState: "missing";
+  requiredFields: Array<"dry_run_ref" | "audit_sink_ref" | "event_type" | "redaction_policy" | "rollback_ref">;
+  safeSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeWorkerAuditPreviewEnvelope = {
+  stageLabel: "Worker Audit Preview Envelope 1";
+  title: string;
+  enabledControls: 0;
+  auditWriteEnabled: false;
+  executionEnabled: false;
+  dispatchEnabled: false;
+  adapterInstallationEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  previews: OfficeWorkerAuditPreview[];
+  dryRunSnapshot: Pick<OfficeWorkerDispatchDryRunEnvelope, "dryRunExecutionEnabled" | "dispatchEnabled" | "auditWriteEnabled">;
+  safeBoundary: string;
+  safeProjectionOnly: true;
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -2599,6 +2627,38 @@ export function buildOfficeWorkerDispatchDryRunEnvelope(authorityHandoff: Office
       executionState: "blocked",
       requiredFields: ["handoff_ref", "simulation_scope", "expected_effects", "rollback_plan", "audit_preview_ref"],
       safeSummary: `${handoff.id} requires a non-executing dry-run envelope before any dispatch can be considered`,
+      rawExcluded: true,
+    })),
+  };
+}
+
+export function buildOfficeWorkerAuditPreviewEnvelope(dryRunEnvelope: OfficeWorkerDispatchDryRunEnvelope): OfficeWorkerAuditPreviewEnvelope {
+  return {
+    stageLabel: "Worker Audit Preview Envelope 1",
+    title: "감사 프리뷰 봉투 · 이벤트 쓰기 없음",
+    enabledControls: 0,
+    auditWriteEnabled: false,
+    executionEnabled: false,
+    dispatchEnabled: false,
+    adapterInstallationEnabled: false,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
+    dryRunSnapshot: {
+      dryRunExecutionEnabled: dryRunEnvelope.dryRunExecutionEnabled,
+      dispatchEnabled: dryRunEnvelope.dispatchEnabled,
+      auditWriteEnabled: dryRunEnvelope.auditWriteEnabled,
+    },
+    safeBoundary: "audit preview envelope only · no audit write · no execution · no dispatch · no adapter installation · no request creation · no assignment",
+    safeProjectionOnly: true,
+    previews: dryRunEnvelope.dryRuns.map((dryRun) => ({
+      id: `audit_${dryRun.id}`,
+      dryRunRef: dryRun.id,
+      facilityId: dryRun.facilityId,
+      workerRole: dryRun.workerRole,
+      status: "not_written",
+      auditSinkState: "missing",
+      requiredFields: ["dry_run_ref", "audit_sink_ref", "event_type", "redaction_policy", "rollback_ref"],
+      safeSummary: `${dryRun.id} requires an audit preview envelope before any audit event can be written`,
       rawExcluded: true,
     })),
   };

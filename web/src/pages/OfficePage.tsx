@@ -96,6 +96,7 @@ import {
   buildOfficeWorkerHumanConfirmationEnvelope,
   buildOfficeWorkerAuthorityHandoffEnvelope,
   buildOfficeWorkerDispatchDryRunEnvelope,
+  buildOfficeWorkerAuditPreviewEnvelope,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -1770,6 +1771,7 @@ export default function OfficePage() {
   const workerHumanConfirmationEnvelope = useMemo(() => buildOfficeWorkerHumanConfirmationEnvelope(workerRequestDraftPreview), [workerRequestDraftPreview]);
   const workerAuthorityHandoffEnvelope = useMemo(() => buildOfficeWorkerAuthorityHandoffEnvelope(workerHumanConfirmationEnvelope), [workerHumanConfirmationEnvelope]);
   const workerDispatchDryRunEnvelope = useMemo(() => buildOfficeWorkerDispatchDryRunEnvelope(workerAuthorityHandoffEnvelope), [workerAuthorityHandoffEnvelope]);
+  const workerAuditPreviewEnvelope = useMemo(() => buildOfficeWorkerAuditPreviewEnvelope(workerDispatchDryRunEnvelope), [workerDispatchDryRunEnvelope]);
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -2353,6 +2355,42 @@ export default function OfficePage() {
               <div className="mt-3 flex flex-wrap gap-1" data-office-worker-dry-run-fields="true">
                 {dryRun.requiredFields.map((field) => (
                   <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-worker-dry-run-field={field}>{field}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-cyan-300/20 bg-cyan-950/10 p-4"
+        data-office-worker-audit-preview-envelope="true"
+        data-office-worker-audit-preview-write-enabled={String(workerAuditPreviewEnvelope.auditWriteEnabled)}
+        data-office-worker-audit-preview-execution-enabled={String(workerAuditPreviewEnvelope.executionEnabled)}
+        data-office-worker-audit-preview-dispatch-enabled={String(workerAuditPreviewEnvelope.dispatchEnabled)}
+        data-office-worker-audit-preview-adapter-installation-enabled={String(workerAuditPreviewEnvelope.adapterInstallationEnabled)}
+        data-office-worker-audit-preview-request-creation-enabled={String(workerAuditPreviewEnvelope.requestCreationEnabled)}
+        data-office-worker-audit-preview-assignment-enabled={String(workerAuditPreviewEnvelope.workAssignmentEnabled)}
+        data-office-worker-audit-preview-enabled-controls={workerAuditPreviewEnvelope.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-200/70">{workerAuditPreviewEnvelope.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{workerAuditPreviewEnvelope.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{workerAuditPreviewEnvelope.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">audit events written: 0</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-worker-audit-previews="true">
+          {workerAuditPreviewEnvelope.previews.map((preview) => (
+            <div key={preview.id} className="border border-current/15 bg-black/20 p-3" data-office-worker-audit-preview={preview.facilityId} data-office-worker-audit-preview-status={preview.status} data-office-worker-audit-preview-sink-state={preview.auditSinkState}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{preview.workerRole}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{preview.id}</div>
+              <div className="mt-1 text-xs text-midground/60">dry-run: {preview.dryRunRef} · sink: {preview.auditSinkState}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{preview.safeSummary}</div>
+              <div className="mt-3 flex flex-wrap gap-1" data-office-worker-audit-preview-fields="true">
+                {preview.requiredFields.map((field) => (
+                  <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-worker-audit-preview-field={field}>{field}</span>
                 ))}
               </div>
             </div>

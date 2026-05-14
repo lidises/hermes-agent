@@ -84,6 +84,7 @@ import {
   buildOfficeWorkerHumanConfirmationEnvelope,
   buildOfficeWorkerAuthorityHandoffEnvelope,
   buildOfficeWorkerDispatchDryRunEnvelope,
+  buildOfficeWorkerAuditPreviewEnvelope,
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
@@ -734,6 +735,32 @@ describe("OfficePage view helpers", () => {
     expect(dryRunEnvelope.handoffSnapshot).toMatchObject({ adapterInstallationEnabled: false, dispatchEnabled: false, auditWriteEnabled: false });
     expect(dryRunEnvelope.safeBoundary).toContain("dispatch dry-run envelope only");
     expect(JSON.stringify(dryRunEnvelope)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw dry-run|secret dry-run|private|token/i);
+  });
+
+  it("builds Worker Audit Preview Envelope 1 without writing audit events", () => {
+    const auditPreview = buildOfficeWorkerAuditPreviewEnvelope(buildOfficeWorkerDispatchDryRunEnvelope(buildOfficeWorkerAuthorityHandoffEnvelope(buildOfficeWorkerHumanConfirmationEnvelope(buildOfficeWorkerRequestDraftPreview(buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-14T16:45:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/audit-preview", status: "partial", checked_at: "2026-05-14T16:40:00Z", item_count: 1, warning_count: 1, error_summary: "raw audit-preview token" } as unknown as OfficeState["data_sources"][number]],
+      work_items: [{ id: "w1", status: "blocked", title: "raw audit-preview task", body: "secret audit-preview body" } as unknown as OfficeState["work_items"][number]],
+      events: [{ id: "event-audit-preview-private", category: "approval_needed", room_id: "review", tone: "warning", generated_at: "2026-05-14T16:44:00Z", detail: "raw audit-preview event token" } as unknown as OfficeState["events"][number]],
+    }))))))))))))));
+
+    expect(auditPreview.stageLabel).toBe("Worker Audit Preview Envelope 1");
+    expect(auditPreview.enabledControls).toBe(0);
+    expect(auditPreview.auditWriteEnabled).toBe(false);
+    expect(auditPreview.executionEnabled).toBe(false);
+    expect(auditPreview.dispatchEnabled).toBe(false);
+    expect(auditPreview.adapterInstallationEnabled).toBe(false);
+    expect(auditPreview.requestCreationEnabled).toBe(false);
+    expect(auditPreview.workAssignmentEnabled).toBe(false);
+    expect(auditPreview.previews.map((preview) => preview.id)).toEqual(["audit_dryrun_handoff_confirm_draft_orchestrator_desk", "audit_dryrun_handoff_confirm_draft_agent_desks", "audit_dryrun_handoff_confirm_draft_incident_corner"]);
+    expect(auditPreview.previews.every((preview) => preview.status === "not_written" && preview.auditSinkState === "missing" && preview.rawExcluded)).toBe(true);
+    expect(auditPreview.previews.map((preview) => preview.requiredFields)).toEqual(expect.arrayContaining([
+      expect.arrayContaining(["dry_run_ref", "audit_sink_ref", "event_type", "redaction_policy", "rollback_ref"]),
+    ]));
+    expect(auditPreview.dryRunSnapshot).toMatchObject({ dryRunExecutionEnabled: false, dispatchEnabled: false, auditWriteEnabled: false });
+    expect(auditPreview.safeBoundary).toContain("audit preview envelope only");
+    expect(JSON.stringify(auditPreview)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw audit-preview|secret audit-preview|private|token/i);
   });
 
   it("builds a disabled Authority Adapter Contract 1 before any execution adapter exists", () => {
