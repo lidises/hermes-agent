@@ -152,4 +152,4 @@ Preserve these as supporting evidence rather than deleting or rewriting them:
 
 ## Recommended next product step
 
-After `Approval Model Contract 1`, the next separately approved work should be `Unified Workbench IA/Layout 1`: a frontend/view-model consolidation plan that groups the existing safe `/office` sections under the four-layer operating-room model and carries approval posture as disabled/display-only safety state. It should start helper-first and read-only-first, and should not add new execution controls, raw projection, services, cron, gateway changes, or renderer dependencies.
+After `Unified Workbench IA/Layout 1`, the next separately approved work should be `Approval Request View 1`: a read-only/hypothetical request posture slice that displays safe request/dry-run/decision/audit readiness from the approval contract without creating requests, enabling controls, adding backend mutation routes, or changing services.

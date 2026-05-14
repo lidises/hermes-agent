@@ -219,9 +219,9 @@ This architecture document is an index and consolidation point. It does not repl
 
 ## Next architecture step
 
-After `Approval Model Contract 1`, the next separately approved architecture task should be `Unified Workbench IA/Layout 1`:
+`Unified Workbench IA/Layout 1` is now locally implemented as a pure `OfficeUnifiedWorkbenchView` helper plus a top `/office` four-layer header. The next separately approved architecture/UI task should be `Approval Request View 1`:
 
-1. Define a pure `OfficeUnifiedWorkbenchView` helper that groups current safe OfficeState sections under the four-layer model.
-2. Include the approval model posture as disabled/display-only safety state, not executable controls.
-3. Add focused tests including raw-leak sentinels.
-4. Reorder/label existing `/office` sections without adding mutation controls, backend schema changes, services, cron/watcher automation, VPS restarts, public exposure, NAS access, or renderer dependencies.
+1. Define safe fixture/DTO posture for action-request, dry-run evidence, and human-decision rows from `docs/ai-office/architecture/approval-model-contract.md`.
+2. Render the posture as read-only/hypothetical request visibility only.
+3. Add focused tests including raw-leak sentinels and zero enabled controls.
+4. Do not create real requests, backend mutation routes, services, cron/watcher automation, VPS restarts, public exposure, NAS access, or renderer dependencies.

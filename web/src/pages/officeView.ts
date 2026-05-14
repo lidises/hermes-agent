@@ -487,6 +487,35 @@ export type OfficePageSectionPlan = {
   ariaLabel: string;
 };
 
+export type OfficeUnifiedWorkbenchLayerId = "operatingBoard" | "evidenceLayer" | "projectionCache" | "rpgRoom";
+
+export type OfficeUnifiedWorkbenchLayer = {
+  id: OfficeUnifiedWorkbenchLayerId;
+  label: string;
+  source: string;
+  summary: string;
+  count: number;
+  tone: OfficeDeltaBadge["tone"];
+};
+
+export type OfficeUnifiedWorkbenchView = {
+  title: "AI Office 통합 운영실";
+  subtitle: string;
+  generatedAt: string;
+  layers: OfficeUnifiedWorkbenchLayer[];
+  safetyPosture: {
+    readOnly: boolean;
+    privateOnly: boolean;
+    rawExcluded: true;
+    approvalModel: {
+      status: "display-only";
+      enabledControls: 0;
+      contract: "approval-model-contract";
+    };
+  };
+  renderOrder: ["operating-room-header", "rpg-room-map", "operating-board", "evidence-layer", "projection-cache", "safety-inspector"];
+};
+
 export type OfficeSourceHealthSummary = {
   counts: Record<OfficeSourceStatus, number>;
   label: string;
@@ -2527,6 +2556,84 @@ function buildPaperclipTimingBucket(checkedAt: string | undefined, generatedAt: 
   if (ageMs <= 24 * 60 * 60 * 1000) return "fresh";
   if (ageMs <= 7 * 24 * 60 * 60 * 1000) return "recent";
   return "stale";
+}
+
+function workbenchToneFromCount(count: number, warningCount = 0): OfficeDeltaBadge["tone"] {
+  if (warningCount > 0) return "warning";
+  return count > 0 ? "positive" : "neutral";
+}
+
+function safeWorkbenchCount(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value) ? Math.max(0, Math.trunc(value)) : 0;
+}
+
+function safeProjectionCacheStatus(status: unknown): "active" | "missing" | "stale" | "rejected" | "unknown" {
+  return status === "active" || status === "missing" || status === "stale" || status === "rejected" ? status : "unknown";
+}
+
+export function buildOfficeUnifiedWorkbenchView(state: OfficeState): OfficeUnifiedWorkbenchView {
+  const paperclipWorkbench = buildOfficePaperclipWorkbench(state);
+  const rpgScene = buildOfficeRpgScene(state);
+  const mutationReadiness = buildOfficeMutationControlReadiness(state);
+  const kanbanSource = state.data_sources.find((source) => source.id === "kanban");
+  const kanbanItemCount = safeWorkbenchCount(kanbanSource?.item_count);
+  const boardCount = kanbanItemCount + state.work_items.length;
+  const blockedCount = state.work_items.filter((item) => textField(item, "status") === "blocked").length;
+  const projectionStatus = safeProjectionCacheStatus(state.projection_cache?.status ?? "missing");
+  const projectionRejectedCount = safeWorkbenchCount(state.projection_cache?.rejected?.count);
+  const activeProjectionCount = state.projection_cache?.active ? 1 : 0;
+  const warningSourceCount = state.data_sources.filter((source) => source.status !== "ok" || safeWorkbenchCount(source.warning_count) > 0).length;
+
+  return {
+    title: "AI Office 통합 운영실",
+    subtitle: "VPS 운영 보드, 안전 근거, projection cache, RPG 운영실을 하나의 읽기 전용 화면으로 묶습니다.",
+    generatedAt: state.generated_at,
+    layers: [
+      {
+        id: "operatingBoard",
+        label: "운영 보드",
+        source: "VPS canonical ai-office Kanban",
+        summary: `작업 ${state.work_items.length}개 · 보드 집계 ${kanbanItemCount}개 · blocked ${blockedCount}개`,
+        count: boardCount,
+        tone: blockedCount > 0 ? "warning" : workbenchToneFromCount(boardCount),
+      },
+      {
+        id: "evidenceLayer",
+        label: "근거 레이어",
+        source: "Paperclip/sourceTags safe manifests",
+        summary: `Paperclip/sourceTags ${paperclipWorkbench.sources.length}개 · source 경고 ${warningSourceCount}개 · raw 제외`,
+        count: paperclipWorkbench.sources.length,
+        tone: workbenchToneFromCount(paperclipWorkbench.sources.length, warningSourceCount),
+      },
+      {
+        id: "projectionCache",
+        label: "안전 투영 캐시",
+        source: "validated active projection cache",
+        summary: `projection ${projectionStatus} · active ${activeProjectionCount}개 · rejected aggregate ${projectionRejectedCount}개`,
+        count: activeProjectionCount + projectionRejectedCount,
+        tone: projectionRejectedCount > 0 ? "warning" : workbenchToneFromCount(activeProjectionCount),
+      },
+      {
+        id: "rpgRoom",
+        label: "RPG 운영실",
+        source: "safe OfficeState RPG scene",
+        summary: `RPG 운영실 rooms ${rpgScene.rooms.length}개 · entities ${rpgScene.entities.length}개 · disabled approval posture`,
+        count: rpgScene.rooms.length + rpgScene.entities.length,
+        tone: mutationReadiness.status === "blocked-read-only" ? "neutral" : "warning",
+      },
+    ],
+    safetyPosture: {
+      readOnly: state.capabilities.read_only !== false,
+      privateOnly: state.display_mode !== "remote",
+      rawExcluded: true,
+      approvalModel: {
+        status: "display-only",
+        enabledControls: 0,
+        contract: "approval-model-contract",
+      },
+    },
+    renderOrder: ["operating-room-header", "rpg-room-map", "operating-board", "evidence-layer", "projection-cache", "safety-inspector"],
+  };
 }
 
 export function buildOfficePageSectionPlan(state: OfficeState): OfficePageSectionPlan[] {

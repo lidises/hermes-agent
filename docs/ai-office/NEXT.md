@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-14 12:12 KST
+Last updated: 2026-05-14 12:23 KST
 
 ## Start here after `/new`
 
@@ -90,7 +90,7 @@ Authoritative Phase 0 umbrella docs:
 - `docs/ai-office/product/unified-operating-workbench.md`
 - `docs/ai-office/architecture/unified-operating-workbench.md`
 
-Next recommended work is now `Unified Workbench IA/Layout 1` after local-only completion of `Approval Console 1` and documentation-only completion of `Approval Model Contract 1`. `Approval Model Contract 1` is recorded in `docs/ai-office/architecture/approval-model-contract.md` and defines authority levels, `OfficeActionRequest`, `OfficeActionTarget`, `OfficeDryRunEvidence`, `OfficeHumanDecision`, execution adapter gates, audit event shape, and per-action gates for Kanban transition, projection promote/reject, NAS save request, watcher/cron enablement, and service restart. It explicitly does not approve implementation of mutation endpoints, enabled browser controls, Kanban writes, projection transfer/promote, watcher/cron enablement, service restart, public exposure, NAS mount/direct credentials, or raw-source reads. The next product-improving slice should be `Unified Workbench IA/Layout 1`: create a pure safe view-model/grouping plan for the existing `/office` sections under the four-layer operating-room order, carrying approval posture as disabled/display-only state. Keep it helper-first/read-only-first and avoid backend schema/API changes, executable controls, VPS/service mutation, Kanban writes, cron/watcher work, public exposure, renderer dependencies, or raw projection.
+Next recommended work is now `Approval Request View 1` after local-only completion of `Unified Workbench IA/Layout 1`. `Unified Workbench IA/Layout 1` added `buildOfficeUnifiedWorkbenchView(state)`, a four-layer `AI Office 통합 운영실` view model (`operatingBoard`, `evidenceLayer`, `projectionCache`, `rpgRoom`), and a top `/office` unified workbench header with `data-office-unified-workbench`, `data-office-unified-layers`, and per-layer hooks. The slice keeps approval posture disabled/display-only via the approval model contract, uses safe aggregate counts/summaries only, and adds no backend schema/API changes, mutation endpoints, enabled browser controls, VPS/service mutation, Kanban writes, cron/watcher work, public exposure, renderer dependencies, or raw projection. The next product-improving slice should be `Approval Request View 1`: render hypothetical/request DTO posture from fixtures or already-safe DTOs without creating requests, routes, backend mutation endpoints, or enabled controls.
 
 Master Spec v0.1 follow-up: read `docs/ai-office/plans/2026-05-14-desk-rpg-master-spec-review.md` before choosing the next work. It reframes read-only-first as the first safety posture, not the permanent product ceiling. The recommended product sequence remains `Desk RPG Product Vision 1` → `Desk RPG Projection Model 1` → `Desk RPG IA/Layout 1` → `Controlled Mutation & Approval Model 1`; the approved first implementation slice is intentionally small and should be reconciled with those contracts before adding executable control.
 

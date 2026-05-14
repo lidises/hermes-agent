@@ -73,6 +73,7 @@ import {
   buildOfficeRpgReviewCornerFacility,
   buildOfficeRpgApprovalConsoleFacility,
   buildOfficeRpgScene,
+  buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
@@ -517,6 +518,53 @@ describe("OfficePage view helpers", () => {
     expect(plan.find((section) => section.id === "work")?.summary).toContain("세션 1개");
     expect(plan.find((section) => section.id === "routing")?.summary).toContain("출처 기록 1개");
     expect(JSON.stringify(plan)).not.toMatch(/raw|secret|body|script|path/i);
+  });
+
+  it("groups the unified operating workbench into four safe layers with disabled approval posture", () => {
+    const view = buildOfficeUnifiedWorkbenchView(officeFixture({
+      generated_at: "2026-05-14T12:20:00Z",
+      data_sources: [
+        { id: "kanban", status: "ok", checked_at: "2026-05-14T12:00:00Z", item_count: 7, warning_count: 0 },
+        { id: "paperclip:/Users/lidises/nas/raw", status: "partial", checked_at: "2026-05-14T11:00:00Z", item_count: 2, warning_count: 1, source_type: "paperclip", tags: ["source:safe", "raw prompt"] } as unknown as OfficeState["data_sources"][number],
+      ],
+      agents: [{ id: "agent-1", status: "active", prompt: "raw prompt must not appear" } as unknown as OfficeState["agents"][number]],
+      work_items: [
+        { id: "w1", status: "blocked", title: "raw title", body: "secret body" } as unknown as OfficeState["work_items"][number],
+        { id: "w2", status: "done", result: "raw result" } as unknown as OfficeState["work_items"][number],
+      ],
+      automations: [{ id: "cron-1", state: "error", last_status: "error", script: "/Users/lidises/private.py" } as unknown as OfficeState["automations"][number]],
+      events: [{ id: "event-1", category: "workload_changed", room_id: "work", tone: "warning", generated_at: "2026-05-14T12:05:00Z", detail: "raw event detail" } as unknown as OfficeState["events"][number]],
+      provenance: [{ source: "paperclip:safe", label: "safe source", detail: "raw path must not appear" } as unknown as OfficeState["provenance"][number]],
+      redactions: { policy_version: 1, redacted_field_count: 5, omitted_sections: ["prompt", "transcript"], warnings: ["raw warning"] },
+      projection_cache: {
+        schema_version: 1,
+        status: "token /Users/lidises/raw projection status",
+        redacted: true,
+        cache_layout: { incoming: "incoming", active: "active", archive: "archive", rejected: "rejected" },
+        active: {
+          bundle_id: "safe-bundle-1",
+          generated_at: "2026-05-14T12:00:00Z",
+          generated_by: "relay",
+          source_kind: "safe_manifest",
+          source_tags: ["source:safe", "raw prompt ignored"],
+          freshness: { stale_after: "2026-05-15T12:00:00Z" },
+          validator: { result: "pass" },
+          redaction: { raw_excluded: true },
+        } as unknown as OfficeState["projection_cache"]["active"],
+        rejected: { count: -9, recent: [] },
+      } as unknown as OfficeState["projection_cache"],
+    }));
+
+    expect(view.title).toBe("AI Office 통합 운영실");
+    expect(view.layers.map((layer) => layer.id)).toEqual(["operatingBoard", "evidenceLayer", "projectionCache", "rpgRoom"]);
+    expect(view.layers.find((layer) => layer.id === "operatingBoard")).toMatchObject({ label: "운영 보드", source: "VPS canonical ai-office Kanban", count: 9 });
+    expect(view.layers.find((layer) => layer.id === "evidenceLayer")?.summary).toContain("Paperclip/sourceTags 1개");
+    expect(view.layers.find((layer) => layer.id === "projectionCache")?.summary).toContain("unknown");
+    expect(view.layers.find((layer) => layer.id === "projectionCache")?.count).toBe(1);
+    expect(view.layers.find((layer) => layer.id === "rpgRoom")?.summary).toContain("RPG 운영실");
+    expect(view.safetyPosture.approvalModel).toMatchObject({ status: "display-only", enabledControls: 0 });
+    expect(view.renderOrder).toEqual(["operating-room-header", "rpg-room-map", "operating-board", "evidence-layer", "projection-cache", "safety-inspector"]);
+    expect(JSON.stringify(view)).not.toMatch(/raw prompt|raw title|secret body|raw result|raw event|raw warning|private\.py|\/Users\/lidises|token/i);
   });
 
   it("builds a safe Paperclip workbench projection from source tags without raw content", () => {

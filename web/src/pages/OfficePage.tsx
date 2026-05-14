@@ -83,6 +83,7 @@ import {
   buildOfficeRpgReviewCornerFacility,
   buildOfficeRpgApprovalConsoleFacility,
   buildOfficeRpgScene,
+  buildOfficeUnifiedWorkbenchView,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -1744,6 +1745,7 @@ export default function OfficePage() {
 
   const needsAttention = useMemo(() => (state ? buildOfficeAttentionItems(state) : []), [state]);
   const rpgScene = useMemo(() => buildOfficeRpgScene(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
+  const unifiedWorkbenchView = useMemo(() => buildOfficeUnifiedWorkbenchView(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -1917,6 +1919,46 @@ export default function OfficePage() {
 
   return (
     <div className="flex flex-col gap-6 normal-case">
+      <section
+        className="border border-emerald-300/25 bg-gradient-to-br from-emerald-950/25 via-black/30 to-sky-950/20 p-5"
+        data-office-unified-workbench="true"
+        data-office-unified-approval-status={unifiedWorkbenchView.safetyPosture.approvalModel.status}
+      >
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+          <div className="max-w-3xl">
+            <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.22em] text-emerald-300">
+              <ShieldCheck className="h-4 w-4" /> 읽기 전용 · AI Office 통합 운영실
+            </div>
+            <h1 className="mt-3 text-3xl font-semibold tracking-wide text-foreground md:text-4xl">{unifiedWorkbenchView.title}</h1>
+            <p className="mt-3 text-sm leading-6 text-midground/80">{unifiedWorkbenchView.subtitle}</p>
+            <div className="mt-3 text-xs text-midground/55">
+              표시 순서: {unifiedWorkbenchView.renderOrder.join(" → ")} · 승인 모델 {unifiedWorkbenchView.safetyPosture.approvalModel.status} · 실행 컨트롤 {unifiedWorkbenchView.safetyPosture.approvalModel.enabledControls}개
+            </div>
+          </div>
+          <div className="grid min-w-72 gap-2 text-xs text-midground/70 sm:grid-cols-2 xl:grid-cols-1">
+            <div className="border border-current/15 bg-black/20 p-3">생성 시각: {fmt(unifiedWorkbenchView.generatedAt)}</div>
+            <div className="border border-current/15 bg-black/20 p-3">raw 제외: {unifiedWorkbenchView.safetyPosture.rawExcluded ? "true" : "false"}</div>
+          </div>
+        </div>
+        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4" data-office-unified-layers="true">
+          {unifiedWorkbenchView.layers.map((layer) => (
+            <div
+              key={layer.id}
+              className="border border-current/15 bg-black/25 p-3"
+              data-office-unified-layer={layer.id}
+              data-office-unified-layer-tone={layer.tone}
+            >
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{layer.source}</div>
+              <div className="mt-1 flex items-center justify-between gap-2">
+                <div className="text-sm font-semibold text-foreground">{layer.label}</div>
+                <div className="font-mono text-xs tabular-nums text-emerald-200">{layer.count}</div>
+              </div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{layer.summary}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {showOverview ? (
         <OfficeRpgMap
           scene={rpgScene}
