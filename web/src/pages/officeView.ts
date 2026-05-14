@@ -1262,6 +1262,34 @@ export type OfficeWorkerRequestDraftPreview = {
   safeProjectionOnly: true;
 };
 
+export type OfficeWorkerHumanConfirmationEnvelopeItem = {
+  id: `confirm_${OfficeWorkerRequestDraft["id"]}`;
+  draftRef: OfficeWorkerRequestDraft["id"];
+  facilityId: OfficeWorkerRequestDraft["facilityId"];
+  workerRole: OfficeWorkerRequestDraft["workerRole"];
+  status: "not_recorded";
+  decisionState: "missing";
+  requiredFields: Array<"draft_ref" | "human_actor_ref" | "decision" | "decision_reason" | "rollback_ack">;
+  safeSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeWorkerHumanConfirmationEnvelope = {
+  stageLabel: "Worker Human Confirmation Envelope 1";
+  title: string;
+  enabledControls: 0;
+  decisionRecordingEnabled: false;
+  requestCreationEnabled: false;
+  requestPersistenceEnabled: false;
+  workAssignmentEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  envelopes: OfficeWorkerHumanConfirmationEnvelopeItem[];
+  draftSnapshot: Pick<OfficeWorkerRequestDraftPreview, "requestCreationEnabled" | "requestPersistenceEnabled" | "dispatchEnabled" | "auditWriteEnabled">;
+  safeBoundary: string;
+  safeProjectionOnly: true;
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -2420,6 +2448,39 @@ export function buildOfficeWorkerRequestDraftPreview(candidateGate: OfficeWorker
       safeFields: ["candidate_ref", "facility", "worker_role", "blocked_reasons"],
       blockedReasonCount: candidate.blockedBy.length,
       safeSummary: `${candidate.facilityId} request draft is a safe preview only; no request record exists`,
+      rawExcluded: true,
+    })),
+  };
+}
+
+export function buildOfficeWorkerHumanConfirmationEnvelope(draftPreview: OfficeWorkerRequestDraftPreview): OfficeWorkerHumanConfirmationEnvelope {
+  return {
+    stageLabel: "Worker Human Confirmation Envelope 1",
+    title: "사람 확인 봉투 · 결정 기록 없음",
+    enabledControls: 0,
+    decisionRecordingEnabled: false,
+    requestCreationEnabled: false,
+    requestPersistenceEnabled: false,
+    workAssignmentEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    draftSnapshot: {
+      requestCreationEnabled: draftPreview.requestCreationEnabled,
+      requestPersistenceEnabled: draftPreview.requestPersistenceEnabled,
+      dispatchEnabled: draftPreview.dispatchEnabled,
+      auditWriteEnabled: draftPreview.auditWriteEnabled,
+    },
+    safeBoundary: "confirmation envelope only · no decision recording · no request creation · no persistence · no assignment · no dispatch · no audit write",
+    safeProjectionOnly: true,
+    envelopes: draftPreview.drafts.map((draft) => ({
+      id: `confirm_${draft.id}`,
+      draftRef: draft.id,
+      facilityId: draft.facilityId,
+      workerRole: draft.workerRole,
+      status: "not_recorded",
+      decisionState: "missing",
+      requiredFields: ["draft_ref", "human_actor_ref", "decision", "decision_reason", "rollback_ack"],
+      safeSummary: `${draft.id} requires an explicit human confirmation envelope before any request can become actionable`,
       rawExcluded: true,
     })),
   };

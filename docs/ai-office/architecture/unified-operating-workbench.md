@@ -219,9 +219,9 @@ This architecture document is an index and consolidation point. It does not repl
 
 ## Next architecture step
 
-`Unified Workbench IA/Layout 1`, `Approval Request View 1`, `Approval Audit Timeline 1`, `Approval Execution Gate 1`, `Authority Adapter Contract 1`, `Orchestrator Mediation Queue 1`, `Worker Intent Routing 1`, `Worker Facility Readiness 1`, `Worker Assignment Candidate Gate 1`, and `Worker Request Draft Preview 1` are now locally implemented as pure safe view-model helpers plus top `/office` display-only sections. The next separately approved architecture/UI task should be `Worker Human Confirmation Envelope 1`:
+`Unified Workbench IA/Layout 1`, `Approval Request View 1`, `Approval Audit Timeline 1`, `Approval Execution Gate 1`, `Authority Adapter Contract 1`, `Orchestrator Mediation Queue 1`, `Worker Intent Routing 1`, `Worker Facility Readiness 1`, `Worker Assignment Candidate Gate 1`, `Worker Request Draft Preview 1`, and `Worker Human Confirmation Envelope 1` are now locally implemented as pure safe view-model helpers plus top `/office` display-only sections. The next separately approved architecture/UI task should be `Worker Authority Handoff Envelope 1`:
 
-1. Define a safe confirmation-envelope posture that states what human confirmation metadata would be required before a request draft can become actionable.
-2. Keep the envelope display-only; every confirmation should remain `not_recorded` until draft, approval, audit, rollback, human confirmation, and adapter prerequisites exist.
-3. Add focused tests for envelope IDs, safe confirmation fields, blocked reasons, zero enabled controls, no decision recording, no request creation, no assignment, no dispatch, no audit write, and no executable browser affordances.
-4. Do not execute actions, record decisions, write audit events, create requests, add backend mutation routes, services, cron/watcher automation, VPS restarts, public exposure, NAS access, or renderer dependencies.
+1. Define a safe authority-handoff posture that states what adapter/authority metadata would be required after human confirmation before any dispatch can exist.
+2. Keep the envelope display-only; every handoff should remain `not_handed_off` until confirmation, adapter contract, audit, rollback, and dispatch prerequisites exist.
+3. Add focused tests for handoff IDs, safe adapter fields, blocked reasons, zero enabled controls, no adapter installation, no dispatch, no request creation, no assignment, no audit write, and no executable browser affordances.
+4. Do not execute actions, install adapters, dispatch work, record decisions, write audit events, create requests, add backend mutation routes, services, cron/watcher automation, VPS restarts, public exposure, NAS access, or renderer dependencies.

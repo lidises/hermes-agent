@@ -81,6 +81,7 @@ import {
   buildOfficeWorkerFacilityReadiness,
   buildOfficeWorkerAssignmentCandidateGate,
   buildOfficeWorkerRequestDraftPreview,
+  buildOfficeWorkerHumanConfirmationEnvelope,
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
@@ -654,6 +655,32 @@ describe("OfficePage view helpers", () => {
     expect(draftPreview.candidateSnapshot).toMatchObject({ assignmentCandidateEnabled: false, requestCreationEnabled: false, dispatchEnabled: false, auditWriteEnabled: false });
     expect(draftPreview.safeBoundary).toContain("request draft preview only");
     expect(JSON.stringify(draftPreview)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw draft|secret draft|private|token/i);
+  });
+
+  it("builds Worker Human Confirmation Envelope 1 without recording decisions", () => {
+    const confirmationEnvelope = buildOfficeWorkerHumanConfirmationEnvelope(buildOfficeWorkerRequestDraftPreview(buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-14T15:45:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/confirm", status: "partial", checked_at: "2026-05-14T15:40:00Z", item_count: 1, warning_count: 1, error_summary: "raw confirmation token" } as unknown as OfficeState["data_sources"][number]],
+      work_items: [{ id: "w1", status: "blocked", title: "raw confirmation task", body: "secret confirmation body" } as unknown as OfficeState["work_items"][number]],
+      events: [{ id: "event-confirm-private", category: "approval_needed", room_id: "command", tone: "warning", generated_at: "2026-05-14T15:44:00Z", detail: "raw confirmation event token" } as unknown as OfficeState["events"][number]],
+    })))))))))));
+
+    expect(confirmationEnvelope.stageLabel).toBe("Worker Human Confirmation Envelope 1");
+    expect(confirmationEnvelope.enabledControls).toBe(0);
+    expect(confirmationEnvelope.decisionRecordingEnabled).toBe(false);
+    expect(confirmationEnvelope.requestCreationEnabled).toBe(false);
+    expect(confirmationEnvelope.requestPersistenceEnabled).toBe(false);
+    expect(confirmationEnvelope.workAssignmentEnabled).toBe(false);
+    expect(confirmationEnvelope.dispatchEnabled).toBe(false);
+    expect(confirmationEnvelope.auditWriteEnabled).toBe(false);
+    expect(confirmationEnvelope.envelopes.map((envelope) => envelope.id)).toEqual(["confirm_draft_orchestrator_desk", "confirm_draft_agent_desks", "confirm_draft_incident_corner"]);
+    expect(confirmationEnvelope.envelopes.every((envelope) => envelope.status === "not_recorded" && envelope.decisionState === "missing" && envelope.rawExcluded)).toBe(true);
+    expect(confirmationEnvelope.envelopes.map((envelope) => envelope.requiredFields)).toEqual(expect.arrayContaining([
+      expect.arrayContaining(["draft_ref", "human_actor_ref", "decision", "decision_reason", "rollback_ack"]),
+    ]));
+    expect(confirmationEnvelope.draftSnapshot).toMatchObject({ requestCreationEnabled: false, requestPersistenceEnabled: false, dispatchEnabled: false, auditWriteEnabled: false });
+    expect(confirmationEnvelope.safeBoundary).toContain("confirmation envelope only");
+    expect(JSON.stringify(confirmationEnvelope)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw confirmation|secret confirmation|private|token/i);
   });
 
   it("builds a disabled Authority Adapter Contract 1 before any execution adapter exists", () => {

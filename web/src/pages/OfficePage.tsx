@@ -93,6 +93,7 @@ import {
   buildOfficeWorkerFacilityReadiness,
   buildOfficeWorkerAssignmentCandidateGate,
   buildOfficeWorkerRequestDraftPreview,
+  buildOfficeWorkerHumanConfirmationEnvelope,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -1764,6 +1765,7 @@ export default function OfficePage() {
   const workerFacilityReadiness = useMemo(() => buildOfficeWorkerFacilityReadiness(workerIntentRouting), [workerIntentRouting]);
   const workerAssignmentCandidateGate = useMemo(() => buildOfficeWorkerAssignmentCandidateGate(workerFacilityReadiness), [workerFacilityReadiness]);
   const workerRequestDraftPreview = useMemo(() => buildOfficeWorkerRequestDraftPreview(workerAssignmentCandidateGate), [workerAssignmentCandidateGate]);
+  const workerHumanConfirmationEnvelope = useMemo(() => buildOfficeWorkerHumanConfirmationEnvelope(workerRequestDraftPreview), [workerRequestDraftPreview]);
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -2240,6 +2242,42 @@ export default function OfficePage() {
               <div className="mt-3 flex flex-wrap gap-1" data-office-worker-request-draft-fields="true">
                 {draft.safeFields.map((field) => (
                   <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-worker-request-draft-field={field}>{field}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-violet-300/20 bg-violet-950/10 p-4"
+        data-office-worker-human-confirmation-envelope="true"
+        data-office-worker-confirmation-decision-recording-enabled={String(workerHumanConfirmationEnvelope.decisionRecordingEnabled)}
+        data-office-worker-confirmation-request-creation-enabled={String(workerHumanConfirmationEnvelope.requestCreationEnabled)}
+        data-office-worker-confirmation-request-persistence-enabled={String(workerHumanConfirmationEnvelope.requestPersistenceEnabled)}
+        data-office-worker-confirmation-assignment-enabled={String(workerHumanConfirmationEnvelope.workAssignmentEnabled)}
+        data-office-worker-confirmation-dispatch-enabled={String(workerHumanConfirmationEnvelope.dispatchEnabled)}
+        data-office-worker-confirmation-audit-write-enabled={String(workerHumanConfirmationEnvelope.auditWriteEnabled)}
+        data-office-worker-confirmation-enabled-controls={workerHumanConfirmationEnvelope.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-violet-200/70">{workerHumanConfirmationEnvelope.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{workerHumanConfirmationEnvelope.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{workerHumanConfirmationEnvelope.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">recorded decisions: 0</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-worker-confirmation-envelopes="true">
+          {workerHumanConfirmationEnvelope.envelopes.map((envelope) => (
+            <div key={envelope.id} className="border border-current/15 bg-black/20 p-3" data-office-worker-confirmation-envelope={envelope.facilityId} data-office-worker-confirmation-status={envelope.status} data-office-worker-confirmation-decision-state={envelope.decisionState}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{envelope.workerRole}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{envelope.id}</div>
+              <div className="mt-1 text-xs text-midground/60">draft: {envelope.draftRef} · decision: {envelope.decisionState}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{envelope.safeSummary}</div>
+              <div className="mt-3 flex flex-wrap gap-1" data-office-worker-confirmation-fields="true">
+                {envelope.requiredFields.map((field) => (
+                  <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-worker-confirmation-field={field}>{field}</span>
                 ))}
               </div>
             </div>
