@@ -18,7 +18,7 @@ vi.mock("@/lib/api", () => ({
 
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
-import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeRpgScene } from "./officeView";
+import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeRpgScene } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
@@ -395,6 +395,45 @@ describe("ApprovalDialogueInspectorDetailPanel", () => {
     expect(markup).not.toContain("<button");
     expect(markup).not.toContain("<input");
     expect(markup).not.toMatch(/raw inspector prompt|raw approval inspector task title|Traceback|\/Users\/lidises|token-shaped-inspector-sentinel|private-inspector-provider/i);
+  });
+});
+
+describe("ReviewerWikiEvidenceDetailPosturePanel", () => {
+  it("Reviewer/Wiki Evidence Detail Posture 1 renders safe evidence detail without source controls", () => {
+    const ReviewerWikiEvidenceDetailPosturePanel = (OfficePageModule as unknown as {
+      ReviewerWikiEvidenceDetailPosturePanel: React.ComponentType<{ detail: ReturnType<typeof buildOfficeReviewerWikiEvidenceDetailPosture> }>;
+    }).ReviewerWikiEvidenceDetailPosturePanel;
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [{ id: "agent-1", status: "active", prompt: "raw evidence prompt", provider: "private-evidence-provider", api_key: "token-shaped-evidence-sentinel" }],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw evidence detail task title", body: "/Users/lidises/private/evidence.md", transcript: "Traceback evidence transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 7, warning_count: 3, error_summary: "Traceback evidence source" },
+      ],
+    }));
+    const handoff = buildOfficeReviewerWikiHandoffPosture(projection);
+    const detail = buildOfficeReviewerWikiEvidenceDetailPosture(projection, handoff);
+
+    const markup = renderToStaticMarkup(<ReviewerWikiEvidenceDetailPosturePanel detail={detail} />);
+
+    expect(markup).toContain("data-office-reviewer-wiki-evidence-detail=\"true\"");
+    expect(markup).toContain("data-office-reviewer-wiki-evidence-detail-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-reviewer-wiki-evidence-detail-source-open-enabled=\"false\"");
+    expect(markup).toContain("data-office-reviewer-wiki-evidence-detail-review-enabled=\"false\"");
+    expect(markup).toContain("data-office-reviewer-wiki-evidence-detail-wiki-draft-enabled=\"false\"");
+    expect(markup).toContain("data-office-reviewer-wiki-evidence-detail-audit-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-reviewer-wiki-evidence-detail-nas-save-enabled=\"false\"");
+    expect(markup).toContain("data-office-reviewer-wiki-evidence-detail-card=\"safe_evidence_count\"");
+    expect(markup).toContain("data-office-reviewer-wiki-evidence-detail-card=\"review_warning_count\"");
+    expect(markup).toContain("data-office-reviewer-wiki-evidence-detail-card=\"wiki_material_posture\"");
+    expect(markup).toContain("data-office-reviewer-wiki-evidence-detail-card=\"nas_save_boundary\"");
+    expect(markup).toContain("Reviewer/Wiki evidence detail posture");
+    expect(markup).toContain("근거 detail posture");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toMatch(/raw evidence prompt|raw evidence detail task title|Traceback|\/Users\/lidises|token-shaped-evidence-sentinel|private-evidence-provider/i);
   });
 });
 

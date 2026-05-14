@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-15 00:43 KST
+Last updated: 2026-05-15 08:26 KST
 
 ## Start here after `/new`
 
@@ -504,3 +504,8 @@ Keep constraints: no renderer/dependency, no backend/API/schema changes, no muta
 - Deployment/smoke complete: `origin/main` and VPS dashboard worktree were at `2d29d13a`; only `hermes-agent-dashboard.service` was restarted; private `/office?v=2d29d13a` returned HTTP 200 with console/js errors 0 and no enabled mutation controls.
 - Fresh `/goal` A+B selection completed a docs-only fast-forward of the dedicated VPS dashboard worktree from `7246cd37` to `29265fc1` with no service restart. Private `/office?goal-docsync=29265fc1` returned HTTP 200; browser smoke found 4 dry-run-only disabled mutation controls, 0 forms, raw leak false, and 0 console/JS errors. Evidence: `docs/ai-office/plans/2026-05-13-goal-docsync-vps-dashboard-smoke.md`.
 - Next gate: any executable browser mutation route, non-dry-run projection promote, Kanban write, automation/cron, public exposure, NAS credentials, or gateway/core runtime change remains out of scope unless separately approved.
+
+
+## Reviewer/Wiki Evidence Detail Posture 1 handoff (2026-05-15 08:26 KST)
+
+- Complete locally; next: Board Evidence-to-Inspector Drill-down 1 or Boss/Orchestrator Request Posture Detail 1.

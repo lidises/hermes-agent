@@ -102,6 +102,7 @@ import {
   buildOfficeDisabledApprovalDialoguePosture,
   buildOfficeReviewerWikiHandoffPosture,
   buildOfficeApprovalDialogueInspectorDetail,
+  buildOfficeReviewerWikiEvidenceDetailPosture,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -288,6 +289,45 @@ describe("Approval Dialogue Inspector Detail 1", () => {
     expect(inspector.safeProjectionOnly).toBe(true);
     expect(inspector.rawExcluded).toBe(true);
     expect(JSON.stringify(inspector)).not.toMatch(/raw inspector prompt|raw approval inspector task title|Traceback|\/Users\/lidises|token-shaped-inspector-sentinel|private-inspector-provider/i);
+  });
+});
+
+describe("Reviewer/Wiki Evidence Detail Posture 1", () => {
+  it("builds safe evidence detail cards for reviewer and wiki without raw sources or writes", () => {
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [
+        { id: "agent-1", status: "active", prompt: "raw evidence prompt", provider: "private-evidence-provider", api_key: "token-shaped-evidence-sentinel" },
+      ],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw evidence detail task title", body: "/Users/lidises/private/evidence.md", transcript: "Traceback evidence transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 7, warning_count: 3, error_summary: "Traceback evidence source" },
+      ],
+    }));
+    const handoff = buildOfficeReviewerWikiHandoffPosture(projection);
+
+    const evidenceDetail = buildOfficeReviewerWikiEvidenceDetailPosture(projection, handoff);
+
+    expect(evidenceDetail.stageLabel).toBe("Reviewer/Wiki Evidence Detail Posture 1");
+    expect(evidenceDetail.detailKind).toBe("reviewer_wiki_evidence_detail_posture");
+    expect(evidenceDetail.cards.map((card) => card.id)).toEqual(["safe_evidence_count", "review_warning_count", "wiki_material_posture", "nas_save_boundary"]);
+    expect(evidenceDetail.evidenceCount).toBe(1);
+    expect(evidenceDetail.warningCount).toBe(1);
+    expect(evidenceDetail.handoffStepCount).toBe(4);
+    expect(evidenceDetail.enabledControls).toBe(0);
+    expect(evidenceDetail.rawSourceVisible).toBe(false);
+    expect(evidenceDetail.sourceOpenEnabled).toBe(false);
+    expect(evidenceDetail.reviewEnabled).toBe(false);
+    expect(evidenceDetail.wikiDraftEnabled).toBe(false);
+    expect(evidenceDetail.assignmentEnabled).toBe(false);
+    expect(evidenceDetail.requestCreationEnabled).toBe(false);
+    expect(evidenceDetail.dispatchEnabled).toBe(false);
+    expect(evidenceDetail.auditWriteEnabled).toBe(false);
+    expect(evidenceDetail.nasSaveEnabled).toBe(false);
+    expect(evidenceDetail.safeProjectionOnly).toBe(true);
+    expect(evidenceDetail.rawExcluded).toBe(true);
+    expect(JSON.stringify(evidenceDetail)).not.toMatch(/raw evidence prompt|raw evidence detail task title|Traceback|\/Users\/lidises|token-shaped-evidence-sentinel|private-evidence-provider/i);
   });
 });
 

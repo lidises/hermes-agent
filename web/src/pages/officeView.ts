@@ -1080,6 +1080,37 @@ export type OfficeApprovalDialogueInspectorDetail = {
   rawExcluded: true;
 };
 
+export type OfficeReviewerWikiEvidenceDetailCard = {
+  id: "safe_evidence_count" | "review_warning_count" | "wiki_material_posture" | "nas_save_boundary";
+  label: string;
+  summary: string;
+  tone: "info" | "warning" | "blocked";
+  rawExcluded: true;
+};
+
+export type OfficeReviewerWikiEvidenceDetailPosture = {
+  stageLabel: "Reviewer/Wiki Evidence Detail Posture 1";
+  title: string;
+  detailKind: "reviewer_wiki_evidence_detail_posture";
+  cards: OfficeReviewerWikiEvidenceDetailCard[];
+  evidenceCount: number;
+  warningCount: number;
+  blockedWorkCount: number;
+  handoffStepCount: number;
+  rawSourceVisible: false;
+  sourceOpenEnabled: false;
+  reviewEnabled: false;
+  wikiDraftEnabled: false;
+  assignmentEnabled: false;
+  requestCreationEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  enabledControls: 0;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeRpgMissionStoryboardStep = {
   id: "request" | "orchestrate" | "board" | "evidence" | "review" | "approval";
   label: string;
@@ -2212,6 +2243,63 @@ export function buildOfficeApprovalDialogueInspectorDetail(
     approveEnabled: false,
     rejectEnabled: false,
     holdEnabled: false,
+    reviewEnabled: false,
+    wikiDraftEnabled: false,
+    assignmentEnabled: false,
+    requestCreationEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    nasSaveEnabled: false,
+    enabledControls: 0,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeReviewerWikiEvidenceDetailPosture(
+  projection: OfficeDeskRpgProjectionModel,
+  handoff: OfficeReviewerWikiHandoffPosture,
+): OfficeReviewerWikiEvidenceDetailPosture {
+  return {
+    stageLabel: "Reviewer/Wiki Evidence Detail Posture 1",
+    title: "Reviewer/Wiki evidence detail posture",
+    detailKind: "reviewer_wiki_evidence_detail_posture",
+    cards: [
+      {
+        id: "safe_evidence_count",
+        label: "safe evidence count",
+        summary: `Paperclip/source evidence is summarized as ${projection.evidenceState.sourceCount} safe aggregate row(s); raw source titles and bodies stay hidden.`,
+        tone: "info",
+        rawExcluded: true,
+      },
+      {
+        id: "review_warning_count",
+        label: "review warning count",
+        summary: `${projection.evidenceState.warningCount} warning signal(s) are available for reviewer posture only; no review execution is exposed.`,
+        tone: projection.evidenceState.warningCount > 0 ? "warning" : "info",
+        rawExcluded: true,
+      },
+      {
+        id: "wiki_material_posture",
+        label: "wiki material posture",
+        summary: `${handoff.sequence.length} handoff step(s) connect evidence to wiki-writing posture without creating a draft or request.`,
+        tone: "info",
+        rawExcluded: true,
+      },
+      {
+        id: "nas_save_boundary",
+        label: "NAS save boundary",
+        summary: "Source opening, audit write, dispatch, wiki draft, and final NAS save remain disabled until authority/event approval exists.",
+        tone: "blocked",
+        rawExcluded: true,
+      },
+    ],
+    evidenceCount: projection.evidenceState.sourceCount,
+    warningCount: projection.evidenceState.warningCount,
+    blockedWorkCount: projection.boardState.blockedCount,
+    handoffStepCount: handoff.sequence.length,
+    rawSourceVisible: false,
+    sourceOpenEnabled: false,
     reviewEnabled: false,
     wikiDraftEnabled: false,
     assignmentEnabled: false,
