@@ -1431,6 +1431,36 @@ export type OfficeWorkerFinalGateChecklist = {
   safeProjectionOnly: true;
 };
 
+export type OfficeControlledMutationProposalContractId = "proposal_identity" | "authority_reference" | "dry_run_evidence" | "audit_plan" | "rollback_plan" | "human_approval";
+
+export type OfficeControlledMutationProposalContractItem = {
+  id: OfficeControlledMutationProposalContractId;
+  label: string;
+  status: "not_available";
+  requiredFields: Array<"proposal_ref" | "authority_ref" | "dry_run_ref" | "audit_ref" | "rollback_ref" | "human_approval_ref">;
+  safeSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeControlledMutationProposalContract = {
+  stageLabel: "Controlled Mutation Proposal Contract 1";
+  title: string;
+  enabledControls: 0;
+  proposalCreationEnabled: false;
+  proposalPersistenceEnabled: false;
+  mutationRouteEnabled: false;
+  controlProposalEnabled: false;
+  rollbackExecutionEnabled: false;
+  auditWriteEnabled: false;
+  executionEnabled: false;
+  dispatchEnabled: false;
+  requestCreationEnabled: false;
+  contracts: OfficeControlledMutationProposalContractItem[];
+  finalGateSnapshot: Pick<OfficeWorkerFinalGateChecklist, "controlProposalEnabled" | "executionEnabled" | "dispatchEnabled">;
+  safeBoundary: string;
+  safeProjectionOnly: true;
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -2790,6 +2820,47 @@ export function buildOfficeWorkerFinalGateChecklist(rollbackPreview: OfficeWorke
       status: "blocked",
       requiredFields,
       safeSummary: `${gate.label} remains blocked until explicit controlled-mutation authority exists`,
+      rawExcluded: true,
+    })),
+  };
+}
+
+export function buildOfficeControlledMutationProposalContract(finalGateChecklist: OfficeWorkerFinalGateChecklist): OfficeControlledMutationProposalContract {
+  const requiredFields: OfficeControlledMutationProposalContractItem["requiredFields"] = ["proposal_ref", "authority_ref", "dry_run_ref", "audit_ref", "rollback_ref", "human_approval_ref"];
+  const contracts: Array<{ id: OfficeControlledMutationProposalContractId; label: string }> = [
+    { id: "proposal_identity", label: "Proposal identity" },
+    { id: "authority_reference", label: "Authority reference" },
+    { id: "dry_run_evidence", label: "Dry-run evidence" },
+    { id: "audit_plan", label: "Audit plan" },
+    { id: "rollback_plan", label: "Rollback plan" },
+    { id: "human_approval", label: "Human approval" },
+  ];
+  return {
+    stageLabel: "Controlled Mutation Proposal Contract 1",
+    title: "제어형 변경 제안 계약 · 생성 없음",
+    enabledControls: 0,
+    proposalCreationEnabled: false,
+    proposalPersistenceEnabled: false,
+    mutationRouteEnabled: false,
+    controlProposalEnabled: false,
+    rollbackExecutionEnabled: false,
+    auditWriteEnabled: false,
+    executionEnabled: false,
+    dispatchEnabled: false,
+    requestCreationEnabled: false,
+    finalGateSnapshot: {
+      controlProposalEnabled: finalGateChecklist.controlProposalEnabled,
+      executionEnabled: finalGateChecklist.executionEnabled,
+      dispatchEnabled: finalGateChecklist.dispatchEnabled,
+    },
+    safeBoundary: "proposal contract only · no proposal creation · no persistence · no mutation route · no executable controls",
+    safeProjectionOnly: true,
+    contracts: contracts.map((contract) => ({
+      id: contract.id,
+      label: contract.label,
+      status: "not_available",
+      requiredFields,
+      safeSummary: `${contract.label} is a required future proposal field, not a created proposal`,
       rawExcluded: true,
     })),
   };

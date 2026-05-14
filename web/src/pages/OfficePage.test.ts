@@ -87,6 +87,7 @@ import {
   buildOfficeWorkerAuditPreviewEnvelope,
   buildOfficeWorkerRollbackPreviewEnvelope,
   buildOfficeWorkerFinalGateChecklist,
+  buildOfficeControlledMutationProposalContract,
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
@@ -818,6 +819,35 @@ describe("OfficePage view helpers", () => {
     expect(finalGate.rollbackPreviewSnapshot).toMatchObject({ rollbackExecutionEnabled: false, auditWriteEnabled: false, dispatchEnabled: false });
     expect(finalGate.safeBoundary).toContain("final gate checklist only");
     expect(JSON.stringify(finalGate)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw final-gate|secret final-gate|private|token/i);
+  });
+
+  it("builds Controlled Mutation Proposal Contract 1 without creating proposals", () => {
+    const proposalContract = buildOfficeControlledMutationProposalContract(buildOfficeWorkerFinalGateChecklist(buildOfficeWorkerRollbackPreviewEnvelope(buildOfficeWorkerAuditPreviewEnvelope(buildOfficeWorkerDispatchDryRunEnvelope(buildOfficeWorkerAuthorityHandoffEnvelope(buildOfficeWorkerHumanConfirmationEnvelope(buildOfficeWorkerRequestDraftPreview(buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-14T17:45:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/proposal-contract", status: "partial", checked_at: "2026-05-14T17:40:00Z", item_count: 1, warning_count: 1, error_summary: "raw proposal-contract token" } as unknown as OfficeState["data_sources"][number]],
+      work_items: [{ id: "w1", status: "blocked", title: "raw proposal-contract task", body: "secret proposal-contract body" } as unknown as OfficeState["work_items"][number]],
+      events: [{ id: "event-proposal-contract-private", category: "approval_needed", room_id: "review", tone: "warning", generated_at: "2026-05-14T17:44:00Z", detail: "raw proposal-contract event token" } as unknown as OfficeState["events"][number]],
+    })))))))))))))))));
+
+    expect(proposalContract.stageLabel).toBe("Controlled Mutation Proposal Contract 1");
+    expect(proposalContract.enabledControls).toBe(0);
+    expect(proposalContract.proposalCreationEnabled).toBe(false);
+    expect(proposalContract.proposalPersistenceEnabled).toBe(false);
+    expect(proposalContract.mutationRouteEnabled).toBe(false);
+    expect(proposalContract.controlProposalEnabled).toBe(false);
+    expect(proposalContract.rollbackExecutionEnabled).toBe(false);
+    expect(proposalContract.auditWriteEnabled).toBe(false);
+    expect(proposalContract.executionEnabled).toBe(false);
+    expect(proposalContract.dispatchEnabled).toBe(false);
+    expect(proposalContract.requestCreationEnabled).toBe(false);
+    expect(proposalContract.contracts.map((contract) => contract.id)).toEqual(["proposal_identity", "authority_reference", "dry_run_evidence", "audit_plan", "rollback_plan", "human_approval"]);
+    expect(proposalContract.contracts.every((contract) => contract.status === "not_available" && contract.rawExcluded)).toBe(true);
+    expect(proposalContract.contracts.map((contract) => contract.requiredFields)).toEqual(expect.arrayContaining([
+      expect.arrayContaining(["proposal_ref", "authority_ref", "dry_run_ref", "audit_ref", "rollback_ref", "human_approval_ref"]),
+    ]));
+    expect(proposalContract.finalGateSnapshot).toMatchObject({ controlProposalEnabled: false, executionEnabled: false, dispatchEnabled: false });
+    expect(proposalContract.safeBoundary).toContain("proposal contract only");
+    expect(JSON.stringify(proposalContract)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw proposal-contract|secret proposal-contract|private|token/i);
   });
 
   it("builds a disabled Authority Adapter Contract 1 before any execution adapter exists", () => {

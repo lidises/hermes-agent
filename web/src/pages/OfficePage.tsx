@@ -99,6 +99,7 @@ import {
   buildOfficeWorkerAuditPreviewEnvelope,
   buildOfficeWorkerRollbackPreviewEnvelope,
   buildOfficeWorkerFinalGateChecklist,
+  buildOfficeControlledMutationProposalContract,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -1776,6 +1777,7 @@ export default function OfficePage() {
   const workerAuditPreviewEnvelope = useMemo(() => buildOfficeWorkerAuditPreviewEnvelope(workerDispatchDryRunEnvelope), [workerDispatchDryRunEnvelope]);
   const workerRollbackPreviewEnvelope = useMemo(() => buildOfficeWorkerRollbackPreviewEnvelope(workerAuditPreviewEnvelope), [workerAuditPreviewEnvelope]);
   const workerFinalGateChecklist = useMemo(() => buildOfficeWorkerFinalGateChecklist(workerRollbackPreviewEnvelope), [workerRollbackPreviewEnvelope]);
+  const controlledMutationProposalContract = useMemo(() => buildOfficeControlledMutationProposalContract(workerFinalGateChecklist), [workerFinalGateChecklist]);
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -2469,6 +2471,44 @@ export default function OfficePage() {
               <div className="mt-3 flex flex-wrap gap-1" data-office-worker-final-gate-fields="true">
                 {gate.requiredFields.map((field) => (
                   <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-worker-final-gate-field={field}>{field}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-sky-300/20 bg-sky-950/10 p-4"
+        data-office-controlled-mutation-proposal-contract="true"
+        data-office-controlled-mutation-proposal-creation-enabled={String(controlledMutationProposalContract.proposalCreationEnabled)}
+        data-office-controlled-mutation-proposal-persistence-enabled={String(controlledMutationProposalContract.proposalPersistenceEnabled)}
+        data-office-controlled-mutation-route-enabled={String(controlledMutationProposalContract.mutationRouteEnabled)}
+        data-office-controlled-mutation-control-proposal-enabled={String(controlledMutationProposalContract.controlProposalEnabled)}
+        data-office-controlled-mutation-rollback-execution-enabled={String(controlledMutationProposalContract.rollbackExecutionEnabled)}
+        data-office-controlled-mutation-audit-write-enabled={String(controlledMutationProposalContract.auditWriteEnabled)}
+        data-office-controlled-mutation-action-execution-enabled={String(controlledMutationProposalContract.executionEnabled)}
+        data-office-controlled-mutation-dispatch-enabled={String(controlledMutationProposalContract.dispatchEnabled)}
+        data-office-controlled-mutation-request-creation-enabled={String(controlledMutationProposalContract.requestCreationEnabled)}
+        data-office-controlled-mutation-enabled-controls={controlledMutationProposalContract.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-200/70">{controlledMutationProposalContract.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{controlledMutationProposalContract.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{controlledMutationProposalContract.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">proposal creations: 0</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-controlled-mutation-contracts="true">
+          {controlledMutationProposalContract.contracts.map((contract) => (
+            <div key={contract.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-contract={contract.id} data-office-controlled-mutation-contract-status={contract.status}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{contract.status}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{contract.label}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{contract.safeSummary}</div>
+              <div className="mt-3 flex flex-wrap gap-1" data-office-controlled-mutation-contract-fields="true">
+                {contract.requiredFields.map((field) => (
+                  <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-controlled-mutation-contract-field={field}>{field}</span>
                 ))}
               </div>
             </div>
