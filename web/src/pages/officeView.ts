@@ -1517,6 +1517,34 @@ export type OfficeControlledMutationAuditSinkPlan = {
   safeProjectionOnly: true;
 };
 
+export type OfficeControlledMutationRollbackVerificationPlanId = "restore_point" | "reversible_scope" | "verification_probe" | "failure_fallback" | "human_recheck";
+
+export type OfficeControlledMutationRollbackVerificationPlanItem = {
+  id: OfficeControlledMutationRollbackVerificationPlanId;
+  label: string;
+  status: "not_verified";
+  requiredFields: Array<"restore_point_ref" | "reversible_scope" | "verification_probe_ref" | "failure_fallback_ref" | "human_recheck_ref">;
+  safeSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeControlledMutationRollbackVerificationPlan = {
+  stageLabel: "Controlled Mutation Rollback Verification Plan 1";
+  title: string;
+  enabledControls: 0;
+  rollbackExecutionEnabled: false;
+  auditWriteEnabled: false;
+  dryRunExecutionEnabled: false;
+  proposalCreationEnabled: false;
+  mutationRouteEnabled: false;
+  executionEnabled: false;
+  dispatchEnabled: false;
+  verificationItems: OfficeControlledMutationRollbackVerificationPlanItem[];
+  auditSinkPlanSnapshot: Pick<OfficeControlledMutationAuditSinkPlan, "auditWriteEnabled" | "rollbackExecutionEnabled" | "executionEnabled">;
+  safeBoundary: string;
+  safeProjectionOnly: true;
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -2993,6 +3021,44 @@ export function buildOfficeControlledMutationAuditSinkPlan(dryRunPlan: OfficeCon
       status: "not_writable",
       requiredFields,
       safeSummary: `${item.label} is required before any future audit event can be written`,
+      rawExcluded: true,
+    })),
+  };
+}
+
+export function buildOfficeControlledMutationRollbackVerificationPlan(auditSinkPlan: OfficeControlledMutationAuditSinkPlan): OfficeControlledMutationRollbackVerificationPlan {
+  const requiredFields: OfficeControlledMutationRollbackVerificationPlanItem["requiredFields"] = ["restore_point_ref", "reversible_scope", "verification_probe_ref", "failure_fallback_ref", "human_recheck_ref"];
+  const verificationItems: Array<{ id: OfficeControlledMutationRollbackVerificationPlanId; label: string }> = [
+    { id: "restore_point", label: "Restore point" },
+    { id: "reversible_scope", label: "Reversible scope" },
+    { id: "verification_probe", label: "Verification probe" },
+    { id: "failure_fallback", label: "Failure fallback" },
+    { id: "human_recheck", label: "Human recheck" },
+  ];
+  return {
+    stageLabel: "Controlled Mutation Rollback Verification Plan 1",
+    title: "제어형 변경 롤백 검증 계획 · 롤백 실행 없음",
+    enabledControls: 0,
+    rollbackExecutionEnabled: false,
+    auditWriteEnabled: false,
+    dryRunExecutionEnabled: false,
+    proposalCreationEnabled: false,
+    mutationRouteEnabled: false,
+    executionEnabled: false,
+    dispatchEnabled: false,
+    auditSinkPlanSnapshot: {
+      auditWriteEnabled: auditSinkPlan.auditWriteEnabled,
+      rollbackExecutionEnabled: auditSinkPlan.rollbackExecutionEnabled,
+      executionEnabled: auditSinkPlan.executionEnabled,
+    },
+    safeBoundary: "rollback verification plan only · no rollback execution · no audit write · no dry-run execution · no proposal creation · no mutation route · no executable controls",
+    safeProjectionOnly: true,
+    verificationItems: verificationItems.map((item) => ({
+      id: item.id,
+      label: item.label,
+      status: "not_verified",
+      requiredFields,
+      safeSummary: `${item.label} is required before any future rollback path can be verified`,
       rawExcluded: true,
     })),
   };

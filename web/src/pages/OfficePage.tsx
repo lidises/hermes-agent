@@ -102,6 +102,7 @@ import {
   buildOfficeControlledMutationProposalContract,
   buildOfficeControlledMutationDryRunPlan,
   buildOfficeControlledMutationAuditSinkPlan,
+  buildOfficeControlledMutationRollbackVerificationPlan,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -1782,6 +1783,7 @@ export default function OfficePage() {
   const controlledMutationProposalContract = useMemo(() => buildOfficeControlledMutationProposalContract(workerFinalGateChecklist), [workerFinalGateChecklist]);
   const controlledMutationDryRunPlan = useMemo(() => buildOfficeControlledMutationDryRunPlan(controlledMutationProposalContract), [controlledMutationProposalContract]);
   const controlledMutationAuditSinkPlan = useMemo(() => buildOfficeControlledMutationAuditSinkPlan(controlledMutationDryRunPlan), [controlledMutationDryRunPlan]);
+  const controlledMutationRollbackVerificationPlan = useMemo(() => buildOfficeControlledMutationRollbackVerificationPlan(controlledMutationAuditSinkPlan), [controlledMutationAuditSinkPlan]);
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -2585,6 +2587,42 @@ export default function OfficePage() {
               <div className="mt-3 flex flex-wrap gap-1" data-office-controlled-mutation-audit-sink-fields="true">
                 {item.requiredFields.map((field) => (
                   <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-controlled-mutation-audit-sink-field={field}>{field}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-rose-300/20 bg-rose-950/10 p-4"
+        data-office-controlled-mutation-rollback-verification-plan="true"
+        data-office-controlled-mutation-rollback-verification-execution-enabled={String(controlledMutationRollbackVerificationPlan.rollbackExecutionEnabled)}
+        data-office-controlled-mutation-rollback-verification-audit-write-enabled={String(controlledMutationRollbackVerificationPlan.auditWriteEnabled)}
+        data-office-controlled-mutation-rollback-verification-dry-run-execution-enabled={String(controlledMutationRollbackVerificationPlan.dryRunExecutionEnabled)}
+        data-office-controlled-mutation-rollback-verification-proposal-creation-enabled={String(controlledMutationRollbackVerificationPlan.proposalCreationEnabled)}
+        data-office-controlled-mutation-rollback-verification-route-enabled={String(controlledMutationRollbackVerificationPlan.mutationRouteEnabled)}
+        data-office-controlled-mutation-rollback-verification-action-execution-enabled={String(controlledMutationRollbackVerificationPlan.executionEnabled)}
+        data-office-controlled-mutation-rollback-verification-dispatch-enabled={String(controlledMutationRollbackVerificationPlan.dispatchEnabled)}
+        data-office-controlled-mutation-rollback-verification-enabled-controls={controlledMutationRollbackVerificationPlan.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-rose-200/70">{controlledMutationRollbackVerificationPlan.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{controlledMutationRollbackVerificationPlan.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{controlledMutationRollbackVerificationPlan.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">rollback executions: 0</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-controlled-mutation-rollback-verification-items="true">
+          {controlledMutationRollbackVerificationPlan.verificationItems.map((item) => (
+            <div key={item.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-rollback-verification-item={item.id} data-office-controlled-mutation-rollback-verification-item-status={item.status}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.status}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{item.safeSummary}</div>
+              <div className="mt-3 flex flex-wrap gap-1" data-office-controlled-mutation-rollback-verification-fields="true">
+                {item.requiredFields.map((field) => (
+                  <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-controlled-mutation-rollback-verification-field={field}>{field}</span>
                 ))}
               </div>
             </div>

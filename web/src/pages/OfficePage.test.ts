@@ -90,6 +90,7 @@ import {
   buildOfficeControlledMutationProposalContract,
   buildOfficeControlledMutationDryRunPlan,
   buildOfficeControlledMutationAuditSinkPlan,
+  buildOfficeControlledMutationRollbackVerificationPlan,
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
@@ -904,6 +905,33 @@ describe("OfficePage view helpers", () => {
     expect(auditSinkPlan.dryRunPlanSnapshot).toMatchObject({ dryRunExecutionEnabled: false, auditWriteEnabled: false, executionEnabled: false });
     expect(auditSinkPlan.safeBoundary).toContain("audit sink plan only");
     expect(JSON.stringify(auditSinkPlan)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw audit-sink-plan|secret audit-sink-plan|private|token/i);
+  });
+
+  it("builds Controlled Mutation Rollback Verification Plan 1 without executing rollback", () => {
+    const rollbackVerificationPlan = buildOfficeControlledMutationRollbackVerificationPlan(buildOfficeControlledMutationAuditSinkPlan(buildOfficeControlledMutationDryRunPlan(buildOfficeControlledMutationProposalContract(buildOfficeWorkerFinalGateChecklist(buildOfficeWorkerRollbackPreviewEnvelope(buildOfficeWorkerAuditPreviewEnvelope(buildOfficeWorkerDispatchDryRunEnvelope(buildOfficeWorkerAuthorityHandoffEnvelope(buildOfficeWorkerHumanConfirmationEnvelope(buildOfficeWorkerRequestDraftPreview(buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-14T18:45:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/rollback-verification", status: "partial", checked_at: "2026-05-14T18:40:00Z", item_count: 1, warning_count: 1, error_summary: "raw rollback-verification token" } as unknown as OfficeState["data_sources"][number]],
+      work_items: [{ id: "w1", status: "blocked", title: "raw rollback-verification task", body: "secret rollback-verification body" } as unknown as OfficeState["work_items"][number]],
+      events: [{ id: "event-rollback-verification-private", category: "approval_needed", room_id: "review", tone: "warning", generated_at: "2026-05-14T18:44:00Z", detail: "raw rollback-verification event token" } as unknown as OfficeState["events"][number]],
+    }))))))))))))))))))));
+
+    expect(rollbackVerificationPlan.stageLabel).toBe("Controlled Mutation Rollback Verification Plan 1");
+    expect(rollbackVerificationPlan.enabledControls).toBe(0);
+    expect(rollbackVerificationPlan.rollbackExecutionEnabled).toBe(false);
+    expect(rollbackVerificationPlan.auditWriteEnabled).toBe(false);
+    expect(rollbackVerificationPlan.dryRunExecutionEnabled).toBe(false);
+    expect(rollbackVerificationPlan.proposalCreationEnabled).toBe(false);
+    expect(rollbackVerificationPlan.mutationRouteEnabled).toBe(false);
+    expect(rollbackVerificationPlan.executionEnabled).toBe(false);
+    expect(rollbackVerificationPlan.dispatchEnabled).toBe(false);
+    expect(rollbackVerificationPlan.verificationItems.map((item) => item.id)).toEqual(["restore_point", "reversible_scope", "verification_probe", "failure_fallback", "human_recheck"]);
+    expect(rollbackVerificationPlan.verificationItems.every((item) => item.status === "not_verified" && item.rawExcluded)).toBe(true);
+    expect(rollbackVerificationPlan.verificationItems.map((item) => item.requiredFields)).toEqual(expect.arrayContaining([
+      expect.arrayContaining(["restore_point_ref", "reversible_scope", "verification_probe_ref", "failure_fallback_ref", "human_recheck_ref"]),
+    ]));
+    expect(rollbackVerificationPlan.auditSinkPlanSnapshot).toMatchObject({ auditWriteEnabled: false, rollbackExecutionEnabled: false, executionEnabled: false });
+    expect(rollbackVerificationPlan.safeBoundary).toContain("rollback verification plan only");
+    expect(JSON.stringify(rollbackVerificationPlan)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw rollback-verification|secret rollback-verification|private|token/i);
   });
 
   it("builds a disabled Authority Adapter Contract 1 before any execution adapter exists", () => {
