@@ -16,8 +16,9 @@ vi.mock("@/lib/api", () => ({
   },
 }));
 
+import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
-import { buildOfficeRpgScene } from "./officeView";
+import { buildOfficeDeskRpgProjectionModel, buildOfficeRpgScene } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
@@ -114,5 +115,47 @@ describe("OfficeRpgMap", () => {
     expect(markup.match(/data-office-rpg-fallback-row=/g)?.length).toBe(scene.entities.length);
     expect(markup).toContain("최근 안전 이벤트");
     expect(markup).not.toMatch(/raw prompt|raw transcript|raw task|secret body|raw token|raw warning|\/Users\/lidises|private-model/i);
+  });
+});
+
+describe("OfficeDeskRpgRoomShell", () => {
+  it("Desk RPG Room Shell 1 renders a read-only operating-room shell from the safe projection DTO", () => {
+    const OfficeDeskRpgRoomShell = (OfficePageModule as unknown as {
+      OfficeDeskRpgRoomShell: React.ComponentType<{ projection: ReturnType<typeof buildOfficeDeskRpgProjectionModel> }>;
+    }).OfficeDeskRpgRoomShell;
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: Array.from({ length: 5 }, (_, index) => ({
+        id: `agent-${index}`,
+        status: "active",
+        prompt: "raw prompt must not leak into room shell",
+        provider: "private-provider-hidden-id",
+        api_key: "sk-test-room-shell-1234567890",
+      })),
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw task title", body: "/Users/lidises/private/wiki.md" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 3, warning_count: 1, error_summary: "Traceback raw source" },
+      ],
+    }));
+
+    const markup = renderToStaticMarkup(<OfficeDeskRpgRoomShell projection={projection} />);
+
+    expect(markup).toContain("data-office-desk-rpg-room-shell=\"true\"");
+    expect(markup).toContain("data-office-desk-rpg-safe-projection-only=\"true\"");
+    expect(markup).toContain("data-office-desk-rpg-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-desk-rpg-raw-excluded=\"true\"");
+    expect(markup).toContain("data-office-desk-rpg-facilities=\"true\"");
+    for (const id of ["boss_desk", "orchestrator_desk", "worker_cluster", "central_board", "right_inspector", "nas_vault", "security_ops_corner", "calm_activity_lane"]) {
+      expect(markup).toContain(`data-office-desk-rpg-facility="${id}"`);
+    }
+    for (const role of ["user_boss", "orchestrator", "search_worker", "reviewer", "wiki_writer", "nas_keeper"]) {
+      expect(markup).toContain(`data-office-desk-rpg-actor="${role}"`);
+    }
+    expect(markup).toContain("읽기 전용 Desk RPG 운영실");
+    expect(markup).toContain("NAS 저장은 승인 전 차단");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toMatch(/raw prompt|raw task title|Traceback|\/Users\/lidises|sk-test-room-shell|private-provider/i);
   });
 });

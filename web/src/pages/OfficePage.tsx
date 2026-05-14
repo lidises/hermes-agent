@@ -27,6 +27,7 @@ import {
   buildOfficeCharacterTrackingCues,
   buildOfficeCharacterView,
   buildOfficeCharacters,
+  buildOfficeDeskRpgProjectionModel,
   buildOfficeEmptySourceCopyPlan,
   buildOfficeEmptyStateHints,
   buildOfficeMapDensityPlan,
@@ -116,6 +117,7 @@ import {
   resolveOfficeLiveTrackingInterval,
   textField,
   visibleRows,
+  type OfficeDeskRpgProjectionModel,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -185,6 +187,91 @@ const SOURCE_LABEL: Record<OfficeSourceStatus, string> = {
   unavailable: "사용 불가",
   error: "오류",
 };
+
+export function OfficeDeskRpgRoomShell({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
+  return (
+    <section
+      className="border border-emerald-200/20 bg-gradient-to-br from-slate-950 via-emerald-950/10 to-black p-4"
+      data-office-desk-rpg-room-shell="true"
+      data-office-desk-rpg-safe-projection-only={String(projection.safeProjectionOnly)}
+      data-office-desk-rpg-enabled-controls={projection.enabledControls}
+      data-office-desk-rpg-raw-excluded={String(projection.rawExcluded)}
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-200/70">Desk RPG Room Shell 1</div>
+          <h2 className="mt-1 text-xl font-semibold text-foreground">읽기 전용 Desk RPG 운영실</h2>
+          <p className="mt-2 max-w-3xl text-xs leading-5 text-midground/70">
+            Boss desk에서 시작한 의도는 Orchestrator desk를 거쳐 worker cluster, central board, inspector, NAS vault, security/ops corner로 표시만 이동합니다.
+            NAS 저장은 승인 전 차단되며 이 shell은 실행·배정·요청 생성·감사 쓰기를 제공하지 않습니다.
+          </p>
+        </div>
+        <div className="grid gap-2 text-xs text-midground/70 sm:grid-cols-3 lg:min-w-[28rem]">
+          <div className="border border-current/15 bg-black/25 p-2">enabled controls: {projection.enabledControls}</div>
+          <div className="border border-current/15 bg-black/25 p-2">safe projection: {projection.safeProjectionOnly ? "true" : "false"}</div>
+          <div className="border border-current/15 bg-black/25 p-2">raw excluded: {projection.rawExcluded ? "true" : "false"}</div>
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-3 lg:grid-cols-[1.2fr_1fr]">
+        <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4" data-office-desk-rpg-facilities="true">
+          {projection.facilities.map((facility) => (
+            <div
+              key={facility.id}
+              className="min-h-28 border border-current/15 bg-black/20 p-3"
+              data-office-desk-rpg-facility={facility.id}
+              data-office-desk-rpg-facility-posture={facility.posture}
+            >
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{facility.posture}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{facility.label}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{facility.safeSummary}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid gap-2" data-office-desk-rpg-actors="true">
+          {projection.actors.map((actor) => (
+            <div
+              key={actor.role}
+              className="border border-current/15 bg-black/20 p-3"
+              data-office-desk-rpg-actor={actor.role}
+              data-office-desk-rpg-actor-facility={actor.facilityId}
+              data-office-desk-rpg-actor-status={actor.status}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-sm font-semibold text-foreground">{actor.label}</div>
+                  <div className="mt-1 text-xs text-midground/55">{actor.role} · {actor.facilityId}</div>
+                </div>
+                <div className="font-mono text-xs text-emerald-200">x{actor.visibleInstances}</div>
+              </div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{actor.safeSummary}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-2 md:grid-cols-4" data-office-desk-rpg-posture="true">
+        <div className="border border-current/15 bg-black/20 p-3" data-office-desk-rpg-board-state="true">
+          <div className="text-xs font-semibold text-foreground">{projection.boardState.label}</div>
+          <div className="mt-1 text-xs text-midground/65">work {projection.boardState.workItemCount} · blocked {projection.boardState.blockedCount}</div>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-3" data-office-desk-rpg-evidence-state="true">
+          <div className="text-xs font-semibold text-foreground">{projection.evidenceState.label}</div>
+          <div className="mt-1 text-xs text-midground/65">sources {projection.evidenceState.sourceCount} · warnings {projection.evidenceState.warningCount}</div>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-3" data-office-desk-rpg-vault-state="true" data-office-desk-rpg-vault-write-enabled={String(projection.vaultState.writeEnabled)}>
+          <div className="text-xs font-semibold text-foreground">{projection.vaultState.label}</div>
+          <div className="mt-1 text-xs text-midground/65">NAS 저장은 승인 전 차단</div>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-3" data-office-desk-rpg-ops-state="true" data-office-desk-rpg-service-controls-enabled={String(projection.opsState.serviceControlsEnabled)}>
+          <div className="text-xs font-semibold text-foreground">{projection.opsState.label}</div>
+          <div className="mt-1 text-xs text-midground/65">service controls disabled</div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 const EMPTY_STATE_DELTA: OfficeStateDelta = {
   hasChanges: false,
@@ -1790,6 +1877,7 @@ export default function OfficePage() {
   const controlledMutationHumanApprovalPlan = useMemo(() => buildOfficeControlledMutationHumanApprovalPlan(controlledMutationRollbackVerificationPlan), [controlledMutationRollbackVerificationPlan]);
   const controlledMutationAuthoritySummary = useMemo(() => buildOfficeControlledMutationAuthoritySummary(controlledMutationHumanApprovalPlan), [controlledMutationHumanApprovalPlan]);
   const controlledMutationExecutionReadinessSummary = useMemo(() => buildOfficeControlledMutationExecutionReadinessSummary(controlledMutationAuthoritySummary), [controlledMutationAuthoritySummary]);
+  const deskRpgProjection = useMemo(() => buildOfficeDeskRpgProjectionModel(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -2002,6 +2090,8 @@ export default function OfficePage() {
           ))}
         </div>
       </section>
+
+      <OfficeDeskRpgRoomShell projection={deskRpgProjection} />
 
       <section
         className="border border-violet-300/20 bg-violet-950/10 p-4"
