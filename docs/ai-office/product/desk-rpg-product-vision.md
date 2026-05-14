@@ -248,15 +248,10 @@ Do not add these while executing Desk RPG Product Vision / Projection Model / IA
 7. NAS final save is deferred behind approval, authority, audit, and rollback.
 8. Renderer dependency non-adoption is explicit for MVP.
 9. Non-goals preserve the current safety boundaries.
-10. `NEXT.md`, `STATUS.md`, and unified workbench product/architecture docs point to the next recommended `Desk RPG Projection Model 1` slice.
+10. `NEXT.md`, `STATUS.md`, and unified workbench product/architecture docs now record that `Desk RPG Projection Model 1` followed this product vision and point to the next recommended `Desk RPG IA/Layout 1` slice.
 
 ## Next recommended slice
 
-`Desk RPG Projection Model 1`
+`Desk RPG IA/Layout 1`
 
-Purpose:
-- Define role avatar vs runtime instance.
-- Separate runtime events, intent/request events, and visual projection events.
-- Define character/desk/board/vault state model.
-- Define visible worker cap and noise suppression.
-- Preserve safe projection and raw-leak boundaries before more UI implementation.
+`Desk RPG Projection Model 1` is now documented in `docs/ai-office/architecture/desk-rpg-projection-model.md`. The next step is IA/layout: define the single central office fixed layout, place boss desk, Orchestrator desk, worker cluster, Kanban/Paperclip board, NAS vault, security/ops corner, and right inspector, and decide which existing HUD/strips move behind tabs or inspector surfaces before UI implementation.
