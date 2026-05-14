@@ -18,7 +18,7 @@ vi.mock("@/lib/api", () => ({
 
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
-import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeRpgScene } from "./officeView";
+import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeRpgScene } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
@@ -279,6 +279,44 @@ describe("OfficeDeskRpgWorkerRoleVisibilityPanel", () => {
     expect(markup).not.toContain("<button");
     expect(markup).not.toContain("<input");
     expect(markup).not.toMatch(/raw worker prompt|raw worker task title|Traceback|\/Users\/lidises|token-shaped-worker-sentinel|private-worker-provider/i);
+  });
+});
+
+describe("DisabledApprovalDialoguePosturePanel", () => {
+  it("Disabled Approval Dialogue Posture 1 renders a JRPG dialogue as disabled read-only posture", () => {
+    const DisabledApprovalDialoguePosturePanel = (OfficePageModule as unknown as {
+      DisabledApprovalDialoguePosturePanel: React.ComponentType<{ dialogue: ReturnType<typeof buildOfficeDisabledApprovalDialoguePosture> }>;
+    }).DisabledApprovalDialoguePosturePanel;
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [{ id: "agent-1", status: "active", prompt: "raw dialogue prompt", provider: "private-dialogue-provider", api_key: "token-shaped-dialogue-sentinel" }],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw dialogue task title", body: "/Users/lidises/private/dialogue.md" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 3, warning_count: 1, error_summary: "Traceback dialogue source" },
+      ],
+    }));
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+
+    const markup = renderToStaticMarkup(<DisabledApprovalDialoguePosturePanel dialogue={dialogue} />);
+
+    expect(markup).toContain("data-office-disabled-approval-dialogue=\"true\"");
+    expect(markup).toContain("data-office-disabled-approval-dialogue-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-disabled-approval-dialogue-approve-enabled=\"false\"");
+    expect(markup).toContain("data-office-disabled-approval-dialogue-reject-enabled=\"false\"");
+    expect(markup).toContain("data-office-disabled-approval-dialogue-hold-enabled=\"false\"");
+    expect(markup).toContain("data-office-disabled-approval-dialogue-request-creation-enabled=\"false\"");
+    expect(markup).toContain("data-office-disabled-approval-dialogue-dispatch-enabled=\"false\"");
+    expect(markup).toContain("data-office-disabled-approval-dialogue-nas-save-enabled=\"false\"");
+    expect(markup).toContain("data-office-disabled-approval-dialogue-line=\"report\"");
+    expect(markup).toContain("data-office-disabled-approval-dialogue-line=\"approval\"");
+    expect(markup).toContain("data-office-disabled-approval-dialogue-line=\"boundary\"");
+    expect(markup).toContain("Disabled approval dialogue posture");
+    expect(markup).toContain("승인 대화 posture");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toMatch(/raw dialogue prompt|raw dialogue task title|Traceback|\/Users\/lidises|token-shaped-dialogue-sentinel|private-dialogue-provider/i);
   });
 });
 

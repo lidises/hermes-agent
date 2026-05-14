@@ -99,6 +99,7 @@ import {
   buildOfficeRpgScene,
   buildOfficeDeskRpgProjectionModel,
   buildOfficeDeskRpgWorkerRoleVisibility,
+  buildOfficeDisabledApprovalDialoguePosture,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -173,6 +174,40 @@ describe("Desk RPG Worker Role Visibility 1", () => {
     expect(visibility.safeProjectionOnly).toBe(true);
     expect(visibility.rawExcluded).toBe(true);
     expect(JSON.stringify(visibility)).not.toMatch(/raw worker prompt|raw worker task title|Traceback|\/Users\/lidises|token-shaped-worker-sentinel|private-worker-provider/i);
+  });
+});
+
+describe("Disabled Approval Dialogue Posture 1", () => {
+  it("builds a safe disabled approval dialogue posture without request creation or execution", () => {
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [
+        { id: "agent-1", status: "active", prompt: "raw dialogue prompt", provider: "private-dialogue-provider", api_key: "token-shaped-dialogue-sentinel" },
+      ],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw dialogue task title", body: "/Users/lidises/private/dialogue.md" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 3, warning_count: 1, error_summary: "Traceback dialogue source" },
+      ],
+    }));
+
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+
+    expect(dialogue.stageLabel).toBe("Disabled Approval Dialogue Posture 1");
+    expect(dialogue.speakerRole).toBe("orchestrator");
+    expect(dialogue.targetRole).toBe("user_boss");
+    expect(dialogue.dialogueKind).toBe("approval_request_posture");
+    expect(dialogue.enabledControls).toBe(0);
+    expect(dialogue.approveEnabled).toBe(false);
+    expect(dialogue.rejectEnabled).toBe(false);
+    expect(dialogue.holdEnabled).toBe(false);
+    expect(dialogue.requestCreationEnabled).toBe(false);
+    expect(dialogue.dispatchEnabled).toBe(false);
+    expect(dialogue.nasSaveEnabled).toBe(false);
+    expect(dialogue.safeProjectionOnly).toBe(true);
+    expect(dialogue.rawExcluded).toBe(true);
+    expect(dialogue.dialogueLines.map((line) => line.id)).toEqual(["report", "approval", "boundary"]);
+    expect(JSON.stringify(dialogue)).not.toMatch(/raw dialogue prompt|raw dialogue task title|Traceback|\/Users\/lidises|token-shaped-dialogue-sentinel|private-dialogue-provider/i);
   });
 });
 

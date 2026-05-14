@@ -991,6 +991,35 @@ export type OfficeDeskRpgWorkerRoleVisibility = {
   rawExcluded: true;
 };
 
+export type OfficeDisabledApprovalDialogueLine = {
+  id: "report" | "approval" | "boundary";
+  speaker: "Orchestrator" | "System";
+  label: string;
+  text: string;
+  tone: "info" | "warning" | "blocked";
+  rawExcluded: true;
+};
+
+export type OfficeDisabledApprovalDialoguePosture = {
+  stageLabel: "Disabled Approval Dialogue Posture 1";
+  title: string;
+  speakerRole: Extract<OfficeDeskRpgProjectionActorRole, "orchestrator">;
+  targetRole: Extract<OfficeDeskRpgProjectionActorRole, "user_boss">;
+  dialogueKind: "approval_request_posture";
+  dialogueLines: OfficeDisabledApprovalDialogueLine[];
+  evidenceCount: number;
+  blockedWorkCount: number;
+  approveEnabled: false;
+  rejectEnabled: false;
+  holdEnabled: false;
+  requestCreationEnabled: false;
+  dispatchEnabled: false;
+  nasSaveEnabled: false;
+  enabledControls: 0;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeRpgMissionStoryboardStep = {
   id: "request" | "orchestrate" | "board" | "evidence" | "review" | "approval";
   label: string;
@@ -1960,6 +1989,55 @@ export function buildOfficeDeskRpgWorkerRoleVisibility(projection: OfficeDeskRpg
     assignmentEnabled: false,
     requestCreationEnabled: false,
     dispatchEnabled: false,
+    enabledControls: 0,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeDisabledApprovalDialoguePosture(projection: OfficeDeskRpgProjectionModel): OfficeDisabledApprovalDialoguePosture {
+  const evidenceCount = projection.evidenceState.sourceCount;
+  const blockedWorkCount = projection.boardState.blockedCount;
+  return {
+    stageLabel: "Disabled Approval Dialogue Posture 1",
+    title: "Disabled approval dialogue posture",
+    speakerRole: "orchestrator",
+    targetRole: "user_boss",
+    dialogueKind: "approval_request_posture",
+    dialogueLines: [
+      {
+        id: "report",
+        speaker: "Orchestrator",
+        label: "완료/승인 대기 보고",
+        text: `근거 ${evidenceCount}개와 차단 업무 ${blockedWorkCount}개를 safe aggregate로만 보고합니다.`,
+        tone: "info",
+        rawExcluded: true,
+      },
+      {
+        id: "approval",
+        speaker: "Orchestrator",
+        label: "승인 대화 posture",
+        text: "approve/reject/hold는 아직 브라우저 제어가 아니라 비활성 posture입니다.",
+        tone: "warning",
+        rawExcluded: true,
+      },
+      {
+        id: "boundary",
+        speaker: "System",
+        label: "권한 경계",
+        text: "request creation, dispatch, NAS save, audit write, backend mutation은 모두 차단되어 있습니다.",
+        tone: "blocked",
+        rawExcluded: true,
+      },
+    ],
+    evidenceCount,
+    blockedWorkCount,
+    approveEnabled: false,
+    rejectEnabled: false,
+    holdEnabled: false,
+    requestCreationEnabled: false,
+    dispatchEnabled: false,
+    nasSaveEnabled: false,
     enabledControls: 0,
     safeProjectionOnly: true,
     rawExcluded: true,

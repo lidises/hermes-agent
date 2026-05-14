@@ -109,6 +109,7 @@ import {
   buildOfficeControlledMutationAuthoritySummary,
   buildOfficeControlledMutationExecutionReadinessSummary,
   buildOfficeDeskRpgWorkerRoleVisibility,
+  buildOfficeDisabledApprovalDialoguePosture,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -121,6 +122,7 @@ import {
   visibleRows,
   type OfficeDeskRpgProjectionModel,
   type OfficeDeskRpgWorkerRoleVisibility,
+  type OfficeDisabledApprovalDialoguePosture,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -1696,6 +1698,54 @@ export function OfficeDeskRpgWorkerRoleVisibilityPanel({ visibility }: { visibil
   );
 }
 
+export function DisabledApprovalDialoguePosturePanel({ dialogue }: { dialogue: OfficeDisabledApprovalDialoguePosture }) {
+  return (
+    <Card
+      data-office-disabled-approval-dialogue="true"
+      data-office-disabled-approval-dialogue-enabled-controls={dialogue.enabledControls}
+      data-office-disabled-approval-dialogue-approve-enabled={String(dialogue.approveEnabled)}
+      data-office-disabled-approval-dialogue-reject-enabled={String(dialogue.rejectEnabled)}
+      data-office-disabled-approval-dialogue-hold-enabled={String(dialogue.holdEnabled)}
+      data-office-disabled-approval-dialogue-request-creation-enabled={String(dialogue.requestCreationEnabled)}
+      data-office-disabled-approval-dialogue-dispatch-enabled={String(dialogue.dispatchEnabled)}
+      data-office-disabled-approval-dialogue-nas-save-enabled={String(dialogue.nasSaveEnabled)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Bot className="h-4 w-4" /> Disabled approval dialogue posture
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-fuchsia-300/20 bg-fuchsia-950/10 p-3">
+            <div className="font-semibold text-fuchsia-100">승인 대화 posture · controls disabled</div>
+            <div className="mt-1 leading-5">
+              Orchestrator가 사장 캐릭터에게 승인 대기를 보고하는 대화 형태만 표시합니다. approve/reject/hold, request creation, dispatch, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3">
+            {dialogue.dialogueLines.map((line) => (
+              <div
+                key={line.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-disabled-approval-dialogue-line={line.id}
+                data-office-disabled-approval-dialogue-tone={line.tone}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{line.speaker}</div>
+                <div className="mt-1 font-semibold text-foreground">{line.label}</div>
+                <div className="mt-2 leading-5">{line.text}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-disabled-approval-dialogue-boundary="true">
+            evidence {dialogue.evidenceCount} · blocked {dialogue.blockedWorkCount} · enabled controls {dialogue.enabledControls} · raw excluded {String(dialogue.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -2090,6 +2140,7 @@ export default function OfficePage() {
   const controlledMutationExecutionReadinessSummary = useMemo(() => buildOfficeControlledMutationExecutionReadinessSummary(controlledMutationAuthoritySummary), [controlledMutationAuthoritySummary]);
   const deskRpgProjection = useMemo(() => buildOfficeDeskRpgProjectionModel(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const deskRpgWorkerRoleVisibility = useMemo(() => buildOfficeDeskRpgWorkerRoleVisibility(deskRpgProjection), [deskRpgProjection]);
+  const disabledApprovalDialoguePosture = useMemo(() => buildOfficeDisabledApprovalDialoguePosture(deskRpgProjection), [deskRpgProjection]);
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -2308,6 +2359,8 @@ export default function OfficePage() {
       <OfficeDeskRpgBossCommandConsolePanel projection={deskRpgProjection} />
 
       <OfficeDeskRpgWorkerRoleVisibilityPanel visibility={deskRpgWorkerRoleVisibility} />
+
+      <DisabledApprovalDialoguePosturePanel dialogue={disabledApprovalDialoguePosture} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 
