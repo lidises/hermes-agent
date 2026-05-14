@@ -1290,6 +1290,33 @@ export type OfficeWorkerHumanConfirmationEnvelope = {
   safeProjectionOnly: true;
 };
 
+export type OfficeWorkerAuthorityHandoff = {
+  id: `handoff_${OfficeWorkerHumanConfirmationEnvelopeItem["id"]}`;
+  confirmationRef: OfficeWorkerHumanConfirmationEnvelopeItem["id"];
+  facilityId: OfficeWorkerHumanConfirmationEnvelopeItem["facilityId"];
+  workerRole: OfficeWorkerHumanConfirmationEnvelopeItem["workerRole"];
+  status: "not_handed_off";
+  adapterState: "missing";
+  requiredFields: Array<"confirmation_ref" | "adapter_contract_ref" | "dry_run_result_ref" | "audit_sink_ref" | "rollback_ref">;
+  safeSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeWorkerAuthorityHandoffEnvelope = {
+  stageLabel: "Worker Authority Handoff Envelope 1";
+  title: string;
+  enabledControls: 0;
+  adapterInstallationEnabled: false;
+  dispatchEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  auditWriteEnabled: false;
+  handoffs: OfficeWorkerAuthorityHandoff[];
+  confirmationSnapshot: Pick<OfficeWorkerHumanConfirmationEnvelope, "decisionRecordingEnabled" | "dispatchEnabled" | "auditWriteEnabled">;
+  safeBoundary: string;
+  safeProjectionOnly: true;
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -2481,6 +2508,37 @@ export function buildOfficeWorkerHumanConfirmationEnvelope(draftPreview: OfficeW
       decisionState: "missing",
       requiredFields: ["draft_ref", "human_actor_ref", "decision", "decision_reason", "rollback_ack"],
       safeSummary: `${draft.id} requires an explicit human confirmation envelope before any request can become actionable`,
+      rawExcluded: true,
+    })),
+  };
+}
+
+export function buildOfficeWorkerAuthorityHandoffEnvelope(confirmationEnvelope: OfficeWorkerHumanConfirmationEnvelope): OfficeWorkerAuthorityHandoffEnvelope {
+  return {
+    stageLabel: "Worker Authority Handoff Envelope 1",
+    title: "권한 인계 봉투 · 어댑터/디스패치 없음",
+    enabledControls: 0,
+    adapterInstallationEnabled: false,
+    dispatchEnabled: false,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
+    auditWriteEnabled: false,
+    confirmationSnapshot: {
+      decisionRecordingEnabled: confirmationEnvelope.decisionRecordingEnabled,
+      dispatchEnabled: confirmationEnvelope.dispatchEnabled,
+      auditWriteEnabled: confirmationEnvelope.auditWriteEnabled,
+    },
+    safeBoundary: "authority handoff envelope only · no adapter installation · no dispatch · no request creation · no assignment · no audit write",
+    safeProjectionOnly: true,
+    handoffs: confirmationEnvelope.envelopes.map((envelope) => ({
+      id: `handoff_${envelope.id}`,
+      confirmationRef: envelope.id,
+      facilityId: envelope.facilityId,
+      workerRole: envelope.workerRole,
+      status: "not_handed_off",
+      adapterState: "missing",
+      requiredFields: ["confirmation_ref", "adapter_contract_ref", "dry_run_result_ref", "audit_sink_ref", "rollback_ref"],
+      safeSummary: `${envelope.id} cannot hand off to authority until adapter, dry-run, audit, and rollback references exist`,
       rawExcluded: true,
     })),
   };

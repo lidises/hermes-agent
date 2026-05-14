@@ -82,6 +82,7 @@ import {
   buildOfficeWorkerAssignmentCandidateGate,
   buildOfficeWorkerRequestDraftPreview,
   buildOfficeWorkerHumanConfirmationEnvelope,
+  buildOfficeWorkerAuthorityHandoffEnvelope,
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
@@ -681,6 +682,31 @@ describe("OfficePage view helpers", () => {
     expect(confirmationEnvelope.draftSnapshot).toMatchObject({ requestCreationEnabled: false, requestPersistenceEnabled: false, dispatchEnabled: false, auditWriteEnabled: false });
     expect(confirmationEnvelope.safeBoundary).toContain("confirmation envelope only");
     expect(JSON.stringify(confirmationEnvelope)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw confirmation|secret confirmation|private|token/i);
+  });
+
+  it("builds Worker Authority Handoff Envelope 1 without dispatch or adapter installation", () => {
+    const authorityHandoff = buildOfficeWorkerAuthorityHandoffEnvelope(buildOfficeWorkerHumanConfirmationEnvelope(buildOfficeWorkerRequestDraftPreview(buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-14T16:05:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/handoff", status: "partial", checked_at: "2026-05-14T16:00:00Z", item_count: 1, warning_count: 1, error_summary: "raw handoff token" } as unknown as OfficeState["data_sources"][number]],
+      work_items: [{ id: "w1", status: "blocked", title: "raw handoff task", body: "secret handoff body" } as unknown as OfficeState["work_items"][number]],
+      automations: [{ id: "cron-handoff-private", state: "error", last_status: "failed", script: "/Users/lidises/handoff.sh" } as unknown as OfficeState["automations"][number]],
+    }))))))))))));
+
+    expect(authorityHandoff.stageLabel).toBe("Worker Authority Handoff Envelope 1");
+    expect(authorityHandoff.enabledControls).toBe(0);
+    expect(authorityHandoff.adapterInstallationEnabled).toBe(false);
+    expect(authorityHandoff.dispatchEnabled).toBe(false);
+    expect(authorityHandoff.requestCreationEnabled).toBe(false);
+    expect(authorityHandoff.workAssignmentEnabled).toBe(false);
+    expect(authorityHandoff.auditWriteEnabled).toBe(false);
+    expect(authorityHandoff.handoffs.map((handoff) => handoff.id)).toEqual(["handoff_confirm_draft_orchestrator_desk", "handoff_confirm_draft_agent_desks", "handoff_confirm_draft_incident_corner"]);
+    expect(authorityHandoff.handoffs.every((handoff) => handoff.status === "not_handed_off" && handoff.adapterState === "missing" && handoff.rawExcluded)).toBe(true);
+    expect(authorityHandoff.handoffs.map((handoff) => handoff.requiredFields)).toEqual(expect.arrayContaining([
+      expect.arrayContaining(["confirmation_ref", "adapter_contract_ref", "dry_run_result_ref", "audit_sink_ref", "rollback_ref"]),
+    ]));
+    expect(authorityHandoff.confirmationSnapshot).toMatchObject({ decisionRecordingEnabled: false, dispatchEnabled: false, auditWriteEnabled: false });
+    expect(authorityHandoff.safeBoundary).toContain("authority handoff envelope only");
+    expect(JSON.stringify(authorityHandoff)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw handoff|secret handoff|private|token/i);
   });
 
   it("builds a disabled Authority Adapter Contract 1 before any execution adapter exists", () => {

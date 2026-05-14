@@ -94,6 +94,7 @@ import {
   buildOfficeWorkerAssignmentCandidateGate,
   buildOfficeWorkerRequestDraftPreview,
   buildOfficeWorkerHumanConfirmationEnvelope,
+  buildOfficeWorkerAuthorityHandoffEnvelope,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -1766,6 +1767,7 @@ export default function OfficePage() {
   const workerAssignmentCandidateGate = useMemo(() => buildOfficeWorkerAssignmentCandidateGate(workerFacilityReadiness), [workerFacilityReadiness]);
   const workerRequestDraftPreview = useMemo(() => buildOfficeWorkerRequestDraftPreview(workerAssignmentCandidateGate), [workerAssignmentCandidateGate]);
   const workerHumanConfirmationEnvelope = useMemo(() => buildOfficeWorkerHumanConfirmationEnvelope(workerRequestDraftPreview), [workerRequestDraftPreview]);
+  const workerAuthorityHandoffEnvelope = useMemo(() => buildOfficeWorkerAuthorityHandoffEnvelope(workerHumanConfirmationEnvelope), [workerHumanConfirmationEnvelope]);
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -2278,6 +2280,41 @@ export default function OfficePage() {
               <div className="mt-3 flex flex-wrap gap-1" data-office-worker-confirmation-fields="true">
                 {envelope.requiredFields.map((field) => (
                   <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-worker-confirmation-field={field}>{field}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-amber-300/20 bg-amber-950/10 p-4"
+        data-office-worker-authority-handoff-envelope="true"
+        data-office-worker-handoff-adapter-installation-enabled={String(workerAuthorityHandoffEnvelope.adapterInstallationEnabled)}
+        data-office-worker-handoff-dispatch-enabled={String(workerAuthorityHandoffEnvelope.dispatchEnabled)}
+        data-office-worker-handoff-request-creation-enabled={String(workerAuthorityHandoffEnvelope.requestCreationEnabled)}
+        data-office-worker-handoff-assignment-enabled={String(workerAuthorityHandoffEnvelope.workAssignmentEnabled)}
+        data-office-worker-handoff-audit-write-enabled={String(workerAuthorityHandoffEnvelope.auditWriteEnabled)}
+        data-office-worker-handoff-enabled-controls={workerAuthorityHandoffEnvelope.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-200/70">{workerAuthorityHandoffEnvelope.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{workerAuthorityHandoffEnvelope.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{workerAuthorityHandoffEnvelope.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">dispatched actions: 0</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-worker-handoffs="true">
+          {workerAuthorityHandoffEnvelope.handoffs.map((handoff) => (
+            <div key={handoff.id} className="border border-current/15 bg-black/20 p-3" data-office-worker-handoff={handoff.facilityId} data-office-worker-handoff-status={handoff.status} data-office-worker-handoff-adapter-state={handoff.adapterState}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{handoff.workerRole}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{handoff.id}</div>
+              <div className="mt-1 text-xs text-midground/60">confirmation: {handoff.confirmationRef} · adapter: {handoff.adapterState}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{handoff.safeSummary}</div>
+              <div className="mt-3 flex flex-wrap gap-1" data-office-worker-handoff-fields="true">
+                {handoff.requiredFields.map((field) => (
+                  <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-worker-handoff-field={field}>{field}</span>
                 ))}
               </div>
             </div>
