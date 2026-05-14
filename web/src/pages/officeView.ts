@@ -1461,6 +1461,34 @@ export type OfficeControlledMutationProposalContract = {
   safeProjectionOnly: true;
 };
 
+export type OfficeControlledMutationDryRunPlanId = "simulation_scope" | "expected_effects" | "audit_capture" | "rollback_verification" | "human_review";
+
+export type OfficeControlledMutationDryRunPlanItem = {
+  id: OfficeControlledMutationDryRunPlanId;
+  label: string;
+  status: "not_runnable";
+  requiredFields: Array<"simulation_scope" | "expected_effects" | "audit_capture_ref" | "rollback_verification_ref" | "human_review_ref">;
+  safeSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeControlledMutationDryRunPlan = {
+  stageLabel: "Controlled Mutation Dry-Run Plan 1";
+  title: string;
+  enabledControls: 0;
+  dryRunExecutionEnabled: false;
+  proposalCreationEnabled: false;
+  mutationRouteEnabled: false;
+  rollbackExecutionEnabled: false;
+  auditWriteEnabled: false;
+  executionEnabled: false;
+  dispatchEnabled: false;
+  planItems: OfficeControlledMutationDryRunPlanItem[];
+  proposalContractSnapshot: Pick<OfficeControlledMutationProposalContract, "proposalCreationEnabled" | "mutationRouteEnabled" | "executionEnabled">;
+  safeBoundary: string;
+  safeProjectionOnly: true;
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -2861,6 +2889,44 @@ export function buildOfficeControlledMutationProposalContract(finalGateChecklist
       status: "not_available",
       requiredFields,
       safeSummary: `${contract.label} is a required future proposal field, not a created proposal`,
+      rawExcluded: true,
+    })),
+  };
+}
+
+export function buildOfficeControlledMutationDryRunPlan(proposalContract: OfficeControlledMutationProposalContract): OfficeControlledMutationDryRunPlan {
+  const requiredFields: OfficeControlledMutationDryRunPlanItem["requiredFields"] = ["simulation_scope", "expected_effects", "audit_capture_ref", "rollback_verification_ref", "human_review_ref"];
+  const planItems: Array<{ id: OfficeControlledMutationDryRunPlanId; label: string }> = [
+    { id: "simulation_scope", label: "Simulation scope" },
+    { id: "expected_effects", label: "Expected effects" },
+    { id: "audit_capture", label: "Audit capture" },
+    { id: "rollback_verification", label: "Rollback verification" },
+    { id: "human_review", label: "Human review" },
+  ];
+  return {
+    stageLabel: "Controlled Mutation Dry-Run Plan 1",
+    title: "제어형 변경 드라이런 계획 · 실행 없음",
+    enabledControls: 0,
+    dryRunExecutionEnabled: false,
+    proposalCreationEnabled: false,
+    mutationRouteEnabled: false,
+    rollbackExecutionEnabled: false,
+    auditWriteEnabled: false,
+    executionEnabled: false,
+    dispatchEnabled: false,
+    proposalContractSnapshot: {
+      proposalCreationEnabled: proposalContract.proposalCreationEnabled,
+      mutationRouteEnabled: proposalContract.mutationRouteEnabled,
+      executionEnabled: proposalContract.executionEnabled,
+    },
+    safeBoundary: "dry-run plan only · no dry-run execution · no proposal creation · no mutation route · no executable controls",
+    safeProjectionOnly: true,
+    planItems: planItems.map((item) => ({
+      id: item.id,
+      label: item.label,
+      status: "not_runnable",
+      requiredFields,
+      safeSummary: `${item.label} is required before any future dry-run can be executed`,
       rawExcluded: true,
     })),
   };

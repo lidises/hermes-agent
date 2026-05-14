@@ -88,6 +88,7 @@ import {
   buildOfficeWorkerRollbackPreviewEnvelope,
   buildOfficeWorkerFinalGateChecklist,
   buildOfficeControlledMutationProposalContract,
+  buildOfficeControlledMutationDryRunPlan,
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
@@ -848,6 +849,33 @@ describe("OfficePage view helpers", () => {
     expect(proposalContract.finalGateSnapshot).toMatchObject({ controlProposalEnabled: false, executionEnabled: false, dispatchEnabled: false });
     expect(proposalContract.safeBoundary).toContain("proposal contract only");
     expect(JSON.stringify(proposalContract)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw proposal-contract|secret proposal-contract|private|token/i);
+  });
+
+  it("builds Controlled Mutation Dry-Run Plan 1 without running dry-runs", () => {
+    const dryRunPlan = buildOfficeControlledMutationDryRunPlan(buildOfficeControlledMutationProposalContract(buildOfficeWorkerFinalGateChecklist(buildOfficeWorkerRollbackPreviewEnvelope(buildOfficeWorkerAuditPreviewEnvelope(buildOfficeWorkerDispatchDryRunEnvelope(buildOfficeWorkerAuthorityHandoffEnvelope(buildOfficeWorkerHumanConfirmationEnvelope(buildOfficeWorkerRequestDraftPreview(buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-14T18:05:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/dry-run-plan", status: "partial", checked_at: "2026-05-14T18:00:00Z", item_count: 1, warning_count: 1, error_summary: "raw dry-run-plan token" } as unknown as OfficeState["data_sources"][number]],
+      work_items: [{ id: "w1", status: "blocked", title: "raw dry-run-plan task", body: "secret dry-run-plan body" } as unknown as OfficeState["work_items"][number]],
+      events: [{ id: "event-dry-run-plan-private", category: "approval_needed", room_id: "review", tone: "warning", generated_at: "2026-05-14T18:04:00Z", detail: "raw dry-run-plan event token" } as unknown as OfficeState["events"][number]],
+    }))))))))))))))))));
+
+    expect(dryRunPlan.stageLabel).toBe("Controlled Mutation Dry-Run Plan 1");
+    expect(dryRunPlan.enabledControls).toBe(0);
+    expect(dryRunPlan.dryRunExecutionEnabled).toBe(false);
+    expect(dryRunPlan.proposalCreationEnabled).toBe(false);
+    expect(dryRunPlan.mutationRouteEnabled).toBe(false);
+    expect(dryRunPlan.rollbackExecutionEnabled).toBe(false);
+    expect(dryRunPlan.auditWriteEnabled).toBe(false);
+    expect(dryRunPlan.executionEnabled).toBe(false);
+    expect(dryRunPlan.dispatchEnabled).toBe(false);
+    expect(dryRunPlan.planItems.map((item) => item.id)).toEqual(["simulation_scope", "expected_effects", "audit_capture", "rollback_verification", "human_review"]);
+    expect(dryRunPlan.planItems.every((item) => item.status === "not_runnable" && item.rawExcluded)).toBe(true);
+    expect(dryRunPlan.planItems.map((item) => item.requiredFields)).toEqual(expect.arrayContaining([
+      expect.arrayContaining(["simulation_scope", "expected_effects", "audit_capture_ref", "rollback_verification_ref", "human_review_ref"]),
+    ]));
+    expect(dryRunPlan.proposalContractSnapshot).toMatchObject({ proposalCreationEnabled: false, mutationRouteEnabled: false, executionEnabled: false });
+    expect(dryRunPlan.safeBoundary).toContain("dry-run plan only");
+    expect(JSON.stringify(dryRunPlan)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw dry-run-plan|secret dry-run-plan|private|token/i);
   });
 
   it("builds a disabled Authority Adapter Contract 1 before any execution adapter exists", () => {

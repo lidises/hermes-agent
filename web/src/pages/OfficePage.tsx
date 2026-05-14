@@ -100,6 +100,7 @@ import {
   buildOfficeWorkerRollbackPreviewEnvelope,
   buildOfficeWorkerFinalGateChecklist,
   buildOfficeControlledMutationProposalContract,
+  buildOfficeControlledMutationDryRunPlan,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -1778,6 +1779,7 @@ export default function OfficePage() {
   const workerRollbackPreviewEnvelope = useMemo(() => buildOfficeWorkerRollbackPreviewEnvelope(workerAuditPreviewEnvelope), [workerAuditPreviewEnvelope]);
   const workerFinalGateChecklist = useMemo(() => buildOfficeWorkerFinalGateChecklist(workerRollbackPreviewEnvelope), [workerRollbackPreviewEnvelope]);
   const controlledMutationProposalContract = useMemo(() => buildOfficeControlledMutationProposalContract(workerFinalGateChecklist), [workerFinalGateChecklist]);
+  const controlledMutationDryRunPlan = useMemo(() => buildOfficeControlledMutationDryRunPlan(controlledMutationProposalContract), [controlledMutationProposalContract]);
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -2509,6 +2511,42 @@ export default function OfficePage() {
               <div className="mt-3 flex flex-wrap gap-1" data-office-controlled-mutation-contract-fields="true">
                 {contract.requiredFields.map((field) => (
                   <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-controlled-mutation-contract-field={field}>{field}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-indigo-300/20 bg-indigo-950/10 p-4"
+        data-office-controlled-mutation-dry-run-plan="true"
+        data-office-controlled-mutation-dry-run-execution-enabled={String(controlledMutationDryRunPlan.dryRunExecutionEnabled)}
+        data-office-controlled-mutation-dry-run-proposal-creation-enabled={String(controlledMutationDryRunPlan.proposalCreationEnabled)}
+        data-office-controlled-mutation-dry-run-route-enabled={String(controlledMutationDryRunPlan.mutationRouteEnabled)}
+        data-office-controlled-mutation-dry-run-rollback-execution-enabled={String(controlledMutationDryRunPlan.rollbackExecutionEnabled)}
+        data-office-controlled-mutation-dry-run-audit-write-enabled={String(controlledMutationDryRunPlan.auditWriteEnabled)}
+        data-office-controlled-mutation-dry-run-action-execution-enabled={String(controlledMutationDryRunPlan.executionEnabled)}
+        data-office-controlled-mutation-dry-run-dispatch-enabled={String(controlledMutationDryRunPlan.dispatchEnabled)}
+        data-office-controlled-mutation-dry-run-enabled-controls={controlledMutationDryRunPlan.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-indigo-200/70">{controlledMutationDryRunPlan.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{controlledMutationDryRunPlan.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{controlledMutationDryRunPlan.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">dry-run executions: 0</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-controlled-mutation-dry-run-items="true">
+          {controlledMutationDryRunPlan.planItems.map((item) => (
+            <div key={item.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-dry-run-item={item.id} data-office-controlled-mutation-dry-run-item-status={item.status}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.status}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{item.safeSummary}</div>
+              <div className="mt-3 flex flex-wrap gap-1" data-office-controlled-mutation-dry-run-fields="true">
+                {item.requiredFields.map((field) => (
+                  <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-controlled-mutation-dry-run-field={field}>{field}</span>
                 ))}
               </div>
             </div>
