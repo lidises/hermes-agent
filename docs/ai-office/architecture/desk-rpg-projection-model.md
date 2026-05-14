@@ -373,15 +373,10 @@ Implementation requirements when approved:
 7. Redaction and raw-leak sentinel policy is explicit.
 8. DTO boundary sketch is documented without implementation.
 9. Non-mutation boundaries are preserved.
-10. `NEXT.md`, `STATUS.md`, and unified product/architecture docs point to the next recommended `Desk RPG IA/Layout 1` slice.
+10. `NEXT.md`, `STATUS.md`, and unified product/architecture docs now record that `Desk RPG IA/Layout 1` followed this projection model and point to the next recommended `Controlled Mutation & Approval Model 1` slice.
 
 ## Next recommended slice
 
-`Desk RPG IA/Layout 1`
+`Controlled Mutation & Approval Model 1`
 
-Purpose:
-- Define the single central office fixed layout.
-- Place boss desk, Orchestrator desk, worker cluster, Kanban/Paperclip board, NAS vault, security/ops corner, and right inspector.
-- Decide which existing HUD/strips move behind tabs or inspector surfaces.
-- Preserve DOM/CSS MVP posture and avoid Phaser/Pixi or new renderer dependencies.
-- Preserve all non-mutation boundaries before UI implementation.
+`Desk RPG IA/Layout 1` is now documented in `docs/ai-office/product/desk-rpg-ia-layout.md`. The next step is controlled mutation/approval modeling: define how natural-language instructions and worker quick actions become event requests, how Orchestrator mediation handles approval/hold/deny routing, and how NAS Keeper final-save authority, audit, rollback, dry-run, and CLI confirmation posture works before any executable implementation.
