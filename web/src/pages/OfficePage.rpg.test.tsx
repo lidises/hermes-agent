@@ -240,3 +240,36 @@ describe("OfficeDeskRpgBoardEvidencePanel", () => {
     expect(markup).not.toMatch(/raw board prompt|raw board task title|raw board done title|raw board transcript|Traceback|\/Users\/lidises|token-shaped-inspector-sentinel|\*\*\*|private-board-provider/i);
   });
 });
+
+describe("OfficeDeskRpgBossCommandConsolePanel", () => {
+  it("Desk RPG Boss Command Console 1 shows user-avatar instruction posture without executable controls", () => {
+    const OfficeDeskRpgBossCommandConsolePanel = (OfficePageModule as unknown as {
+      OfficeDeskRpgBossCommandConsolePanel: React.ComponentType<{ projection: ReturnType<typeof buildOfficeDeskRpgProjectionModel> }>;
+    }).OfficeDeskRpgBossCommandConsolePanel;
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [{ id: "agent-1", status: "active", prompt: "raw boss prompt", provider: "private-boss-provider", api_key: "token-shaped-boss-sentinel" }],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw boss task title", body: "/Users/lidises/private/boss.md" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 3, warning_count: 1, error_summary: "Traceback boss source" },
+      ],
+    }));
+
+    const markup = renderToStaticMarkup(<OfficeDeskRpgBossCommandConsolePanel projection={projection} />);
+
+    expect(markup).toContain("data-office-desk-rpg-boss-console=\"true\"");
+    expect(markup).toContain("data-office-desk-rpg-boss-console-safe-projection-only=\"true\"");
+    expect(markup).toContain("data-office-desk-rpg-boss-console-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-desk-rpg-boss-console-request-creation-enabled=\"false\"");
+    expect(markup).toContain("data-office-desk-rpg-boss-console-orchestrator-required=\"true\"");
+    expect(markup).toContain("data-office-desk-rpg-boss-console-nas-save-enabled=\"false\"");
+    expect(markup).toContain("Boss command console");
+    expect(markup).toContain("사장 캐릭터");
+    expect(markup).toContain("Orchestrator-level instruction posture");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toMatch(/raw boss prompt|raw boss task title|Traceback|\/Users\/lidises|token-shaped-boss-sentinel|private-boss-provider/i);
+  });
+});

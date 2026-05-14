@@ -1646,6 +1646,52 @@ export function OfficeRpgMap({
   );
 }
 
+export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
+  const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
+  const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
+  return (
+    <Card
+      data-office-desk-rpg-boss-console="true"
+      data-office-desk-rpg-boss-console-safe-projection-only={String(projection.safeProjectionOnly)}
+      data-office-desk-rpg-boss-console-enabled-controls={projection.enabledControls}
+      data-office-desk-rpg-boss-console-request-creation-enabled="false"
+      data-office-desk-rpg-boss-console-orchestrator-required="true"
+      data-office-desk-rpg-boss-console-nas-save-enabled="false"
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Bot className="h-4 w-4" /> Boss command console
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-amber-300/20 bg-amber-950/10 p-3">
+            <div className="font-semibold text-amber-100">사장 캐릭터 · Orchestrator-level instruction posture</div>
+            <div className="mt-1 leading-5">
+              자연어 지시는 이 자리에서 바로 실행되지 않고 Orchestrator에게 전달될 request posture로만 표시됩니다. 현재 slice는 입력 생성, 요청 저장, 작업 배정, NAS 저장을 모두 비활성으로 둡니다.
+            </div>
+          </div>
+
+          <div className="grid gap-2 sm:grid-cols-3">
+            <div className="border border-current/15 bg-black/15 p-3" data-office-desk-rpg-boss-console-avatar="true">
+              <div className="font-semibold text-foreground">{bossActor?.label ?? "User Avatar"}</div>
+              <div className="mt-1 text-midground/60">role: user_boss · facility: {bossActor?.facilityId ?? "boss_desk"}</div>
+            </div>
+            <div className="border border-current/15 bg-black/15 p-3" data-office-desk-rpg-boss-console-orchestrator="true">
+              <div className="font-semibold text-foreground">{orchestratorActor?.label ?? "Orchestrator"}</div>
+              <div className="mt-1 text-midground/60">중복 작업과 권한 우회를 막는 중앙 mediation 경로</div>
+            </div>
+            <div className="border border-current/15 bg-black/15 p-3" data-office-desk-rpg-boss-console-boundary="true">
+              <div className="font-semibold text-foreground">approval boundary</div>
+              <div className="mt-1 text-midground/60">request creation false · NAS save false · controls 0</div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBoardEvidencePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   return (
     <Card
@@ -2207,6 +2253,8 @@ export default function OfficePage() {
       </section>
 
       <OfficeDeskRpgRoomShell projection={deskRpgProjection} />
+
+      <OfficeDeskRpgBossCommandConsolePanel projection={deskRpgProjection} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 
