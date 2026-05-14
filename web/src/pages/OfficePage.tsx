@@ -92,6 +92,7 @@ import {
   buildOfficeWorkerIntentRouting,
   buildOfficeWorkerFacilityReadiness,
   buildOfficeWorkerAssignmentCandidateGate,
+  buildOfficeWorkerRequestDraftPreview,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -1762,6 +1763,7 @@ export default function OfficePage() {
   const workerIntentRouting = useMemo(() => buildOfficeWorkerIntentRouting(orchestratorMediationQueue), [orchestratorMediationQueue]);
   const workerFacilityReadiness = useMemo(() => buildOfficeWorkerFacilityReadiness(workerIntentRouting), [workerIntentRouting]);
   const workerAssignmentCandidateGate = useMemo(() => buildOfficeWorkerAssignmentCandidateGate(workerFacilityReadiness), [workerFacilityReadiness]);
+  const workerRequestDraftPreview = useMemo(() => buildOfficeWorkerRequestDraftPreview(workerAssignmentCandidateGate), [workerAssignmentCandidateGate]);
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -2203,6 +2205,41 @@ export default function OfficePage() {
                   <div key={item.id} className="border border-current/10 bg-black/20 px-2 py-1 text-xs text-midground/70" data-office-worker-assignment-blocker={item.id} data-office-worker-assignment-blocker-status={item.status}>
                     <span className="font-semibold text-foreground/80">{item.label}</span> · {item.safeSummary}
                   </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-sky-300/20 bg-sky-950/10 p-4"
+        data-office-worker-request-draft-preview="true"
+        data-office-worker-request-creation-enabled={String(workerRequestDraftPreview.requestCreationEnabled)}
+        data-office-worker-request-persistence-enabled={String(workerRequestDraftPreview.requestPersistenceEnabled)}
+        data-office-worker-request-assignment-enabled={String(workerRequestDraftPreview.workAssignmentEnabled)}
+        data-office-worker-request-dispatch-enabled={String(workerRequestDraftPreview.dispatchEnabled)}
+        data-office-worker-request-audit-write-enabled={String(workerRequestDraftPreview.auditWriteEnabled)}
+        data-office-worker-request-enabled-controls={workerRequestDraftPreview.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-200/70">{workerRequestDraftPreview.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{workerRequestDraftPreview.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{workerRequestDraftPreview.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">created requests: 0</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-worker-request-drafts="true">
+          {workerRequestDraftPreview.drafts.map((draft) => (
+            <div key={draft.id} className="border border-current/15 bg-black/20 p-3" data-office-worker-request-draft={draft.facilityId} data-office-worker-request-draft-status={draft.status} data-office-worker-request-draft-persistence={draft.persistenceStatus}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{draft.workerRole}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{draft.id}</div>
+              <div className="mt-1 text-xs text-midground/60">candidate: {draft.candidateRef} · blockers: {draft.blockedReasonCount}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{draft.safeSummary}</div>
+              <div className="mt-3 flex flex-wrap gap-1" data-office-worker-request-draft-fields="true">
+                {draft.safeFields.map((field) => (
+                  <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-worker-request-draft-field={field}>{field}</span>
                 ))}
               </div>
             </div>

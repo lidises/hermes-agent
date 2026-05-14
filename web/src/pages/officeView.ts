@@ -1234,6 +1234,34 @@ export type OfficeWorkerAssignmentCandidateGate = {
   safeProjectionOnly: true;
 };
 
+export type OfficeWorkerRequestDraft = {
+  id: `draft_${OfficeWorkerAssignmentCandidate["facilityId"]}`;
+  candidateRef: OfficeWorkerAssignmentCandidate["id"];
+  facilityId: OfficeWorkerAssignmentCandidate["facilityId"];
+  workerRole: OfficeWorkerAssignmentCandidate["workerRole"];
+  status: "not_created";
+  persistenceStatus: "not_persisted";
+  safeFields: Array<"candidate_ref" | "facility" | "worker_role" | "blocked_reasons">;
+  blockedReasonCount: number;
+  safeSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeWorkerRequestDraftPreview = {
+  stageLabel: "Worker Request Draft Preview 1";
+  title: string;
+  enabledControls: 0;
+  requestCreationEnabled: false;
+  requestPersistenceEnabled: false;
+  workAssignmentEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  drafts: OfficeWorkerRequestDraft[];
+  candidateSnapshot: Pick<OfficeWorkerAssignmentCandidateGate, "assignmentCandidateEnabled" | "requestCreationEnabled" | "dispatchEnabled" | "auditWriteEnabled">;
+  safeBoundary: string;
+  safeProjectionOnly: true;
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -2359,6 +2387,39 @@ export function buildOfficeWorkerAssignmentCandidateGate(readiness: OfficeWorker
       assignmentReady: false,
       blockedBy,
       safeSummary: `${facility.id} cannot become an assignment candidate until readiness, approval, audit, human confirmation, and authority gates exist`,
+      rawExcluded: true,
+    })),
+  };
+}
+
+export function buildOfficeWorkerRequestDraftPreview(candidateGate: OfficeWorkerAssignmentCandidateGate): OfficeWorkerRequestDraftPreview {
+  return {
+    stageLabel: "Worker Request Draft Preview 1",
+    title: "작업 요청 초안 미리보기 · 생성 없음",
+    enabledControls: 0,
+    requestCreationEnabled: false,
+    requestPersistenceEnabled: false,
+    workAssignmentEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    candidateSnapshot: {
+      assignmentCandidateEnabled: candidateGate.assignmentCandidateEnabled,
+      requestCreationEnabled: candidateGate.requestCreationEnabled,
+      dispatchEnabled: candidateGate.dispatchEnabled,
+      auditWriteEnabled: candidateGate.auditWriteEnabled,
+    },
+    safeBoundary: "request draft preview only · no request creation · no persistence · no assignment · no dispatch · no audit write",
+    safeProjectionOnly: true,
+    drafts: candidateGate.candidates.map((candidate) => ({
+      id: `draft_${candidate.facilityId}`,
+      candidateRef: candidate.id,
+      facilityId: candidate.facilityId,
+      workerRole: candidate.workerRole,
+      status: "not_created",
+      persistenceStatus: "not_persisted",
+      safeFields: ["candidate_ref", "facility", "worker_role", "blocked_reasons"],
+      blockedReasonCount: candidate.blockedBy.length,
+      safeSummary: `${candidate.facilityId} request draft is a safe preview only; no request record exists`,
       rawExcluded: true,
     })),
   };

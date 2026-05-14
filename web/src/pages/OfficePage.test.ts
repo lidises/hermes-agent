@@ -80,6 +80,7 @@ import {
   buildOfficeWorkerIntentRouting,
   buildOfficeWorkerFacilityReadiness,
   buildOfficeWorkerAssignmentCandidateGate,
+  buildOfficeWorkerRequestDraftPreview,
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
@@ -628,6 +629,31 @@ describe("OfficePage view helpers", () => {
     expect(candidateGate.readinessSnapshot).toMatchObject({ workAssignmentEnabled: false, requestCreationEnabled: false, dispatchEnabled: false, auditWriteEnabled: false });
     expect(candidateGate.safeBoundary).toContain("candidate gate only");
     expect(JSON.stringify(candidateGate)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw candidate|secret candidate|private|token/i);
+  });
+
+  it("builds Worker Request Draft Preview 1 without creating requests", () => {
+    const draftPreview = buildOfficeWorkerRequestDraftPreview(buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-14T15:25:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/draft", status: "partial", checked_at: "2026-05-14T15:20:00Z", item_count: 1, warning_count: 1, error_summary: "raw draft token" } as unknown as OfficeState["data_sources"][number]],
+      work_items: [{ id: "w1", status: "blocked", title: "raw draft task", body: "secret draft body" } as unknown as OfficeState["work_items"][number]],
+      events: [{ id: "event-draft-private", category: "approval_needed", room_id: "command", tone: "warning", generated_at: "2026-05-14T15:24:00Z", detail: "raw draft event token" } as unknown as OfficeState["events"][number]],
+    }))))))))));
+
+    expect(draftPreview.stageLabel).toBe("Worker Request Draft Preview 1");
+    expect(draftPreview.enabledControls).toBe(0);
+    expect(draftPreview.requestCreationEnabled).toBe(false);
+    expect(draftPreview.requestPersistenceEnabled).toBe(false);
+    expect(draftPreview.workAssignmentEnabled).toBe(false);
+    expect(draftPreview.dispatchEnabled).toBe(false);
+    expect(draftPreview.auditWriteEnabled).toBe(false);
+    expect(draftPreview.drafts.map((draft) => draft.id)).toEqual(["draft_orchestrator_desk", "draft_agent_desks", "draft_incident_corner"]);
+    expect(draftPreview.drafts.every((draft) => draft.status === "not_created" && draft.persistenceStatus === "not_persisted" && draft.rawExcluded)).toBe(true);
+    expect(draftPreview.drafts.map((draft) => draft.safeFields)).toEqual(expect.arrayContaining([
+      expect.arrayContaining(["candidate_ref", "facility", "worker_role", "blocked_reasons"]),
+    ]));
+    expect(draftPreview.candidateSnapshot).toMatchObject({ assignmentCandidateEnabled: false, requestCreationEnabled: false, dispatchEnabled: false, auditWriteEnabled: false });
+    expect(draftPreview.safeBoundary).toContain("request draft preview only");
+    expect(JSON.stringify(draftPreview)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw draft|secret draft|private|token/i);
   });
 
   it("builds a disabled Authority Adapter Contract 1 before any execution adapter exists", () => {
