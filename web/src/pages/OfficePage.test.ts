@@ -92,6 +92,7 @@ import {
   buildOfficeControlledMutationAuditSinkPlan,
   buildOfficeControlledMutationRollbackVerificationPlan,
   buildOfficeControlledMutationHumanApprovalPlan,
+  buildOfficeControlledMutationAuthoritySummary,
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
@@ -961,6 +962,35 @@ describe("OfficePage view helpers", () => {
     expect(humanApprovalPlan.rollbackVerificationPlanSnapshot).toMatchObject({ rollbackExecutionEnabled: false, auditWriteEnabled: false, executionEnabled: false });
     expect(humanApprovalPlan.safeBoundary).toContain("human approval plan only");
     expect(JSON.stringify(humanApprovalPlan)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw human-approval|secret human-approval|private|token/i);
+  });
+
+  it("builds Controlled Mutation Authority Summary 1 without granting authority", () => {
+    const authoritySummary = buildOfficeControlledMutationAuthoritySummary(buildOfficeControlledMutationHumanApprovalPlan(buildOfficeControlledMutationRollbackVerificationPlan(buildOfficeControlledMutationAuditSinkPlan(buildOfficeControlledMutationDryRunPlan(buildOfficeControlledMutationProposalContract(buildOfficeWorkerFinalGateChecklist(buildOfficeWorkerRollbackPreviewEnvelope(buildOfficeWorkerAuditPreviewEnvelope(buildOfficeWorkerDispatchDryRunEnvelope(buildOfficeWorkerAuthorityHandoffEnvelope(buildOfficeWorkerHumanConfirmationEnvelope(buildOfficeWorkerRequestDraftPreview(buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-14T19:25:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/authority-summary", status: "partial", checked_at: "2026-05-14T19:20:00Z", item_count: 1, warning_count: 1, error_summary: "raw authority-summary token" } as unknown as OfficeState["data_sources"][number]],
+      work_items: [{ id: "w1", status: "blocked", title: "raw authority-summary task", body: "secret authority-summary body" } as unknown as OfficeState["work_items"][number]],
+      events: [{ id: "event-authority-summary-private", category: "approval_needed", room_id: "review", tone: "warning", generated_at: "2026-05-14T19:24:00Z", detail: "raw authority-summary event token" } as unknown as OfficeState["events"][number]],
+    }))))))))))))))))))))));
+
+    expect(authoritySummary.stageLabel).toBe("Controlled Mutation Authority Summary 1");
+    expect(authoritySummary.enabledControls).toBe(0);
+    expect(authoritySummary.authorityGrantEnabled).toBe(false);
+    expect(authoritySummary.approvalRecordingEnabled).toBe(false);
+    expect(authoritySummary.rollbackExecutionEnabled).toBe(false);
+    expect(authoritySummary.auditWriteEnabled).toBe(false);
+    expect(authoritySummary.dryRunExecutionEnabled).toBe(false);
+    expect(authoritySummary.proposalCreationEnabled).toBe(false);
+    expect(authoritySummary.mutationRouteEnabled).toBe(false);
+    expect(authoritySummary.executionEnabled).toBe(false);
+    expect(authoritySummary.dispatchEnabled).toBe(false);
+    expect(authoritySummary.authorityItems.map((item) => item.id)).toEqual(["authority_scope", "adapter_readiness", "approval_linkage", "dry_run_evidence", "audit_rollback_linkage"]);
+    expect(authoritySummary.authorityItems.every((item) => item.status === "blocked" && item.rawExcluded)).toBe(true);
+    expect(authoritySummary.authorityItems.map((item) => item.requiredFields)).toEqual(expect.arrayContaining([
+      expect.arrayContaining(["authority_scope_ref", "adapter_readiness_ref", "approval_linkage_ref", "dry_run_evidence_ref", "audit_rollback_linkage_ref"]),
+    ]));
+    expect(authoritySummary.humanApprovalPlanSnapshot).toMatchObject({ approvalRecordingEnabled: false, rollbackExecutionEnabled: false, executionEnabled: false });
+    expect(authoritySummary.safeBoundary).toContain("authority summary only");
+    expect(JSON.stringify(authoritySummary)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw authority-summary|secret authority-summary|private|token/i);
   });
 
   it("builds a disabled Authority Adapter Contract 1 before any execution adapter exists", () => {

@@ -1574,6 +1574,36 @@ export type OfficeControlledMutationHumanApprovalPlan = {
   safeProjectionOnly: true;
 };
 
+export type OfficeControlledMutationAuthoritySummaryId = "authority_scope" | "adapter_readiness" | "approval_linkage" | "dry_run_evidence" | "audit_rollback_linkage";
+
+export type OfficeControlledMutationAuthoritySummaryItem = {
+  id: OfficeControlledMutationAuthoritySummaryId;
+  label: string;
+  status: "blocked";
+  requiredFields: Array<"authority_scope_ref" | "adapter_readiness_ref" | "approval_linkage_ref" | "dry_run_evidence_ref" | "audit_rollback_linkage_ref">;
+  safeSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeControlledMutationAuthoritySummary = {
+  stageLabel: "Controlled Mutation Authority Summary 1";
+  title: string;
+  enabledControls: 0;
+  authorityGrantEnabled: false;
+  approvalRecordingEnabled: false;
+  rollbackExecutionEnabled: false;
+  auditWriteEnabled: false;
+  dryRunExecutionEnabled: false;
+  proposalCreationEnabled: false;
+  mutationRouteEnabled: false;
+  executionEnabled: false;
+  dispatchEnabled: false;
+  authorityItems: OfficeControlledMutationAuthoritySummaryItem[];
+  humanApprovalPlanSnapshot: Pick<OfficeControlledMutationHumanApprovalPlan, "approvalRecordingEnabled" | "rollbackExecutionEnabled" | "executionEnabled">;
+  safeBoundary: string;
+  safeProjectionOnly: true;
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -3127,6 +3157,46 @@ export function buildOfficeControlledMutationHumanApprovalPlan(rollbackVerificat
       status: "not_recorded",
       requiredFields,
       safeSummary: `${item.label} is required before any future approval decision can be recorded`,
+      rawExcluded: true,
+    })),
+  };
+}
+
+export function buildOfficeControlledMutationAuthoritySummary(humanApprovalPlan: OfficeControlledMutationHumanApprovalPlan): OfficeControlledMutationAuthoritySummary {
+  const requiredFields: OfficeControlledMutationAuthoritySummaryItem["requiredFields"] = ["authority_scope_ref", "adapter_readiness_ref", "approval_linkage_ref", "dry_run_evidence_ref", "audit_rollback_linkage_ref"];
+  const authorityItems: Array<{ id: OfficeControlledMutationAuthoritySummaryId; label: string }> = [
+    { id: "authority_scope", label: "Authority scope" },
+    { id: "adapter_readiness", label: "Adapter readiness" },
+    { id: "approval_linkage", label: "Approval linkage" },
+    { id: "dry_run_evidence", label: "Dry-run evidence" },
+    { id: "audit_rollback_linkage", label: "Audit/rollback linkage" },
+  ];
+  return {
+    stageLabel: "Controlled Mutation Authority Summary 1",
+    title: "제어형 변경 권한 요약 · 권한 부여 없음",
+    enabledControls: 0,
+    authorityGrantEnabled: false,
+    approvalRecordingEnabled: false,
+    rollbackExecutionEnabled: false,
+    auditWriteEnabled: false,
+    dryRunExecutionEnabled: false,
+    proposalCreationEnabled: false,
+    mutationRouteEnabled: false,
+    executionEnabled: false,
+    dispatchEnabled: false,
+    humanApprovalPlanSnapshot: {
+      approvalRecordingEnabled: humanApprovalPlan.approvalRecordingEnabled,
+      rollbackExecutionEnabled: humanApprovalPlan.rollbackExecutionEnabled,
+      executionEnabled: humanApprovalPlan.executionEnabled,
+    },
+    safeBoundary: "authority summary only · no authority grant · no approval recording · no rollback execution · no audit write · no dry-run execution · no proposal creation · no mutation route · no executable controls",
+    safeProjectionOnly: true,
+    authorityItems: authorityItems.map((item) => ({
+      id: item.id,
+      label: item.label,
+      status: "blocked",
+      requiredFields,
+      safeSummary: `${item.label} is required before any executable authority can be considered`,
       rawExcluded: true,
     })),
   };
