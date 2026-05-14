@@ -1646,6 +1646,69 @@ export function OfficeRpgMap({
   );
 }
 
+export function OfficeDeskRpgInspectorPanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
+  const rightInspector = projection.facilities.find((facility) => facility.id === "right_inspector");
+  return (
+    <Card
+      data-office-desk-rpg-inspector="true"
+      data-office-desk-rpg-inspector-safe-projection-only={String(projection.safeProjectionOnly)}
+      data-office-desk-rpg-inspector-enabled-controls={projection.enabledControls}
+      data-office-desk-rpg-inspector-raw-excluded={String(projection.rawExcluded)}
+      data-office-desk-rpg-inspector-suppressed-search-worker={projection.suppressedCounts.search_worker}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Eye className="h-4 w-4" /> Right inspector posture
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-emerald-300/20 bg-emerald-950/10 p-3" data-office-desk-rpg-inspector-targets="true">
+            <div className="font-semibold text-emerald-100">Desk RPG inspector migration · aggregate-only</div>
+            <div className="mt-1 leading-5">선택 세부 정보는 safe DTO target/count/posture만 사용합니다. 원문 작업명, 프롬프트, 경로, 토큰, provider 세부값은 제외됩니다.</div>
+            <div className="mt-2 grid max-h-48 gap-1 overflow-auto">
+              {projection.inspectorTargets.map((target) => (
+                <div
+                  key={target.id}
+                  className="grid grid-cols-[7rem_1fr] gap-2 border border-current/10 bg-black/15 px-2 py-1"
+                  data-office-desk-rpg-inspector-target={target.id}
+                  data-office-desk-rpg-inspector-target-type={target.targetType}
+                >
+                  <span className="text-midground/50">{target.targetType}</span>
+                  <span className="break-words text-midground/85">{target.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div className="border border-current/15 bg-black/15 p-3" data-office-desk-rpg-inspector-board="true">
+              <div className="font-semibold text-foreground">{projection.boardState.label}</div>
+              <div className="mt-1">업무 {projection.boardState.workItemCount} · blocked {projection.boardState.blockedCount}</div>
+              <div className="mt-1 text-midground/60">{projection.boardState.safeSummary}</div>
+            </div>
+            <div className="border border-current/15 bg-black/15 p-3" data-office-desk-rpg-inspector-evidence="true">
+              <div className="font-semibold text-foreground">{projection.evidenceState.label}</div>
+              <div className="mt-1">sources {projection.evidenceState.sourceCount} · warnings {projection.evidenceState.warningCount}</div>
+              <div className="mt-1 text-midground/60">raw bodies visible: {String(projection.evidenceState.rawBodiesVisible)}</div>
+            </div>
+            <div className="border border-current/15 bg-black/15 p-3" data-office-desk-rpg-inspector-vault="true" data-office-desk-rpg-inspector-vault-write-enabled={String(projection.vaultState.writeEnabled)}>
+              <div className="font-semibold text-foreground">{projection.vaultState.label}</div>
+              <div className="mt-1">승인 전 NAS 저장 차단</div>
+              <div className="mt-1 text-midground/60">posture: {projection.vaultState.posture}</div>
+            </div>
+            <div className="border border-current/15 bg-black/15 p-3" data-office-desk-rpg-inspector-ops="true" data-office-desk-rpg-inspector-service-controls-enabled={String(projection.opsState.serviceControlsEnabled)}>
+              <div className="font-semibold text-foreground">{projection.opsState.label}</div>
+              <div className="mt-1">service controls disabled</div>
+              <div className="mt-1 text-midground/60">right inspector: {rightInspector?.posture ?? "watching"}</div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function InspectorPanel({ selection }: { selection: InspectorSelection | null }) {
   return (
     <Card id="office-safe-inspector" tabIndex={-1} className="scroll-mt-24 focus:outline-none focus:ring-2 focus:ring-emerald-200/70">
@@ -3718,7 +3781,10 @@ export default function OfficePage() {
           <div className="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-midground/55">
             <Filter className="h-3 w-3" /> 보기: {FOCUS_LABEL[focus]}
           </div>
-          <InspectorPanel selection={selection} />
+          <OfficeDeskRpgInspectorPanel projection={deskRpgProjection} />
+          <div className="mt-3">
+            <InspectorPanel selection={selection} />
+          </div>
         </div>
       </div>
     </div>

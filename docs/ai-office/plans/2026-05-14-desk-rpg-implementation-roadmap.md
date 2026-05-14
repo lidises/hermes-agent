@@ -388,16 +388,16 @@ Rules:
 5. It preserves no-backend/no-mutation/no-renderer-dependency/no-VPS/NAS/Kanban/cron/service boundaries.
 6. It defines browser smoke and raw-leak sentinel expectations before UI coding.
 7. It documents deferred waves for controlled mutation backend design, projection dry-run promotion, and VPS deploy.
-8. `NEXT.md`, `STATUS.md`, and unified product/architecture docs now record `Desk RPG Room Shell 1` completion and point to `Desk RPG Inspector Migration 1` as the next implementation slice.
+8. `NEXT.md`, `STATUS.md`, and unified product/architecture docs now record `Desk RPG Inspector Migration 1` completion and point to `Desk RPG Board Evidence Tab 1` as the next implementation slice.
 
 ## Next recommended slice
 
-`Desk RPG Inspector Migration 1`
+`Desk RPG Board Evidence Tab 1`
 
 Purpose:
-- write a focused RED test for stable `data-office-desk-rpg-inspector-*` hooks;
-- bridge selected safe actor/facility/board/vault/ops details from `buildOfficeDeskRpgProjectionModel` into a right-inspector posture;
+- write a focused RED test for stable `data-office-desk-rpg-board-*` hooks;
+- migrate safe board/evidence posture from `buildOfficeDeskRpgProjectionModel` into a central board tab/section;
 - assert aggregate-only safe fields, zero forms, zero enabled controls, no mutation/action controls, and private sentinel exclusion;
 - run focused/full frontend checks, build, diff-check, static scan, and local-only browser smoke;
 - update handoff docs;
-- commit before board evidence tab migration.
+- commit before request posture/accessibility migration.

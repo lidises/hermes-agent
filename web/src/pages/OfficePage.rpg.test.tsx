@@ -159,3 +159,47 @@ describe("OfficeDeskRpgRoomShell", () => {
     expect(markup).not.toMatch(/raw prompt|raw task title|Traceback|\/Users\/lidises|sk-test-room-shell|private-provider/i);
   });
 });
+
+describe("OfficeDeskRpgInspectorPanel", () => {
+  it("Desk RPG Inspector Migration 1 bridges safe DTO details into a read-only right inspector posture", () => {
+    const OfficeDeskRpgInspectorPanel = (OfficePageModule as unknown as {
+      OfficeDeskRpgInspectorPanel: React.ComponentType<{ projection: ReturnType<typeof buildOfficeDeskRpgProjectionModel> }>;
+    }).OfficeDeskRpgInspectorPanel;
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: Array.from({ length: 6 }, (_, index) => ({
+        id: `agent-${index}`,
+        status: "active",
+        prompt: "raw inspector prompt must not leak",
+        provider: "private-inspector-provider",
+        api_key: "sk-test-inspector-1234567890",
+      })),
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw inspector task title", body: "/Users/lidises/private/inspector.md" } as unknown as OfficeState["work_items"][number],
+        { id: "task-2", status: "done", title: "safe count only" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 3, warning_count: 1, error_summary: "Traceback inspector source" },
+      ],
+    }));
+
+    const markup = renderToStaticMarkup(<OfficeDeskRpgInspectorPanel projection={projection} />);
+
+    expect(markup).toContain("data-office-desk-rpg-inspector=\"true\"");
+    expect(markup).toContain("data-office-desk-rpg-inspector-safe-projection-only=\"true\"");
+    expect(markup).toContain("data-office-desk-rpg-inspector-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-desk-rpg-inspector-raw-excluded=\"true\"");
+    expect(markup).toContain("data-office-desk-rpg-inspector-targets=\"true\"");
+    expect(markup).toContain("data-office-desk-rpg-inspector-target=\"actor:search_worker\"");
+    expect(markup).toContain("data-office-desk-rpg-inspector-target=\"facility:right_inspector\"");
+    expect(markup).toContain("data-office-desk-rpg-inspector-board=\"true\"");
+    expect(markup).toContain("data-office-desk-rpg-inspector-vault=\"true\"");
+    expect(markup).toContain("data-office-desk-rpg-inspector-ops=\"true\"");
+    expect(markup).toContain("data-office-desk-rpg-inspector-suppressed-search-worker=\"3\"");
+    expect(markup).toContain("Right inspector posture");
+    expect(markup).toContain("aggregate-only");
+    expect(markup).toContain("승인 전 NAS 저장 차단");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toMatch(/raw inspector prompt|raw inspector task title|Traceback|\/Users\/lidises|sk-test-inspector|private-inspector-provider/i);
+  });
+});
