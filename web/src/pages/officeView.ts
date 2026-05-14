@@ -1050,6 +1050,36 @@ export type OfficeReviewerWikiHandoffPosture = {
   rawExcluded: true;
 };
 
+export type OfficeApprovalDialogueInspectorCard = {
+  id: "dialogue_summary" | "review_handoff" | "decision_boundary" | "nas_boundary";
+  label: string;
+  summary: string;
+  tone: "info" | "warning" | "blocked";
+  rawExcluded: true;
+};
+
+export type OfficeApprovalDialogueInspectorDetail = {
+  stageLabel: "Approval Dialogue Inspector Detail 1";
+  title: string;
+  inspectorKind: "approval_dialogue_detail_posture";
+  cards: OfficeApprovalDialogueInspectorCard[];
+  dialogueLineCount: number;
+  handoffStepCount: number;
+  approveEnabled: false;
+  rejectEnabled: false;
+  holdEnabled: false;
+  reviewEnabled: false;
+  wikiDraftEnabled: false;
+  assignmentEnabled: false;
+  requestCreationEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  enabledControls: 0;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeRpgMissionStoryboardStep = {
   id: "request" | "orchestrate" | "board" | "evidence" | "review" | "approval";
   label: string;
@@ -2132,6 +2162,62 @@ export function buildOfficeReviewerWikiHandoffPosture(projection: OfficeDeskRpgP
     assignmentEnabled: false,
     requestCreationEnabled: false,
     dispatchEnabled: false,
+    nasSaveEnabled: false,
+    enabledControls: 0,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeApprovalDialogueInspectorDetail(
+  dialogue: OfficeDisabledApprovalDialoguePosture,
+  handoff: OfficeReviewerWikiHandoffPosture,
+): OfficeApprovalDialogueInspectorDetail {
+  return {
+    stageLabel: "Approval Dialogue Inspector Detail 1",
+    title: "Approval dialogue inspector detail",
+    inspectorKind: "approval_dialogue_detail_posture",
+    cards: [
+      {
+        id: "dialogue_summary",
+        label: "승인 대화 요약",
+        summary: `${dialogue.dialogueLines.length}개 safe line으로 Orchestrator 보고 posture만 표시합니다.`,
+        tone: "info",
+        rawExcluded: true,
+      },
+      {
+        id: "review_handoff",
+        label: "검토/위키 handoff 연결",
+        summary: `${handoff.sequence.length}단계 handoff와 근거 ${handoff.evidenceCount}개를 aggregate로만 연결합니다.`,
+        tone: handoff.warningCount > 0 ? "warning" : "info",
+        rawExcluded: true,
+      },
+      {
+        id: "decision_boundary",
+        label: "결정 경계",
+        summary: "approve/reject/hold/review/wiki draft/assignment는 inspector에서도 비활성 posture입니다.",
+        tone: "blocked",
+        rawExcluded: true,
+      },
+      {
+        id: "nas_boundary",
+        label: "NAS 저장 경계",
+        summary: "audit write, dispatch, request creation, NAS save는 별도 authority 전까지 차단됩니다.",
+        tone: "blocked",
+        rawExcluded: true,
+      },
+    ],
+    dialogueLineCount: dialogue.dialogueLines.length,
+    handoffStepCount: handoff.sequence.length,
+    approveEnabled: false,
+    rejectEnabled: false,
+    holdEnabled: false,
+    reviewEnabled: false,
+    wikiDraftEnabled: false,
+    assignmentEnabled: false,
+    requestCreationEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
     nasSaveEnabled: false,
     enabledControls: 0,
     safeProjectionOnly: true,

@@ -18,7 +18,7 @@ vi.mock("@/lib/api", () => ({
 
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
-import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeRpgScene } from "./officeView";
+import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeRpgScene } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
@@ -356,6 +356,45 @@ describe("ReviewerWikiHandoffPosturePanel", () => {
     expect(markup).not.toContain("<button");
     expect(markup).not.toContain("<input");
     expect(markup).not.toMatch(/raw handoff prompt|raw reviewer wiki task title|Traceback|\/Users\/lidises|token-shaped-handoff-sentinel|private-handoff-provider/i);
+  });
+});
+
+describe("ApprovalDialogueInspectorDetailPanel", () => {
+  it("Approval Dialogue Inspector Detail 1 renders disabled inspector cards without controls", () => {
+    const ApprovalDialogueInspectorDetailPanel = (OfficePageModule as unknown as {
+      ApprovalDialogueInspectorDetailPanel: React.ComponentType<{ inspector: ReturnType<typeof buildOfficeApprovalDialogueInspectorDetail> }>;
+    }).ApprovalDialogueInspectorDetailPanel;
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [{ id: "agent-1", status: "active", prompt: "raw inspector prompt", provider: "private-inspector-provider", api_key: "token-shaped-inspector-sentinel" }],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw approval inspector task title", body: "/Users/lidises/private/inspector.md" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 5, warning_count: 2, error_summary: "Traceback inspector source" },
+      ],
+    }));
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const handoff = buildOfficeReviewerWikiHandoffPosture(projection);
+    const inspector = buildOfficeApprovalDialogueInspectorDetail(dialogue, handoff);
+
+    const markup = renderToStaticMarkup(<ApprovalDialogueInspectorDetailPanel inspector={inspector} />);
+
+    expect(markup).toContain("data-office-approval-dialogue-inspector=\"true\"");
+    expect(markup).toContain("data-office-approval-dialogue-inspector-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-approval-dialogue-inspector-approve-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-dialogue-inspector-review-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-dialogue-inspector-audit-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-dialogue-inspector-nas-save-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-dialogue-inspector-card=\"dialogue_summary\"");
+    expect(markup).toContain("data-office-approval-dialogue-inspector-card=\"review_handoff\"");
+    expect(markup).toContain("data-office-approval-dialogue-inspector-card=\"decision_boundary\"");
+    expect(markup).toContain("data-office-approval-dialogue-inspector-card=\"nas_boundary\"");
+    expect(markup).toContain("Approval dialogue inspector detail");
+    expect(markup).toContain("승인 대화 inspector");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toMatch(/raw inspector prompt|raw approval inspector task title|Traceback|\/Users\/lidises|token-shaped-inspector-sentinel|private-inspector-provider/i);
   });
 });
 

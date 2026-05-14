@@ -101,6 +101,7 @@ import {
   buildOfficeDeskRpgWorkerRoleVisibility,
   buildOfficeDisabledApprovalDialoguePosture,
   buildOfficeReviewerWikiHandoffPosture,
+  buildOfficeApprovalDialogueInspectorDetail,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -246,6 +247,47 @@ describe("Reviewer/Wiki Handoff Posture 1", () => {
     expect(handoff.safeProjectionOnly).toBe(true);
     expect(handoff.rawExcluded).toBe(true);
     expect(JSON.stringify(handoff)).not.toMatch(/raw handoff prompt|raw reviewer wiki task title|Traceback|\/Users\/lidises|token-shaped-handoff-sentinel|private-handoff-provider/i);
+  });
+});
+
+describe("Approval Dialogue Inspector Detail 1", () => {
+  it("builds safe inspector detail for the approval dialogue without decisions or persistence", () => {
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [
+        { id: "agent-1", status: "active", prompt: "raw inspector prompt", provider: "private-inspector-provider", api_key: "token-shaped-inspector-sentinel" },
+        { id: "agent-2", status: "active", transcript: "Traceback inspector transcript" },
+      ],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw approval inspector task title", body: "/Users/lidises/private/inspector.md" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 5, warning_count: 2, error_summary: "Traceback inspector source" },
+      ],
+    }));
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const handoff = buildOfficeReviewerWikiHandoffPosture(projection);
+
+    const inspector = buildOfficeApprovalDialogueInspectorDetail(dialogue, handoff);
+
+    expect(inspector.stageLabel).toBe("Approval Dialogue Inspector Detail 1");
+    expect(inspector.inspectorKind).toBe("approval_dialogue_detail_posture");
+    expect(inspector.cards.map((card) => card.id)).toEqual(["dialogue_summary", "review_handoff", "decision_boundary", "nas_boundary"]);
+    expect(inspector.dialogueLineCount).toBe(3);
+    expect(inspector.handoffStepCount).toBe(4);
+    expect(inspector.enabledControls).toBe(0);
+    expect(inspector.approveEnabled).toBe(false);
+    expect(inspector.rejectEnabled).toBe(false);
+    expect(inspector.holdEnabled).toBe(false);
+    expect(inspector.reviewEnabled).toBe(false);
+    expect(inspector.wikiDraftEnabled).toBe(false);
+    expect(inspector.assignmentEnabled).toBe(false);
+    expect(inspector.requestCreationEnabled).toBe(false);
+    expect(inspector.dispatchEnabled).toBe(false);
+    expect(inspector.auditWriteEnabled).toBe(false);
+    expect(inspector.nasSaveEnabled).toBe(false);
+    expect(inspector.safeProjectionOnly).toBe(true);
+    expect(inspector.rawExcluded).toBe(true);
+    expect(JSON.stringify(inspector)).not.toMatch(/raw inspector prompt|raw approval inspector task title|Traceback|\/Users\/lidises|token-shaped-inspector-sentinel|private-inspector-provider/i);
   });
 });
 

@@ -111,6 +111,7 @@ import {
   buildOfficeDeskRpgWorkerRoleVisibility,
   buildOfficeDisabledApprovalDialoguePosture,
   buildOfficeReviewerWikiHandoffPosture,
+  buildOfficeApprovalDialogueInspectorDetail,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -125,6 +126,7 @@ import {
   type OfficeDeskRpgWorkerRoleVisibility,
   type OfficeDisabledApprovalDialoguePosture,
   type OfficeReviewerWikiHandoffPosture,
+  type OfficeApprovalDialogueInspectorDetail,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -1798,6 +1800,52 @@ export function ReviewerWikiHandoffPosturePanel({ handoff }: { handoff: OfficeRe
   );
 }
 
+export function ApprovalDialogueInspectorDetailPanel({ inspector }: { inspector: OfficeApprovalDialogueInspectorDetail }) {
+  return (
+    <Card
+      data-office-approval-dialogue-inspector="true"
+      data-office-approval-dialogue-inspector-enabled-controls={inspector.enabledControls}
+      data-office-approval-dialogue-inspector-approve-enabled={String(inspector.approveEnabled)}
+      data-office-approval-dialogue-inspector-review-enabled={String(inspector.reviewEnabled)}
+      data-office-approval-dialogue-inspector-audit-write-enabled={String(inspector.auditWriteEnabled)}
+      data-office-approval-dialogue-inspector-nas-save-enabled={String(inspector.nasSaveEnabled)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4" /> Approval dialogue inspector detail
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-sky-300/20 bg-sky-950/10 p-3">
+            <div className="font-semibold text-sky-100">승인 대화 inspector · detail only</div>
+            <div className="mt-1 leading-5">
+              JRPG 승인 대화와 reviewer/wiki handoff를 오른쪽 inspector 수준으로만 풀어 보여줍니다. decision, review, draft, audit write, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {inspector.cards.map((card) => (
+              <div
+                key={card.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-approval-dialogue-inspector-card={card.id}
+                data-office-approval-dialogue-inspector-card-tone={card.tone}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{card.label}</div>
+                <div className="mt-2 leading-5">{card.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-approval-dialogue-inspector-boundary="true">
+            dialogue lines {inspector.dialogueLineCount} · handoff steps {inspector.handoffStepCount} · enabled controls {inspector.enabledControls} · raw excluded {String(inspector.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -2194,6 +2242,10 @@ export default function OfficePage() {
   const deskRpgWorkerRoleVisibility = useMemo(() => buildOfficeDeskRpgWorkerRoleVisibility(deskRpgProjection), [deskRpgProjection]);
   const disabledApprovalDialoguePosture = useMemo(() => buildOfficeDisabledApprovalDialoguePosture(deskRpgProjection), [deskRpgProjection]);
   const reviewerWikiHandoffPosture = useMemo(() => buildOfficeReviewerWikiHandoffPosture(deskRpgProjection), [deskRpgProjection]);
+  const approvalDialogueInspectorDetail = useMemo(
+    () => buildOfficeApprovalDialogueInspectorDetail(disabledApprovalDialoguePosture, reviewerWikiHandoffPosture),
+    [disabledApprovalDialoguePosture, reviewerWikiHandoffPosture],
+  );
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -2416,6 +2468,8 @@ export default function OfficePage() {
       <DisabledApprovalDialoguePosturePanel dialogue={disabledApprovalDialoguePosture} />
 
       <ReviewerWikiHandoffPosturePanel handoff={reviewerWikiHandoffPosture} />
+
+      <ApprovalDialogueInspectorDetailPanel inspector={approvalDialogueInspectorDetail} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 
