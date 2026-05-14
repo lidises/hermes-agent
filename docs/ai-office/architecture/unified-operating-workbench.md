@@ -157,6 +157,12 @@ OfficeUnifiedWorkbenchView
     rawExcluded
     mutationControls
     approvalGates
+    approvalModel
+      actionRequest
+      dryRunEvidence
+      humanDecision
+      auditEvent
+      executionAuthority
 ```
 
 Rules for any future DTO/helper:
@@ -190,6 +196,8 @@ This architecture document is an index and consolidation point. It does not repl
 
 - Desk RPG/JRPG master-spec review and recommended next contracts:
   - `docs/ai-office/plans/2026-05-14-desk-rpg-master-spec-review.md`
+- Controlled approval/authority contract:
+  - `docs/ai-office/architecture/approval-model-contract.md`
 - RPG Visualizer implementation and private VPS smoke:
   - `docs/ai-office/plans/2026-05-13-ai-office-rpg-visualizer-implementation-evidence.md`
   - `docs/ai-office/plans/2026-05-13-ai-office-rpg-visualizer-vps-deploy-smoke.md`
@@ -211,8 +219,9 @@ This architecture document is an index and consolidation point. It does not repl
 
 ## Next architecture step
 
-After this Phase 0 consolidation, the next separately approved architecture task should be `Unified Workbench IA/Layout 1`:
+After `Approval Model Contract 1`, the next separately approved architecture task should be `Unified Workbench IA/Layout 1`:
 
 1. Define a pure `OfficeUnifiedWorkbenchView` helper that groups current safe OfficeState sections under the four-layer model.
-2. Add focused tests including raw-leak sentinels.
-3. Reorder/label existing `/office` sections without adding mutation controls, backend schema changes, services, cron/watcher automation, VPS restarts, public exposure, NAS access, or renderer dependencies.
+2. Include the approval model posture as disabled/display-only safety state, not executable controls.
+3. Add focused tests including raw-leak sentinels.
+4. Reorder/label existing `/office` sections without adding mutation controls, backend schema changes, services, cron/watcher automation, VPS restarts, public exposure, NAS access, or renderer dependencies.

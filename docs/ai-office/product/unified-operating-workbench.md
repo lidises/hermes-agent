@@ -117,6 +117,8 @@ The next product/layout consolidation should move away from a long feature/HUD s
 
 ## Non-goals and approval gates
 
+The controlled approval path now has a documentation-only contract in `docs/ai-office/architecture/approval-model-contract.md`. That contract defines action request, dry-run evidence, human decision, execution authority, and audit event shapes that must exist before any future mutation can be enabled. It does not approve implementation.
+
 This product definition does not approve:
 
 - `/office` code implementation
@@ -137,6 +139,7 @@ Future changes should preserve the read-only-first product posture unless the us
 Preserve these as supporting evidence rather than deleting or rewriting them:
 
 - `docs/ai-office/plans/2026-05-14-desk-rpg-master-spec-review.md`
+- `docs/ai-office/architecture/approval-model-contract.md`
 - `docs/ai-office/plans/2026-05-13-ai-office-rpg-visualizer-implementation-evidence.md`
 - `docs/ai-office/plans/2026-05-13-ai-office-rpg-visualizer-vps-deploy-smoke.md`
 - `docs/ai-office/plans/2026-05-13-kanban-first-operating-conversion.md`
@@ -149,4 +152,4 @@ Preserve these as supporting evidence rather than deleting or rewriting them:
 
 ## Recommended next product step
 
-After Phase 0 docs consolidation, the next separately approved work should be `Unified Workbench IA/Layout 1`: a frontend/view-model consolidation plan that groups the existing safe `/office` sections under the four-layer operating-room model. It should start helper-first and read-only-first, and should not add new execution controls, raw projection, services, cron, gateway changes, or renderer dependencies.
+After `Approval Model Contract 1`, the next separately approved work should be `Unified Workbench IA/Layout 1`: a frontend/view-model consolidation plan that groups the existing safe `/office` sections under the four-layer operating-room model and carries approval posture as disabled/display-only safety state. It should start helper-first and read-only-first, and should not add new execution controls, raw projection, services, cron, gateway changes, or renderer dependencies.
