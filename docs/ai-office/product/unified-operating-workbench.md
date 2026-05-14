@@ -152,4 +152,4 @@ Preserve these as supporting evidence rather than deleting or rewriting them:
 
 ## Recommended next product step
 
-After `Approval Execution Gate 1`, the next separately approved work should be `Authority Adapter Contract 1`: a disabled-by-design contract slice that defines the typed prerequisites for future controlled execution while keeping the browser read-only and without executing actions, writing audit events, creating requests, enabling controls, adding backend mutation routes, or changing services.
+After `Authority Adapter Contract 1`, the next separately approved work should be `Orchestrator Mediation Queue 1`: a read-only queue/posture slice that shows how user and character intents would wait for orchestrator mediation before becoming authority-adapter candidates, without enqueueing real requests, executing actions, writing audit events, creating requests, enabling controls, adding backend mutation routes, or changing services.

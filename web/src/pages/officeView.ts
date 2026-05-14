@@ -1091,6 +1091,28 @@ export type OfficeApprovalExecutionGate = {
   safeProjectionOnly: true;
 };
 
+export type OfficeAuthorityAdapterContractField = {
+  id: "request_ref" | "dry_run_result" | "audit_sink" | "rollback_ref" | "human_confirmation_ref";
+  label: string;
+  required: true;
+  status: "missing";
+  safeSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeAuthorityAdapterContract = {
+  stageLabel: "Authority Adapter Contract 1";
+  title: string;
+  enabledControls: 0;
+  dispatchEnabled: false;
+  adaptersInstalled: false;
+  allowedActionKinds: OfficeApprovalActionKind[];
+  requiredFields: OfficeAuthorityAdapterContractField[];
+  gateSnapshot: Pick<OfficeApprovalExecutionGate, "executionAllowed" | "browserAffordance">;
+  safeBoundary: string;
+  safeProjectionOnly: true;
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -1895,6 +1917,65 @@ export function buildOfficeApprovalExecutionGate(timeline: OfficeApprovalAuditTi
         label: "사용자 최종 확인",
         status: "missing",
         safeSummary: "human single-action confirmation required at dispatch time",
+        rawExcluded: true,
+      },
+    ],
+  };
+}
+
+export function buildOfficeAuthorityAdapterContract(gate: OfficeApprovalExecutionGate): OfficeAuthorityAdapterContract {
+  return {
+    stageLabel: "Authority Adapter Contract 1",
+    title: "권한 어댑터 계약 · 비활성 명세",
+    enabledControls: 0,
+    dispatchEnabled: false,
+    adaptersInstalled: false,
+    allowedActionKinds: ["kanban_transition", "projection_promote", "nas_save_request", "watcher_enable_request", "service_restart_request"],
+    gateSnapshot: {
+      executionAllowed: gate.executionAllowed,
+      browserAffordance: gate.browserAffordance,
+    },
+    safeBoundary: "contract only · disabled adapter · no dispatch · no audit write · no browser control",
+    safeProjectionOnly: true,
+    requiredFields: [
+      {
+        id: "request_ref",
+        label: "요청 참조",
+        required: true,
+        status: "missing",
+        safeSummary: "stable request reference required before dispatch contract can be satisfied",
+        rawExcluded: true,
+      },
+      {
+        id: "dry_run_result",
+        label: "드라이런 결과",
+        required: true,
+        status: "missing",
+        safeSummary: "validated dry-run result required before execution planning",
+        rawExcluded: true,
+      },
+      {
+        id: "audit_sink",
+        label: "감사 기록 대상",
+        required: true,
+        status: "missing",
+        safeSummary: "durable audit sink required before any state-changing adapter",
+        rawExcluded: true,
+      },
+      {
+        id: "rollback_ref",
+        label: "롤백 참조",
+        required: true,
+        status: "missing",
+        safeSummary: "rollback reference required before dispatch contract can be activated",
+        rawExcluded: true,
+      },
+      {
+        id: "human_confirmation_ref",
+        label: "사용자 확인 참조",
+        required: true,
+        status: "missing",
+        safeSummary: "single-action human confirmation reference required at execution boundary",
         rawExcluded: true,
       },
     ],

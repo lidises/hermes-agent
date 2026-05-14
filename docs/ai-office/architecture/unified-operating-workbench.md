@@ -219,9 +219,9 @@ This architecture document is an index and consolidation point. It does not repl
 
 ## Next architecture step
 
-`Unified Workbench IA/Layout 1`, `Approval Request View 1`, `Approval Audit Timeline 1`, and `Approval Execution Gate 1` are now locally implemented as pure safe view-model helpers plus top `/office` display-only sections. The next separately approved architecture/UI task should be `Authority Adapter Contract 1`:
+`Unified Workbench IA/Layout 1`, `Approval Request View 1`, `Approval Audit Timeline 1`, `Approval Execution Gate 1`, and `Authority Adapter Contract 1` are now locally implemented as pure safe view-model helpers plus top `/office` display-only sections. The next separately approved architecture/UI task should be `Orchestrator Mediation Queue 1`:
 
-1. Define the typed interface and invariants a future authority adapter must satisfy before any execution can exist.
-2. Keep the contract disabled/display-only in the current UI; no adapter implementation should dispatch real actions yet.
-3. Add focused tests for allowed action kinds, required audit/rollback/human-confirmation fields, zero enabled controls, and no executable browser affordances.
+1. Define a safe queued-intent view from hypothetical user/character/orchestrator inputs before authority-adapter candidacy.
+2. Keep the queue display-only; no enqueue endpoint, adapter implementation, or dispatch should exist yet.
+3. Add focused tests for intent categories, orchestrator-required posture, zero enabled controls, and no executable browser affordances.
 4. Do not execute actions, write audit events, create requests, add backend mutation routes, services, cron/watcher automation, VPS restarts, public exposure, NAS access, or renderer dependencies.

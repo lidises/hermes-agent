@@ -87,6 +87,7 @@ import {
   buildOfficeApprovalRequestView,
   buildOfficeApprovalAuditTimeline,
   buildOfficeApprovalExecutionGate,
+  buildOfficeAuthorityAdapterContract,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -1752,6 +1753,7 @@ export default function OfficePage() {
   const approvalRequestView = useMemo(() => buildOfficeApprovalRequestView(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const approvalAuditTimeline = useMemo(() => buildOfficeApprovalAuditTimeline(approvalRequestView), [approvalRequestView]);
   const approvalExecutionGate = useMemo(() => buildOfficeApprovalExecutionGate(approvalAuditTimeline), [approvalAuditTimeline]);
+  const authorityAdapterContract = useMemo(() => buildOfficeAuthorityAdapterContract(approvalExecutionGate), [approvalExecutionGate]);
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -2042,6 +2044,32 @@ export default function OfficePage() {
               <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.status}</div>
               <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
               <div className="mt-2 text-xs leading-5 text-midground/70">{item.safeSummary}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-amber-300/20 bg-amber-950/10 p-4"
+        data-office-authority-adapter-contract="true"
+        data-office-authority-dispatch-enabled={String(authorityAdapterContract.dispatchEnabled)}
+        data-office-authority-enabled-controls={authorityAdapterContract.enabledControls}
+        data-office-authority-adapters-installed={String(authorityAdapterContract.adaptersInstalled)}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-200/70">{authorityAdapterContract.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{authorityAdapterContract.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{authorityAdapterContract.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">dispatch enabled: {authorityAdapterContract.dispatchEnabled ? "true" : "false"}</div>
+        </div>
+        <div className="mt-3 grid gap-2 md:grid-cols-5" data-office-authority-required-fields="true">
+          {authorityAdapterContract.requiredFields.map((field) => (
+            <div key={field.id} className="border border-current/15 bg-black/20 p-3" data-office-authority-required-field={field.id} data-office-authority-required-field-status={field.status}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{field.status}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{field.label}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{field.safeSummary}</div>
             </div>
           ))}
         </div>

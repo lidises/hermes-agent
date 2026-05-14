@@ -75,6 +75,7 @@ import {
   buildOfficeApprovalRequestView,
   buildOfficeApprovalAuditTimeline,
   buildOfficeApprovalExecutionGate,
+  buildOfficeAuthorityAdapterContract,
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
@@ -521,6 +522,26 @@ describe("OfficePage view helpers", () => {
     expect(plan.find((section) => section.id === "work")?.summary).toContain("세션 1개");
     expect(plan.find((section) => section.id === "routing")?.summary).toContain("출처 기록 1개");
     expect(JSON.stringify(plan)).not.toMatch(/raw|secret|body|script|path/i);
+  });
+
+  it("builds a disabled Authority Adapter Contract 1 before any execution adapter exists", () => {
+    const contract = buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-14T13:35:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/authority", status: "partial", checked_at: "2026-05-14T13:30:00Z", item_count: 1, warning_count: 1, error_summary: "raw authority token" } as unknown as OfficeState["data_sources"][number]],
+      work_items: [{ id: "w1", status: "blocked", title: "raw authority work", body: "secret authority body" } as unknown as OfficeState["work_items"][number]],
+      automations: [{ id: "cron-authority-private", state: "error", last_status: "failed", script: "/Users/lidises/authority.sh" } as unknown as OfficeState["automations"][number]],
+    })))));
+
+    expect(contract.stageLabel).toBe("Authority Adapter Contract 1");
+    expect(contract.enabledControls).toBe(0);
+    expect(contract.dispatchEnabled).toBe(false);
+    expect(contract.adaptersInstalled).toBe(false);
+    expect(contract.allowedActionKinds).toEqual(["kanban_transition", "projection_promote", "nas_save_request", "watcher_enable_request", "service_restart_request"]);
+    expect(contract.requiredFields.map((field) => field.id)).toEqual(["request_ref", "dry_run_result", "audit_sink", "rollback_ref", "human_confirmation_ref"]);
+    expect(contract.requiredFields.every((field) => field.required && field.status === "missing" && field.rawExcluded)).toBe(true);
+    expect(contract.gateSnapshot).toMatchObject({ executionAllowed: false, browserAffordance: "none" });
+    expect(contract.safeBoundary).toContain("contract only");
+    expect(JSON.stringify(contract)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw authority|secret authority|private|token/i);
   });
 
   it("builds a read-only Approval Execution Gate 1 without executable authority", () => {
