@@ -171,7 +171,7 @@ describe("OfficeDeskRpgInspectorPanel", () => {
         status: "active",
         prompt: "raw inspector prompt must not leak",
         provider: "private-inspector-provider",
-        api_key: "sk-test-inspector-1234567890",
+        api_key: "token-shaped-inspector-sentinel",
       })),
       work_items: [
         { id: "task-1", status: "blocked", title: "raw inspector task title", body: "/Users/lidises/private/inspector.md" } as unknown as OfficeState["work_items"][number],
@@ -200,6 +200,43 @@ describe("OfficeDeskRpgInspectorPanel", () => {
     expect(markup).toContain("승인 전 NAS 저장 차단");
     expect(markup).not.toContain("<form");
     expect(markup).not.toContain("<button");
-    expect(markup).not.toMatch(/raw inspector prompt|raw inspector task title|Traceback|\/Users\/lidises|sk-test-inspector|private-inspector-provider/i);
+    expect(markup).not.toMatch(/raw inspector prompt|raw inspector task title|Traceback|\/Users\/lidises|token-shaped-inspector-sentinel|\*\*\*|private-inspector-provider/i);
+  });
+});
+
+describe("OfficeDeskRpgBoardEvidencePanel", () => {
+  it("Desk RPG Board Evidence Tab 1 migrates safe board and evidence posture into a read-only central board tab", () => {
+    const OfficeDeskRpgBoardEvidencePanel = (OfficePageModule as unknown as {
+      OfficeDeskRpgBoardEvidencePanel: React.ComponentType<{ projection: ReturnType<typeof buildOfficeDeskRpgProjectionModel> }>;
+    }).OfficeDeskRpgBoardEvidencePanel;
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [{ id: "agent-1", status: "active", prompt: "raw board prompt", provider: "private-board-provider", api_key: "token-shaped-inspector-sentinel" }],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw board task title", body: "/Users/lidises/private/board.md" } as unknown as OfficeState["work_items"][number],
+        { id: "task-2", status: "done", title: "raw board done title", transcript: "raw board transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 3, warning_count: 1, error_summary: "Traceback board source" },
+        { id: "kanban", status: "ok", checked_at: "2026-05-14T00:00:00Z", item_count: 2, warning_count: 0 },
+      ],
+    }));
+
+    const markup = renderToStaticMarkup(<OfficeDeskRpgBoardEvidencePanel projection={projection} />);
+
+    expect(markup).toContain("data-office-desk-rpg-board=\"true\"");
+    expect(markup).toContain("data-office-desk-rpg-board-tab=\"evidence\"");
+    expect(markup).toContain("data-office-desk-rpg-board-safe-projection-only=\"true\"");
+    expect(markup).toContain("data-office-desk-rpg-board-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-desk-rpg-board-raw-excluded=\"true\"");
+    expect(markup).toContain("data-office-desk-rpg-board-work-count=\"2\"");
+    expect(markup).toContain("data-office-desk-rpg-board-blocked-count=\"1\"");
+    expect(markup).toContain("data-office-desk-rpg-board-source-count=\"2\"");
+    expect(markup).toContain("data-office-desk-rpg-board-warning-count=\"1\"");
+    expect(markup).toContain("data-office-desk-rpg-board-raw-bodies-visible=\"false\"");
+    expect(markup).toContain("Central board evidence tab");
+    expect(markup).toContain("aggregate-only");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toMatch(/raw board prompt|raw board task title|raw board done title|raw board transcript|Traceback|\/Users\/lidises|token-shaped-inspector-sentinel|\*\*\*|private-board-provider/i);
   });
 });

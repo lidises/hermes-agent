@@ -1646,6 +1646,58 @@ export function OfficeRpgMap({
   );
 }
 
+export function OfficeDeskRpgBoardEvidencePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
+  return (
+    <Card
+      data-office-desk-rpg-board="true"
+      data-office-desk-rpg-board-tab="evidence"
+      data-office-desk-rpg-board-safe-projection-only={String(projection.safeProjectionOnly)}
+      data-office-desk-rpg-board-enabled-controls={projection.enabledControls}
+      data-office-desk-rpg-board-raw-excluded={String(projection.rawExcluded)}
+      data-office-desk-rpg-board-work-count={projection.boardState.workItemCount}
+      data-office-desk-rpg-board-blocked-count={projection.boardState.blockedCount}
+      data-office-desk-rpg-board-source-count={projection.evidenceState.sourceCount}
+      data-office-desk-rpg-board-warning-count={projection.evidenceState.warningCount}
+      data-office-desk-rpg-board-raw-bodies-visible={String(projection.evidenceState.rawBodiesVisible)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Database className="h-4 w-4" /> Central board evidence tab
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-emerald-300/20 bg-emerald-950/10 p-3">
+            <div className="font-semibold text-emerald-100">Desk RPG Board Evidence Tab 1 · aggregate-only</div>
+            <div className="mt-1 leading-5">
+              중앙 보드는 safe DTO count/posture만 묶어 보여줍니다. 작업 본문, 프롬프트, transcript, 경로, token, provider 세부값은 표시하지 않습니다.
+            </div>
+          </div>
+
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div className="border border-current/15 bg-black/15 p-3" data-office-desk-rpg-board-work="true">
+              <div className="font-semibold text-foreground">{projection.boardState.label}</div>
+              <div className="mt-1">업무 {projection.boardState.workItemCount} · blocked {projection.boardState.blockedCount}</div>
+              <div className="mt-1 text-midground/60">{projection.boardState.safeSummary}</div>
+            </div>
+            <div className="border border-current/15 bg-black/15 p-3" data-office-desk-rpg-board-evidence="true">
+              <div className="font-semibold text-foreground">{projection.evidenceState.label}</div>
+              <div className="mt-1">sources {projection.evidenceState.sourceCount} · warnings {projection.evidenceState.warningCount}</div>
+              <div className="mt-1 text-midground/60">raw bodies visible: {String(projection.evidenceState.rawBodiesVisible)}</div>
+            </div>
+          </div>
+
+          <div className="grid gap-2 sm:grid-cols-3" data-office-desk-rpg-board-boundary="true">
+            <div className="border border-current/15 bg-black/15 p-2">enabled controls: {projection.enabledControls}</div>
+            <div className="border border-current/15 bg-black/15 p-2">safe projection: {projection.safeProjectionOnly ? "true" : "false"}</div>
+            <div className="border border-current/15 bg-black/15 p-2">raw excluded: {projection.rawExcluded ? "true" : "false"}</div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgInspectorPanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const rightInspector = projection.facilities.find((facility) => facility.id === "right_inspector");
   return (
@@ -2155,6 +2207,8 @@ export default function OfficePage() {
       </section>
 
       <OfficeDeskRpgRoomShell projection={deskRpgProjection} />
+
+      <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 
       <section
         className="border border-violet-300/20 bg-violet-950/10 p-4"
