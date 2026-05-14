@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-14 13:10 KST
+Last updated: 2026-05-14 13:16 KST
 
 ## Start here after `/new`
 
@@ -90,7 +90,7 @@ Authoritative Phase 0 umbrella docs:
 - `docs/ai-office/product/unified-operating-workbench.md`
 - `docs/ai-office/architecture/unified-operating-workbench.md`
 
-Next recommended work is now `Orchestrator Mediation Queue 1` after local-only completion of `Authority Adapter Contract 1`. `Authority Adapter Contract 1` added `buildOfficeAuthorityAdapterContract(gate)`, a disabled-by-design authority adapter contract with allowed action kinds, required fields (`request_ref`, `dry_run_result`, `audit_sink`, `rollback_ref`, `human_confirmation_ref`), and a top `/office` section with `data-office-authority-*` hooks. The slice keeps `enabledControls: 0`, `dispatchEnabled: false`, and `adaptersInstalled: false`; it executes no actions, writes no audit events, creates no requests, mutation routes, forms, buttons, backend writes, Kanban transitions, projection promote/reject operations, watcher/cron enablement, service restarts, public exposure, renderer dependencies, or raw projection. The next product-improving slice should be `Orchestrator Mediation Queue 1`: show how user/character intents would queue for orchestrator mediation before they ever reach the disabled authority adapter contract.
+Next recommended work is now `Worker Intent Routing 1` after local-only completion of `Orchestrator Mediation Queue 1`. `Orchestrator Mediation Queue 1` added `buildOfficeOrchestratorMediationQueue(contract)`, a read-only queue posture for user instructions, character quick actions, and system attention signals before authority-adapter candidacy, and a top `/office` section with `data-office-orchestrator-*` hooks. The slice keeps `enabledControls: 0`, `enqueueEnabled: false`, and `candidatePromotionEnabled: false`; it enqueues no requests, executes no actions, writes no audit events, creates no requests, mutation routes, forms, buttons, backend writes, Kanban transitions, projection promote/reject operations, watcher/cron enablement, service restarts, public exposure, renderer dependencies, or raw projection. The next product-improving slice should be `Worker Intent Routing 1`: show how mediated intents would map to worker roles/facilities as read-only routing posture before any work assignment or mutation is possible.
 
 Master Spec v0.1 follow-up: read `docs/ai-office/plans/2026-05-14-desk-rpg-master-spec-review.md` before choosing the next work. It reframes read-only-first as the first safety posture, not the permanent product ceiling. The recommended product sequence remains `Desk RPG Product Vision 1` → `Desk RPG Projection Model 1` → `Desk RPG IA/Layout 1` → `Controlled Mutation & Approval Model 1`; the approved first implementation slice is intentionally small and should be reconciled with those contracts before adding executable control.
 

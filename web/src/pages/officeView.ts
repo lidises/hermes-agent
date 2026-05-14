@@ -1113,6 +1113,27 @@ export type OfficeAuthorityAdapterContract = {
   safeProjectionOnly: true;
 };
 
+export type OfficeOrchestratorMediationQueueItem = {
+  id: "userInstruction" | "characterQuickAction" | "systemAttention";
+  intentKind: "user_instruction" | "character_quick_action" | "system_attention";
+  status: "waiting_for_orchestrator";
+  safeSummary: string;
+  orchestratorRequired: true;
+  rawExcluded: true;
+};
+
+export type OfficeOrchestratorMediationQueue = {
+  stageLabel: "Orchestrator Mediation Queue 1";
+  title: string;
+  enabledControls: 0;
+  enqueueEnabled: false;
+  candidatePromotionEnabled: false;
+  items: OfficeOrchestratorMediationQueueItem[];
+  contractSnapshot: Pick<OfficeAuthorityAdapterContract, "dispatchEnabled" | "adaptersInstalled">;
+  safeBoundary: string;
+  safeProjectionOnly: true;
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -1976,6 +1997,48 @@ export function buildOfficeAuthorityAdapterContract(gate: OfficeApprovalExecutio
         required: true,
         status: "missing",
         safeSummary: "single-action human confirmation reference required at execution boundary",
+        rawExcluded: true,
+      },
+    ],
+  };
+}
+
+export function buildOfficeOrchestratorMediationQueue(contract: OfficeAuthorityAdapterContract): OfficeOrchestratorMediationQueue {
+  return {
+    stageLabel: "Orchestrator Mediation Queue 1",
+    title: "오케스트레이터 중재 대기열 · 읽기 전용",
+    enabledControls: 0,
+    enqueueEnabled: false,
+    candidatePromotionEnabled: false,
+    contractSnapshot: {
+      dispatchEnabled: contract.dispatchEnabled,
+      adaptersInstalled: contract.adaptersInstalled,
+    },
+    safeBoundary: "queue posture only · no enqueue · no request creation · no adapter promotion · no dispatch",
+    safeProjectionOnly: true,
+    items: [
+      {
+        id: "userInstruction",
+        intentKind: "user_instruction",
+        status: "waiting_for_orchestrator",
+        safeSummary: "user natural-language intent would be mediated by the orchestrator before request posture",
+        orchestratorRequired: true,
+        rawExcluded: true,
+      },
+      {
+        id: "characterQuickAction",
+        intentKind: "character_quick_action",
+        status: "waiting_for_orchestrator",
+        safeSummary: "character quick action remains a mediated intent, not direct execution",
+        orchestratorRequired: true,
+        rawExcluded: true,
+      },
+      {
+        id: "systemAttention",
+        intentKind: "system_attention",
+        status: "waiting_for_orchestrator",
+        safeSummary: "system attention signal can suggest work but cannot promote itself",
+        orchestratorRequired: true,
         rawExcluded: true,
       },
     ],

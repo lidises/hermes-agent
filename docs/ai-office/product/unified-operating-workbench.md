@@ -152,4 +152,4 @@ Preserve these as supporting evidence rather than deleting or rewriting them:
 
 ## Recommended next product step
 
-After `Authority Adapter Contract 1`, the next separately approved work should be `Orchestrator Mediation Queue 1`: a read-only queue/posture slice that shows how user and character intents would wait for orchestrator mediation before becoming authority-adapter candidates, without enqueueing real requests, executing actions, writing audit events, creating requests, enabling controls, adding backend mutation routes, or changing services.
+After `Orchestrator Mediation Queue 1`, the next separately approved work should be `Worker Intent Routing 1`: a read-only routing posture slice that shows how mediated intents would map toward worker roles/facilities, without assigning work, enqueueing real requests, executing actions, writing audit events, creating requests, enabling controls, adding backend mutation routes, or changing services.

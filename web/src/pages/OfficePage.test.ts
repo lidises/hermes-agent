@@ -76,6 +76,7 @@ import {
   buildOfficeApprovalAuditTimeline,
   buildOfficeApprovalExecutionGate,
   buildOfficeAuthorityAdapterContract,
+  buildOfficeOrchestratorMediationQueue,
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
@@ -522,6 +523,25 @@ describe("OfficePage view helpers", () => {
     expect(plan.find((section) => section.id === "work")?.summary).toContain("세션 1개");
     expect(plan.find((section) => section.id === "routing")?.summary).toContain("출처 기록 1개");
     expect(JSON.stringify(plan)).not.toMatch(/raw|secret|body|script|path/i);
+  });
+
+  it("builds a read-only Orchestrator Mediation Queue 1 before authority candidates", () => {
+    const queue = buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-14T13:50:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/mediation", status: "partial", checked_at: "2026-05-14T13:45:00Z", item_count: 1, warning_count: 1, error_summary: "raw mediation token" } as unknown as OfficeState["data_sources"][number]],
+      work_items: [{ id: "w1", status: "blocked", title: "raw mediation work", body: "secret mediation body" } as unknown as OfficeState["work_items"][number]],
+      events: [{ id: "event-private", category: "approval_needed", room_id: "command", tone: "warning", generated_at: "2026-05-14T13:49:00Z", detail: "raw mediation event token" } as unknown as OfficeState["events"][number]],
+    }))))));
+
+    expect(queue.stageLabel).toBe("Orchestrator Mediation Queue 1");
+    expect(queue.enabledControls).toBe(0);
+    expect(queue.enqueueEnabled).toBe(false);
+    expect(queue.candidatePromotionEnabled).toBe(false);
+    expect(queue.items.map((item) => item.intentKind)).toEqual(["user_instruction", "character_quick_action", "system_attention"]);
+    expect(queue.items.every((item) => item.status === "waiting_for_orchestrator" && item.orchestratorRequired && item.rawExcluded)).toBe(true);
+    expect(queue.contractSnapshot).toMatchObject({ dispatchEnabled: false, adaptersInstalled: false });
+    expect(queue.safeBoundary).toContain("queue posture only");
+    expect(JSON.stringify(queue)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw mediation|secret mediation|private|token/i);
   });
 
   it("builds a disabled Authority Adapter Contract 1 before any execution adapter exists", () => {

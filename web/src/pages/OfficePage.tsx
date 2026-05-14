@@ -88,6 +88,7 @@ import {
   buildOfficeApprovalAuditTimeline,
   buildOfficeApprovalExecutionGate,
   buildOfficeAuthorityAdapterContract,
+  buildOfficeOrchestratorMediationQueue,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -1754,6 +1755,7 @@ export default function OfficePage() {
   const approvalAuditTimeline = useMemo(() => buildOfficeApprovalAuditTimeline(approvalRequestView), [approvalRequestView]);
   const approvalExecutionGate = useMemo(() => buildOfficeApprovalExecutionGate(approvalAuditTimeline), [approvalAuditTimeline]);
   const authorityAdapterContract = useMemo(() => buildOfficeAuthorityAdapterContract(approvalExecutionGate), [approvalExecutionGate]);
+  const orchestratorMediationQueue = useMemo(() => buildOfficeOrchestratorMediationQueue(authorityAdapterContract), [authorityAdapterContract]);
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -2070,6 +2072,32 @@ export default function OfficePage() {
               <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{field.status}</div>
               <div className="mt-1 text-sm font-semibold text-foreground">{field.label}</div>
               <div className="mt-2 text-xs leading-5 text-midground/70">{field.safeSummary}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-sky-300/20 bg-sky-950/10 p-4"
+        data-office-orchestrator-mediation-queue="true"
+        data-office-orchestrator-enqueue-enabled={String(orchestratorMediationQueue.enqueueEnabled)}
+        data-office-orchestrator-candidate-promotion-enabled={String(orchestratorMediationQueue.candidatePromotionEnabled)}
+        data-office-orchestrator-enabled-controls={orchestratorMediationQueue.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-200/70">{orchestratorMediationQueue.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{orchestratorMediationQueue.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{orchestratorMediationQueue.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">enqueue enabled: {orchestratorMediationQueue.enqueueEnabled ? "true" : "false"}</div>
+        </div>
+        <div className="mt-3 grid gap-2 md:grid-cols-3" data-office-orchestrator-mediation-items="true">
+          {orchestratorMediationQueue.items.map((item) => (
+            <div key={item.id} className="border border-current/15 bg-black/20 p-3" data-office-orchestrator-mediation-item={item.intentKind} data-office-orchestrator-mediation-status={item.status}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.intentKind}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{item.status}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{item.safeSummary}</div>
             </div>
           ))}
         </div>

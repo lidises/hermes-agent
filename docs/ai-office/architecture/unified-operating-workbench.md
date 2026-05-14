@@ -219,9 +219,9 @@ This architecture document is an index and consolidation point. It does not repl
 
 ## Next architecture step
 
-`Unified Workbench IA/Layout 1`, `Approval Request View 1`, `Approval Audit Timeline 1`, `Approval Execution Gate 1`, and `Authority Adapter Contract 1` are now locally implemented as pure safe view-model helpers plus top `/office` display-only sections. The next separately approved architecture/UI task should be `Orchestrator Mediation Queue 1`:
+`Unified Workbench IA/Layout 1`, `Approval Request View 1`, `Approval Audit Timeline 1`, `Approval Execution Gate 1`, `Authority Adapter Contract 1`, and `Orchestrator Mediation Queue 1` are now locally implemented as pure safe view-model helpers plus top `/office` display-only sections. The next separately approved architecture/UI task should be `Worker Intent Routing 1`:
 
-1. Define a safe queued-intent view from hypothetical user/character/orchestrator inputs before authority-adapter candidacy.
-2. Keep the queue display-only; no enqueue endpoint, adapter implementation, or dispatch should exist yet.
-3. Add focused tests for intent categories, orchestrator-required posture, zero enabled controls, and no executable browser affordances.
+1. Define a safe routing posture from mediated intents to worker roles/facilities.
+2. Keep routing display-only; no assignment endpoint, worker dispatch, adapter implementation, or state write should exist yet.
+3. Add focused tests for route categories, worker-role labels, zero enabled controls, and no executable browser affordances.
 4. Do not execute actions, write audit events, create requests, add backend mutation routes, services, cron/watcher automation, VPS restarts, public exposure, NAS access, or renderer dependencies.
