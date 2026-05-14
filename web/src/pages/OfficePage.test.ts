@@ -79,6 +79,7 @@ import {
   buildOfficeOrchestratorMediationQueue,
   buildOfficeWorkerIntentRouting,
   buildOfficeWorkerFacilityReadiness,
+  buildOfficeWorkerAssignmentCandidateGate,
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
@@ -598,6 +599,35 @@ describe("OfficePage view helpers", () => {
     expect(readiness.routingSnapshot).toMatchObject({ workAssignmentEnabled: false, requestCreationEnabled: false, dispatchEnabled: false });
     expect(readiness.safeBoundary).toContain("facility readiness only");
     expect(JSON.stringify(readiness)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw facility|secret facility|private|token/i);
+  });
+
+  it("builds Worker Assignment Candidate Gate 1 as blocked display-only candidates", () => {
+    const candidateGate = buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-14T15:05:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/candidate", status: "partial", checked_at: "2026-05-14T15:00:00Z", item_count: 1, warning_count: 1, error_summary: "raw candidate token" } as unknown as OfficeState["data_sources"][number]],
+      work_items: [{ id: "w1", status: "blocked", title: "raw candidate task", body: "secret candidate body" } as unknown as OfficeState["work_items"][number]],
+      events: [{ id: "event-candidate-private", category: "approval_needed", room_id: "command", tone: "warning", generated_at: "2026-05-14T15:04:00Z", detail: "raw candidate event token" } as unknown as OfficeState["events"][number]],
+    })))))))));
+
+    expect(candidateGate.stageLabel).toBe("Worker Assignment Candidate Gate 1");
+    expect(candidateGate.enabledControls).toBe(0);
+    expect(candidateGate.assignmentCandidateEnabled).toBe(false);
+    expect(candidateGate.workAssignmentEnabled).toBe(false);
+    expect(candidateGate.requestCreationEnabled).toBe(false);
+    expect(candidateGate.dispatchEnabled).toBe(false);
+    expect(candidateGate.auditWriteEnabled).toBe(false);
+    expect(candidateGate.candidates.map((candidate) => candidate.id)).toEqual(["candidate_orchestrator_desk", "candidate_agent_desks", "candidate_incident_corner"]);
+    expect(candidateGate.candidates.every((candidate) => candidate.status === "blocked" && candidate.assignmentReady === false && candidate.rawExcluded)).toBe(true);
+    expect(candidateGate.candidates.flatMap((candidate) => candidate.blockedBy.map((item) => item.id))).toEqual(expect.arrayContaining([
+      "facility_prerequisites_missing",
+      "approval_execution_blocked",
+      "authority_adapter_missing",
+      "audit_write_disabled",
+      "human_confirmation_missing",
+    ]));
+    expect(candidateGate.readinessSnapshot).toMatchObject({ workAssignmentEnabled: false, requestCreationEnabled: false, dispatchEnabled: false, auditWriteEnabled: false });
+    expect(candidateGate.safeBoundary).toContain("candidate gate only");
+    expect(JSON.stringify(candidateGate)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw candidate|secret candidate|private|token/i);
   });
 
   it("builds a disabled Authority Adapter Contract 1 before any execution adapter exists", () => {

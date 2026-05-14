@@ -91,6 +91,7 @@ import {
   buildOfficeOrchestratorMediationQueue,
   buildOfficeWorkerIntentRouting,
   buildOfficeWorkerFacilityReadiness,
+  buildOfficeWorkerAssignmentCandidateGate,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -1760,6 +1761,7 @@ export default function OfficePage() {
   const orchestratorMediationQueue = useMemo(() => buildOfficeOrchestratorMediationQueue(authorityAdapterContract), [authorityAdapterContract]);
   const workerIntentRouting = useMemo(() => buildOfficeWorkerIntentRouting(orchestratorMediationQueue), [orchestratorMediationQueue]);
   const workerFacilityReadiness = useMemo(() => buildOfficeWorkerFacilityReadiness(workerIntentRouting), [workerIntentRouting]);
+  const workerAssignmentCandidateGate = useMemo(() => buildOfficeWorkerAssignmentCandidateGate(workerFacilityReadiness), [workerFacilityReadiness]);
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -2162,6 +2164,43 @@ export default function OfficePage() {
               <div className="mt-3 space-y-1" data-office-worker-facility-prerequisites="true">
                 {facility.prerequisites.map((item) => (
                   <div key={item.id} className="border border-current/10 bg-black/20 px-2 py-1 text-xs text-midground/70" data-office-worker-facility-prerequisite={item.id} data-office-worker-facility-prerequisite-status={item.status}>
+                    <span className="font-semibold text-foreground/80">{item.label}</span> · {item.safeSummary}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-emerald-300/20 bg-emerald-950/10 p-4"
+        data-office-worker-assignment-candidate-gate="true"
+        data-office-worker-candidate-enabled={String(workerAssignmentCandidateGate.assignmentCandidateEnabled)}
+        data-office-worker-candidate-assignment-enabled={String(workerAssignmentCandidateGate.workAssignmentEnabled)}
+        data-office-worker-candidate-request-creation-enabled={String(workerAssignmentCandidateGate.requestCreationEnabled)}
+        data-office-worker-candidate-dispatch-enabled={String(workerAssignmentCandidateGate.dispatchEnabled)}
+        data-office-worker-candidate-audit-write-enabled={String(workerAssignmentCandidateGate.auditWriteEnabled)}
+        data-office-worker-candidate-enabled-controls={workerAssignmentCandidateGate.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">{workerAssignmentCandidateGate.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{workerAssignmentCandidateGate.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{workerAssignmentCandidateGate.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">candidate enabled: {workerAssignmentCandidateGate.assignmentCandidateEnabled ? "true" : "false"}</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-worker-assignment-candidates="true">
+          {workerAssignmentCandidateGate.candidates.map((candidate) => (
+            <div key={candidate.id} className="border border-current/15 bg-black/20 p-3" data-office-worker-assignment-candidate={candidate.facilityId} data-office-worker-assignment-candidate-status={candidate.status} data-office-worker-assignment-candidate-ready={String(candidate.assignmentReady)}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{candidate.workerRole}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{candidate.id}</div>
+              <div className="mt-1 text-xs text-midground/60">assignment ready: {candidate.assignmentReady ? "true" : "false"}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{candidate.safeSummary}</div>
+              <div className="mt-3 space-y-1" data-office-worker-assignment-blockers="true">
+                {candidate.blockedBy.map((item) => (
+                  <div key={item.id} className="border border-current/10 bg-black/20 px-2 py-1 text-xs text-midground/70" data-office-worker-assignment-blocker={item.id} data-office-worker-assignment-blocker-status={item.status}>
                     <span className="font-semibold text-foreground/80">{item.label}</span> · {item.safeSummary}
                   </div>
                 ))}

@@ -1200,6 +1200,40 @@ export type OfficeWorkerFacilityReadiness = {
   safeProjectionOnly: true;
 };
 
+export type OfficeWorkerAssignmentCandidateBlockedReason = {
+  id: "facility_prerequisites_missing" | "approval_execution_blocked" | "authority_adapter_missing" | "audit_write_disabled" | "human_confirmation_missing";
+  label: string;
+  status: "blocked";
+  safeSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeWorkerAssignmentCandidate = {
+  id: `candidate_${OfficeWorkerFacilityReadinessFacility["id"]}`;
+  facilityId: OfficeWorkerFacilityReadinessFacility["id"];
+  workerRole: OfficeWorkerFacilityReadinessFacility["workerRole"];
+  status: "blocked";
+  assignmentReady: false;
+  blockedBy: OfficeWorkerAssignmentCandidateBlockedReason[];
+  safeSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeWorkerAssignmentCandidateGate = {
+  stageLabel: "Worker Assignment Candidate Gate 1";
+  title: string;
+  enabledControls: 0;
+  assignmentCandidateEnabled: false;
+  workAssignmentEnabled: false;
+  requestCreationEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  candidates: OfficeWorkerAssignmentCandidate[];
+  readinessSnapshot: Pick<OfficeWorkerFacilityReadiness, "workAssignmentEnabled" | "requestCreationEnabled" | "dispatchEnabled" | "auditWriteEnabled">;
+  safeBoundary: string;
+  safeProjectionOnly: true;
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -2256,6 +2290,75 @@ export function buildOfficeWorkerFacilityReadiness(routing: OfficeWorkerIntentRo
       routeCount: 1,
       prerequisites: prerequisiteMap[route.targetFacility],
       safeSummary: `${route.targetFacility} stays visible as a readiness posture only before any ${route.workerRole} assignment exists`,
+      rawExcluded: true,
+    })),
+  };
+}
+
+export function buildOfficeWorkerAssignmentCandidateGate(readiness: OfficeWorkerFacilityReadiness): OfficeWorkerAssignmentCandidateGate {
+  const blockedBy: OfficeWorkerAssignmentCandidateBlockedReason[] = [
+    {
+      id: "facility_prerequisites_missing",
+      label: "시설 선행조건 미충족",
+      status: "blocked",
+      safeSummary: "facility readiness prerequisites must be satisfied before assignment candidacy",
+      rawExcluded: true,
+    },
+    {
+      id: "approval_execution_blocked",
+      label: "승인 실행 게이트 차단",
+      status: "blocked",
+      safeSummary: "approval execution gate still blocks executable authority",
+      rawExcluded: true,
+    },
+    {
+      id: "authority_adapter_missing",
+      label: "권한 어댑터 없음",
+      status: "blocked",
+      safeSummary: "authority adapter contract is not installed for dispatch or state change",
+      rawExcluded: true,
+    },
+    {
+      id: "audit_write_disabled",
+      label: "감사 쓰기 비활성",
+      status: "blocked",
+      safeSummary: "audit writes remain disabled until a durable sink is approved",
+      rawExcluded: true,
+    },
+    {
+      id: "human_confirmation_missing",
+      label: "사용자 확인 없음",
+      status: "blocked",
+      safeSummary: "human confirmation reference is required before any candidate can advance",
+      rawExcluded: true,
+    },
+  ];
+
+  return {
+    stageLabel: "Worker Assignment Candidate Gate 1",
+    title: "작업 배정 후보 게이트 · 전부 차단",
+    enabledControls: 0,
+    assignmentCandidateEnabled: false,
+    workAssignmentEnabled: false,
+    requestCreationEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    readinessSnapshot: {
+      workAssignmentEnabled: readiness.workAssignmentEnabled,
+      requestCreationEnabled: readiness.requestCreationEnabled,
+      dispatchEnabled: readiness.dispatchEnabled,
+      auditWriteEnabled: readiness.auditWriteEnabled,
+    },
+    safeBoundary: "candidate gate only · no assignment candidate promotion · no request creation · no dispatch · no audit write",
+    safeProjectionOnly: true,
+    candidates: readiness.facilities.map((facility) => ({
+      id: `candidate_${facility.id}`,
+      facilityId: facility.id,
+      workerRole: facility.workerRole,
+      status: "blocked",
+      assignmentReady: false,
+      blockedBy,
+      safeSummary: `${facility.id} cannot become an assignment candidate until readiness, approval, audit, human confirmation, and authority gates exist`,
       rawExcluded: true,
     })),
   };
