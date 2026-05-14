@@ -89,6 +89,7 @@ import {
   buildOfficeWorkerFinalGateChecklist,
   buildOfficeControlledMutationProposalContract,
   buildOfficeControlledMutationDryRunPlan,
+  buildOfficeControlledMutationAuditSinkPlan,
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
@@ -876,6 +877,33 @@ describe("OfficePage view helpers", () => {
     expect(dryRunPlan.proposalContractSnapshot).toMatchObject({ proposalCreationEnabled: false, mutationRouteEnabled: false, executionEnabled: false });
     expect(dryRunPlan.safeBoundary).toContain("dry-run plan only");
     expect(JSON.stringify(dryRunPlan)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw dry-run-plan|secret dry-run-plan|private|token/i);
+  });
+
+  it("builds Controlled Mutation Audit Sink Plan 1 without writing audit events", () => {
+    const auditSinkPlan = buildOfficeControlledMutationAuditSinkPlan(buildOfficeControlledMutationDryRunPlan(buildOfficeControlledMutationProposalContract(buildOfficeWorkerFinalGateChecklist(buildOfficeWorkerRollbackPreviewEnvelope(buildOfficeWorkerAuditPreviewEnvelope(buildOfficeWorkerDispatchDryRunEnvelope(buildOfficeWorkerAuthorityHandoffEnvelope(buildOfficeWorkerHumanConfirmationEnvelope(buildOfficeWorkerRequestDraftPreview(buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-14T18:25:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/audit-sink-plan", status: "partial", checked_at: "2026-05-14T18:20:00Z", item_count: 1, warning_count: 1, error_summary: "raw audit-sink-plan token" } as unknown as OfficeState["data_sources"][number]],
+      work_items: [{ id: "w1", status: "blocked", title: "raw audit-sink-plan task", body: "secret audit-sink-plan body" } as unknown as OfficeState["work_items"][number]],
+      events: [{ id: "event-audit-sink-plan-private", category: "approval_needed", room_id: "review", tone: "warning", generated_at: "2026-05-14T18:24:00Z", detail: "raw audit-sink-plan event token" } as unknown as OfficeState["events"][number]],
+    })))))))))))))))))));
+
+    expect(auditSinkPlan.stageLabel).toBe("Controlled Mutation Audit Sink Plan 1");
+    expect(auditSinkPlan.enabledControls).toBe(0);
+    expect(auditSinkPlan.auditWriteEnabled).toBe(false);
+    expect(auditSinkPlan.dryRunExecutionEnabled).toBe(false);
+    expect(auditSinkPlan.proposalCreationEnabled).toBe(false);
+    expect(auditSinkPlan.mutationRouteEnabled).toBe(false);
+    expect(auditSinkPlan.rollbackExecutionEnabled).toBe(false);
+    expect(auditSinkPlan.executionEnabled).toBe(false);
+    expect(auditSinkPlan.dispatchEnabled).toBe(false);
+    expect(auditSinkPlan.sinkItems.map((item) => item.id)).toEqual(["event_type", "redaction_policy", "sink_reference", "retention_policy", "failure_handling"]);
+    expect(auditSinkPlan.sinkItems.every((item) => item.status === "not_writable" && item.rawExcluded)).toBe(true);
+    expect(auditSinkPlan.sinkItems.map((item) => item.requiredFields)).toEqual(expect.arrayContaining([
+      expect.arrayContaining(["event_type", "redaction_policy", "sink_ref", "retention_policy", "failure_handling_ref"]),
+    ]));
+    expect(auditSinkPlan.dryRunPlanSnapshot).toMatchObject({ dryRunExecutionEnabled: false, auditWriteEnabled: false, executionEnabled: false });
+    expect(auditSinkPlan.safeBoundary).toContain("audit sink plan only");
+    expect(JSON.stringify(auditSinkPlan)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw audit-sink-plan|secret audit-sink-plan|private|token/i);
   });
 
   it("builds a disabled Authority Adapter Contract 1 before any execution adapter exists", () => {

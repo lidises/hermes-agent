@@ -1489,6 +1489,34 @@ export type OfficeControlledMutationDryRunPlan = {
   safeProjectionOnly: true;
 };
 
+export type OfficeControlledMutationAuditSinkPlanId = "event_type" | "redaction_policy" | "sink_reference" | "retention_policy" | "failure_handling";
+
+export type OfficeControlledMutationAuditSinkPlanItem = {
+  id: OfficeControlledMutationAuditSinkPlanId;
+  label: string;
+  status: "not_writable";
+  requiredFields: Array<"event_type" | "redaction_policy" | "sink_ref" | "retention_policy" | "failure_handling_ref">;
+  safeSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeControlledMutationAuditSinkPlan = {
+  stageLabel: "Controlled Mutation Audit Sink Plan 1";
+  title: string;
+  enabledControls: 0;
+  auditWriteEnabled: false;
+  dryRunExecutionEnabled: false;
+  proposalCreationEnabled: false;
+  mutationRouteEnabled: false;
+  rollbackExecutionEnabled: false;
+  executionEnabled: false;
+  dispatchEnabled: false;
+  sinkItems: OfficeControlledMutationAuditSinkPlanItem[];
+  dryRunPlanSnapshot: Pick<OfficeControlledMutationDryRunPlan, "dryRunExecutionEnabled" | "auditWriteEnabled" | "executionEnabled">;
+  safeBoundary: string;
+  safeProjectionOnly: true;
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -2927,6 +2955,44 @@ export function buildOfficeControlledMutationDryRunPlan(proposalContract: Office
       status: "not_runnable",
       requiredFields,
       safeSummary: `${item.label} is required before any future dry-run can be executed`,
+      rawExcluded: true,
+    })),
+  };
+}
+
+export function buildOfficeControlledMutationAuditSinkPlan(dryRunPlan: OfficeControlledMutationDryRunPlan): OfficeControlledMutationAuditSinkPlan {
+  const requiredFields: OfficeControlledMutationAuditSinkPlanItem["requiredFields"] = ["event_type", "redaction_policy", "sink_ref", "retention_policy", "failure_handling_ref"];
+  const sinkItems: Array<{ id: OfficeControlledMutationAuditSinkPlanId; label: string }> = [
+    { id: "event_type", label: "Event type" },
+    { id: "redaction_policy", label: "Redaction policy" },
+    { id: "sink_reference", label: "Sink reference" },
+    { id: "retention_policy", label: "Retention policy" },
+    { id: "failure_handling", label: "Failure handling" },
+  ];
+  return {
+    stageLabel: "Controlled Mutation Audit Sink Plan 1",
+    title: "제어형 변경 감사 싱크 계획 · 쓰기 없음",
+    enabledControls: 0,
+    auditWriteEnabled: false,
+    dryRunExecutionEnabled: false,
+    proposalCreationEnabled: false,
+    mutationRouteEnabled: false,
+    rollbackExecutionEnabled: false,
+    executionEnabled: false,
+    dispatchEnabled: false,
+    dryRunPlanSnapshot: {
+      dryRunExecutionEnabled: dryRunPlan.dryRunExecutionEnabled,
+      auditWriteEnabled: dryRunPlan.auditWriteEnabled,
+      executionEnabled: dryRunPlan.executionEnabled,
+    },
+    safeBoundary: "audit sink plan only · no audit write · no dry-run execution · no proposal creation · no mutation route · no executable controls",
+    safeProjectionOnly: true,
+    sinkItems: sinkItems.map((item) => ({
+      id: item.id,
+      label: item.label,
+      status: "not_writable",
+      requiredFields,
+      safeSummary: `${item.label} is required before any future audit event can be written`,
       rawExcluded: true,
     })),
   };
