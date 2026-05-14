@@ -1,6 +1,29 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-13 20:58 KST
+Last updated: 2026-05-14 12:06 KST
+
+## AI Office 통합 운영실 umbrella summary
+
+Current umbrella project: `AI Office Unified Operating Workbench` / `AI Office 통합 운영실`.
+
+AI Office/VPS dashboard, canonical VPS `ai-office` Kanban, Paperclip/sourceTags/Projection Pipeline, and the DeskRPG-like RPG Visualizer are one product with four layers:
+
+```text
+VPS ai-office Kanban = 운영 보드 / work state source of truth
+Paperclip/sourceTags = 근거 레이어 / safe evidence context
+Projection Cache = 안전 투영 캐시 / validated last-known-good display material
+/office RPG Visualizer = RPG 운영실 / human-readable private dashboard
+```
+
+Phase 0 consolidation docs:
+
+- `docs/ai-office/product/unified-operating-workbench.md`
+- `docs/ai-office/architecture/unified-operating-workbench.md`
+- `docs/ai-office/plans/2026-05-14-desk-rpg-master-spec-review.md`
+
+Status of this summary: Phase 0 docs consolidation is complete, and the first approved frontend implementation slices are local-only completed through `Approval Console 1`. `/office` gained a safe mission-storyboard helper and visible DOM/CSS flow row for the unified operating-room story, then `Orchestrator Desk 1`, `Kanban Board 1`, `Paperclip Source Archive 1`, `Review Corner 1`, and `Approval Console 1` deepened the main facilities in order. The approval console is safe projection only: disabled summary/human/dry-run/audit/boundary/control cards, no approval buttons or form inputs, no approve/reject execution, raw source display, raw path/bundle id/prompt/body/private value projection, projection transfer/promote, executable mutation control, Kanban write/transition, watcher/cron, VPS/service change, NAS mount/direct credential/direct raw-source read, public exposure change, gateway/core restart, or renderer dependency was added. Verification passed for this local slice: `npm test -- --run OfficePage.test.ts` (76 passed), `npm test -- --run OfficePage.rpg.test.tsx` (1 passed), focused ESLint on touched Office files, `npm run build` with only the known chunk-size warning, focused backend Office tests (28 passed), `git diff --check`, and local `/office` browser smoke with approval hooks present, zero approval buttons/inputs, raw-leak false, and no console/JS errors. Full `npm test -- --run` is still blocked by the existing Vitest collection mismatch for `scripts/sync-assets.test.mjs`, while `node --test scripts/sync-assets.test.mjs` passes.
+
+Master Spec v0.1 review adds an important clarification: read-only-first is the first safety posture, not the permanent ceiling. The long-term target is a Desk RPG/JRPG operating room with user avatar, orchestrator-mediated instructions, worker characters, Kanban/Paperclip facilities, approval flow, and eventually controlled mutation under a separate authority model. The first local implementation now makes that story visible without adding executable control: `buildOfficeRpgMissionStoryboard(scene)` and `OfficeRpgMap` render the `지식위키 요청 → 오케스트레이터 → 운영 보드 → Paperclip 근거 → 리뷰 → 승인 후 저장` flow from safe scene counts only. `Orchestrator Desk 1`, `Kanban Board 1`, `Paperclip Source Archive 1`, `Review Corner 1`, and `Approval Console 1` add visible `data-office-rpg-*` hooks for intake/decomposition, read-only board lanes, safe evidence shelves, review/incident posture, and a disabled non-executable approval console. Next recommended direction is `Approval Model Contract 1`: define authority, dry-run evidence, audit event, and decision DTO boundaries before any real mutation path.
 
 ## AI Office RPG Visualizer deployed to private VPS dashboard
 
@@ -16,7 +39,7 @@ Safety/non-actions: frontend/read-only only; no backend schema/API change, mutat
 
 ## Kanban-first operating conversion completed
 
-The canonical VPS `ai-office` board is now being used as the operating source of truth rather than only as historical/checkpoint storage. Three real operating cards were created and completed/verified on the board: `t_83f3ff90` operating rules, `t_0fced671` live operating-room report, and `t_49757d89` safety review. A Mac convenience wrapper `/Users/lidises/.local/bin/ai-office-kanban` now queries the VPS canonical board without creating a second local board. `/office` gained a read-only Kanban-first operating posture panel showing VPS `ai-office` as source of truth, open/active/blocked/done counts, and guidance cards for intake, orchestration, review gates, and Mac relay status. Evidence: `docs/ai-office/plans/2026-05-13-kanban-first-operating-conversion.md`.
+The canonical VPS `ai-office` board is now being used as the operating source of truth rather than only as historical/checkpoint storage. Three real operating cards were created and completed/verified on the board: `t_83f3ff90` operating rules, `t_0fced671` live operating-room report, and `t_49757d89` safety review. A Mac convenience wrapper `<local-user-bin>/ai-office-kanban` now queries the VPS canonical board without creating a second local board. `/office` gained a read-only Kanban-first operating posture panel showing VPS `ai-office` as source of truth, open/active/blocked/done counts, and guidance cards for intake, orchestration, review gates, and Mac relay status. Evidence: `docs/ai-office/plans/2026-05-13-kanban-first-operating-conversion.md`.
 
 Safety/non-actions: `/office` remains read-only; no mutation controls, cron/watcher enablement, public exposure, NAS mount/direct credentials, gateway restart, or raw task body/result projection were added.
 

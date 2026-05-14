@@ -877,6 +877,106 @@ export type OfficeRpgScene = {
   };
 };
 
+export type OfficeRpgMissionStoryboardStep = {
+  id: "request" | "orchestrate" | "board" | "evidence" | "review" | "approval";
+  label: string;
+  room: OfficeRpgRoomId;
+  detail: string;
+  tone: OfficeRpgSeverity;
+};
+
+export type OfficeRpgMissionStoryboard = {
+  stageLabel: "First Implementation Scene";
+  title: string;
+  summary: string;
+  steps: OfficeRpgMissionStoryboardStep[];
+  approvalBoundary: string;
+  safeProjectionOnly: true;
+};
+
+export type OfficeRpgOrchestratorDeskCard = {
+  id: "intake" | "decompose" | "assign" | "evidence" | "review" | "authority";
+  label: string;
+  value: string;
+  detail: string;
+  tone: "neutral" | "info" | "warning";
+};
+
+export type OfficeRpgOrchestratorDesk = {
+  stageLabel: "Orchestrator Desk 1";
+  title: string;
+  intent: string;
+  cards: OfficeRpgOrchestratorDeskCard[];
+  actionBoundary: string;
+  safeProjectionOnly: true;
+};
+
+export type OfficeRpgKanbanBoardLane = {
+  id: "intake" | "active" | "blocked" | "done" | "clerk" | "boundary";
+  label: string;
+  value: string;
+  detail: string;
+  tone: "neutral" | "info" | "warning";
+};
+
+export type OfficeRpgKanbanBoardFacility = {
+  stageLabel: "Kanban Board 1";
+  title: string;
+  sourceOfTruth: "VPS ai-office Kanban";
+  lanes: OfficeRpgKanbanBoardLane[];
+  writeBoundary: string;
+  safeProjectionOnly: true;
+};
+
+export type OfficeRpgSourceArchiveShelf = {
+  id: "evidence" | "sourceTags" | "manifests" | "validation" | "boundary" | "handoff";
+  label: string;
+  value: string;
+  detail: string;
+  tone: "neutral" | "info" | "warning";
+};
+
+export type OfficeRpgSourceArchiveFacility = {
+  stageLabel: "Paperclip Source Archive 1";
+  title: string;
+  shelves: OfficeRpgSourceArchiveShelf[];
+  rawBoundary: string;
+  safeProjectionOnly: true;
+};
+
+export type OfficeRpgReviewCornerStation = {
+  id: "queue" | "blocked" | "source" | "automation" | "escalation" | "boundary";
+  label: string;
+  value: string;
+  detail: string;
+  tone: "neutral" | "info" | "warning";
+};
+
+export type OfficeRpgReviewCornerFacility = {
+  stageLabel: "Review Corner 1";
+  title: string;
+  stations: OfficeRpgReviewCornerStation[];
+  approvalBoundary: string;
+  safeProjectionOnly: true;
+};
+
+export type OfficeRpgApprovalConsoleControl = {
+  id: "summary" | "human" | "dryRun" | "audit" | "boundary" | "disabled";
+  label: string;
+  value: string;
+  detail: string;
+  tone: "neutral" | "info" | "warning";
+  disabled: true;
+};
+
+export type OfficeRpgApprovalConsoleFacility = {
+  stageLabel: "Approval Console 1";
+  title: string;
+  controls: OfficeRpgApprovalConsoleControl[];
+  decisionBoundary: string;
+  safeProjectionOnly: true;
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -1095,9 +1195,10 @@ export function buildOfficeRpgScene(state: OfficeState): OfficeRpgScene {
       return { id: room.id, label: room.label, summary: `에이전트 ${state.agents.length}개`, severity: state.agents.length > 0 ? "info" : "normal", counts: { agents: state.agents.length } };
     }
     if (room.id === "task_board") {
-      const blocked = workStatuses.filter((status) => status === "blocked" || status === "failed").length;
+      const blocked = workStatuses.filter((status) => status === "blocked").length;
       const completed = workStatuses.filter((status) => status === "completed").length;
-      return { id: room.id, label: room.label, summary: `업무 ${state.work_items.length}개 · 막힘 ${blocked}개`, severity: blocked > 0 ? "danger" : state.work_items.length > 0 ? "info" : "normal", counts: { work_items: state.work_items.length, blocked, completed } };
+      const active = workStatuses.filter((status) => status === "working").length;
+      return { id: room.id, label: room.label, summary: `작업 ${state.work_items.length}개 · 막힘 ${blocked}개`, severity: blocked > 0 ? "danger" : state.work_items.length > 0 ? "info" : "normal", counts: { work_items: state.work_items.length, active, blocked, completed } };
     }
     if (room.id === "cron_room") {
       const failed = cronStatuses.filter((status) => status === "failed").length;
@@ -1123,6 +1224,378 @@ export function buildOfficeRpgScene(state: OfficeState): OfficeRpgScene {
       source: "OfficeState",
       omittedRawSections: state.redactions.omitted_sections.filter((section) => typeof section === "string" && section.length > 0).map((_, index) => `omitted-${index + 1}`),
     },
+  };
+}
+
+function rpgRoomCount(scene: OfficeRpgScene, roomId: OfficeRpgRoomId, key: string): number {
+  const value = scene.rooms.find((room) => room.id === roomId)?.counts[key];
+  return typeof value === "number" && Number.isFinite(value) ? Math.max(0, value) : 0;
+}
+
+function rpgStoryboardTone(count: number, fallback: OfficeRpgSeverity = "info"): OfficeRpgSeverity {
+  return count > 0 ? fallback : "normal";
+}
+
+export function buildOfficeRpgMissionStoryboard(scene: OfficeRpgScene): OfficeRpgMissionStoryboard {
+  const agentCount = rpgRoomCount(scene, "agent_desks", "agents");
+  const workCount = rpgRoomCount(scene, "task_board", "work_items");
+  const blockedCount = rpgRoomCount(scene, "task_board", "blocked");
+  const sourceCount = rpgRoomCount(scene, "source_archive", "sources");
+  const sourceWarningCount = rpgRoomCount(scene, "source_archive", "warnings");
+
+  return {
+    stageLabel: "First Implementation Scene",
+    title: "지식위키 요청 → 통합 운영실 처리 흐름",
+    summary: "사용자 요청이 오케스트레이터, 운영 보드, 근거 레이어, 리뷰/승인 경계로 흘러가는 첫 실제 화면입니다",
+    approvalBoundary: "최종 저장/NAS 반영은 사용자 승인 전까지 UI에서 실행하지 않습니다",
+    safeProjectionOnly: true,
+    steps: [
+      {
+        id: "request",
+        label: "요청 접수",
+        room: "command",
+        detail: "사용자가 지식위키 글 작성을 요청하면 운영실은 읽기 전용 흐름으로 먼저 표시합니다",
+        tone: "info",
+      },
+      {
+        id: "orchestrate",
+        label: "오케스트레이터 분해",
+        room: "agent_desks",
+        detail: `직원 ${agentCount}개 안전 상태를 바탕으로 역할 분담을 보여줍니다`,
+        tone: rpgStoryboardTone(agentCount),
+      },
+      {
+        id: "board",
+        label: "운영 보드 배치",
+        room: "task_board",
+        detail: `작업 카드 ${workCount}개 · 막힘 ${blockedCount}개를 안전 집계로 표시합니다`,
+        tone: blockedCount > 0 ? "warning" : rpgStoryboardTone(workCount),
+      },
+      {
+        id: "evidence",
+        label: "근거 수집",
+        room: "source_archive",
+        detail: `Paperclip/sourceTags 소스 ${sourceCount}개 · 확인 ${sourceWarningCount}개를 원문 없이 연결합니다`,
+        tone: sourceWarningCount > 0 ? "warning" : rpgStoryboardTone(sourceCount),
+      },
+      {
+        id: "review",
+        label: "검토 대기",
+        room: "incident_corner",
+        detail: blockedCount > 0 ? "리뷰/승인이 필요한 항목을 주의 구역으로 올립니다" : "검토 구역은 승인 필요 신호가 생길 때 강조됩니다",
+        tone: blockedCount > 0 ? "warning" : "normal",
+      },
+      {
+        id: "approval",
+        label: "승인 후 저장",
+        room: "command",
+        detail: "NAS Keeper 역할은 나중에 승인된 저장 요청만 실행하도록 분리합니다",
+        tone: "normal",
+      },
+    ],
+  };
+}
+
+export function buildOfficeRpgOrchestratorDesk(scene: OfficeRpgScene): OfficeRpgOrchestratorDesk {
+  const agentCount = rpgRoomCount(scene, "agent_desks", "agents");
+  const workCount = rpgRoomCount(scene, "task_board", "work_items");
+  const blockedCount = rpgRoomCount(scene, "task_board", "blocked");
+  const sourceCount = rpgRoomCount(scene, "source_archive", "sources");
+  const sourceWarningCount = rpgRoomCount(scene, "source_archive", "warnings");
+  const incidentCount = rpgRoomCount(scene, "incident_corner", "incidents");
+
+  return {
+    stageLabel: "Orchestrator Desk 1",
+    title: "오케스트레이터 데스크 · 안전 분해 미리보기",
+    intent: "사용자 지시를 실행이 아니라 운영 가능한 요청 흐름으로 정리합니다",
+    actionBoundary: "이 데스크는 UserInstructionSubmitted/ActionRequested 같은 요청 형태만 보여주며 실행 이벤트를 만들지 않습니다",
+    safeProjectionOnly: true,
+    cards: [
+      {
+        id: "intake",
+        label: "지시 접수",
+        value: "요청 1건",
+        detail: "자연어 지시는 항상 오케스트레이터 수준 요청으로 들어옵니다",
+        tone: "neutral",
+      },
+      {
+        id: "decompose",
+        label: "작업 분해",
+        value: `작업 ${workCount}개`,
+        detail: workCount > 0 ? "운영 보드에 놓일 단위를 안전 집계로 미리 보여줍니다" : "작업 단위가 생기면 운영 보드로 분해됩니다",
+        tone: rpgStoryboardTone(workCount, "info") === "normal" ? "neutral" : "info",
+      },
+      {
+        id: "assign",
+        label: "역할 배치",
+        value: `직원 ${agentCount}명`,
+        detail: "검색 worker, Reviewer, Wiki Writer 후보를 실행 없이 배치 상태로만 표시합니다",
+        tone: rpgStoryboardTone(agentCount, "info") === "normal" ? "neutral" : "info",
+      },
+      {
+        id: "evidence",
+        label: "근거 요구",
+        value: `소스 ${sourceCount}개`,
+        detail: "Paperclip/sourceTags 근거 필요 여부를 원문 없이 신호화합니다",
+        tone: sourceWarningCount > 0 ? "warning" : sourceCount > 0 ? "info" : "neutral",
+      },
+      {
+        id: "review",
+        label: "리뷰 게이트",
+        value: `막힘 ${blockedCount}개`,
+        detail: incidentCount > 0 || blockedCount > 0 ? "검토/승인 필요 신호를 실행 전 게이트로 올립니다" : "리뷰 신호가 생기면 승인 흐름으로 연결됩니다",
+        tone: blockedCount > 0 || incidentCount > 0 ? "warning" : "neutral",
+      },
+      {
+        id: "authority",
+        label: "권한 경계",
+        value: "실행 없음",
+        detail: "저장, 배포, Kanban write, watcher는 별도 승인 전까지 발생하지 않습니다",
+        tone: "neutral",
+      },
+    ],
+  };
+}
+
+export function buildOfficeRpgKanbanBoardFacility(scene: OfficeRpgScene): OfficeRpgKanbanBoardFacility {
+  const workCount = rpgRoomCount(scene, "task_board", "work_items");
+  const activeCount = rpgRoomCount(scene, "task_board", "active");
+  const blockedCount = rpgRoomCount(scene, "task_board", "blocked");
+  const doneCount = rpgRoomCount(scene, "task_board", "completed");
+  const intakeCount = Math.max(0, workCount - activeCount - blockedCount - doneCount);
+
+  return {
+    stageLabel: "Kanban Board 1",
+    title: "운영 보드 · 안전 작업판 미리보기",
+    sourceOfTruth: "VPS ai-office Kanban",
+    writeBoundary: "이 보드는 작업 상태를 안전 투영으로만 보여주며 Kanban write/transition을 실행하지 않습니다",
+    safeProjectionOnly: true,
+    lanes: [
+      {
+        id: "intake",
+        label: "접수",
+        value: `${intakeCount}개`,
+        detail: "새 요청이 작업 카드 후보가 되는 위치입니다",
+        tone: intakeCount > 0 ? "info" : "neutral",
+      },
+      {
+        id: "active",
+        label: "진행",
+        value: `${activeCount}개`,
+        detail: "진행 중인 작업 수만 안전 집계로 표시합니다",
+        tone: activeCount > 0 ? "info" : "neutral",
+      },
+      {
+        id: "blocked",
+        label: "검토 필요",
+        value: `${blockedCount}개`,
+        detail: "오케스트레이터/Reviewer 확인이 필요한 카드 수입니다",
+        tone: blockedCount > 0 ? "warning" : "neutral",
+      },
+      {
+        id: "done",
+        label: "완료",
+        value: `${doneCount}개`,
+        detail: "완료된 카드도 원문 없이 수량만 유지합니다",
+        tone: "neutral",
+      },
+      {
+        id: "clerk",
+        label: "Board Clerk",
+        value: "정리 담당",
+        detail: "상태 설명 역할만 표시하며 작업 변경 권한은 없습니다",
+        tone: "neutral",
+      },
+      {
+        id: "boundary",
+        label: "전환 경계",
+        value: "쓰기 없음",
+        detail: "drag/drop, 상태 전환, 카드 생성은 별도 승인된 mutation 모델 이후입니다",
+        tone: "neutral",
+      },
+    ],
+  };
+}
+
+export function buildOfficeRpgSourceArchiveFacility(scene: OfficeRpgScene): OfficeRpgSourceArchiveFacility {
+  const sourceCount = rpgRoomCount(scene, "source_archive", "sources");
+  const warningCount = rpgRoomCount(scene, "source_archive", "warnings");
+  const workCount = rpgRoomCount(scene, "task_board", "work_items");
+
+  return {
+    stageLabel: "Paperclip Source Archive 1",
+    title: "근거 자료실 · 안전 근거 선반 미리보기",
+    rawBoundary: "이 자료실은 safe sourceTag/manifest posture만 보여주며 원문, 경로, 본문, projection transfer/promote를 실행하지 않습니다",
+    safeProjectionOnly: true,
+    shelves: [
+      {
+        id: "evidence",
+        label: "근거 선반",
+        value: `소스 ${sourceCount}개`,
+        detail: "Paperclip/source archive 항목을 원문 없이 수량과 상태로만 정리합니다",
+        tone: sourceCount > 0 ? "info" : "neutral",
+      },
+      {
+        id: "sourceTags",
+        label: "sourceTags",
+        value: "태그 자세",
+        detail: warningCount > 0 ? "확인 필요한 태그/소스 신호가 있어 리뷰 게이트로 연결합니다" : "태그 이름 대신 안전 자세만 표시합니다",
+        tone: warningCount > 0 ? "warning" : "info",
+      },
+      {
+        id: "manifests",
+        label: "안전 manifest",
+        value: `후보 ${sourceCount}개`,
+        detail: "검증된 safe manifest 후보 수만 보여주고 bundle id/path는 숨깁니다",
+        tone: sourceCount > 0 ? "info" : "neutral",
+      },
+      {
+        id: "validation",
+        label: "검증 선반",
+        value: warningCount > 0 ? `확인 ${warningCount}개` : "정상",
+        detail: "validator 결과는 pass/warning 수준의 posture로만 이어집니다",
+        tone: warningCount > 0 ? "warning" : "neutral",
+      },
+      {
+        id: "boundary",
+        label: "원문 경계",
+        value: "원문 없음",
+        detail: "경로, 본문, 토큰, 프롬프트, 로그는 자료실 카드에 들어오지 않습니다",
+        tone: "neutral",
+      },
+      {
+        id: "handoff",
+        label: "리뷰 연결",
+        value: `작업 ${workCount}개`,
+        detail: "운영 보드 작업과 리뷰 코너를 safe ref 수준에서만 이어줍니다",
+        tone: workCount > 0 ? "info" : "neutral",
+      },
+    ],
+  };
+}
+
+export function buildOfficeRpgReviewCornerFacility(scene: OfficeRpgScene): OfficeRpgReviewCornerFacility {
+  const workCount = rpgRoomCount(scene, "task_board", "work_items");
+  const blockedCount = rpgRoomCount(scene, "task_board", "blocked");
+  const sourceCount = rpgRoomCount(scene, "source_archive", "sources");
+  const sourceWarningCount = rpgRoomCount(scene, "source_archive", "warnings");
+  const failedAutomationCount = rpgRoomCount(scene, "cron_room", "failed");
+  const incidentCount = rpgRoomCount(scene, "incident_corner", "incidents");
+
+  return {
+    stageLabel: "Review Corner 1",
+    title: "리뷰 코너 · 안전 승인 대기 미리보기",
+    approvalBoundary: "이 리뷰 코너는 승인 필요 posture만 보여주며 approve/reject, Kanban transition, 저장, 전송, 서비스 작업을 실행하지 않습니다",
+    safeProjectionOnly: true,
+    stations: [
+      {
+        id: "queue",
+        label: "검토 큐",
+        value: `작업 ${workCount}개`,
+        detail: "운영 보드의 작업 수를 승인 전 대기열 posture로만 보여줍니다",
+        tone: workCount > 0 ? "info" : "neutral",
+      },
+      {
+        id: "blocked",
+        label: "막힘",
+        value: `${blockedCount}개`,
+        detail: "막힌 작업은 원문 없이 확인 필요 수량으로만 표시합니다",
+        tone: blockedCount > 0 ? "warning" : "neutral",
+      },
+      {
+        id: "source",
+        label: "근거 확인",
+        value: `소스 ${sourceCount}개`,
+        detail: sourceWarningCount > 0 ? "Paperclip/source 경고가 리뷰 확인 대상으로 연결됩니다" : "근거 레이어는 safe source posture만 전달합니다",
+        tone: sourceWarningCount > 0 ? "warning" : sourceCount > 0 ? "info" : "neutral",
+      },
+      {
+        id: "automation",
+        label: "자동화 확인",
+        value: `실패 ${failedAutomationCount}개`,
+        detail: "자동화 실패 여부만 집계하고 스크립트/로그는 표시하지 않습니다",
+        tone: failedAutomationCount > 0 ? "warning" : "neutral",
+      },
+      {
+        id: "escalation",
+        label: "에스컬레이션",
+        value: `신호 ${incidentCount}개`,
+        detail: "리뷰가 필요한 안전 신호를 승인 콘솔 이전 단계로 모읍니다",
+        tone: incidentCount > 0 ? "warning" : "neutral",
+      },
+      {
+        id: "boundary",
+        label: "권한 경계",
+        value: "실행 없음",
+        detail: "승인, 거절, 저장, 전송, 상태 전환은 다음 별도 권한 모델 전까지 비활성입니다",
+        tone: "neutral",
+      },
+    ],
+  };
+}
+
+export function buildOfficeRpgApprovalConsoleFacility(scene: OfficeRpgScene): OfficeRpgApprovalConsoleFacility {
+  const blockedCount = rpgRoomCount(scene, "task_board", "blocked");
+  const sourceWarningCount = rpgRoomCount(scene, "source_archive", "warnings");
+  const failedAutomationCount = rpgRoomCount(scene, "cron_room", "failed");
+  const approvalSignalCount = blockedCount + sourceWarningCount;
+  const auditSignalCount = sourceWarningCount + failedAutomationCount;
+
+  return {
+    stageLabel: "Approval Console 1",
+    title: "승인 콘솔 · 비실행 승인 자세 미리보기",
+    decisionBoundary: "이 콘솔은 승인 자세와 감사 handoff만 보여주며 approve/reject, 저장, 전송, Kanban transition, projection promote를 실행하지 않습니다",
+    safeProjectionOnly: true,
+    controls: [
+      {
+        id: "summary",
+        label: "승인 필요",
+        value: `신호 ${approvalSignalCount}개`,
+        detail: "막힘/리뷰 신호를 사람 승인 전 posture로만 요약합니다",
+        tone: approvalSignalCount > 0 ? "warning" : "neutral",
+        disabled: true,
+      },
+      {
+        id: "human",
+        label: "사람 결정",
+        value: "대기",
+        detail: "최종 판단은 UI 자동 실행이 아니라 별도 사용자 승인으로만 넘어갑니다",
+        tone: approvalSignalCount > 0 ? "info" : "neutral",
+        disabled: true,
+      },
+      {
+        id: "dryRun",
+        label: "dry-run only",
+        value: "비활성",
+        detail: "dry-run 결과를 설명할 수는 있지만 여기서 promote/저장을 실행하지 않습니다",
+        tone: "neutral",
+        disabled: true,
+      },
+      {
+        id: "audit",
+        label: "감사 handoff",
+        value: `확인 ${auditSignalCount}개`,
+        detail: "근거/자동화 확인 신호를 감사 메모 수준으로만 넘깁니다",
+        tone: auditSignalCount > 0 ? "warning" : "neutral",
+        disabled: true,
+      },
+      {
+        id: "boundary",
+        label: "권한 모델",
+        value: "분리됨",
+        detail: "mutation authority는 별도 설계/승인 전까지 이 화면에 존재하지 않습니다",
+        tone: "neutral",
+        disabled: true,
+      },
+      {
+        id: "disabled",
+        label: "실행 버튼",
+        value: "없음",
+        detail: "approve/reject/save/send/transition 버튼을 렌더링하지 않습니다",
+        tone: "neutral",
+        disabled: true,
+      },
+    ],
   };
 }
 

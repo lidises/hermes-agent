@@ -66,6 +66,12 @@ import {
   buildOfficeProjectionCacheSummary,
   buildOfficeProjectionOrchestration,
   buildOfficeMutationControlReadiness,
+  buildOfficeRpgMissionStoryboard,
+  buildOfficeRpgOrchestratorDesk,
+  buildOfficeRpgKanbanBoardFacility,
+  buildOfficeRpgSourceArchiveFacility,
+  buildOfficeRpgReviewCornerFacility,
+  buildOfficeRpgApprovalConsoleFacility,
   buildOfficeRpgScene,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -156,6 +162,172 @@ describe("OfficePage view helpers", () => {
     expect(scene.recentEvents).toEqual([{ id: "event-0", label: "최근 안전 이벤트", room: "task_board", severity: "warning", at: "2026-05-13T09:55:00Z" }]);
     expect(scene.entities.every((entity) => entity.positionHint.x >= 8 && entity.positionHint.x <= 92 && entity.positionHint.y >= 10 && entity.positionHint.y <= 88)).toBe(true);
     expect(JSON.stringify(scene)).not.toMatch(/raw prompt|raw transcript|raw task|raw blocked|raw done|raw result|secret body|secret script|raw token|raw warning|\/Users\/lidises|private-model|private-provider/i);
+  });
+
+  it("builds a first-implementation mission storyboard for the unified operating room", () => {
+    const scene = buildOfficeRpgScene(officeFixture({
+      data_sources: [
+        { id: "kanban", status: "ok", checked_at: "2026-05-13T09:59:00Z", item_count: 4, warning_count: 0 },
+        { id: "paperclip:clinic-evidence", status: "partial", checked_at: "2026-05-13T09:58:00Z", item_count: 2, warning_count: 1, error_summary: "raw prompt token path must not leak" } as unknown as OfficeState["data_sources"][number],
+      ],
+      agents: [
+        { id: "orchestrator", status: "active", model: "private-model", prompt: "raw prompt must not leak" },
+      ],
+      work_items: [
+        { id: "wiki-1", status: "running", title: "raw scientific acupuncture evidence task", body: "secret body" } as unknown as OfficeState["work_items"][number],
+        { id: "review-1", status: "blocked", title: "raw review title", result: "raw token" } as unknown as OfficeState["work_items"][number],
+      ],
+      automations: [
+        { id: "validator", state: "scheduled", last_status: "ok", script: "/Users/lidises/private.py" } as unknown as OfficeState["automations"][number],
+      ],
+    }));
+
+    const storyboard = buildOfficeRpgMissionStoryboard(scene);
+
+    expect(storyboard.stageLabel).toBe("First Implementation Scene");
+    expect(storyboard.title).toBe("지식위키 요청 → 통합 운영실 처리 흐름");
+    expect(storyboard.steps.map((step) => step.id)).toEqual(["request", "orchestrate", "board", "evidence", "review", "approval"]);
+    expect(storyboard.steps.map((step) => step.room)).toEqual(["command", "agent_desks", "task_board", "source_archive", "incident_corner", "command"]);
+    expect(storyboard.steps.find((step) => step.id === "board")?.detail).toContain("작업 카드");
+    expect(storyboard.steps.find((step) => step.id === "evidence")?.detail).toContain("Paperclip");
+    expect(storyboard.approvalBoundary).toBe("최종 저장/NAS 반영은 사용자 승인 전까지 UI에서 실행하지 않습니다");
+    expect(storyboard.safeProjectionOnly).toBe(true);
+    expect(JSON.stringify(storyboard)).not.toMatch(/raw|prompt|transcript|task_body|body|script|secret|token|private|\/Users\/lidises|model|provider|sk-/i);
+  });
+
+  it("builds a safe Orchestrator Desk 1 decomposition preview without executable actions", () => {
+    const scene = buildOfficeRpgScene(officeFixture({
+      data_sources: [
+        { id: "kanban", status: "ok", checked_at: "2026-05-14T09:59:00Z", item_count: 4, warning_count: 0 },
+        { id: "paperclip:/Users/lidises/nas/raw", status: "partial", checked_at: "2026-05-14T09:58:00Z", item_count: 2, warning_count: 1, error_summary: "raw prompt token path must not leak" } as unknown as OfficeState["data_sources"][number],
+      ],
+      agents: [
+        { id: "orchestrator", status: "active", model: "private-model", prompt: "raw prompt must not leak" },
+        { id: "search-worker", status: "idle", provider: "private-provider", transcript: "raw transcript must not leak" },
+      ],
+      work_items: [
+        { id: "wiki-1", status: "running", title: "침 치료 과학적 근거 위키 글 작성", body: "secret body" } as unknown as OfficeState["work_items"][number],
+        { id: "review-1", status: "blocked", title: "raw review title", result: "raw token" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+
+    const desk = buildOfficeRpgOrchestratorDesk(scene);
+
+    expect(desk.stageLabel).toBe("Orchestrator Desk 1");
+    expect(desk.title).toBe("오케스트레이터 데스크 · 안전 분해 미리보기");
+    expect(desk.intent).toBe("사용자 지시를 실행이 아니라 운영 가능한 요청 흐름으로 정리합니다");
+    expect(desk.cards.map((card) => card.id)).toEqual(["intake", "decompose", "assign", "evidence", "review", "authority"]);
+    expect(desk.cards.find((card) => card.id === "decompose")).toMatchObject({ label: "작업 분해", value: "작업 2개", tone: "info" });
+    expect(desk.cards.find((card) => card.id === "assign")).toMatchObject({ label: "역할 배치", value: "직원 2명", tone: "info" });
+    expect(desk.cards.find((card) => card.id === "evidence")).toMatchObject({ label: "근거 요구", value: "소스 2개", tone: "warning" });
+    expect(desk.cards.find((card) => card.id === "review")).toMatchObject({ label: "리뷰 게이트", value: "막힘 1개", tone: "warning" });
+    expect(desk.actionBoundary).toBe("이 데스크는 UserInstructionSubmitted/ActionRequested 같은 요청 형태만 보여주며 실행 이벤트를 만들지 않습니다");
+    expect(desk.safeProjectionOnly).toBe(true);
+    expect(JSON.stringify(desk)).not.toMatch(/raw|prompt|transcript|task_body|body|script|secret|token|private|\/Users\/lidises|model|provider|sk-|침 치료/i);
+  });
+
+  it("builds a safe Kanban Board 1 facility preview without writing task state", () => {
+    const scene = buildOfficeRpgScene(officeFixture({
+      work_items: [
+        { id: "wiki-1", status: "running", title: "raw clinic wiki task", body: "secret body" } as unknown as OfficeState["work_items"][number],
+        { id: "review-1", status: "blocked", title: "raw review title", result: "raw token" } as unknown as OfficeState["work_items"][number],
+        { id: "done-1", status: "done", title: "raw done title", transcript: "raw transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      agents: [{ id: "board-clerk", status: "active", prompt: "raw prompt" }],
+      data_sources: [{ id: "kanban", status: "ok", checked_at: "2026-05-14T10:00:00Z", item_count: 3, warning_count: 0 }],
+    }));
+
+    const board = buildOfficeRpgKanbanBoardFacility(scene);
+
+    expect(board.stageLabel).toBe("Kanban Board 1");
+    expect(board.title).toBe("운영 보드 · 안전 작업판 미리보기");
+    expect(board.sourceOfTruth).toBe("VPS ai-office Kanban");
+    expect(board.lanes.map((lane) => lane.id)).toEqual(["intake", "active", "blocked", "done", "clerk", "boundary"]);
+    expect(board.lanes.find((lane) => lane.id === "active")).toMatchObject({ label: "진행", value: "1개", tone: "info" });
+    expect(board.lanes.find((lane) => lane.id === "blocked")).toMatchObject({ label: "검토 필요", value: "1개", tone: "warning" });
+    expect(board.lanes.find((lane) => lane.id === "done")).toMatchObject({ label: "완료", value: "1개", tone: "neutral" });
+    expect(board.writeBoundary).toBe("이 보드는 작업 상태를 안전 투영으로만 보여주며 Kanban write/transition을 실행하지 않습니다");
+    expect(board.safeProjectionOnly).toBe(true);
+    expect(JSON.stringify(board)).not.toMatch(/raw|prompt|transcript|task_body|body|script|secret|token|private|\/Users\/lidises|clinic|model|provider|sk-/i);
+  });
+
+  it("builds a safe Paperclip Source Archive 1 facility preview without raw evidence", () => {
+    const scene = buildOfficeRpgScene(officeFixture({
+      data_sources: [
+        { id: "paperclip:/Users/lidises/nas/private", status: "ok", checked_at: "2026-05-14T10:00:00Z", item_count: 4, warning_count: 0, error_summary: "raw safe tag should not leak" } as unknown as OfficeState["data_sources"][number],
+        { id: "sourceTags:clinic-growth", status: "partial", checked_at: "2026-05-14T10:01:00Z", item_count: 2, warning_count: 1, error_summary: "secret token path prompt" } as unknown as OfficeState["data_sources"][number],
+        { id: "manifest:pcwb-safe-001", status: "ok", checked_at: "2026-05-14T10:02:00Z", item_count: 1, warning_count: 0, error_summary: "raw manifest body" } as unknown as OfficeState["data_sources"][number],
+      ],
+      work_items: [{ id: "wiki-1", status: "running", title: "raw clinic wiki task", body: "secret body" } as unknown as OfficeState["work_items"][number]],
+    }));
+
+    const archive = buildOfficeRpgSourceArchiveFacility(scene);
+
+    expect(archive.stageLabel).toBe("Paperclip Source Archive 1");
+    expect(archive.title).toBe("근거 자료실 · 안전 근거 선반 미리보기");
+    expect(archive.shelves.map((shelf) => shelf.id)).toEqual(["evidence", "sourceTags", "manifests", "validation", "boundary", "handoff"]);
+    expect(archive.shelves.find((shelf) => shelf.id === "evidence")).toMatchObject({ label: "근거 선반", value: "소스 3개", tone: "info" });
+    expect(archive.shelves.find((shelf) => shelf.id === "sourceTags")).toMatchObject({ label: "sourceTags", value: "태그 자세", tone: "warning" });
+    expect(archive.shelves.find((shelf) => shelf.id === "manifests")).toMatchObject({ label: "안전 manifest", value: "후보 3개", tone: "info" });
+    expect(archive.rawBoundary).toBe("이 자료실은 safe sourceTag/manifest posture만 보여주며 원문, 경로, 본문, projection transfer/promote를 실행하지 않습니다");
+    expect(archive.safeProjectionOnly).toBe(true);
+    expect(JSON.stringify(archive)).not.toMatch(/paperclip:\/Users|\/Users\/lidises|clinic-growth|pcwb-safe-001|secret token path prompt|raw safe tag should not leak|raw manifest body|raw clinic wiki task|secret body|private/i);
+  });
+
+  it("builds a safe Review Corner 1 facility preview without executable approval", () => {
+    const scene = buildOfficeRpgScene(officeFixture({
+      data_sources: [
+        { id: "paperclip:/Users/lidises/nas/private", status: "partial", checked_at: "2026-05-14T10:00:00Z", item_count: 2, warning_count: 1, error_summary: "raw prompt token path must not leak" } as unknown as OfficeState["data_sources"][number],
+      ],
+      agents: [{ id: "reviewer", status: "active", model: "private-model", prompt: "raw prompt" }],
+      work_items: [
+        { id: "wiki-1", status: "blocked", title: "raw clinic review", body: "secret body" } as unknown as OfficeState["work_items"][number],
+        { id: "wiki-2", status: "review", title: "raw review waiting", result: "secret token" } as unknown as OfficeState["work_items"][number],
+        { id: "wiki-3", status: "done", title: "raw done", transcript: "raw transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      automations: [{ id: "validator", state: "error", last_status: "error", script: "/Users/lidises/private.py" } as unknown as OfficeState["automations"][number]],
+      events: [{ id: "event-1", category: "review_needed", room_id: "incident_corner", tone: "warning", generated_at: "2026-05-14T10:02:00Z", detail: "raw token detail" } as unknown as OfficeState["events"][number]],
+    }));
+
+    const review = buildOfficeRpgReviewCornerFacility(scene);
+
+    expect(review.stageLabel).toBe("Review Corner 1");
+    expect(review.title).toBe("리뷰 코너 · 안전 승인 대기 미리보기");
+    expect(review.stations.map((station) => station.id)).toEqual(["queue", "blocked", "source", "automation", "escalation", "boundary"]);
+    expect(review.stations.find((station) => station.id === "queue")).toMatchObject({ label: "검토 큐", value: "작업 3개", tone: "info" });
+    expect(review.stations.find((station) => station.id === "blocked")).toMatchObject({ label: "막힘", value: "1개", tone: "warning" });
+    expect(review.stations.find((station) => station.id === "source")).toMatchObject({ label: "근거 확인", value: "소스 1개", tone: "warning" });
+    expect(review.approvalBoundary).toBe("이 리뷰 코너는 승인 필요 posture만 보여주며 approve/reject, Kanban transition, 저장, 전송, 서비스 작업을 실행하지 않습니다");
+    expect(review.safeProjectionOnly).toBe(true);
+    expect(JSON.stringify(review)).not.toMatch(/paperclip:\/Users|\/Users\/lidises|raw prompt token path|raw clinic review|raw review waiting|secret body|secret token|raw transcript|private-model|private\.py/i);
+  });
+
+  it("builds a safe Approval Console 1 facility preview without executable controls", () => {
+    const scene = buildOfficeRpgScene(officeFixture({
+      data_sources: [
+        { id: "paperclip:/Users/lidises/nas/private", status: "partial", checked_at: "2026-05-14T10:00:00Z", item_count: 2, warning_count: 1, error_summary: "raw approval source path token" } as unknown as OfficeState["data_sources"][number],
+      ],
+      agents: [{ id: "approver", status: "active", model: "private-model", prompt: "raw approval prompt" }],
+      work_items: [
+        { id: "wiki-1", status: "blocked", title: "raw approval blocked", body: "secret body" } as unknown as OfficeState["work_items"][number],
+        { id: "wiki-2", status: "review", title: "raw approval review", result: "secret token" } as unknown as OfficeState["work_items"][number],
+        { id: "wiki-3", status: "done", title: "raw approval done", transcript: "raw transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      automations: [{ id: "promote", state: "error", last_status: "error", script: "/Users/lidises/promote.py" } as unknown as OfficeState["automations"][number]],
+      events: [{ id: "event-1", category: "approval_needed", room_id: "incident_corner", tone: "warning", generated_at: "2026-05-14T10:03:00Z", detail: "raw approval token detail" } as unknown as OfficeState["events"][number]],
+    }));
+
+    const approval = buildOfficeRpgApprovalConsoleFacility(scene);
+
+    expect(approval.stageLabel).toBe("Approval Console 1");
+    expect(approval.title).toBe("승인 콘솔 · 비실행 승인 자세 미리보기");
+    expect(approval.controls.map((control) => control.id)).toEqual(["summary", "human", "dryRun", "audit", "boundary", "disabled"]);
+    expect(approval.controls.find((control) => control.id === "summary")).toMatchObject({ label: "승인 필요", value: "신호 2개", tone: "warning", disabled: true });
+    expect(approval.controls.find((control) => control.id === "dryRun")).toMatchObject({ label: "dry-run only", value: "비활성", tone: "neutral", disabled: true });
+    expect(approval.controls.find((control) => control.id === "disabled")).toMatchObject({ label: "실행 버튼", value: "없음", tone: "neutral", disabled: true });
+    expect(approval.decisionBoundary).toBe("이 콘솔은 승인 자세와 감사 handoff만 보여주며 approve/reject, 저장, 전송, Kanban transition, projection promote를 실행하지 않습니다");
+    expect(approval.safeProjectionOnly).toBe(true);
+    expect(JSON.stringify(approval)).not.toMatch(/paperclip:\/Users|\/Users\/lidises|raw approval|secret body|secret token|raw transcript|private-model|promote\.py/i);
   });
 
   it("builds a dynamic projection orchestration view from safe cache and source posture", () => {

@@ -76,6 +76,12 @@ import {
   buildOfficeProjectionCacheSummary,
   buildOfficeProjectionOrchestration,
   buildOfficeMutationControlReadiness,
+  buildOfficeRpgMissionStoryboard,
+  buildOfficeRpgOrchestratorDesk,
+  buildOfficeRpgKanbanBoardFacility,
+  buildOfficeRpgSourceArchiveFacility,
+  buildOfficeRpgReviewCornerFacility,
+  buildOfficeRpgApprovalConsoleFacility,
   buildOfficeRpgScene,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
@@ -1257,6 +1263,12 @@ export function OfficeRpgMap({
   const statusOptions = Array.from(new Set(scene.entities.map((entity) => entity.status)));
   const severityOptions = Array.from(new Set(scene.entities.map((entity) => entity.severity)));
   const roleOptions = Array.from(new Set(scene.entities.map((entity) => entity.kind)));
+  const missionStoryboard = buildOfficeRpgMissionStoryboard(scene);
+  const orchestratorDesk = buildOfficeRpgOrchestratorDesk(scene);
+  const kanbanBoardFacility = buildOfficeRpgKanbanBoardFacility(scene);
+  const sourceArchiveFacility = buildOfficeRpgSourceArchiveFacility(scene);
+  const reviewCornerFacility = buildOfficeRpgReviewCornerFacility(scene);
+  const approvalConsoleFacility = buildOfficeRpgApprovalConsoleFacility(scene);
 
   return (
     <Card className="overflow-hidden border-emerald-300/25 bg-black/25" data-office-rpg-map="true">
@@ -1277,14 +1289,147 @@ export function OfficeRpgMap({
         <nav className="flex flex-wrap gap-2 text-xs" aria-label="RPG 지도 이동">
           {[
             ["map", "지도"],
+            ["mission", "미션 흐름"],
             ["attention", "주의"],
             ["source_archive", "자료실"],
+            ["approval", "승인"],
             ["inspector", "검사"],
             ["fallback", "대체 목록"],
           ].map(([id, label]) => (
             <a key={id} href={id === "inspector" ? "#office-safe-inspector" : `#office-rpg-${id}`} className="border border-current/20 px-2 py-1 text-midground/70 hover:text-foreground" data-office-rpg-jump-target={id}>{label}</a>
           ))}
         </nav>
+        <section id="office-rpg-mission" className="office-rpg-mission" data-office-rpg-mission-storyboard="true" aria-label={missionStoryboard.title}>
+          <div className="office-rpg-mission__header">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">{missionStoryboard.stageLabel}</div>
+              <h3 className="text-sm font-semibold text-foreground">{missionStoryboard.title}</h3>
+              <p className="mt-1 text-xs leading-5 text-midground/70">{missionStoryboard.summary}</p>
+            </div>
+            <div className="border border-emerald-300/25 bg-emerald-950/15 px-3 py-2 text-xs text-emerald-100" data-office-rpg-approval-boundary="true">
+              {missionStoryboard.approvalBoundary}
+            </div>
+          </div>
+          <div className="office-rpg-mission__steps">
+            {missionStoryboard.steps.map((step, index) => (
+              <div key={step.id} className={`office-rpg-mission__step office-rpg-mission__step--${step.tone}`} data-office-rpg-mission-step={step.id}>
+                <div className="office-rpg-mission__node" aria-hidden="true">{index + 1}</div>
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-foreground">
+                    <span>{step.label}</span>
+                    <span className="text-[10px] font-normal uppercase tracking-[0.16em] text-midground/55">{step.room}</span>
+                  </div>
+                  <div className="mt-1 text-xs leading-5 text-midground/70">{step.detail}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+        <section id="office-rpg-orchestrator" className="office-rpg-orchestrator" data-office-rpg-orchestrator-desk="true" aria-label={orchestratorDesk.title}>
+          <div className="office-rpg-orchestrator__header">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-200/70">{orchestratorDesk.stageLabel}</div>
+              <h3 className="text-sm font-semibold text-foreground">{orchestratorDesk.title}</h3>
+              <p className="mt-1 text-xs leading-5 text-midground/70">{orchestratorDesk.intent}</p>
+            </div>
+            <div className="border border-sky-300/25 bg-sky-950/15 px-3 py-2 text-xs text-sky-100" data-office-rpg-orchestrator-boundary="true">
+              {orchestratorDesk.actionBoundary}
+            </div>
+          </div>
+          <div className="office-rpg-orchestrator__cards">
+            {orchestratorDesk.cards.map((card) => (
+              <div key={card.id} className={`office-rpg-orchestrator__card office-rpg-orchestrator__card--${card.tone}`} data-office-rpg-orchestrator-card={card.id}>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.label}</div>
+                <div className="mt-1 text-sm font-semibold text-foreground">{card.value}</div>
+                <div className="mt-1 text-xs leading-5 text-midground/70">{card.detail}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+        <section id="office-rpg-kanban-board" className="office-rpg-board" data-office-rpg-kanban-board="true" aria-label={kanbanBoardFacility.title}>
+          <div className="office-rpg-board__header">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-yellow-200/70">{kanbanBoardFacility.stageLabel}</div>
+              <h3 className="text-sm font-semibold text-foreground">{kanbanBoardFacility.title}</h3>
+              <p className="mt-1 text-xs leading-5 text-midground/70">source of truth: {kanbanBoardFacility.sourceOfTruth}</p>
+            </div>
+            <div className="border border-yellow-300/25 bg-yellow-950/15 px-3 py-2 text-xs text-yellow-100" data-office-rpg-kanban-boundary="true">
+              {kanbanBoardFacility.writeBoundary}
+            </div>
+          </div>
+          <div className="office-rpg-board__lanes">
+            {kanbanBoardFacility.lanes.map((lane) => (
+              <div key={lane.id} className={`office-rpg-board__lane office-rpg-board__lane--${lane.tone}`} data-office-rpg-kanban-lane={lane.id}>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{lane.label}</div>
+                <div className="mt-1 text-sm font-semibold text-foreground">{lane.value}</div>
+                <div className="mt-1 text-xs leading-5 text-midground/70">{lane.detail}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+        <section id="office-rpg-source-archive" className="office-rpg-source-archive" data-office-rpg-source-archive="true" aria-label={sourceArchiveFacility.title}>
+          <div className="office-rpg-source-archive__header">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-200/70">{sourceArchiveFacility.stageLabel}</div>
+              <h3 className="text-sm font-semibold text-foreground">{sourceArchiveFacility.title}</h3>
+              <p className="mt-1 text-xs leading-5 text-midground/70">Paperclip/sourceTags 근거 레이어를 원문 없이 운영실 자료실로 보여줍니다</p>
+            </div>
+            <div className="border border-cyan-300/25 bg-cyan-950/15 px-3 py-2 text-xs text-cyan-100" data-office-rpg-source-boundary="true">
+              {sourceArchiveFacility.rawBoundary}
+            </div>
+          </div>
+          <div className="office-rpg-source-archive__shelves">
+            {sourceArchiveFacility.shelves.map((shelf) => (
+              <div key={shelf.id} className={`office-rpg-source-archive__shelf office-rpg-source-archive__shelf--${shelf.tone}`} data-office-rpg-source-shelf={shelf.id}>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{shelf.label}</div>
+                <div className="mt-1 text-sm font-semibold text-foreground">{shelf.value}</div>
+                <div className="mt-1 text-xs leading-5 text-midground/70">{shelf.detail}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+        <section id="office-rpg-review-corner" className="office-rpg-review-corner" data-office-rpg-review-corner="true" aria-label={reviewCornerFacility.title}>
+          <div className="office-rpg-review-corner__header">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-rose-200/70">{reviewCornerFacility.stageLabel}</div>
+              <h3 className="text-sm font-semibold text-foreground">{reviewCornerFacility.title}</h3>
+              <p className="mt-1 text-xs leading-5 text-midground/70">검토/승인 신호를 실행 전 안전 대기 구역으로만 모읍니다</p>
+            </div>
+            <div className="border border-rose-300/25 bg-rose-950/15 px-3 py-2 text-xs text-rose-100" data-office-rpg-review-boundary="true">
+              {reviewCornerFacility.approvalBoundary}
+            </div>
+          </div>
+          <div className="office-rpg-review-corner__stations">
+            {reviewCornerFacility.stations.map((station) => (
+              <div key={station.id} className={`office-rpg-review-corner__station office-rpg-review-corner__station--${station.tone}`} data-office-rpg-review-station={station.id}>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{station.label}</div>
+                <div className="mt-1 text-sm font-semibold text-foreground">{station.value}</div>
+                <div className="mt-1 text-xs leading-5 text-midground/70">{station.detail}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+        <section id="office-rpg-approval" className="office-rpg-approval" data-office-rpg-approval-console="true" aria-label={approvalConsoleFacility.title}>
+          <div className="office-rpg-approval__header">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-violet-200/70">{approvalConsoleFacility.stageLabel}</div>
+              <h3 className="text-sm font-semibold text-foreground">{approvalConsoleFacility.title}</h3>
+              <p className="mt-1 text-xs leading-5 text-midground/70">승인/거절 실행이 아니라 사람이 판단하기 전 안전 자세만 표시합니다</p>
+            </div>
+            <div className="border border-violet-300/25 bg-violet-950/15 px-3 py-2 text-xs text-violet-100" data-office-rpg-approval-boundary="true">
+              {approvalConsoleFacility.decisionBoundary}
+            </div>
+          </div>
+          <div className="office-rpg-approval__controls" aria-label="비활성 승인 콘솔 컨트롤">
+            {approvalConsoleFacility.controls.map((control) => (
+              <div key={control.id} className={`office-rpg-approval__control office-rpg-approval__control--${control.tone}`} data-office-rpg-approval-control={control.id} aria-disabled={control.disabled}>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{control.label}</div>
+                <div className="mt-1 text-sm font-semibold text-foreground">{control.value}</div>
+                <div className="mt-1 text-xs leading-5 text-midground/70">{control.detail}</div>
+              </div>
+            ))}
+          </div>
+        </section>
         <div className="grid gap-2 text-xs md:grid-cols-4" data-office-rpg-filters="true">
           <label className="grid gap-1 text-midground/65">
             <span>방</span>

@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-13 20:58 KST
+Last updated: 2026-05-14 12:06 KST
 
 ## Start here after `/new`
 
@@ -11,26 +11,32 @@ Last updated: 2026-05-13 20:58 KST
    - `kanban-orchestrator` only if creating/organizing board tasks is explicitly approved
 2. Read this file.
 3. Read `STATUS.md`.
-4. Read the latest Stage 5 outputs:
+4. Read the current umbrella docs first:
+   - `docs/ai-office/product/unified-operating-workbench.md`
+   - `docs/ai-office/architecture/unified-operating-workbench.md`
+   - `docs/ai-office/plans/2026-05-14-desk-rpg-master-spec-review.md`
+   - `.hermes/plans/2026-05-14_082251-ai-office-unified-operating-workbench-plan.md`
+   - `docs/ai-office/plans/2026-05-14-unified-operating-workbench-fresh-session-start.md`
+5. If implementation or lower-level API context is separately approved, then read the older Stage 5 outputs:
    - `docs/ai-office/architecture/backend-api.md`
    - `docs/ai-office/architecture/data-adapters.md`
    - `docs/ai-office/architecture/frontend-components.md`
    - `docs/ai-office/architecture/test-plan.md`
    - `docs/ai-office/architecture/rollout-plan.md`
    - `docs/ai-office/architecture/pixel-renderer-adapter.md`
-5. If needed for provenance/routing context, then read the Stage 4 outputs:
+6. If needed for provenance/routing context, then read the Stage 4 outputs:
    - `docs/ai-office/design/topic-registry-spec.md`
    - `docs/ai-office/design/task-provenance-metadata.md`
    - `docs/ai-office/design/provenance-backfill.md`
    - `docs/ai-office/design/privacy-security.md`
-6. If needed for product context, then read the Stage 3 outputs:
+7. If needed for product context, then read the Stage 3 outputs:
    - `docs/ai-office/product/user-stories.md`
    - `docs/ai-office/architecture/office-state-model.md`
    - `docs/ai-office/product/information-architecture.md`
    - `docs/ai-office/product/non-goals-and-mutation-boundary.md`
    - `docs/ai-office/product/mvp-acceptance-criteria.md`
-7. Do not implement dashboard code unless the user explicitly approves an implementation stage.
-8. Continue from the `Current next stage` below.
+8. Do not implement dashboard code unless the user explicitly approves an implementation stage.
+9. Continue from the `Current next stage` below.
 
 ## Suggested `/goal` for a fresh session
 
@@ -68,9 +74,31 @@ The user approved A-G approval buckets for future AI Office work while excluding
 
 ## Current next stage
 
+Current umbrella project: `AI Office Unified Operating Workbench` / `AI Office 통합 운영실`.
+
+Treat AI Office/VPS dashboard, canonical VPS `ai-office` Kanban, Paperclip/sourceTags/Projection Pipeline, and the DeskRPG-like RPG Visualizer as one product. The operating model is:
+
+```text
+VPS ai-office Kanban = 운영 보드 / work state source of truth
+Paperclip/sourceTags = 근거 레이어 / safe evidence context
+Projection Cache = 안전 투영 캐시 / validated last-known-good display material
+/office RPG Visualizer = RPG 운영실 / human-readable private dashboard
+```
+
+Authoritative Phase 0 umbrella docs:
+
+- `docs/ai-office/product/unified-operating-workbench.md`
+- `docs/ai-office/architecture/unified-operating-workbench.md`
+
+Next recommended work is now `Approval Model Contract 1` after local-only completion of `Orchestrator Desk 1`, `Kanban Board 1`, `Paperclip Source Archive 1`, `Review Corner 1`, and `Approval Console 1`. The first implementation slice added `buildOfficeRpgMissionStoryboard(scene)` plus a DOM/CSS mission flow in `OfficeRpgMap`, showing `지식위키 요청 → 오케스트레이터 → 운영 보드 → Paperclip 근거 → 리뷰 → 승인 후 저장`. The follow-up facility slices now deepen that story in order: `buildOfficeRpgOrchestratorDesk(scene)` renders read-only decomposition; `buildOfficeRpgKanbanBoardFacility(scene)` renders safe operating-board lanes; `buildOfficeRpgSourceArchiveFacility(scene)` renders Paperclip/source evidence shelves without raw sources, paths, bundle ids, prompts, body text, or private values; `buildOfficeRpgReviewCornerFacility(scene)` renders safe review/incident posture; and `buildOfficeRpgApprovalConsoleFacility(scene)` renders a non-executable approval posture with disabled summary/human/dry-run/audit/boundary/control cards. The next product-improving slice should define the controlled approval/mutation contract without enabling it: authority model, request/decision DTO shape, audit event boundaries, dry-run evidence requirements, and explicit gates for approve/reject, Kanban transition, projection transfer/promote, watcher/cron, service restart, and public exposure. Do not add executable mutation controls, backend mutation endpoints, VPS/service changes, Kanban writes, watcher/cron enablement, public exposure, NAS mount/direct credentials, or raw Paperclip/NAS reads. Local verification for `Approval Console 1` passed: `npm test -- --run OfficePage.test.ts` (76 passed), `npm test -- --run OfficePage.rpg.test.tsx` (1 passed), focused ESLint on touched Office files, `npm run build` with only the known chunk-size warning, focused backend Office tests (28 passed), `git diff --check`, and local `/office` browser smoke with approval hooks present, zero approval buttons/inputs, raw-leak false, and no console/JS errors. Full `npm test -- --run` remains blocked by the pre-existing Vitest collection issue where Node's `scripts/sync-assets.test.mjs` is discovered as a Vitest test even though `node --test scripts/sync-assets.test.mjs` passes.
+
+Master Spec v0.1 follow-up: read `docs/ai-office/plans/2026-05-14-desk-rpg-master-spec-review.md` before choosing the next work. It reframes read-only-first as the first safety posture, not the permanent product ceiling. The recommended product sequence remains `Desk RPG Product Vision 1` → `Desk RPG Projection Model 1` → `Desk RPG IA/Layout 1` → `Controlled Mutation & Approval Model 1`; the approved first implementation slice is intentionally small and should be reconciled with those contracts before adding executable control.
+
+Recent supporting evidence remains linked below; do not delete it when using the umbrella model.
+
 AI Office RPG Visualizer Phase 2-5 is implemented, pushed, and deployed to the private VPS dashboard. `/office` now has a read-only DOM/CSS RPG map derived from safe `OfficeState`, with filters, jump targets, inspector integration, text fallback, reduced-motion-aware CSS motion, focused tests, and local/private browser smoke evidence. Code commit `ebca3a3c` is deployed in `/home/hermes/.hermes/ai-office-dashboard`; only `hermes-agent-dashboard.service` was restarted. Evidence: `docs/ai-office/plans/2026-05-13-ai-office-rpg-visualizer-implementation-evidence.md` and `docs/ai-office/plans/2026-05-13-ai-office-rpg-visualizer-vps-deploy-smoke.md`. Next operational choice should be a new concrete task; keep gateway/core restart, public exposure, NAS mount/direct credentials, active watcher/cron automation, and executable mutation controls separately approval-gated.
 
-Kanban-first operating conversion completed on 2026-05-13: canonical VPS `ai-office` is now the operating source of truth, three real operating cards were created/completed (`t_83f3ff90`, `t_0fced671`, `t_49757d89`), Mac has `/Users/lidises/.local/bin/ai-office-kanban` for safe canonical board access, and `/office` now includes a read-only Kanban-first operating posture panel. Evidence: `docs/ai-office/plans/2026-05-13-kanban-first-operating-conversion.md`. Next AI Office work should create/route durable tasks on the VPS `ai-office` board by default; keep dashboard mutation controls, cron/watcher automation, public exposure, NAS mount/direct credentials, and gateway/core restarts separately approval-gated.
+Kanban-first operating conversion completed on 2026-05-13: canonical VPS `ai-office` is now the operating source of truth, three real operating cards were created/completed (`t_83f3ff90`, `t_0fced671`, `t_49757d89`), Mac has `<local-user-bin>/ai-office-kanban` for safe canonical board access, and `/office` now includes a read-only Kanban-first operating posture panel. Evidence: `docs/ai-office/plans/2026-05-13-kanban-first-operating-conversion.md`. Next AI Office work should create/route durable tasks on the VPS `ai-office` board by default; keep dashboard mutation controls, cron/watcher automation, public exposure, NAS mount/direct credentials, and gateway/core restarts separately approval-gated.
 
 Fresh-session `/goal` C-G execution completed: protected projection ingest dry-run API is implemented, pushed, deployed to the private VPS dashboard, and smoked; validator-passing safe bundle `pcwb-vps-smoke-001` was promoted non-dry-run with archive rollback evidence; canonical VPS `ai-office` Kanban checkpoint `t_bd4fe848` was created/completed; disabled-by-default dry-run watcher script `scripts/ai_office/office_projection_watchdog.py` and tests were added. Final commit `009c57f3` is pushed and synced to the VPS dashboard worktree for code/docs availability; focused VPS tests and private `/office?goal-cg=009c57f3` smoke passed. No active cron/watcher was enabled, gateway was not restarted, public exposure remained closed, and VPS NAS/direct raw-source access stayed excluded. Evidence: `docs/ai-office/plans/2026-05-13-goal-c-g-execution-evidence.md`. Next work should start from a new concrete task/approval, not from the A-G bucket labels themselves.
 
@@ -226,7 +254,9 @@ Browser smoke: http://127.0.0.1:8765/office
 # Office map visible with stronger room-card contrast, non-interactive scene markers, readable bottom safety/flow legend, Safe inspector zone metadata, no fixture raw-field leaks, no console JS errors
 ```
 
-## Immediate next action
+## Immediate next action — historical/stale
+
+Historical/stale; do not follow this block over the top `Current next stage`. The active next direction is `AI Office 통합 운영실` umbrella IA/layout/view-model consolidation, not finishing this older Stage 16-A handoff.
 
 Immediate next action is finishing Stage 16-A on `ai-office-stage16a-office-first-reset-20260509`:
 
