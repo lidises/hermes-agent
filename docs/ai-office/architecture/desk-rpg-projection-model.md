@@ -373,7 +373,7 @@ Implementation requirements when approved:
 7. Redaction and raw-leak sentinel policy is explicit.
 8. DTO boundary sketch is documented without implementation.
 9. Non-mutation boundaries are preserved.
-10. `NEXT.md`, `STATUS.md`, and unified product/architecture docs now record that `Desk RPG IA/Layout 1` followed this projection model and point to the next recommended `Controlled Mutation & Approval Model 1` slice.
+10. `NEXT.md`, `STATUS.md`, and unified product/architecture docs now record that `Desk RPG IA/Layout 1` and `Controlled Mutation & Approval Model 1` followed this projection model and point to the next recommended `Implementation Roadmap 1` slice.
 
 ## Next recommended slice
 

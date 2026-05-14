@@ -283,7 +283,7 @@ Non-MVP interactions:
 - restart service;
 - enable cron/watchers.
 
-Those non-MVP interactions require the later `Controlled Mutation & Approval Model 1` and implementation roadmap.
+Those non-MVP interactions are modeled in `Controlled Mutation & Approval Model 1` and still require the later implementation roadmap before any executable behavior.
 
 ## Accessibility and reduced-motion posture
 
@@ -347,15 +347,10 @@ Forbidden map-level labels:
 7. Accessibility and reduced-motion requirements are documented.
 8. Renderer non-adoption posture is preserved.
 9. Safe/forbidden visual vocabulary is explicit.
-10. `NEXT.md`, `STATUS.md`, and unified product/architecture docs point to the next recommended `Controlled Mutation & Approval Model 1` slice.
+10. `NEXT.md`, `STATUS.md`, and unified product/architecture docs now record that `Controlled Mutation & Approval Model 1` followed this IA/layout contract and point to the next recommended `Implementation Roadmap 1` slice.
 
 ## Next recommended slice
 
-`Controlled Mutation & Approval Model 1`
+`Implementation Roadmap 1`
 
-Purpose:
-- define how natural-language instructions and worker quick actions become event requests;
-- define Orchestrator mediation and approval/hold/deny routing;
-- define NAS Keeper final-save approval/write boundary;
-- define authority, audit, rollback, dry-run, and CLI confirmation posture before any executable implementation;
-- preserve read-only browser posture until backend authority exists.
+`Controlled Mutation & Approval Model 1` is now documented in `docs/ai-office/architecture/controlled-mutation-approval-model.md`. The next step is an implementation roadmap: convert the product vision, projection model, IA/layout, and controlled mutation/approval model into a small, testable, read-only-first implementation sequence before coding.

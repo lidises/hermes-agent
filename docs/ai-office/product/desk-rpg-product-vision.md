@@ -248,7 +248,7 @@ Do not add these while executing Desk RPG Product Vision / Projection Model / IA
 7. NAS final save is deferred behind approval, authority, audit, and rollback.
 8. Renderer dependency non-adoption is explicit for MVP.
 9. Non-goals preserve the current safety boundaries.
-10. `NEXT.md`, `STATUS.md`, and unified workbench product/architecture docs now record that `Desk RPG Projection Model 1` and `Desk RPG IA/Layout 1` followed this product vision and point to the next recommended `Controlled Mutation & Approval Model 1` slice.
+10. `NEXT.md`, `STATUS.md`, and unified workbench product/architecture docs now record that `Desk RPG Projection Model 1`, `Desk RPG IA/Layout 1`, and `Controlled Mutation & Approval Model 1` followed this product vision and point to the next recommended `Implementation Roadmap 1` slice.
 
 ## Next recommended slice
 
