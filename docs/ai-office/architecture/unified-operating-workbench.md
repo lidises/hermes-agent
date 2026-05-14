@@ -219,9 +219,9 @@ This architecture document is an index and consolidation point. It does not repl
 
 ## Next architecture step
 
-`Unified Workbench IA/Layout 1`, `Approval Request View 1`, and `Approval Audit Timeline 1` are now locally implemented as pure safe view-model helpers plus top `/office` display-only sections. The next separately approved architecture/UI task should be `Approval Execution Gate 1`:
+`Unified Workbench IA/Layout 1`, `Approval Request View 1`, `Approval Audit Timeline 1`, and `Approval Execution Gate 1` are now locally implemented as pure safe view-model helpers plus top `/office` display-only sections. The next separately approved architecture/UI task should be `Authority Adapter Contract 1`:
 
-1. Define a safe execution-gate posture from the approval request and audit timeline models.
-2. Render the required future prerequisites for executable authority as read-only checklist/gate visibility only.
-3. Add focused tests including raw-leak sentinels, zero enabled controls, and no executable browser affordances.
+1. Define the typed interface and invariants a future authority adapter must satisfy before any execution can exist.
+2. Keep the contract disabled/display-only in the current UI; no adapter implementation should dispatch real actions yet.
+3. Add focused tests for allowed action kinds, required audit/rollback/human-confirmation fields, zero enabled controls, and no executable browser affordances.
 4. Do not execute actions, write audit events, create requests, add backend mutation routes, services, cron/watcher automation, VPS restarts, public exposure, NAS access, or renderer dependencies.

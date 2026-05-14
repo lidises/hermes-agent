@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-14 12:55 KST
+Last updated: 2026-05-14 13:04 KST
 
 ## Start here after `/new`
 
@@ -90,7 +90,7 @@ Authoritative Phase 0 umbrella docs:
 - `docs/ai-office/product/unified-operating-workbench.md`
 - `docs/ai-office/architecture/unified-operating-workbench.md`
 
-Next recommended work is now `Approval Execution Gate 1` after local-only completion of `Approval Audit Timeline 1`. `Approval Audit Timeline 1` added `buildOfficeApprovalAuditTimeline(requestView)`, a read-only/hypothetical audit-chain posture for `action_requested` → `dry_run_completed` → `human_decision_recorded` → `execution_blocked`, and a top `/office` audit timeline section with `data-office-approval-audit-timeline`, `data-office-approval-audit-steps`, and per-step hooks. The slice displays audit ordering and execution-blocked posture only, with `enabledControls: 0` and `writesAuditEvents: false`; it writes no audit events, creates no requests, mutation routes, forms, buttons, backend writes, Kanban transitions, projection promote/reject operations, watcher/cron enablement, service restarts, public exposure, renderer dependencies, or raw projection. The next product-improving slice should be `Approval Execution Gate 1`: render the explicit no-execution gate and required future authority-adapter prerequisites, still without enabling controls or writing state.
+Next recommended work is now `Authority Adapter Contract 1` after local-only completion of `Approval Execution Gate 1`. `Approval Execution Gate 1` added `buildOfficeApprovalExecutionGate(timeline)`, a read-only gate posture that keeps execution disallowed while listing missing prerequisites (`authority_adapter`, `audit_writer`, `rollback_plan`, `human_confirmation`), and a top `/office` section with `data-office-approval-execution-gate` and per-prerequisite hooks. The slice displays why execution remains blocked with `enabledControls: 0`, `executionAllowed: false`, and `browserAffordance: "none"`; it executes no actions, writes no audit events, creates no requests, mutation routes, forms, buttons, backend writes, Kanban transitions, projection promote/reject operations, watcher/cron enablement, service restarts, public exposure, renderer dependencies, or raw projection. The next product-improving slice should be `Authority Adapter Contract 1`: document and test a typed, still-disabled authority adapter contract that a future approved mutation implementation would have to satisfy before any real state-changing control appears.
 
 Master Spec v0.1 follow-up: read `docs/ai-office/plans/2026-05-14-desk-rpg-master-spec-review.md` before choosing the next work. It reframes read-only-first as the first safety posture, not the permanent product ceiling. The recommended product sequence remains `Desk RPG Product Vision 1` → `Desk RPG Projection Model 1` → `Desk RPG IA/Layout 1` → `Controlled Mutation & Approval Model 1`; the approved first implementation slice is intentionally small and should be reconciled with those contracts before adding executable control.
 

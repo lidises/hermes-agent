@@ -74,6 +74,7 @@ import {
   buildOfficeRpgApprovalConsoleFacility,
   buildOfficeApprovalRequestView,
   buildOfficeApprovalAuditTimeline,
+  buildOfficeApprovalExecutionGate,
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
@@ -520,6 +521,25 @@ describe("OfficePage view helpers", () => {
     expect(plan.find((section) => section.id === "work")?.summary).toContain("세션 1개");
     expect(plan.find((section) => section.id === "routing")?.summary).toContain("출처 기록 1개");
     expect(JSON.stringify(plan)).not.toMatch(/raw|secret|body|script|path/i);
+  });
+
+  it("builds a read-only Approval Execution Gate 1 without executable authority", () => {
+    const gate = buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-14T13:20:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/execution", status: "partial", checked_at: "2026-05-14T13:10:00Z", item_count: 1, warning_count: 1, error_summary: "raw execution token" } as unknown as OfficeState["data_sources"][number]],
+      work_items: [{ id: "w1", status: "blocked", title: "raw execution work", body: "secret execution body" } as unknown as OfficeState["work_items"][number]],
+      automations: [{ id: "cron-exec-private", state: "error", last_status: "failed", script: "/Users/lidises/execute.sh" } as unknown as OfficeState["automations"][number]],
+    }))));
+
+    expect(gate.stageLabel).toBe("Approval Execution Gate 1");
+    expect(gate.enabledControls).toBe(0);
+    expect(gate.executionAllowed).toBe(false);
+    expect(gate.browserAffordance).toBe("none");
+    expect(gate.requiredPrerequisites.map((item) => item.id)).toEqual(["authority_adapter", "audit_writer", "rollback_plan", "human_confirmation"]);
+    expect(gate.requiredPrerequisites.every((item) => item.status === "missing" && item.rawExcluded)).toBe(true);
+    expect(gate.blockedBy.map((item) => item.eventKind)).toEqual(["execution_blocked"]);
+    expect(gate.safeBoundary).toContain("no execution authority");
+    expect(JSON.stringify(gate)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw execution|secret execution|private|token/i);
   });
 
   it("builds a read-only Approval Audit Timeline 1 chain without writing audit events", () => {

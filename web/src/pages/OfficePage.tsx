@@ -86,6 +86,7 @@ import {
   buildOfficeUnifiedWorkbenchView,
   buildOfficeApprovalRequestView,
   buildOfficeApprovalAuditTimeline,
+  buildOfficeApprovalExecutionGate,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -1750,6 +1751,7 @@ export default function OfficePage() {
   const unifiedWorkbenchView = useMemo(() => buildOfficeUnifiedWorkbenchView(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const approvalRequestView = useMemo(() => buildOfficeApprovalRequestView(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const approvalAuditTimeline = useMemo(() => buildOfficeApprovalAuditTimeline(approvalRequestView), [approvalRequestView]);
+  const approvalExecutionGate = useMemo(() => buildOfficeApprovalExecutionGate(approvalAuditTimeline), [approvalAuditTimeline]);
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -2014,6 +2016,32 @@ export default function OfficePage() {
               <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{step.eventKind}</div>
               <div className="mt-1 text-sm font-semibold text-foreground">{step.status}</div>
               <div className="mt-2 text-xs leading-5 text-midground/70">{step.safeSummary}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-rose-300/20 bg-rose-950/10 p-4"
+        data-office-approval-execution-gate="true"
+        data-office-approval-execution-allowed={String(approvalExecutionGate.executionAllowed)}
+        data-office-approval-execution-enabled-controls={approvalExecutionGate.enabledControls}
+        data-office-approval-browser-affordance={approvalExecutionGate.browserAffordance}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-rose-200/70">{approvalExecutionGate.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{approvalExecutionGate.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{approvalExecutionGate.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">execution allowed: {approvalExecutionGate.executionAllowed ? "true" : "false"}</div>
+        </div>
+        <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-approval-execution-prerequisites="true">
+          {approvalExecutionGate.requiredPrerequisites.map((item) => (
+            <div key={item.id} className="border border-current/15 bg-black/20 p-3" data-office-approval-execution-prerequisite={item.id} data-office-approval-execution-prerequisite-status={item.status}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.status}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{item.safeSummary}</div>
             </div>
           ))}
         </div>

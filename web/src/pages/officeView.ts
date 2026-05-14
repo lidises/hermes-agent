@@ -1071,6 +1071,26 @@ export type OfficeApprovalAuditTimeline = {
   safeProjectionOnly: true;
 };
 
+export type OfficeApprovalExecutionGatePrerequisite = {
+  id: "authority_adapter" | "audit_writer" | "rollback_plan" | "human_confirmation";
+  label: string;
+  status: "missing";
+  safeSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeApprovalExecutionGate = {
+  stageLabel: "Approval Execution Gate 1";
+  title: string;
+  enabledControls: 0;
+  executionAllowed: false;
+  browserAffordance: "none";
+  requiredPrerequisites: OfficeApprovalExecutionGatePrerequisite[];
+  blockedBy: OfficeApprovalAuditTimelineStep[];
+  safeBoundary: string;
+  safeProjectionOnly: true;
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -1831,6 +1851,50 @@ export function buildOfficeApprovalAuditTimeline(requestView: OfficeApprovalRequ
         status: "blocked-preview",
         resultPosture: "blocked",
         safeSummary: "execution remains blocked until a separate approved authority adapter exists",
+        rawExcluded: true,
+      },
+    ],
+  };
+}
+
+export function buildOfficeApprovalExecutionGate(timeline: OfficeApprovalAuditTimeline): OfficeApprovalExecutionGate {
+  const blockedBy = timeline.steps.filter((step) => step.eventKind === "execution_blocked");
+  return {
+    stageLabel: "Approval Execution Gate 1",
+    title: "승인 실행 게이트 · 실행 권한 없음",
+    enabledControls: 0,
+    executionAllowed: false,
+    browserAffordance: "none",
+    blockedBy,
+    safeBoundary: "no execution authority · prerequisite posture only · no controls · no writes",
+    safeProjectionOnly: true,
+    requiredPrerequisites: [
+      {
+        id: "authority_adapter",
+        label: "권한 어댑터",
+        status: "missing",
+        safeSummary: "separate approved authority adapter required before any execution",
+        rawExcluded: true,
+      },
+      {
+        id: "audit_writer",
+        label: "감사 이벤트 기록기",
+        status: "missing",
+        safeSummary: "durable audit writer required before state-changing flow",
+        rawExcluded: true,
+      },
+      {
+        id: "rollback_plan",
+        label: "롤백 계획",
+        status: "missing",
+        safeSummary: "rollback evidence and revert path required before action dispatch",
+        rawExcluded: true,
+      },
+      {
+        id: "human_confirmation",
+        label: "사용자 최종 확인",
+        status: "missing",
+        safeSummary: "human single-action confirmation required at dispatch time",
         rawExcluded: true,
       },
     ],
