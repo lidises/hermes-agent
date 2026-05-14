@@ -86,6 +86,7 @@ import {
   buildOfficeWorkerDispatchDryRunEnvelope,
   buildOfficeWorkerAuditPreviewEnvelope,
   buildOfficeWorkerRollbackPreviewEnvelope,
+  buildOfficeWorkerFinalGateChecklist,
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
@@ -789,6 +790,34 @@ describe("OfficePage view helpers", () => {
     expect(rollbackPreview.auditPreviewSnapshot).toMatchObject({ auditWriteEnabled: false, executionEnabled: false, dispatchEnabled: false });
     expect(rollbackPreview.safeBoundary).toContain("rollback preview envelope only");
     expect(JSON.stringify(rollbackPreview)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw rollback-preview|secret rollback-preview|private|token/i);
+  });
+
+  it("builds Worker Final Gate Checklist 1 without enabling controls", () => {
+    const finalGate = buildOfficeWorkerFinalGateChecklist(buildOfficeWorkerRollbackPreviewEnvelope(buildOfficeWorkerAuditPreviewEnvelope(buildOfficeWorkerDispatchDryRunEnvelope(buildOfficeWorkerAuthorityHandoffEnvelope(buildOfficeWorkerHumanConfirmationEnvelope(buildOfficeWorkerRequestDraftPreview(buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-14T17:25:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/final-gate", status: "partial", checked_at: "2026-05-14T17:20:00Z", item_count: 1, warning_count: 1, error_summary: "raw final-gate token" } as unknown as OfficeState["data_sources"][number]],
+      work_items: [{ id: "w1", status: "blocked", title: "raw final-gate task", body: "secret final-gate body" } as unknown as OfficeState["work_items"][number]],
+      events: [{ id: "event-final-gate-private", category: "approval_needed", room_id: "review", tone: "warning", generated_at: "2026-05-14T17:24:00Z", detail: "raw final-gate event token" } as unknown as OfficeState["events"][number]],
+    }))))))))))))))));
+
+    expect(finalGate.stageLabel).toBe("Worker Final Gate Checklist 1");
+    expect(finalGate.enabledControls).toBe(0);
+    expect(finalGate.controlProposalEnabled).toBe(false);
+    expect(finalGate.rollbackExecutionEnabled).toBe(false);
+    expect(finalGate.auditWriteEnabled).toBe(false);
+    expect(finalGate.executionEnabled).toBe(false);
+    expect(finalGate.dispatchEnabled).toBe(false);
+    expect(finalGate.adapterInstallationEnabled).toBe(false);
+    expect(finalGate.requestCreationEnabled).toBe(false);
+    expect(finalGate.workAssignmentEnabled).toBe(false);
+    expect(finalGate.gates.map((gate) => gate.id)).toEqual(["authority_model", "human_confirmation", "audit_sink", "rollback_plan", "adapter_contract", "runtime_boundary"]);
+    expect(finalGate.gates.every((gate) => gate.status === "blocked" && gate.rawExcluded)).toBe(true);
+    expect(finalGate.gates.map((gate) => gate.requiredFields)).toEqual(expect.arrayContaining([
+      expect.arrayContaining(["approved_authority_model", "mutation_route_design", "runtime_scope", "rollback_verified"]),
+    ]));
+    expect(finalGate.rollbackPreviewSnapshot).toMatchObject({ rollbackExecutionEnabled: false, auditWriteEnabled: false, dispatchEnabled: false });
+    expect(finalGate.safeBoundary).toContain("final gate checklist only");
+    expect(JSON.stringify(finalGate)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw final-gate|secret final-gate|private|token/i);
   });
 
   it("builds a disabled Authority Adapter Contract 1 before any execution adapter exists", () => {

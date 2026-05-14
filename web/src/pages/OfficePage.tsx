@@ -98,6 +98,7 @@ import {
   buildOfficeWorkerDispatchDryRunEnvelope,
   buildOfficeWorkerAuditPreviewEnvelope,
   buildOfficeWorkerRollbackPreviewEnvelope,
+  buildOfficeWorkerFinalGateChecklist,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -1774,6 +1775,7 @@ export default function OfficePage() {
   const workerDispatchDryRunEnvelope = useMemo(() => buildOfficeWorkerDispatchDryRunEnvelope(workerAuthorityHandoffEnvelope), [workerAuthorityHandoffEnvelope]);
   const workerAuditPreviewEnvelope = useMemo(() => buildOfficeWorkerAuditPreviewEnvelope(workerDispatchDryRunEnvelope), [workerDispatchDryRunEnvelope]);
   const workerRollbackPreviewEnvelope = useMemo(() => buildOfficeWorkerRollbackPreviewEnvelope(workerAuditPreviewEnvelope), [workerAuditPreviewEnvelope]);
+  const workerFinalGateChecklist = useMemo(() => buildOfficeWorkerFinalGateChecklist(workerRollbackPreviewEnvelope), [workerRollbackPreviewEnvelope]);
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -2430,6 +2432,43 @@ export default function OfficePage() {
               <div className="mt-3 flex flex-wrap gap-1" data-office-worker-rollback-preview-fields="true">
                 {preview.requiredFields.map((field) => (
                   <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-worker-rollback-preview-field={field}>{field}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-lime-300/20 bg-lime-950/10 p-4"
+        data-office-worker-final-gate-checklist="true"
+        data-office-worker-final-gate-control-proposal-enabled={String(workerFinalGateChecklist.controlProposalEnabled)}
+        data-office-worker-final-gate-rollback-execution-enabled={String(workerFinalGateChecklist.rollbackExecutionEnabled)}
+        data-office-worker-final-gate-audit-write-enabled={String(workerFinalGateChecklist.auditWriteEnabled)}
+        data-office-worker-final-gate-action-execution-enabled={String(workerFinalGateChecklist.executionEnabled)}
+        data-office-worker-final-gate-dispatch-enabled={String(workerFinalGateChecklist.dispatchEnabled)}
+        data-office-worker-final-gate-adapter-installation-enabled={String(workerFinalGateChecklist.adapterInstallationEnabled)}
+        data-office-worker-final-gate-request-creation-enabled={String(workerFinalGateChecklist.requestCreationEnabled)}
+        data-office-worker-final-gate-assignment-enabled={String(workerFinalGateChecklist.workAssignmentEnabled)}
+        data-office-worker-final-gate-enabled-controls={workerFinalGateChecklist.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-lime-200/70">{workerFinalGateChecklist.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{workerFinalGateChecklist.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{workerFinalGateChecklist.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">enabled controls: 0</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-worker-final-gates="true">
+          {workerFinalGateChecklist.gates.map((gate) => (
+            <div key={gate.id} className="border border-current/15 bg-black/20 p-3" data-office-worker-final-gate={gate.id} data-office-worker-final-gate-status={gate.status}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{gate.status}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{gate.label}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{gate.safeSummary}</div>
+              <div className="mt-3 flex flex-wrap gap-1" data-office-worker-final-gate-fields="true">
+                {gate.requiredFields.map((field) => (
+                  <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-worker-final-gate-field={field}>{field}</span>
                 ))}
               </div>
             </div>

@@ -1402,6 +1402,35 @@ export type OfficeWorkerRollbackPreviewEnvelope = {
   safeProjectionOnly: true;
 };
 
+export type OfficeWorkerFinalGateId = "authority_model" | "human_confirmation" | "audit_sink" | "rollback_plan" | "adapter_contract" | "runtime_boundary";
+
+export type OfficeWorkerFinalGate = {
+  id: OfficeWorkerFinalGateId;
+  label: string;
+  status: "blocked";
+  requiredFields: Array<"approved_authority_model" | "mutation_route_design" | "runtime_scope" | "rollback_verified">;
+  safeSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeWorkerFinalGateChecklist = {
+  stageLabel: "Worker Final Gate Checklist 1";
+  title: string;
+  enabledControls: 0;
+  controlProposalEnabled: false;
+  rollbackExecutionEnabled: false;
+  auditWriteEnabled: false;
+  executionEnabled: false;
+  dispatchEnabled: false;
+  adapterInstallationEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  gates: OfficeWorkerFinalGate[];
+  rollbackPreviewSnapshot: Pick<OfficeWorkerRollbackPreviewEnvelope, "rollbackExecutionEnabled" | "auditWriteEnabled" | "dispatchEnabled">;
+  safeBoundary: string;
+  safeProjectionOnly: true;
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -2721,6 +2750,46 @@ export function buildOfficeWorkerRollbackPreviewEnvelope(auditPreviewEnvelope: O
       rollbackState: "missing",
       requiredFields: ["audit_preview_ref", "rollback_scope", "restore_point_ref", "verification_plan", "human_reconfirm_ref"],
       safeSummary: `${preview.id} requires a rollback preview envelope before any reversible execution can be considered`,
+      rawExcluded: true,
+    })),
+  };
+}
+
+export function buildOfficeWorkerFinalGateChecklist(rollbackPreview: OfficeWorkerRollbackPreviewEnvelope): OfficeWorkerFinalGateChecklist {
+  const requiredFields: OfficeWorkerFinalGate["requiredFields"] = ["approved_authority_model", "mutation_route_design", "runtime_scope", "rollback_verified"];
+  const gates: Array<{ id: OfficeWorkerFinalGateId; label: string }> = [
+    { id: "authority_model", label: "Authority model" },
+    { id: "human_confirmation", label: "Human confirmation" },
+    { id: "audit_sink", label: "Audit sink" },
+    { id: "rollback_plan", label: "Rollback plan" },
+    { id: "adapter_contract", label: "Adapter contract" },
+    { id: "runtime_boundary", label: "Runtime boundary" },
+  ];
+  return {
+    stageLabel: "Worker Final Gate Checklist 1",
+    title: "최종 게이트 체크리스트 · 컨트롤 비활성",
+    enabledControls: 0,
+    controlProposalEnabled: false,
+    rollbackExecutionEnabled: false,
+    auditWriteEnabled: false,
+    executionEnabled: false,
+    dispatchEnabled: false,
+    adapterInstallationEnabled: false,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
+    rollbackPreviewSnapshot: {
+      rollbackExecutionEnabled: rollbackPreview.rollbackExecutionEnabled,
+      auditWriteEnabled: rollbackPreview.auditWriteEnabled,
+      dispatchEnabled: rollbackPreview.dispatchEnabled,
+    },
+    safeBoundary: "final gate checklist only · no controls enabled · no rollback execution · no audit write · no execution · no dispatch · no adapter installation · no request creation · no assignment",
+    safeProjectionOnly: true,
+    gates: gates.map((gate) => ({
+      id: gate.id,
+      label: gate.label,
+      status: "blocked",
+      requiredFields,
+      safeSummary: `${gate.label} remains blocked until explicit controlled-mutation authority exists`,
       rawExcluded: true,
     })),
   };
