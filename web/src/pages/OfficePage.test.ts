@@ -99,6 +99,7 @@ import {
   buildOfficeControlledMutationContractPostureProjection,
   buildOfficeControlledMutationContractPosturePolish,
   buildOfficeControlledMutationReadinessHandoffRibbon,
+  buildOfficeControlledMutationReadinessSummaryPolish,
   buildOfficeRpgScene,
   buildOfficeDeskRpgProjectionModel,
   buildOfficeDeskRpgWorkerRoleVisibility,
@@ -2765,6 +2766,45 @@ describe("Desk RPG Projection ViewModel Helper 1", () => {
     expect(ribbon.disabledSurfaceSummary).toEqual({ rows: 4, enabledControls: 0 });
     expect(ribbon.safeBoundary).toContain("read-only handoff ribbon only");
     expect(JSON.stringify(ribbon)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw handoff ribbon|private-handoff-ribbon|token-shaped-value|provider/i);
+  });
+
+  it("builds Frontend Readiness Summary Polish 1 as a read-only summary surface without executable controls", () => {
+    const executionReadiness = buildOfficeControlledMutationExecutionReadinessSummary(buildOfficeControlledMutationAuthoritySummary(buildOfficeControlledMutationHumanApprovalPlan(buildOfficeControlledMutationRollbackVerificationPlan(buildOfficeControlledMutationAuditSinkPlan(buildOfficeControlledMutationDryRunPlan(buildOfficeControlledMutationProposalContract(buildOfficeWorkerFinalGateChecklist(buildOfficeWorkerRollbackPreviewEnvelope(buildOfficeWorkerAuditPreviewEnvelope(buildOfficeWorkerDispatchDryRunEnvelope(buildOfficeWorkerAuthorityHandoffEnvelope(buildOfficeWorkerHumanConfirmationEnvelope(buildOfficeWorkerRequestDraftPreview(buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-15T14:05:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/readiness-summary-polish", status: "partial", checked_at: "2026-05-15T14:00:00Z", item_count: 1, warning_count: 1, error_summary: "raw summary polish token" } as unknown as OfficeState["data_sources"][number]],
+      agents: [{ id: "agent-summary-polish", status: "active", prompt: "raw readiness summary polish prompt token-shaped-value", provider: "private-summary-polish-provider" }],
+      work_items: [{ id: "w-summary-polish", status: "blocked", title: "raw readiness summary polish task", body: "/Users/lidises/private/readiness-summary-polish.md" } as unknown as OfficeState["work_items"][number]],
+    })))))))))))))))))))))));
+    const projection = buildOfficeControlledMutationContractPostureProjection(executionReadiness);
+    const polish = buildOfficeControlledMutationContractPosturePolish(projection);
+    const ribbon = buildOfficeControlledMutationReadinessHandoffRibbon(polish);
+    const summary = buildOfficeControlledMutationReadinessSummaryPolish(ribbon);
+
+    expect(summary.stageLabel).toBe("Frontend Readiness Summary Polish 1");
+    expect(summary.sourceStageLabel).toBe("Frontend Readiness Handoff Ribbon 1");
+    expect(summary.detailKind).toBe("controlled_mutation_readiness_summary_polish");
+    expect(summary.enabledControls).toBe(0);
+    expect(summary.formControlEnabled).toBe(false);
+    expect(summary.browserExecutableControlsEnabled).toBe(false);
+    expect(summary.backendMutationEnabled).toBe(false);
+    expect(summary.storageWriteEnabled).toBe(false);
+    expect(summary.eventAppendEnabled).toBe(false);
+    expect(summary.eventReadbackEnabled).toBe(false);
+    expect(summary.auditWriteEnabled).toBe(false);
+    expect(summary.executionEnabled).toBe(false);
+    expect(summary.dryRunExecutionEnabled).toBe(false);
+    expect(summary.dispatchEnabled).toBe(false);
+    expect(summary.targetMutationEnabled).toBe(false);
+    expect(summary.authorityAdapterBindingEnabled).toBe(false);
+    expect(summary.credentialChangeEnabled).toBe(false);
+    expect(summary.nasMutationEnabled).toBe(false);
+    expect(summary.safeProjectionOnly).toBe(true);
+    expect(summary.rawExcluded).toBe(true);
+    expect(summary.summaryCards.map((card) => card.id)).toEqual(["chain", "locks", "next_boundary"]);
+    expect(summary.summaryCards.every((card) => card.status === "blocked" && card.rawExcluded)).toBe(true);
+    expect(summary.disabledSurfaceSummary).toEqual({ steps: 4, summaryCards: 3, enabledControls: 0 });
+    expect(summary.safeBoundary).toContain("read-only readiness summary polish only");
+    expect(JSON.stringify(summary)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw readiness summary polish|private-summary-polish|token-shaped-value|provider/i);
   });
 
   it("builds a disabled Authority Adapter Contract 1 before any execution adapter exists", () => {

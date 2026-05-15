@@ -112,6 +112,7 @@ import {
   buildOfficeControlledMutationContractPostureProjection,
   buildOfficeControlledMutationContractPosturePolish,
   buildOfficeControlledMutationReadinessHandoffRibbon,
+  buildOfficeControlledMutationReadinessSummaryPolish,
   buildOfficeDeskRpgWorkerRoleVisibility,
   buildOfficeDisabledApprovalDialoguePosture,
   buildOfficeReviewerWikiHandoffPosture,
@@ -183,6 +184,7 @@ import {
   type OfficeControlledMutationContractPostureProjection,
   type OfficeControlledMutationContractPosturePolish,
   type OfficeControlledMutationReadinessHandoffRibbon,
+  type OfficeControlledMutationReadinessSummaryPolish,
   type OfficeEventDrivenCharacterStateProjection,
   type OfficeCharacterStateRoomOverlay,
   type OfficeCharacterRoomInteractionPosture,
@@ -3633,6 +3635,52 @@ export function ControlledMutationReadinessHandoffRibbonPanel({ ribbon }: { ribb
   );
 }
 
+export function ControlledMutationReadinessSummaryPolishPanel({ summary }: { summary: OfficeControlledMutationReadinessSummaryPolish }) {
+  return (
+    <section
+      className="border border-violet-300/20 bg-violet-950/10 p-4"
+      data-office-controlled-mutation-readiness-summary-polish="true"
+      data-office-controlled-mutation-readiness-summary-polish-enabled-controls={summary.enabledControls}
+      data-office-controlled-mutation-readiness-summary-polish-form-control-enabled={String(summary.formControlEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-browser-executable-controls-enabled={String(summary.browserExecutableControlsEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-backend-mutation-enabled={String(summary.backendMutationEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-storage-write-enabled={String(summary.storageWriteEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-event-append-enabled={String(summary.eventAppendEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-event-readback-enabled={String(summary.eventReadbackEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-audit-write-enabled={String(summary.auditWriteEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-execution-enabled={String(summary.executionEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-dry-run-execution-enabled={String(summary.dryRunExecutionEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-dispatch-enabled={String(summary.dispatchEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-target-mutation-enabled={String(summary.targetMutationEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-authority-adapter-binding-enabled={String(summary.authorityAdapterBindingEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-credential-change-enabled={String(summary.credentialChangeEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-nas-mutation-enabled={String(summary.nasMutationEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-safe-projection-only={String(summary.safeProjectionOnly)}
+      data-office-controlled-mutation-readiness-summary-polish-raw-excluded={String(summary.rawExcluded)}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-violet-200/70">{summary.stageLabel}</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">{summary.title}</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">{summary.safeBoundary}</p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          cards: {summary.disabledSurfaceSummary.summaryCards} · controls: {summary.disabledSurfaceSummary.enabledControls}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-3" data-office-controlled-mutation-readiness-summary-polish-cards="true">
+        {summary.summaryCards.map((card) => (
+          <div key={card.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-readiness-summary-polish-card={card.id} data-office-controlled-mutation-readiness-summary-polish-card-status={card.status}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.status}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{card.label}</div>
+            <div className="mt-2 text-xs leading-5 text-midground/70">{card.detail}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -4028,6 +4076,7 @@ export default function OfficePage() {
   const controlledMutationContractPostureProjection = useMemo(() => buildOfficeControlledMutationContractPostureProjection(controlledMutationExecutionReadinessSummary), [controlledMutationExecutionReadinessSummary]);
   const controlledMutationContractPosturePolish = useMemo(() => buildOfficeControlledMutationContractPosturePolish(controlledMutationContractPostureProjection), [controlledMutationContractPostureProjection]);
   const controlledMutationReadinessHandoffRibbon = useMemo(() => buildOfficeControlledMutationReadinessHandoffRibbon(controlledMutationContractPosturePolish), [controlledMutationContractPosturePolish]);
+  const controlledMutationReadinessSummaryPolish = useMemo(() => buildOfficeControlledMutationReadinessSummaryPolish(controlledMutationReadinessHandoffRibbon), [controlledMutationReadinessHandoffRibbon]);
   const deskRpgProjection = useMemo(() => buildOfficeDeskRpgProjectionModel(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const deskRpgWorkerRoleVisibility = useMemo(() => buildOfficeDeskRpgWorkerRoleVisibility(deskRpgProjection), [deskRpgProjection]);
   const disabledApprovalDialoguePosture = useMemo(() => buildOfficeDisabledApprovalDialoguePosture(deskRpgProjection), [deskRpgProjection]);
@@ -5193,6 +5242,7 @@ export default function OfficePage() {
       <ControlledMutationContractPostureProjectionPanel projection={controlledMutationContractPostureProjection} />
       <ControlledMutationContractPosturePolishPanel polish={controlledMutationContractPosturePolish} />
       <ControlledMutationReadinessHandoffRibbonPanel ribbon={controlledMutationReadinessHandoffRibbon} />
+      <ControlledMutationReadinessSummaryPolishPanel summary={controlledMutationReadinessSummaryPolish} />
 
       {showOverview ? (
         <OfficeRpgMap

@@ -2955,6 +2955,47 @@ export type OfficeControlledMutationReadinessHandoffRibbon = {
   handoffSteps: OfficeControlledMutationReadinessHandoffRibbonStep[];
 };
 
+export type OfficeControlledMutationReadinessSummaryPolishCardId = "chain" | "locks" | "next_boundary";
+
+export type OfficeControlledMutationReadinessSummaryPolishCard = {
+  id: OfficeControlledMutationReadinessSummaryPolishCardId;
+  label: string;
+  status: "blocked";
+  detail: string;
+  rawExcluded: true;
+};
+
+export type OfficeControlledMutationReadinessSummaryPolish = {
+  stageLabel: "Frontend Readiness Summary Polish 1";
+  sourceStageLabel: OfficeControlledMutationReadinessHandoffRibbon["stageLabel"];
+  detailKind: "controlled_mutation_readiness_summary_polish";
+  title: string;
+  safeBoundary: string;
+  enabledControls: 0;
+  formControlEnabled: false;
+  browserExecutableControlsEnabled: false;
+  backendMutationEnabled: false;
+  storageWriteEnabled: false;
+  eventAppendEnabled: false;
+  eventReadbackEnabled: false;
+  auditWriteEnabled: false;
+  executionEnabled: false;
+  dryRunExecutionEnabled: false;
+  dispatchEnabled: false;
+  targetMutationEnabled: false;
+  authorityAdapterBindingEnabled: false;
+  credentialChangeEnabled: false;
+  nasMutationEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+  disabledSurfaceSummary: {
+    steps: number;
+    summaryCards: number;
+    enabledControls: 0;
+  };
+  summaryCards: OfficeControlledMutationReadinessSummaryPolishCard[];
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -6693,6 +6734,48 @@ export function buildOfficeControlledMutationReadinessHandoffRibbon(polish: Offi
     handoffSteps: handoffSteps.map((step) => ({
       ...step,
       status: "disabled",
+      rawExcluded: true,
+    })),
+  };
+}
+
+export function buildOfficeControlledMutationReadinessSummaryPolish(ribbon: OfficeControlledMutationReadinessHandoffRibbon): OfficeControlledMutationReadinessSummaryPolish {
+  const summaryCards: Array<{ id: OfficeControlledMutationReadinessSummaryPolishCardId; label: string; detail: string }> = [
+    { id: "chain", label: "Readiness chain", detail: "Request, approval, authority, and execution remain visible as a disabled handoff sequence only" },
+    { id: "locks", label: "Safety locks", detail: "Controls, backend mutation, event append/readback, storage writes, audit writes, dispatch, and target mutation all remain false" },
+    { id: "next_boundary", label: "Next boundary", detail: "Any executable control, route, adapter, credential, NAS, VPS, Kanban, cron, deploy, push, or merge still needs separate approval" },
+  ];
+  return {
+    stageLabel: "Frontend Readiness Summary Polish 1",
+    sourceStageLabel: ribbon.stageLabel,
+    detailKind: "controlled_mutation_readiness_summary_polish",
+    title: "제어형 변경 준비 요약 정리 · 읽기 전용",
+    safeBoundary: "read-only readiness summary polish only · clarifies the existing disabled handoff ribbon · no forms/buttons/inputs · no browser executable controls · no backend/schema/API route/service changes · no storage/write path · no event append/readback · no audit write · no execution/dry-run/dispatch/target mutation · no authority adapter binding · no credential/auth/env change · no NAS/VPS/Kanban/cron mutation",
+    enabledControls: 0,
+    formControlEnabled: false,
+    browserExecutableControlsEnabled: false,
+    backendMutationEnabled: false,
+    storageWriteEnabled: false,
+    eventAppendEnabled: false,
+    eventReadbackEnabled: false,
+    auditWriteEnabled: false,
+    executionEnabled: false,
+    dryRunExecutionEnabled: false,
+    dispatchEnabled: false,
+    targetMutationEnabled: false,
+    authorityAdapterBindingEnabled: false,
+    credentialChangeEnabled: false,
+    nasMutationEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+    disabledSurfaceSummary: {
+      steps: ribbon.handoffSteps.length,
+      summaryCards: summaryCards.length,
+      enabledControls: 0,
+    },
+    summaryCards: summaryCards.map((card) => ({
+      ...card,
+      status: "blocked",
       rawExcluded: true,
     })),
   };
