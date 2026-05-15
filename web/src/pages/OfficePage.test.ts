@@ -96,6 +96,7 @@ import {
   buildOfficeControlledMutationHumanApprovalPlan,
   buildOfficeControlledMutationAuthoritySummary,
   buildOfficeControlledMutationExecutionReadinessSummary,
+  buildOfficeControlledMutationContractPostureProjection,
   buildOfficeRpgScene,
   buildOfficeDeskRpgProjectionModel,
   buildOfficeDeskRpgWorkerRoleVisibility,
@@ -2659,6 +2660,39 @@ describe("Desk RPG Projection ViewModel Helper 1", () => {
     expect(readinessSummary.authoritySummarySnapshot).toMatchObject({ authorityGrantEnabled: false, approvalRecordingEnabled: false, executionEnabled: false });
     expect(readinessSummary.safeBoundary).toContain("execution readiness summary only");
     expect(JSON.stringify(readinessSummary)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw execution-readiness|secret execution-readiness|private|token/i);
+  });
+
+  it("builds Frontend Contract Posture Projection 1 from execution readiness without enabling browser controls", () => {
+    const executionReadiness = buildOfficeControlledMutationExecutionReadinessSummary(buildOfficeControlledMutationAuthoritySummary(buildOfficeControlledMutationHumanApprovalPlan(buildOfficeControlledMutationRollbackVerificationPlan(buildOfficeControlledMutationAuditSinkPlan(buildOfficeControlledMutationDryRunPlan(buildOfficeControlledMutationProposalContract(buildOfficeWorkerFinalGateChecklist(buildOfficeWorkerRollbackPreviewEnvelope(buildOfficeWorkerAuditPreviewEnvelope(buildOfficeWorkerDispatchDryRunEnvelope(buildOfficeWorkerAuthorityHandoffEnvelope(buildOfficeWorkerHumanConfirmationEnvelope(buildOfficeWorkerRequestDraftPreview(buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-15T12:45:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/frontend-posture", status: "partial", checked_at: "2026-05-15T12:40:00Z", item_count: 1, warning_count: 1, error_summary: "raw frontend posture token" } as unknown as OfficeState["data_sources"][number]],
+      work_items: [{ id: "w1", status: "blocked", title: "raw frontend posture task", body: "secret frontend posture body" } as unknown as OfficeState["work_items"][number]],
+      events: [{ id: "event-frontend-posture-private", category: "approval_needed", room_id: "review", tone: "warning", generated_at: "2026-05-15T12:44:00Z", detail: "raw frontend posture event token" } as unknown as OfficeState["events"][number]],
+    })))))))))))))))))))))));
+    const projection = buildOfficeControlledMutationContractPostureProjection(executionReadiness);
+
+    expect(projection.stageLabel).toBe("Frontend Contract Posture Projection 1");
+    expect(projection.sourceStageLabel).toBe("Controlled Mutation Execution Readiness Summary 1");
+    expect(projection.detailKind).toBe("controlled_mutation_contract_posture_projection");
+    expect(projection.enabledControls).toBe(0);
+    expect(projection.formControlEnabled).toBe(false);
+    expect(projection.browserExecutableControlsEnabled).toBe(false);
+    expect(projection.backendMutationEnabled).toBe(false);
+    expect(projection.storageWriteEnabled).toBe(false);
+    expect(projection.eventAppendEnabled).toBe(false);
+    expect(projection.eventReadbackEnabled).toBe(false);
+    expect(projection.auditWriteEnabled).toBe(false);
+    expect(projection.executionEnabled).toBe(false);
+    expect(projection.dryRunExecutionEnabled).toBe(false);
+    expect(projection.dispatchEnabled).toBe(false);
+    expect(projection.authorityAdapterBindingEnabled).toBe(false);
+    expect(projection.credentialChangeEnabled).toBe(false);
+    expect(projection.nasMutationEnabled).toBe(false);
+    expect(projection.safeProjectionOnly).toBe(true);
+    expect(projection.rawExcluded).toBe(true);
+    expect(projection.postureCards.map((card) => card.id)).toEqual(["contract_chain", "browser_surface", "backend_boundary", "authority_boundary", "storage_boundary", "nas_boundary"]);
+    expect(projection.postureCards.every((card) => card.status === "blocked" && card.rawExcluded)).toBe(true);
+    expect(JSON.stringify(projection)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw frontend posture|secret frontend posture|private|token/i);
   });
 
   it("builds a disabled Authority Adapter Contract 1 before any execution adapter exists", () => {

@@ -2840,6 +2840,41 @@ export type OfficeControlledMutationExecutionReadinessSummary = {
   safeProjectionOnly: true;
 };
 
+export type OfficeControlledMutationContractPostureProjectionId = "contract_chain" | "browser_surface" | "backend_boundary" | "authority_boundary" | "storage_boundary" | "nas_boundary";
+
+export type OfficeControlledMutationContractPostureProjectionCard = {
+  id: OfficeControlledMutationContractPostureProjectionId;
+  label: string;
+  status: "blocked";
+  detail: string;
+  rawExcluded: true;
+};
+
+export type OfficeControlledMutationContractPostureProjection = {
+  stageLabel: "Frontend Contract Posture Projection 1";
+  sourceStageLabel: OfficeControlledMutationExecutionReadinessSummary["stageLabel"];
+  detailKind: "controlled_mutation_contract_posture_projection";
+  title: string;
+  enabledControls: 0;
+  formControlEnabled: false;
+  browserExecutableControlsEnabled: false;
+  backendMutationEnabled: false;
+  storageWriteEnabled: false;
+  eventAppendEnabled: false;
+  eventReadbackEnabled: false;
+  auditWriteEnabled: false;
+  executionEnabled: false;
+  dryRunExecutionEnabled: false;
+  dispatchEnabled: false;
+  authorityAdapterBindingEnabled: false;
+  credentialChangeEnabled: false;
+  nasMutationEnabled: false;
+  safeBoundary: string;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+  postureCards: OfficeControlledMutationContractPostureProjectionCard[];
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -6454,6 +6489,45 @@ export function buildOfficeControlledMutationExecutionReadinessSummary(authority
       status: "blocked",
       requiredFields,
       safeSummary: `${item.label} must remain blocked until every prerequisite is approved and verified`,
+      rawExcluded: true,
+    })),
+  };
+}
+
+export function buildOfficeControlledMutationContractPostureProjection(executionReadiness: OfficeControlledMutationExecutionReadinessSummary): OfficeControlledMutationContractPostureProjection {
+  const postureCards: Array<{ id: OfficeControlledMutationContractPostureProjectionId; label: string; detail: string }> = [
+    { id: "contract_chain", label: "Contract chain", detail: `${executionReadiness.stageLabel} is projected as display-only browser posture` },
+    { id: "browser_surface", label: "Browser surface", detail: "No form, button, input, select, textarea, click handler, or submit handler is exposed" },
+    { id: "backend_boundary", label: "Backend boundary", detail: "No backend schema, API route, service, event append, readback, audit write, execution, dry-run, dispatch, or target mutation is present" },
+    { id: "authority_boundary", label: "Authority boundary", detail: "No authority adapter implementation, adapter binding, credential access, auth change, or environment change is present" },
+    { id: "storage_boundary", label: "Storage boundary", detail: "No storage write, persistence, migration, approval record, or audit record is present" },
+    { id: "nas_boundary", label: "NAS boundary", detail: "No NAS save, NAS write preparation, VPS, Kanban, cron, or source mutation is present" },
+  ];
+  return {
+    stageLabel: "Frontend Contract Posture Projection 1",
+    sourceStageLabel: executionReadiness.stageLabel,
+    detailKind: "controlled_mutation_contract_posture_projection",
+    title: "프론트엔드 계약 자세 투영 · 읽기 전용",
+    enabledControls: 0,
+    formControlEnabled: false,
+    browserExecutableControlsEnabled: false,
+    backendMutationEnabled: false,
+    storageWriteEnabled: false,
+    eventAppendEnabled: false,
+    eventReadbackEnabled: false,
+    auditWriteEnabled: false,
+    executionEnabled: false,
+    dryRunExecutionEnabled: false,
+    dispatchEnabled: false,
+    authorityAdapterBindingEnabled: false,
+    credentialChangeEnabled: false,
+    nasMutationEnabled: false,
+    safeBoundary: "frontend read-only contract posture projection only · no forms/buttons/inputs · no browser executable controls · no backend/schema/API route/service changes · no storage/write path · no event append/readback · no audit write · no execution/dry-run/dispatch/target mutation · no authority adapter binding · no credential/auth/env change · no NAS/VPS/Kanban/cron mutation",
+    safeProjectionOnly: true,
+    rawExcluded: true,
+    postureCards: postureCards.map((card) => ({
+      ...card,
+      status: "blocked",
       rawExcluded: true,
     })),
   };
