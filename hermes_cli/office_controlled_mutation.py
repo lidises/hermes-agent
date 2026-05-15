@@ -1,16 +1,20 @@
 """Contract-only AI Office controlled mutation schema.
 
-This module intentionally exposes no executable mutation, persistence, adapter,
-or audit behavior. It returns a fixed allowlisted contract shape that the
-protected dashboard API can display before any future authority implementation
-exists.
+This module intentionally exposes no executable mutation, adapter, target,
+or audit behavior. It provides fixed allowlisted contract shapes plus the first
+approved narrow safe request-event JSONL append/readback boundary under local
+Hermes profile storage, before any future authority implementation exists.
 """
 
 from __future__ import annotations
 
+import json
 import re
 from collections.abc import Mapping, Sequence
-from typing import Any
+from pathlib import Path
+from typing import Any, cast
+
+from hermes_constants import get_hermes_home
 
 _AUTHORITY_LEVELS = [
     "display_only",
@@ -209,6 +213,98 @@ def validate_office_controlled_mutation_request_event(payload: object) -> dict[s
         "redaction": dict(_REDACTION_POSTURE),
     }
     return {"valid": True, "errors": [], "dto": dto}
+
+
+def _default_request_event_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "requests.jsonl"
+
+
+def _with_request_event_persistence_capabilities(dto: Mapping[str, Any]) -> dict[str, object]:
+    stored_dto = dict(dto)
+    capabilities = dict(stored_dto.get("capabilities", {}))
+    capabilities.update(
+        {
+            "request_creation_enabled": True,
+            "persistence_enabled": True,
+            "dry_run_execution_enabled": False,
+            "human_decision_recording_enabled": False,
+            "authority_adapter_enabled": False,
+            "target_mutation_enabled": False,
+            "audit_write_enabled": False,
+            "nas_save_enabled": False,
+        }
+    )
+    stored_dto["capabilities"] = capabilities
+    return stored_dto
+
+
+def append_office_controlled_mutation_request_event(
+    payload: object, *, store_path: Path | None = None
+) -> dict[str, object]:
+    """Validate and append a safe request-event DTO to the local Hermes JSONL store.
+
+    This is the first narrow write boundary: it stores only the already validated,
+    allowlisted DTO under ``HERMES_HOME`` (or an explicit test path). It does not
+    execute a dry run, record a human decision, call an authority adapter, mutate
+    a target, write audit/NAS material, or echo unsupported/raw input values.
+    """
+
+    validation = validate_office_controlled_mutation_request_event(payload)
+    if not validation["valid"]:
+        return {"stored": False, "errors": validation["errors"], "dto": None}
+
+    dto = _with_request_event_persistence_capabilities(cast(Mapping[str, Any], validation["dto"]))
+    path = store_path or _default_request_event_store_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(dto, sort_keys=True, separators=(",", ":")) + "\n")
+    return {"stored": True, "errors": [], "dto": dto}
+
+
+def _normalize_stored_request_event(item: object) -> dict[str, object] | None:
+    if not isinstance(item, Mapping):
+        return None
+    payload = {field: item.get(field) for field in _REQUEST_EVENT_FIELDS if field in item}
+    validation = validate_office_controlled_mutation_request_event(payload)
+    if not validation["valid"]:
+        return None
+    return _with_request_event_persistence_capabilities(cast(Mapping[str, Any], validation["dto"]))
+
+
+def list_office_controlled_mutation_request_events(
+    *, store_path: Path | None = None, limit: int = 50
+) -> dict[str, object]:
+    """Read back safe stored request-event DTOs without exposing raw inputs."""
+
+    path = store_path or _default_request_event_store_path()
+    max_events = max(0, min(limit, 200))
+    events: list[dict[str, object]] = []
+    if max_events and path.exists():
+        for line in path.read_text(encoding="utf-8").splitlines():
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            normalized = _normalize_stored_request_event(item)
+            if normalized is not None:
+                events.append(normalized)
+        events = events[-max_events:]
+    return {
+        "schema_version": 1,
+        "mode": "stored_request_events_readback",
+        "count": len(events),
+        "events": events,
+        "capabilities": {
+            "readback_enabled": True,
+            "dry_run_execution_enabled": False,
+            "human_decision_recording_enabled": False,
+            "authority_adapter_enabled": False,
+            "target_mutation_enabled": False,
+            "audit_write_enabled": False,
+            "nas_save_enabled": False,
+        },
+        "redaction": dict(_REDACTION_POSTURE),
+    }
 
 
 def build_office_controlled_mutation_event_persistence_contract(

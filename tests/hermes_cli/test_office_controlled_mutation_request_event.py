@@ -258,3 +258,166 @@ def test_request_event_validate_api_rejects_non_validate_methods(safe_request_ev
     for method in (client.put, client.patch, client.delete):
         resp = method(route, headers=headers)
         assert resp.status_code in {404, 405}
+
+
+def test_request_event_append_and_readback_store_safe_dto_only(tmp_path, safe_request_event_payload):
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_request_event,
+        list_office_controlled_mutation_request_events,
+    )
+
+    store_path = tmp_path / "requests.jsonl"
+    result = append_office_controlled_mutation_request_event(
+        {
+            **safe_request_event_payload,
+            "prompt": "raw prompt must not be echoed",
+            "path": "/Users/lidises/private/source.md",
+        },
+        store_path=store_path,
+    )
+
+    assert result == {
+        "stored": False,
+        "errors": [{"field": "unsupported_fields", "code": "unsupported_field"}],
+        "dto": None,
+    }
+    assert not store_path.exists()
+
+    result = append_office_controlled_mutation_request_event(safe_request_event_payload, store_path=store_path)
+
+    assert result["stored"] is True
+    assert result["errors"] == []
+    assert result["dto"]["mode"] == "validated_request_event"
+    assert result["dto"]["capabilities"]["request_creation_enabled"] is True
+    assert result["dto"]["capabilities"]["persistence_enabled"] is True
+    assert result["dto"]["capabilities"]["dry_run_execution_enabled"] is False
+    assert result["dto"]["capabilities"]["target_mutation_enabled"] is False
+    assert result["dto"]["capabilities"]["audit_write_enabled"] is False
+    assert result["dto"]["capabilities"]["nas_save_enabled"] is False
+    assert store_path.exists()
+
+    events = list_office_controlled_mutation_request_events(store_path=store_path)
+    assert events["count"] == 1
+    assert events["events"] == [result["dto"]]
+    assert events["capabilities"] == {
+        "readback_enabled": True,
+        "dry_run_execution_enabled": False,
+        "human_decision_recording_enabled": False,
+        "authority_adapter_enabled": False,
+        "target_mutation_enabled": False,
+        "audit_write_enabled": False,
+        "nas_save_enabled": False,
+    }
+    serialized = str(events).lower()
+    assert "raw prompt" not in serialized
+    assert "/users/lidises" not in serialized
+
+
+def test_request_event_append_api_is_protected_and_writes_under_hermes_home(monkeypatch, tmp_path, safe_request_event_payload):
+    from starlette.testclient import TestClient
+    from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+    client = TestClient(app)
+    route = "/api/office/controlled-mutation/request"
+
+    unauthenticated = client.post(route, json=safe_request_event_payload)
+    assert unauthenticated.status_code == 401
+
+    resp = client.post(route, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN}, json=safe_request_event_payload)
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["stored"] is True
+    assert body["dto"]["capabilities"]["persistence_enabled"] is True
+    assert body["dto"]["capabilities"]["dry_run_execution_enabled"] is False
+    assert body["dto"]["capabilities"]["target_mutation_enabled"] is False
+
+    store_path = tmp_path / "office" / "controlled-mutation" / "requests.jsonl"
+    assert store_path.exists()
+    assert store_path.read_text().count("\n") == 1
+
+    readback = client.get("/api/office/controlled-mutation/requests", headers={_SESSION_HEADER_NAME: _SESSION_TOKEN})
+    assert readback.status_code == 200
+    payload = readback.json()
+    assert payload["count"] == 1
+    assert payload["events"][0]["request_id"] == safe_request_event_payload["request_id"]
+    assert payload["capabilities"]["readback_enabled"] is True
+    assert payload["capabilities"]["audit_write_enabled"] is False
+    assert payload["capabilities"]["nas_save_enabled"] is False
+
+
+def test_request_event_append_api_rejects_raw_without_write_or_echo(monkeypatch, tmp_path, safe_request_event_payload):
+    from starlette.testclient import TestClient
+    from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+    client = TestClient(app)
+    payload = {
+        **safe_request_event_payload,
+        "prompt": "raw prompt must not be echoed",
+        "path": "/Users/lidises/private/source.md",
+        "provider": "private-provider-id",
+    }
+
+    resp = client.post(
+        "/api/office/controlled-mutation/request",
+        headers={_SESSION_HEADER_NAME: _SESSION_TOKEN},
+        json=payload,
+    )
+
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body == {"stored": False, "errors": [{"field": "unsupported_fields", "code": "unsupported_field"}], "dto": None}
+    assert not (tmp_path / "office" / "controlled-mutation" / "requests.jsonl").exists()
+    serialized = str(body).lower()
+    assert "raw prompt" not in serialized
+    assert "/users/lidises" not in serialized
+    assert "private-provider-id" not in serialized
+
+
+def test_request_event_readback_skips_tampered_raw_jsonl_entries(tmp_path, safe_request_event_payload):
+    import json
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_request_event,
+        list_office_controlled_mutation_request_events,
+    )
+
+    store_path = tmp_path / "requests.jsonl"
+    append_office_controlled_mutation_request_event(safe_request_event_payload, store_path=store_path)
+    with store_path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps({"prompt": "raw prompt must not be echoed", "path": "/Users/lidises/private/source.md"}) + "\n")
+
+    result = list_office_controlled_mutation_request_events(store_path=store_path)
+
+    assert result["count"] == 1
+    assert result["events"][0]["request_id"] == safe_request_event_payload["request_id"]
+    serialized = str(result).lower()
+    assert "raw prompt" not in serialized
+    assert "/users/lidises" not in serialized
+
+
+def test_request_event_readback_limit_zero_returns_no_events(tmp_path, safe_request_event_payload):
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_request_event,
+        list_office_controlled_mutation_request_events,
+    )
+
+    store_path = tmp_path / "requests.jsonl"
+    append_office_controlled_mutation_request_event(safe_request_event_payload, store_path=store_path)
+
+    result = list_office_controlled_mutation_request_events(store_path=store_path, limit=0)
+
+    assert result["count"] == 0
+    assert result["events"] == []
+
+
+def test_request_event_readback_api_requires_dashboard_session_token(monkeypatch, tmp_path):
+    from starlette.testclient import TestClient
+    from hermes_cli.web_server import app
+
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+    client = TestClient(app)
+
+    resp = client.get("/api/office/controlled-mutation/requests")
+
+    assert resp.status_code == 401

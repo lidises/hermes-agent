@@ -49,7 +49,9 @@ from hermes_cli.config import (
 )
 from gateway.status import get_running_pid, read_runtime_status
 from hermes_cli.office_controlled_mutation import (
+    append_office_controlled_mutation_request_event,
     build_office_controlled_mutation_contract_schema,
+    list_office_controlled_mutation_request_events,
     validate_office_controlled_mutation_request_event,
 )
 from hermes_cli.office_state import build_office_safe_event_payload, build_office_state
@@ -556,6 +558,18 @@ async def get_office_controlled_mutation_schema():
 async def validate_office_controlled_mutation_request(payload: Any = Body(None)):
     """Validate a safe request-event DTO without creating or persisting it."""
     return validate_office_controlled_mutation_request_event(payload)
+
+
+@app.post("/api/office/controlled-mutation/request")
+async def append_office_controlled_mutation_request(payload: Any = Body(None)):
+    """Append a validated safe request-event DTO to the local Hermes JSONL store."""
+    return append_office_controlled_mutation_request_event(payload)
+
+
+@app.get("/api/office/controlled-mutation/requests")
+async def list_office_controlled_mutation_requests(limit: int = 50):
+    """Read back stored safe request-event DTOs from the local Hermes JSONL store."""
+    return list_office_controlled_mutation_request_events(limit=limit)
 
 
 @app.get("/api/office/events")
