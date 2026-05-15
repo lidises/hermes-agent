@@ -129,6 +129,7 @@ import {
   buildOfficeApprovalAuthorityDecisionEnvelopePreview,
   buildOfficeApprovalDecisionAuditNasTracePreview,
   buildOfficeNasKeeperSaveRequestGate,
+  buildOfficeNasKeeperRollbackEvidencePreview,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -161,6 +162,7 @@ import {
   type OfficeApprovalAuthorityDecisionEnvelopePreview,
   type OfficeApprovalDecisionAuditNasTracePreview,
   type OfficeNasKeeperSaveRequestGate,
+  type OfficeNasKeeperRollbackEvidencePreview,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -2770,6 +2772,61 @@ export function NasKeeperSaveRequestGatePanel({ gate }: { gate: OfficeNasKeeperS
   );
 }
 
+export function NasKeeperRollbackEvidencePreviewPanel({ rollback }: { rollback: OfficeNasKeeperRollbackEvidencePreview }) {
+  return (
+    <Card
+      data-office-nas-keeper-rollback-evidence="true"
+      data-office-nas-keeper-rollback-evidence-enabled-controls={rollback.enabledControls}
+      data-office-nas-keeper-rollback-evidence-rollback-point-created={String(rollback.rollbackPointCreated)}
+      data-office-nas-keeper-rollback-evidence-rollback-evidence-persisted={String(rollback.rollbackEvidencePersisted)}
+      data-office-nas-keeper-rollback-evidence-audit-event-appended={String(rollback.auditEventAppended)}
+      data-office-nas-keeper-rollback-evidence-nas-trace-persisted={String(rollback.nasTracePersisted)}
+      data-office-nas-keeper-rollback-evidence-nas-write-prepared={String(rollback.nasWritePrepared)}
+      data-office-nas-keeper-rollback-evidence-nas-save-enabled={String(rollback.nasSaveEnabled)}
+      data-office-nas-keeper-rollback-evidence-audit-write-enabled={String(rollback.auditWriteEnabled)}
+      data-office-nas-keeper-rollback-evidence-dispatch-enabled={String(rollback.dispatchEnabled)}
+      data-office-nas-keeper-rollback-evidence-request-creation-enabled={String(rollback.requestCreationEnabled)}
+      data-office-nas-keeper-rollback-evidence-work-assignment-enabled={String(rollback.workAssignmentEnabled)}
+      data-office-nas-keeper-rollback-evidence-safe-projection-only={String(rollback.safeProjectionOnly)}
+      data-office-nas-keeper-rollback-evidence-raw-excluded={String(rollback.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Database className="h-4 w-4" /> NAS Keeper rollback evidence preview
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-cyan-300/20 bg-cyan-950/10 p-3">
+            <div className="font-semibold text-cyan-100">rollback point · evidence package preview</div>
+            <div className="mt-1 leading-5">
+              NAS 저장 전에 남겨야 할 rollback/evidence package의 안전한 shape만 보여줍니다. rollback point 생성, audit append, NAS trace persistence, NAS write/save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {rollback.evidenceCards.map((card) => (
+              <div
+                key={card.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-nas-keeper-rollback-evidence-card={card.id}
+                data-office-nas-keeper-rollback-evidence-card-status={card.status}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{card.label}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-cyan-100/80">{card.status}</div>
+                <div className="mt-2 leading-5">{card.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-nas-keeper-rollback-evidence-boundary="true">
+            source {rollback.sourceDetailKind} · gate steps {rollback.sourceGateStepCount} · warnings {rollback.sourceWarningCount} · evidence cards {rollback.evidenceCardCount} · controls {rollback.enabledControls} · rollback point {String(rollback.rollbackPointCreated)} · audit appended {String(rollback.auditEventAppended)} · NAS trace persisted {String(rollback.nasTracePersisted)} · raw excluded {String(rollback.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -3238,6 +3295,10 @@ export default function OfficePage() {
     () => buildOfficeNasKeeperSaveRequestGate(approvalDecisionAuditNasTracePreview),
     [approvalDecisionAuditNasTracePreview],
   );
+  const nasKeeperRollbackEvidencePreview = useMemo(
+    () => buildOfficeNasKeeperRollbackEvidencePreview(nasKeeperSaveRequestGate),
+    [nasKeeperSaveRequestGate],
+  );
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -3496,6 +3557,8 @@ export default function OfficePage() {
       <ApprovalDecisionAuditNasTracePreviewPanel trace={approvalDecisionAuditNasTracePreview} />
 
       <NasKeeperSaveRequestGatePanel gate={nasKeeperSaveRequestGate} />
+
+      <NasKeeperRollbackEvidencePreviewPanel rollback={nasKeeperRollbackEvidencePreview} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 

@@ -1926,6 +1926,38 @@ export type OfficeNasKeeperSaveRequestGate = {
   rawExcluded: true;
 };
 
+export type OfficeNasKeeperRollbackEvidenceCard = {
+  id: "rollback_snapshot" | "evidence_manifest" | "audit_anchor" | "restore_boundary";
+  label: string;
+  status: "projected" | "blocked";
+  summary: string;
+  rawExcluded: true;
+};
+
+export type OfficeNasKeeperRollbackEvidencePreview = {
+  stageLabel: "NAS Keeper Rollback Evidence Preview 1";
+  title: string;
+  detailKind: "nas_keeper_rollback_evidence_preview";
+  evidenceCards: OfficeNasKeeperRollbackEvidenceCard[];
+  sourceDetailKind: OfficeNasKeeperSaveRequestGate["detailKind"];
+  sourceGateStepCount: number;
+  sourceWarningCount: number;
+  evidenceCardCount: number;
+  enabledControls: 0;
+  rollbackPointCreated: false;
+  rollbackEvidencePersisted: false;
+  auditEventAppended: false;
+  nasTracePersisted: false;
+  nasWritePrepared: false;
+  nasSaveEnabled: false;
+  auditWriteEnabled: false;
+  dispatchEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeWorkerAssignmentCandidateBlockedReason = {
   id: "facility_prerequisites_missing" | "approval_execution_blocked" | "authority_adapter_missing" | "audit_write_disabled" | "human_confirmation_missing";
   label: string;
@@ -3740,6 +3772,62 @@ export function buildOfficeNasKeeperSaveRequestGate(trace: OfficeApprovalDecisio
     saveRequestCreated: false,
     saveRequestPersisted: false,
     rollbackPointCreated: false,
+    nasWritePrepared: false,
+    nasSaveEnabled: false,
+    auditWriteEnabled: false,
+    dispatchEnabled: false,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeNasKeeperRollbackEvidencePreview(gate: OfficeNasKeeperSaveRequestGate): OfficeNasKeeperRollbackEvidencePreview {
+  const evidenceCards: OfficeNasKeeperRollbackEvidenceCard[] = [
+    {
+      id: "rollback_snapshot",
+      label: "Rollback snapshot preview",
+      status: "projected",
+      summary: "NAS 저장 직전 되돌림 기준점의 shape만 보여줍니다. rollback point는 아직 생성하지 않습니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "evidence_manifest",
+      label: "Evidence manifest preview",
+      status: "blocked",
+      summary: "저장 근거 패키지에 포함될 안전 필드 목록만 보여줍니다. raw path, 원문, credential은 포함하지 않습니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "audit_anchor",
+      label: "Audit anchor preview",
+      status: "blocked",
+      summary: "감사 anchor가 어디에 연결되어야 하는지만 표시합니다. audit event append와 audit write는 비활성입니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "restore_boundary",
+      label: "Restore boundary",
+      status: "blocked",
+      summary: "복구 실행과 최종 NAS write는 별도 권한 gate 뒤에 남겨둡니다. 이 화면은 evidence package preview만 제공합니다.",
+      rawExcluded: true,
+    },
+  ];
+  return {
+    stageLabel: "NAS Keeper Rollback Evidence Preview 1",
+    title: "NAS Keeper rollback evidence preview",
+    detailKind: "nas_keeper_rollback_evidence_preview",
+    evidenceCards,
+    sourceDetailKind: gate.detailKind,
+    sourceGateStepCount: gate.gateStepCount,
+    sourceWarningCount: gate.sourceWarningCount,
+    evidenceCardCount: evidenceCards.length,
+    enabledControls: 0,
+    rollbackPointCreated: false,
+    rollbackEvidencePersisted: false,
+    auditEventAppended: false,
+    nasTracePersisted: false,
     nasWritePrepared: false,
     nasSaveEnabled: false,
     auditWriteEnabled: false,

@@ -119,6 +119,7 @@ import {
   buildOfficeApprovalAuthorityDecisionEnvelopePreview,
   buildOfficeApprovalDecisionAuditNasTracePreview,
   buildOfficeNasKeeperSaveRequestGate,
+  buildOfficeNasKeeperRollbackEvidencePreview,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -1058,6 +1059,45 @@ describe("NAS Keeper Save Request Gate 1", () => {
     expect(gate.safeProjectionOnly).toBe(true);
     expect(gate.rawExcluded).toBe(true);
     expect(JSON.stringify(gate)).not.toMatch(/raw nas gate prompt|raw nas gate task|Traceback|\/Users\/lidises|token-shaped-nas-gate|private-nas-gate-provider/i);
+  });
+});
+
+
+describe("NAS Keeper Rollback Evidence Preview 1", () => {
+  it("builds a projected rollback evidence package without creating rollback points or NAS writes", () => {
+    const secretSentinel = ["token", "shaped", "rollback", "evidence"].join("-");
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishFixture({
+      agents: [{ id: "agent-rollback-evidence", status: "active", prompt: "raw rollback evidence prompt", provider: "private-rollback-evidence-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-rollback-evidence", status: "blocked", title: "raw rollback evidence task", body: "/Users/lidises/private/rollback-evidence.md", transcript: "Traceback rollback evidence transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+    const trace = buildOfficeApprovalDecisionAuditNasTracePreview(envelope);
+    const gate = buildOfficeNasKeeperSaveRequestGate(trace);
+
+    const rollback = buildOfficeNasKeeperRollbackEvidencePreview(gate);
+
+    expect(rollback.stageLabel).toBe("NAS Keeper Rollback Evidence Preview 1");
+    expect(rollback.detailKind).toBe("nas_keeper_rollback_evidence_preview");
+    expect(rollback.evidenceCards.map((card) => card.id)).toEqual(["rollback_snapshot", "evidence_manifest", "audit_anchor", "restore_boundary"]);
+    expect(rollback.sourceDetailKind).toBe("nas_keeper_save_request_gate");
+    expect(rollback.sourceGateStepCount).toBe(4);
+    expect(rollback.evidenceCardCount).toBe(4);
+    expect(rollback.enabledControls).toBe(0);
+    expect(rollback.rollbackPointCreated).toBe(false);
+    expect(rollback.rollbackEvidencePersisted).toBe(false);
+    expect(rollback.auditEventAppended).toBe(false);
+    expect(rollback.nasTracePersisted).toBe(false);
+    expect(rollback.nasWritePrepared).toBe(false);
+    expect(rollback.nasSaveEnabled).toBe(false);
+    expect(rollback.auditWriteEnabled).toBe(false);
+    expect(rollback.dispatchEnabled).toBe(false);
+    expect(rollback.requestCreationEnabled).toBe(false);
+    expect(rollback.workAssignmentEnabled).toBe(false);
+    expect(rollback.safeProjectionOnly).toBe(true);
+    expect(rollback.rawExcluded).toBe(true);
+    expect(JSON.stringify(rollback)).not.toMatch(/raw rollback evidence prompt|raw rollback evidence task|Traceback|\/Users\/lidises|token-shaped-rollback-evidence|private-rollback-evidence-provider/i);
   });
 });
 
