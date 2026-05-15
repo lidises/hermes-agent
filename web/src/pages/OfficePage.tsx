@@ -120,6 +120,7 @@ import {
   buildOfficeEventRequestContractProjection,
   buildOfficeApprovalDialogueRouteInspector,
   buildOfficeEventTimelineProjection,
+  buildOfficeTimelineWorkerHandoffDrilldown,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -143,6 +144,7 @@ import {
   type OfficeEventRequestContractProjection,
   type OfficeApprovalDialogueRouteInspector,
   type OfficeEventTimelineProjection,
+  type OfficeTimelineWorkerHandoffDrilldown,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -2267,6 +2269,60 @@ export function EventTimelineProjectionPanel({ timeline }: { timeline: OfficeEve
   );
 }
 
+export function TimelineWorkerHandoffDrilldownPanel({ drilldown }: { drilldown: OfficeTimelineWorkerHandoffDrilldown }) {
+  return (
+    <Card
+      data-office-timeline-worker-handoff-drilldown="true"
+      data-office-timeline-worker-handoff-drilldown-enabled-controls={drilldown.enabledControls}
+      data-office-timeline-worker-handoff-drilldown-write-enabled={String(drilldown.drilldownWriteEnabled)}
+      data-office-timeline-worker-handoff-drilldown-work-assignment-enabled={String(drilldown.workAssignmentEnabled)}
+      data-office-timeline-worker-handoff-drilldown-request-creation-enabled={String(drilldown.requestCreationEnabled)}
+      data-office-timeline-worker-handoff-drilldown-dispatch-enabled={String(drilldown.dispatchEnabled)}
+      data-office-timeline-worker-handoff-drilldown-audit-write-enabled={String(drilldown.auditWriteEnabled)}
+      data-office-timeline-worker-handoff-drilldown-nas-save-enabled={String(drilldown.nasSaveEnabled)}
+      data-office-timeline-worker-handoff-drilldown-safe-projection-only={String(drilldown.safeProjectionOnly)}
+      data-office-timeline-worker-handoff-drilldown-raw-excluded={String(drilldown.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Bot className="h-4 w-4" /> Timeline/worker handoff drill-down
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-sky-300/20 bg-sky-950/10 p-3">
+            <div className="font-semibold text-sky-100">Projected worker sequence · no assignment</div>
+            <div className="mt-1 leading-5">
+              Event timeline 다음에 어떤 worker lane이 등장하는지만 safe aggregate로 drill-down합니다. Work assignment, request creation, dispatch, audit write, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {drilldown.handoffSteps.map((step) => (
+              <div
+                key={step.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-timeline-worker-handoff-drilldown-step={step.id}
+                data-office-timeline-worker-handoff-drilldown-step-lane={step.lane}
+                data-office-timeline-worker-handoff-drilldown-step-tone={step.tone}
+                data-office-timeline-worker-handoff-drilldown-step-assignment-enabled={String(step.assignmentEnabled)}
+                data-office-timeline-worker-handoff-drilldown-step-dispatch-enabled={String(step.dispatchEnabled)}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{step.sourceEventId}</div>
+                <div className="mt-1 font-semibold text-foreground">{step.label}</div>
+                <div className="mt-1 text-midground/60">{step.id} · {step.facilityId}</div>
+                <div className="mt-2 leading-5">{step.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-timeline-worker-handoff-drilldown-boundary="true">
+            state {drilldown.handoffState} · source {drilldown.sourceTimelineKind} / {drilldown.sourceWorkerVisibilityKind} / {drilldown.sourceHandoffKind} · timeline events {drilldown.timelineEventCount} · visible workers {drilldown.visibleWorkerCount} · evidence {drilldown.evidenceCount} · blocked {drilldown.blockedWorkCount} · warnings {drilldown.warningCount} · controls {drilldown.enabledControls} · raw excluded {String(drilldown.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -2699,6 +2755,10 @@ export default function OfficePage() {
     () => buildOfficeEventTimelineProjection(eventRequestContractProjection, approvalDialogueRouteInspector),
     [eventRequestContractProjection, approvalDialogueRouteInspector],
   );
+  const timelineWorkerHandoffDrilldown = useMemo(
+    () => buildOfficeTimelineWorkerHandoffDrilldown(eventTimelineProjection, deskRpgWorkerRoleVisibility, reviewerWikiHandoffPosture),
+    [eventTimelineProjection, deskRpgWorkerRoleVisibility, reviewerWikiHandoffPosture],
+  );
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -2939,6 +2999,8 @@ export default function OfficePage() {
       <ApprovalDialogueRouteInspectorPanel inspector={approvalDialogueRouteInspector} />
 
       <EventTimelineProjectionPanel timeline={eventTimelineProjection} />
+
+      <TimelineWorkerHandoffDrilldownPanel drilldown={timelineWorkerHandoffDrilldown} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 

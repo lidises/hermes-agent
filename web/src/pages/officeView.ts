@@ -1330,6 +1330,44 @@ export type OfficeEventTimelineProjection = {
   rawExcluded: true;
 };
 
+export type OfficeTimelineWorkerHandoffDrilldownStep = {
+  id: Extract<OfficeDeskRpgProjectionActorRole, "search_worker" | "reviewer" | "wiki_writer" | "nas_keeper">;
+  label: string;
+  facilityId: OfficeDeskRpgProjectionFacilityId;
+  sourceEventId: OfficeEventTimelineProjectionEvent["id"];
+  lane: "research" | "review" | "writing" | "vault";
+  summary: string;
+  tone: "info" | "warning" | "blocked";
+  assignmentEnabled: false;
+  dispatchEnabled: false;
+  rawExcluded: true;
+};
+
+export type OfficeTimelineWorkerHandoffDrilldown = {
+  stageLabel: "Timeline/Worker Handoff Drill-down 1";
+  title: string;
+  detailKind: "timeline_worker_handoff_drilldown";
+  handoffSteps: OfficeTimelineWorkerHandoffDrilldownStep[];
+  sourceTimelineKind: OfficeEventTimelineProjection["detailKind"];
+  sourceWorkerVisibilityKind: "desk_rpg_worker_role_visibility";
+  sourceHandoffKind: OfficeReviewerWikiHandoffPosture["handoffKind"];
+  handoffState: "projection_only";
+  timelineEventCount: number;
+  visibleWorkerCount: number;
+  evidenceCount: number;
+  blockedWorkCount: number;
+  warningCount: number;
+  drilldownWriteEnabled: false;
+  workAssignmentEnabled: false;
+  requestCreationEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  enabledControls: 0;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeRpgMissionStoryboardStep = {
   id: "request" | "orchestrate" | "board" | "evidence" | "review" | "approval";
   label: string;
@@ -2932,6 +2970,65 @@ export function buildOfficeEventTimelineProjection(
     timelineAppendEnabled: false,
     auditWriteEnabled: false,
     dispatchEnabled: false,
+    nasSaveEnabled: false,
+    enabledControls: 0,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeTimelineWorkerHandoffDrilldown(
+  timeline: OfficeEventTimelineProjection,
+  workerVisibility: OfficeDeskRpgWorkerRoleVisibility,
+  handoff: OfficeReviewerWikiHandoffPosture,
+): OfficeTimelineWorkerHandoffDrilldown {
+  const roleById = Object.fromEntries(workerVisibility.roles.map((role) => [role.role, role])) as Partial<Record<OfficeTimelineWorkerHandoffDrilldownStep["id"], OfficeDeskRpgWorkerRoleVisibilityRole>>;
+  const handoffByRole = Object.fromEntries(handoff.sequence.map((step) => [step.actorRole, step])) as Partial<Record<OfficeTimelineWorkerHandoffDrilldownStep["id"], OfficeReviewerWikiHandoffStep>>;
+  const sourceEventByRole: Record<OfficeTimelineWorkerHandoffDrilldownStep["id"], OfficeEventTimelineProjectionEvent["id"]> = {
+    search_worker: "orchestrator_plan_requested",
+    reviewer: "approval_requested",
+    wiki_writer: "approval_requested",
+    nas_keeper: "nas_save_approval_pending",
+  };
+  const roleOrder: OfficeTimelineWorkerHandoffDrilldownStep["id"][] = ["search_worker", "reviewer", "wiki_writer", "nas_keeper"];
+  const handoffSteps = roleOrder.map((role): OfficeTimelineWorkerHandoffDrilldownStep => {
+    const visibleRole = roleById[role];
+    const handoffStep = handoffByRole[role];
+    const visibleInstances = Math.max(0, visibleRole?.visibleInstances ?? 0);
+    const lane = visibleRole?.lane ?? (role === "nas_keeper" ? "vault" : role === "wiki_writer" ? "writing" : role === "reviewer" ? "review" : "research");
+    return {
+      id: role,
+      label: visibleRole?.label ?? handoffStep?.actorLabel ?? role,
+      facilityId: visibleRole?.facilityId ?? handoffStep?.facilityId ?? "worker_cluster",
+      sourceEventId: sourceEventByRole[role],
+      lane,
+      summary: `${handoffStep?.label ?? "safe handoff"}: ${visibleInstances} visible worker posture(s); assignment and dispatch stay disabled.`,
+      tone: handoff.blockedWorkCount > 0 && (role === "reviewer" || role === "nas_keeper") ? "warning" : role === "nas_keeper" ? "blocked" : "info",
+      assignmentEnabled: false,
+      dispatchEnabled: false,
+      rawExcluded: true,
+    };
+  });
+
+  return {
+    stageLabel: "Timeline/Worker Handoff Drill-down 1",
+    title: "Timeline/worker handoff drill-down",
+    detailKind: "timeline_worker_handoff_drilldown",
+    handoffSteps,
+    sourceTimelineKind: timeline.detailKind,
+    sourceWorkerVisibilityKind: "desk_rpg_worker_role_visibility",
+    sourceHandoffKind: handoff.handoffKind,
+    handoffState: "projection_only",
+    timelineEventCount: timeline.eventCount,
+    visibleWorkerCount: workerVisibility.roles.reduce((total, role) => total + Math.max(0, role.visibleInstances), 0),
+    evidenceCount: Math.max(timeline.evidenceCount, handoff.evidenceCount),
+    blockedWorkCount: Math.max(timeline.blockedWorkCount, handoff.blockedWorkCount),
+    warningCount: handoff.warningCount,
+    drilldownWriteEnabled: false,
+    workAssignmentEnabled: false,
+    requestCreationEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
     nasSaveEnabled: false,
     enabledControls: 0,
     safeProjectionOnly: true,

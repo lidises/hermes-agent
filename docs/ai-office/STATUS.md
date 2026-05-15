@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-15 10:45 KST
+Last updated: 2026-05-15 11:09 KST
 
 ## AI Office 통합 운영실 umbrella summary
 
@@ -123,6 +123,14 @@ Safety/non-actions: frontend/read-only only; no backend/schema/mutation/NAS/VPS/
 Verification 2026-05-15 10:45 KST: `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx -t "Event Timeline Projection 1"` failed first with the missing helper, then passed (2 passed, 127 skipped); `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx` passed (129 passed); focused ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/OfficePage.test.ts`, `src/pages/OfficePage.rpg.test.tsx`, and `src/pages/officeView.ts`; `npm run build` passed with only the existing Vite large-chunk warning; `git diff --check` passed; local preview `/office?event-timeline-projection=1` returned HTTP 200 to the app shell. Added-line safety scan hits were limited to intentional test negative sentinels and no new executable controls/mutation calls were found. Independent review returned PASS/no blocking findings. Scope remains frontend/docs only with no backend/schema/API route/service/Kanban/cron/VPS/NAS changes.
 
 Safety/non-actions: frontend/read-only only; no backend/schema/mutation/NAS/VPS/service change, no renderer dependency, no forms/buttons/inputs in the component, no runtime event write, no intent event creation, no visual event creation, no event persistence, no timeline append, no dispatch, no audit write, no NAS save, and no raw prompt/task body/transcript/path/token/provider projection.
+
+## Timeline/Worker Handoff Drill-down 1 completed locally
+
+`Timeline/Worker Handoff Drill-down 1` adds a safe helper, `buildOfficeTimelineWorkerHandoffDrilldown(timeline, workerVisibility, handoff)`, plus `TimelineWorkerHandoffDrilldownPanel` in `/office`. It composes only the existing read-only event timeline projection, safe Desk RPG worker-role visibility, and reviewer/wiki handoff posture into four projected worker lanes: Search Worker, Reviewer, Wiki Writer, and NAS Keeper. It keeps `enabledControls=0`, `drilldownWriteEnabled=false`, `workAssignmentEnabled=false`, `requestCreationEnabled=false`, `dispatchEnabled=false`, `auditWriteEnabled=false`, `nasSaveEnabled=false`, and raw exclusion true through stable `data-office-timeline-worker-handoff-drilldown*` hooks. The RED cycle added helper and component coverage first, confirmed missing-helper failures, then implemented the safe DTO helper and read-only panel wiring.
+
+Verification 2026-05-15 11:09 KST: `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx -t "Timeline/Worker Handoff Drill-down 1"` failed first with the missing helper, then passed (2 passed, 129 skipped); `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx` passed (131 passed); focused ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/OfficePage.test.ts`, `src/pages/OfficePage.rpg.test.tsx`, and `src/pages/officeView.ts`; `npm run build` passed with only the existing Vite large-chunk warning; `git diff --check` passed. Added-line safety scan hits were limited to documentation safety copy and intentional negative sentinel tests; no backend/schema/API route/service/Kanban/cron/VPS/NAS changes were present. Local preview `/office?timeline-worker-handoff-drilldown=1` returned HTTP 200 to the app shell; unauthenticated browser smoke showed the expected protected Office fallback, raw-leak probe false, zero main forms/inputs, and zero console/JS errors. Independent pre-commit review returned PASS/no blocking findings.
+
+Safety/non-actions: frontend/read-only only; no backend/schema/mutation/NAS/VPS/service change, no renderer dependency, no forms/buttons/inputs in the component, no drill-down writes, no worker assignment, no request creation, no dispatch, no audit write, no NAS save, and no raw prompt/task body/transcript/path/token/provider projection.
 
 ## Desk RPG Boss Command Console 1 completed locally
 

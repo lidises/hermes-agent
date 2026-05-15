@@ -110,6 +110,7 @@ import {
   buildOfficeEventRequestContractProjection,
   buildOfficeApprovalDialogueRouteInspector,
   buildOfficeEventTimelineProjection,
+  buildOfficeTimelineWorkerHandoffDrilldown,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -637,6 +638,54 @@ describe("Event Timeline Projection 1", () => {
     expect(timeline.safeProjectionOnly).toBe(true);
     expect(timeline.rawExcluded).toBe(true);
     expect(JSON.stringify(timeline)).not.toMatch(/raw timeline prompt|raw timeline task title|Traceback|\/Users\/lidises|token-shaped-timeline-sentinel|private-timeline-provider/i);
+  });
+});
+
+describe("Timeline/Worker Handoff Drill-down 1", () => {
+  it("builds a read-only worker handoff drill-down from the safe timeline without assigning work", () => {
+    const secretSentinel = ["token", "shaped", "worker", "handoff"].join("-");
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [
+        { id: "agent-1", status: "active", prompt: "raw worker handoff prompt", provider: "private-worker-handoff-provider", api_key: secretSentinel },
+      ],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw worker handoff task", body: "/Users/lidises/private/worker-handoff.md", transcript: "Traceback worker handoff transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 13, warning_count: 5, error_summary: "Traceback worker handoff source" },
+      ],
+    }));
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const posture = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
+    const envelope = buildOfficeOrchestratorRequestEnvelopeDetail(projection, posture);
+    const route = buildOfficeApprovalRequestRouteDetail(envelope, dialogue);
+    const contract = buildOfficeEventRequestContractProjection(route);
+    const inspector = buildOfficeApprovalDialogueRouteInspector(dialogue, route, contract);
+    const timeline = buildOfficeEventTimelineProjection(contract, inspector);
+    const workerRoles = buildOfficeDeskRpgWorkerRoleVisibility(projection);
+    const handoff = buildOfficeReviewerWikiHandoffPosture(projection);
+
+    const drilldown = buildOfficeTimelineWorkerHandoffDrilldown(timeline, workerRoles, handoff);
+
+    expect(drilldown.stageLabel).toBe("Timeline/Worker Handoff Drill-down 1");
+    expect(drilldown.detailKind).toBe("timeline_worker_handoff_drilldown");
+    expect(drilldown.sourceTimelineKind).toBe("event_timeline_projection");
+    expect(drilldown.sourceWorkerVisibilityKind).toBe("desk_rpg_worker_role_visibility");
+    expect(drilldown.sourceHandoffKind).toBe("review_to_wiki_posture");
+    expect(drilldown.handoffSteps.map((step) => step.id)).toEqual(["search_worker", "reviewer", "wiki_writer", "nas_keeper"]);
+    expect(drilldown.timelineEventCount).toBe(4);
+    expect(drilldown.visibleWorkerCount).toBeGreaterThanOrEqual(4);
+    expect(drilldown.handoffState).toBe("projection_only");
+    expect(drilldown.enabledControls).toBe(0);
+    expect(drilldown.drilldownWriteEnabled).toBe(false);
+    expect(drilldown.workAssignmentEnabled).toBe(false);
+    expect(drilldown.requestCreationEnabled).toBe(false);
+    expect(drilldown.dispatchEnabled).toBe(false);
+    expect(drilldown.auditWriteEnabled).toBe(false);
+    expect(drilldown.nasSaveEnabled).toBe(false);
+    expect(drilldown.safeProjectionOnly).toBe(true);
+    expect(drilldown.rawExcluded).toBe(true);
+    expect(JSON.stringify(drilldown)).not.toMatch(/raw worker handoff prompt|raw worker handoff task|Traceback|\/Users\/lidises|token-shaped-worker-handoff|private-worker-handoff-provider/i);
   });
 });
 

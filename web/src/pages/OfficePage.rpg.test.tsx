@@ -18,7 +18,7 @@ vi.mock("@/lib/api", () => ({
 
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
-import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeRpgScene } from "./officeView";
+import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeRpgScene } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
@@ -760,6 +760,57 @@ describe("EventTimelineProjectionPanel", () => {
     expect(markup).not.toContain("<button");
     expect(markup).not.toContain("<input");
     expect(markup).not.toMatch(/raw timeline prompt|raw timeline task title|Traceback|\/Users\/lidises|token-shaped-timeline-sentinel|private-timeline-provider/i);
+  });
+});
+
+describe("TimelineWorkerHandoffDrilldownPanel", () => {
+  it("Timeline/Worker Handoff Drill-down 1 renders a read-only worker drill-down without controls", () => {
+    const TimelineWorkerHandoffDrilldownPanel = (OfficePageModule as unknown as {
+      TimelineWorkerHandoffDrilldownPanel: React.ComponentType<{ drilldown: ReturnType<typeof buildOfficeTimelineWorkerHandoffDrilldown> }>;
+    }).TimelineWorkerHandoffDrilldownPanel;
+    const secretSentinel = ["token", "shaped", "worker", "handoff"].join("-");
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [{ id: "agent-1", status: "active", prompt: "raw worker handoff prompt", provider: "private-worker-handoff-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw worker handoff task", body: "/Users/lidises/private/worker-handoff.md", transcript: "Traceback worker handoff transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 13, warning_count: 5, error_summary: "Traceback worker handoff source" },
+      ],
+    }));
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const posture = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
+    const envelope = buildOfficeOrchestratorRequestEnvelopeDetail(projection, posture);
+    const route = buildOfficeApprovalRequestRouteDetail(envelope, dialogue);
+    const contract = buildOfficeEventRequestContractProjection(route);
+    const inspector = buildOfficeApprovalDialogueRouteInspector(dialogue, route, contract);
+    const timeline = buildOfficeEventTimelineProjection(contract, inspector);
+    const workerRoles = buildOfficeDeskRpgWorkerRoleVisibility(projection);
+    const handoff = buildOfficeReviewerWikiHandoffPosture(projection);
+    const drilldown = buildOfficeTimelineWorkerHandoffDrilldown(timeline, workerRoles, handoff);
+
+    const markup = renderToStaticMarkup(<TimelineWorkerHandoffDrilldownPanel drilldown={drilldown} />);
+
+    expect(markup).toContain("data-office-timeline-worker-handoff-drilldown=\"true\"");
+    expect(markup).toContain("data-office-timeline-worker-handoff-drilldown-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-timeline-worker-handoff-drilldown-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-timeline-worker-handoff-drilldown-work-assignment-enabled=\"false\"");
+    expect(markup).toContain("data-office-timeline-worker-handoff-drilldown-request-creation-enabled=\"false\"");
+    expect(markup).toContain("data-office-timeline-worker-handoff-drilldown-dispatch-enabled=\"false\"");
+    expect(markup).toContain("data-office-timeline-worker-handoff-drilldown-audit-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-timeline-worker-handoff-drilldown-nas-save-enabled=\"false\"");
+    expect(markup).toContain("data-office-timeline-worker-handoff-drilldown-step=\"search_worker\"");
+    expect(markup).toContain("data-office-timeline-worker-handoff-drilldown-step=\"reviewer\"");
+    expect(markup).toContain("data-office-timeline-worker-handoff-drilldown-step=\"wiki_writer\"");
+    expect(markup).toContain("data-office-timeline-worker-handoff-drilldown-step=\"nas_keeper\"");
+    expect(markup).toContain("Timeline/worker handoff drill-down");
+    expect(markup).toContain("Projected worker sequence · no assignment");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw worker handoff prompt|raw worker handoff task|Traceback|\/Users\/lidises|token-shaped-worker-handoff|private-worker-handoff-provider/i);
   });
 });
 
