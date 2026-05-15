@@ -209,3 +209,60 @@ def validate_office_controlled_mutation_request_event(payload: object) -> dict[s
         "redaction": dict(_REDACTION_POSTURE),
     }
     return {"valid": True, "errors": [], "dto": dto}
+
+
+def build_office_controlled_mutation_event_persistence_contract(
+    *, unsafe_examples: Mapping[str, Any] | None = None
+) -> dict[str, object]:
+    """Return the non-writing event persistence contract descriptor.
+
+    ``unsafe_examples`` is accepted only to prove boundary behavior. Values are
+    deliberately ignored so raw prompt/task body/transcript/path/provider/token
+    material can never be echoed.
+    """
+
+    _ = unsafe_examples
+    return {
+        "schema_version": 1,
+        "mode": "event_persistence_contract_only",
+        "event_store": {
+            "implementation_enabled": False,
+            "append_enabled": False,
+            "readback_enabled": False,
+            "durable_storage_enabled": False,
+            "database_migration_required": False,
+        },
+        "accepted_event_kinds": list(_EVENT_KINDS),
+        "required_envelope_fields": [
+            "event_id",
+            "correlation_id",
+            "request_id",
+            "event_kind",
+            "actor_ref",
+            "target_ref",
+            "safe_summary",
+            "evidence_refs",
+            "created_at",
+        ],
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "opaque_refs_only": True,
+            "unsupported_values_echoed": False,
+        },
+        "capabilities": {
+            "request_creation_enabled": False,
+            "event_append_enabled": False,
+            "audit_write_enabled": False,
+            "dry_run_execution_enabled": False,
+            "human_decision_recording_enabled": False,
+            "authority_adapter_enabled": False,
+            "target_mutation_enabled": False,
+            "nas_save_enabled": False,
+        },
+        "storage_endpoints": [],
+        "contract_notes": [
+            "contract describes future persistence only; no event is appended",
+            "storage backend, migration, retention, and audit sink require separate approval",
+        ],
+    }
