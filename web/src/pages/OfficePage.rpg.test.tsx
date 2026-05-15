@@ -18,7 +18,7 @@ vi.mock("@/lib/api", () => ({
 
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
-import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeNasKeeperSaveRequestGate, buildOfficeNasKeeperRollbackEvidencePreview, buildOfficeDeskRpgReadOnlyChainCompletionReview, buildOfficeEventDrivenCharacterStateProjection, buildOfficeCharacterStateRoomOverlay, buildOfficeCharacterRoomInteractionPosture, buildOfficeCharacterInspectorDetailPosture, buildOfficeCharacterDetailSafeDialogueCopy, buildOfficeCharacterBubbleInspectorAlignment, buildOfficeCharacterPanelBoundarySummary, buildOfficeRpgScene } from "./officeView";
+import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeNasKeeperSaveRequestGate, buildOfficeNasKeeperRollbackEvidencePreview, buildOfficeDeskRpgReadOnlyChainCompletionReview, buildOfficeEventDrivenCharacterStateProjection, buildOfficeCharacterStateRoomOverlay, buildOfficeCharacterRoomInteractionPosture, buildOfficeCharacterInspectorDetailPosture, buildOfficeCharacterDetailSafeDialogueCopy, buildOfficeCharacterBubbleInspectorAlignment, buildOfficeCharacterPanelBoundarySummary, buildOfficeCharacterFacilityRoleLegend, buildOfficeRpgScene } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
@@ -1484,6 +1484,57 @@ describe("CharacterDetailSafeDialogueCopyPanel", () => {
     expect(markup).not.toContain("<select");
     expect(markup).not.toContain("<textarea");
     expect(markup).not.toMatch(/raw character dialogue panel prompt|raw character dialogue panel task|Traceback|\/Users\/lidises|token-shaped-dialogue-copy|private-character-dialogue-panel-provider/i);
+  });
+});
+
+
+describe("CharacterFacilityRoleLegendPanel", () => {
+  it("Character Facility Role Legend 1 renders role/facility boundaries without controls or raw leaks", () => {
+    const CharacterFacilityRoleLegendPanel = (OfficePageModule as unknown as {
+      CharacterFacilityRoleLegendPanel: React.ComponentType<{ legend: ReturnType<typeof buildOfficeCharacterFacilityRoleLegend> }>;
+    }).CharacterFacilityRoleLegendPanel;
+    const secretSentinel = ["token", "shaped", "facility", "panel"].join("-");
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishPanelFixture({
+      agents: [{ id: "agent-character-facility-panel", status: "active", prompt: "raw character facility panel prompt", provider: "private-character-facility-panel-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-character-facility-panel", status: "blocked", title: "raw character facility panel task", body: "/Users/lidises/private/character-facility-panel.md", transcript: "Traceback character facility panel transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+    const trace = buildOfficeApprovalDecisionAuditNasTracePreview(envelope);
+    const gate = buildOfficeNasKeeperSaveRequestGate(trace);
+    const rollback = buildOfficeNasKeeperRollbackEvidencePreview(gate);
+    const review = buildOfficeDeskRpgReadOnlyChainCompletionReview(rollback);
+    const stateProjection = buildOfficeEventDrivenCharacterStateProjection(review, [
+      { id: "evt-runtime-facility-panel", category: "room_density_changed", roomId: "work", tone: "warning", count: 3, safeLabel: "room density", detail: "safe density aggregate", redacted: true, rawSource: false },
+      { id: "evt-intent-facility-panel", category: "attention_changed", roomId: "routing", tone: "negative", count: 1, safeLabel: "approval attention", detail: "safe attention aggregate", redacted: true, rawSource: false },
+      { id: "evt-visual-facility-panel", category: "snapshot_static", roomId: "sessions", tone: "neutral", count: 0, safeLabel: "static snapshot", detail: "safe static aggregate", redacted: true, rawSource: false },
+    ] as const);
+    const overlay = buildOfficeCharacterStateRoomOverlay(stateProjection);
+    const interaction = buildOfficeCharacterRoomInteractionPosture(overlay);
+    const detail = buildOfficeCharacterInspectorDetailPosture(interaction);
+    const dialogue = buildOfficeCharacterDetailSafeDialogueCopy(detail);
+    const alignment = buildOfficeCharacterBubbleInspectorAlignment(dialogue, detail);
+    const summary = buildOfficeCharacterPanelBoundarySummary(detail, dialogue, alignment);
+    const legend = buildOfficeCharacterFacilityRoleLegend(summary, overlay);
+    const markup = renderToStaticMarkup(<CharacterFacilityRoleLegendPanel legend={legend} />);
+
+    expect(markup).toContain("data-office-character-facility-role-legend=\"true\"");
+    expect(markup).toContain("data-office-character-facility-role-legend-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-character-facility-role-legend-safe-projection-only=\"true\"");
+    expect(markup).toContain("data-office-character-facility-role-legend-role=\"user_boss\"");
+    expect(markup).toContain("data-office-character-facility-role-legend-role=\"nas_keeper\"");
+    expect(markup).toContain("data-office-character-facility-role-legend-facility=\"boss_desk\"");
+    expect(markup).toContain("data-office-character-facility-role-legend-facility=\"nas_vault\"");
+    expect(markup).toContain("data-office-character-facility-role-legend-boundary=\"NAS save disabled\"");
+    expect(markup).toContain("instruction display only");
+    expect(markup).toContain("NAS save disabled");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw character facility panel prompt|raw character facility panel task|Traceback|\/Users\/lidises|token-shaped-facility-panel|private-character-facility-panel-provider/i);
   });
 });
 

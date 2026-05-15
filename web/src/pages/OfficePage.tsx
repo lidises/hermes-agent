@@ -139,6 +139,7 @@ import {
   buildOfficeCharacterDetailSafeDialogueCopy,
   buildOfficeCharacterBubbleInspectorAlignment,
   buildOfficeCharacterPanelBoundarySummary,
+  buildOfficeCharacterFacilityRoleLegend,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -180,6 +181,7 @@ import {
   type OfficeCharacterDetailSafeDialogueCopy,
   type OfficeCharacterBubbleInspectorAlignment,
   type OfficeCharacterPanelBoundarySummary,
+  type OfficeCharacterFacilityRoleLegend,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -3280,6 +3282,60 @@ export function CharacterPanelBoundarySummaryPanel({ summary }: { summary: Offic
   );
 }
 
+export function CharacterFacilityRoleLegendPanel({ legend }: { legend: OfficeCharacterFacilityRoleLegend }) {
+  return (
+    <Card
+      data-office-character-facility-role-legend="true"
+      data-office-character-facility-role-legend-enabled-controls={legend.enabledControls}
+      data-office-character-facility-role-legend-click-handler-enabled={String(legend.clickHandlerEnabled)}
+      data-office-character-facility-role-legend-keyboard-handler-enabled={String(legend.keyboardHandlerEnabled)}
+      data-office-character-facility-role-legend-form-control-enabled={String(legend.formControlEnabled)}
+      data-office-character-facility-role-legend-event-persistence-enabled={String(legend.eventPersistenceEnabled)}
+      data-office-character-facility-role-legend-backend-stream-enabled={String(legend.backendStreamEnabled)}
+      data-office-character-facility-role-legend-animation-state-persistence-enabled={String(legend.animationStatePersistenceEnabled)}
+      data-office-character-facility-role-legend-request-creation-enabled={String(legend.requestCreationEnabled)}
+      data-office-character-facility-role-legend-dispatch-enabled={String(legend.dispatchEnabled)}
+      data-office-character-facility-role-legend-nas-save-enabled={String(legend.nasSaveEnabled)}
+      data-office-character-facility-role-legend-safe-projection-only={String(legend.safeProjectionOnly)}
+      data-office-character-facility-role-legend-raw-excluded={String(legend.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <MapPinned className="h-4 w-4" /> Character facility role legend
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-cyan-300/20 bg-cyan-950/10 p-3">
+            <div className="font-semibold text-cyan-100">Role ↔ facility zone legend</div>
+            <div className="mt-1 leading-5">Six Desk RPG roles are mapped to their display-only facility zones. This legend explains posture only; it does not create requests, assign workers, dispatch, write audit records, or save to NAS.</div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3">
+            {legend.legendItems.map((item) => (
+              <div
+                key={item.role}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-character-facility-role-legend-role={item.role}
+                data-office-character-facility-role-legend-facility={item.facilityZoneId}
+                data-office-character-facility-role-legend-boundary={item.boundaryLabel}
+                data-office-character-facility-role-legend-executable={String(item.executable)}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.role} · {item.facilityZoneId}</div>
+                <div className="mt-1 font-semibold text-foreground">{item.label}</div>
+                <div className="mt-1 text-midground/70">{item.facilityLabel}</div>
+                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.14em] text-cyan-100/80">{item.boundaryLabel} · controls {item.enabledControls}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-character-facility-role-legend-summary="true">
+            source {legend.sourceSummaryKind} / {legend.sourceOverlayKind} · roles {legend.roleCount} · facilities {legend.facilityCount} · controls {legend.enabledControls}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -3826,6 +3882,10 @@ export default function OfficePage() {
     () => buildOfficeCharacterPanelBoundarySummary(characterInspectorDetailPosture, characterDetailSafeDialogueCopy, characterBubbleInspectorAlignment),
     [characterInspectorDetailPosture, characterDetailSafeDialogueCopy, characterBubbleInspectorAlignment],
   );
+  const characterFacilityRoleLegend = useMemo(
+    () => buildOfficeCharacterFacilityRoleLegend(characterPanelBoundarySummary, characterStateRoomOverlay),
+    [characterPanelBoundarySummary, characterStateRoomOverlay],
+  );
   const safeMotionHeartbeat = useMemo(
     () => buildOfficeSafeMotionHeartbeat(safeStreamPosture, {
       pollStatus: safeEventsStatus === "loaded" ? "active" : safeEventsStatus,
@@ -4060,6 +4120,8 @@ export default function OfficePage() {
       <CharacterBubbleInspectorAlignmentPanel alignment={characterBubbleInspectorAlignment} />
 
       <CharacterPanelBoundarySummaryPanel summary={characterPanelBoundarySummary} />
+
+      <CharacterFacilityRoleLegendPanel legend={characterFacilityRoleLegend} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 

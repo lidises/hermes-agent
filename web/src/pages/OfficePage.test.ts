@@ -128,6 +128,7 @@ import {
   buildOfficeCharacterDetailSafeDialogueCopy,
   buildOfficeCharacterBubbleInspectorAlignment,
   buildOfficeCharacterPanelBoundarySummary,
+  buildOfficeCharacterFacilityRoleLegend,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -1388,6 +1389,63 @@ describe("Character Detail Safe Dialogue Copy 1", () => {
     expect(dialogue.safeProjectionOnly).toBe(true);
     expect(dialogue.rawExcluded).toBe(true);
     expect(JSON.stringify(dialogue)).not.toMatch(/raw character dialogue prompt|raw character dialogue task|Traceback|\/Users\/lidises|token-shaped-dialogue-copy|private-character-dialogue-provider/i);
+  });
+});
+
+
+describe("Character Facility Role Legend 1", () => {
+  it("maps the six safe character roles to facility zones and disabled boundary posture", () => {
+    const secretSentinel = ["token", "shaped", "facility", "legend"].join("-");
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishFixture({
+      agents: [{ id: "agent-character-facility", status: "active", prompt: "raw character facility prompt", provider: "private-character-facility-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-character-facility", status: "blocked", title: "raw character facility title", body: "/Users/lidises/private/character-facility.md", transcript: "Traceback character facility transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+    const trace = buildOfficeApprovalDecisionAuditNasTracePreview(envelope);
+    const gate = buildOfficeNasKeeperSaveRequestGate(trace);
+    const rollback = buildOfficeNasKeeperRollbackEvidencePreview(gate);
+    const review = buildOfficeDeskRpgReadOnlyChainCompletionReview(rollback);
+    const stateProjection = buildOfficeEventDrivenCharacterStateProjection(review, [
+      { id: "evt-runtime-facility", category: "room_density_changed", roomId: "work", tone: "warning", count: 3, safeLabel: "room density", detail: "safe density aggregate", redacted: true, rawSource: false },
+      { id: "evt-intent-facility", category: "attention_changed", roomId: "routing", tone: "negative", count: 1, safeLabel: "approval attention", detail: "safe attention aggregate", redacted: true, rawSource: false },
+      { id: "evt-visual-facility", category: "snapshot_static", roomId: "sessions", tone: "neutral", count: 0, safeLabel: "static snapshot", detail: "safe static aggregate", redacted: true, rawSource: false },
+    ] as const);
+    const overlay = buildOfficeCharacterStateRoomOverlay(stateProjection);
+    const interaction = buildOfficeCharacterRoomInteractionPosture(overlay);
+    const detail = buildOfficeCharacterInspectorDetailPosture(interaction);
+    const dialogue = buildOfficeCharacterDetailSafeDialogueCopy(detail);
+    const alignment = buildOfficeCharacterBubbleInspectorAlignment(dialogue, detail);
+    const summary = buildOfficeCharacterPanelBoundarySummary(detail, dialogue, alignment);
+
+    const legend = buildOfficeCharacterFacilityRoleLegend(summary, overlay);
+
+    expect(legend.stageLabel).toBe("Character Facility Role Legend 1");
+    expect(legend.detailKind).toBe("character_facility_role_legend");
+    expect(legend.sourceSummaryKind).toBe("character_panel_boundary_summary");
+    expect(legend.sourceOverlayKind).toBe("character_state_room_overlay");
+    expect(legend.roleCount).toBe(6);
+    expect(legend.facilityCount).toBe(6);
+    expect(legend.legendItems.map((item) => item.role)).toEqual(["user_boss", "orchestrator", "search_worker", "reviewer", "wiki_writer", "nas_keeper"]);
+    expect(legend.legendItems.map((item) => item.facilityZoneId)).toEqual(["boss_desk", "orchestrator_desk", "worker_cluster", "right_inspector", "central_board", "nas_vault"]);
+    expect(legend.legendItems.map((item) => item.boundaryLabel)).toEqual(["instruction display only", "mediation display only", "research posture only", "review posture only", "wiki draft disabled", "NAS save disabled"]);
+    expect(legend.legendItems.every((item) => item.enabledControls === 0 && item.executable === false && item.rawExcluded === true)).toBe(true);
+    expect(legend.enabledControls).toBe(0);
+    expect(legend.clickHandlerEnabled).toBe(false);
+    expect(legend.keyboardHandlerEnabled).toBe(false);
+    expect(legend.formControlEnabled).toBe(false);
+    expect(legend.eventPersistenceEnabled).toBe(false);
+    expect(legend.backendStreamEnabled).toBe(false);
+    expect(legend.animationStatePersistenceEnabled).toBe(false);
+    expect(legend.requestCreationEnabled).toBe(false);
+    expect(legend.workAssignmentEnabled).toBe(false);
+    expect(legend.dispatchEnabled).toBe(false);
+    expect(legend.auditWriteEnabled).toBe(false);
+    expect(legend.nasSaveEnabled).toBe(false);
+    expect(legend.safeProjectionOnly).toBe(true);
+    expect(legend.rawExcluded).toBe(true);
+    expect(JSON.stringify(legend)).not.toMatch(/raw character facility prompt|raw character facility title|Traceback|\/Users\/lidises|token-shaped-facility-legend|private-character-facility-provider/i);
   });
 });
 

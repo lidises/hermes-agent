@@ -2259,6 +2259,48 @@ export type OfficeCharacterPanelBoundarySummary = {
   rawExcluded: true;
 };
 
+export type OfficeCharacterFacilityRoleLegendItem = {
+  role: OfficeCharacterStateRoomOverlayMarker["role"];
+  label: string;
+  facilityZoneId: OfficeCharacterStateRoomOverlayMarker["roomSurfaceId"];
+  facilityLabel: string;
+  state: OfficeCharacterStateRoomOverlayMarker["state"];
+  markerKind: OfficeCharacterStateRoomOverlayMarker["markerKind"];
+  boundaryLabel: "instruction display only" | "mediation display only" | "research posture only" | "review posture only" | "wiki draft disabled" | "NAS save disabled";
+  safeSummary: string;
+  enabledControls: 0;
+  executable: false;
+  rawExcluded: true;
+};
+
+export type OfficeCharacterFacilityRoleLegend = {
+  stageLabel: "Character Facility Role Legend 1";
+  title: string;
+  detailKind: "character_facility_role_legend";
+  sourceSummaryKind: OfficeCharacterPanelBoundarySummary["detailKind"];
+  sourceOverlayKind: OfficeCharacterStateRoomOverlay["detailKind"];
+  sourcePanelCount: number;
+  sourceMarkerCount: number;
+  roleCount: number;
+  facilityCount: number;
+  legendItems: OfficeCharacterFacilityRoleLegendItem[];
+  boundaryLabels: OfficeCharacterFacilityRoleLegendItem["boundaryLabel"][];
+  enabledControls: 0;
+  clickHandlerEnabled: false;
+  keyboardHandlerEnabled: false;
+  formControlEnabled: false;
+  eventPersistenceEnabled: false;
+  backendStreamEnabled: false;
+  animationStatePersistenceEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeWorkerAssignmentCandidateBlockedReason = {
   id: "facility_prerequisites_missing" | "approval_execution_blocked" | "authority_adapter_missing" | "audit_write_disabled" | "human_confirmation_missing";
   label: string;
@@ -4559,6 +4601,61 @@ export function buildOfficeCharacterPanelBoundarySummary(detail: OfficeCharacter
     totalRoleCount: Math.max(detail.detailCardCount, dialogue.bubbleCount, alignment.alignmentCount),
     panels,
     boundaryLabels: panels.map((panel) => panel.boundaryLabel),
+    enabledControls: 0,
+    clickHandlerEnabled: false,
+    keyboardHandlerEnabled: false,
+    formControlEnabled: false,
+    eventPersistenceEnabled: false,
+    backendStreamEnabled: false,
+    animationStatePersistenceEnabled: false,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    nasSaveEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+const characterFacilityRoleLegendByRole: Record<OfficeCharacterStateRoomOverlayMarker["role"], Pick<OfficeCharacterFacilityRoleLegendItem, "facilityLabel" | "boundaryLabel">> = {
+  user_boss: { facilityLabel: "Boss desk", boundaryLabel: "instruction display only" },
+  orchestrator: { facilityLabel: "Orchestrator desk", boundaryLabel: "mediation display only" },
+  search_worker: { facilityLabel: "Worker desk cluster", boundaryLabel: "research posture only" },
+  reviewer: { facilityLabel: "Right inspector", boundaryLabel: "review posture only" },
+  wiki_writer: { facilityLabel: "Central board", boundaryLabel: "wiki draft disabled" },
+  nas_keeper: { facilityLabel: "NAS vault", boundaryLabel: "NAS save disabled" },
+};
+
+export function buildOfficeCharacterFacilityRoleLegend(summary: OfficeCharacterPanelBoundarySummary, overlay: OfficeCharacterStateRoomOverlay): OfficeCharacterFacilityRoleLegend {
+  const legendItems: OfficeCharacterFacilityRoleLegendItem[] = overlay.markers.map((marker) => {
+    const roleLegend = characterFacilityRoleLegendByRole[marker.role];
+    return {
+      role: marker.role,
+      label: marker.label,
+      facilityZoneId: marker.roomSurfaceId,
+      facilityLabel: roleLegend.facilityLabel,
+      state: marker.state,
+      markerKind: marker.markerKind,
+      boundaryLabel: roleLegend.boundaryLabel,
+      safeSummary: marker.safeSummary,
+      enabledControls: 0,
+      executable: false,
+      rawExcluded: true,
+    };
+  });
+  return {
+    stageLabel: "Character Facility Role Legend 1",
+    title: "Character facility role legend",
+    detailKind: "character_facility_role_legend",
+    sourceSummaryKind: summary.detailKind,
+    sourceOverlayKind: overlay.detailKind,
+    sourcePanelCount: summary.panelCount,
+    sourceMarkerCount: overlay.markerCount,
+    roleCount: legendItems.length,
+    facilityCount: new Set(legendItems.map((item) => item.facilityZoneId)).size,
+    legendItems,
+    boundaryLabels: legendItems.map((item) => item.boundaryLabel),
     enabledControls: 0,
     clickHandlerEnabled: false,
     keyboardHandlerEnabled: false,
