@@ -3075,6 +3075,49 @@ export type OfficeControlledMutationRequestStoreHardeningPlan = {
   hardeningItems: OfficeControlledMutationRequestStoreHardeningPlanItem[];
 };
 
+export type OfficeControlledMutationNextApprovalBoundaryOptionId = "request_store_hardening" | "human_decision_store" | "execution_audit_authority" | "ops_runtime_mutation";
+
+export type OfficeControlledMutationNextApprovalBoundaryOption = {
+  id: OfficeControlledMutationNextApprovalBoundaryOptionId;
+  label: string;
+  status: "approval_required";
+  detail: string;
+  rawExcluded: true;
+};
+
+export type OfficeControlledMutationNextApprovalBoundary = {
+  stageLabel: "Controlled Mutation Next Approval Boundary 1";
+  sourceStageLabel: OfficeControlledMutationRequestStoreHardeningPlan["stageLabel"];
+  detailKind: "controlled_mutation_next_approval_boundary";
+  title: string;
+  safeBoundary: string;
+  enabledControls: 0;
+  approvalGranted: false;
+  backendMutationEnabled: false;
+  storageWriteEnabled: false;
+  eventAppendEnabled: false;
+  eventReadbackEnabled: false;
+  hardeningImplemented: false;
+  decisionStoreEnabled: false;
+  requestCreationEnabled: false;
+  auditWriteEnabled: false;
+  executionEnabled: false;
+  dryRunExecutionEnabled: false;
+  dispatchEnabled: false;
+  targetMutationEnabled: false;
+  authorityAdapterBindingEnabled: false;
+  credentialChangeEnabled: false;
+  nasMutationEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+  disabledSurfaceSummary: {
+    sourceItems: number;
+    boundaryOptions: number;
+    enabledControls: 0;
+  };
+  boundaryOptions: OfficeControlledMutationNextApprovalBoundaryOption[];
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -6936,6 +6979,51 @@ export function buildOfficeControlledMutationRequestStoreHardeningPlan(posture: 
       enabledControls: 0,
     },
     hardeningItems: hardeningItems.map((item) => ({
+      ...item,
+      status: "approval_required",
+      rawExcluded: true,
+    })),
+  };
+}
+
+export function buildOfficeControlledMutationNextApprovalBoundary(plan: OfficeControlledMutationRequestStoreHardeningPlan): OfficeControlledMutationNextApprovalBoundary {
+  const boundaryOptions: Array<{ id: OfficeControlledMutationNextApprovalBoundaryOptionId; label: string; detail: string }> = [
+    { id: "request_store_hardening", label: "Request-store hardening", detail: "Needs explicit backend/write approval before duplicate, correlation, readback-limit, or malformed JSONL behavior changes" },
+    { id: "human_decision_store", label: "Human-decision recording", detail: "Needs explicit storage approval before approve/reject/hold decisions or readback records exist" },
+    { id: "execution_audit_authority", label: "Execution, audit, and authority", detail: "Needs a separate gate before dry-run execution, audit append, adapter binding, dispatch, or target mutation" },
+    { id: "ops_runtime_mutation", label: "Ops/runtime mutation", detail: "Needs a separate gate before credential/env changes, migrations, VPS/NAS/Kanban/cron changes, deploy, restart, push, PR, or merge" },
+  ];
+  return {
+    stageLabel: "Controlled Mutation Next Approval Boundary 1",
+    sourceStageLabel: plan.stageLabel,
+    detailKind: "controlled_mutation_next_approval_boundary",
+    title: "다음 승인 경계 · 응답 없으면 읽기 전용 유지",
+    safeBoundary: "frontend read-only next approval boundary only · records that backend/write approval was not granted in this turn and keeps every mutation/storage/execution/ops surface disabled · no forms/buttons/inputs · no browser executable controls · no backend/schema/API route/service changes · no storage/write path · no event append/readback · no hardening implementation · no decision store · no request creation · no audit write · no execution/dry-run/dispatch/target mutation · no authority adapter binding · no credential/auth/env change · no migration · no VPS/NAS/Kanban/cron mutation",
+    enabledControls: 0,
+    approvalGranted: false,
+    backendMutationEnabled: false,
+    storageWriteEnabled: false,
+    eventAppendEnabled: false,
+    eventReadbackEnabled: false,
+    hardeningImplemented: false,
+    decisionStoreEnabled: false,
+    requestCreationEnabled: false,
+    auditWriteEnabled: false,
+    executionEnabled: false,
+    dryRunExecutionEnabled: false,
+    dispatchEnabled: false,
+    targetMutationEnabled: false,
+    authorityAdapterBindingEnabled: false,
+    credentialChangeEnabled: false,
+    nasMutationEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+    disabledSurfaceSummary: {
+      sourceItems: plan.hardeningItems.length,
+      boundaryOptions: boundaryOptions.length,
+      enabledControls: 0,
+    },
+    boundaryOptions: boundaryOptions.map((item) => ({
       ...item,
       status: "approval_required",
       rawExcluded: true,
