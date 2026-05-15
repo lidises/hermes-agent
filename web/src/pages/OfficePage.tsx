@@ -141,6 +141,7 @@ import {
   buildOfficeCharacterPanelBoundarySummary,
   buildOfficeCharacterFacilityRoleLegend,
   buildOfficeCharacterFacilityBoundaryStrip,
+  buildOfficeCharacterFacilitySourceLedgerStrip,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -184,6 +185,7 @@ import {
   type OfficeCharacterPanelBoundarySummary,
   type OfficeCharacterFacilityRoleLegend,
   type OfficeCharacterFacilityBoundaryStrip,
+  type OfficeCharacterFacilitySourceLedgerStrip,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -3390,6 +3392,62 @@ export function CharacterFacilityBoundaryStripPanel({ strip }: { strip: OfficeCh
   );
 }
 
+export function CharacterFacilitySourceLedgerStripPanel({ ledger }: { ledger: OfficeCharacterFacilitySourceLedgerStrip }) {
+  return (
+    <Card
+      data-office-character-facility-source-ledger-strip="true"
+      data-office-character-facility-source-ledger-strip-enabled-controls={ledger.enabledControls}
+      data-office-character-facility-source-ledger-strip-click-handler-enabled={String(ledger.clickHandlerEnabled)}
+      data-office-character-facility-source-ledger-strip-keyboard-handler-enabled={String(ledger.keyboardHandlerEnabled)}
+      data-office-character-facility-source-ledger-strip-form-control-enabled={String(ledger.formControlEnabled)}
+      data-office-character-facility-source-ledger-strip-source-ledger-persistence-enabled={String(ledger.sourceLedgerPersistenceEnabled)}
+      data-office-character-facility-source-ledger-strip-event-persistence-enabled={String(ledger.eventPersistenceEnabled)}
+      data-office-character-facility-source-ledger-strip-backend-stream-enabled={String(ledger.backendStreamEnabled)}
+      data-office-character-facility-source-ledger-strip-animation-state-persistence-enabled={String(ledger.animationStatePersistenceEnabled)}
+      data-office-character-facility-source-ledger-strip-request-creation-enabled={String(ledger.requestCreationEnabled)}
+      data-office-character-facility-source-ledger-strip-work-assignment-enabled={String(ledger.workAssignmentEnabled)}
+      data-office-character-facility-source-ledger-strip-dispatch-enabled={String(ledger.dispatchEnabled)}
+      data-office-character-facility-source-ledger-strip-audit-write-enabled={String(ledger.auditWriteEnabled)}
+      data-office-character-facility-source-ledger-strip-nas-save-enabled={String(ledger.nasSaveEnabled)}
+      data-office-character-facility-source-ledger-strip-safe-projection-only={String(ledger.safeProjectionOnly)}
+      data-office-character-facility-source-ledger-strip-raw-excluded={String(ledger.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4" /> Character facility source ledger strip
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-sky-300/20 bg-sky-950/10 p-3">
+            <div className="font-semibold text-sky-100">Aggregate provenance only</div>
+            <div className="mt-1 leading-5">Facility zones point back to safe aggregate DTOs only. Raw sources, source titles, paths, providers, transcripts, prompts, and credentials are not projected.</div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3">
+            {ledger.ledgerItems.map((item) => (
+              <div
+                key={item.facilityZoneId}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-character-facility-source-ledger-strip-zone={item.facilityZoneId}
+                data-office-character-facility-source-ledger-strip-provenance={item.provenanceLabel}
+                data-office-character-facility-source-ledger-strip-raw-source-projected={String(item.rawSourceProjected)}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.facilityZoneId} · markers {item.aggregateMarkerCount}</div>
+                <div className="mt-1 font-semibold text-foreground">{item.facilityLabel}</div>
+                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.14em] text-sky-100/80">{item.provenanceLabel}</div>
+                <div className="mt-1 text-[10px] text-midground/55">{item.mutationBoundary} · controls {item.enabledControls}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-character-facility-source-ledger-strip-summary="true">
+            source {ledger.sourceBoundaryStripKind} / {ledger.sourceOverlayKind} · zones {ledger.zoneCount} · controls {ledger.enabledControls}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -3944,6 +4002,10 @@ export default function OfficePage() {
     () => buildOfficeCharacterFacilityBoundaryStrip(characterFacilityRoleLegend, characterStateRoomOverlay),
     [characterFacilityRoleLegend, characterStateRoomOverlay],
   );
+  const characterFacilitySourceLedgerStrip = useMemo(
+    () => buildOfficeCharacterFacilitySourceLedgerStrip(characterFacilityBoundaryStrip, characterStateRoomOverlay),
+    [characterFacilityBoundaryStrip, characterStateRoomOverlay],
+  );
   const safeMotionHeartbeat = useMemo(
     () => buildOfficeSafeMotionHeartbeat(safeStreamPosture, {
       pollStatus: safeEventsStatus === "loaded" ? "active" : safeEventsStatus,
@@ -4182,6 +4244,8 @@ export default function OfficePage() {
       <CharacterFacilityRoleLegendPanel legend={characterFacilityRoleLegend} />
 
       <CharacterFacilityBoundaryStripPanel strip={characterFacilityBoundaryStrip} />
+
+      <CharacterFacilitySourceLedgerStripPanel ledger={characterFacilitySourceLedgerStrip} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 

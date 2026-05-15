@@ -130,6 +130,7 @@ import {
   buildOfficeCharacterPanelBoundarySummary,
   buildOfficeCharacterFacilityRoleLegend,
   buildOfficeCharacterFacilityBoundaryStrip,
+  buildOfficeCharacterFacilitySourceLedgerStrip,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -1390,6 +1391,60 @@ describe("Character Detail Safe Dialogue Copy 1", () => {
     expect(dialogue.safeProjectionOnly).toBe(true);
     expect(dialogue.rawExcluded).toBe(true);
     expect(JSON.stringify(dialogue)).not.toMatch(/raw character dialogue prompt|raw character dialogue task|Traceback|\/Users\/lidises|token-shaped-dialogue-copy|private-character-dialogue-provider/i);
+  });
+});
+
+
+describe("Character Facility Source Ledger Strip 1", () => {
+  it("ties facility zones to aggregate source provenance without raw source projection", () => {
+    const secretSentinel = ["token", "shaped", "facility", "source", "ledger"].join("-");
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishFixture({
+      agents: [{ id: "agent-character-source-ledger", status: "active", prompt: "raw source ledger prompt", provider: "private-source-ledger-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-character-source-ledger", status: "blocked", title: "raw source ledger title", body: "/Users/lidises/private/source-ledger.md", transcript: "Traceback source ledger transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+    const trace = buildOfficeApprovalDecisionAuditNasTracePreview(envelope);
+    const gate = buildOfficeNasKeeperSaveRequestGate(trace);
+    const rollback = buildOfficeNasKeeperRollbackEvidencePreview(gate);
+    const review = buildOfficeDeskRpgReadOnlyChainCompletionReview(rollback);
+    const stateProjection = buildOfficeEventDrivenCharacterStateProjection(review, [
+      { id: "evt-runtime-source-ledger", category: "room_density_changed", roomId: "work", tone: "warning", count: 3, safeLabel: "room density", detail: "safe density aggregate", redacted: true, rawSource: false },
+      { id: "evt-intent-source-ledger", category: "attention_changed", roomId: "routing", tone: "negative", count: 1, safeLabel: "approval attention", detail: "safe attention aggregate", redacted: true, rawSource: false },
+      { id: "evt-visual-source-ledger", category: "snapshot_static", roomId: "sessions", tone: "neutral", count: 0, safeLabel: "static snapshot", detail: "safe static aggregate", redacted: true, rawSource: false },
+    ] as const);
+    const overlay = buildOfficeCharacterStateRoomOverlay(stateProjection);
+    const interaction = buildOfficeCharacterRoomInteractionPosture(overlay);
+    const detail = buildOfficeCharacterInspectorDetailPosture(interaction);
+    const dialogue = buildOfficeCharacterDetailSafeDialogueCopy(detail);
+    const alignment = buildOfficeCharacterBubbleInspectorAlignment(dialogue, detail);
+    const summary = buildOfficeCharacterPanelBoundarySummary(detail, dialogue, alignment);
+    const legend = buildOfficeCharacterFacilityRoleLegend(summary, overlay);
+    const strip = buildOfficeCharacterFacilityBoundaryStrip(legend, overlay);
+
+    const ledger = buildOfficeCharacterFacilitySourceLedgerStrip(strip, overlay);
+
+    expect(ledger.stageLabel).toBe("Character Facility Source Ledger Strip 1");
+    expect(ledger.detailKind).toBe("character_facility_source_ledger_strip");
+    expect(ledger.sourceBoundaryStripKind).toBe("character_facility_boundary_strip");
+    expect(ledger.sourceOverlayKind).toBe("character_state_room_overlay");
+    expect(ledger.zoneCount).toBe(6);
+    expect(ledger.ledgerItems).toHaveLength(6);
+    expect(ledger.ledgerItems.map((item) => item.facilityZoneId)).toEqual(["boss_desk", "orchestrator_desk", "worker_cluster", "right_inspector", "central_board", "nas_vault"]);
+    expect(ledger.ledgerItems.map((item) => item.provenanceLabel)).toEqual(["safe role legend", "safe room overlay", "safe marker aggregate", "safe inspector aggregate", "safe board aggregate", "safe NAS boundary aggregate"]);
+    expect(ledger.ledgerItems.every((item) => item.rawSourceProjected === false && item.sourceTitleProjected === false && item.pathProjected === false && item.providerProjected === false && item.enabledControls === 0)).toBe(true);
+    expect(ledger.sourceLedgerPersistenceEnabled).toBe(false);
+    expect(ledger.eventPersistenceEnabled).toBe(false);
+    expect(ledger.backendStreamEnabled).toBe(false);
+    expect(ledger.requestCreationEnabled).toBe(false);
+    expect(ledger.workAssignmentEnabled).toBe(false);
+    expect(ledger.dispatchEnabled).toBe(false);
+    expect(ledger.auditWriteEnabled).toBe(false);
+    expect(ledger.nasSaveEnabled).toBe(false);
+    expect(ledger.safeProjectionOnly).toBe(true);
+    expect(ledger.rawExcluded).toBe(true);
+    expect(JSON.stringify(ledger)).not.toMatch(/raw source ledger prompt|raw source ledger title|Traceback|\/Users\/lidises|token-shaped-facility-source-ledger|private-source-ledger-provider/i);
   });
 });
 

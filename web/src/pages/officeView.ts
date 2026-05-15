@@ -2339,6 +2339,45 @@ export type OfficeCharacterFacilityBoundaryStrip = {
   rawExcluded: true;
 };
 
+export type OfficeCharacterFacilitySourceLedgerStripItem = {
+  facilityZoneId: OfficeCharacterFacilityBoundaryStripZone["facilityZoneId"];
+  facilityLabel: string;
+  provenanceLabel: "safe role legend" | "safe room overlay" | "safe marker aggregate" | "safe inspector aggregate" | "safe board aggregate" | "safe NAS boundary aggregate";
+  aggregateMarkerCount: number;
+  mutationBoundary: OfficeCharacterFacilityBoundaryStripZone["mutationBoundary"];
+  rawSourceProjected: false;
+  sourceTitleProjected: false;
+  pathProjected: false;
+  providerProjected: false;
+  enabledControls: 0;
+  rawExcluded: true;
+};
+
+export type OfficeCharacterFacilitySourceLedgerStrip = {
+  stageLabel: "Character Facility Source Ledger Strip 1";
+  title: string;
+  detailKind: "character_facility_source_ledger_strip";
+  sourceBoundaryStripKind: OfficeCharacterFacilityBoundaryStrip["detailKind"];
+  sourceOverlayKind: OfficeCharacterStateRoomOverlay["detailKind"];
+  zoneCount: number;
+  ledgerItems: OfficeCharacterFacilitySourceLedgerStripItem[];
+  enabledControls: 0;
+  clickHandlerEnabled: false;
+  keyboardHandlerEnabled: false;
+  formControlEnabled: false;
+  sourceLedgerPersistenceEnabled: false;
+  eventPersistenceEnabled: false;
+  backendStreamEnabled: false;
+  animationStatePersistenceEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeWorkerAssignmentCandidateBlockedReason = {
   id: "facility_prerequisites_missing" | "approval_execution_blocked" | "authority_adapter_missing" | "audit_write_disabled" | "human_confirmation_missing";
   label: string;
@@ -4750,6 +4789,59 @@ export function buildOfficeCharacterFacilityBoundaryStrip(legend: OfficeCharacte
     clickHandlerEnabled: false,
     keyboardHandlerEnabled: false,
     formControlEnabled: false,
+    eventPersistenceEnabled: false,
+    backendStreamEnabled: false,
+    animationStatePersistenceEnabled: false,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    nasSaveEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+const characterFacilitySourceLedgerLabelByZone: Record<OfficeCharacterFacilityBoundaryStripZone["facilityZoneId"], OfficeCharacterFacilitySourceLedgerStripItem["provenanceLabel"]> = {
+  boss_desk: "safe role legend",
+  orchestrator_desk: "safe room overlay",
+  worker_cluster: "safe marker aggregate",
+  right_inspector: "safe inspector aggregate",
+  central_board: "safe board aggregate",
+  nas_vault: "safe NAS boundary aggregate",
+  security_ops_corner: "safe room overlay",
+  calm_activity_lane: "safe room overlay",
+};
+
+export function buildOfficeCharacterFacilitySourceLedgerStrip(strip: OfficeCharacterFacilityBoundaryStrip, overlay: OfficeCharacterStateRoomOverlay): OfficeCharacterFacilitySourceLedgerStrip {
+  const markerCounts = new Map<OfficeCharacterFacilityBoundaryStripZone["facilityZoneId"], number>();
+  overlay.markers.forEach((marker) => markerCounts.set(marker.roomSurfaceId, (markerCounts.get(marker.roomSurfaceId) ?? 0) + 1));
+  const ledgerItems: OfficeCharacterFacilitySourceLedgerStripItem[] = strip.safeZones.map((zone) => ({
+    facilityZoneId: zone.facilityZoneId,
+    facilityLabel: zone.facilityLabel,
+    provenanceLabel: characterFacilitySourceLedgerLabelByZone[zone.facilityZoneId],
+    aggregateMarkerCount: markerCounts.get(zone.facilityZoneId) ?? zone.sourceMarkerCount,
+    mutationBoundary: zone.mutationBoundary,
+    rawSourceProjected: false,
+    sourceTitleProjected: false,
+    pathProjected: false,
+    providerProjected: false,
+    enabledControls: 0,
+    rawExcluded: true,
+  }));
+  return {
+    stageLabel: "Character Facility Source Ledger Strip 1",
+    title: "Character facility source ledger strip",
+    detailKind: "character_facility_source_ledger_strip",
+    sourceBoundaryStripKind: strip.detailKind,
+    sourceOverlayKind: overlay.detailKind,
+    zoneCount: ledgerItems.length,
+    ledgerItems,
+    enabledControls: 0,
+    clickHandlerEnabled: false,
+    keyboardHandlerEnabled: false,
+    formControlEnabled: false,
+    sourceLedgerPersistenceEnabled: false,
     eventPersistenceEnabled: false,
     backendStreamEnabled: false,
     animationStatePersistenceEnabled: false,
