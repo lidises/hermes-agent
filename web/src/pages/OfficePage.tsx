@@ -124,6 +124,7 @@ import {
   buildOfficeApprovalRequestDetailDeepening,
   buildOfficeWorkerFacilityLanePolish,
   buildOfficeWorkerRequestHandoffDetail,
+  buildOfficeApprovalNasBoundaryPolish,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -151,6 +152,7 @@ import {
   type OfficeApprovalRequestDetailDeepening,
   type OfficeWorkerFacilityLanePolish,
   type OfficeWorkerRequestHandoffDetail,
+  type OfficeApprovalNasBoundaryPolish,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -2488,6 +2490,59 @@ export function WorkerRequestHandoffDetailPanel({ detail }: { detail: OfficeWork
   );
 }
 
+
+export function ApprovalNasBoundaryPolishPanel({ polish }: { polish: OfficeApprovalNasBoundaryPolish }) {
+  return (
+    <Card
+      data-office-approval-nas-boundary-polish="true"
+      data-office-approval-nas-boundary-polish-enabled-controls={polish.enabledControls}
+      data-office-approval-nas-boundary-polish-approve-enabled={String(polish.approveEnabled)}
+      data-office-approval-nas-boundary-polish-reject-enabled={String(polish.rejectEnabled)}
+      data-office-approval-nas-boundary-polish-hold-enabled={String(polish.holdEnabled)}
+      data-office-approval-nas-boundary-polish-request-creation-enabled={String(polish.requestCreationEnabled)}
+      data-office-approval-nas-boundary-polish-work-assignment-enabled={String(polish.workAssignmentEnabled)}
+      data-office-approval-nas-boundary-polish-dispatch-enabled={String(polish.dispatchEnabled)}
+      data-office-approval-nas-boundary-polish-audit-write-enabled={String(polish.auditWriteEnabled)}
+      data-office-approval-nas-boundary-polish-nas-save-enabled={String(polish.nasSaveEnabled)}
+      data-office-approval-nas-boundary-polish-safe-projection-only={String(polish.safeProjectionOnly)}
+      data-office-approval-nas-boundary-polish-raw-excluded={String(polish.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4" /> Approval/NAS boundary polish
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-amber-300/20 bg-amber-950/10 p-3">
+            <div className="font-semibold text-amber-100">approval gate · NAS vault locked · projection only</div>
+            <div className="mt-1 leading-5">
+              Approval, audit, NAS 저장 경계를 더 선명하게 표시합니다. 이 slice는 approve/reject/hold, audit write, NAS save, worker assignment를 모두 비활성으로 둡니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {polish.cards.map((card) => (
+              <div
+                key={card.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-approval-nas-boundary-card={card.id}
+                data-office-approval-nas-boundary-card-tone={card.tone}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{card.label}</div>
+                <div className="mt-2 leading-5">{card.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-approval-nas-boundary-polish-boundary="true">
+            source {polish.sourceDetailKind} · sections {polish.sourceSectionCount} · warnings {polish.sourceWarningCount} · boundaries {polish.boundaryCount} · controls {polish.enabledControls} · raw excluded {String(polish.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -2936,6 +2991,10 @@ export default function OfficePage() {
     () => buildOfficeWorkerRequestHandoffDetail(approvalRequestDetailDeepening, workerFacilityLanePolish),
     [approvalRequestDetailDeepening, workerFacilityLanePolish],
   );
+  const approvalNasBoundaryPolish = useMemo(
+    () => buildOfficeApprovalNasBoundaryPolish(workerRequestHandoffDetail),
+    [workerRequestHandoffDetail],
+  );
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -3184,6 +3243,8 @@ export default function OfficePage() {
       <WorkerFacilityLanePolishPanel polish={workerFacilityLanePolish} />
 
       <WorkerRequestHandoffDetailPanel detail={workerRequestHandoffDetail} />
+
+      <ApprovalNasBoundaryPolishPanel polish={approvalNasBoundaryPolish} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 

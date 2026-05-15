@@ -114,6 +114,7 @@ import {
   buildOfficeApprovalRequestDetailDeepening,
   buildOfficeWorkerFacilityLanePolish,
   buildOfficeWorkerRequestHandoffDetail,
+  buildOfficeApprovalNasBoundaryPolish,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -851,6 +852,63 @@ describe("Worker Request Handoff Detail 1", () => {
     expect(detail.safeProjectionOnly).toBe(true);
     expect(detail.rawExcluded).toBe(true);
     expect(JSON.stringify(detail)).not.toMatch(/raw worker request handoff prompt|raw worker request handoff task|Traceback|\/Users\/lidises|token-shaped-worker-request-handoff|private-worker-request-provider/i);
+  });
+});
+
+
+describe("Approval/NAS Boundary Polish 1", () => {
+  it("builds a read-only approval and NAS boundary polish from safe request handoff detail", () => {
+    const state = officeFixture({
+      agents: [{ id: "agent-approval-nas", status: "active", prompt: "raw approval nas prompt", provider: "private-approval-nas-provider", api_key: "token-shaped-approval-nas" }],
+      work_items: [
+        { id: "task-approval-nas", status: "blocked", title: "raw approval nas task", body: "/Users/lidises/private/approval-nas.md", transcript: "Traceback approval nas transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-15T00:00:00Z", item_count: 11, warning_count: 4, error_summary: "Traceback approval nas source" },
+      ],
+    });
+    const projection = buildOfficeDeskRpgProjectionModel(state);
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const posture = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
+    const envelope = buildOfficeOrchestratorRequestEnvelopeDetail(projection, posture);
+    const route = buildOfficeApprovalRequestRouteDetail(envelope, dialogue);
+    const contract = buildOfficeEventRequestContractProjection(route);
+    const inspector = buildOfficeApprovalDialogueRouteInspector(dialogue, route, contract);
+    const timeline = buildOfficeEventTimelineProjection(contract, inspector);
+    const workerRoles = buildOfficeDeskRpgWorkerRoleVisibility(projection);
+    const handoff = buildOfficeReviewerWikiHandoffPosture(projection);
+    const drilldown = buildOfficeTimelineWorkerHandoffDrilldown(timeline, workerRoles, handoff);
+    const approvalDetail = buildOfficeApprovalRequestDetailDeepening(route, timeline, drilldown);
+    const approvalView = buildOfficeApprovalRequestView(state);
+    const audit = buildOfficeApprovalAuditTimeline(approvalView);
+    const gate = buildOfficeApprovalExecutionGate(audit);
+    const authority = buildOfficeAuthorityAdapterContract(gate);
+    const queue = buildOfficeOrchestratorMediationQueue(authority);
+    const routing = buildOfficeWorkerIntentRouting(queue);
+    const readiness = buildOfficeWorkerFacilityReadiness(routing);
+    const lanePolish = buildOfficeWorkerFacilityLanePolish(drilldown, readiness);
+    const detail = buildOfficeWorkerRequestHandoffDetail(approvalDetail, lanePolish);
+
+    const polish = buildOfficeApprovalNasBoundaryPolish(detail);
+
+    expect(polish.stageLabel).toBe("Approval/NAS Boundary Polish 1");
+    expect(polish.detailKind).toBe("approval_nas_boundary_polish");
+    expect(polish.cards.map((card) => card.id)).toEqual(["approval_gate", "worker_handoff", "audit_boundary", "nas_vault_boundary"]);
+    expect(polish.sourceDetailKind).toBe("worker_request_handoff_detail");
+    expect(polish.sourceSectionCount).toBe(4);
+    expect(polish.boundaryCount).toBe(4);
+    expect(polish.enabledControls).toBe(0);
+    expect(polish.approveEnabled).toBe(false);
+    expect(polish.rejectEnabled).toBe(false);
+    expect(polish.holdEnabled).toBe(false);
+    expect(polish.requestCreationEnabled).toBe(false);
+    expect(polish.workAssignmentEnabled).toBe(false);
+    expect(polish.dispatchEnabled).toBe(false);
+    expect(polish.auditWriteEnabled).toBe(false);
+    expect(polish.nasSaveEnabled).toBe(false);
+    expect(polish.safeProjectionOnly).toBe(true);
+    expect(polish.rawExcluded).toBe(true);
+    expect(JSON.stringify(polish)).not.toMatch(/raw approval nas prompt|raw approval nas task|Traceback|\/Users\/lidises|token-shaped-approval-nas|private-approval-nas-provider/i);
   });
 });
 

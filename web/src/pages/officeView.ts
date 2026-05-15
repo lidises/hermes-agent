@@ -1769,6 +1769,36 @@ export type OfficeWorkerRequestHandoffDetail = {
   rawExcluded: true;
 };
 
+export type OfficeApprovalNasBoundaryCard = {
+  id: "approval_gate" | "worker_handoff" | "audit_boundary" | "nas_vault_boundary";
+  label: string;
+  summary: string;
+  tone: "info" | "warning" | "blocked";
+  rawExcluded: true;
+};
+
+export type OfficeApprovalNasBoundaryPolish = {
+  stageLabel: "Approval/NAS Boundary Polish 1";
+  title: string;
+  detailKind: "approval_nas_boundary_polish";
+  cards: OfficeApprovalNasBoundaryCard[];
+  sourceDetailKind: OfficeWorkerRequestHandoffDetail["detailKind"];
+  sourceSectionCount: number;
+  sourceWarningCount: number;
+  boundaryCount: number;
+  enabledControls: 0;
+  approveEnabled: false;
+  rejectEnabled: false;
+  holdEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeWorkerAssignmentCandidateBlockedReason = {
   id: "facility_prerequisites_missing" | "approval_execution_blocked" | "authority_adapter_missing" | "audit_write_disabled" | "human_confirmation_missing";
   label: string;
@@ -3314,6 +3344,59 @@ export function buildOfficeWorkerRequestHandoffDetail(
     handoffPrerequisiteCount: lanePolish.prerequisiteCount,
     warningCount,
     enabledControls: 0,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    nasSaveEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeApprovalNasBoundaryPolish(detail: OfficeWorkerRequestHandoffDetail): OfficeApprovalNasBoundaryPolish {
+  return {
+    stageLabel: "Approval/NAS Boundary Polish 1",
+    title: "Approval/NAS boundary polish",
+    detailKind: "approval_nas_boundary_polish",
+    cards: [
+      {
+        id: "approval_gate",
+        label: "approval gate",
+        summary: "Approve, reject, and hold remain explicit future authority states; this panel only labels the gate and keeps all decision controls disabled.",
+        tone: "blocked",
+        rawExcluded: true,
+      },
+      {
+        id: "worker_handoff",
+        label: "worker handoff boundary",
+        summary: `${detail.workerLaneCount} worker lane(s) stay downstream of the disabled request handoff with no assignment, request creation, or dispatch.`,
+        tone: detail.warningCount > 0 ? "warning" : "info",
+        rawExcluded: true,
+      },
+      {
+        id: "audit_boundary",
+        label: "audit write boundary",
+        summary: "Audit events are described as a required future sink, but the browser does not append or persist audit records in this read-only slice.",
+        tone: "blocked",
+        rawExcluded: true,
+      },
+      {
+        id: "nas_vault_boundary",
+        label: "NAS vault boundary",
+        summary: "Final NAS save stays locked behind future user approval and NAS Keeper authority; no NAS write or save request is created here.",
+        tone: "blocked",
+        rawExcluded: true,
+      },
+    ],
+    sourceDetailKind: detail.detailKind,
+    sourceSectionCount: detail.sections.length,
+    sourceWarningCount: detail.warningCount,
+    boundaryCount: 4,
+    enabledControls: 0,
+    approveEnabled: false,
+    rejectEnabled: false,
+    holdEnabled: false,
     requestCreationEnabled: false,
     workAssignmentEnabled: false,
     dispatchEnabled: false,
