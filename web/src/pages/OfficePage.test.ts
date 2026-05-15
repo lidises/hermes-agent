@@ -129,6 +129,7 @@ import {
   buildOfficeCharacterBubbleInspectorAlignment,
   buildOfficeCharacterPanelBoundarySummary,
   buildOfficeCharacterFacilityRoleLegend,
+  buildOfficeCharacterFacilityBoundaryStrip,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -1389,6 +1390,63 @@ describe("Character Detail Safe Dialogue Copy 1", () => {
     expect(dialogue.safeProjectionOnly).toBe(true);
     expect(dialogue.rawExcluded).toBe(true);
     expect(JSON.stringify(dialogue)).not.toMatch(/raw character dialogue prompt|raw character dialogue task|Traceback|\/Users\/lidises|token-shaped-dialogue-copy|private-character-dialogue-provider/i);
+  });
+});
+
+
+describe("Character Facility Boundary Strip 1", () => {
+  it("summarizes facility-zone posture and disabled mutation boundaries without raw projection", () => {
+    const secretSentinel = ["token", "shaped", "facility", "strip"].join("-");
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishFixture({
+      agents: [{ id: "agent-character-strip", status: "active", prompt: "raw character strip prompt", provider: "private-character-strip-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-character-strip", status: "blocked", title: "raw character strip title", body: "/Users/lidises/private/character-strip.md", transcript: "Traceback character strip transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+    const trace = buildOfficeApprovalDecisionAuditNasTracePreview(envelope);
+    const gate = buildOfficeNasKeeperSaveRequestGate(trace);
+    const rollback = buildOfficeNasKeeperRollbackEvidencePreview(gate);
+    const review = buildOfficeDeskRpgReadOnlyChainCompletionReview(rollback);
+    const stateProjection = buildOfficeEventDrivenCharacterStateProjection(review, [
+      { id: "evt-runtime-strip", category: "room_density_changed", roomId: "work", tone: "warning", count: 3, safeLabel: "room density", detail: "safe density aggregate", redacted: true, rawSource: false },
+      { id: "evt-intent-strip", category: "attention_changed", roomId: "routing", tone: "negative", count: 1, safeLabel: "approval attention", detail: "safe attention aggregate", redacted: true, rawSource: false },
+      { id: "evt-visual-strip", category: "snapshot_static", roomId: "sessions", tone: "neutral", count: 0, safeLabel: "static snapshot", detail: "safe static aggregate", redacted: true, rawSource: false },
+    ] as const);
+    const overlay = buildOfficeCharacterStateRoomOverlay(stateProjection);
+    const interaction = buildOfficeCharacterRoomInteractionPosture(overlay);
+    const detail = buildOfficeCharacterInspectorDetailPosture(interaction);
+    const dialogue = buildOfficeCharacterDetailSafeDialogueCopy(detail);
+    const alignment = buildOfficeCharacterBubbleInspectorAlignment(dialogue, detail);
+    const summary = buildOfficeCharacterPanelBoundarySummary(detail, dialogue, alignment);
+    const legend = buildOfficeCharacterFacilityRoleLegend(summary, overlay);
+
+    const strip = buildOfficeCharacterFacilityBoundaryStrip(legend, overlay);
+
+    expect(strip.stageLabel).toBe("Character Facility Boundary Strip 1");
+    expect(strip.detailKind).toBe("character_facility_boundary_strip");
+    expect(strip.sourceLegendKind).toBe("character_facility_role_legend");
+    expect(strip.sourceOverlayKind).toBe("character_state_room_overlay");
+    expect(strip.zoneCount).toBe(6);
+    expect(strip.boundaryCount).toBe(6);
+    expect(strip.safeZones.map((zone) => zone.facilityZoneId)).toEqual(["boss_desk", "orchestrator_desk", "worker_cluster", "right_inspector", "central_board", "nas_vault"]);
+    expect(strip.safeZones.map((zone) => zone.mutationBoundary)).toEqual(["instruction intake disabled", "mediation write disabled", "assignment disabled", "inspector write disabled", "draft creation disabled", "NAS save disabled"]);
+    expect(strip.safeZones.every((zone) => zone.roleCount === 1 && zone.enabledControls === 0 && zone.executable === false && zone.rawExcluded === true)).toBe(true);
+    expect(strip.enabledControls).toBe(0);
+    expect(strip.clickHandlerEnabled).toBe(false);
+    expect(strip.keyboardHandlerEnabled).toBe(false);
+    expect(strip.formControlEnabled).toBe(false);
+    expect(strip.eventPersistenceEnabled).toBe(false);
+    expect(strip.backendStreamEnabled).toBe(false);
+    expect(strip.animationStatePersistenceEnabled).toBe(false);
+    expect(strip.requestCreationEnabled).toBe(false);
+    expect(strip.workAssignmentEnabled).toBe(false);
+    expect(strip.dispatchEnabled).toBe(false);
+    expect(strip.auditWriteEnabled).toBe(false);
+    expect(strip.nasSaveEnabled).toBe(false);
+    expect(strip.safeProjectionOnly).toBe(true);
+    expect(strip.rawExcluded).toBe(true);
+    expect(JSON.stringify(strip)).not.toMatch(/raw character strip prompt|raw character strip title|Traceback|\/Users\/lidises|token-shaped-facility-strip|private-character-strip-provider/i);
   });
 });
 

@@ -140,6 +140,7 @@ import {
   buildOfficeCharacterBubbleInspectorAlignment,
   buildOfficeCharacterPanelBoundarySummary,
   buildOfficeCharacterFacilityRoleLegend,
+  buildOfficeCharacterFacilityBoundaryStrip,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -182,6 +183,7 @@ import {
   type OfficeCharacterBubbleInspectorAlignment,
   type OfficeCharacterPanelBoundarySummary,
   type OfficeCharacterFacilityRoleLegend,
+  type OfficeCharacterFacilityBoundaryStrip,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -3336,6 +3338,58 @@ export function CharacterFacilityRoleLegendPanel({ legend }: { legend: OfficeCha
   );
 }
 
+export function CharacterFacilityBoundaryStripPanel({ strip }: { strip: OfficeCharacterFacilityBoundaryStrip }) {
+  return (
+    <Card
+      data-office-character-facility-boundary-strip="true"
+      data-office-character-facility-boundary-strip-enabled-controls={strip.enabledControls}
+      data-office-character-facility-boundary-strip-click-handler-enabled={String(strip.clickHandlerEnabled)}
+      data-office-character-facility-boundary-strip-keyboard-handler-enabled={String(strip.keyboardHandlerEnabled)}
+      data-office-character-facility-boundary-strip-form-control-enabled={String(strip.formControlEnabled)}
+      data-office-character-facility-boundary-strip-event-persistence-enabled={String(strip.eventPersistenceEnabled)}
+      data-office-character-facility-boundary-strip-backend-stream-enabled={String(strip.backendStreamEnabled)}
+      data-office-character-facility-boundary-strip-animation-state-persistence-enabled={String(strip.animationStatePersistenceEnabled)}
+      data-office-character-facility-boundary-strip-request-creation-enabled={String(strip.requestCreationEnabled)}
+      data-office-character-facility-boundary-strip-dispatch-enabled={String(strip.dispatchEnabled)}
+      data-office-character-facility-boundary-strip-nas-save-enabled={String(strip.nasSaveEnabled)}
+      data-office-character-facility-boundary-strip-safe-projection-only={String(strip.safeProjectionOnly)}
+      data-office-character-facility-boundary-strip-raw-excluded={String(strip.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4" /> Character facility boundary strip
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-amber-300/20 bg-amber-950/10 p-3">
+            <div className="font-semibold text-amber-100">Facility mutation boundary strip</div>
+            <div className="mt-1 leading-5">Facility zones summarize disabled mutation posture only. Instruction intake, mediation writes, assignment, inspector writes, draft creation, and NAS save remain disabled.</div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3">
+            {strip.safeZones.map((zone) => (
+              <div
+                key={zone.facilityZoneId}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-character-facility-boundary-strip-zone={zone.facilityZoneId}
+                data-office-character-facility-boundary-strip-mutation-boundary={zone.mutationBoundary}
+                data-office-character-facility-boundary-strip-executable={String(zone.executable)}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{zone.facilityZoneId} · roles {zone.roleCount}</div>
+                <div className="mt-1 font-semibold text-foreground">{zone.facilityLabel}</div>
+                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.14em] text-amber-100/80">{zone.mutationBoundary} · controls {zone.enabledControls}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-character-facility-boundary-strip-summary="true">
+            source {strip.sourceLegendKind} / {strip.sourceOverlayKind} · zones {strip.zoneCount} · boundaries {strip.boundaryCount} · controls {strip.enabledControls}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -3886,6 +3940,10 @@ export default function OfficePage() {
     () => buildOfficeCharacterFacilityRoleLegend(characterPanelBoundarySummary, characterStateRoomOverlay),
     [characterPanelBoundarySummary, characterStateRoomOverlay],
   );
+  const characterFacilityBoundaryStrip = useMemo(
+    () => buildOfficeCharacterFacilityBoundaryStrip(characterFacilityRoleLegend, characterStateRoomOverlay),
+    [characterFacilityRoleLegend, characterStateRoomOverlay],
+  );
   const safeMotionHeartbeat = useMemo(
     () => buildOfficeSafeMotionHeartbeat(safeStreamPosture, {
       pollStatus: safeEventsStatus === "loaded" ? "active" : safeEventsStatus,
@@ -4122,6 +4180,8 @@ export default function OfficePage() {
       <CharacterPanelBoundarySummaryPanel summary={characterPanelBoundarySummary} />
 
       <CharacterFacilityRoleLegendPanel legend={characterFacilityRoleLegend} />
+
+      <CharacterFacilityBoundaryStripPanel strip={characterFacilityBoundaryStrip} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 

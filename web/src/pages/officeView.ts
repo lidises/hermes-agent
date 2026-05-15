@@ -2301,6 +2301,44 @@ export type OfficeCharacterFacilityRoleLegend = {
   rawExcluded: true;
 };
 
+export type OfficeCharacterFacilityBoundaryStripZone = {
+  facilityZoneId: OfficeCharacterFacilityRoleLegendItem["facilityZoneId"];
+  facilityLabel: string;
+  roles: OfficeCharacterFacilityRoleLegendItem["role"][];
+  roleCount: number;
+  mutationBoundary: "instruction intake disabled" | "mediation write disabled" | "assignment disabled" | "inspector write disabled" | "draft creation disabled" | "NAS save disabled";
+  sourceMarkerCount: number;
+  enabledControls: 0;
+  executable: false;
+  rawExcluded: true;
+};
+
+export type OfficeCharacterFacilityBoundaryStrip = {
+  stageLabel: "Character Facility Boundary Strip 1";
+  title: string;
+  detailKind: "character_facility_boundary_strip";
+  sourceLegendKind: OfficeCharacterFacilityRoleLegend["detailKind"];
+  sourceOverlayKind: OfficeCharacterStateRoomOverlay["detailKind"];
+  zoneCount: number;
+  boundaryCount: number;
+  safeZones: OfficeCharacterFacilityBoundaryStripZone[];
+  mutationBoundaries: OfficeCharacterFacilityBoundaryStripZone["mutationBoundary"][];
+  enabledControls: 0;
+  clickHandlerEnabled: false;
+  keyboardHandlerEnabled: false;
+  formControlEnabled: false;
+  eventPersistenceEnabled: false;
+  backendStreamEnabled: false;
+  animationStatePersistenceEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeWorkerAssignmentCandidateBlockedReason = {
   id: "facility_prerequisites_missing" | "approval_execution_blocked" | "authority_adapter_missing" | "audit_write_disabled" | "human_confirmation_missing";
   label: string;
@@ -4656,6 +4694,58 @@ export function buildOfficeCharacterFacilityRoleLegend(summary: OfficeCharacterP
     facilityCount: new Set(legendItems.map((item) => item.facilityZoneId)).size,
     legendItems,
     boundaryLabels: legendItems.map((item) => item.boundaryLabel),
+    enabledControls: 0,
+    clickHandlerEnabled: false,
+    keyboardHandlerEnabled: false,
+    formControlEnabled: false,
+    eventPersistenceEnabled: false,
+    backendStreamEnabled: false,
+    animationStatePersistenceEnabled: false,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    nasSaveEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+const characterFacilityMutationBoundaryByZone: Record<OfficeCharacterFacilityRoleLegendItem["facilityZoneId"], OfficeCharacterFacilityBoundaryStripZone["mutationBoundary"]> = {
+  boss_desk: "instruction intake disabled",
+  orchestrator_desk: "mediation write disabled",
+  worker_cluster: "assignment disabled",
+  right_inspector: "inspector write disabled",
+  central_board: "draft creation disabled",
+  nas_vault: "NAS save disabled",
+  security_ops_corner: "mediation write disabled",
+  calm_activity_lane: "mediation write disabled",
+};
+
+export function buildOfficeCharacterFacilityBoundaryStrip(legend: OfficeCharacterFacilityRoleLegend, overlay: OfficeCharacterStateRoomOverlay): OfficeCharacterFacilityBoundaryStrip {
+  const markerCounts = new Map<OfficeCharacterFacilityRoleLegendItem["facilityZoneId"], number>();
+  overlay.markers.forEach((marker) => markerCounts.set(marker.roomSurfaceId, (markerCounts.get(marker.roomSurfaceId) ?? 0) + 1));
+  const safeZones: OfficeCharacterFacilityBoundaryStripZone[] = legend.legendItems.map((item) => ({
+    facilityZoneId: item.facilityZoneId,
+    facilityLabel: item.facilityLabel,
+    roles: [item.role],
+    roleCount: 1,
+    mutationBoundary: characterFacilityMutationBoundaryByZone[item.facilityZoneId],
+    sourceMarkerCount: markerCounts.get(item.facilityZoneId) ?? 0,
+    enabledControls: 0,
+    executable: false,
+    rawExcluded: true,
+  }));
+  return {
+    stageLabel: "Character Facility Boundary Strip 1",
+    title: "Character facility boundary strip",
+    detailKind: "character_facility_boundary_strip",
+    sourceLegendKind: legend.detailKind,
+    sourceOverlayKind: overlay.detailKind,
+    zoneCount: safeZones.length,
+    boundaryCount: safeZones.length,
+    safeZones,
+    mutationBoundaries: safeZones.map((zone) => zone.mutationBoundary),
     enabledControls: 0,
     clickHandlerEnabled: false,
     keyboardHandlerEnabled: false,
