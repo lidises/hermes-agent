@@ -2996,6 +2996,48 @@ export type OfficeControlledMutationReadinessSummaryPolish = {
   summaryCards: OfficeControlledMutationReadinessSummaryPolishCard[];
 };
 
+export type OfficeControlledMutationRequestStorePostureCardId = "local_store" | "validation" | "hardening_boundary" | "approval_boundary";
+
+export type OfficeControlledMutationRequestStorePostureCard = {
+  id: OfficeControlledMutationRequestStorePostureCardId;
+  label: string;
+  status: "display_only";
+  detail: string;
+  rawExcluded: true;
+};
+
+export type OfficeControlledMutationRequestStorePosture = {
+  stageLabel: "Frontend Request Store Posture 1";
+  sourceStageLabel: OfficeControlledMutationReadinessSummaryPolish["stageLabel"];
+  detailKind: "controlled_mutation_request_store_posture";
+  title: string;
+  safeBoundary: string;
+  enabledControls: 0;
+  formControlEnabled: false;
+  browserExecutableControlsEnabled: false;
+  backendMutationEnabled: false;
+  storageWriteEnabled: false;
+  eventAppendEnabled: false;
+  eventReadbackEnabled: false;
+  requestCreationEnabled: false;
+  auditWriteEnabled: false;
+  executionEnabled: false;
+  dryRunExecutionEnabled: false;
+  dispatchEnabled: false;
+  targetMutationEnabled: false;
+  authorityAdapterBindingEnabled: false;
+  credentialChangeEnabled: false;
+  nasMutationEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+  disabledSurfaceSummary: {
+    sourceCards: number;
+    postureCards: number;
+    enabledControls: 0;
+  };
+  postureCards: OfficeControlledMutationRequestStorePostureCard[];
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -6776,6 +6818,50 @@ export function buildOfficeControlledMutationReadinessSummaryPolish(ribbon: Offi
     summaryCards: summaryCards.map((card) => ({
       ...card,
       status: "blocked",
+      rawExcluded: true,
+    })),
+  };
+}
+
+export function buildOfficeControlledMutationRequestStorePosture(summary: OfficeControlledMutationReadinessSummaryPolish): OfficeControlledMutationRequestStorePosture {
+  const postureCards: Array<{ id: OfficeControlledMutationRequestStorePostureCardId; label: string; detail: string }> = [
+    { id: "local_store", label: "Local request store", detail: "The approved local request store remains a protected backend boundary, not a browser control" },
+    { id: "validation", label: "Allowlisted DTO validation", detail: "Only validator-passing safe request DTOs may be discussed; raw values stay excluded from the posture surface" },
+    { id: "hardening_boundary", label: "Hardening boundary", detail: "Duplicate, correlation, max-limit, and malformed-line resilience still require explicit backend approval" },
+    { id: "approval_boundary", label: "Decision boundary", detail: "Human decisions, audit writes, dry-run execution, dispatch, target mutation, and NAS save remain blocked" },
+  ];
+  return {
+    stageLabel: "Frontend Request Store Posture 1",
+    sourceStageLabel: summary.stageLabel,
+    detailKind: "controlled_mutation_request_store_posture",
+    title: "제어형 변경 요청 저장소 자세 · 읽기 전용",
+    safeBoundary: "frontend read-only request-store posture only · projects the approved local request-store boundary without calling routes or adding controls · no forms/buttons/inputs · no browser executable controls · no backend/schema/API route/service changes · no storage/write path · no event append/readback · no request creation · no audit write · no execution/dry-run/dispatch/target mutation · no authority adapter binding · no credential/auth/env change · no NAS/VPS/Kanban/cron mutation",
+    enabledControls: 0,
+    formControlEnabled: false,
+    browserExecutableControlsEnabled: false,
+    backendMutationEnabled: false,
+    storageWriteEnabled: false,
+    eventAppendEnabled: false,
+    eventReadbackEnabled: false,
+    requestCreationEnabled: false,
+    auditWriteEnabled: false,
+    executionEnabled: false,
+    dryRunExecutionEnabled: false,
+    dispatchEnabled: false,
+    targetMutationEnabled: false,
+    authorityAdapterBindingEnabled: false,
+    credentialChangeEnabled: false,
+    nasMutationEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+    disabledSurfaceSummary: {
+      sourceCards: summary.summaryCards.length,
+      postureCards: postureCards.length,
+      enabledControls: 0,
+    },
+    postureCards: postureCards.map((card) => ({
+      ...card,
+      status: "display_only",
       rawExcluded: true,
     })),
   };

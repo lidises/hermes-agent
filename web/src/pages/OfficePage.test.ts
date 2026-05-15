@@ -100,6 +100,7 @@ import {
   buildOfficeControlledMutationContractPosturePolish,
   buildOfficeControlledMutationReadinessHandoffRibbon,
   buildOfficeControlledMutationReadinessSummaryPolish,
+  buildOfficeControlledMutationRequestStorePosture,
   buildOfficeRpgScene,
   buildOfficeDeskRpgProjectionModel,
   buildOfficeDeskRpgWorkerRoleVisibility,
@@ -2805,6 +2806,47 @@ describe("Desk RPG Projection ViewModel Helper 1", () => {
     expect(summary.disabledSurfaceSummary).toEqual({ steps: 4, summaryCards: 3, enabledControls: 0 });
     expect(summary.safeBoundary).toContain("read-only readiness summary polish only");
     expect(JSON.stringify(summary)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw readiness summary polish|private-summary-polish|token-shaped-value|provider/i);
+  });
+
+  it("builds Frontend Request Store Posture 1 as a read-only local-store posture surface without adding writes", () => {
+    const executionReadiness = buildOfficeControlledMutationExecutionReadinessSummary(buildOfficeControlledMutationAuthoritySummary(buildOfficeControlledMutationHumanApprovalPlan(buildOfficeControlledMutationRollbackVerificationPlan(buildOfficeControlledMutationAuditSinkPlan(buildOfficeControlledMutationDryRunPlan(buildOfficeControlledMutationProposalContract(buildOfficeWorkerFinalGateChecklist(buildOfficeWorkerRollbackPreviewEnvelope(buildOfficeWorkerAuditPreviewEnvelope(buildOfficeWorkerDispatchDryRunEnvelope(buildOfficeWorkerAuthorityHandoffEnvelope(buildOfficeWorkerHumanConfirmationEnvelope(buildOfficeWorkerRequestDraftPreview(buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-16T00:05:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/request-store-posture", status: "partial", checked_at: "2026-05-16T00:00:00Z", item_count: 1, warning_count: 1, error_summary: "raw request store token" } as unknown as OfficeState["data_sources"][number]],
+      agents: [{ id: "agent-request-store-posture", status: "active", prompt: "raw request store posture prompt token-shaped-value", provider: "private-request-store-posture-provider" }],
+      work_items: [{ id: "w-request-store-posture", status: "blocked", title: "raw request store posture task", body: "/Users/lidises/private/request-store-posture.md" } as unknown as OfficeState["work_items"][number]],
+    })))))))))))))))))))))));
+    const projection = buildOfficeControlledMutationContractPostureProjection(executionReadiness);
+    const polish = buildOfficeControlledMutationContractPosturePolish(projection);
+    const ribbon = buildOfficeControlledMutationReadinessHandoffRibbon(polish);
+    const summary = buildOfficeControlledMutationReadinessSummaryPolish(ribbon);
+    const posture = buildOfficeControlledMutationRequestStorePosture(summary);
+
+    expect(posture.stageLabel).toBe("Frontend Request Store Posture 1");
+    expect(posture.sourceStageLabel).toBe("Frontend Readiness Summary Polish 1");
+    expect(posture.detailKind).toBe("controlled_mutation_request_store_posture");
+    expect(posture.enabledControls).toBe(0);
+    expect(posture.formControlEnabled).toBe(false);
+    expect(posture.browserExecutableControlsEnabled).toBe(false);
+    expect(posture.backendMutationEnabled).toBe(false);
+    expect(posture.storageWriteEnabled).toBe(false);
+    expect(posture.eventAppendEnabled).toBe(false);
+    expect(posture.eventReadbackEnabled).toBe(false);
+    expect(posture.requestCreationEnabled).toBe(false);
+    expect(posture.auditWriteEnabled).toBe(false);
+    expect(posture.executionEnabled).toBe(false);
+    expect(posture.dryRunExecutionEnabled).toBe(false);
+    expect(posture.dispatchEnabled).toBe(false);
+    expect(posture.targetMutationEnabled).toBe(false);
+    expect(posture.authorityAdapterBindingEnabled).toBe(false);
+    expect(posture.credentialChangeEnabled).toBe(false);
+    expect(posture.nasMutationEnabled).toBe(false);
+    expect(posture.safeProjectionOnly).toBe(true);
+    expect(posture.rawExcluded).toBe(true);
+    expect(posture.postureCards.map((card) => card.id)).toEqual(["local_store", "validation", "hardening_boundary", "approval_boundary"]);
+    expect(posture.postureCards.every((card) => card.status === "display_only" && card.rawExcluded)).toBe(true);
+    expect(posture.disabledSurfaceSummary).toEqual({ sourceCards: 3, postureCards: 4, enabledControls: 0 });
+    expect(posture.safeBoundary).toContain("frontend read-only request-store posture only");
+    expect(JSON.stringify(posture)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw request store posture|private-request-store-posture|token-shaped-value|provider/i);
   });
 
   it("builds a disabled Authority Adapter Contract 1 before any execution adapter exists", () => {

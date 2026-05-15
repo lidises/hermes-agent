@@ -113,6 +113,7 @@ import {
   buildOfficeControlledMutationContractPosturePolish,
   buildOfficeControlledMutationReadinessHandoffRibbon,
   buildOfficeControlledMutationReadinessSummaryPolish,
+  buildOfficeControlledMutationRequestStorePosture,
   buildOfficeDeskRpgWorkerRoleVisibility,
   buildOfficeDisabledApprovalDialoguePosture,
   buildOfficeReviewerWikiHandoffPosture,
@@ -185,6 +186,7 @@ import {
   type OfficeControlledMutationContractPosturePolish,
   type OfficeControlledMutationReadinessHandoffRibbon,
   type OfficeControlledMutationReadinessSummaryPolish,
+  type OfficeControlledMutationRequestStorePosture,
   type OfficeEventDrivenCharacterStateProjection,
   type OfficeCharacterStateRoomOverlay,
   type OfficeCharacterRoomInteractionPosture,
@@ -713,6 +715,53 @@ const OFFICE_ZONE_PANELS: Array<{ id: OfficeMapNode["id"]; label: string; classN
   { id: "automation", label: "기계실", className: "border-cyan-200/25 bg-[repeating-linear-gradient(90deg,rgba(34,211,238,0.13)_0_5px,rgba(34,211,238,0.055)_5px_11px)]", style: { left: "10%", top: "54%", width: "34%", height: "25%" } },
   { id: "routing", label: "우편실", className: "border-sky-200/25 bg-[repeating-linear-gradient(135deg,rgba(125,211,252,0.13)_0_6px,rgba(125,211,252,0.055)_6px_12px)]", style: { left: "56%", top: "54%", width: "34%", height: "25%" } },
 ];
+
+export function ControlledMutationRequestStorePosturePanel({ posture }: { posture: OfficeControlledMutationRequestStorePosture }) {
+  return (
+    <section
+      className="border border-cyan-300/20 bg-cyan-950/10 p-4"
+      data-office-controlled-mutation-request-store-posture="true"
+      data-office-controlled-mutation-request-store-posture-enabled-controls={posture.enabledControls}
+      data-office-controlled-mutation-request-store-posture-form-control-enabled={String(posture.formControlEnabled)}
+      data-office-controlled-mutation-request-store-posture-browser-executable-controls-enabled={String(posture.browserExecutableControlsEnabled)}
+      data-office-controlled-mutation-request-store-posture-backend-mutation-enabled={String(posture.backendMutationEnabled)}
+      data-office-controlled-mutation-request-store-posture-storage-write-enabled={String(posture.storageWriteEnabled)}
+      data-office-controlled-mutation-request-store-posture-event-append-enabled={String(posture.eventAppendEnabled)}
+      data-office-controlled-mutation-request-store-posture-event-readback-enabled={String(posture.eventReadbackEnabled)}
+      data-office-controlled-mutation-request-store-posture-request-creation-enabled={String(posture.requestCreationEnabled)}
+      data-office-controlled-mutation-request-store-posture-audit-write-enabled={String(posture.auditWriteEnabled)}
+      data-office-controlled-mutation-request-store-posture-execution-enabled={String(posture.executionEnabled)}
+      data-office-controlled-mutation-request-store-posture-dry-run-execution-enabled={String(posture.dryRunExecutionEnabled)}
+      data-office-controlled-mutation-request-store-posture-dispatch-enabled={String(posture.dispatchEnabled)}
+      data-office-controlled-mutation-request-store-posture-target-mutation-enabled={String(posture.targetMutationEnabled)}
+      data-office-controlled-mutation-request-store-posture-authority-adapter-binding-enabled={String(posture.authorityAdapterBindingEnabled)}
+      data-office-controlled-mutation-request-store-posture-credential-change-enabled={String(posture.credentialChangeEnabled)}
+      data-office-controlled-mutation-request-store-posture-nas-mutation-enabled={String(posture.nasMutationEnabled)}
+      data-office-controlled-mutation-request-store-posture-safe-projection-only={String(posture.safeProjectionOnly)}
+      data-office-controlled-mutation-request-store-posture-raw-excluded={String(posture.rawExcluded)}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-200/70">{posture.stageLabel}</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">{posture.title}</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">{posture.safeBoundary}</p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          cards: {posture.disabledSurfaceSummary.postureCards} · controls: {posture.disabledSurfaceSummary.enabledControls}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-controlled-mutation-request-store-posture-cards="true">
+        {posture.postureCards.map((card) => (
+          <div key={card.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-request-store-posture-card={card.id} data-office-controlled-mutation-request-store-posture-card-status={card.status}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.status}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{card.label}</div>
+            <div className="mt-2 text-xs leading-5 text-midground/70">{card.detail}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
 
 function OfficeMap({
   nodes,
@@ -4077,6 +4126,7 @@ export default function OfficePage() {
   const controlledMutationContractPosturePolish = useMemo(() => buildOfficeControlledMutationContractPosturePolish(controlledMutationContractPostureProjection), [controlledMutationContractPostureProjection]);
   const controlledMutationReadinessHandoffRibbon = useMemo(() => buildOfficeControlledMutationReadinessHandoffRibbon(controlledMutationContractPosturePolish), [controlledMutationContractPosturePolish]);
   const controlledMutationReadinessSummaryPolish = useMemo(() => buildOfficeControlledMutationReadinessSummaryPolish(controlledMutationReadinessHandoffRibbon), [controlledMutationReadinessHandoffRibbon]);
+  const controlledMutationRequestStorePosture = useMemo(() => buildOfficeControlledMutationRequestStorePosture(controlledMutationReadinessSummaryPolish), [controlledMutationReadinessSummaryPolish]);
   const deskRpgProjection = useMemo(() => buildOfficeDeskRpgProjectionModel(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const deskRpgWorkerRoleVisibility = useMemo(() => buildOfficeDeskRpgWorkerRoleVisibility(deskRpgProjection), [deskRpgProjection]);
   const disabledApprovalDialoguePosture = useMemo(() => buildOfficeDisabledApprovalDialoguePosture(deskRpgProjection), [deskRpgProjection]);
@@ -5243,6 +5293,7 @@ export default function OfficePage() {
       <ControlledMutationContractPosturePolishPanel polish={controlledMutationContractPosturePolish} />
       <ControlledMutationReadinessHandoffRibbonPanel ribbon={controlledMutationReadinessHandoffRibbon} />
       <ControlledMutationReadinessSummaryPolishPanel summary={controlledMutationReadinessSummaryPolish} />
+      <ControlledMutationRequestStorePosturePanel posture={controlledMutationRequestStorePosture} />
 
       {showOverview ? (
         <OfficeRpgMap
