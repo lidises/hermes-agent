@@ -2179,6 +2179,48 @@ export type OfficeCharacterDetailSafeDialogueCopy = {
   rawExcluded: true;
 };
 
+export type OfficeCharacterBubbleInspectorAlignmentItem = {
+  role: OfficeCharacterDetailSafeDialogueBubble["role"];
+  sourceDetailCardId: OfficeCharacterDetailSafeDialogueBubble["sourceDetailCardId"];
+  copyKind: OfficeCharacterDetailSafeDialogueBubble["copyKind"];
+  generatedCopy: string;
+  inspectorCardLabel: string;
+  inspectorSurfaceId: OfficeCharacterInspectorDetailPostureCard["inspectorSurfaceId"];
+  roomSurfaceId: OfficeCharacterInspectorDetailPostureCard["roomSurfaceId"];
+  inspectTargetId: OfficeCharacterInspectorDetailPostureCard["inspectTargetId"];
+  routeLabel: "boss → orchestrator" | "orchestrator → route" | "search → evidence" | "evidence → review" | "review → wiki" | "approval → NAS";
+  boundaryLabel: "instruction only" | "mediation only" | "source title hidden" | "review execution disabled" | "draft creation disabled" | "NAS save disabled";
+  rawTextVisible: false;
+  executable: false;
+  rawExcluded: true;
+};
+
+export type OfficeCharacterBubbleInspectorAlignment = {
+  stageLabel: "Character Bubble-to-Inspector Alignment 1";
+  title: string;
+  detailKind: "character_bubble_inspector_alignment";
+  sourceDialogueKind: OfficeCharacterDetailSafeDialogueCopy["detailKind"];
+  sourceInspectorKind: OfficeCharacterInspectorDetailPosture["detailKind"];
+  sourceBubbleCount: number;
+  sourceInspectorCardCount: number;
+  alignmentCount: number;
+  alignments: OfficeCharacterBubbleInspectorAlignmentItem[];
+  enabledControls: 0;
+  clickHandlerEnabled: false;
+  keyboardHandlerEnabled: false;
+  formControlEnabled: false;
+  eventPersistenceEnabled: false;
+  backendStreamEnabled: false;
+  animationStatePersistenceEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeWorkerAssignmentCandidateBlockedReason = {
   id: "facility_prerequisites_missing" | "approval_execution_blocked" | "authority_adapter_missing" | "audit_write_disabled" | "human_confirmation_missing";
   label: string;
@@ -4361,6 +4403,63 @@ export function buildOfficeCharacterDetailSafeDialogueCopy(detail: OfficeCharact
     sourceCardCount: detail.detailCardCount,
     bubbleCount: bubbles.length,
     bubbles,
+    enabledControls: 0,
+    clickHandlerEnabled: false,
+    keyboardHandlerEnabled: false,
+    formControlEnabled: false,
+    eventPersistenceEnabled: false,
+    backendStreamEnabled: false,
+    animationStatePersistenceEnabled: false,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    nasSaveEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+const characterBubbleAlignmentByRole: Record<OfficeCharacterDetailSafeDialogueBubble["role"], Pick<OfficeCharacterBubbleInspectorAlignmentItem, "routeLabel" | "boundaryLabel">> = {
+  user_boss: { routeLabel: "boss → orchestrator", boundaryLabel: "instruction only" },
+  orchestrator: { routeLabel: "orchestrator → route", boundaryLabel: "mediation only" },
+  search_worker: { routeLabel: "search → evidence", boundaryLabel: "source title hidden" },
+  reviewer: { routeLabel: "evidence → review", boundaryLabel: "review execution disabled" },
+  wiki_writer: { routeLabel: "review → wiki", boundaryLabel: "draft creation disabled" },
+  nas_keeper: { routeLabel: "approval → NAS", boundaryLabel: "NAS save disabled" },
+};
+
+export function buildOfficeCharacterBubbleInspectorAlignment(dialogue: OfficeCharacterDetailSafeDialogueCopy, detail: OfficeCharacterInspectorDetailPosture): OfficeCharacterBubbleInspectorAlignment {
+  const cardsByRole = new Map(detail.cards.map((card) => [card.role, card]));
+  const alignments: OfficeCharacterBubbleInspectorAlignmentItem[] = dialogue.bubbles.map((bubble) => {
+    const card = cardsByRole.get(bubble.role);
+    const alignment = characterBubbleAlignmentByRole[bubble.role];
+    return {
+      role: bubble.role,
+      sourceDetailCardId: bubble.sourceDetailCardId,
+      copyKind: bubble.copyKind,
+      generatedCopy: bubble.generatedCopy,
+      inspectorCardLabel: card?.label ?? bubble.role,
+      inspectorSurfaceId: card?.inspectorSurfaceId ?? "right_inspector",
+      roomSurfaceId: card?.roomSurfaceId ?? "central_board",
+      inspectTargetId: card?.inspectTargetId ?? `inspect_${bubble.role}`,
+      routeLabel: alignment.routeLabel,
+      boundaryLabel: alignment.boundaryLabel,
+      rawTextVisible: false,
+      executable: false,
+      rawExcluded: true,
+    };
+  });
+  return {
+    stageLabel: "Character Bubble-to-Inspector Alignment 1",
+    title: "Character bubble-to-inspector alignment",
+    detailKind: "character_bubble_inspector_alignment",
+    sourceDialogueKind: dialogue.detailKind,
+    sourceInspectorKind: detail.detailKind,
+    sourceBubbleCount: dialogue.bubbleCount,
+    sourceInspectorCardCount: detail.detailCardCount,
+    alignmentCount: alignments.length,
+    alignments,
     enabledControls: 0,
     clickHandlerEnabled: false,
     keyboardHandlerEnabled: false,

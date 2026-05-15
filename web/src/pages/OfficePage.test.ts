@@ -126,6 +126,7 @@ import {
   buildOfficeCharacterRoomInteractionPosture,
   buildOfficeCharacterInspectorDetailPosture,
   buildOfficeCharacterDetailSafeDialogueCopy,
+  buildOfficeCharacterBubbleInspectorAlignment,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -1386,6 +1387,61 @@ describe("Character Detail Safe Dialogue Copy 1", () => {
     expect(dialogue.safeProjectionOnly).toBe(true);
     expect(dialogue.rawExcluded).toBe(true);
     expect(JSON.stringify(dialogue)).not.toMatch(/raw character dialogue prompt|raw character dialogue task|Traceback|\/Users\/lidises|token-shaped-dialogue-copy|private-character-dialogue-provider/i);
+  });
+});
+
+
+describe("Character Bubble-to-Inspector Alignment 1", () => {
+  it("aligns generated bubbles with right-inspector metadata and safe route boundaries", () => {
+    const secretSentinel = ["token", "shaped", "bubble", "alignment"].join("-");
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishFixture({
+      agents: [{ id: "agent-character-alignment", status: "active", prompt: "raw character alignment prompt", provider: "private-character-alignment-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-character-alignment", status: "blocked", title: "raw character alignment title", body: "/Users/lidises/private/character-alignment.md", transcript: "Traceback character alignment transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+    const trace = buildOfficeApprovalDecisionAuditNasTracePreview(envelope);
+    const gate = buildOfficeNasKeeperSaveRequestGate(trace);
+    const rollback = buildOfficeNasKeeperRollbackEvidencePreview(gate);
+    const review = buildOfficeDeskRpgReadOnlyChainCompletionReview(rollback);
+    const stateProjection = buildOfficeEventDrivenCharacterStateProjection(review, [
+      { id: "evt-runtime-alignment", category: "room_density_changed", roomId: "work", tone: "warning", count: 3, safeLabel: "room density", detail: "safe density aggregate", redacted: true, rawSource: false },
+      { id: "evt-intent-alignment", category: "attention_changed", roomId: "routing", tone: "negative", count: 1, safeLabel: "approval attention", detail: "safe attention aggregate", redacted: true, rawSource: false },
+      { id: "evt-visual-alignment", category: "snapshot_static", roomId: "sessions", tone: "neutral", count: 0, safeLabel: "static snapshot", detail: "safe static aggregate", redacted: true, rawSource: false },
+    ] as const);
+    const overlay = buildOfficeCharacterStateRoomOverlay(stateProjection);
+    const interaction = buildOfficeCharacterRoomInteractionPosture(overlay);
+    const detail = buildOfficeCharacterInspectorDetailPosture(interaction);
+    const dialogue = buildOfficeCharacterDetailSafeDialogueCopy(detail);
+
+    const alignment = buildOfficeCharacterBubbleInspectorAlignment(dialogue, detail);
+
+    expect(alignment.stageLabel).toBe("Character Bubble-to-Inspector Alignment 1");
+    expect(alignment.detailKind).toBe("character_bubble_inspector_alignment");
+    expect(alignment.sourceDialogueKind).toBe("character_detail_safe_dialogue_copy");
+    expect(alignment.sourceInspectorKind).toBe("character_inspector_detail_posture");
+    expect(alignment.alignmentCount).toBe(6);
+    expect(alignment.alignments.map((item) => item.role)).toEqual(["user_boss", "orchestrator", "search_worker", "reviewer", "wiki_writer", "nas_keeper"]);
+    expect(alignment.alignments.map((item) => item.inspectorSurfaceId).every((surface) => surface === "right_inspector")).toBe(true);
+    expect(alignment.alignments.map((item) => item.routeLabel)).toEqual(["boss → orchestrator", "orchestrator → route", "search → evidence", "evidence → review", "review → wiki", "approval → NAS"]);
+    expect(alignment.alignments.map((item) => item.boundaryLabel)).toEqual(["instruction only", "mediation only", "source title hidden", "review execution disabled", "draft creation disabled", "NAS save disabled"]);
+    expect(alignment.alignments.every((item) => item.generatedCopy.length > 0 && item.inspectorCardLabel.length > 0 && item.rawTextVisible === false && item.executable === false && item.rawExcluded === true)).toBe(true);
+    expect(alignment.enabledControls).toBe(0);
+    expect(alignment.clickHandlerEnabled).toBe(false);
+    expect(alignment.keyboardHandlerEnabled).toBe(false);
+    expect(alignment.formControlEnabled).toBe(false);
+    expect(alignment.eventPersistenceEnabled).toBe(false);
+    expect(alignment.backendStreamEnabled).toBe(false);
+    expect(alignment.animationStatePersistenceEnabled).toBe(false);
+    expect(alignment.requestCreationEnabled).toBe(false);
+    expect(alignment.workAssignmentEnabled).toBe(false);
+    expect(alignment.dispatchEnabled).toBe(false);
+    expect(alignment.auditWriteEnabled).toBe(false);
+    expect(alignment.nasSaveEnabled).toBe(false);
+    expect(alignment.safeProjectionOnly).toBe(true);
+    expect(alignment.rawExcluded).toBe(true);
+    expect(JSON.stringify(alignment)).not.toMatch(/raw character alignment prompt|raw character alignment title|Traceback|\/Users\/lidises|token-shaped-bubble-alignment|private-character-alignment-provider/i);
   });
 });
 

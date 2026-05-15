@@ -137,6 +137,7 @@ import {
   buildOfficeCharacterRoomInteractionPosture,
   buildOfficeCharacterInspectorDetailPosture,
   buildOfficeCharacterDetailSafeDialogueCopy,
+  buildOfficeCharacterBubbleInspectorAlignment,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -176,6 +177,7 @@ import {
   type OfficeCharacterRoomInteractionPosture,
   type OfficeCharacterInspectorDetailPosture,
   type OfficeCharacterDetailSafeDialogueCopy,
+  type OfficeCharacterBubbleInspectorAlignment,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -3166,6 +3168,64 @@ export function CharacterDetailSafeDialogueCopyPanel({ dialogue }: { dialogue: O
   );
 }
 
+export function CharacterBubbleInspectorAlignmentPanel({ alignment }: { alignment: OfficeCharacterBubbleInspectorAlignment }) {
+  return (
+    <Card
+      data-office-character-bubble-inspector-alignment="true"
+      data-office-character-bubble-inspector-alignment-enabled-controls={alignment.enabledControls}
+      data-office-character-bubble-inspector-alignment-click-handler-enabled={String(alignment.clickHandlerEnabled)}
+      data-office-character-bubble-inspector-alignment-keyboard-handler-enabled={String(alignment.keyboardHandlerEnabled)}
+      data-office-character-bubble-inspector-alignment-form-control-enabled={String(alignment.formControlEnabled)}
+      data-office-character-bubble-inspector-alignment-event-persistence-enabled={String(alignment.eventPersistenceEnabled)}
+      data-office-character-bubble-inspector-alignment-backend-stream-enabled={String(alignment.backendStreamEnabled)}
+      data-office-character-bubble-inspector-alignment-animation-state-persistence-enabled={String(alignment.animationStatePersistenceEnabled)}
+      data-office-character-bubble-inspector-alignment-request-creation-enabled={String(alignment.requestCreationEnabled)}
+      data-office-character-bubble-inspector-alignment-dispatch-enabled={String(alignment.dispatchEnabled)}
+      data-office-character-bubble-inspector-alignment-nas-save-enabled={String(alignment.nasSaveEnabled)}
+      data-office-character-bubble-inspector-alignment-safe-projection-only={String(alignment.safeProjectionOnly)}
+      data-office-character-bubble-inspector-alignment-raw-excluded={String(alignment.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <MessageSquareText className="h-4 w-4" /> Character bubble-to-inspector alignment
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-sky-300/20 bg-sky-950/10 p-3">
+            <div className="font-semibold text-sky-100">Generated bubble ↔ right inspector alignment</div>
+            <div className="mt-1 leading-5">
+              역할별 생성 말풍선을 오른쪽 inspector card, route label, boundary label과 맞춰 표시합니다. source title/provider/path/raw body는 여전히 제외하고 요청/배정/dispatch/NAS 저장은 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3">
+            {alignment.alignments.map((item) => (
+              <div
+                key={item.role}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-character-bubble-inspector-alignment-item={item.role}
+                data-office-character-bubble-inspector-alignment-route={item.routeLabel}
+                data-office-character-bubble-inspector-alignment-boundary={item.boundaryLabel}
+                data-office-character-bubble-inspector-alignment-surface={item.inspectorSurfaceId}
+                data-office-character-bubble-inspector-alignment-raw-text-visible={String(item.rawTextVisible)}
+                data-office-character-bubble-inspector-alignment-executable={String(item.executable)}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.sourceDetailCardId} · {item.inspectorSurfaceId}</div>
+                <div className="mt-1 font-semibold text-foreground">{item.generatedCopy}</div>
+                <div className="mt-1 leading-5 text-midground/70">{item.inspectorCardLabel}</div>
+                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.14em] text-sky-100/80">{item.routeLabel} · {item.boundaryLabel}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-character-bubble-inspector-alignment-boundary-summary="true">
+            dialogue {alignment.sourceDialogueKind} · inspector {alignment.sourceInspectorKind} · bubbles {alignment.sourceBubbleCount} · cards {alignment.sourceInspectorCardCount} · aligned {alignment.alignmentCount} · controls {alignment.enabledControls}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -3704,6 +3764,10 @@ export default function OfficePage() {
     () => buildOfficeCharacterDetailSafeDialogueCopy(characterInspectorDetailPosture),
     [characterInspectorDetailPosture],
   );
+  const characterBubbleInspectorAlignment = useMemo(
+    () => buildOfficeCharacterBubbleInspectorAlignment(characterDetailSafeDialogueCopy, characterInspectorDetailPosture),
+    [characterDetailSafeDialogueCopy, characterInspectorDetailPosture],
+  );
   const safeMotionHeartbeat = useMemo(
     () => buildOfficeSafeMotionHeartbeat(safeStreamPosture, {
       pollStatus: safeEventsStatus === "loaded" ? "active" : safeEventsStatus,
@@ -3934,6 +3998,8 @@ export default function OfficePage() {
       <CharacterInspectorDetailPosturePanel detail={characterInspectorDetailPosture} />
 
       <CharacterDetailSafeDialogueCopyPanel dialogue={characterDetailSafeDialogueCopy} />
+
+      <CharacterBubbleInspectorAlignmentPanel alignment={characterBubbleInspectorAlignment} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 
