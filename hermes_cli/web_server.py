@@ -49,8 +49,10 @@ from hermes_cli.config import (
 )
 from gateway.status import get_running_pid, read_runtime_status
 from hermes_cli.office_controlled_mutation import (
+    append_office_controlled_mutation_decision_event,
     append_office_controlled_mutation_request_event,
     build_office_controlled_mutation_contract_schema,
+    list_office_controlled_mutation_decision_events,
     list_office_controlled_mutation_request_events,
     validate_office_controlled_mutation_request_event,
 )
@@ -570,6 +572,24 @@ async def append_office_controlled_mutation_request(payload: Any = Body(None)):
 async def list_office_controlled_mutation_requests(limit: int = 50, correlation_id: str | None = None):
     """Read back stored safe request-event DTOs from the local Hermes JSONL store."""
     return list_office_controlled_mutation_request_events(limit=limit, correlation_id=correlation_id)
+
+
+@app.post("/api/office/controlled-mutation/decision")
+async def append_office_controlled_mutation_decision(payload: Any = Body(None)):
+    """Append a validated safe human decision DTO to the local Hermes JSONL store."""
+    return append_office_controlled_mutation_decision_event(payload)
+
+
+@app.get("/api/office/controlled-mutation/decisions")
+async def list_office_controlled_mutation_decisions(
+    limit: int = 50, request_id: str | None = None, correlation_id: str | None = None
+):
+    """Read back stored safe human decision DTOs from the local Hermes JSONL store."""
+    return list_office_controlled_mutation_decision_events(
+        limit=limit,
+        request_id=request_id,
+        correlation_id=correlation_id,
+    )
 
 
 @app.get("/api/office/events")

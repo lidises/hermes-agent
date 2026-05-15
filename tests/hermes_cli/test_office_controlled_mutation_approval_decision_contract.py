@@ -17,7 +17,7 @@ def test_approval_decision_contract_exposes_non_recording_design_shape():
             "durable_storage_enabled": False,
             "database_migration_required": False,
         },
-        "allowed_decisions": ["approve", "reject", "defer"],
+        "allowed_decisions": ["approve", "reject", "hold"],
         "approval_scope": "single_action_only",
         "required_decision_fields": [
             "decision_ref",
