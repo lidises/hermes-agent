@@ -48,11 +48,14 @@ from hermes_cli.config import (
     redact_key,
 )
 from gateway.status import get_running_pid, read_runtime_status
-from hermes_cli.office_controlled_mutation import build_office_controlled_mutation_contract_schema
+from hermes_cli.office_controlled_mutation import (
+    build_office_controlled_mutation_contract_schema,
+    validate_office_controlled_mutation_request_event,
+)
 from hermes_cli.office_state import build_office_safe_event_payload, build_office_state
 
 try:
-    from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
+    from fastapi import Body, FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
     from fastapi.middleware.cors import CORSMiddleware
     from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
     from fastapi.staticfiles import StaticFiles
@@ -547,6 +550,12 @@ async def get_office_state(request: Request):
 async def get_office_controlled_mutation_schema():
     """Return the non-executable AI Office controlled-mutation contract."""
     return build_office_controlled_mutation_contract_schema()
+
+
+@app.post("/api/office/controlled-mutation/request/validate")
+async def validate_office_controlled_mutation_request(payload: Any = Body(None)):
+    """Validate a safe request-event DTO without creating or persisting it."""
+    return validate_office_controlled_mutation_request_event(payload)
 
 
 @app.get("/api/office/events")
