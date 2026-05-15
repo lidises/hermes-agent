@@ -326,3 +326,61 @@ def build_office_controlled_mutation_audit_sink_contract(
             "audit storage, append route, retention, and readback require separate approval",
         ],
     }
+
+
+def build_office_controlled_mutation_approval_decision_contract(
+    *, unsafe_examples: Mapping[str, Any] | None = None
+) -> dict[str, object]:
+    """Return the non-recording human approval decision contract descriptor."""
+
+    _ = unsafe_examples
+    return {
+        "schema_version": 1,
+        "mode": "approval_decision_contract_only",
+        "decision_store": {
+            "implementation_enabled": False,
+            "recording_enabled": False,
+            "append_enabled": False,
+            "readback_enabled": False,
+            "durable_storage_enabled": False,
+            "database_migration_required": False,
+        },
+        "allowed_decisions": ["approve", "reject", "defer"],
+        "approval_scope": "single_action_only",
+        "required_decision_fields": [
+            "decision_ref",
+            "request_ref",
+            "dry_run_ref",
+            "decided_at",
+            "decision",
+            "decided_by",
+            "approval_scope",
+            "expires_at",
+        ],
+        "optional_safe_fields": ["comment_summary"],
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "opaque_refs_only": True,
+            "safe_summaries_only": True,
+            "unsupported_values_echoed": False,
+        },
+        "capabilities": {
+            "human_decision_recording_enabled": False,
+            "decision_append_enabled": False,
+            "decision_readback_enabled": False,
+            "audit_write_enabled": False,
+            "event_append_enabled": False,
+            "request_creation_enabled": False,
+            "dry_run_execution_enabled": False,
+            "authority_adapter_enabled": False,
+            "target_mutation_enabled": False,
+            "nas_save_enabled": False,
+        },
+        "decision_endpoints": [],
+        "storage_endpoints": [],
+        "contract_notes": [
+            "contract describes future human decision shape only; no decision is recorded",
+            "decision route, storage, expiry enforcement, and audit write require separate approval",
+        ],
+    }
