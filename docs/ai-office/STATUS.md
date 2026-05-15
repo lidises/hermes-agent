@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-15 11:09 KST
+Last updated: 2026-05-15 11:29 KST
 
 ## AI Office 통합 운영실 umbrella summary
 
@@ -131,6 +131,15 @@ Safety/non-actions: frontend/read-only only; no backend/schema/mutation/NAS/VPS/
 Verification 2026-05-15 11:09 KST: `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx -t "Timeline/Worker Handoff Drill-down 1"` failed first with the missing helper, then passed (2 passed, 129 skipped); `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx` passed (131 passed); focused ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/OfficePage.test.ts`, `src/pages/OfficePage.rpg.test.tsx`, and `src/pages/officeView.ts`; `npm run build` passed with only the existing Vite large-chunk warning; `git diff --check` passed. Added-line safety scan hits were limited to documentation safety copy and intentional negative sentinel tests; no backend/schema/API route/service/Kanban/cron/VPS/NAS changes were present. Local preview `/office?timeline-worker-handoff-drilldown=1` returned HTTP 200 to the app shell; unauthenticated browser smoke showed the expected protected Office fallback, raw-leak probe false, zero main forms/inputs, and zero console/JS errors. Independent pre-commit review returned PASS/no blocking findings.
 
 Safety/non-actions: frontend/read-only only; no backend/schema/mutation/NAS/VPS/service change, no renderer dependency, no forms/buttons/inputs in the component, no drill-down writes, no worker assignment, no request creation, no dispatch, no audit write, no NAS save, and no raw prompt/task body/transcript/path/token/provider projection.
+
+
+## Approval-request Detail Deepening 1 completed locally
+
+`Approval-request Detail Deepening 1` adds a safe helper, `buildOfficeApprovalRequestDetailDeepening(route, timeline, drilldown)`, plus `ApprovalRequestDetailDeepeningPanel` in `/office`. It composes only the existing read-only approval request route detail, event timeline projection, and timeline/worker handoff drill-down into four safe sections: request snapshot, timeline alignment, worker handoff, and write boundary. It keeps `enabledControls=0`, `approveEnabled=false`, `rejectEnabled=false`, `holdEnabled=false`, `requestCreationEnabled=false`, `eventCreationEnabled=false`, `eventPersistenceEnabled=false`, `workAssignmentEnabled=false`, `dispatchEnabled=false`, `auditWriteEnabled=false`, `nasSaveEnabled=false`, and raw exclusion true through stable `data-office-approval-request-detail-deepening*` hooks. The RED cycle added helper and component coverage first, confirmed missing-helper/missing-component failures, then implemented the safe DTO helper and read-only panel wiring.
+
+Verification 2026-05-15 11:29 KST: focused `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx -t "Approval-request Detail Deepening 1"` first failed with `buildOfficeApprovalRequestDetailDeepening is not a function`, then passed after implementation and aggregate-count expectation correction (2 passed, 131 skipped); combined `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx` passed (133 passed); focused ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/OfficePage.test.ts`, `src/pages/OfficePage.rpg.test.tsx`, and `src/pages/officeView.ts`; `npm run build` passed with only the existing Vite large-chunk warning; `git diff --check` passed. Added-line safety scan hits were limited to documentation safety copy and intentional negative sentinel tests, with no new executable controls/mutation calls found. Local preview `/office?approval-request-detail-deepening=1` returned HTTP 200 to the app shell; unauthenticated browser smoke showed the expected protected Office fallback, raw-leak probe false, zero main forms/inputs, and zero console/JS errors. Scope remains frontend/docs only with no backend/schema/API route/service/Kanban/cron/VPS/NAS changes.
+
+Safety/non-actions: frontend/read-only only; no backend/schema/mutation/NAS/VPS/service change, no renderer dependency, no forms/buttons/inputs in the component, no approve/reject/hold decision, no request creation, no event creation, no event persistence, no worker assignment, no dispatch, no audit write, no NAS save, and no raw prompt/task body/transcript/path/token/provider projection.
 
 ## Desk RPG Boss Command Console 1 completed locally
 

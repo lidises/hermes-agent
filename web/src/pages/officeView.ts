@@ -1368,6 +1368,45 @@ export type OfficeTimelineWorkerHandoffDrilldown = {
   rawExcluded: true;
 };
 
+
+export type OfficeApprovalRequestDetailDeepeningSection = {
+  id: "request_snapshot" | "timeline_alignment" | "worker_handoff" | "write_boundary";
+  label: string;
+  summary: string;
+  tone: "info" | "warning" | "blocked";
+  rawExcluded: true;
+};
+
+export type OfficeApprovalRequestDetailDeepening = {
+  stageLabel: "Approval-request Detail Deepening 1";
+  title: string;
+  detailKind: "approval_request_detail_deepening";
+  sections: OfficeApprovalRequestDetailDeepeningSection[];
+  sourceRouteKind: OfficeApprovalRequestRouteDetail["detailKind"];
+  sourceTimelineKind: OfficeEventTimelineProjection["detailKind"];
+  sourceDrilldownKind: OfficeTimelineWorkerHandoffDrilldown["detailKind"];
+  requestState: "projection_only";
+  routeCardCount: number;
+  timelineEventCount: number;
+  handoffStepCount: number;
+  evidenceCount: number;
+  blockedWorkCount: number;
+  warningCount: number;
+  approveEnabled: false;
+  rejectEnabled: false;
+  holdEnabled: false;
+  requestCreationEnabled: false;
+  eventCreationEnabled: false;
+  eventPersistenceEnabled: false;
+  workAssignmentEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  enabledControls: 0;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeRpgMissionStoryboardStep = {
   id: "request" | "orchestrate" | "board" | "evidence" | "review" | "approval";
   label: string;
@@ -3027,6 +3066,75 @@ export function buildOfficeTimelineWorkerHandoffDrilldown(
     drilldownWriteEnabled: false,
     workAssignmentEnabled: false,
     requestCreationEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    nasSaveEnabled: false,
+    enabledControls: 0,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+
+export function buildOfficeApprovalRequestDetailDeepening(
+  route: OfficeApprovalRequestRouteDetail,
+  timeline: OfficeEventTimelineProjection,
+  drilldown: OfficeTimelineWorkerHandoffDrilldown,
+): OfficeApprovalRequestDetailDeepening {
+  const evidenceCount = Math.max(route.evidenceCount, timeline.evidenceCount, drilldown.evidenceCount);
+  const blockedWorkCount = Math.max(route.blockedWorkCount, timeline.blockedWorkCount, drilldown.blockedWorkCount);
+  const warningCount = drilldown.warningCount;
+  return {
+    stageLabel: "Approval-request Detail Deepening 1",
+    title: "Approval-request detail deepening",
+    detailKind: "approval_request_detail_deepening",
+    sections: [
+      {
+        id: "request_snapshot",
+        label: "request snapshot",
+        summary: `Approval request posture is summarized from ${route.cards.length} safe route card(s), ${evidenceCount} evidence aggregate(s), and ${blockedWorkCount} blocked signal(s).`,
+        tone: blockedWorkCount > 0 ? "warning" : "info",
+        rawExcluded: true,
+      },
+      {
+        id: "timeline_alignment",
+        label: "timeline alignment",
+        summary: `The request aligns to ${timeline.eventCount} projected event marker(s) without creating, persisting, or appending events.`,
+        tone: timeline.blockedWorkCount > 0 ? "warning" : "info",
+        rawExcluded: true,
+      },
+      {
+        id: "worker_handoff",
+        label: "worker handoff",
+        summary: `${drilldown.handoffSteps.length} worker handoff lane(s) are visible as posture only; assignment and dispatch remain disabled.`,
+        tone: warningCount > 0 ? "warning" : "info",
+        rawExcluded: true,
+      },
+      {
+        id: "write_boundary",
+        label: "write boundary",
+        summary: "Approve/reject/hold, request creation, event creation, event persistence, worker assignment, dispatch, audit write, and NAS save remain unavailable.",
+        tone: "blocked",
+        rawExcluded: true,
+      },
+    ],
+    sourceRouteKind: route.detailKind,
+    sourceTimelineKind: timeline.detailKind,
+    sourceDrilldownKind: drilldown.detailKind,
+    requestState: "projection_only",
+    routeCardCount: route.cards.length,
+    timelineEventCount: timeline.eventCount,
+    handoffStepCount: drilldown.handoffSteps.length,
+    evidenceCount,
+    blockedWorkCount,
+    warningCount,
+    approveEnabled: false,
+    rejectEnabled: false,
+    holdEnabled: false,
+    requestCreationEnabled: false,
+    eventCreationEnabled: false,
+    eventPersistenceEnabled: false,
+    workAssignmentEnabled: false,
     dispatchEnabled: false,
     auditWriteEnabled: false,
     nasSaveEnabled: false,

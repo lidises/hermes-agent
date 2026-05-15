@@ -111,6 +111,7 @@ import {
   buildOfficeApprovalDialogueRouteInspector,
   buildOfficeEventTimelineProjection,
   buildOfficeTimelineWorkerHandoffDrilldown,
+  buildOfficeApprovalRequestDetailDeepening,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -154,6 +155,59 @@ function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
 }
 
 describe("OfficePage view helpers", () => {
+
+
+describe("Approval-request Detail Deepening 1", () => {
+  it("builds a safe approval-request detail deepening projection without executable controls", () => {
+    const secretSentinel = ["token", "shaped", "approval", "detail"].join("-");
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [{ id: "agent-approval-detail", status: "active", prompt: "raw approval detail prompt", provider: "private-approval-detail-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-approval-detail", status: "blocked", title: "raw approval detail task", body: "/Users/lidises/private/approval-detail.md", transcript: "Traceback approval detail transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-15T00:00:00Z", item_count: 8, warning_count: 2, error_summary: "Traceback approval detail source" },
+      ],
+    }));
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const posture = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
+    const envelope = buildOfficeOrchestratorRequestEnvelopeDetail(projection, posture);
+    const route = buildOfficeApprovalRequestRouteDetail(envelope, dialogue);
+    const contract = buildOfficeEventRequestContractProjection(route);
+    const inspector = buildOfficeApprovalDialogueRouteInspector(dialogue, route, contract);
+    const timeline = buildOfficeEventTimelineProjection(contract, inspector);
+    const workerRoles = buildOfficeDeskRpgWorkerRoleVisibility(projection);
+    const handoff = buildOfficeReviewerWikiHandoffPosture(projection);
+    const drilldown = buildOfficeTimelineWorkerHandoffDrilldown(timeline, workerRoles, handoff);
+
+    const detail = buildOfficeApprovalRequestDetailDeepening(route, timeline, drilldown);
+
+    expect(detail.stageLabel).toBe("Approval-request Detail Deepening 1");
+    expect(detail.detailKind).toBe("approval_request_detail_deepening");
+    expect(detail.requestState).toBe("projection_only");
+    expect(detail.sections.map((section) => section.id)).toEqual(["request_snapshot", "timeline_alignment", "worker_handoff", "write_boundary"]);
+    expect(detail.routeCardCount).toBe(4);
+    expect(detail.timelineEventCount).toBe(4);
+    expect(detail.handoffStepCount).toBe(4);
+    expect(detail.evidenceCount).toBe(1);
+    expect(detail.blockedWorkCount).toBe(1);
+    expect(detail.warningCount).toBe(1);
+    expect(detail.enabledControls).toBe(0);
+    expect(detail.approveEnabled).toBe(false);
+    expect(detail.rejectEnabled).toBe(false);
+    expect(detail.holdEnabled).toBe(false);
+    expect(detail.requestCreationEnabled).toBe(false);
+    expect(detail.eventCreationEnabled).toBe(false);
+    expect(detail.eventPersistenceEnabled).toBe(false);
+    expect(detail.workAssignmentEnabled).toBe(false);
+    expect(detail.dispatchEnabled).toBe(false);
+    expect(detail.auditWriteEnabled).toBe(false);
+    expect(detail.nasSaveEnabled).toBe(false);
+    expect(detail.safeProjectionOnly).toBe(true);
+    expect(detail.rawExcluded).toBe(true);
+    expect(JSON.stringify(detail)).not.toMatch(/raw approval detail prompt|raw approval detail task|Traceback|\/Users\/lidises|token-shaped-approval-detail|private-approval-detail-provider/i);
+  });
+});
 describe("Desk RPG Worker Role Visibility 1", () => {
   it("builds safe worker role visibility without assignment or dispatch authority", () => {
     const projection = buildOfficeDeskRpgProjectionModel(officeFixture({

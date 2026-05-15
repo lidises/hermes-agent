@@ -18,7 +18,7 @@ vi.mock("@/lib/api", () => ({
 
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
-import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeRpgScene } from "./officeView";
+import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeRpgScene } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
@@ -811,6 +811,60 @@ describe("TimelineWorkerHandoffDrilldownPanel", () => {
     expect(markup).not.toContain("<select");
     expect(markup).not.toContain("<textarea");
     expect(markup).not.toMatch(/raw worker handoff prompt|raw worker handoff task|Traceback|\/Users\/lidises|token-shaped-worker-handoff|private-worker-handoff-provider/i);
+  });
+});
+
+
+describe("ApprovalRequestDetailDeepeningPanel", () => {
+  it("Approval-request Detail Deepening 1 renders a read-only approval request detail without controls", () => {
+    const ApprovalRequestDetailDeepeningPanel = (OfficePageModule as unknown as {
+      ApprovalRequestDetailDeepeningPanel: React.ComponentType<{ detail: ReturnType<typeof buildOfficeApprovalRequestDetailDeepening> }>;
+    }).ApprovalRequestDetailDeepeningPanel;
+    const secretSentinel = ["token", "shaped", "approval", "detail"].join("-");
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [{ id: "agent-1", status: "active", prompt: "raw approval detail prompt", provider: "private-approval-detail-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw approval detail task", body: "/Users/lidises/private/approval-detail.md", transcript: "Traceback approval detail transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-15T00:00:00Z", item_count: 8, warning_count: 2, error_summary: "Traceback approval detail source" },
+      ],
+    }));
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const posture = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
+    const envelope = buildOfficeOrchestratorRequestEnvelopeDetail(projection, posture);
+    const route = buildOfficeApprovalRequestRouteDetail(envelope, dialogue);
+    const contract = buildOfficeEventRequestContractProjection(route);
+    const inspector = buildOfficeApprovalDialogueRouteInspector(dialogue, route, contract);
+    const timeline = buildOfficeEventTimelineProjection(contract, inspector);
+    const workerRoles = buildOfficeDeskRpgWorkerRoleVisibility(projection);
+    const handoff = buildOfficeReviewerWikiHandoffPosture(projection);
+    const drilldown = buildOfficeTimelineWorkerHandoffDrilldown(timeline, workerRoles, handoff);
+    const detail = buildOfficeApprovalRequestDetailDeepening(route, timeline, drilldown);
+
+    const markup = renderToStaticMarkup(<ApprovalRequestDetailDeepeningPanel detail={detail} />);
+
+    expect(markup).toContain("data-office-approval-request-detail-deepening=\"true\"");
+    expect(markup).toContain("data-office-approval-request-detail-deepening-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-approval-request-detail-deepening-approve-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-request-detail-deepening-request-creation-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-request-detail-deepening-event-creation-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-request-detail-deepening-work-assignment-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-request-detail-deepening-dispatch-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-request-detail-deepening-audit-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-request-detail-deepening-nas-save-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-request-detail-deepening-section=\"request_snapshot\"");
+    expect(markup).toContain("data-office-approval-request-detail-deepening-section=\"timeline_alignment\"");
+    expect(markup).toContain("data-office-approval-request-detail-deepening-section=\"worker_handoff\"");
+    expect(markup).toContain("data-office-approval-request-detail-deepening-section=\"write_boundary\"");
+    expect(markup).toContain("Approval-request detail deepening");
+    expect(markup).toContain("Approval request detail · projection only");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw approval detail prompt|raw approval detail task|Traceback|\/Users\/lidises|token-shaped-approval-detail|private-approval-detail-provider/i);
   });
 });
 
