@@ -138,6 +138,7 @@ import {
   buildOfficeCharacterInspectorDetailPosture,
   buildOfficeCharacterDetailSafeDialogueCopy,
   buildOfficeCharacterBubbleInspectorAlignment,
+  buildOfficeCharacterPanelBoundarySummary,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -178,6 +179,7 @@ import {
   type OfficeCharacterInspectorDetailPosture,
   type OfficeCharacterDetailSafeDialogueCopy,
   type OfficeCharacterBubbleInspectorAlignment,
+  type OfficeCharacterPanelBoundarySummary,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -3226,6 +3228,58 @@ export function CharacterBubbleInspectorAlignmentPanel({ alignment }: { alignmen
   );
 }
 
+export function CharacterPanelBoundarySummaryPanel({ summary }: { summary: OfficeCharacterPanelBoundarySummary }) {
+  return (
+    <Card
+      data-office-character-panel-boundary-summary="true"
+      data-office-character-panel-boundary-summary-enabled-controls={summary.enabledControls}
+      data-office-character-panel-boundary-summary-click-handler-enabled={String(summary.clickHandlerEnabled)}
+      data-office-character-panel-boundary-summary-keyboard-handler-enabled={String(summary.keyboardHandlerEnabled)}
+      data-office-character-panel-boundary-summary-form-control-enabled={String(summary.formControlEnabled)}
+      data-office-character-panel-boundary-summary-event-persistence-enabled={String(summary.eventPersistenceEnabled)}
+      data-office-character-panel-boundary-summary-backend-stream-enabled={String(summary.backendStreamEnabled)}
+      data-office-character-panel-boundary-summary-animation-state-persistence-enabled={String(summary.animationStatePersistenceEnabled)}
+      data-office-character-panel-boundary-summary-request-creation-enabled={String(summary.requestCreationEnabled)}
+      data-office-character-panel-boundary-summary-dispatch-enabled={String(summary.dispatchEnabled)}
+      data-office-character-panel-boundary-summary-nas-save-enabled={String(summary.nasSaveEnabled)}
+      data-office-character-panel-boundary-summary-safe-projection-only={String(summary.safeProjectionOnly)}
+      data-office-character-panel-boundary-summary-raw-excluded={String(summary.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4" /> Character panel boundary summary
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-emerald-300/20 bg-emerald-950/10 p-3">
+            <div className="font-semibold text-emerald-100">Compact read-only boundary strip</div>
+            <div className="mt-1 leading-5">Inspector detail, generated dialogue copy, and bubble alignment are summarized as display-only panels. No request creation, assignment, dispatch, audit write, or NAS save is enabled.</div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3">
+            {summary.panels.map((panel) => (
+              <div
+                key={panel.panelKind}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-character-panel-boundary-summary-panel={panel.panelKind}
+                data-office-character-panel-boundary-summary-boundary={panel.boundaryLabel}
+                data-office-character-panel-boundary-summary-executable={String(panel.executable)}
+              >
+                <div className="font-semibold text-foreground">{panel.label}</div>
+                <div className="mt-1 text-midground/70">{panel.boundaryLabel}</div>
+                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.14em] text-emerald-100/80">{panel.sourceKind} · roles {panel.roleCount} · controls {panel.enabledControls}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-character-panel-boundary-summary-boundaries="true">
+            panels {summary.panelCount} · roles {summary.totalRoleCount} · boundaries {summary.boundaryLabels.join(" / ")} · controls {summary.enabledControls}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -3768,6 +3822,10 @@ export default function OfficePage() {
     () => buildOfficeCharacterBubbleInspectorAlignment(characterDetailSafeDialogueCopy, characterInspectorDetailPosture),
     [characterDetailSafeDialogueCopy, characterInspectorDetailPosture],
   );
+  const characterPanelBoundarySummary = useMemo(
+    () => buildOfficeCharacterPanelBoundarySummary(characterInspectorDetailPosture, characterDetailSafeDialogueCopy, characterBubbleInspectorAlignment),
+    [characterInspectorDetailPosture, characterDetailSafeDialogueCopy, characterBubbleInspectorAlignment],
+  );
   const safeMotionHeartbeat = useMemo(
     () => buildOfficeSafeMotionHeartbeat(safeStreamPosture, {
       pollStatus: safeEventsStatus === "loaded" ? "active" : safeEventsStatus,
@@ -4000,6 +4058,8 @@ export default function OfficePage() {
       <CharacterDetailSafeDialogueCopyPanel dialogue={characterDetailSafeDialogueCopy} />
 
       <CharacterBubbleInspectorAlignmentPanel alignment={characterBubbleInspectorAlignment} />
+
+      <CharacterPanelBoundarySummaryPanel summary={characterPanelBoundarySummary} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 

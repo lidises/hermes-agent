@@ -127,6 +127,7 @@ import {
   buildOfficeCharacterInspectorDetailPosture,
   buildOfficeCharacterDetailSafeDialogueCopy,
   buildOfficeCharacterBubbleInspectorAlignment,
+  buildOfficeCharacterPanelBoundarySummary,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -1387,6 +1388,57 @@ describe("Character Detail Safe Dialogue Copy 1", () => {
     expect(dialogue.safeProjectionOnly).toBe(true);
     expect(dialogue.rawExcluded).toBe(true);
     expect(JSON.stringify(dialogue)).not.toMatch(/raw character dialogue prompt|raw character dialogue task|Traceback|\/Users\/lidises|token-shaped-dialogue-copy|private-character-dialogue-provider/i);
+  });
+});
+
+
+describe("Character Panel Boundary Summary 1", () => {
+  it("summarizes inspector, bubble, and alignment safety boundaries without raw projection", () => {
+    const secretSentinel = ["token", "shaped", "boundary", "summary"].join("-");
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishFixture({
+      agents: [{ id: "agent-character-boundary", status: "active", prompt: "raw character boundary prompt", provider: "private-character-boundary-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-character-boundary", status: "blocked", title: "raw character boundary title", body: "/Users/lidises/private/character-boundary.md", transcript: "Traceback character boundary transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+    const trace = buildOfficeApprovalDecisionAuditNasTracePreview(envelope);
+    const gate = buildOfficeNasKeeperSaveRequestGate(trace);
+    const rollback = buildOfficeNasKeeperRollbackEvidencePreview(gate);
+    const review = buildOfficeDeskRpgReadOnlyChainCompletionReview(rollback);
+    const stateProjection = buildOfficeEventDrivenCharacterStateProjection(review, [
+      { id: "evt-runtime-boundary", category: "room_density_changed", roomId: "work", tone: "warning", count: 3, safeLabel: "room density", detail: "safe density aggregate", redacted: true, rawSource: false },
+      { id: "evt-intent-boundary", category: "attention_changed", roomId: "routing", tone: "negative", count: 1, safeLabel: "approval attention", detail: "safe attention aggregate", redacted: true, rawSource: false },
+      { id: "evt-visual-boundary", category: "snapshot_static", roomId: "sessions", tone: "neutral", count: 0, safeLabel: "static snapshot", detail: "safe static aggregate", redacted: true, rawSource: false },
+    ] as const);
+    const overlay = buildOfficeCharacterStateRoomOverlay(stateProjection);
+    const interaction = buildOfficeCharacterRoomInteractionPosture(overlay);
+    const detail = buildOfficeCharacterInspectorDetailPosture(interaction);
+    const dialogue = buildOfficeCharacterDetailSafeDialogueCopy(detail);
+    const alignment = buildOfficeCharacterBubbleInspectorAlignment(dialogue, detail);
+
+    const summary = buildOfficeCharacterPanelBoundarySummary(detail, dialogue, alignment);
+
+    expect(summary.stageLabel).toBe("Character Panel Boundary Summary 1");
+    expect(summary.detailKind).toBe("character_panel_boundary_summary");
+    expect(summary.panelCount).toBe(3);
+    expect(summary.totalRoleCount).toBe(6);
+    expect(summary.panels.map((panel) => panel.panelKind)).toEqual(["inspector_detail", "safe_dialogue_copy", "bubble_inspector_alignment"]);
+    expect(summary.panels.every((panel) => panel.enabledControls === 0 && panel.rawExcluded === true && panel.executable === false)).toBe(true);
+    expect(summary.boundaryLabels).toEqual(["right inspector display only", "generated safe copy only", "route and NAS boundary display only"]);
+    expect(summary.enabledControls).toBe(0);
+    expect(summary.formControlEnabled).toBe(false);
+    expect(summary.eventPersistenceEnabled).toBe(false);
+    expect(summary.backendStreamEnabled).toBe(false);
+    expect(summary.animationStatePersistenceEnabled).toBe(false);
+    expect(summary.requestCreationEnabled).toBe(false);
+    expect(summary.workAssignmentEnabled).toBe(false);
+    expect(summary.dispatchEnabled).toBe(false);
+    expect(summary.auditWriteEnabled).toBe(false);
+    expect(summary.nasSaveEnabled).toBe(false);
+    expect(summary.safeProjectionOnly).toBe(true);
+    expect(summary.rawExcluded).toBe(true);
+    expect(JSON.stringify(summary)).not.toMatch(/raw character boundary prompt|raw character boundary title|Traceback|\/Users\/lidises|token-shaped-boundary-summary|private-character-boundary-provider/i);
   });
 });
 

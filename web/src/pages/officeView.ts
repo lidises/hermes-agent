@@ -2221,6 +2221,44 @@ export type OfficeCharacterBubbleInspectorAlignment = {
   rawExcluded: true;
 };
 
+export type OfficeCharacterPanelBoundarySummaryPanel = {
+  panelKind: "inspector_detail" | "safe_dialogue_copy" | "bubble_inspector_alignment";
+  label: string;
+  sourceKind: OfficeCharacterInspectorDetailPosture["detailKind"] | OfficeCharacterDetailSafeDialogueCopy["detailKind"] | OfficeCharacterBubbleInspectorAlignment["detailKind"];
+  roleCount: number;
+  boundaryLabel: "right inspector display only" | "generated safe copy only" | "route and NAS boundary display only";
+  enabledControls: 0;
+  executable: false;
+  rawExcluded: true;
+};
+
+export type OfficeCharacterPanelBoundarySummary = {
+  stageLabel: "Character Panel Boundary Summary 1";
+  title: string;
+  detailKind: "character_panel_boundary_summary";
+  sourceInspectorKind: OfficeCharacterInspectorDetailPosture["detailKind"];
+  sourceDialogueKind: OfficeCharacterDetailSafeDialogueCopy["detailKind"];
+  sourceAlignmentKind: OfficeCharacterBubbleInspectorAlignment["detailKind"];
+  panelCount: 3;
+  totalRoleCount: number;
+  panels: OfficeCharacterPanelBoundarySummaryPanel[];
+  boundaryLabels: OfficeCharacterPanelBoundarySummaryPanel["boundaryLabel"][];
+  enabledControls: 0;
+  clickHandlerEnabled: false;
+  keyboardHandlerEnabled: false;
+  formControlEnabled: false;
+  eventPersistenceEnabled: false;
+  backendStreamEnabled: false;
+  animationStatePersistenceEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeWorkerAssignmentCandidateBlockedReason = {
   id: "facility_prerequisites_missing" | "approval_execution_blocked" | "authority_adapter_missing" | "audit_write_disabled" | "human_confirmation_missing";
   label: string;
@@ -4460,6 +4498,67 @@ export function buildOfficeCharacterBubbleInspectorAlignment(dialogue: OfficeCha
     sourceInspectorCardCount: detail.detailCardCount,
     alignmentCount: alignments.length,
     alignments,
+    enabledControls: 0,
+    clickHandlerEnabled: false,
+    keyboardHandlerEnabled: false,
+    formControlEnabled: false,
+    eventPersistenceEnabled: false,
+    backendStreamEnabled: false,
+    animationStatePersistenceEnabled: false,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    nasSaveEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeCharacterPanelBoundarySummary(detail: OfficeCharacterInspectorDetailPosture, dialogue: OfficeCharacterDetailSafeDialogueCopy, alignment: OfficeCharacterBubbleInspectorAlignment): OfficeCharacterPanelBoundarySummary {
+  const panels: OfficeCharacterPanelBoundarySummaryPanel[] = [
+    {
+      panelKind: "inspector_detail",
+      label: "Right inspector details",
+      sourceKind: detail.detailKind,
+      roleCount: detail.detailCardCount,
+      boundaryLabel: "right inspector display only",
+      enabledControls: 0,
+      executable: false,
+      rawExcluded: true,
+    },
+    {
+      panelKind: "safe_dialogue_copy",
+      label: "Generated safe dialogue copy",
+      sourceKind: dialogue.detailKind,
+      roleCount: dialogue.bubbleCount,
+      boundaryLabel: "generated safe copy only",
+      enabledControls: 0,
+      executable: false,
+      rawExcluded: true,
+    },
+    {
+      panelKind: "bubble_inspector_alignment",
+      label: "Bubble-to-inspector route boundaries",
+      sourceKind: alignment.detailKind,
+      roleCount: alignment.alignmentCount,
+      boundaryLabel: "route and NAS boundary display only",
+      enabledControls: 0,
+      executable: false,
+      rawExcluded: true,
+    },
+  ];
+  return {
+    stageLabel: "Character Panel Boundary Summary 1",
+    title: "Character panel boundary summary",
+    detailKind: "character_panel_boundary_summary",
+    sourceInspectorKind: detail.detailKind,
+    sourceDialogueKind: dialogue.detailKind,
+    sourceAlignmentKind: alignment.detailKind,
+    panelCount: 3,
+    totalRoleCount: Math.max(detail.detailCardCount, dialogue.bubbleCount, alignment.alignmentCount),
+    panels,
+    boundaryLabels: panels.map((panel) => panel.boundaryLabel),
     enabledControls: 0,
     clickHandlerEnabled: false,
     keyboardHandlerEnabled: false,
