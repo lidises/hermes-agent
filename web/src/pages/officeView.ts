@@ -2095,6 +2095,47 @@ export type OfficeCharacterRoomInteractionPosture = {
   rawExcluded: true;
 };
 
+export type OfficeCharacterInspectorDetailPostureCard = {
+  role: OfficeCharacterRoomInteractionPostureMarker["role"];
+  label: string;
+  roomSurfaceId: OfficeCharacterRoomInteractionPostureMarker["roomSurfaceId"];
+  inspectTargetId: OfficeCharacterRoomInteractionPostureMarker["inspectTargetId"];
+  detailCardId: `detail_${OfficeCharacterRoomInteractionPostureMarker["role"]}`;
+  inspectorSurfaceId: "right_inspector";
+  selectionPosture: "static_detail_card";
+  sourceClickInspectionPosture: OfficeCharacterRoomInteractionPostureMarker["clickInspectionPosture"];
+  sourceKeyboardInspectionPosture: OfficeCharacterRoomInteractionPostureMarker["keyboardInspectionPosture"];
+  visibleInRightInspector: true;
+  executable: false;
+  safeSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeCharacterInspectorDetailPosture = {
+  stageLabel: "Character Inspector Detail Posture 1";
+  title: string;
+  detailKind: "character_inspector_detail_posture";
+  sourceDetailKind: OfficeCharacterRoomInteractionPosture["detailKind"];
+  sourcePostureCount: number;
+  detailCardCount: number;
+  cards: OfficeCharacterInspectorDetailPostureCard[];
+  enabledControls: 0;
+  selectedMarkerPersistenceEnabled: false;
+  clickHandlerEnabled: false;
+  keyboardHandlerEnabled: false;
+  inspectorWriteEnabled: false;
+  eventPersistenceEnabled: false;
+  backendStreamEnabled: false;
+  animationStatePersistenceEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeWorkerAssignmentCandidateBlockedReason = {
   id: "facility_prerequisites_missing" | "approval_execution_blocked" | "authority_adapter_missing" | "audit_write_disabled" | "human_confirmation_missing";
   label: string;
@@ -4191,6 +4232,48 @@ export function buildOfficeCharacterRoomInteractionPosture(overlay: OfficeCharac
     enabledControls: 0,
     clickHandlerEnabled: false,
     keyboardHandlerEnabled: false,
+    eventPersistenceEnabled: false,
+    backendStreamEnabled: false,
+    animationStatePersistenceEnabled: false,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    nasSaveEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeCharacterInspectorDetailPosture(interaction: OfficeCharacterRoomInteractionPosture): OfficeCharacterInspectorDetailPosture {
+  const cards: OfficeCharacterInspectorDetailPostureCard[] = interaction.postures.map((posture) => ({
+    role: posture.role,
+    label: posture.label,
+    roomSurfaceId: posture.roomSurfaceId,
+    inspectTargetId: posture.inspectTargetId,
+    detailCardId: `detail_${posture.role}`,
+    inspectorSurfaceId: "right_inspector",
+    selectionPosture: "static_detail_card",
+    sourceClickInspectionPosture: posture.clickInspectionPosture,
+    sourceKeyboardInspectionPosture: posture.keyboardInspectionPosture,
+    visibleInRightInspector: true,
+    executable: false,
+    safeSummary: `${posture.label} marker 선택 결과는 오른쪽 inspector detail card로만 투영되며 선택 상태 저장과 실행은 없습니다.`,
+    rawExcluded: true,
+  }));
+  return {
+    stageLabel: "Character Inspector Detail Posture 1",
+    title: "Character inspector detail posture",
+    detailKind: "character_inspector_detail_posture",
+    sourceDetailKind: interaction.detailKind,
+    sourcePostureCount: interaction.postureCount,
+    detailCardCount: cards.length,
+    cards,
+    enabledControls: 0,
+    selectedMarkerPersistenceEnabled: false,
+    clickHandlerEnabled: false,
+    keyboardHandlerEnabled: false,
+    inspectorWriteEnabled: false,
     eventPersistenceEnabled: false,
     backendStreamEnabled: false,
     animationStatePersistenceEnabled: false,

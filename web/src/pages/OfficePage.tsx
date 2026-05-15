@@ -134,6 +134,7 @@ import {
   buildOfficeEventDrivenCharacterStateProjection,
   buildOfficeCharacterStateRoomOverlay,
   buildOfficeCharacterRoomInteractionPosture,
+  buildOfficeCharacterInspectorDetailPosture,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -171,6 +172,7 @@ import {
   type OfficeEventDrivenCharacterStateProjection,
   type OfficeCharacterStateRoomOverlay,
   type OfficeCharacterRoomInteractionPosture,
+  type OfficeCharacterInspectorDetailPosture,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -3047,6 +3049,64 @@ export function CharacterRoomInteractionPosturePanel({ posture }: { posture: Off
   );
 }
 
+export function CharacterInspectorDetailPosturePanel({ detail }: { detail: OfficeCharacterInspectorDetailPosture }) {
+  return (
+    <Card
+      data-office-character-inspector-detail-posture="true"
+      data-office-character-inspector-detail-posture-enabled-controls={detail.enabledControls}
+      data-office-character-inspector-detail-posture-selected-marker-persistence-enabled={String(detail.selectedMarkerPersistenceEnabled)}
+      data-office-character-inspector-detail-posture-click-handler-enabled={String(detail.clickHandlerEnabled)}
+      data-office-character-inspector-detail-posture-keyboard-handler-enabled={String(detail.keyboardHandlerEnabled)}
+      data-office-character-inspector-detail-posture-inspector-write-enabled={String(detail.inspectorWriteEnabled)}
+      data-office-character-inspector-detail-posture-event-persistence-enabled={String(detail.eventPersistenceEnabled)}
+      data-office-character-inspector-detail-posture-backend-stream-enabled={String(detail.backendStreamEnabled)}
+      data-office-character-inspector-detail-posture-animation-state-persistence-enabled={String(detail.animationStatePersistenceEnabled)}
+      data-office-character-inspector-detail-posture-request-creation-enabled={String(detail.requestCreationEnabled)}
+      data-office-character-inspector-detail-posture-dispatch-enabled={String(detail.dispatchEnabled)}
+      data-office-character-inspector-detail-posture-nas-save-enabled={String(detail.nasSaveEnabled)}
+      data-office-character-inspector-detail-posture-safe-projection-only={String(detail.safeProjectionOnly)}
+      data-office-character-inspector-detail-posture-raw-excluded={String(detail.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Eye className="h-4 w-4" /> Character inspector detail posture
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-violet-300/20 bg-violet-950/10 p-3">
+            <div className="font-semibold text-violet-100">Right inspector static detail cards</div>
+            <div className="mt-1 leading-5">
+              selected marker 결과를 오른쪽 inspector detail card 계약으로만 표시합니다. 선택 상태 저장, handler, inspector write, request creation, dispatch, audit, NAS save는 모두 false입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3">
+            {detail.cards.map((item) => (
+              <div
+                key={item.role}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-character-inspector-detail-posture-card={item.role}
+                data-office-character-inspector-detail-posture-room={item.roomSurfaceId}
+                data-office-character-inspector-detail-posture-target={item.inspectTargetId}
+                data-office-character-inspector-detail-posture-surface={item.inspectorSurfaceId}
+                data-office-character-inspector-detail-posture-executable={String(item.executable)}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.detailCardId}</div>
+                <div className="mt-1 font-semibold text-foreground">{item.label}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-violet-100/80">{item.selectionPosture} · {item.inspectorSurfaceId}</div>
+                <div className="mt-2 leading-5">{item.safeSummary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-character-inspector-detail-posture-boundary="true">
+            source {detail.sourceDetailKind} · source postures {detail.sourcePostureCount} · detail cards {detail.detailCardCount} · controls {detail.enabledControls} · persistence false
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -3577,6 +3637,10 @@ export default function OfficePage() {
     () => buildOfficeCharacterRoomInteractionPosture(characterStateRoomOverlay),
     [characterStateRoomOverlay],
   );
+  const characterInspectorDetailPosture = useMemo(
+    () => buildOfficeCharacterInspectorDetailPosture(characterRoomInteractionPosture),
+    [characterRoomInteractionPosture],
+  );
   const safeMotionHeartbeat = useMemo(
     () => buildOfficeSafeMotionHeartbeat(safeStreamPosture, {
       pollStatus: safeEventsStatus === "loaded" ? "active" : safeEventsStatus,
@@ -3803,6 +3867,8 @@ export default function OfficePage() {
       <CharacterStateRoomOverlayPanel overlay={characterStateRoomOverlay} />
 
       <CharacterRoomInteractionPosturePanel posture={characterRoomInteractionPosture} />
+
+      <CharacterInspectorDetailPosturePanel detail={characterInspectorDetailPosture} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 

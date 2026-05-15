@@ -124,6 +124,7 @@ import {
   buildOfficeEventDrivenCharacterStateProjection,
   buildOfficeCharacterStateRoomOverlay,
   buildOfficeCharacterRoomInteractionPosture,
+  buildOfficeCharacterInspectorDetailPosture,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -1282,6 +1283,57 @@ describe("Character Room Interaction Posture 1", () => {
     expect(posture.safeProjectionOnly).toBe(true);
     expect(posture.rawExcluded).toBe(true);
     expect(JSON.stringify(posture)).not.toMatch(/raw character interaction prompt|raw character interaction task|Traceback|\/Users\/lidises|token-shaped-room-interaction|private-character-interaction-provider/i);
+  });
+});
+
+
+describe("Character Inspector Detail Posture 1", () => {
+  it("projects selected marker detail cards for the right inspector without enabling interaction or persistence", () => {
+    const secretSentinel = ["token", "shaped", "inspector", "detail"].join("-");
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishFixture({
+      agents: [{ id: "agent-character-inspector", status: "active", prompt: "raw character inspector prompt", provider: "private-character-inspector-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-character-inspector", status: "blocked", title: "raw character inspector task", body: "/Users/lidises/private/character-inspector.md", transcript: "Traceback character inspector transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+    const trace = buildOfficeApprovalDecisionAuditNasTracePreview(envelope);
+    const gate = buildOfficeNasKeeperSaveRequestGate(trace);
+    const rollback = buildOfficeNasKeeperRollbackEvidencePreview(gate);
+    const review = buildOfficeDeskRpgReadOnlyChainCompletionReview(rollback);
+    const stateProjection = buildOfficeEventDrivenCharacterStateProjection(review, [
+      { id: "evt-runtime-inspector", category: "room_density_changed", roomId: "work", tone: "warning", count: 3, safeLabel: "room density", detail: "safe density aggregate", redacted: true, rawSource: false },
+      { id: "evt-intent-inspector", category: "attention_changed", roomId: "routing", tone: "negative", count: 1, safeLabel: "approval attention", detail: "safe attention aggregate", redacted: true, rawSource: false },
+      { id: "evt-visual-inspector", category: "snapshot_static", roomId: "sessions", tone: "neutral", count: 0, safeLabel: "static snapshot", detail: "safe static aggregate", redacted: true, rawSource: false },
+    ] as const);
+    const overlay = buildOfficeCharacterStateRoomOverlay(stateProjection);
+    const interaction = buildOfficeCharacterRoomInteractionPosture(overlay);
+
+    const detail = buildOfficeCharacterInspectorDetailPosture(interaction);
+
+    expect(detail.stageLabel).toBe("Character Inspector Detail Posture 1");
+    expect(detail.detailKind).toBe("character_inspector_detail_posture");
+    expect(detail.sourceDetailKind).toBe("character_room_interaction_posture");
+    expect(detail.detailCardCount).toBe(6);
+    expect(detail.cards.map((item) => item.role)).toEqual(["user_boss", "orchestrator", "search_worker", "reviewer", "wiki_writer", "nas_keeper"]);
+    expect(detail.cards.every((item) => item.inspectorSurfaceId === "right_inspector" && item.selectionPosture === "static_detail_card")).toBe(true);
+    expect(detail.cards.every((item) => item.visibleInRightInspector === true && item.executable === false && item.rawExcluded === true)).toBe(true);
+    expect(detail.enabledControls).toBe(0);
+    expect(detail.selectedMarkerPersistenceEnabled).toBe(false);
+    expect(detail.clickHandlerEnabled).toBe(false);
+    expect(detail.keyboardHandlerEnabled).toBe(false);
+    expect(detail.inspectorWriteEnabled).toBe(false);
+    expect(detail.eventPersistenceEnabled).toBe(false);
+    expect(detail.backendStreamEnabled).toBe(false);
+    expect(detail.animationStatePersistenceEnabled).toBe(false);
+    expect(detail.requestCreationEnabled).toBe(false);
+    expect(detail.workAssignmentEnabled).toBe(false);
+    expect(detail.dispatchEnabled).toBe(false);
+    expect(detail.auditWriteEnabled).toBe(false);
+    expect(detail.nasSaveEnabled).toBe(false);
+    expect(detail.safeProjectionOnly).toBe(true);
+    expect(detail.rawExcluded).toBe(true);
+    expect(JSON.stringify(detail)).not.toMatch(/raw character inspector prompt|raw character inspector task|Traceback|\/Users\/lidises|token-shaped-inspector-detail|private-character-inspector-provider/i);
   });
 });
 

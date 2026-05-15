@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-15 15:53 KST
+Last updated: 2026-05-15 16:09 KST
 
 ## AI Office 통합 운영실 umbrella summary
 
@@ -28,6 +28,14 @@ Master Spec v0.1 review adds an important clarification: read-only-first is the 
 
 
 
+
+## Character Inspector Detail Posture 1 completed locally
+
+`Character Inspector Detail Posture 1` adds a safe helper, `buildOfficeCharacterInspectorDetailPosture(interaction)`, plus `CharacterInspectorDetailPosturePanel` in `/office`. It composes only the existing safe `Character Room Interaction Posture 1` DTO into six static right-inspector detail cards for the user boss, Orchestrator, Search Worker, Reviewer, Wiki Writer, and NAS Keeper. It keeps `enabledControls=0`, `selectedMarkerPersistenceEnabled=false`, `clickHandlerEnabled=false`, `keyboardHandlerEnabled=false`, `inspectorWriteEnabled=false`, `eventPersistenceEnabled=false`, `backendStreamEnabled=false`, `animationStatePersistenceEnabled=false`, `requestCreationEnabled=false`, `workAssignmentEnabled=false`, `dispatchEnabled=false`, `auditWriteEnabled=false`, `nasSaveEnabled=false`, and raw exclusion true through stable `data-office-character-inspector-detail-posture*` hooks.
+
+Verification 2026-05-15 16:09 KST: focused RED first failed with `buildOfficeCharacterInspectorDetailPosture is not a function`; focused GREEN passed with `2 passed | 157 skipped`; combined Office tests passed with `159 passed`; focused ESLint passed; production build passed with the existing Vite large chunk warning; `git diff --check` passed; safety scan passed; browser smoke passed on the local dashboard route with one panel, six cards, zero controls, disabled handlers/persistence/writes/request/dispatch/NAS flags, and no raw sentinel leak; independent review passed with no blockers. Remaining final gate in this session: commit.
+
+Safety/non-actions: frontend/read-only only; no backend/schema/API route/service/Kanban/cron/VPS/NAS mutation, no renderer dependency, no form/button/input/select/textarea controls in the new panel, no click handler, no keyboard handler, no selected-marker persistence, no inspector write, no backend stream, no event persistence, no animation-state persistence, no request creation, no worker assignment, no dispatch, no audit write, no NAS save, and no raw prompt/task body/transcript/path/token/provider projection.
 
 ## Character Room Interaction Posture 1 completed locally
 
