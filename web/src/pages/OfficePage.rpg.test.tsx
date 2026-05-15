@@ -18,7 +18,7 @@ vi.mock("@/lib/api", () => ({
 
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
-import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeRpgScene } from "./officeView";
+import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeRpgScene } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
@@ -1118,6 +1118,46 @@ describe("ApprovalAuthorityDecisionEnvelopePreviewPanel", () => {
     expect(markup).not.toContain("<select");
     expect(markup).not.toContain("<textarea");
     expect(markup).not.toMatch(/raw decision envelope prompt|raw decision envelope task|Traceback|\/Users\/lidises|token-shaped-decision-envelope|private-decision-envelope-provider/i);
+  });
+});
+
+
+describe("ApprovalDecisionAuditNasTracePreviewPanel", () => {
+  it("Approval Decision Audit/NAS Trace Preview 1 renders projected trace without writable controls", () => {
+    const ApprovalDecisionAuditNasTracePreviewPanel = (OfficePageModule as unknown as {
+      ApprovalDecisionAuditNasTracePreviewPanel: React.ComponentType<{ trace: ReturnType<typeof buildOfficeApprovalDecisionAuditNasTracePreview> }>;
+    }).ApprovalDecisionAuditNasTracePreviewPanel;
+    const secretSentinel = ["token", "shaped", "decision", "trace"].join("-");
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishPanelFixture({
+      agents: [{ id: "agent-decision-trace", status: "active", prompt: "raw decision trace prompt", provider: "private-decision-trace-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-decision-trace", status: "blocked", title: "raw decision trace task", body: "/Users/lidises/private/decision-trace.md", transcript: "Traceback decision trace transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+    const trace = buildOfficeApprovalDecisionAuditNasTracePreview(envelope);
+
+    const markup = renderToStaticMarkup(<ApprovalDecisionAuditNasTracePreviewPanel trace={trace} />);
+
+    expect(markup).toContain("data-office-approval-decision-audit-nas-trace=\"true\"");
+    expect(markup).toContain("data-office-approval-decision-audit-nas-trace-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-approval-decision-audit-nas-trace-decision-record-created=\"false\"");
+    expect(markup).toContain("data-office-approval-decision-audit-nas-trace-audit-event-appended=\"false\"");
+    expect(markup).toContain("data-office-approval-decision-audit-nas-trace-nas-trace-persisted=\"false\"");
+    expect(markup).toContain("data-office-approval-decision-audit-nas-trace-dispatch-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-decision-audit-nas-trace-audit-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-decision-audit-nas-trace-nas-save-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-decision-audit-nas-step=\"decision_intake\"");
+    expect(markup).toContain("data-office-approval-decision-audit-nas-step=\"audit_trace\"");
+    expect(markup).toContain("data-office-approval-decision-audit-nas-step=\"nas_save_request\"");
+    expect(markup).toContain("data-office-approval-decision-audit-nas-step=\"nas_keeper_boundary\"");
+    expect(markup).toContain("Approval decision audit/NAS trace");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw decision trace prompt|raw decision trace task|Traceback|\/Users\/lidises|token-shaped-decision-trace|private-decision-trace-provider/i);
   });
 });
 

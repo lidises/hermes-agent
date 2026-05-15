@@ -1862,6 +1862,39 @@ export type OfficeApprovalAuthorityDecisionEnvelopePreview = {
   rawExcluded: true;
 };
 
+export type OfficeApprovalDecisionAuditNasTraceStep = {
+  id: "decision_intake" | "audit_trace" | "nas_save_request" | "nas_keeper_boundary";
+  label: string;
+  status: "projected" | "blocked";
+  summary: string;
+  rawExcluded: true;
+};
+
+export type OfficeApprovalDecisionAuditNasTracePreview = {
+  stageLabel: "Approval Decision Audit/NAS Trace Preview 1";
+  title: string;
+  detailKind: "approval_decision_audit_nas_trace_preview";
+  traceSteps: OfficeApprovalDecisionAuditNasTraceStep[];
+  sourceDetailKind: OfficeApprovalAuthorityDecisionEnvelopePreview["detailKind"];
+  sourceDecisionOptionCount: number;
+  sourceWarningCount: number;
+  traceStepCount: number;
+  enabledControls: 0;
+  decisionRecordCreated: false;
+  auditEventAppended: false;
+  nasTracePersisted: false;
+  approveEnabled: false;
+  rejectEnabled: false;
+  holdEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeWorkerAssignmentCandidateBlockedReason = {
   id: "facility_prerequisites_missing" | "approval_execution_blocked" | "authority_adapter_missing" | "audit_write_disabled" | "human_confirmation_missing";
   label: string;
@@ -3562,6 +3595,63 @@ export function buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness: O
     decisionOptionCount: options.length,
     enabledControls: 0,
     decisionRecordCreated: false,
+    approveEnabled: false,
+    rejectEnabled: false,
+    holdEnabled: false,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    nasSaveEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeApprovalDecisionAuditNasTracePreview(envelope: OfficeApprovalAuthorityDecisionEnvelopePreview): OfficeApprovalDecisionAuditNasTracePreview {
+  const traceSteps: OfficeApprovalDecisionAuditNasTraceStep[] = [
+    {
+      id: "decision_intake",
+      label: "Decision intake trace",
+      status: "projected",
+      summary: "approve/reject/hold 선택이 들어올 경우의 안전한 trace 시작점만 표시합니다. 현재 decision record는 생성하지 않습니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "audit_trace",
+      label: "Audit trace preview",
+      status: "blocked",
+      summary: "감사 이벤트가 어떤 단계에 남아야 하는지만 보여줍니다. audit event append와 audit write는 모두 비활성입니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "nas_save_request",
+      label: "NAS save request preview",
+      status: "blocked",
+      summary: "승인 이후 NAS 저장 요청의 shape만 보여주며 SaveRequested 이벤트나 NAS trace persistence를 만들지 않습니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "nas_keeper_boundary",
+      label: "NAS Keeper boundary",
+      status: "blocked",
+      summary: "최종 NAS save는 NAS Keeper 권한과 별도 승인 모델 뒤에 남겨둡니다. 경로, 원문, credential은 projection하지 않습니다.",
+      rawExcluded: true,
+    },
+  ];
+  return {
+    stageLabel: "Approval Decision Audit/NAS Trace Preview 1",
+    title: "Approval decision audit/NAS trace",
+    detailKind: "approval_decision_audit_nas_trace_preview",
+    traceSteps,
+    sourceDetailKind: envelope.detailKind,
+    sourceDecisionOptionCount: envelope.decisionOptionCount,
+    sourceWarningCount: envelope.sourceWarningCount,
+    traceStepCount: traceSteps.length,
+    enabledControls: 0,
+    decisionRecordCreated: false,
+    auditEventAppended: false,
+    nasTracePersisted: false,
     approveEnabled: false,
     rejectEnabled: false,
     holdEnabled: false,

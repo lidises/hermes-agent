@@ -127,6 +127,7 @@ import {
   buildOfficeApprovalNasBoundaryPolish,
   buildOfficeApprovalAuthorityReadinessDetail,
   buildOfficeApprovalAuthorityDecisionEnvelopePreview,
+  buildOfficeApprovalDecisionAuditNasTracePreview,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -157,6 +158,7 @@ import {
   type OfficeApprovalNasBoundaryPolish,
   type OfficeApprovalAuthorityReadinessDetail,
   type OfficeApprovalAuthorityDecisionEnvelopePreview,
+  type OfficeApprovalDecisionAuditNasTracePreview,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -2656,6 +2658,62 @@ export function ApprovalAuthorityDecisionEnvelopePreviewPanel({ envelope }: { en
   );
 }
 
+export function ApprovalDecisionAuditNasTracePreviewPanel({ trace }: { trace: OfficeApprovalDecisionAuditNasTracePreview }) {
+  return (
+    <Card
+      data-office-approval-decision-audit-nas-trace="true"
+      data-office-approval-decision-audit-nas-trace-enabled-controls={trace.enabledControls}
+      data-office-approval-decision-audit-nas-trace-decision-record-created={String(trace.decisionRecordCreated)}
+      data-office-approval-decision-audit-nas-trace-audit-event-appended={String(trace.auditEventAppended)}
+      data-office-approval-decision-audit-nas-trace-nas-trace-persisted={String(trace.nasTracePersisted)}
+      data-office-approval-decision-audit-nas-trace-approve-enabled={String(trace.approveEnabled)}
+      data-office-approval-decision-audit-nas-trace-reject-enabled={String(trace.rejectEnabled)}
+      data-office-approval-decision-audit-nas-trace-hold-enabled={String(trace.holdEnabled)}
+      data-office-approval-decision-audit-nas-trace-request-creation-enabled={String(trace.requestCreationEnabled)}
+      data-office-approval-decision-audit-nas-trace-work-assignment-enabled={String(trace.workAssignmentEnabled)}
+      data-office-approval-decision-audit-nas-trace-dispatch-enabled={String(trace.dispatchEnabled)}
+      data-office-approval-decision-audit-nas-trace-audit-write-enabled={String(trace.auditWriteEnabled)}
+      data-office-approval-decision-audit-nas-trace-nas-save-enabled={String(trace.nasSaveEnabled)}
+      data-office-approval-decision-audit-nas-trace-safe-projection-only={String(trace.safeProjectionOnly)}
+      data-office-approval-decision-audit-nas-trace-raw-excluded={String(trace.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4" /> Approval decision audit/NAS trace
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-violet-300/20 bg-violet-950/10 p-3">
+            <div className="font-semibold text-violet-100">post-decision audit · NAS trace preview</div>
+            <div className="mt-1 leading-5">
+              approve/reject/hold 이후 남아야 할 audit/NAS trace shape만 보여줍니다. 현재는 decision record, audit append, NAS trace persistence, NAS save가 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {trace.traceSteps.map((step) => (
+              <div
+                key={step.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-approval-decision-audit-nas-step={step.id}
+                data-office-approval-decision-audit-nas-step-status={step.status}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{step.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{step.label}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-violet-100/80">{step.status}</div>
+                <div className="mt-2 leading-5">{step.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-approval-decision-audit-nas-trace-boundary="true">
+            source {trace.sourceDetailKind} · options {trace.sourceDecisionOptionCount} · warnings {trace.sourceWarningCount} · trace steps {trace.traceStepCount} · controls {trace.enabledControls} · decision record {String(trace.decisionRecordCreated)} · audit appended {String(trace.auditEventAppended)} · NAS trace persisted {String(trace.nasTracePersisted)} · raw excluded {String(trace.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -3116,6 +3174,10 @@ export default function OfficePage() {
     () => buildOfficeApprovalAuthorityDecisionEnvelopePreview(approvalAuthorityReadinessDetail),
     [approvalAuthorityReadinessDetail],
   );
+  const approvalDecisionAuditNasTracePreview = useMemo(
+    () => buildOfficeApprovalDecisionAuditNasTracePreview(approvalAuthorityDecisionEnvelopePreview),
+    [approvalAuthorityDecisionEnvelopePreview],
+  );
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -3370,6 +3432,8 @@ export default function OfficePage() {
       <ApprovalAuthorityReadinessDetailPanel readiness={approvalAuthorityReadinessDetail} />
 
       <ApprovalAuthorityDecisionEnvelopePreviewPanel envelope={approvalAuthorityDecisionEnvelopePreview} />
+
+      <ApprovalDecisionAuditNasTracePreviewPanel trace={approvalDecisionAuditNasTracePreview} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 

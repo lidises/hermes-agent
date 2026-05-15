@@ -117,6 +117,7 @@ import {
   buildOfficeApprovalNasBoundaryPolish,
   buildOfficeApprovalAuthorityReadinessDetail,
   buildOfficeApprovalAuthorityDecisionEnvelopePreview,
+  buildOfficeApprovalDecisionAuditNasTracePreview,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -983,6 +984,42 @@ describe("Approval Authority Decision Envelope Preview 1", () => {
     expect(envelope.safeProjectionOnly).toBe(true);
     expect(envelope.rawExcluded).toBe(true);
     expect(JSON.stringify(envelope)).not.toMatch(/raw decision envelope prompt|raw decision envelope task|Traceback|\/Users\/lidises|token-shaped-decision-envelope|private-decision-envelope-provider/i);
+  });
+});
+
+
+describe("Approval Decision Audit/NAS Trace Preview 1", () => {
+  it("builds a projected post-decision audit and NAS trace without writing records", () => {
+    const secretSentinel = ["token", "shaped", "decision", "trace"].join("-");
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishFixture({
+      agents: [{ id: "agent-decision-trace", status: "active", prompt: "raw decision trace prompt", provider: "private-decision-trace-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-decision-trace", status: "blocked", title: "raw decision trace task", body: "/Users/lidises/private/decision-trace.md", transcript: "Traceback decision trace transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+
+    const trace = buildOfficeApprovalDecisionAuditNasTracePreview(envelope);
+
+    expect(trace.stageLabel).toBe("Approval Decision Audit/NAS Trace Preview 1");
+    expect(trace.detailKind).toBe("approval_decision_audit_nas_trace_preview");
+    expect(trace.traceSteps.map((step) => step.id)).toEqual(["decision_intake", "audit_trace", "nas_save_request", "nas_keeper_boundary"]);
+    expect(trace.sourceDetailKind).toBe("approval_authority_decision_envelope_preview");
+    expect(trace.sourceDecisionOptionCount).toBe(3);
+    expect(trace.traceStepCount).toBe(4);
+    expect(trace.enabledControls).toBe(0);
+    expect(trace.decisionRecordCreated).toBe(false);
+    expect(trace.auditEventAppended).toBe(false);
+    expect(trace.nasTracePersisted).toBe(false);
+    expect(trace.approveEnabled).toBe(false);
+    expect(trace.rejectEnabled).toBe(false);
+    expect(trace.holdEnabled).toBe(false);
+    expect(trace.dispatchEnabled).toBe(false);
+    expect(trace.auditWriteEnabled).toBe(false);
+    expect(trace.nasSaveEnabled).toBe(false);
+    expect(trace.safeProjectionOnly).toBe(true);
+    expect(trace.rawExcluded).toBe(true);
+    expect(JSON.stringify(trace)).not.toMatch(/raw decision trace prompt|raw decision trace task|Traceback|\/Users\/lidises|token-shaped-decision-trace|private-decision-trace-provider/i);
   });
 });
 
