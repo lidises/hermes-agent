@@ -520,3 +520,72 @@ def build_office_controlled_mutation_authority_adapter_contract(
             "adapter implementation, dispatch, credential access, storage, and audit write require separate approval",
         ],
     }
+
+
+def build_office_controlled_mutation_execution_readiness_contract(
+    *, unsafe_examples: Mapping[str, Any] | None = None
+) -> dict[str, object]:
+    """Return the non-executing execution readiness contract descriptor."""
+
+    _ = unsafe_examples
+    return {
+        "schema_version": 1,
+        "mode": "execution_readiness_contract_only",
+        "execution": {
+            "implementation_enabled": False,
+            "execution_enabled": False,
+            "dispatch_enabled": False,
+            "target_mutation_enabled": False,
+            "durable_storage_enabled": False,
+            "database_migration_required": False,
+        },
+        "required_readiness_fields": [
+            "readiness_ref",
+            "request_ref",
+            "authority_candidate_ref",
+            "dry_run_ref",
+            "decision_ref",
+            "audit_preview_ref",
+            "rollback_preview_ref",
+            "risk_class",
+            "gate_status",
+            "blocked_reasons",
+            "required_confirmations",
+        ],
+        "allowed_gate_statuses": ["blocked", "ready_pending_approval", "ready_read_only", "not_evaluated"],
+        "required_gate_fields": [
+            "gate_ref",
+            "gate_kind",
+            "status",
+            "evidence_ref",
+            "blocked_reason",
+        ],
+        "optional_safe_fields": ["summary", "gate_count", "warning_count"],
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "opaque_refs_only": True,
+            "safe_summaries_only": True,
+            "unsupported_values_echoed": False,
+        },
+        "capabilities": {
+            "execution_implementation_enabled": False,
+            "execution_dispatch_enabled": False,
+            "target_mutation_enabled": False,
+            "dry_run_execution_enabled": False,
+            "authority_adapter_implementation_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "credential_access_enabled": False,
+            "audit_write_enabled": False,
+            "event_append_enabled": False,
+            "request_creation_enabled": False,
+            "human_decision_recording_enabled": False,
+            "nas_save_enabled": False,
+        },
+        "execution_endpoints": [],
+        "storage_endpoints": [],
+        "contract_notes": [
+            "contract describes future execution readiness shape only; no execution is implemented",
+            "execution implementation, dispatch, target mutation, storage, and audit write require separate approval",
+        ],
+    }
