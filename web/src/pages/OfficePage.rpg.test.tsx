@@ -18,7 +18,7 @@ vi.mock("@/lib/api", () => ({
 
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
-import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeNasKeeperSaveRequestGate, buildOfficeNasKeeperRollbackEvidencePreview, buildOfficeDeskRpgReadOnlyChainCompletionReview, buildOfficeRpgScene } from "./officeView";
+import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeNasKeeperSaveRequestGate, buildOfficeNasKeeperRollbackEvidencePreview, buildOfficeDeskRpgReadOnlyChainCompletionReview, buildOfficeEventDrivenCharacterStateProjection, buildOfficeRpgScene } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
@@ -1280,6 +1280,54 @@ describe("DeskRpgReadOnlyChainCompletionReviewPanel", () => {
     expect(markup).not.toContain("<select");
     expect(markup).not.toContain("<textarea");
     expect(markup).not.toMatch(/raw completion review prompt|raw completion review task|Traceback|\/Users\/lidises|token-shaped-completion-review|private-completion-review-provider/i);
+  });
+});
+
+
+describe("EventDrivenCharacterStateProjectionPanel", () => {
+  it("Event-driven Character State Projection 1 renders character states without writable controls", () => {
+    const EventDrivenCharacterStateProjectionPanel = (OfficePageModule as unknown as {
+      EventDrivenCharacterStateProjectionPanel: React.ComponentType<{ projection: ReturnType<typeof buildOfficeEventDrivenCharacterStateProjection> }>;
+    }).EventDrivenCharacterStateProjectionPanel;
+    const secretSentinel = ["token", "shaped", "character", "state"].join("-");
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishPanelFixture({
+      agents: [{ id: "agent-character-state", status: "active", prompt: "raw character state prompt", provider: "private-character-state-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-character-state", status: "blocked", title: "raw character state task", body: "/Users/lidises/private/character-state.md", transcript: "Traceback character state transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+    const trace = buildOfficeApprovalDecisionAuditNasTracePreview(envelope);
+    const gate = buildOfficeNasKeeperSaveRequestGate(trace);
+    const rollback = buildOfficeNasKeeperRollbackEvidencePreview(gate);
+    const review = buildOfficeDeskRpgReadOnlyChainCompletionReview(rollback);
+    const safeEvents = [
+      { id: "evt-runtime-workload", category: "workload_changed", roomId: "work", tone: "warning", count: 2, safeLabel: "업무 변화", detail: "safe aggregate only", redacted: true, rawSource: false },
+      { id: "evt-intent-attention", category: "attention_changed", roomId: "routing", tone: "negative", count: 1, safeLabel: "승인 주의", detail: "safe attention aggregate", redacted: true, rawSource: false },
+      { id: "evt-visual-static", category: "snapshot_static", roomId: "sessions", tone: "neutral", count: 0, safeLabel: "정적 snapshot", detail: "safe static posture", redacted: true, rawSource: false },
+    ] as const;
+    const projection = buildOfficeEventDrivenCharacterStateProjection(review, safeEvents);
+
+    const markup = renderToStaticMarkup(<EventDrivenCharacterStateProjectionPanel projection={projection} />);
+
+    expect(markup).toContain("data-office-event-driven-character-state-projection=\"true\"");
+    expect(markup).toContain("data-office-event-driven-character-state-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-event-driven-character-state-runtime-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-event-driven-character-state-event-persistence-enabled=\"false\"");
+    expect(markup).toContain("data-office-event-driven-character-state-request-creation-enabled=\"false\"");
+    expect(markup).toContain("data-office-event-driven-character-state-dispatch-enabled=\"false\"");
+    expect(markup).toContain("data-office-event-driven-character-state-nas-save-enabled=\"false\"");
+    expect(markup).toContain("data-office-event-driven-character-state-role=\"user_boss\"");
+    expect(markup).toContain("data-office-event-driven-character-state-role=\"orchestrator\"");
+    expect(markup).toContain("data-office-event-driven-character-state-role=\"search_worker\"");
+    expect(markup).toContain("data-office-event-driven-character-state-role=\"nas_keeper\"");
+    expect(markup).toContain("Event-driven character state projection");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw character state prompt|raw character state task|Traceback|\/Users\/lidises|token-shaped-character-state|private-character-state-provider/i);
   });
 });
 

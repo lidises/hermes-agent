@@ -1988,6 +1988,42 @@ export type OfficeDeskRpgReadOnlyChainCompletionReview = {
   rawExcluded: true;
 };
 
+export type OfficeEventDrivenCharacterEventClass = "runtime" | "intent" | "visual";
+
+export type OfficeEventDrivenCharacterState = {
+  role: OfficeDeskRpgProjectionActorRole;
+  label: string;
+  state: "attention_requested" | "mediating" | "working" | "reviewing" | "drafting" | "approval_waiting";
+  eventClass: OfficeEventDrivenCharacterEventClass;
+  sourceEventCategory: OfficeSafeEventCategory;
+  facilityId: OfficeDeskRpgProjectionFacilityId;
+  safeSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeEventDrivenCharacterStateProjection = {
+  stageLabel: "Event-driven Character State Projection 1";
+  title: string;
+  detailKind: "event_driven_character_state_projection";
+  sourceReviewKind: OfficeDeskRpgReadOnlyChainCompletionReview["detailKind"];
+  sourceNextRecommendedSlice: OfficeDeskRpgReadOnlyChainCompletionReview["nextRecommendedSlice"];
+  characterStates: OfficeEventDrivenCharacterState[];
+  eventCategoryCount: number;
+  enabledControls: 0;
+  runtimeEventWriteEnabled: false;
+  intentEventCreationEnabled: false;
+  visualEventCreationEnabled: false;
+  eventPersistenceEnabled: false;
+  stateMachinePersistenceEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeWorkerAssignmentCandidateBlockedReason = {
   id: "facility_prerequisites_missing" | "approval_execution_blocked" | "authority_adapter_missing" | "audit_write_disabled" | "human_confirmation_missing";
   label: string;
@@ -3913,6 +3949,100 @@ export function buildOfficeDeskRpgReadOnlyChainCompletionReview(rollback: Office
     enabledControls: 0,
     mutationControlsAdded: false,
     runtimeWriteEnabled: false,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    nasSaveEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+function firstSafeEventCategory(events: readonly OfficeSafeEvent[], categories: OfficeSafeEventCategory[], fallback: OfficeSafeEventCategory): OfficeSafeEventCategory {
+  return events.find((event) => categories.includes(event.category))?.category ?? fallback;
+}
+
+export function buildOfficeEventDrivenCharacterStateProjection(review: OfficeDeskRpgReadOnlyChainCompletionReview, events: readonly OfficeSafeEvent[] = []): OfficeEventDrivenCharacterStateProjection {
+  const runtimeCategory = firstSafeEventCategory(events, ["workload_changed", "flow_changed", "room_density_changed", "source_health_changed"], "workload_changed");
+  const intentCategory = firstSafeEventCategory(events, ["attention_changed"], "attention_changed");
+  const visualCategory = firstSafeEventCategory(events, ["snapshot_static"], "snapshot_static");
+  const characterStates: OfficeEventDrivenCharacterState[] = [
+    {
+      role: "user_boss",
+      label: "사장 캐릭터",
+      state: "attention_requested",
+      eventClass: "intent",
+      sourceEventCategory: intentCategory,
+      facilityId: "boss_desk",
+      safeSummary: "사용자 지시는 실행 명령이 아니라 Orchestrator가 해석해야 할 intent posture로만 표시됩니다.",
+      rawExcluded: true,
+    },
+    {
+      role: "orchestrator",
+      label: "Orchestrator",
+      state: "mediating",
+      eventClass: "intent",
+      sourceEventCategory: intentCategory,
+      facilityId: "orchestrator_desk",
+      safeSummary: "주의·요청 intent를 중앙 mediation 상태로 축약하며 요청 레코드는 생성하지 않습니다.",
+      rawExcluded: true,
+    },
+    {
+      role: "search_worker",
+      label: "Search Worker",
+      state: "working",
+      eventClass: "runtime",
+      sourceEventCategory: runtimeCategory,
+      facilityId: "worker_cluster",
+      safeSummary: "workload/flow/source health aggregate를 작업 중 posture로만 반영합니다.",
+      rawExcluded: true,
+    },
+    {
+      role: "reviewer",
+      label: "Reviewer",
+      state: "reviewing",
+      eventClass: "runtime",
+      sourceEventCategory: runtimeCategory,
+      facilityId: "right_inspector",
+      safeSummary: "검토자는 safe aggregate 변화에 반응하는 읽기 전용 검토 posture로 표시됩니다.",
+      rawExcluded: true,
+    },
+    {
+      role: "wiki_writer",
+      label: "Wiki Writer",
+      state: "drafting",
+      eventClass: "visual",
+      sourceEventCategory: visualCategory,
+      facilityId: "central_board",
+      safeSummary: "시각적 snapshot은 초안 준비 상태만 보여주며 문서 작성이나 NAS 저장을 수행하지 않습니다.",
+      rawExcluded: true,
+    },
+    {
+      role: "nas_keeper",
+      label: "NAS Keeper",
+      state: "approval_waiting",
+      eventClass: "visual",
+      sourceEventCategory: visualCategory,
+      facilityId: "nas_vault",
+      safeSummary: "NAS Keeper는 승인 대기와 저장 금지 상태만 표시하며 save request를 만들지 않습니다.",
+      rawExcluded: true,
+    },
+  ];
+  return {
+    stageLabel: "Event-driven Character State Projection 1",
+    title: "Event-driven character state projection",
+    detailKind: "event_driven_character_state_projection",
+    sourceReviewKind: review.detailKind,
+    sourceNextRecommendedSlice: review.nextRecommendedSlice,
+    characterStates,
+    eventCategoryCount: new Set(events.map((event) => event.category)).size,
+    enabledControls: 0,
+    runtimeEventWriteEnabled: false,
+    intentEventCreationEnabled: false,
+    visualEventCreationEnabled: false,
+    eventPersistenceEnabled: false,
+    stateMachinePersistenceEnabled: false,
     requestCreationEnabled: false,
     workAssignmentEnabled: false,
     dispatchEnabled: false,

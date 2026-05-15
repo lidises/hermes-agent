@@ -131,6 +131,7 @@ import {
   buildOfficeNasKeeperSaveRequestGate,
   buildOfficeNasKeeperRollbackEvidencePreview,
   buildOfficeDeskRpgReadOnlyChainCompletionReview,
+  buildOfficeEventDrivenCharacterStateProjection,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -165,6 +166,7 @@ import {
   type OfficeNasKeeperSaveRequestGate,
   type OfficeNasKeeperRollbackEvidencePreview,
   type OfficeDeskRpgReadOnlyChainCompletionReview,
+  type OfficeEventDrivenCharacterStateProjection,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -2881,6 +2883,57 @@ export function DeskRpgReadOnlyChainCompletionReviewPanel({ review }: { review: 
   );
 }
 
+export function EventDrivenCharacterStateProjectionPanel({ projection }: { projection: OfficeEventDrivenCharacterStateProjection }) {
+  return (
+    <Card
+      data-office-event-driven-character-state-projection="true"
+      data-office-event-driven-character-state-enabled-controls={projection.enabledControls}
+      data-office-event-driven-character-state-runtime-write-enabled={String(projection.runtimeEventWriteEnabled)}
+      data-office-event-driven-character-state-event-persistence-enabled={String(projection.eventPersistenceEnabled)}
+      data-office-event-driven-character-state-request-creation-enabled={String(projection.requestCreationEnabled)}
+      data-office-event-driven-character-state-dispatch-enabled={String(projection.dispatchEnabled)}
+      data-office-event-driven-character-state-nas-save-enabled={String(projection.nasSaveEnabled)}
+      data-office-event-driven-character-state-safe-projection-only={String(projection.safeProjectionOnly)}
+      data-office-event-driven-character-state-raw-excluded={String(projection.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Activity className="h-4 w-4" /> Event-driven character state projection
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-sky-300/20 bg-sky-950/10 p-3">
+            <div className="font-semibold text-sky-100">runtime/intent/visual events → display-only character states</div>
+            <div className="mt-1 leading-5">
+              safe event aggregate를 Desk RPG 캐릭터 상태로만 축약합니다. event 생성·persist, state machine 저장, request 생성, dispatch, NAS 저장은 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3">
+            {projection.characterStates.map((state) => (
+              <div
+                key={state.role}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-event-driven-character-state-role={state.role}
+                data-office-event-driven-character-state-event-class={state.eventClass}
+                data-office-event-driven-character-state-state={state.state}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{state.eventClass}</div>
+                <div className="mt-1 font-semibold text-foreground">{state.label}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-sky-100/80">{state.state}</div>
+                <div className="mt-2 leading-5">{state.safeSummary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-event-driven-character-state-boundary="true">
+            source {projection.sourceReviewKind} · next {projection.sourceNextRecommendedSlice} · event categories {projection.eventCategoryCount} · controls {projection.enabledControls} · raw excluded {String(projection.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -3399,6 +3452,10 @@ export default function OfficePage() {
     ),
     [localSafeEventSubstrate, safeEvents, safeEventsStatus],
   );
+  const eventDrivenCharacterStateProjection = useMemo(
+    () => buildOfficeEventDrivenCharacterStateProjection(deskRpgReadOnlyChainCompletionReview, safeStreamPosture.events),
+    [deskRpgReadOnlyChainCompletionReview, safeStreamPosture.events],
+  );
   const safeMotionHeartbeat = useMemo(
     () => buildOfficeSafeMotionHeartbeat(safeStreamPosture, {
       pollStatus: safeEventsStatus === "loaded" ? "active" : safeEventsStatus,
@@ -3619,6 +3676,8 @@ export default function OfficePage() {
       <NasKeeperRollbackEvidencePreviewPanel rollback={nasKeeperRollbackEvidencePreview} />
 
       <DeskRpgReadOnlyChainCompletionReviewPanel review={deskRpgReadOnlyChainCompletionReview} />
+
+      <EventDrivenCharacterStateProjectionPanel projection={eventDrivenCharacterStateProjection} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 

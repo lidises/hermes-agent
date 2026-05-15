@@ -121,6 +121,7 @@ import {
   buildOfficeNasKeeperSaveRequestGate,
   buildOfficeNasKeeperRollbackEvidencePreview,
   buildOfficeDeskRpgReadOnlyChainCompletionReview,
+  buildOfficeEventDrivenCharacterStateProjection,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -1137,6 +1138,55 @@ describe("Desk RPG Read-only Chain Completion Review 1", () => {
     expect(review.safeProjectionOnly).toBe(true);
     expect(review.rawExcluded).toBe(true);
     expect(JSON.stringify(review)).not.toMatch(/raw completion review prompt|raw completion review task|Traceback|\/Users\/lidises|token-shaped-completion-review|private-completion-review-provider/i);
+  });
+});
+
+
+describe("Event-driven Character State Projection 1", () => {
+  it("maps allowlisted safe events to display-only Desk RPG character states", () => {
+    const secretSentinel = ["token", "shaped", "character", "state"].join("-");
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishFixture({
+      agents: [{ id: "agent-character-state", status: "active", prompt: "raw character state prompt", provider: "private-character-state-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-character-state", status: "blocked", title: "raw character state task", body: "/Users/lidises/private/character-state.md", transcript: "Traceback character state transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+    const trace = buildOfficeApprovalDecisionAuditNasTracePreview(envelope);
+    const gate = buildOfficeNasKeeperSaveRequestGate(trace);
+    const rollback = buildOfficeNasKeeperRollbackEvidencePreview(gate);
+    const review = buildOfficeDeskRpgReadOnlyChainCompletionReview(rollback);
+    const safeEvents = [
+      { id: "evt-runtime-workload", category: "workload_changed", roomId: "work", tone: "warning", count: 2, safeLabel: "업무 변화", detail: "safe aggregate only", redacted: true, rawSource: false },
+      { id: "evt-runtime-flow", category: "flow_changed", roomId: "work", toRoomId: "routing", tone: "neutral", count: 1, safeLabel: "흐름 변화", detail: "safe route aggregate", redacted: true, rawSource: false },
+      { id: "evt-intent-attention", category: "attention_changed", roomId: "routing", tone: "negative", count: 1, safeLabel: "승인 주의", detail: "safe attention aggregate", redacted: true, rawSource: false },
+      { id: "evt-visual-static", category: "snapshot_static", roomId: "sessions", tone: "neutral", count: 0, safeLabel: "정적 snapshot", detail: "safe static posture", redacted: true, rawSource: false },
+    ] as const;
+
+    const projection = buildOfficeEventDrivenCharacterStateProjection(review, safeEvents);
+
+    expect(projection.stageLabel).toBe("Event-driven Character State Projection 1");
+    expect(projection.detailKind).toBe("event_driven_character_state_projection");
+    expect(projection.sourceReviewKind).toBe("desk_rpg_readonly_chain_completion_review");
+    expect(projection.eventCategoryCount).toBe(4);
+    expect(projection.characterStates.map((state) => state.role)).toEqual(["user_boss", "orchestrator", "search_worker", "reviewer", "wiki_writer", "nas_keeper"]);
+    expect(projection.characterStates.map((state) => state.eventClass)).toEqual(["intent", "intent", "runtime", "runtime", "visual", "visual"]);
+    expect(projection.characterStates.map((state) => state.state)).toEqual(["attention_requested", "mediating", "working", "reviewing", "drafting", "approval_waiting"]);
+    expect(projection.runtimeEventWriteEnabled).toBe(false);
+    expect(projection.intentEventCreationEnabled).toBe(false);
+    expect(projection.visualEventCreationEnabled).toBe(false);
+    expect(projection.eventPersistenceEnabled).toBe(false);
+    expect(projection.stateMachinePersistenceEnabled).toBe(false);
+    expect(projection.requestCreationEnabled).toBe(false);
+    expect(projection.workAssignmentEnabled).toBe(false);
+    expect(projection.dispatchEnabled).toBe(false);
+    expect(projection.auditWriteEnabled).toBe(false);
+    expect(projection.nasSaveEnabled).toBe(false);
+    expect(projection.enabledControls).toBe(0);
+    expect(projection.safeProjectionOnly).toBe(true);
+    expect(projection.rawExcluded).toBe(true);
+    expect(projection.characterStates.every((state) => state.rawExcluded === true)).toBe(true);
+    expect(JSON.stringify(projection)).not.toMatch(/raw character state prompt|raw character state task|Traceback|\/Users\/lidises|token-shaped-character-state|private-character-state-provider/i);
   });
 });
 
