@@ -18,7 +18,7 @@ vi.mock("@/lib/api", () => ({
 
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
-import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeRpgScene } from "./officeView";
+import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeRpgScene } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
@@ -1081,6 +1081,43 @@ describe("ApprovalAuthorityReadinessDetailPanel", () => {
     expect(markup).not.toContain("<select");
     expect(markup).not.toContain("<textarea");
     expect(markup).not.toMatch(/raw authority readiness prompt|raw authority readiness task|Traceback|\/Users\/lidises|token-shaped-authority-readiness|private-authority-readiness-provider/i);
+  });
+});
+
+
+describe("ApprovalAuthorityDecisionEnvelopePreviewPanel", () => {
+  it("Approval Authority Decision Envelope Preview 1 renders disabled decision options without controls", () => {
+    const ApprovalAuthorityDecisionEnvelopePreviewPanel = (OfficePageModule as unknown as {
+      ApprovalAuthorityDecisionEnvelopePreviewPanel: React.ComponentType<{ envelope: ReturnType<typeof buildOfficeApprovalAuthorityDecisionEnvelopePreview> }>;
+    }).ApprovalAuthorityDecisionEnvelopePreviewPanel;
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishPanelFixture({
+      agents: [{ id: "agent-decision-envelope", status: "active", prompt: "raw decision envelope prompt", provider: "private-decision-envelope-provider", api_key: "token-shaped-decision-envelope" }],
+      work_items: [
+        { id: "task-decision-envelope", status: "blocked", title: "raw decision envelope task", body: "/Users/lidises/private/decision-envelope.md", transcript: "Traceback decision envelope transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+
+    const markup = renderToStaticMarkup(<ApprovalAuthorityDecisionEnvelopePreviewPanel envelope={envelope} />);
+
+    expect(markup).toContain("data-office-approval-authority-decision-envelope=\"true\"");
+    expect(markup).toContain("data-office-approval-authority-decision-envelope-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-approval-authority-decision-envelope-record-created=\"false\"");
+    expect(markup).toContain("data-office-approval-authority-decision-envelope-approve-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-authority-decision-envelope-reject-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-authority-decision-envelope-hold-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-authority-decision-envelope-audit-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-authority-decision-envelope-nas-save-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-authority-decision-option=\"approve\"");
+    expect(markup).toContain("data-office-approval-authority-decision-option=\"reject\"");
+    expect(markup).toContain("data-office-approval-authority-decision-option=\"hold\"");
+    expect(markup).toContain("Approval authority decision envelope");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw decision envelope prompt|raw decision envelope task|Traceback|\/Users\/lidises|token-shaped-decision-envelope|private-decision-envelope-provider/i);
   });
 });
 

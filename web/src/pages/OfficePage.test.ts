@@ -116,6 +116,7 @@ import {
   buildOfficeWorkerRequestHandoffDetail,
   buildOfficeApprovalNasBoundaryPolish,
   buildOfficeApprovalAuthorityReadinessDetail,
+  buildOfficeApprovalAuthorityDecisionEnvelopePreview,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -948,6 +949,40 @@ describe("Approval Authority Readiness Detail 1", () => {
     expect(readiness.safeProjectionOnly).toBe(true);
     expect(readiness.rawExcluded).toBe(true);
     expect(JSON.stringify(readiness)).not.toMatch(/raw authority readiness prompt|raw authority readiness task|Traceback|\/Users\/lidises|token-shaped-authority-readiness|private-authority-readiness-provider/i);
+  });
+});
+
+
+describe("Approval Authority Decision Envelope Preview 1", () => {
+  it("builds a disabled approve reject hold envelope without recording decisions", () => {
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishFixture({
+      agents: [{ id: "agent-decision-envelope", status: "active", prompt: "raw decision envelope prompt", provider: "private-decision-envelope-provider", api_key: "token-shaped-decision-envelope" }],
+      work_items: [
+        { id: "task-decision-envelope", status: "blocked", title: "raw decision envelope task", body: "/Users/lidises/private/decision-envelope.md", transcript: "Traceback decision envelope transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+
+    expect(envelope.stageLabel).toBe("Approval Authority Decision Envelope Preview 1");
+    expect(envelope.detailKind).toBe("approval_authority_decision_envelope_preview");
+    expect(envelope.options.map((option) => option.id)).toEqual(["approve", "reject", "hold"]);
+    expect(envelope.sourceDetailKind).toBe("approval_authority_readiness_detail");
+    expect(envelope.sourcePrerequisiteCount).toBe(4);
+    expect(envelope.decisionOptionCount).toBe(3);
+    expect(envelope.enabledControls).toBe(0);
+    expect(envelope.decisionRecordCreated).toBe(false);
+    expect(envelope.approveEnabled).toBe(false);
+    expect(envelope.rejectEnabled).toBe(false);
+    expect(envelope.holdEnabled).toBe(false);
+    expect(envelope.requestCreationEnabled).toBe(false);
+    expect(envelope.workAssignmentEnabled).toBe(false);
+    expect(envelope.dispatchEnabled).toBe(false);
+    expect(envelope.auditWriteEnabled).toBe(false);
+    expect(envelope.nasSaveEnabled).toBe(false);
+    expect(envelope.safeProjectionOnly).toBe(true);
+    expect(envelope.rawExcluded).toBe(true);
+    expect(JSON.stringify(envelope)).not.toMatch(/raw decision envelope prompt|raw decision envelope task|Traceback|\/Users\/lidises|token-shaped-decision-envelope|private-decision-envelope-provider/i);
   });
 });
 

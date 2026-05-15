@@ -126,6 +126,7 @@ import {
   buildOfficeWorkerRequestHandoffDetail,
   buildOfficeApprovalNasBoundaryPolish,
   buildOfficeApprovalAuthorityReadinessDetail,
+  buildOfficeApprovalAuthorityDecisionEnvelopePreview,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -155,6 +156,7 @@ import {
   type OfficeWorkerRequestHandoffDetail,
   type OfficeApprovalNasBoundaryPolish,
   type OfficeApprovalAuthorityReadinessDetail,
+  type OfficeApprovalAuthorityDecisionEnvelopePreview,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -2599,6 +2601,61 @@ export function ApprovalAuthorityReadinessDetailPanel({ readiness }: { readiness
   );
 }
 
+export function ApprovalAuthorityDecisionEnvelopePreviewPanel({ envelope }: { envelope: OfficeApprovalAuthorityDecisionEnvelopePreview }) {
+  return (
+    <Card
+      data-office-approval-authority-decision-envelope="true"
+      data-office-approval-authority-decision-envelope-enabled-controls={envelope.enabledControls}
+      data-office-approval-authority-decision-envelope-record-created={String(envelope.decisionRecordCreated)}
+      data-office-approval-authority-decision-envelope-approve-enabled={String(envelope.approveEnabled)}
+      data-office-approval-authority-decision-envelope-reject-enabled={String(envelope.rejectEnabled)}
+      data-office-approval-authority-decision-envelope-hold-enabled={String(envelope.holdEnabled)}
+      data-office-approval-authority-decision-envelope-request-creation-enabled={String(envelope.requestCreationEnabled)}
+      data-office-approval-authority-decision-envelope-work-assignment-enabled={String(envelope.workAssignmentEnabled)}
+      data-office-approval-authority-decision-envelope-dispatch-enabled={String(envelope.dispatchEnabled)}
+      data-office-approval-authority-decision-envelope-audit-write-enabled={String(envelope.auditWriteEnabled)}
+      data-office-approval-authority-decision-envelope-nas-save-enabled={String(envelope.nasSaveEnabled)}
+      data-office-approval-authority-decision-envelope-safe-projection-only={String(envelope.safeProjectionOnly)}
+      data-office-approval-authority-decision-envelope-raw-excluded={String(envelope.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4" /> Approval authority decision envelope
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-violet-300/20 bg-violet-950/10 p-3">
+            <div className="font-semibold text-violet-100">approve · reject · hold envelope preview</div>
+            <div className="mt-1 leading-5">
+              사용자 결정이 나중에 어떤 envelope로 표현될지만 보여줍니다. 현재는 decision record 생성, audit write, worker dispatch, NAS save가 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3">
+            {envelope.options.map((option) => (
+              <div
+                key={option.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-approval-authority-decision-option={option.id}
+                data-office-approval-authority-decision-option-status={option.status}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{option.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{option.label}</div>
+                <div className="mt-1 text-midground/60">prerequisite: {option.prerequisite}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-violet-100/80">{option.status}</div>
+                <div className="mt-2 leading-5">{option.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-approval-authority-decision-envelope-boundary="true">
+            source {envelope.sourceDetailKind} · prerequisites {envelope.sourcePrerequisiteCount} · warnings {envelope.sourceWarningCount} · options {envelope.decisionOptionCount} · controls {envelope.enabledControls} · record created {String(envelope.decisionRecordCreated)} · raw excluded {String(envelope.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -3055,6 +3112,10 @@ export default function OfficePage() {
     () => buildOfficeApprovalAuthorityReadinessDetail(approvalNasBoundaryPolish),
     [approvalNasBoundaryPolish],
   );
+  const approvalAuthorityDecisionEnvelopePreview = useMemo(
+    () => buildOfficeApprovalAuthorityDecisionEnvelopePreview(approvalAuthorityReadinessDetail),
+    [approvalAuthorityReadinessDetail],
+  );
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -3307,6 +3368,8 @@ export default function OfficePage() {
       <ApprovalNasBoundaryPolishPanel polish={approvalNasBoundaryPolish} />
 
       <ApprovalAuthorityReadinessDetailPanel readiness={approvalAuthorityReadinessDetail} />
+
+      <ApprovalAuthorityDecisionEnvelopePreviewPanel envelope={approvalAuthorityDecisionEnvelopePreview} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 

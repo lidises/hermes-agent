@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-15 12:35 KST
+Last updated: 2026-05-15 13:07 KST
 
 ## AI Office 통합 운영실 umbrella summary
 
@@ -164,6 +164,14 @@ Safety/non-actions: frontend/read-only only; no backend/schema/mutation/NAS/VPS/
 Verification 2026-05-15 12:46 KST: focused `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx -t "Approval Authority Readiness Detail 1"` first failed with `buildOfficeApprovalAuthorityReadinessDetail is not a function`, then passed after helper/panel implementation (2 passed, 139 skipped); combined `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx` passed (141 passed); focused ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/OfficePage.test.ts`, `src/pages/OfficePage.rpg.test.tsx`, and `src/pages/officeView.ts`; `npm run build` passed with only the existing Vite large-chunk warning; `git diff --check` passed; added-line safety scan hits were limited to documentation safety copy and intentional negative sentinel tests. Local preview `/office?approval-authority-readiness=1` returned HTTP 200 to the app shell; unauthenticated browser smoke showed the expected protected Office fallback, raw-leak probe false, zero main forms/inputs, and zero console/JS errors.
 
 Safety/non-actions: frontend/read-only only; no backend/schema/mutation/NAS/VPS/service change, no renderer dependency, no forms/buttons/inputs in the component, no authority grant, no approve/reject/hold decision, no request creation, no worker assignment, no dispatch, no audit write, no NAS save, and no raw prompt/task body/transcript/path/token/provider projection.
+
+## Approval Authority Decision Envelope Preview 1 completed locally
+
+`Approval Authority Decision Envelope Preview 1` adds a safe helper, `buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness)`, plus `ApprovalAuthorityDecisionEnvelopePreviewPanel` in `/office`. It composes only the existing read-only `Approval Authority Readiness Detail 1` DTO into three disabled decision-envelope options: approve, reject, and hold. It keeps `enabledControls=0`, `decisionRecordCreated=false`, `approveEnabled=false`, `rejectEnabled=false`, `holdEnabled=false`, `requestCreationEnabled=false`, `workAssignmentEnabled=false`, `dispatchEnabled=false`, `auditWriteEnabled=false`, `nasSaveEnabled=false`, `safeProjectionOnly=true`, and `rawExcluded=true` through stable `data-office-approval-authority-decision-envelope*` and `data-office-approval-authority-decision-option*` hooks.
+
+Verification 2026-05-15 13:07 KST: focused `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx -t "Approval Authority Decision Envelope Preview 1"` first failed with `buildOfficeApprovalAuthorityDecisionEnvelopePreview is not a function`, then passed after helper/panel implementation (2 passed, 141 skipped); combined `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx` passed (143 passed); focused ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/OfficePage.test.ts`, `src/pages/OfficePage.rpg.test.tsx`, and `src/pages/officeView.ts`; `npm run build` passed with only the existing Vite large-chunk warning; `git diff --check` passed. Added-line safety scan hits were limited to negative no-form/no-button/no-input assertions in tests. Scope remains frontend/docs only with no backend/schema/API route/service/Kanban/cron/VPS/NAS changes.
+
+Safety/non-actions: frontend/read-only only; no backend/schema/mutation/NAS/VPS/service change, no renderer dependency, no forms/buttons/inputs in the component, no decision record creation, no approve/reject/hold execution, no request creation, no worker assignment, no dispatch, no audit write, no NAS save, and no raw prompt/task body/transcript/path/token/provider projection.
 
 ## Approval/NAS Boundary Polish 1 completed locally
 

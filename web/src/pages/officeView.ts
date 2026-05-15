@@ -1830,6 +1830,38 @@ export type OfficeApprovalAuthorityReadinessDetail = {
   rawExcluded: true;
 };
 
+export type OfficeApprovalAuthorityDecisionOption = {
+  id: "approve" | "reject" | "hold";
+  label: string;
+  status: "disabled";
+  prerequisite: string;
+  summary: string;
+  rawExcluded: true;
+};
+
+export type OfficeApprovalAuthorityDecisionEnvelopePreview = {
+  stageLabel: "Approval Authority Decision Envelope Preview 1";
+  title: string;
+  detailKind: "approval_authority_decision_envelope_preview";
+  options: OfficeApprovalAuthorityDecisionOption[];
+  sourceDetailKind: OfficeApprovalAuthorityReadinessDetail["detailKind"];
+  sourcePrerequisiteCount: number;
+  sourceWarningCount: number;
+  decisionOptionCount: number;
+  enabledControls: 0;
+  decisionRecordCreated: false;
+  approveEnabled: false;
+  rejectEnabled: false;
+  holdEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeWorkerAssignmentCandidateBlockedReason = {
   id: "facility_prerequisites_missing" | "approval_execution_blocked" | "authority_adapter_missing" | "audit_write_disabled" | "human_confirmation_missing";
   label: string;
@@ -3479,6 +3511,57 @@ export function buildOfficeApprovalAuthorityReadinessDetail(boundary: OfficeAppr
     authorityPrerequisiteCount: 4,
     enabledControls: 0,
     authorityGranted: false,
+    approveEnabled: false,
+    rejectEnabled: false,
+    holdEnabled: false,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    nasSaveEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness: OfficeApprovalAuthorityReadinessDetail): OfficeApprovalAuthorityDecisionEnvelopePreview {
+  const options: OfficeApprovalAuthorityDecisionOption[] = [
+    {
+      id: "approve",
+      label: "Approve envelope",
+      status: "disabled",
+      prerequisite: "human authority + audit sink",
+      summary: "승인 선택지는 envelope shape만 표시합니다. decision record, audit append, worker dispatch, NAS save는 생성하지 않습니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "reject",
+      label: "Reject envelope",
+      status: "disabled",
+      prerequisite: "human authority + orchestrator mediation",
+      summary: "거절 선택지는 future decision boundary를 설명할 뿐이며 request state나 Kanban/NAS 상태를 변경하지 않습니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "hold",
+      label: "Hold envelope",
+      status: "disabled",
+      prerequisite: "human authority + safe follow-up context",
+      summary: "보류 선택지는 추가 지시 필요 posture만 보여주며 hold event, audit write, worker assignment를 만들지 않습니다.",
+      rawExcluded: true,
+    },
+  ];
+  return {
+    stageLabel: "Approval Authority Decision Envelope Preview 1",
+    title: "Approval authority decision envelope",
+    detailKind: "approval_authority_decision_envelope_preview",
+    options,
+    sourceDetailKind: readiness.detailKind,
+    sourcePrerequisiteCount: readiness.authorityPrerequisiteCount,
+    sourceWarningCount: readiness.sourceWarningCount,
+    decisionOptionCount: options.length,
+    enabledControls: 0,
+    decisionRecordCreated: false,
     approveEnabled: false,
     rejectEnabled: false,
     holdEnabled: false,
