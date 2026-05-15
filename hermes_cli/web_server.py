@@ -567,9 +567,9 @@ async def append_office_controlled_mutation_request(payload: Any = Body(None)):
 
 
 @app.get("/api/office/controlled-mutation/requests")
-async def list_office_controlled_mutation_requests(limit: int = 50):
+async def list_office_controlled_mutation_requests(limit: int = 50, correlation_id: str | None = None):
     """Read back stored safe request-event DTOs from the local Hermes JSONL store."""
-    return list_office_controlled_mutation_request_events(limit=limit)
+    return list_office_controlled_mutation_request_events(limit=limit, correlation_id=correlation_id)
 
 
 @app.get("/api/office/events")

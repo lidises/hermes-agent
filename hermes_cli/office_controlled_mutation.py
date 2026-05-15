@@ -238,6 +238,37 @@ def _with_request_event_persistence_capabilities(dto: Mapping[str, Any]) -> dict
     return stored_dto
 
 
+def _normalize_stored_request_event(item: object) -> dict[str, object] | None:
+    if not isinstance(item, Mapping):
+        return None
+    payload = {field: item.get(field) for field in _REQUEST_EVENT_FIELDS if field in item}
+    validation = validate_office_controlled_mutation_request_event(payload)
+    if not validation["valid"]:
+        return None
+    return _with_request_event_persistence_capabilities(cast(Mapping[str, Any], validation["dto"]))
+
+
+def _read_request_event_store(path: Path) -> tuple[list[dict[str, object]], int]:
+    events: list[dict[str, object]] = []
+    skipped_count = 0
+    if not path.exists():
+        return events, skipped_count
+
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped_count += 1
+                continue
+            normalized = _normalize_stored_request_event(item)
+            if normalized is None:
+                skipped_count += 1
+                continue
+            events.append(normalized)
+    return events, skipped_count
+
+
 def append_office_controlled_mutation_request_event(
     payload: object, *, store_path: Path | None = None
 ) -> dict[str, object]:
@@ -255,47 +286,48 @@ def append_office_controlled_mutation_request_event(
 
     dto = _with_request_event_persistence_capabilities(cast(Mapping[str, Any], validation["dto"]))
     path = store_path or _default_request_event_store_path()
+    existing_events, _ = _read_request_event_store(path)
+    if any(event.get("request_id") == dto["request_id"] for event in existing_events):
+        return {"stored": False, "errors": [_error("request_id", "duplicate_request_id")], "dto": None}
+
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(dto, sort_keys=True, separators=(",", ":")) + "\n")
     return {"stored": True, "errors": [], "dto": dto}
 
 
-def _normalize_stored_request_event(item: object) -> dict[str, object] | None:
-    if not isinstance(item, Mapping):
-        return None
-    payload = {field: item.get(field) for field in _REQUEST_EVENT_FIELDS if field in item}
-    validation = validate_office_controlled_mutation_request_event(payload)
-    if not validation["valid"]:
-        return None
-    return _with_request_event_persistence_capabilities(cast(Mapping[str, Any], validation["dto"]))
-
-
 def list_office_controlled_mutation_request_events(
-    *, store_path: Path | None = None, limit: int = 50
+    *, store_path: Path | None = None, limit: int = 50, correlation_id: str | None = None
 ) -> dict[str, object]:
     """Read back safe stored request-event DTOs without exposing raw inputs."""
 
     path = store_path or _default_request_event_store_path()
     max_events = max(0, min(limit, 200))
-    events: list[dict[str, object]] = []
-    if max_events and path.exists():
-        for line in path.read_text(encoding="utf-8").splitlines():
-            try:
-                item = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            normalized = _normalize_stored_request_event(item)
-            if normalized is not None:
-                events.append(normalized)
-        events = events[-max_events:]
-    return {
+    events, skipped_count = _read_request_event_store(path)
+    response_correlation_id: str | None = None
+    errors: list[dict[str, str]] = []
+
+    if correlation_id is not None:
+        if _is_opaque_id(correlation_id):
+            response_correlation_id = correlation_id
+            events = [event for event in events if event.get("correlation_id") == correlation_id]
+        else:
+            errors.append(_error("correlation_id", "invalid_opaque_id"))
+            events = []
+
+    events = events[-max_events:] if max_events else []
+    response: dict[str, object] = {
         "schema_version": 1,
         "mode": "stored_request_events_readback",
         "count": len(events),
+        "limit": max_events,
+        "skipped_count": skipped_count,
         "events": events,
         "capabilities": {
             "readback_enabled": True,
+            "duplicate_detection_enabled": True,
+            "correlation_filter_enabled": True,
+            "malformed_line_resilience_enabled": True,
             "dry_run_execution_enabled": False,
             "human_decision_recording_enabled": False,
             "authority_adapter_enabled": False,
@@ -304,7 +336,11 @@ def list_office_controlled_mutation_request_events(
             "nas_save_enabled": False,
         },
         "redaction": dict(_REDACTION_POSTURE),
+        "errors": errors,
     }
+    if response_correlation_id is not None:
+        response["correlation_id"] = response_correlation_id
+    return response
 
 
 def build_office_controlled_mutation_event_persistence_contract(
