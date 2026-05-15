@@ -101,6 +101,7 @@ import {
   buildOfficeControlledMutationReadinessHandoffRibbon,
   buildOfficeControlledMutationReadinessSummaryPolish,
   buildOfficeControlledMutationRequestStorePosture,
+  buildOfficeControlledMutationRequestStoreHardeningPlan,
   buildOfficeRpgScene,
   buildOfficeDeskRpgProjectionModel,
   buildOfficeDeskRpgWorkerRoleVisibility,
@@ -2847,6 +2848,43 @@ describe("Desk RPG Projection ViewModel Helper 1", () => {
     expect(posture.disabledSurfaceSummary).toEqual({ sourceCards: 3, postureCards: 4, enabledControls: 0 });
     expect(posture.safeBoundary).toContain("frontend read-only request-store posture only");
     expect(JSON.stringify(posture)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw request store posture|private-request-store-posture|token-shaped-value|provider/i);
+  });
+
+  it("builds Request Store Hardening Plan 1 as frontend-only read-only hardening posture without implementing storage changes", () => {
+    const executionReadiness = buildOfficeControlledMutationExecutionReadinessSummary(buildOfficeControlledMutationAuthoritySummary(buildOfficeControlledMutationHumanApprovalPlan(buildOfficeControlledMutationRollbackVerificationPlan(buildOfficeControlledMutationAuditSinkPlan(buildOfficeControlledMutationDryRunPlan(buildOfficeControlledMutationProposalContract(buildOfficeWorkerFinalGateChecklist(buildOfficeWorkerRollbackPreviewEnvelope(buildOfficeWorkerAuditPreviewEnvelope(buildOfficeWorkerDispatchDryRunEnvelope(buildOfficeWorkerAuthorityHandoffEnvelope(buildOfficeWorkerHumanConfirmationEnvelope(buildOfficeWorkerRequestDraftPreview(buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-16T00:45:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/request-store-hardening", status: "partial", checked_at: "2026-05-16T00:40:00Z", item_count: 1, warning_count: 1, error_summary: "raw hardening token" } as unknown as OfficeState["data_sources"][number]],
+      agents: [{ id: "agent-request-store-hardening", status: "active", prompt: "raw request store hardening prompt token-shaped-value", provider: "private-request-store-hardening-provider" }],
+      work_items: [{ id: "w-request-store-hardening", status: "blocked", title: "raw request store hardening task", body: "/Users/lidises/private/request-store-hardening.md" } as unknown as OfficeState["work_items"][number]],
+    })))))))))))))))))))))));
+    const projection = buildOfficeControlledMutationContractPostureProjection(executionReadiness);
+    const polish = buildOfficeControlledMutationContractPosturePolish(projection);
+    const ribbon = buildOfficeControlledMutationReadinessHandoffRibbon(polish);
+    const summary = buildOfficeControlledMutationReadinessSummaryPolish(ribbon);
+    const posture = buildOfficeControlledMutationRequestStorePosture(summary);
+    const hardening = buildOfficeControlledMutationRequestStoreHardeningPlan(posture);
+
+    expect(hardening.stageLabel).toBe("Request Store Hardening Plan 1");
+    expect(hardening.sourceStageLabel).toBe("Frontend Request Store Posture 1");
+    expect(hardening.detailKind).toBe("controlled_mutation_request_store_hardening_plan");
+    expect(hardening.enabledControls).toBe(0);
+    expect(hardening.backendMutationEnabled).toBe(false);
+    expect(hardening.storageWriteEnabled).toBe(false);
+    expect(hardening.eventAppendEnabled).toBe(false);
+    expect(hardening.eventReadbackEnabled).toBe(false);
+    expect(hardening.hardeningImplemented).toBe(false);
+    expect(hardening.requestCreationEnabled).toBe(false);
+    expect(hardening.auditWriteEnabled).toBe(false);
+    expect(hardening.executionEnabled).toBe(false);
+    expect(hardening.dispatchEnabled).toBe(false);
+    expect(hardening.nasMutationEnabled).toBe(false);
+    expect(hardening.safeProjectionOnly).toBe(true);
+    expect(hardening.rawExcluded).toBe(true);
+    expect(hardening.hardeningItems.map((item) => item.id)).toEqual(["duplicate_detection", "correlation_index", "readback_limit", "malformed_line_resilience"]);
+    expect(hardening.hardeningItems.every((item) => item.status === "approval_required" && item.rawExcluded)).toBe(true);
+    expect(hardening.disabledSurfaceSummary).toEqual({ sourceCards: 4, hardeningItems: 4, enabledControls: 0 });
+    expect(hardening.safeBoundary).toContain("frontend read-only hardening plan only");
+    expect(JSON.stringify(hardening)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw request store hardening|private-request-store-hardening|token-shaped-value|provider/i);
   });
 
   it("builds a disabled Authority Adapter Contract 1 before any execution adapter exists", () => {

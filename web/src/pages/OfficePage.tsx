@@ -114,6 +114,7 @@ import {
   buildOfficeControlledMutationReadinessHandoffRibbon,
   buildOfficeControlledMutationReadinessSummaryPolish,
   buildOfficeControlledMutationRequestStorePosture,
+  buildOfficeControlledMutationRequestStoreHardeningPlan,
   buildOfficeDeskRpgWorkerRoleVisibility,
   buildOfficeDisabledApprovalDialoguePosture,
   buildOfficeReviewerWikiHandoffPosture,
@@ -187,6 +188,7 @@ import {
   type OfficeControlledMutationReadinessHandoffRibbon,
   type OfficeControlledMutationReadinessSummaryPolish,
   type OfficeControlledMutationRequestStorePosture,
+  type OfficeControlledMutationRequestStoreHardeningPlan,
   type OfficeEventDrivenCharacterStateProjection,
   type OfficeCharacterStateRoomOverlay,
   type OfficeCharacterRoomInteractionPosture,
@@ -756,6 +758,48 @@ export function ControlledMutationRequestStorePosturePanel({ posture }: { postur
             <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.status}</div>
             <div className="mt-1 text-sm font-semibold text-foreground">{card.label}</div>
             <div className="mt-2 text-xs leading-5 text-midground/70">{card.detail}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function ControlledMutationRequestStoreHardeningPlanPanel({ plan }: { plan: OfficeControlledMutationRequestStoreHardeningPlan }) {
+  return (
+    <section
+      className="border border-amber-300/20 bg-amber-950/10 p-4"
+      data-office-controlled-mutation-request-store-hardening-plan="true"
+      data-office-controlled-mutation-request-store-hardening-plan-enabled-controls={plan.enabledControls}
+      data-office-controlled-mutation-request-store-hardening-plan-backend-mutation-enabled={String(plan.backendMutationEnabled)}
+      data-office-controlled-mutation-request-store-hardening-plan-storage-write-enabled={String(plan.storageWriteEnabled)}
+      data-office-controlled-mutation-request-store-hardening-plan-event-append-enabled={String(plan.eventAppendEnabled)}
+      data-office-controlled-mutation-request-store-hardening-plan-event-readback-enabled={String(plan.eventReadbackEnabled)}
+      data-office-controlled-mutation-request-store-hardening-plan-hardening-implemented={String(plan.hardeningImplemented)}
+      data-office-controlled-mutation-request-store-hardening-plan-request-creation-enabled={String(plan.requestCreationEnabled)}
+      data-office-controlled-mutation-request-store-hardening-plan-audit-write-enabled={String(plan.auditWriteEnabled)}
+      data-office-controlled-mutation-request-store-hardening-plan-execution-enabled={String(plan.executionEnabled)}
+      data-office-controlled-mutation-request-store-hardening-plan-dispatch-enabled={String(plan.dispatchEnabled)}
+      data-office-controlled-mutation-request-store-hardening-plan-nas-mutation-enabled={String(plan.nasMutationEnabled)}
+      data-office-controlled-mutation-request-store-hardening-plan-safe-projection-only={String(plan.safeProjectionOnly)}
+      data-office-controlled-mutation-request-store-hardening-plan-raw-excluded={String(plan.rawExcluded)}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-200/70">{plan.stageLabel}</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">{plan.title}</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">{plan.safeBoundary}</p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          hardening items: {plan.disabledSurfaceSummary.hardeningItems} · controls: {plan.disabledSurfaceSummary.enabledControls}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-controlled-mutation-request-store-hardening-plan-items="true">
+        {plan.hardeningItems.map((item) => (
+          <div key={item.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-request-store-hardening-plan-item={item.id} data-office-controlled-mutation-request-store-hardening-plan-item-status={item.status}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.status}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+            <div className="mt-2 text-xs leading-5 text-midground/70">{item.detail}</div>
           </div>
         ))}
       </div>
@@ -4127,6 +4171,7 @@ export default function OfficePage() {
   const controlledMutationReadinessHandoffRibbon = useMemo(() => buildOfficeControlledMutationReadinessHandoffRibbon(controlledMutationContractPosturePolish), [controlledMutationContractPosturePolish]);
   const controlledMutationReadinessSummaryPolish = useMemo(() => buildOfficeControlledMutationReadinessSummaryPolish(controlledMutationReadinessHandoffRibbon), [controlledMutationReadinessHandoffRibbon]);
   const controlledMutationRequestStorePosture = useMemo(() => buildOfficeControlledMutationRequestStorePosture(controlledMutationReadinessSummaryPolish), [controlledMutationReadinessSummaryPolish]);
+  const controlledMutationRequestStoreHardeningPlan = useMemo(() => buildOfficeControlledMutationRequestStoreHardeningPlan(controlledMutationRequestStorePosture), [controlledMutationRequestStorePosture]);
   const deskRpgProjection = useMemo(() => buildOfficeDeskRpgProjectionModel(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const deskRpgWorkerRoleVisibility = useMemo(() => buildOfficeDeskRpgWorkerRoleVisibility(deskRpgProjection), [deskRpgProjection]);
   const disabledApprovalDialoguePosture = useMemo(() => buildOfficeDisabledApprovalDialoguePosture(deskRpgProjection), [deskRpgProjection]);
@@ -5294,6 +5339,7 @@ export default function OfficePage() {
       <ControlledMutationReadinessHandoffRibbonPanel ribbon={controlledMutationReadinessHandoffRibbon} />
       <ControlledMutationReadinessSummaryPolishPanel summary={controlledMutationReadinessSummaryPolish} />
       <ControlledMutationRequestStorePosturePanel posture={controlledMutationRequestStorePosture} />
+      <ControlledMutationRequestStoreHardeningPlanPanel plan={controlledMutationRequestStoreHardeningPlan} />
 
       {showOverview ? (
         <OfficeRpgMap

@@ -3038,6 +3038,43 @@ export type OfficeControlledMutationRequestStorePosture = {
   postureCards: OfficeControlledMutationRequestStorePostureCard[];
 };
 
+export type OfficeControlledMutationRequestStoreHardeningPlanItemId = "duplicate_detection" | "correlation_index" | "readback_limit" | "malformed_line_resilience";
+
+export type OfficeControlledMutationRequestStoreHardeningPlanItem = {
+  id: OfficeControlledMutationRequestStoreHardeningPlanItemId;
+  label: string;
+  status: "approval_required";
+  detail: string;
+  rawExcluded: true;
+};
+
+export type OfficeControlledMutationRequestStoreHardeningPlan = {
+  stageLabel: "Request Store Hardening Plan 1";
+  sourceStageLabel: OfficeControlledMutationRequestStorePosture["stageLabel"];
+  detailKind: "controlled_mutation_request_store_hardening_plan";
+  title: string;
+  safeBoundary: string;
+  enabledControls: 0;
+  backendMutationEnabled: false;
+  storageWriteEnabled: false;
+  eventAppendEnabled: false;
+  eventReadbackEnabled: false;
+  hardeningImplemented: false;
+  requestCreationEnabled: false;
+  auditWriteEnabled: false;
+  executionEnabled: false;
+  dispatchEnabled: false;
+  nasMutationEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+  disabledSurfaceSummary: {
+    sourceCards: number;
+    hardeningItems: number;
+    enabledControls: 0;
+  };
+  hardeningItems: OfficeControlledMutationRequestStoreHardeningPlanItem[];
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -6862,6 +6899,45 @@ export function buildOfficeControlledMutationRequestStorePosture(summary: Office
     postureCards: postureCards.map((card) => ({
       ...card,
       status: "display_only",
+      rawExcluded: true,
+    })),
+  };
+}
+
+export function buildOfficeControlledMutationRequestStoreHardeningPlan(posture: OfficeControlledMutationRequestStorePosture): OfficeControlledMutationRequestStoreHardeningPlan {
+  const hardeningItems: Array<{ id: OfficeControlledMutationRequestStoreHardeningPlanItemId; label: string; detail: string }> = [
+    { id: "duplicate_detection", label: "Duplicate detection", detail: "Requires an approved backend hardening slice before dedupe keys or write-time rejection can exist" },
+    { id: "correlation_index", label: "Correlation index", detail: "Requires explicit storage contract approval before correlation lookup or index materialization" },
+    { id: "readback_limit", label: "Readback limit", detail: "Requires approved route/store changes before max-limit enforcement changes the readback behavior" },
+    { id: "malformed_line_resilience", label: "Malformed JSONL resilience", detail: "Requires approved parser hardening before skip/quarantine behavior changes in the local request store" },
+  ];
+  return {
+    stageLabel: "Request Store Hardening Plan 1",
+    sourceStageLabel: posture.stageLabel,
+    detailKind: "controlled_mutation_request_store_hardening_plan",
+    title: "요청 저장소 하드닝 계획 · 승인 대기",
+    safeBoundary: "frontend read-only hardening plan only · describes duplicate/correlation/readback/malformed-line backend hardening prerequisites without implementing storage changes · no forms/buttons/inputs · no browser executable controls · no backend/schema/API route/service changes · no storage/write path · no event append/readback · no request creation · no audit write · no execution/dry-run/dispatch/target mutation · no NAS/VPS/Kanban/cron mutation",
+    enabledControls: 0,
+    backendMutationEnabled: false,
+    storageWriteEnabled: false,
+    eventAppendEnabled: false,
+    eventReadbackEnabled: false,
+    hardeningImplemented: false,
+    requestCreationEnabled: false,
+    auditWriteEnabled: false,
+    executionEnabled: false,
+    dispatchEnabled: false,
+    nasMutationEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+    disabledSurfaceSummary: {
+      sourceCards: posture.postureCards.length,
+      hardeningItems: hardeningItems.length,
+      enabledControls: 0,
+    },
+    hardeningItems: hardeningItems.map((item) => ({
+      ...item,
+      status: "approval_required",
       rawExcluded: true,
     })),
   };
