@@ -2378,6 +2378,33 @@ export type OfficeCharacterFacilitySourceLedgerStrip = {
   rawExcluded: true;
 };
 
+export type OfficeCharacterFacilityCompletionReview = {
+  stageLabel: "Character Facility Completion Review 1";
+  title: string;
+  detailKind: "character_facility_completion_review";
+  sourceLedgerKind: OfficeCharacterFacilitySourceLedgerStrip["detailKind"];
+  completedSlices: ["Character Panel Boundary Summary 1", "Character Facility Role Legend 1", "Character Facility Boundary Strip 1", "Character Facility Source Ledger Strip 1"];
+  completedSliceCount: 4;
+  zoneCount: number;
+  readOnlyTargetLevelReached: true;
+  nextLargePhaseBoundary: "event schema and controlled mutation approval boundary";
+  nextRequiresExplicitApproval: true;
+  enabledControls: 0;
+  clickHandlerEnabled: false;
+  keyboardHandlerEnabled: false;
+  formControlEnabled: false;
+  eventPersistenceEnabled: false;
+  backendStreamEnabled: false;
+  animationStatePersistenceEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeWorkerAssignmentCandidateBlockedReason = {
   id: "facility_prerequisites_missing" | "approval_execution_blocked" | "authority_adapter_missing" | "audit_write_disabled" | "human_confirmation_missing";
   label: string;
@@ -4842,6 +4869,36 @@ export function buildOfficeCharacterFacilitySourceLedgerStrip(strip: OfficeChara
     keyboardHandlerEnabled: false,
     formControlEnabled: false,
     sourceLedgerPersistenceEnabled: false,
+    eventPersistenceEnabled: false,
+    backendStreamEnabled: false,
+    animationStatePersistenceEnabled: false,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    nasSaveEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+
+export function buildOfficeCharacterFacilityCompletionReview(ledger: OfficeCharacterFacilitySourceLedgerStrip): OfficeCharacterFacilityCompletionReview {
+  return {
+    stageLabel: "Character Facility Completion Review 1",
+    title: "Character facility completion review",
+    detailKind: "character_facility_completion_review",
+    sourceLedgerKind: ledger.detailKind,
+    completedSlices: ["Character Panel Boundary Summary 1", "Character Facility Role Legend 1", "Character Facility Boundary Strip 1", "Character Facility Source Ledger Strip 1"],
+    completedSliceCount: 4,
+    zoneCount: ledger.zoneCount,
+    readOnlyTargetLevelReached: true,
+    nextLargePhaseBoundary: "event schema and controlled mutation approval boundary",
+    nextRequiresExplicitApproval: true,
+    enabledControls: 0,
+    clickHandlerEnabled: false,
+    keyboardHandlerEnabled: false,
+    formControlEnabled: false,
     eventPersistenceEnabled: false,
     backendStreamEnabled: false,
     animationStatePersistenceEnabled: false,

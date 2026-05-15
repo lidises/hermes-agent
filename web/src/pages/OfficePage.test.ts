@@ -131,6 +131,7 @@ import {
   buildOfficeCharacterFacilityRoleLegend,
   buildOfficeCharacterFacilityBoundaryStrip,
   buildOfficeCharacterFacilitySourceLedgerStrip,
+  buildOfficeCharacterFacilityCompletionReview,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -1391,6 +1392,59 @@ describe("Character Detail Safe Dialogue Copy 1", () => {
     expect(dialogue.safeProjectionOnly).toBe(true);
     expect(dialogue.rawExcluded).toBe(true);
     expect(JSON.stringify(dialogue)).not.toMatch(/raw character dialogue prompt|raw character dialogue task|Traceback|\/Users\/lidises|token-shaped-dialogue-copy|private-character-dialogue-provider/i);
+  });
+});
+
+
+describe("Character Facility Completion Review 1", () => {
+  it("summarizes the completed read-only character facility chain and stops at the next large boundary", () => {
+    const secretSentinel = ["token", "shaped", "facility", "completion"].join("-");
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishFixture({
+      agents: [{ id: "agent-character-completion", status: "active", prompt: "raw completion prompt", provider: "private-completion-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-character-completion", status: "blocked", title: "raw completion title", body: "/Users/lidises/private/completion.md", transcript: "Traceback completion transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+    const trace = buildOfficeApprovalDecisionAuditNasTracePreview(envelope);
+    const gate = buildOfficeNasKeeperSaveRequestGate(trace);
+    const rollback = buildOfficeNasKeeperRollbackEvidencePreview(gate);
+    const review = buildOfficeDeskRpgReadOnlyChainCompletionReview(rollback);
+    const stateProjection = buildOfficeEventDrivenCharacterStateProjection(review, [
+      { id: "evt-runtime-completion", category: "room_density_changed", roomId: "work", tone: "warning", count: 3, safeLabel: "room density", detail: "safe density aggregate", redacted: true, rawSource: false },
+      { id: "evt-intent-completion", category: "attention_changed", roomId: "routing", tone: "negative", count: 1, safeLabel: "approval attention", detail: "safe attention aggregate", redacted: true, rawSource: false },
+      { id: "evt-visual-completion", category: "snapshot_static", roomId: "sessions", tone: "neutral", count: 0, safeLabel: "static snapshot", detail: "safe static aggregate", redacted: true, rawSource: false },
+    ] as const);
+    const overlay = buildOfficeCharacterStateRoomOverlay(stateProjection);
+    const interaction = buildOfficeCharacterRoomInteractionPosture(overlay);
+    const detail = buildOfficeCharacterInspectorDetailPosture(interaction);
+    const dialogue = buildOfficeCharacterDetailSafeDialogueCopy(detail);
+    const alignment = buildOfficeCharacterBubbleInspectorAlignment(dialogue, detail);
+    const summary = buildOfficeCharacterPanelBoundarySummary(detail, dialogue, alignment);
+    const legend = buildOfficeCharacterFacilityRoleLegend(summary, overlay);
+    const strip = buildOfficeCharacterFacilityBoundaryStrip(legend, overlay);
+    const ledger = buildOfficeCharacterFacilitySourceLedgerStrip(strip, overlay);
+
+    const completion = buildOfficeCharacterFacilityCompletionReview(ledger);
+
+    expect(completion.stageLabel).toBe("Character Facility Completion Review 1");
+    expect(completion.detailKind).toBe("character_facility_completion_review");
+    expect(completion.sourceLedgerKind).toBe("character_facility_source_ledger_strip");
+    expect(completion.readOnlyTargetLevelReached).toBe(true);
+    expect(completion.completedSliceCount).toBe(4);
+    expect(completion.completedSlices).toEqual(["Character Panel Boundary Summary 1", "Character Facility Role Legend 1", "Character Facility Boundary Strip 1", "Character Facility Source Ledger Strip 1"]);
+    expect(completion.nextLargePhaseBoundary).toBe("event schema and controlled mutation approval boundary");
+    expect(completion.nextRequiresExplicitApproval).toBe(true);
+    expect(completion.enabledControls).toBe(0);
+    expect(completion.eventPersistenceEnabled).toBe(false);
+    expect(completion.requestCreationEnabled).toBe(false);
+    expect(completion.workAssignmentEnabled).toBe(false);
+    expect(completion.dispatchEnabled).toBe(false);
+    expect(completion.auditWriteEnabled).toBe(false);
+    expect(completion.nasSaveEnabled).toBe(false);
+    expect(completion.safeProjectionOnly).toBe(true);
+    expect(completion.rawExcluded).toBe(true);
+    expect(JSON.stringify(completion)).not.toMatch(/raw completion prompt|raw completion title|Traceback|\/Users\/lidises|token-shaped-facility-completion|private-completion-provider/i);
   });
 });
 

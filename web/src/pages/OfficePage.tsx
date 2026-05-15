@@ -142,6 +142,7 @@ import {
   buildOfficeCharacterFacilityRoleLegend,
   buildOfficeCharacterFacilityBoundaryStrip,
   buildOfficeCharacterFacilitySourceLedgerStrip,
+  buildOfficeCharacterFacilityCompletionReview,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -186,6 +187,7 @@ import {
   type OfficeCharacterFacilityRoleLegend,
   type OfficeCharacterFacilityBoundaryStrip,
   type OfficeCharacterFacilitySourceLedgerStrip,
+  type OfficeCharacterFacilityCompletionReview,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -3448,6 +3450,49 @@ export function CharacterFacilitySourceLedgerStripPanel({ ledger }: { ledger: Of
   );
 }
 
+export function CharacterFacilityCompletionReviewPanel({ review }: { review: OfficeCharacterFacilityCompletionReview }) {
+  return (
+    <Card
+      data-office-character-facility-completion-review="true"
+      data-office-character-facility-completion-review-enabled-controls={review.enabledControls}
+      data-office-character-facility-completion-review-target-reached={String(review.readOnlyTargetLevelReached)}
+      data-office-character-facility-completion-review-next-requires-approval={String(review.nextRequiresExplicitApproval)}
+      data-office-character-facility-completion-review-safe-projection-only={String(review.safeProjectionOnly)}
+      data-office-character-facility-completion-review-raw-excluded={String(review.rawExcluded)}
+      data-office-character-facility-completion-review-event-persistence-enabled={String(review.eventPersistenceEnabled)}
+      data-office-character-facility-completion-review-request-creation-enabled={String(review.requestCreationEnabled)}
+      data-office-character-facility-completion-review-dispatch-enabled={String(review.dispatchEnabled)}
+      data-office-character-facility-completion-review-audit-write-enabled={String(review.auditWriteEnabled)}
+      data-office-character-facility-completion-review-nas-save-enabled={String(review.nasSaveEnabled)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4" /> Character facility completion review
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-emerald-300/20 bg-emerald-950/10 p-3">
+            <div className="font-semibold text-emerald-100">Read-only character facility target reached</div>
+            <div className="mt-1 leading-5">The character/facility read-only chain is complete at this target level. The next boundary is the event schema and controlled mutation approval boundary, which requires explicit approval before any executable work.</div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-2">
+            {review.completedSlices.map((slice) => (
+              <div key={slice} className="border border-current/15 bg-black/15 p-3" data-office-character-facility-completion-review-slice={slice}>
+                <div className="font-semibold text-foreground">{slice}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-emerald-100/80">completed · controls {review.enabledControls}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-character-facility-completion-review-boundary="true">
+            source {review.sourceLedgerKind} · zones {review.zoneCount} · next {review.nextLargePhaseBoundary} · explicit approval {String(review.nextRequiresExplicitApproval)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -4006,6 +4051,10 @@ export default function OfficePage() {
     () => buildOfficeCharacterFacilitySourceLedgerStrip(characterFacilityBoundaryStrip, characterStateRoomOverlay),
     [characterFacilityBoundaryStrip, characterStateRoomOverlay],
   );
+  const characterFacilityCompletionReview = useMemo(
+    () => buildOfficeCharacterFacilityCompletionReview(characterFacilitySourceLedgerStrip),
+    [characterFacilitySourceLedgerStrip],
+  );
   const safeMotionHeartbeat = useMemo(
     () => buildOfficeSafeMotionHeartbeat(safeStreamPosture, {
       pollStatus: safeEventsStatus === "loaded" ? "active" : safeEventsStatus,
@@ -4246,6 +4295,8 @@ export default function OfficePage() {
       <CharacterFacilityBoundaryStripPanel strip={characterFacilityBoundaryStrip} />
 
       <CharacterFacilitySourceLedgerStripPanel ledger={characterFacilitySourceLedgerStrip} />
+
+      <CharacterFacilityCompletionReviewPanel review={characterFacilityCompletionReview} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 
