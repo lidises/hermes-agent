@@ -48,6 +48,7 @@ from hermes_cli.config import (
     redact_key,
 )
 from gateway.status import get_running_pid, read_runtime_status
+from hermes_cli.office_controlled_mutation import build_office_controlled_mutation_contract_schema
 from hermes_cli.office_state import build_office_safe_event_payload, build_office_state
 
 try:
@@ -540,6 +541,12 @@ async def get_office_state(request: Request):
     """Return the redacted read-only AI OfficeState projection."""
     mode = _validate_office_display_mode(request)
     return build_office_state(display_mode=mode).to_dict()
+
+
+@app.get("/api/office/controlled-mutation/schema")
+async def get_office_controlled_mutation_schema():
+    """Return the non-executable AI Office controlled-mutation contract."""
+    return build_office_controlled_mutation_contract_schema()
 
 
 @app.get("/api/office/events")
