@@ -266,3 +266,63 @@ def build_office_controlled_mutation_event_persistence_contract(
             "storage backend, migration, retention, and audit sink require separate approval",
         ],
     }
+
+
+def build_office_controlled_mutation_audit_sink_contract(
+    *, unsafe_examples: Mapping[str, Any] | None = None
+) -> dict[str, object]:
+    """Return the non-writing audit sink contract descriptor.
+
+    ``unsafe_examples`` is deliberately ignored so private raw audit material,
+    prompts, transcripts, paths, providers, tokens, and topic ids are never
+    echoed by the contract helper.
+    """
+
+    _ = unsafe_examples
+    return {
+        "schema_version": 1,
+        "mode": "audit_sink_contract_only",
+        "audit_sink": {
+            "implementation_enabled": False,
+            "write_enabled": False,
+            "append_enabled": False,
+            "readback_enabled": False,
+            "durable_storage_enabled": False,
+            "database_migration_required": False,
+        },
+        "accepted_event_kinds": list(_EVENT_KINDS),
+        "result_postures": ["info", "warning", "blocked", "success"],
+        "required_audit_fields": [
+            "audit_ref",
+            "event_at",
+            "event_kind",
+            "result_posture",
+            "safe_summary",
+        ],
+        "optional_safe_refs": ["request_ref", "dry_run_ref", "decision_ref", "action_kind"],
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "opaque_refs_only": True,
+            "safe_summaries_only": True,
+            "unsupported_values_echoed": False,
+        },
+        "capabilities": {
+            "audit_write_enabled": False,
+            "audit_append_enabled": False,
+            "audit_readback_enabled": False,
+            "event_append_enabled": False,
+            "request_creation_enabled": False,
+            "dry_run_execution_enabled": False,
+            "human_decision_recording_enabled": False,
+            "authority_adapter_enabled": False,
+            "target_mutation_enabled": False,
+            "nas_save_enabled": False,
+        },
+        "audit_endpoints": [],
+        "storage_endpoints": [],
+        "contract_notes": [
+            "contract describes future audit sink shape only; no audit event is written",
+            "audit storage, append route, retention, and readback require separate approval",
+        ],
+    }
