@@ -18,7 +18,7 @@ vi.mock("@/lib/api", () => ({
 
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
-import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeRpgScene } from "./officeView";
+import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeRpgScene } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
@@ -987,42 +987,47 @@ describe("WorkerRequestHandoffDetailPanel", () => {
 });
 
 
+function buildApprovalNasBoundaryPolishPanelFixture(overrides: Partial<OfficeState> = {}) {
+  const state = officeFixture({
+    agents: [{ id: "agent-approval-nas", status: "active", prompt: "raw approval nas prompt", provider: "private-approval-nas-provider", api_key: "token-shaped-approval-nas" }],
+    work_items: [
+      { id: "task-approval-nas", status: "blocked", title: "raw approval nas task", body: "/Users/lidises/private/approval-nas.md", transcript: "Traceback approval nas transcript" } as unknown as OfficeState["work_items"][number],
+    ],
+    data_sources: [
+      { id: "paperclip", status: "partial", checked_at: "2026-05-15T00:00:00Z", item_count: 11, warning_count: 4, error_summary: "Traceback approval nas source" },
+    ],
+    ...overrides,
+  });
+  const projection = buildOfficeDeskRpgProjectionModel(state);
+  const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+  const posture = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
+  const envelope = buildOfficeOrchestratorRequestEnvelopeDetail(projection, posture);
+  const route = buildOfficeApprovalRequestRouteDetail(envelope, dialogue);
+  const contract = buildOfficeEventRequestContractProjection(route);
+  const inspector = buildOfficeApprovalDialogueRouteInspector(dialogue, route, contract);
+  const timeline = buildOfficeEventTimelineProjection(contract, inspector);
+  const workerRoles = buildOfficeDeskRpgWorkerRoleVisibility(projection);
+  const handoff = buildOfficeReviewerWikiHandoffPosture(projection);
+  const drilldown = buildOfficeTimelineWorkerHandoffDrilldown(timeline, workerRoles, handoff);
+  const approvalDetail = buildOfficeApprovalRequestDetailDeepening(route, timeline, drilldown);
+  const approvalView = buildOfficeApprovalRequestView(state);
+  const audit = buildOfficeApprovalAuditTimeline(approvalView);
+  const gate = buildOfficeApprovalExecutionGate(audit);
+  const authority = buildOfficeAuthorityAdapterContract(gate);
+  const queue = buildOfficeOrchestratorMediationQueue(authority);
+  const routing = buildOfficeWorkerIntentRouting(queue);
+  const readiness = buildOfficeWorkerFacilityReadiness(routing);
+  const lanePolish = buildOfficeWorkerFacilityLanePolish(drilldown, readiness);
+  const detail = buildOfficeWorkerRequestHandoffDetail(approvalDetail, lanePolish);
+  return buildOfficeApprovalNasBoundaryPolish(detail);
+}
+
 describe("ApprovalNasBoundaryPolishPanel", () => {
   it("Approval/NAS Boundary Polish 1 renders approval and NAS locks as read-only posture", () => {
     const ApprovalNasBoundaryPolishPanel = (OfficePageModule as unknown as {
       ApprovalNasBoundaryPolishPanel: React.ComponentType<{ polish: ReturnType<typeof buildOfficeApprovalNasBoundaryPolish> }>;
     }).ApprovalNasBoundaryPolishPanel;
-    const state = officeFixture({
-      agents: [{ id: "agent-approval-nas", status: "active", prompt: "raw approval nas prompt", provider: "private-approval-nas-provider", api_key: "token-shaped-approval-nas" }],
-      work_items: [
-        { id: "task-approval-nas", status: "blocked", title: "raw approval nas task", body: "/Users/lidises/private/approval-nas.md", transcript: "Traceback approval nas transcript" } as unknown as OfficeState["work_items"][number],
-      ],
-      data_sources: [
-        { id: "paperclip", status: "partial", checked_at: "2026-05-15T00:00:00Z", item_count: 11, warning_count: 4, error_summary: "Traceback approval nas source" },
-      ],
-    });
-    const projection = buildOfficeDeskRpgProjectionModel(state);
-    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
-    const posture = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
-    const envelope = buildOfficeOrchestratorRequestEnvelopeDetail(projection, posture);
-    const route = buildOfficeApprovalRequestRouteDetail(envelope, dialogue);
-    const contract = buildOfficeEventRequestContractProjection(route);
-    const inspector = buildOfficeApprovalDialogueRouteInspector(dialogue, route, contract);
-    const timeline = buildOfficeEventTimelineProjection(contract, inspector);
-    const workerRoles = buildOfficeDeskRpgWorkerRoleVisibility(projection);
-    const handoff = buildOfficeReviewerWikiHandoffPosture(projection);
-    const drilldown = buildOfficeTimelineWorkerHandoffDrilldown(timeline, workerRoles, handoff);
-    const approvalDetail = buildOfficeApprovalRequestDetailDeepening(route, timeline, drilldown);
-    const approvalView = buildOfficeApprovalRequestView(state);
-    const audit = buildOfficeApprovalAuditTimeline(approvalView);
-    const gate = buildOfficeApprovalExecutionGate(audit);
-    const authority = buildOfficeAuthorityAdapterContract(gate);
-    const queue = buildOfficeOrchestratorMediationQueue(authority);
-    const routing = buildOfficeWorkerIntentRouting(queue);
-    const readiness = buildOfficeWorkerFacilityReadiness(routing);
-    const lanePolish = buildOfficeWorkerFacilityLanePolish(drilldown, readiness);
-    const detail = buildOfficeWorkerRequestHandoffDetail(approvalDetail, lanePolish);
-    const polish = buildOfficeApprovalNasBoundaryPolish(detail);
+    const polish = buildApprovalNasBoundaryPolishPanelFixture();
 
     const markup = renderToStaticMarkup(<ApprovalNasBoundaryPolishPanel polish={polish} />);
 
@@ -1041,6 +1046,41 @@ describe("ApprovalNasBoundaryPolishPanel", () => {
     expect(markup).not.toContain("<select");
     expect(markup).not.toContain("<textarea");
     expect(markup).not.toMatch(/raw approval nas prompt|raw approval nas task|Traceback|\/Users\/lidises|token-shaped-approval-nas|private-approval-nas-provider/i);
+  });
+});
+
+
+describe("ApprovalAuthorityReadinessDetailPanel", () => {
+  it("Approval Authority Readiness Detail 1 renders authority prerequisites without enabled controls", () => {
+    const ApprovalAuthorityReadinessDetailPanel = (OfficePageModule as unknown as {
+      ApprovalAuthorityReadinessDetailPanel: React.ComponentType<{ readiness: ReturnType<typeof buildOfficeApprovalAuthorityReadinessDetail> }>;
+    }).ApprovalAuthorityReadinessDetailPanel;
+    const boundary = buildApprovalNasBoundaryPolishPanelFixture({
+      agents: [{ id: "agent-authority-readiness", status: "active", prompt: "raw authority readiness prompt", provider: "private-authority-readiness-provider", api_key: "token-shaped-authority-readiness" }],
+      work_items: [
+        { id: "task-authority-readiness", status: "blocked", title: "raw authority readiness task", body: "/Users/lidises/private/authority-readiness.md", transcript: "Traceback authority readiness transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    });
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(boundary);
+
+    const markup = renderToStaticMarkup(<ApprovalAuthorityReadinessDetailPanel readiness={readiness} />);
+
+    expect(markup).toContain("data-office-approval-authority-readiness-detail=\"true\"");
+    expect(markup).toContain("data-office-approval-authority-readiness-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-approval-authority-readiness-authority-granted=\"false\"");
+    expect(markup).toContain("data-office-approval-authority-readiness-approve-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-authority-readiness-nas-save-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-authority-readiness-card=\"human_authority\"");
+    expect(markup).toContain("data-office-approval-authority-readiness-card=\"orchestrator_mediation\"");
+    expect(markup).toContain("data-office-approval-authority-readiness-card=\"audit_sink\"");
+    expect(markup).toContain("data-office-approval-authority-readiness-card=\"nas_keeper_authority\"");
+    expect(markup).toContain("Approval authority readiness");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw authority readiness prompt|raw authority readiness task|Traceback|\/Users\/lidises|token-shaped-authority-readiness|private-authority-readiness-provider/i);
   });
 });
 

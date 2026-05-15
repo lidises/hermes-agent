@@ -125,6 +125,7 @@ import {
   buildOfficeWorkerFacilityLanePolish,
   buildOfficeWorkerRequestHandoffDetail,
   buildOfficeApprovalNasBoundaryPolish,
+  buildOfficeApprovalAuthorityReadinessDetail,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -153,6 +154,7 @@ import {
   type OfficeWorkerFacilityLanePolish,
   type OfficeWorkerRequestHandoffDetail,
   type OfficeApprovalNasBoundaryPolish,
+  type OfficeApprovalAuthorityReadinessDetail,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -2543,6 +2545,60 @@ export function ApprovalNasBoundaryPolishPanel({ polish }: { polish: OfficeAppro
   );
 }
 
+export function ApprovalAuthorityReadinessDetailPanel({ readiness }: { readiness: OfficeApprovalAuthorityReadinessDetail }) {
+  return (
+    <Card
+      data-office-approval-authority-readiness-detail="true"
+      data-office-approval-authority-readiness-enabled-controls={readiness.enabledControls}
+      data-office-approval-authority-readiness-authority-granted={String(readiness.authorityGranted)}
+      data-office-approval-authority-readiness-approve-enabled={String(readiness.approveEnabled)}
+      data-office-approval-authority-readiness-reject-enabled={String(readiness.rejectEnabled)}
+      data-office-approval-authority-readiness-hold-enabled={String(readiness.holdEnabled)}
+      data-office-approval-authority-readiness-request-creation-enabled={String(readiness.requestCreationEnabled)}
+      data-office-approval-authority-readiness-work-assignment-enabled={String(readiness.workAssignmentEnabled)}
+      data-office-approval-authority-readiness-dispatch-enabled={String(readiness.dispatchEnabled)}
+      data-office-approval-authority-readiness-audit-write-enabled={String(readiness.auditWriteEnabled)}
+      data-office-approval-authority-readiness-nas-save-enabled={String(readiness.nasSaveEnabled)}
+      data-office-approval-authority-readiness-safe-projection-only={String(readiness.safeProjectionOnly)}
+      data-office-approval-authority-readiness-raw-excluded={String(readiness.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4" /> Approval authority readiness
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-violet-300/20 bg-violet-950/10 p-3">
+            <div className="font-semibold text-violet-100">human authority · orchestrator mediation · audit/NAS prerequisites</div>
+            <div className="mt-1 leading-5">
+              Approval 권한이 실제 실행 가능해지기 전에 필요한 사람 승인, Orchestrator 중재, audit sink, NAS Keeper 권한을 표시합니다. 현재 slice는 authority granted=false, controls=0인 projection-only 상태입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {readiness.cards.map((card) => (
+              <div
+                key={card.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-approval-authority-readiness-card={card.id}
+                data-office-approval-authority-readiness-card-status={card.status}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{card.label}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-violet-100/80">{card.status}</div>
+                <div className="mt-2 leading-5">{card.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-approval-authority-readiness-boundary="true">
+            source {readiness.sourceDetailKind} · boundaries {readiness.sourceBoundaryCount} · warnings {readiness.sourceWarningCount} · prerequisites {readiness.authorityPrerequisiteCount} · controls {readiness.enabledControls} · authority granted {String(readiness.authorityGranted)} · raw excluded {String(readiness.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -2995,6 +3051,10 @@ export default function OfficePage() {
     () => buildOfficeApprovalNasBoundaryPolish(workerRequestHandoffDetail),
     [workerRequestHandoffDetail],
   );
+  const approvalAuthorityReadinessDetail = useMemo(
+    () => buildOfficeApprovalAuthorityReadinessDetail(approvalNasBoundaryPolish),
+    [approvalNasBoundaryPolish],
+  );
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -3245,6 +3305,8 @@ export default function OfficePage() {
       <WorkerRequestHandoffDetailPanel detail={workerRequestHandoffDetail} />
 
       <ApprovalNasBoundaryPolishPanel polish={approvalNasBoundaryPolish} />
+
+      <ApprovalAuthorityReadinessDetailPanel readiness={approvalAuthorityReadinessDetail} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 

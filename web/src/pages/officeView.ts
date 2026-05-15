@@ -1799,6 +1799,37 @@ export type OfficeApprovalNasBoundaryPolish = {
   rawExcluded: true;
 };
 
+export type OfficeApprovalAuthorityReadinessCard = {
+  id: "human_authority" | "orchestrator_mediation" | "audit_sink" | "nas_keeper_authority";
+  label: string;
+  status: "blocked" | "read_only";
+  summary: string;
+  rawExcluded: true;
+};
+
+export type OfficeApprovalAuthorityReadinessDetail = {
+  stageLabel: "Approval Authority Readiness Detail 1";
+  title: string;
+  detailKind: "approval_authority_readiness_detail";
+  cards: OfficeApprovalAuthorityReadinessCard[];
+  sourceDetailKind: OfficeApprovalNasBoundaryPolish["detailKind"];
+  sourceBoundaryCount: number;
+  sourceWarningCount: number;
+  authorityPrerequisiteCount: number;
+  enabledControls: 0;
+  authorityGranted: false;
+  approveEnabled: false;
+  rejectEnabled: false;
+  holdEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeWorkerAssignmentCandidateBlockedReason = {
   id: "facility_prerequisites_missing" | "approval_execution_blocked" | "authority_adapter_missing" | "audit_write_disabled" | "human_confirmation_missing";
   label: string;
@@ -3394,6 +3425,60 @@ export function buildOfficeApprovalNasBoundaryPolish(detail: OfficeWorkerRequest
     sourceWarningCount: detail.warningCount,
     boundaryCount: 4,
     enabledControls: 0,
+    approveEnabled: false,
+    rejectEnabled: false,
+    holdEnabled: false,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    nasSaveEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeApprovalAuthorityReadinessDetail(boundary: OfficeApprovalNasBoundaryPolish): OfficeApprovalAuthorityReadinessDetail {
+  return {
+    stageLabel: "Approval Authority Readiness Detail 1",
+    title: "Approval authority readiness",
+    detailKind: "approval_authority_readiness_detail",
+    cards: [
+      {
+        id: "human_authority",
+        label: "human authority",
+        status: "blocked",
+        summary: "Human approve/reject/hold authority is named as a prerequisite, but this read-only browser panel grants no decision capability.",
+        rawExcluded: true,
+      },
+      {
+        id: "orchestrator_mediation",
+        label: "orchestrator mediation",
+        status: "read_only",
+        summary: `${boundary.boundaryCount} boundary marker(s) remain mediated posture only; no request creation, work assignment, or dispatch path is opened.`,
+        rawExcluded: true,
+      },
+      {
+        id: "audit_sink",
+        label: "audit sink readiness",
+        status: "blocked",
+        summary: "Audit sink readiness is a required future prerequisite, but audit write remains disabled and no audit record is appended here.",
+        rawExcluded: true,
+      },
+      {
+        id: "nas_keeper_authority",
+        label: "NAS keeper authority",
+        status: "blocked",
+        summary: "NAS Keeper authority remains locked behind future approval; no NAS save, vault write, path projection, or save request is created.",
+        rawExcluded: true,
+      },
+    ],
+    sourceDetailKind: boundary.detailKind,
+    sourceBoundaryCount: boundary.boundaryCount,
+    sourceWarningCount: boundary.sourceWarningCount,
+    authorityPrerequisiteCount: 4,
+    enabledControls: 0,
+    authorityGranted: false,
     approveEnabled: false,
     rejectEnabled: false,
     holdEnabled: false,
