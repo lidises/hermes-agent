@@ -2024,6 +2024,40 @@ export type OfficeEventDrivenCharacterStateProjection = {
   rawExcluded: true;
 };
 
+export type OfficeCharacterStateRoomOverlayMarker = {
+  role: OfficeEventDrivenCharacterState["role"];
+  label: string;
+  state: OfficeEventDrivenCharacterState["state"];
+  eventClass: OfficeEventDrivenCharacterState["eventClass"];
+  sourceEventCategory: OfficeEventDrivenCharacterState["sourceEventCategory"];
+  roomSurfaceId: OfficeDeskRpgProjectionFacilityId;
+  markerKind: "presence" | "attention" | "handoff" | "boundary";
+  safeSummary: string;
+  interactive: false;
+  rawExcluded: true;
+};
+
+export type OfficeCharacterStateRoomOverlay = {
+  stageLabel: "Character State Room Overlay 1";
+  title: string;
+  detailKind: "character_state_room_overlay";
+  sourceDetailKind: OfficeEventDrivenCharacterStateProjection["detailKind"];
+  sourceCharacterStateCount: number;
+  markerCount: number;
+  markers: OfficeCharacterStateRoomOverlayMarker[];
+  enabledControls: 0;
+  eventPersistenceEnabled: false;
+  backendStreamEnabled: false;
+  animationStatePersistenceEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeWorkerAssignmentCandidateBlockedReason = {
   id: "facility_prerequisites_missing" | "approval_execution_blocked" | "authority_adapter_missing" | "audit_write_disabled" | "human_confirmation_missing";
   label: string;
@@ -4043,6 +4077,48 @@ export function buildOfficeEventDrivenCharacterStateProjection(review: OfficeDes
     visualEventCreationEnabled: false,
     eventPersistenceEnabled: false,
     stateMachinePersistenceEnabled: false,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    nasSaveEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+function markerKindForCharacterState(state: OfficeEventDrivenCharacterState): OfficeCharacterStateRoomOverlayMarker["markerKind"] {
+  if (state.role === "user_boss" || state.role === "orchestrator") return "attention";
+  if (state.role === "nas_keeper") return "boundary";
+  if (state.role === "reviewer" || state.role === "wiki_writer") return "handoff";
+  return "presence";
+}
+
+export function buildOfficeCharacterStateRoomOverlay(projection: OfficeEventDrivenCharacterStateProjection): OfficeCharacterStateRoomOverlay {
+  const markers: OfficeCharacterStateRoomOverlayMarker[] = projection.characterStates.map((state) => ({
+    role: state.role,
+    label: state.label,
+    state: state.state,
+    eventClass: state.eventClass,
+    sourceEventCategory: state.sourceEventCategory,
+    roomSurfaceId: state.facilityId,
+    markerKind: markerKindForCharacterState(state),
+    safeSummary: `${state.label} presence marker: ${state.safeSummary}`,
+    interactive: false,
+    rawExcluded: true,
+  }));
+  return {
+    stageLabel: "Character State Room Overlay 1",
+    title: "Character state room overlay",
+    detailKind: "character_state_room_overlay",
+    sourceDetailKind: projection.detailKind,
+    sourceCharacterStateCount: projection.characterStates.length,
+    markerCount: markers.length,
+    markers,
+    enabledControls: 0,
+    eventPersistenceEnabled: false,
+    backendStreamEnabled: false,
+    animationStatePersistenceEnabled: false,
     requestCreationEnabled: false,
     workAssignmentEnabled: false,
     dispatchEnabled: false,

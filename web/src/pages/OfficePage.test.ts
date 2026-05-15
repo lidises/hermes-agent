@@ -122,6 +122,7 @@ import {
   buildOfficeNasKeeperRollbackEvidencePreview,
   buildOfficeDeskRpgReadOnlyChainCompletionReview,
   buildOfficeEventDrivenCharacterStateProjection,
+  buildOfficeCharacterStateRoomOverlay,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -1187,6 +1188,51 @@ describe("Event-driven Character State Projection 1", () => {
     expect(projection.rawExcluded).toBe(true);
     expect(projection.characterStates.every((state) => state.rawExcluded === true)).toBe(true);
     expect(JSON.stringify(projection)).not.toMatch(/raw character state prompt|raw character state task|Traceback|\/Users\/lidises|token-shaped-character-state|private-character-state-provider/i);
+  });
+});
+
+
+describe("Character State Room Overlay 1", () => {
+  it("projects safe character states into non-interactive room presence markers", () => {
+    const secretSentinel = ["token", "shaped", "room", "overlay"].join("-");
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishFixture({
+      agents: [{ id: "agent-character-overlay", status: "active", prompt: "raw character overlay prompt", provider: "private-character-overlay-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-character-overlay", status: "blocked", title: "raw character overlay task", body: "/Users/lidises/private/character-overlay.md", transcript: "Traceback character overlay transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+    const trace = buildOfficeApprovalDecisionAuditNasTracePreview(envelope);
+    const gate = buildOfficeNasKeeperSaveRequestGate(trace);
+    const rollback = buildOfficeNasKeeperRollbackEvidencePreview(gate);
+    const review = buildOfficeDeskRpgReadOnlyChainCompletionReview(rollback);
+    const stateProjection = buildOfficeEventDrivenCharacterStateProjection(review, [
+      { id: "evt-runtime-room", category: "room_density_changed", roomId: "work", tone: "warning", count: 3, safeLabel: "room density", detail: "safe density aggregate", redacted: true, rawSource: false },
+      { id: "evt-intent-room", category: "attention_changed", roomId: "routing", tone: "negative", count: 1, safeLabel: "approval attention", detail: "safe attention aggregate", redacted: true, rawSource: false },
+      { id: "evt-visual-room", category: "snapshot_static", roomId: "sessions", tone: "neutral", count: 0, safeLabel: "static snapshot", detail: "safe static aggregate", redacted: true, rawSource: false },
+    ] as const);
+
+    const overlay = buildOfficeCharacterStateRoomOverlay(stateProjection);
+
+    expect(overlay.stageLabel).toBe("Character State Room Overlay 1");
+    expect(overlay.detailKind).toBe("character_state_room_overlay");
+    expect(overlay.sourceDetailKind).toBe("event_driven_character_state_projection");
+    expect(overlay.markerCount).toBe(6);
+    expect(overlay.markers.map((marker) => marker.role)).toEqual(["user_boss", "orchestrator", "search_worker", "reviewer", "wiki_writer", "nas_keeper"]);
+    expect(overlay.markers.map((marker) => marker.roomSurfaceId)).toEqual(["boss_desk", "orchestrator_desk", "worker_cluster", "right_inspector", "central_board", "nas_vault"]);
+    expect(overlay.markers.every((marker) => marker.interactive === false && marker.rawExcluded === true)).toBe(true);
+    expect(overlay.enabledControls).toBe(0);
+    expect(overlay.eventPersistenceEnabled).toBe(false);
+    expect(overlay.backendStreamEnabled).toBe(false);
+    expect(overlay.animationStatePersistenceEnabled).toBe(false);
+    expect(overlay.requestCreationEnabled).toBe(false);
+    expect(overlay.workAssignmentEnabled).toBe(false);
+    expect(overlay.dispatchEnabled).toBe(false);
+    expect(overlay.auditWriteEnabled).toBe(false);
+    expect(overlay.nasSaveEnabled).toBe(false);
+    expect(overlay.safeProjectionOnly).toBe(true);
+    expect(overlay.rawExcluded).toBe(true);
+    expect(JSON.stringify(overlay)).not.toMatch(/raw character overlay prompt|raw character overlay task|Traceback|\/Users\/lidises|token-shaped-room-overlay|private-character-overlay-provider/i);
   });
 });
 

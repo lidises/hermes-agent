@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-15 14:57 KST
+Last updated: 2026-05-15 15:25 KST
 
 ## AI Office 통합 운영실 umbrella summary
 
@@ -28,6 +28,14 @@ Master Spec v0.1 review adds an important clarification: read-only-first is the 
 
 
 
+
+## Character State Room Overlay 1 completed locally
+
+`Character State Room Overlay 1` adds a safe helper, `buildOfficeCharacterStateRoomOverlay(projection)`, plus `CharacterStateRoomOverlayPanel` in `/office`. It composes only the existing safe `Event-driven Character State Projection 1` DTO into six non-interactive room/facility presence markers for the user boss, Orchestrator, Search Worker, Reviewer, Wiki Writer, and NAS Keeper. It keeps `enabledControls=0`, `eventPersistenceEnabled=false`, `backendStreamEnabled=false`, `animationStatePersistenceEnabled=false`, `requestCreationEnabled=false`, `workAssignmentEnabled=false`, `dispatchEnabled=false`, `auditWriteEnabled=false`, `nasSaveEnabled=false`, and raw exclusion true through stable `data-office-character-state-room-overlay*` hooks.
+
+Verification 2026-05-15 15:25 KST: focused RED first failed with `buildOfficeCharacterStateRoomOverlay is not a function`; focused GREEN passed with `2 passed | 153 skipped`. Combined Office tests passed with `155 passed`; touched-file ESLint passed; `npm run build` passed with only the existing Vite large-chunk warning; `git diff --check` passed; preview smoke for `/office?character-state-room-overlay=1` returned HTTP 200 app shell and no raw sentinel leak; browser smoke reached the expected unauthorized dashboard fallback with no console/JS errors and no raw sentinel leak; independent diff review returned PASS with no blocking findings.
+
+Safety/non-actions: frontend/read-only only; no backend/schema/API route/service/Kanban/cron/VPS/NAS mutation, no renderer dependency, no form/button/input/select/textarea controls in the new panel, no backend stream, no event persistence, no animation-state persistence, no request creation, no worker assignment, no dispatch, no audit write, no NAS save, and no raw prompt/task body/transcript/path/token/provider projection.
 
 ## Event-driven Character State Projection 1 completed locally
 

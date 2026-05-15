@@ -132,6 +132,7 @@ import {
   buildOfficeNasKeeperRollbackEvidencePreview,
   buildOfficeDeskRpgReadOnlyChainCompletionReview,
   buildOfficeEventDrivenCharacterStateProjection,
+  buildOfficeCharacterStateRoomOverlay,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -167,6 +168,7 @@ import {
   type OfficeNasKeeperRollbackEvidencePreview,
   type OfficeDeskRpgReadOnlyChainCompletionReview,
   type OfficeEventDrivenCharacterStateProjection,
+  type OfficeCharacterStateRoomOverlay,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -2934,6 +2936,59 @@ export function EventDrivenCharacterStateProjectionPanel({ projection }: { proje
   );
 }
 
+export function CharacterStateRoomOverlayPanel({ overlay }: { overlay: OfficeCharacterStateRoomOverlay }) {
+  return (
+    <Card
+      data-office-character-state-room-overlay="true"
+      data-office-character-state-room-overlay-enabled-controls={overlay.enabledControls}
+      data-office-character-state-room-overlay-event-persistence-enabled={String(overlay.eventPersistenceEnabled)}
+      data-office-character-state-room-overlay-backend-stream-enabled={String(overlay.backendStreamEnabled)}
+      data-office-character-state-room-overlay-animation-state-persistence-enabled={String(overlay.animationStatePersistenceEnabled)}
+      data-office-character-state-room-overlay-request-creation-enabled={String(overlay.requestCreationEnabled)}
+      data-office-character-state-room-overlay-dispatch-enabled={String(overlay.dispatchEnabled)}
+      data-office-character-state-room-overlay-nas-save-enabled={String(overlay.nasSaveEnabled)}
+      data-office-character-state-room-overlay-safe-projection-only={String(overlay.safeProjectionOnly)}
+      data-office-character-state-room-overlay-raw-excluded={String(overlay.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <MapPinned className="h-4 w-4" /> Character state room overlay
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-cyan-300/20 bg-cyan-950/10 p-3">
+            <div className="font-semibold text-cyan-100">safe character states → room presence markers</div>
+            <div className="mt-1 leading-5">
+              여섯 캐릭터 상태를 기존 Desk RPG room/facility 표면의 non-interactive marker로만 올립니다. backend stream, event persist, animation state 저장, request 생성, dispatch, NAS 저장은 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3">
+            {overlay.markers.map((marker) => (
+              <div
+                key={marker.role}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-character-state-room-overlay-marker={marker.role}
+                data-office-character-state-room-overlay-room={marker.roomSurfaceId}
+                data-office-character-state-room-overlay-marker-kind={marker.markerKind}
+                data-office-character-state-room-overlay-interactive={String(marker.interactive)}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{marker.roomSurfaceId}</div>
+                <div className="mt-1 font-semibold text-foreground">{marker.label}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-cyan-100/80">{marker.state}</div>
+                <div className="mt-2 leading-5">{marker.safeSummary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-character-state-room-overlay-boundary="true">
+            source {overlay.sourceDetailKind} · states {overlay.sourceCharacterStateCount} · markers {overlay.markerCount} · controls {overlay.enabledControls} · raw excluded {String(overlay.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -3456,6 +3511,10 @@ export default function OfficePage() {
     () => buildOfficeEventDrivenCharacterStateProjection(deskRpgReadOnlyChainCompletionReview, safeStreamPosture.events),
     [deskRpgReadOnlyChainCompletionReview, safeStreamPosture.events],
   );
+  const characterStateRoomOverlay = useMemo(
+    () => buildOfficeCharacterStateRoomOverlay(eventDrivenCharacterStateProjection),
+    [eventDrivenCharacterStateProjection],
+  );
   const safeMotionHeartbeat = useMemo(
     () => buildOfficeSafeMotionHeartbeat(safeStreamPosture, {
       pollStatus: safeEventsStatus === "loaded" ? "active" : safeEventsStatus,
@@ -3678,6 +3737,8 @@ export default function OfficePage() {
       <DeskRpgReadOnlyChainCompletionReviewPanel review={deskRpgReadOnlyChainCompletionReview} />
 
       <EventDrivenCharacterStateProjectionPanel projection={eventDrivenCharacterStateProjection} />
+
+      <CharacterStateRoomOverlayPanel overlay={characterStateRoomOverlay} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 
