@@ -2136,6 +2136,49 @@ export type OfficeCharacterInspectorDetailPosture = {
   rawExcluded: true;
 };
 
+export type OfficeCharacterDetailSafeDialogueCopyKind =
+  | "boss_instruction_waiting"
+  | "orchestrator_mediation"
+  | "search_evidence"
+  | "review_waiting"
+  | "wiki_draft_waiting"
+  | "nas_approval_required";
+
+export type OfficeCharacterDetailSafeDialogueBubble = {
+  role: OfficeCharacterInspectorDetailPostureCard["role"];
+  sourceDetailCardId: OfficeCharacterInspectorDetailPostureCard["detailCardId"];
+  copyKind: OfficeCharacterDetailSafeDialogueCopyKind;
+  generatedCopy: string;
+  safeTone: "neutral" | "info" | "warning";
+  rawTextVisible: false;
+  executable: false;
+  rawExcluded: true;
+};
+
+export type OfficeCharacterDetailSafeDialogueCopy = {
+  stageLabel: "Character Detail Safe Dialogue Copy 1";
+  title: string;
+  detailKind: "character_detail_safe_dialogue_copy";
+  sourceDetailKind: OfficeCharacterInspectorDetailPosture["detailKind"];
+  sourceCardCount: number;
+  bubbleCount: number;
+  bubbles: OfficeCharacterDetailSafeDialogueBubble[];
+  enabledControls: 0;
+  clickHandlerEnabled: false;
+  keyboardHandlerEnabled: false;
+  formControlEnabled: false;
+  eventPersistenceEnabled: false;
+  backendStreamEnabled: false;
+  animationStatePersistenceEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeWorkerAssignmentCandidateBlockedReason = {
   id: "facility_prerequisites_missing" | "approval_execution_blocked" | "authority_adapter_missing" | "audit_write_disabled" | "human_confirmation_missing";
   label: string;
@@ -4274,6 +4317,54 @@ export function buildOfficeCharacterInspectorDetailPosture(interaction: OfficeCh
     clickHandlerEnabled: false,
     keyboardHandlerEnabled: false,
     inspectorWriteEnabled: false,
+    eventPersistenceEnabled: false,
+    backendStreamEnabled: false,
+    animationStatePersistenceEnabled: false,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    nasSaveEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+const characterDialogueCopyByRole: Record<OfficeCharacterInspectorDetailPostureCard["role"], { copyKind: OfficeCharacterDetailSafeDialogueCopyKind; generatedCopy: string; safeTone: "neutral" | "info" | "warning" }> = {
+  user_boss: { copyKind: "boss_instruction_waiting", generatedCopy: "사장 지시는 Orchestrator 확인을 기다립니다.", safeTone: "neutral" },
+  orchestrator: { copyKind: "orchestrator_mediation", generatedCopy: "오케스트레이터가 요청 경로를 정리 중입니다.", safeTone: "info" },
+  search_worker: { copyKind: "search_evidence", generatedCopy: "웹 근거 찾는 중…", safeTone: "info" },
+  reviewer: { copyKind: "review_waiting", generatedCopy: "근거 검토 대기", safeTone: "warning" },
+  wiki_writer: { copyKind: "wiki_draft_waiting", generatedCopy: "위키 초안 준비 대기", safeTone: "neutral" },
+  nas_keeper: { copyKind: "nas_approval_required", generatedCopy: "저장 승인 필요", safeTone: "warning" },
+};
+
+export function buildOfficeCharacterDetailSafeDialogueCopy(detail: OfficeCharacterInspectorDetailPosture): OfficeCharacterDetailSafeDialogueCopy {
+  const bubbles: OfficeCharacterDetailSafeDialogueBubble[] = detail.cards.map((card) => {
+    const copy = characterDialogueCopyByRole[card.role];
+    return {
+      role: card.role,
+      sourceDetailCardId: card.detailCardId,
+      copyKind: copy.copyKind,
+      generatedCopy: copy.generatedCopy,
+      safeTone: copy.safeTone,
+      rawTextVisible: false,
+      executable: false,
+      rawExcluded: true,
+    };
+  });
+  return {
+    stageLabel: "Character Detail Safe Dialogue Copy 1",
+    title: "Character detail safe dialogue copy",
+    detailKind: "character_detail_safe_dialogue_copy",
+    sourceDetailKind: detail.detailKind,
+    sourceCardCount: detail.detailCardCount,
+    bubbleCount: bubbles.length,
+    bubbles,
+    enabledControls: 0,
+    clickHandlerEnabled: false,
+    keyboardHandlerEnabled: false,
+    formControlEnabled: false,
     eventPersistenceEnabled: false,
     backendStreamEnabled: false,
     animationStatePersistenceEnabled: false,

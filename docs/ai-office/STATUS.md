@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-15 16:09 KST
+Last updated: 2026-05-15 16:59 KST
 
 ## AI Office 통합 운영실 umbrella summary
 
@@ -28,6 +28,14 @@ Master Spec v0.1 review adds an important clarification: read-only-first is the 
 
 
 
+
+## Character Detail Safe Dialogue Copy 1 completed locally
+
+`Character Detail Safe Dialogue Copy 1` adds a safe helper, `buildOfficeCharacterDetailSafeDialogueCopy(detail)`, plus `CharacterDetailSafeDialogueCopyPanel` in `/office`. It composes only the existing safe `Character Inspector Detail Posture 1` DTO into six generated role bubbles for the user boss, Orchestrator, Search Worker, Reviewer, Wiki Writer, and NAS Keeper. It keeps `enabledControls=0`, `clickHandlerEnabled=false`, `keyboardHandlerEnabled=false`, `formControlEnabled=false`, `eventPersistenceEnabled=false`, `backendStreamEnabled=false`, `animationStatePersistenceEnabled=false`, `requestCreationEnabled=false`, `workAssignmentEnabled=false`, `dispatchEnabled=false`, `auditWriteEnabled=false`, `nasSaveEnabled=false`, and raw exclusion true through stable `data-office-character-detail-safe-dialogue-copy*` hooks.
+
+Verification 2026-05-15 16:59 KST: focused RED first failed with `buildOfficeCharacterDetailSafeDialogueCopy is not a function`; focused GREEN passed with `2 passed | 159 skipped`; combined Office tests passed with `161 passed`; focused ESLint passed; production build passed with the existing Vite large chunk warning; `git diff --check` and `git diff --cached --check` passed; safety scan passed with zero suspicious added control/raw hits; browser smoke on local Vite `/office?character-dialogue-copy=1` found the panel hook, six bubbles, zero controls, no sentinel raw leak, and zero console/JS errors; independent review passed with no blockers. Committed locally with message `feat(office): add character safe dialogue copy`.
+
+Safety/non-actions: frontend/read-only only; no backend/schema/API route/service/Kanban/cron/VPS/NAS mutation, no renderer dependency, no form/button/input/select/textarea controls in the new panel, no click handler, no keyboard handler, no backend stream, no event persistence, no animation-state persistence, no request creation, no worker assignment, no dispatch, no audit write, no NAS save, and no raw prompt/task body/transcript/path/source-title/token/provider projection.
 
 ## Character Inspector Detail Posture 1 completed locally
 

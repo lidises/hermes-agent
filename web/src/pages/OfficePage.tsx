@@ -10,6 +10,7 @@ import {
   Filter,
   Lock,
   MapPinned,
+  MessageSquareText,
   RefreshCw,
   Route,
   ShieldCheck,
@@ -135,6 +136,7 @@ import {
   buildOfficeCharacterStateRoomOverlay,
   buildOfficeCharacterRoomInteractionPosture,
   buildOfficeCharacterInspectorDetailPosture,
+  buildOfficeCharacterDetailSafeDialogueCopy,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -173,6 +175,7 @@ import {
   type OfficeCharacterStateRoomOverlay,
   type OfficeCharacterRoomInteractionPosture,
   type OfficeCharacterInspectorDetailPosture,
+  type OfficeCharacterDetailSafeDialogueCopy,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -3107,6 +3110,62 @@ export function CharacterInspectorDetailPosturePanel({ detail }: { detail: Offic
   );
 }
 
+export function CharacterDetailSafeDialogueCopyPanel({ dialogue }: { dialogue: OfficeCharacterDetailSafeDialogueCopy }) {
+  return (
+    <Card
+      data-office-character-detail-safe-dialogue-copy="true"
+      data-office-character-detail-safe-dialogue-copy-enabled-controls={dialogue.enabledControls}
+      data-office-character-detail-safe-dialogue-copy-click-handler-enabled={String(dialogue.clickHandlerEnabled)}
+      data-office-character-detail-safe-dialogue-copy-keyboard-handler-enabled={String(dialogue.keyboardHandlerEnabled)}
+      data-office-character-detail-safe-dialogue-copy-form-control-enabled={String(dialogue.formControlEnabled)}
+      data-office-character-detail-safe-dialogue-copy-event-persistence-enabled={String(dialogue.eventPersistenceEnabled)}
+      data-office-character-detail-safe-dialogue-copy-backend-stream-enabled={String(dialogue.backendStreamEnabled)}
+      data-office-character-detail-safe-dialogue-copy-animation-state-persistence-enabled={String(dialogue.animationStatePersistenceEnabled)}
+      data-office-character-detail-safe-dialogue-copy-request-creation-enabled={String(dialogue.requestCreationEnabled)}
+      data-office-character-detail-safe-dialogue-copy-dispatch-enabled={String(dialogue.dispatchEnabled)}
+      data-office-character-detail-safe-dialogue-copy-nas-save-enabled={String(dialogue.nasSaveEnabled)}
+      data-office-character-detail-safe-dialogue-copy-safe-projection-only={String(dialogue.safeProjectionOnly)}
+      data-office-character-detail-safe-dialogue-copy-raw-excluded={String(dialogue.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <MessageSquareText className="h-4 w-4" /> Character detail safe dialogue copy
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-cyan-300/20 bg-cyan-950/10 p-3">
+            <div className="font-semibold text-cyan-100">Safe generated bubble posture</div>
+            <div className="mt-1 leading-5">
+              말풍선은 raw instruction, task body, transcript, path, source title, provider를 표시하지 않고 역할별 생성 copy만 보여줍니다. 입력/버튼/저장/요청/배정/dispatch는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3">
+            {dialogue.bubbles.map((bubble) => (
+              <div
+                key={bubble.role}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-character-detail-safe-dialogue-copy-bubble={bubble.role}
+                data-office-character-detail-safe-dialogue-copy-kind={bubble.copyKind}
+                data-office-character-detail-safe-dialogue-copy-tone={bubble.safeTone}
+                data-office-character-detail-safe-dialogue-copy-raw-text-visible={String(bubble.rawTextVisible)}
+                data-office-character-detail-safe-dialogue-copy-executable={String(bubble.executable)}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{bubble.sourceDetailCardId}</div>
+                <div className="mt-1 font-semibold text-foreground">{bubble.generatedCopy}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-cyan-100/80">{bubble.copyKind}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-character-detail-safe-dialogue-copy-boundary="true">
+            source {dialogue.sourceDetailKind} · cards {dialogue.sourceCardCount} · bubbles {dialogue.bubbleCount} · controls {dialogue.enabledControls} · raw text false
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -3641,6 +3700,10 @@ export default function OfficePage() {
     () => buildOfficeCharacterInspectorDetailPosture(characterRoomInteractionPosture),
     [characterRoomInteractionPosture],
   );
+  const characterDetailSafeDialogueCopy = useMemo(
+    () => buildOfficeCharacterDetailSafeDialogueCopy(characterInspectorDetailPosture),
+    [characterInspectorDetailPosture],
+  );
   const safeMotionHeartbeat = useMemo(
     () => buildOfficeSafeMotionHeartbeat(safeStreamPosture, {
       pollStatus: safeEventsStatus === "loaded" ? "active" : safeEventsStatus,
@@ -3869,6 +3932,8 @@ export default function OfficePage() {
       <CharacterRoomInteractionPosturePanel posture={characterRoomInteractionPosture} />
 
       <CharacterInspectorDetailPosturePanel detail={characterInspectorDetailPosture} />
+
+      <CharacterDetailSafeDialogueCopyPanel dialogue={characterDetailSafeDialogueCopy} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 

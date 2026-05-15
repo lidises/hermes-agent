@@ -125,6 +125,7 @@ import {
   buildOfficeCharacterStateRoomOverlay,
   buildOfficeCharacterRoomInteractionPosture,
   buildOfficeCharacterInspectorDetailPosture,
+  buildOfficeCharacterDetailSafeDialogueCopy,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -1334,6 +1335,57 @@ describe("Character Inspector Detail Posture 1", () => {
     expect(detail.safeProjectionOnly).toBe(true);
     expect(detail.rawExcluded).toBe(true);
     expect(JSON.stringify(detail)).not.toMatch(/raw character inspector prompt|raw character inspector task|Traceback|\/Users\/lidises|token-shaped-inspector-detail|private-character-inspector-provider/i);
+  });
+});
+
+
+describe("Character Detail Safe Dialogue Copy 1", () => {
+  it("projects safe generated dialogue copy for character detail cards without raw text or executable controls", () => {
+    const secretSentinel = ["token", "shaped", "dialogue", "copy"].join("-");
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishFixture({
+      agents: [{ id: "agent-character-dialogue", status: "active", prompt: "raw character dialogue prompt", provider: "private-character-dialogue-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-character-dialogue", status: "blocked", title: "raw character dialogue task", body: "/Users/lidises/private/character-dialogue.md", transcript: "Traceback character dialogue transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+    const trace = buildOfficeApprovalDecisionAuditNasTracePreview(envelope);
+    const gate = buildOfficeNasKeeperSaveRequestGate(trace);
+    const rollback = buildOfficeNasKeeperRollbackEvidencePreview(gate);
+    const review = buildOfficeDeskRpgReadOnlyChainCompletionReview(rollback);
+    const stateProjection = buildOfficeEventDrivenCharacterStateProjection(review, [
+      { id: "evt-runtime-dialogue", category: "room_density_changed", roomId: "work", tone: "warning", count: 3, safeLabel: "room density", detail: "safe density aggregate", redacted: true, rawSource: false },
+      { id: "evt-intent-dialogue", category: "attention_changed", roomId: "routing", tone: "negative", count: 1, safeLabel: "approval attention", detail: "safe attention aggregate", redacted: true, rawSource: false },
+      { id: "evt-visual-dialogue", category: "snapshot_static", roomId: "sessions", tone: "neutral", count: 0, safeLabel: "static snapshot", detail: "safe static aggregate", redacted: true, rawSource: false },
+    ] as const);
+    const overlay = buildOfficeCharacterStateRoomOverlay(stateProjection);
+    const interaction = buildOfficeCharacterRoomInteractionPosture(overlay);
+    const detail = buildOfficeCharacterInspectorDetailPosture(interaction);
+
+    const dialogue = buildOfficeCharacterDetailSafeDialogueCopy(detail);
+
+    expect(dialogue.stageLabel).toBe("Character Detail Safe Dialogue Copy 1");
+    expect(dialogue.detailKind).toBe("character_detail_safe_dialogue_copy");
+    expect(dialogue.sourceDetailKind).toBe("character_inspector_detail_posture");
+    expect(dialogue.bubbleCount).toBe(6);
+    expect(dialogue.bubbles.map((bubble) => bubble.role)).toEqual(["user_boss", "orchestrator", "search_worker", "reviewer", "wiki_writer", "nas_keeper"]);
+    expect(dialogue.bubbles.map((bubble) => bubble.copyKind)).toEqual(["boss_instruction_waiting", "orchestrator_mediation", "search_evidence", "review_waiting", "wiki_draft_waiting", "nas_approval_required"]);
+    expect(dialogue.bubbles.every((bubble) => bubble.generatedCopy.length > 0 && bubble.rawTextVisible === false && bubble.executable === false && bubble.rawExcluded === true)).toBe(true);
+    expect(dialogue.enabledControls).toBe(0);
+    expect(dialogue.clickHandlerEnabled).toBe(false);
+    expect(dialogue.keyboardHandlerEnabled).toBe(false);
+    expect(dialogue.formControlEnabled).toBe(false);
+    expect(dialogue.eventPersistenceEnabled).toBe(false);
+    expect(dialogue.backendStreamEnabled).toBe(false);
+    expect(dialogue.animationStatePersistenceEnabled).toBe(false);
+    expect(dialogue.requestCreationEnabled).toBe(false);
+    expect(dialogue.workAssignmentEnabled).toBe(false);
+    expect(dialogue.dispatchEnabled).toBe(false);
+    expect(dialogue.auditWriteEnabled).toBe(false);
+    expect(dialogue.nasSaveEnabled).toBe(false);
+    expect(dialogue.safeProjectionOnly).toBe(true);
+    expect(dialogue.rawExcluded).toBe(true);
+    expect(JSON.stringify(dialogue)).not.toMatch(/raw character dialogue prompt|raw character dialogue task|Traceback|\/Users\/lidises|token-shaped-dialogue-copy|private-character-dialogue-provider/i);
   });
 });
 
