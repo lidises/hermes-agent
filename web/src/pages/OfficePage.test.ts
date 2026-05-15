@@ -118,6 +118,7 @@ import {
   buildOfficeApprovalAuthorityReadinessDetail,
   buildOfficeApprovalAuthorityDecisionEnvelopePreview,
   buildOfficeApprovalDecisionAuditNasTracePreview,
+  buildOfficeNasKeeperSaveRequestGate,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -1020,6 +1021,43 @@ describe("Approval Decision Audit/NAS Trace Preview 1", () => {
     expect(trace.safeProjectionOnly).toBe(true);
     expect(trace.rawExcluded).toBe(true);
     expect(JSON.stringify(trace)).not.toMatch(/raw decision trace prompt|raw decision trace task|Traceback|\/Users\/lidises|token-shaped-decision-trace|private-decision-trace-provider/i);
+  });
+});
+
+
+describe("NAS Keeper Save Request Gate 1", () => {
+  it("builds a projected SaveRequested gate without creating save requests or NAS writes", () => {
+    const secretSentinel = ["token", "shaped", "nas", "gate"].join("-");
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishFixture({
+      agents: [{ id: "agent-nas-gate", status: "active", prompt: "raw nas gate prompt", provider: "private-nas-gate-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-nas-gate", status: "blocked", title: "raw nas gate task", body: "/Users/lidises/private/nas-gate.md", transcript: "Traceback nas gate transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+    const trace = buildOfficeApprovalDecisionAuditNasTracePreview(envelope);
+
+    const gate = buildOfficeNasKeeperSaveRequestGate(trace);
+
+    expect(gate.stageLabel).toBe("NAS Keeper Save Request Gate 1");
+    expect(gate.detailKind).toBe("nas_keeper_save_request_gate");
+    expect(gate.gateSteps.map((step) => step.id)).toEqual(["save_requested_event", "nas_keeper_review", "rollback_point", "final_save_boundary"]);
+    expect(gate.sourceDetailKind).toBe("approval_decision_audit_nas_trace_preview");
+    expect(gate.sourceTraceStepCount).toBe(4);
+    expect(gate.gateStepCount).toBe(4);
+    expect(gate.enabledControls).toBe(0);
+    expect(gate.saveRequestCreated).toBe(false);
+    expect(gate.saveRequestPersisted).toBe(false);
+    expect(gate.rollbackPointCreated).toBe(false);
+    expect(gate.nasWritePrepared).toBe(false);
+    expect(gate.nasSaveEnabled).toBe(false);
+    expect(gate.auditWriteEnabled).toBe(false);
+    expect(gate.dispatchEnabled).toBe(false);
+    expect(gate.requestCreationEnabled).toBe(false);
+    expect(gate.workAssignmentEnabled).toBe(false);
+    expect(gate.safeProjectionOnly).toBe(true);
+    expect(gate.rawExcluded).toBe(true);
+    expect(JSON.stringify(gate)).not.toMatch(/raw nas gate prompt|raw nas gate task|Traceback|\/Users\/lidises|token-shaped-nas-gate|private-nas-gate-provider/i);
   });
 });
 

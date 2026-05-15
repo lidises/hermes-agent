@@ -128,6 +128,7 @@ import {
   buildOfficeApprovalAuthorityReadinessDetail,
   buildOfficeApprovalAuthorityDecisionEnvelopePreview,
   buildOfficeApprovalDecisionAuditNasTracePreview,
+  buildOfficeNasKeeperSaveRequestGate,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -159,6 +160,7 @@ import {
   type OfficeApprovalAuthorityReadinessDetail,
   type OfficeApprovalAuthorityDecisionEnvelopePreview,
   type OfficeApprovalDecisionAuditNasTracePreview,
+  type OfficeNasKeeperSaveRequestGate,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -2714,6 +2716,60 @@ export function ApprovalDecisionAuditNasTracePreviewPanel({ trace }: { trace: Of
   );
 }
 
+export function NasKeeperSaveRequestGatePanel({ gate }: { gate: OfficeNasKeeperSaveRequestGate }) {
+  return (
+    <Card
+      data-office-nas-keeper-save-request-gate="true"
+      data-office-nas-keeper-save-request-gate-enabled-controls={gate.enabledControls}
+      data-office-nas-keeper-save-request-gate-save-request-created={String(gate.saveRequestCreated)}
+      data-office-nas-keeper-save-request-gate-save-request-persisted={String(gate.saveRequestPersisted)}
+      data-office-nas-keeper-save-request-gate-rollback-point-created={String(gate.rollbackPointCreated)}
+      data-office-nas-keeper-save-request-gate-nas-write-prepared={String(gate.nasWritePrepared)}
+      data-office-nas-keeper-save-request-gate-nas-save-enabled={String(gate.nasSaveEnabled)}
+      data-office-nas-keeper-save-request-gate-audit-write-enabled={String(gate.auditWriteEnabled)}
+      data-office-nas-keeper-save-request-gate-dispatch-enabled={String(gate.dispatchEnabled)}
+      data-office-nas-keeper-save-request-gate-request-creation-enabled={String(gate.requestCreationEnabled)}
+      data-office-nas-keeper-save-request-gate-work-assignment-enabled={String(gate.workAssignmentEnabled)}
+      data-office-nas-keeper-save-request-gate-safe-projection-only={String(gate.safeProjectionOnly)}
+      data-office-nas-keeper-save-request-gate-raw-excluded={String(gate.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Database className="h-4 w-4" /> NAS Keeper save request gate
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-emerald-300/20 bg-emerald-950/10 p-3">
+            <div className="font-semibold text-emerald-100">SaveRequested · NAS Keeper gate preview</div>
+            <div className="mt-1 leading-5">
+              승인 trace 이후 NAS Keeper에게 넘어갈 저장 요청 gate shape만 보여줍니다. save request 생성, audit write, dispatch, rollback point 생성, NAS write는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {gate.gateSteps.map((step) => (
+              <div
+                key={step.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-nas-keeper-save-request-gate-step={step.id}
+                data-office-nas-keeper-save-request-gate-step-status={step.status}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{step.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{step.label}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-emerald-100/80">{step.status}</div>
+                <div className="mt-2 leading-5">{step.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-nas-keeper-save-request-gate-boundary="true">
+            source {gate.sourceDetailKind} · trace steps {gate.sourceTraceStepCount} · warnings {gate.sourceWarningCount} · gate steps {gate.gateStepCount} · controls {gate.enabledControls} · save request {String(gate.saveRequestCreated)} · rollback point {String(gate.rollbackPointCreated)} · NAS write prepared {String(gate.nasWritePrepared)} · raw excluded {String(gate.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -3178,6 +3234,10 @@ export default function OfficePage() {
     () => buildOfficeApprovalDecisionAuditNasTracePreview(approvalAuthorityDecisionEnvelopePreview),
     [approvalAuthorityDecisionEnvelopePreview],
   );
+  const nasKeeperSaveRequestGate = useMemo(
+    () => buildOfficeNasKeeperSaveRequestGate(approvalDecisionAuditNasTracePreview),
+    [approvalDecisionAuditNasTracePreview],
+  );
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -3434,6 +3494,8 @@ export default function OfficePage() {
       <ApprovalAuthorityDecisionEnvelopePreviewPanel envelope={approvalAuthorityDecisionEnvelopePreview} />
 
       <ApprovalDecisionAuditNasTracePreviewPanel trace={approvalDecisionAuditNasTracePreview} />
+
+      <NasKeeperSaveRequestGatePanel gate={nasKeeperSaveRequestGate} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 

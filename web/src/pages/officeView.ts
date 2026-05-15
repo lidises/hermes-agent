@@ -1895,6 +1895,37 @@ export type OfficeApprovalDecisionAuditNasTracePreview = {
   rawExcluded: true;
 };
 
+export type OfficeNasKeeperSaveRequestGateStep = {
+  id: "save_requested_event" | "nas_keeper_review" | "rollback_point" | "final_save_boundary";
+  label: string;
+  status: "projected" | "blocked";
+  summary: string;
+  rawExcluded: true;
+};
+
+export type OfficeNasKeeperSaveRequestGate = {
+  stageLabel: "NAS Keeper Save Request Gate 1";
+  title: string;
+  detailKind: "nas_keeper_save_request_gate";
+  gateSteps: OfficeNasKeeperSaveRequestGateStep[];
+  sourceDetailKind: OfficeApprovalDecisionAuditNasTracePreview["detailKind"];
+  sourceTraceStepCount: number;
+  sourceWarningCount: number;
+  gateStepCount: number;
+  enabledControls: 0;
+  saveRequestCreated: false;
+  saveRequestPersisted: false;
+  rollbackPointCreated: false;
+  nasWritePrepared: false;
+  nasSaveEnabled: false;
+  auditWriteEnabled: false;
+  dispatchEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeWorkerAssignmentCandidateBlockedReason = {
   id: "facility_prerequisites_missing" | "approval_execution_blocked" | "authority_adapter_missing" | "audit_write_disabled" | "human_confirmation_missing";
   label: string;
@@ -3660,6 +3691,61 @@ export function buildOfficeApprovalDecisionAuditNasTracePreview(envelope: Office
     dispatchEnabled: false,
     auditWriteEnabled: false,
     nasSaveEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeNasKeeperSaveRequestGate(trace: OfficeApprovalDecisionAuditNasTracePreview): OfficeNasKeeperSaveRequestGate {
+  const gateSteps: OfficeNasKeeperSaveRequestGateStep[] = [
+    {
+      id: "save_requested_event",
+      label: "SaveRequested event preview",
+      status: "projected",
+      summary: "사용자 승인 이후 생성될 SaveRequested 이벤트의 위치만 보여줍니다. 현재 save request는 생성하거나 저장하지 않습니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "nas_keeper_review",
+      label: "NAS Keeper review gate",
+      status: "blocked",
+      summary: "NAS Keeper가 최종 저장 권한을 확인해야 하는 gate만 표시합니다. worker assignment와 dispatch는 비활성입니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "rollback_point",
+      label: "Rollback point preview",
+      status: "blocked",
+      summary: "최종 저장 전에 필요한 rollback point/evidence 위치만 보여줍니다. rollback point는 아직 만들지 않습니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "final_save_boundary",
+      label: "Final NAS save boundary",
+      status: "blocked",
+      summary: "최종 NAS write는 별도 authority gate 이후에만 가능하도록 남겨둡니다. NAS 경로와 credential은 projection하지 않습니다.",
+      rawExcluded: true,
+    },
+  ];
+  return {
+    stageLabel: "NAS Keeper Save Request Gate 1",
+    title: "NAS Keeper save request gate",
+    detailKind: "nas_keeper_save_request_gate",
+    gateSteps,
+    sourceDetailKind: trace.detailKind,
+    sourceTraceStepCount: trace.traceStepCount,
+    sourceWarningCount: trace.sourceWarningCount,
+    gateStepCount: gateSteps.length,
+    enabledControls: 0,
+    saveRequestCreated: false,
+    saveRequestPersisted: false,
+    rollbackPointCreated: false,
+    nasWritePrepared: false,
+    nasSaveEnabled: false,
+    auditWriteEnabled: false,
+    dispatchEnabled: false,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
     safeProjectionOnly: true,
     rawExcluded: true,
   };
