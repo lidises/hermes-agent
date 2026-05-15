@@ -111,6 +111,7 @@ import {
   buildOfficeControlledMutationExecutionReadinessSummary,
   buildOfficeControlledMutationContractPostureProjection,
   buildOfficeControlledMutationContractPosturePolish,
+  buildOfficeControlledMutationReadinessHandoffRibbon,
   buildOfficeDeskRpgWorkerRoleVisibility,
   buildOfficeDisabledApprovalDialoguePosture,
   buildOfficeReviewerWikiHandoffPosture,
@@ -181,6 +182,7 @@ import {
   type OfficeDeskRpgReadOnlyChainCompletionReview,
   type OfficeControlledMutationContractPostureProjection,
   type OfficeControlledMutationContractPosturePolish,
+  type OfficeControlledMutationReadinessHandoffRibbon,
   type OfficeEventDrivenCharacterStateProjection,
   type OfficeCharacterStateRoomOverlay,
   type OfficeCharacterRoomInteractionPosture,
@@ -3585,6 +3587,52 @@ export function ControlledMutationContractPosturePolishPanel({ polish }: { polis
   );
 }
 
+export function ControlledMutationReadinessHandoffRibbonPanel({ ribbon }: { ribbon: OfficeControlledMutationReadinessHandoffRibbon }) {
+  return (
+    <section
+      className="border border-indigo-300/20 bg-indigo-950/10 p-4"
+      data-office-controlled-mutation-readiness-handoff-ribbon="true"
+      data-office-controlled-mutation-readiness-handoff-ribbon-enabled-controls={ribbon.enabledControls}
+      data-office-controlled-mutation-readiness-handoff-ribbon-form-control-enabled={String(ribbon.formControlEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-browser-executable-controls-enabled={String(ribbon.browserExecutableControlsEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-backend-mutation-enabled={String(ribbon.backendMutationEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-storage-write-enabled={String(ribbon.storageWriteEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-event-append-enabled={String(ribbon.eventAppendEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-event-readback-enabled={String(ribbon.eventReadbackEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-audit-write-enabled={String(ribbon.auditWriteEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-execution-enabled={String(ribbon.executionEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-dry-run-execution-enabled={String(ribbon.dryRunExecutionEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-dispatch-enabled={String(ribbon.dispatchEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-target-mutation-enabled={String(ribbon.targetMutationEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-authority-adapter-binding-enabled={String(ribbon.authorityAdapterBindingEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-credential-change-enabled={String(ribbon.credentialChangeEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-nas-mutation-enabled={String(ribbon.nasMutationEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-safe-projection-only={String(ribbon.safeProjectionOnly)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-raw-excluded={String(ribbon.rawExcluded)}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-indigo-200/70">{ribbon.stageLabel}</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">{ribbon.title}</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">{ribbon.safeBoundary}</p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          steps: {ribbon.disabledSurfaceSummary.rows} · controls: {ribbon.disabledSurfaceSummary.enabledControls}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-controlled-mutation-readiness-handoff-ribbon-steps="true">
+        {ribbon.handoffSteps.map((step) => (
+          <div key={step.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-readiness-handoff-ribbon-step={step.id} data-office-controlled-mutation-readiness-handoff-ribbon-step-status={step.status}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{step.status}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{step.label}</div>
+            <div className="mt-2 text-xs leading-5 text-midground/70">{step.detail}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -3979,6 +4027,7 @@ export default function OfficePage() {
   const controlledMutationExecutionReadinessSummary = useMemo(() => buildOfficeControlledMutationExecutionReadinessSummary(controlledMutationAuthoritySummary), [controlledMutationAuthoritySummary]);
   const controlledMutationContractPostureProjection = useMemo(() => buildOfficeControlledMutationContractPostureProjection(controlledMutationExecutionReadinessSummary), [controlledMutationExecutionReadinessSummary]);
   const controlledMutationContractPosturePolish = useMemo(() => buildOfficeControlledMutationContractPosturePolish(controlledMutationContractPostureProjection), [controlledMutationContractPostureProjection]);
+  const controlledMutationReadinessHandoffRibbon = useMemo(() => buildOfficeControlledMutationReadinessHandoffRibbon(controlledMutationContractPosturePolish), [controlledMutationContractPosturePolish]);
   const deskRpgProjection = useMemo(() => buildOfficeDeskRpgProjectionModel(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const deskRpgWorkerRoleVisibility = useMemo(() => buildOfficeDeskRpgWorkerRoleVisibility(deskRpgProjection), [deskRpgProjection]);
   const disabledApprovalDialoguePosture = useMemo(() => buildOfficeDisabledApprovalDialoguePosture(deskRpgProjection), [deskRpgProjection]);
@@ -5143,6 +5192,7 @@ export default function OfficePage() {
 
       <ControlledMutationContractPostureProjectionPanel projection={controlledMutationContractPostureProjection} />
       <ControlledMutationContractPosturePolishPanel polish={controlledMutationContractPosturePolish} />
+      <ControlledMutationReadinessHandoffRibbonPanel ribbon={controlledMutationReadinessHandoffRibbon} />
 
       {showOverview ? (
         <OfficeRpgMap

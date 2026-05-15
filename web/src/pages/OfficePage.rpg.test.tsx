@@ -18,7 +18,7 @@ vi.mock("@/lib/api", () => ({
 
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
-import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerAssignmentCandidateGate, buildOfficeWorkerRequestDraftPreview, buildOfficeWorkerHumanConfirmationEnvelope, buildOfficeWorkerAuthorityHandoffEnvelope, buildOfficeWorkerDispatchDryRunEnvelope, buildOfficeWorkerAuditPreviewEnvelope, buildOfficeWorkerRollbackPreviewEnvelope, buildOfficeWorkerFinalGateChecklist, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeNasKeeperSaveRequestGate, buildOfficeNasKeeperRollbackEvidencePreview, buildOfficeDeskRpgReadOnlyChainCompletionReview, buildOfficeEventDrivenCharacterStateProjection, buildOfficeCharacterStateRoomOverlay, buildOfficeCharacterRoomInteractionPosture, buildOfficeCharacterInspectorDetailPosture, buildOfficeCharacterDetailSafeDialogueCopy, buildOfficeCharacterBubbleInspectorAlignment, buildOfficeCharacterPanelBoundarySummary, buildOfficeCharacterFacilityRoleLegend, buildOfficeCharacterFacilityBoundaryStrip, buildOfficeCharacterFacilitySourceLedgerStrip, buildOfficeCharacterFacilityCompletionReview, buildOfficeControlledMutationProposalContract, buildOfficeControlledMutationDryRunPlan, buildOfficeControlledMutationAuditSinkPlan, buildOfficeControlledMutationRollbackVerificationPlan, buildOfficeControlledMutationHumanApprovalPlan, buildOfficeControlledMutationAuthoritySummary, buildOfficeControlledMutationExecutionReadinessSummary, buildOfficeControlledMutationContractPostureProjection, buildOfficeControlledMutationContractPosturePolish, buildOfficeRpgScene } from "./officeView";
+import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerAssignmentCandidateGate, buildOfficeWorkerRequestDraftPreview, buildOfficeWorkerHumanConfirmationEnvelope, buildOfficeWorkerAuthorityHandoffEnvelope, buildOfficeWorkerDispatchDryRunEnvelope, buildOfficeWorkerAuditPreviewEnvelope, buildOfficeWorkerRollbackPreviewEnvelope, buildOfficeWorkerFinalGateChecklist, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeNasKeeperSaveRequestGate, buildOfficeNasKeeperRollbackEvidencePreview, buildOfficeDeskRpgReadOnlyChainCompletionReview, buildOfficeEventDrivenCharacterStateProjection, buildOfficeCharacterStateRoomOverlay, buildOfficeCharacterRoomInteractionPosture, buildOfficeCharacterInspectorDetailPosture, buildOfficeCharacterDetailSafeDialogueCopy, buildOfficeCharacterBubbleInspectorAlignment, buildOfficeCharacterPanelBoundarySummary, buildOfficeCharacterFacilityRoleLegend, buildOfficeCharacterFacilityBoundaryStrip, buildOfficeCharacterFacilitySourceLedgerStrip, buildOfficeCharacterFacilityCompletionReview, buildOfficeControlledMutationProposalContract, buildOfficeControlledMutationDryRunPlan, buildOfficeControlledMutationAuditSinkPlan, buildOfficeControlledMutationRollbackVerificationPlan, buildOfficeControlledMutationHumanApprovalPlan, buildOfficeControlledMutationAuthoritySummary, buildOfficeControlledMutationExecutionReadinessSummary, buildOfficeControlledMutationContractPostureProjection, buildOfficeControlledMutationContractPosturePolish, buildOfficeControlledMutationReadinessHandoffRibbon, buildOfficeRpgScene } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
@@ -1930,6 +1930,53 @@ describe("ControlledMutationContractPosturePolishPanel", () => {
     expect(markup).not.toContain("<select");
     expect(markup).not.toContain("<textarea");
     expect(markup).not.toMatch(/\/Users\/lidises|raw posture polish panel|private-posture-polish-panel|token-shaped-value|provider/i);
+  });
+});
+
+
+describe("ControlledMutationReadinessHandoffRibbonPanel", () => {
+  it("Frontend controlled-mutation readiness handoff ribbon renders static request approval authority execution steps", () => {
+    const ControlledMutationReadinessHandoffRibbonPanel = (OfficePageModule as unknown as {
+      ControlledMutationReadinessHandoffRibbonPanel: React.ComponentType<{ ribbon: ReturnType<typeof buildOfficeControlledMutationReadinessHandoffRibbon> }>;
+    }).ControlledMutationReadinessHandoffRibbonPanel;
+    const executionReadiness = buildOfficeControlledMutationExecutionReadinessSummary(buildOfficeControlledMutationAuthoritySummary(buildOfficeControlledMutationHumanApprovalPlan(buildOfficeControlledMutationRollbackVerificationPlan(buildOfficeControlledMutationAuditSinkPlan(buildOfficeControlledMutationDryRunPlan(buildOfficeControlledMutationProposalContract(buildOfficeWorkerFinalGateChecklist(buildOfficeWorkerRollbackPreviewEnvelope(buildOfficeWorkerAuditPreviewEnvelope(buildOfficeWorkerDispatchDryRunEnvelope(buildOfficeWorkerAuthorityHandoffEnvelope(buildOfficeWorkerHumanConfirmationEnvelope(buildOfficeWorkerRequestDraftPreview(buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-15T13:50:00Z",
+      agents: [{ id: "agent-handoff-ribbon-panel", status: "active", prompt: "raw handoff ribbon panel prompt token-shaped-value", provider: "private-handoff-ribbon-panel-provider" }],
+      work_items: [{ id: "task-handoff-ribbon", status: "blocked", title: "raw handoff ribbon panel task", body: "/Users/lidises/private/handoff-ribbon-panel.md" } as unknown as OfficeState["work_items"][number]],
+    })))))))))))))))))))))));
+    const projection = buildOfficeControlledMutationContractPostureProjection(executionReadiness);
+    const polish = buildOfficeControlledMutationContractPosturePolish(projection);
+    const ribbon = buildOfficeControlledMutationReadinessHandoffRibbon(polish);
+    const markup = renderToStaticMarkup(<ControlledMutationReadinessHandoffRibbonPanel ribbon={ribbon} />);
+
+    expect(markup).toContain("data-office-controlled-mutation-readiness-handoff-ribbon=\"true\"");
+    expect(markup).toContain("data-office-controlled-mutation-readiness-handoff-ribbon-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-controlled-mutation-readiness-handoff-ribbon-form-control-enabled=\"false\"");
+    expect(markup).toContain("data-office-controlled-mutation-readiness-handoff-ribbon-browser-executable-controls-enabled=\"false\"");
+    expect(markup).toContain("data-office-controlled-mutation-readiness-handoff-ribbon-backend-mutation-enabled=\"false\"");
+    expect(markup).toContain("data-office-controlled-mutation-readiness-handoff-ribbon-storage-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-controlled-mutation-readiness-handoff-ribbon-event-append-enabled=\"false\"");
+    expect(markup).toContain("data-office-controlled-mutation-readiness-handoff-ribbon-event-readback-enabled=\"false\"");
+    expect(markup).toContain("data-office-controlled-mutation-readiness-handoff-ribbon-audit-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-controlled-mutation-readiness-handoff-ribbon-execution-enabled=\"false\"");
+    expect(markup).toContain("data-office-controlled-mutation-readiness-handoff-ribbon-dry-run-execution-enabled=\"false\"");
+    expect(markup).toContain("data-office-controlled-mutation-readiness-handoff-ribbon-dispatch-enabled=\"false\"");
+    expect(markup).toContain("data-office-controlled-mutation-readiness-handoff-ribbon-target-mutation-enabled=\"false\"");
+    expect(markup).toContain("data-office-controlled-mutation-readiness-handoff-ribbon-authority-adapter-binding-enabled=\"false\"");
+    expect(markup).toContain("data-office-controlled-mutation-readiness-handoff-ribbon-nas-mutation-enabled=\"false\"");
+    expect(markup.match(/data-office-controlled-mutation-readiness-handoff-ribbon-step=/g)?.length).toBe(4);
+    for (const step of ["request", "approval", "authority", "execution"]) {
+      expect(markup).toContain(`data-office-controlled-mutation-readiness-handoff-ribbon-step="${step}"`);
+    }
+    expect(markup).toContain("Frontend Readiness Handoff Ribbon 1");
+    expect(markup).not.toContain("onClick");
+    expect(markup).not.toContain("onSubmit");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/\/Users\/lidises|raw handoff ribbon panel|private-handoff-ribbon-panel|token-shaped-value|provider/i);
   });
 });
 

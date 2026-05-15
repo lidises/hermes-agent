@@ -2915,6 +2915,46 @@ export type OfficeControlledMutationContractPosturePolish = {
   polishRows: OfficeControlledMutationContractPosturePolishRow[];
 };
 
+export type OfficeControlledMutationReadinessHandoffRibbonStepId = "request" | "approval" | "authority" | "execution";
+
+export type OfficeControlledMutationReadinessHandoffRibbonStep = {
+  id: OfficeControlledMutationReadinessHandoffRibbonStepId;
+  label: string;
+  status: "disabled";
+  detail: string;
+  rawExcluded: true;
+};
+
+export type OfficeControlledMutationReadinessHandoffRibbon = {
+  stageLabel: "Frontend Readiness Handoff Ribbon 1";
+  sourceStageLabel: OfficeControlledMutationContractPosturePolish["stageLabel"];
+  detailKind: "controlled_mutation_readiness_handoff_ribbon";
+  title: string;
+  safeBoundary: string;
+  enabledControls: 0;
+  formControlEnabled: false;
+  browserExecutableControlsEnabled: false;
+  backendMutationEnabled: false;
+  storageWriteEnabled: false;
+  eventAppendEnabled: false;
+  eventReadbackEnabled: false;
+  auditWriteEnabled: false;
+  executionEnabled: false;
+  dryRunExecutionEnabled: false;
+  dispatchEnabled: false;
+  targetMutationEnabled: false;
+  authorityAdapterBindingEnabled: false;
+  credentialChangeEnabled: false;
+  nasMutationEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+  disabledSurfaceSummary: {
+    rows: number;
+    enabledControls: 0;
+  };
+  handoffSteps: OfficeControlledMutationReadinessHandoffRibbonStep[];
+};
+
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
   { id: "agent_desks", label: "Agent Desks" },
@@ -6610,6 +6650,48 @@ export function buildOfficeControlledMutationContractPosturePolish(projection: O
     },
     polishRows: polishRows.map((row) => ({
       ...row,
+      status: "disabled",
+      rawExcluded: true,
+    })),
+  };
+}
+
+export function buildOfficeControlledMutationReadinessHandoffRibbon(polish: OfficeControlledMutationContractPosturePolish): OfficeControlledMutationReadinessHandoffRibbon {
+  const handoffSteps: Array<{ id: OfficeControlledMutationReadinessHandoffRibbonStepId; label: string; detail: string }> = [
+    { id: "request", label: "Request", detail: "Request posture remains projection-only; no request creation, form input, target mutation, or storage write" },
+    { id: "approval", label: "Approval", detail: "Approval posture remains disabled; no approve/reject/hold control, decision recording, audit append, or readback" },
+    { id: "authority", label: "Authority", detail: "Authority posture remains unbound; no adapter implementation, adapter binding, credential access, auth change, or env change" },
+    { id: "execution", label: "Execution", detail: "Execution posture remains blocked; no dry-run execution, dispatch, target mutation, backend route, NAS save, VPS, Kanban, or cron mutation" },
+  ];
+  return {
+    stageLabel: "Frontend Readiness Handoff Ribbon 1",
+    sourceStageLabel: polish.stageLabel,
+    detailKind: "controlled_mutation_readiness_handoff_ribbon",
+    title: "요청→승인→권한→실행 인계 리본 · 읽기 전용",
+    safeBoundary: "read-only handoff ribbon only · summarizes disabled request approval authority execution posture · no forms/buttons/inputs · no browser executable controls · no backend/schema/API route/service changes · no storage/write path · no event append/readback · no audit write · no execution/dry-run/dispatch/target mutation · no authority adapter binding · no credential/auth/env change · no NAS/VPS/Kanban/cron mutation",
+    enabledControls: 0,
+    formControlEnabled: false,
+    browserExecutableControlsEnabled: false,
+    backendMutationEnabled: false,
+    storageWriteEnabled: false,
+    eventAppendEnabled: false,
+    eventReadbackEnabled: false,
+    auditWriteEnabled: false,
+    executionEnabled: false,
+    dryRunExecutionEnabled: false,
+    dispatchEnabled: false,
+    targetMutationEnabled: false,
+    authorityAdapterBindingEnabled: false,
+    credentialChangeEnabled: false,
+    nasMutationEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+    disabledSurfaceSummary: {
+      rows: polish.polishRows.length,
+      enabledControls: 0,
+    },
+    handoffSteps: handoffSteps.map((step) => ({
+      ...step,
       status: "disabled",
       rawExcluded: true,
     })),

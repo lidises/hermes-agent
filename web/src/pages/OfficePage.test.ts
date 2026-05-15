@@ -98,6 +98,7 @@ import {
   buildOfficeControlledMutationExecutionReadinessSummary,
   buildOfficeControlledMutationContractPostureProjection,
   buildOfficeControlledMutationContractPosturePolish,
+  buildOfficeControlledMutationReadinessHandoffRibbon,
   buildOfficeRpgScene,
   buildOfficeDeskRpgProjectionModel,
   buildOfficeDeskRpgWorkerRoleVisibility,
@@ -2726,6 +2727,44 @@ describe("Desk RPG Projection ViewModel Helper 1", () => {
     expect(polish.disabledSurfaceSummary).toEqual({ cards: 6, blockedCards: 6, enabledControls: 0 });
     expect(polish.safeBoundary).toContain("read-only posture polish only");
     expect(JSON.stringify(polish)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw posture polish|private-posture-polish|token-shaped-value|provider/i);
+  });
+
+  it("builds Frontend Readiness Handoff Ribbon 1 as a read-only chain summary without executable controls", () => {
+    const executionReadiness = buildOfficeControlledMutationExecutionReadinessSummary(buildOfficeControlledMutationAuthoritySummary(buildOfficeControlledMutationHumanApprovalPlan(buildOfficeControlledMutationRollbackVerificationPlan(buildOfficeControlledMutationAuditSinkPlan(buildOfficeControlledMutationDryRunPlan(buildOfficeControlledMutationProposalContract(buildOfficeWorkerFinalGateChecklist(buildOfficeWorkerRollbackPreviewEnvelope(buildOfficeWorkerAuditPreviewEnvelope(buildOfficeWorkerDispatchDryRunEnvelope(buildOfficeWorkerAuthorityHandoffEnvelope(buildOfficeWorkerHumanConfirmationEnvelope(buildOfficeWorkerRequestDraftPreview(buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-15T13:45:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/readiness-handoff", status: "partial", checked_at: "2026-05-15T13:40:00Z", item_count: 1, warning_count: 1, error_summary: "raw handoff ribbon token" } as unknown as OfficeState["data_sources"][number]],
+      agents: [{ id: "agent-handoff-ribbon", status: "active", prompt: "raw handoff ribbon prompt token-shaped-value", provider: "private-handoff-ribbon-provider" }],
+      work_items: [{ id: "w-handoff", status: "blocked", title: "raw handoff ribbon task", body: "/Users/lidises/private/readiness-handoff.md" } as unknown as OfficeState["work_items"][number]],
+    })))))))))))))))))))))));
+    const projection = buildOfficeControlledMutationContractPostureProjection(executionReadiness);
+    const polish = buildOfficeControlledMutationContractPosturePolish(projection);
+    const ribbon = buildOfficeControlledMutationReadinessHandoffRibbon(polish);
+
+    expect(ribbon.stageLabel).toBe("Frontend Readiness Handoff Ribbon 1");
+    expect(ribbon.sourceStageLabel).toBe("Frontend Contract Posture Polish 2");
+    expect(ribbon.detailKind).toBe("controlled_mutation_readiness_handoff_ribbon");
+    expect(ribbon.enabledControls).toBe(0);
+    expect(ribbon.formControlEnabled).toBe(false);
+    expect(ribbon.browserExecutableControlsEnabled).toBe(false);
+    expect(ribbon.backendMutationEnabled).toBe(false);
+    expect(ribbon.storageWriteEnabled).toBe(false);
+    expect(ribbon.eventAppendEnabled).toBe(false);
+    expect(ribbon.eventReadbackEnabled).toBe(false);
+    expect(ribbon.auditWriteEnabled).toBe(false);
+    expect(ribbon.executionEnabled).toBe(false);
+    expect(ribbon.dryRunExecutionEnabled).toBe(false);
+    expect(ribbon.dispatchEnabled).toBe(false);
+    expect(ribbon.targetMutationEnabled).toBe(false);
+    expect(ribbon.authorityAdapterBindingEnabled).toBe(false);
+    expect(ribbon.credentialChangeEnabled).toBe(false);
+    expect(ribbon.nasMutationEnabled).toBe(false);
+    expect(ribbon.safeProjectionOnly).toBe(true);
+    expect(ribbon.rawExcluded).toBe(true);
+    expect(ribbon.handoffSteps.map((step) => step.id)).toEqual(["request", "approval", "authority", "execution"]);
+    expect(ribbon.handoffSteps.every((step) => step.status === "disabled" && step.rawExcluded)).toBe(true);
+    expect(ribbon.disabledSurfaceSummary).toEqual({ rows: 4, enabledControls: 0 });
+    expect(ribbon.safeBoundary).toContain("read-only handoff ribbon only");
+    expect(JSON.stringify(ribbon)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw handoff ribbon|private-handoff-ribbon|token-shaped-value|provider/i);
   });
 
   it("builds a disabled Authority Adapter Contract 1 before any execution adapter exists", () => {
