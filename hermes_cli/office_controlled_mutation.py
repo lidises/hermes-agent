@@ -450,3 +450,73 @@ def build_office_controlled_mutation_dry_run_evidence_contract(
             "dry-run engine, result recording, readback, and audit write require separate approval",
         ],
     }
+
+
+def build_office_controlled_mutation_authority_adapter_contract(
+    *, unsafe_examples: Mapping[str, Any] | None = None
+) -> dict[str, object]:
+    """Return the non-implementing authority adapter contract descriptor."""
+
+    _ = unsafe_examples
+    return {
+        "schema_version": 1,
+        "mode": "authority_adapter_contract_only",
+        "adapter": {
+            "implementation_enabled": False,
+            "dispatch_enabled": False,
+            "binding_enabled": False,
+            "credential_access_enabled": False,
+            "durable_storage_enabled": False,
+            "database_migration_required": False,
+        },
+        "required_authority_fields": [
+            "authority_candidate_ref",
+            "request_ref",
+            "dry_run_ref",
+            "decision_ref",
+            "actor_ref",
+            "risk_class",
+            "scope",
+            "expires_at",
+            "required_capabilities",
+        ],
+        "allowed_authority_scopes": [
+            "single_action",
+            "bounded_batch",
+            "read_only_projection",
+        ],
+        "required_capability_fields": [
+            "capability_ref",
+            "operation_kind",
+            "target_ref",
+            "permission_posture",
+            "blocked_reason",
+        ],
+        "optional_safe_fields": ["summary", "capability_count", "warning_count"],
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "opaque_refs_only": True,
+            "safe_summaries_only": True,
+            "unsupported_values_echoed": False,
+        },
+        "capabilities": {
+            "adapter_implementation_enabled": False,
+            "adapter_dispatch_enabled": False,
+            "adapter_binding_enabled": False,
+            "credential_access_enabled": False,
+            "target_mutation_enabled": False,
+            "dry_run_execution_enabled": False,
+            "audit_write_enabled": False,
+            "event_append_enabled": False,
+            "request_creation_enabled": False,
+            "human_decision_recording_enabled": False,
+            "nas_save_enabled": False,
+        },
+        "adapter_endpoints": [],
+        "storage_endpoints": [],
+        "contract_notes": [
+            "contract describes future authority adapter shape only; no adapter is implemented or bound",
+            "adapter implementation, dispatch, credential access, storage, and audit write require separate approval",
+        ],
+    }
