@@ -130,6 +130,7 @@ import {
   buildOfficeApprovalDecisionAuditNasTracePreview,
   buildOfficeNasKeeperSaveRequestGate,
   buildOfficeNasKeeperRollbackEvidencePreview,
+  buildOfficeDeskRpgReadOnlyChainCompletionReview,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -163,6 +164,7 @@ import {
   type OfficeApprovalDecisionAuditNasTracePreview,
   type OfficeNasKeeperSaveRequestGate,
   type OfficeNasKeeperRollbackEvidencePreview,
+  type OfficeDeskRpgReadOnlyChainCompletionReview,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -2827,6 +2829,58 @@ export function NasKeeperRollbackEvidencePreviewPanel({ rollback }: { rollback: 
   );
 }
 
+export function DeskRpgReadOnlyChainCompletionReviewPanel({ review }: { review: OfficeDeskRpgReadOnlyChainCompletionReview }) {
+  return (
+    <Card
+      data-office-desk-rpg-readonly-chain-completion-review="true"
+      data-office-desk-rpg-readonly-chain-completion-review-enabled-controls={review.enabledControls}
+      data-office-desk-rpg-readonly-chain-completion-review-mutation-controls-added={String(review.mutationControlsAdded)}
+      data-office-desk-rpg-readonly-chain-completion-review-runtime-write-enabled={String(review.runtimeWriteEnabled)}
+      data-office-desk-rpg-readonly-chain-completion-review-request-creation-enabled={String(review.requestCreationEnabled)}
+      data-office-desk-rpg-readonly-chain-completion-review-work-assignment-enabled={String(review.workAssignmentEnabled)}
+      data-office-desk-rpg-readonly-chain-completion-review-dispatch-enabled={String(review.dispatchEnabled)}
+      data-office-desk-rpg-readonly-chain-completion-review-audit-write-enabled={String(review.auditWriteEnabled)}
+      data-office-desk-rpg-readonly-chain-completion-review-nas-save-enabled={String(review.nasSaveEnabled)}
+      data-office-desk-rpg-readonly-chain-completion-review-safe-projection-only={String(review.safeProjectionOnly)}
+      data-office-desk-rpg-readonly-chain-completion-review-raw-excluded={String(review.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4" /> Desk RPG read-only chain completion review
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-violet-300/20 bg-violet-950/10 p-3">
+            <div className="font-semibold text-violet-100">Master Spec v0.1 alignment · next projection-only gap</div>
+            <div className="mt-1 leading-5">
+              완료된 request/approval/NAS Keeper 읽기 전용 체인을 Master Spec 성공 장면과 대조하고, 다음 최소 slice를 mutation이 아닌 캐릭터 상태 projection으로 고정합니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {review.reviewCards.map((card) => (
+              <div
+                key={card.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-desk-rpg-readonly-chain-completion-review-card={card.id}
+                data-office-desk-rpg-readonly-chain-completion-review-card-status={card.status}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{card.label}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-violet-100/80">{card.status}</div>
+                <div className="mt-2 leading-5">{card.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-desk-rpg-readonly-chain-completion-review-boundary="true">
+            source {review.sourceDetailKind} · source evidence cards {review.sourceEvidenceCardCount} · chain steps {review.completedChainStepCount} · master spec checkpoints {review.masterSpecCheckpointCount} · next {review.nextRecommendedSlice} · controls {review.enabledControls} · raw excluded {String(review.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -3299,6 +3353,10 @@ export default function OfficePage() {
     () => buildOfficeNasKeeperRollbackEvidencePreview(nasKeeperSaveRequestGate),
     [nasKeeperSaveRequestGate],
   );
+  const deskRpgReadOnlyChainCompletionReview = useMemo(
+    () => buildOfficeDeskRpgReadOnlyChainCompletionReview(nasKeeperRollbackEvidencePreview),
+    [nasKeeperRollbackEvidencePreview],
+  );
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -3559,6 +3617,8 @@ export default function OfficePage() {
       <NasKeeperSaveRequestGatePanel gate={nasKeeperSaveRequestGate} />
 
       <NasKeeperRollbackEvidencePreviewPanel rollback={nasKeeperRollbackEvidencePreview} />
+
+      <DeskRpgReadOnlyChainCompletionReviewPanel review={deskRpgReadOnlyChainCompletionReview} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 

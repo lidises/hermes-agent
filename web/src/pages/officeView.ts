@@ -1958,6 +1958,36 @@ export type OfficeNasKeeperRollbackEvidencePreview = {
   rawExcluded: true;
 };
 
+export type OfficeDeskRpgReadOnlyChainCompletionReviewCard = {
+  id: "request_to_orchestrator" | "evidence_to_review" | "approval_to_nas_keeper" | "next_projection_gap";
+  label: string;
+  status: "covered" | "next_gap";
+  summary: string;
+  rawExcluded: true;
+};
+
+export type OfficeDeskRpgReadOnlyChainCompletionReview = {
+  stageLabel: "Desk RPG Read-only Chain Completion Review 1";
+  title: string;
+  detailKind: "desk_rpg_readonly_chain_completion_review";
+  reviewCards: OfficeDeskRpgReadOnlyChainCompletionReviewCard[];
+  sourceDetailKind: OfficeNasKeeperRollbackEvidencePreview["detailKind"];
+  sourceEvidenceCardCount: number;
+  completedChainStepCount: number;
+  masterSpecCheckpointCount: number;
+  nextRecommendedSlice: "Event-driven Character State Projection 1";
+  enabledControls: 0;
+  mutationControlsAdded: false;
+  runtimeWriteEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeWorkerAssignmentCandidateBlockedReason = {
   id: "facility_prerequisites_missing" | "approval_execution_blocked" | "authority_adapter_missing" | "audit_write_disabled" | "human_confirmation_missing";
   label: string;
@@ -3834,6 +3864,60 @@ export function buildOfficeNasKeeperRollbackEvidencePreview(gate: OfficeNasKeepe
     dispatchEnabled: false,
     requestCreationEnabled: false,
     workAssignmentEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeDeskRpgReadOnlyChainCompletionReview(rollback: OfficeNasKeeperRollbackEvidencePreview): OfficeDeskRpgReadOnlyChainCompletionReview {
+  const reviewCards: OfficeDeskRpgReadOnlyChainCompletionReviewCard[] = [
+    {
+      id: "request_to_orchestrator",
+      label: "Boss request → Orchestrator mediation",
+      status: "covered",
+      summary: "사장 지시는 Orchestrator-level request posture로 보이지만 요청 생성과 실행은 여전히 비활성입니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "evidence_to_review",
+      label: "Evidence → Reviewer/Wiki handoff",
+      status: "covered",
+      summary: "검색·근거·Reviewer·Wiki Writer handoff는 safe aggregate와 inspector detail로만 연결되어 있습니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "approval_to_nas_keeper",
+      label: "Approval → NAS Keeper boundary",
+      status: "covered",
+      summary: "승인 대기, decision envelope, audit/NAS trace, SaveRequested gate, rollback evidence preview까지 쓰기 없이 닫혔습니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "next_projection_gap",
+      label: "Next projection-only gap",
+      status: "next_gap",
+      summary: "Master Spec v0.1의 다음 최소 gap은 runtime/intent/visual events를 캐릭터 상태로 축약하는 projection model입니다.",
+      rawExcluded: true,
+    },
+  ];
+  return {
+    stageLabel: "Desk RPG Read-only Chain Completion Review 1",
+    title: "Desk RPG read-only chain completion review",
+    detailKind: "desk_rpg_readonly_chain_completion_review",
+    reviewCards,
+    sourceDetailKind: rollback.detailKind,
+    sourceEvidenceCardCount: rollback.evidenceCardCount,
+    completedChainStepCount: 16,
+    masterSpecCheckpointCount: reviewCards.length,
+    nextRecommendedSlice: "Event-driven Character State Projection 1",
+    enabledControls: 0,
+    mutationControlsAdded: false,
+    runtimeWriteEnabled: false,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    nasSaveEnabled: false,
     safeProjectionOnly: true,
     rawExcluded: true,
   };

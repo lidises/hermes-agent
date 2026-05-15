@@ -18,7 +18,7 @@ vi.mock("@/lib/api", () => ({
 
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
-import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeNasKeeperSaveRequestGate, buildOfficeNasKeeperRollbackEvidencePreview, buildOfficeRpgScene } from "./officeView";
+import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeNasKeeperSaveRequestGate, buildOfficeNasKeeperRollbackEvidencePreview, buildOfficeDeskRpgReadOnlyChainCompletionReview, buildOfficeRpgScene } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
@@ -1239,6 +1239,47 @@ describe("NasKeeperRollbackEvidencePreviewPanel", () => {
     expect(markup).not.toContain("<select");
     expect(markup).not.toContain("<textarea");
     expect(markup).not.toMatch(/raw rollback evidence prompt|raw rollback evidence task|Traceback|\/Users\/lidises|token-shaped-rollback-evidence|private-rollback-evidence-provider/i);
+  });
+});
+
+
+describe("DeskRpgReadOnlyChainCompletionReviewPanel", () => {
+  it("Desk RPG Read-only Chain Completion Review 1 renders completion review without writable controls", () => {
+    const DeskRpgReadOnlyChainCompletionReviewPanel = (OfficePageModule as unknown as {
+      DeskRpgReadOnlyChainCompletionReviewPanel: React.ComponentType<{ review: ReturnType<typeof buildOfficeDeskRpgReadOnlyChainCompletionReview> }>;
+    }).DeskRpgReadOnlyChainCompletionReviewPanel;
+    const secretSentinel = ["token", "shaped", "completion", "review"].join("-");
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishPanelFixture({
+      agents: [{ id: "agent-completion-review", status: "active", prompt: "raw completion review prompt", provider: "private-completion-review-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-completion-review", status: "blocked", title: "raw completion review task", body: "/Users/lidises/private/completion-review.md", transcript: "Traceback completion review transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+    const trace = buildOfficeApprovalDecisionAuditNasTracePreview(envelope);
+    const gate = buildOfficeNasKeeperSaveRequestGate(trace);
+    const rollback = buildOfficeNasKeeperRollbackEvidencePreview(gate);
+    const review = buildOfficeDeskRpgReadOnlyChainCompletionReview(rollback);
+
+    const markup = renderToStaticMarkup(<DeskRpgReadOnlyChainCompletionReviewPanel review={review} />);
+
+    expect(markup).toContain("data-office-desk-rpg-readonly-chain-completion-review=\"true\"");
+    expect(markup).toContain("data-office-desk-rpg-readonly-chain-completion-review-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-desk-rpg-readonly-chain-completion-review-mutation-controls-added=\"false\"");
+    expect(markup).toContain("data-office-desk-rpg-readonly-chain-completion-review-runtime-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-desk-rpg-readonly-chain-completion-review-nas-save-enabled=\"false\"");
+    expect(markup).toContain("data-office-desk-rpg-readonly-chain-completion-review-card=\"request_to_orchestrator\"");
+    expect(markup).toContain("data-office-desk-rpg-readonly-chain-completion-review-card=\"evidence_to_review\"");
+    expect(markup).toContain("data-office-desk-rpg-readonly-chain-completion-review-card=\"approval_to_nas_keeper\"");
+    expect(markup).toContain("data-office-desk-rpg-readonly-chain-completion-review-card=\"next_projection_gap\"");
+    expect(markup).toContain("Desk RPG read-only chain completion review");
+    expect(markup).toContain("Event-driven Character State Projection 1");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw completion review prompt|raw completion review task|Traceback|\/Users\/lidises|token-shaped-completion-review|private-completion-review-provider/i);
   });
 });
 

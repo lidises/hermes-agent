@@ -120,6 +120,7 @@ import {
   buildOfficeApprovalDecisionAuditNasTracePreview,
   buildOfficeNasKeeperSaveRequestGate,
   buildOfficeNasKeeperRollbackEvidencePreview,
+  buildOfficeDeskRpgReadOnlyChainCompletionReview,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -1098,6 +1099,44 @@ describe("NAS Keeper Rollback Evidence Preview 1", () => {
     expect(rollback.safeProjectionOnly).toBe(true);
     expect(rollback.rawExcluded).toBe(true);
     expect(JSON.stringify(rollback)).not.toMatch(/raw rollback evidence prompt|raw rollback evidence task|Traceback|\/Users\/lidises|token-shaped-rollback-evidence|private-rollback-evidence-provider/i);
+  });
+});
+
+
+describe("Desk RPG Read-only Chain Completion Review 1", () => {
+  it("reviews the completed request approval NAS Keeper chain and selects the next projection-only gap", () => {
+    const secretSentinel = ["token", "shaped", "completion", "review"].join("-");
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishFixture({
+      agents: [{ id: "agent-completion-review", status: "active", prompt: "raw completion review prompt", provider: "private-completion-review-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-completion-review", status: "blocked", title: "raw completion review task", body: "/Users/lidises/private/completion-review.md", transcript: "Traceback completion review transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+    const trace = buildOfficeApprovalDecisionAuditNasTracePreview(envelope);
+    const gate = buildOfficeNasKeeperSaveRequestGate(trace);
+    const rollback = buildOfficeNasKeeperRollbackEvidencePreview(gate);
+
+    const review = buildOfficeDeskRpgReadOnlyChainCompletionReview(rollback);
+
+    expect(review.stageLabel).toBe("Desk RPG Read-only Chain Completion Review 1");
+    expect(review.detailKind).toBe("desk_rpg_readonly_chain_completion_review");
+    expect(review.sourceDetailKind).toBe("nas_keeper_rollback_evidence_preview");
+    expect(review.reviewCards.map((card) => card.id)).toEqual(["request_to_orchestrator", "evidence_to_review", "approval_to_nas_keeper", "next_projection_gap"]);
+    expect(review.completedChainStepCount).toBe(16);
+    expect(review.masterSpecCheckpointCount).toBe(4);
+    expect(review.nextRecommendedSlice).toBe("Event-driven Character State Projection 1");
+    expect(review.enabledControls).toBe(0);
+    expect(review.mutationControlsAdded).toBe(false);
+    expect(review.runtimeWriteEnabled).toBe(false);
+    expect(review.requestCreationEnabled).toBe(false);
+    expect(review.workAssignmentEnabled).toBe(false);
+    expect(review.dispatchEnabled).toBe(false);
+    expect(review.auditWriteEnabled).toBe(false);
+    expect(review.nasSaveEnabled).toBe(false);
+    expect(review.safeProjectionOnly).toBe(true);
+    expect(review.rawExcluded).toBe(true);
+    expect(JSON.stringify(review)).not.toMatch(/raw completion review prompt|raw completion review task|Traceback|\/Users\/lidises|token-shaped-completion-review|private-completion-review-provider/i);
   });
 });
 
