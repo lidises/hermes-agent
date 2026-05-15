@@ -133,6 +133,7 @@ import {
   buildOfficeDeskRpgReadOnlyChainCompletionReview,
   buildOfficeEventDrivenCharacterStateProjection,
   buildOfficeCharacterStateRoomOverlay,
+  buildOfficeCharacterRoomInteractionPosture,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -169,6 +170,7 @@ import {
   type OfficeDeskRpgReadOnlyChainCompletionReview,
   type OfficeEventDrivenCharacterStateProjection,
   type OfficeCharacterStateRoomOverlay,
+  type OfficeCharacterRoomInteractionPosture,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -2989,6 +2991,62 @@ export function CharacterStateRoomOverlayPanel({ overlay }: { overlay: OfficeCha
   );
 }
 
+export function CharacterRoomInteractionPosturePanel({ posture }: { posture: OfficeCharacterRoomInteractionPosture }) {
+  return (
+    <Card
+      data-office-character-room-interaction-posture="true"
+      data-office-character-room-interaction-posture-enabled-controls={posture.enabledControls}
+      data-office-character-room-interaction-posture-click-handler-enabled={String(posture.clickHandlerEnabled)}
+      data-office-character-room-interaction-posture-keyboard-handler-enabled={String(posture.keyboardHandlerEnabled)}
+      data-office-character-room-interaction-posture-event-persistence-enabled={String(posture.eventPersistenceEnabled)}
+      data-office-character-room-interaction-posture-backend-stream-enabled={String(posture.backendStreamEnabled)}
+      data-office-character-room-interaction-posture-animation-state-persistence-enabled={String(posture.animationStatePersistenceEnabled)}
+      data-office-character-room-interaction-posture-request-creation-enabled={String(posture.requestCreationEnabled)}
+      data-office-character-room-interaction-posture-dispatch-enabled={String(posture.dispatchEnabled)}
+      data-office-character-room-interaction-posture-nas-save-enabled={String(posture.nasSaveEnabled)}
+      data-office-character-room-interaction-posture-safe-projection-only={String(posture.safeProjectionOnly)}
+      data-office-character-room-interaction-posture-raw-excluded={String(posture.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Eye className="h-4 w-4" /> Click/keyboard inspection posture
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-violet-300/20 bg-violet-950/10 p-3">
+            <div className="font-semibold text-violet-100">표시용 inspection contract only</div>
+            <div className="mt-1 leading-5">
+              overlay marker별 click/keyboard inspection affordance를 계약으로만 표시합니다. handler, request creation, assignment, dispatch, audit, NAS save는 모두 false입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3">
+            {posture.postures.map((item) => (
+              <div
+                key={item.role}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-character-room-interaction-posture-marker={item.role}
+                data-office-character-room-interaction-posture-room={item.roomSurfaceId}
+                data-office-character-room-interaction-posture-click={item.clickInspectionPosture}
+                data-office-character-room-interaction-posture-keyboard={item.keyboardInspectionPosture}
+                data-office-character-room-interaction-posture-executable={String(item.executable)}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.inspectTargetId}</div>
+                <div className="mt-1 font-semibold text-foreground">{item.label}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-violet-100/80">{item.clickInspectionPosture} · {item.keyboardInspectionPosture}</div>
+                <div className="mt-2 leading-5">{item.safeSummary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-character-room-interaction-posture-boundary="true">
+            source {posture.sourceDetailKind} · markers {posture.sourceMarkerCount} · postures {posture.postureCount} · controls {posture.enabledControls} · handlers false
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -3515,6 +3573,10 @@ export default function OfficePage() {
     () => buildOfficeCharacterStateRoomOverlay(eventDrivenCharacterStateProjection),
     [eventDrivenCharacterStateProjection],
   );
+  const characterRoomInteractionPosture = useMemo(
+    () => buildOfficeCharacterRoomInteractionPosture(characterStateRoomOverlay),
+    [characterStateRoomOverlay],
+  );
   const safeMotionHeartbeat = useMemo(
     () => buildOfficeSafeMotionHeartbeat(safeStreamPosture, {
       pollStatus: safeEventsStatus === "loaded" ? "active" : safeEventsStatus,
@@ -3739,6 +3801,8 @@ export default function OfficePage() {
       <EventDrivenCharacterStateProjectionPanel projection={eventDrivenCharacterStateProjection} />
 
       <CharacterStateRoomOverlayPanel overlay={characterStateRoomOverlay} />
+
+      <CharacterRoomInteractionPosturePanel posture={characterRoomInteractionPosture} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 

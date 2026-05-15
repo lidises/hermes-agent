@@ -2058,6 +2058,43 @@ export type OfficeCharacterStateRoomOverlay = {
   rawExcluded: true;
 };
 
+export type OfficeCharacterRoomInteractionPostureMarker = {
+  role: OfficeCharacterStateRoomOverlayMarker["role"];
+  label: string;
+  roomSurfaceId: OfficeCharacterStateRoomOverlayMarker["roomSurfaceId"];
+  sourceMarkerKind: OfficeCharacterStateRoomOverlayMarker["markerKind"];
+  inspectTargetId: `inspect_${OfficeCharacterStateRoomOverlayMarker["role"]}`;
+  clickInspectionPosture: "display_only";
+  keyboardInspectionPosture: "display_only";
+  inspectable: true;
+  executable: false;
+  safeSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeCharacterRoomInteractionPosture = {
+  stageLabel: "Character Room Interaction Posture 1";
+  title: string;
+  detailKind: "character_room_interaction_posture";
+  sourceDetailKind: OfficeCharacterStateRoomOverlay["detailKind"];
+  sourceMarkerCount: number;
+  postureCount: number;
+  postures: OfficeCharacterRoomInteractionPostureMarker[];
+  enabledControls: 0;
+  clickHandlerEnabled: false;
+  keyboardHandlerEnabled: false;
+  eventPersistenceEnabled: false;
+  backendStreamEnabled: false;
+  animationStatePersistenceEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeWorkerAssignmentCandidateBlockedReason = {
   id: "facility_prerequisites_missing" | "approval_execution_blocked" | "authority_adapter_missing" | "audit_write_disabled" | "human_confirmation_missing";
   label: string;
@@ -4116,6 +4153,44 @@ export function buildOfficeCharacterStateRoomOverlay(projection: OfficeEventDriv
     markerCount: markers.length,
     markers,
     enabledControls: 0,
+    eventPersistenceEnabled: false,
+    backendStreamEnabled: false,
+    animationStatePersistenceEnabled: false,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    nasSaveEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeCharacterRoomInteractionPosture(overlay: OfficeCharacterStateRoomOverlay): OfficeCharacterRoomInteractionPosture {
+  const postures: OfficeCharacterRoomInteractionPostureMarker[] = overlay.markers.map((marker) => ({
+    role: marker.role,
+    label: marker.label,
+    roomSurfaceId: marker.roomSurfaceId,
+    sourceMarkerKind: marker.markerKind,
+    inspectTargetId: `inspect_${marker.role}`,
+    clickInspectionPosture: "display_only",
+    keyboardInspectionPosture: "display_only",
+    inspectable: true,
+    executable: false,
+    safeSummary: `${marker.label} marker는 click/keyboard inspection 가능성을 표시만 하며 handler와 실행 권한은 없습니다.`,
+    rawExcluded: true,
+  }));
+  return {
+    stageLabel: "Character Room Interaction Posture 1",
+    title: "Click/keyboard inspection posture",
+    detailKind: "character_room_interaction_posture",
+    sourceDetailKind: overlay.detailKind,
+    sourceMarkerCount: overlay.markerCount,
+    postureCount: postures.length,
+    postures,
+    enabledControls: 0,
+    clickHandlerEnabled: false,
+    keyboardHandlerEnabled: false,
     eventPersistenceEnabled: false,
     backendStreamEnabled: false,
     animationStatePersistenceEnabled: false,

@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-15 15:25 KST
+Last updated: 2026-05-15 15:53 KST
 
 ## AI Office 통합 운영실 umbrella summary
 
@@ -28,6 +28,14 @@ Master Spec v0.1 review adds an important clarification: read-only-first is the 
 
 
 
+
+## Character Room Interaction Posture 1 completed locally
+
+`Character Room Interaction Posture 1` adds a safe helper, `buildOfficeCharacterRoomInteractionPosture(overlay)`, plus `CharacterRoomInteractionPosturePanel` in `/office`. It composes only the existing safe `Character State Room Overlay 1` DTO into six display-only click/keyboard inspection posture contracts for the user boss, Orchestrator, Search Worker, Reviewer, Wiki Writer, and NAS Keeper. It keeps `enabledControls=0`, `clickHandlerEnabled=false`, `keyboardHandlerEnabled=false`, `eventPersistenceEnabled=false`, `backendStreamEnabled=false`, `animationStatePersistenceEnabled=false`, `requestCreationEnabled=false`, `workAssignmentEnabled=false`, `dispatchEnabled=false`, `auditWriteEnabled=false`, `nasSaveEnabled=false`, and raw exclusion true through stable `data-office-character-room-interaction-posture*` hooks.
+
+Verification 2026-05-15 15:53 KST: focused RED first failed with `buildOfficeCharacterRoomInteractionPosture is not a function`; focused GREEN passed with `2 passed | 155 skipped`; combined `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx` passed 157 tests; focused ESLint passed for touched Office files; `npm run build` passed with only the existing Vite large-chunk warning; `git diff --check` passed; safety scan passed for changed paths, forbidden runtime controls, and raw/private/provider sentinels; browser smoke on local dashboard `/office?character-room-interaction-posture=1` found 1 posture panel, 6 marker hooks, controls 0, click/keyboard handlers false, no form/button/input/select/textarea inside the panel, and raw leak false; independent review PASS. Remaining final gate in this session: commit.
+
+Safety/non-actions: frontend/read-only only; no backend/schema/API route/service/Kanban/cron/VPS/NAS mutation, no renderer dependency, no form/button/input/select/textarea controls in the new panel, no click handler, no keyboard handler, no backend stream, no event persistence, no animation-state persistence, no request creation, no worker assignment, no dispatch, no audit write, no NAS save, and no raw prompt/task body/transcript/path/token/provider projection.
 
 ## Character State Room Overlay 1 completed locally
 

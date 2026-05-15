@@ -123,6 +123,7 @@ import {
   buildOfficeDeskRpgReadOnlyChainCompletionReview,
   buildOfficeEventDrivenCharacterStateProjection,
   buildOfficeCharacterStateRoomOverlay,
+  buildOfficeCharacterRoomInteractionPosture,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -1233,6 +1234,54 @@ describe("Character State Room Overlay 1", () => {
     expect(overlay.safeProjectionOnly).toBe(true);
     expect(overlay.rawExcluded).toBe(true);
     expect(JSON.stringify(overlay)).not.toMatch(/raw character overlay prompt|raw character overlay task|Traceback|\/Users\/lidises|token-shaped-room-overlay|private-character-overlay-provider/i);
+  });
+});
+
+
+describe("Character Room Interaction Posture 1", () => {
+  it("projects click and keyboard inspection posture for safe overlay markers without enabling interaction", () => {
+    const secretSentinel = ["token", "shaped", "room", "interaction"].join("-");
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishFixture({
+      agents: [{ id: "agent-character-interaction", status: "active", prompt: "raw character interaction prompt", provider: "private-character-interaction-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-character-interaction", status: "blocked", title: "raw character interaction task", body: "/Users/lidises/private/character-interaction.md", transcript: "Traceback character interaction transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+    const trace = buildOfficeApprovalDecisionAuditNasTracePreview(envelope);
+    const gate = buildOfficeNasKeeperSaveRequestGate(trace);
+    const rollback = buildOfficeNasKeeperRollbackEvidencePreview(gate);
+    const review = buildOfficeDeskRpgReadOnlyChainCompletionReview(rollback);
+    const stateProjection = buildOfficeEventDrivenCharacterStateProjection(review, [
+      { id: "evt-runtime-interaction", category: "room_density_changed", roomId: "work", tone: "warning", count: 3, safeLabel: "room density", detail: "safe density aggregate", redacted: true, rawSource: false },
+      { id: "evt-intent-interaction", category: "attention_changed", roomId: "routing", tone: "negative", count: 1, safeLabel: "approval attention", detail: "safe attention aggregate", redacted: true, rawSource: false },
+      { id: "evt-visual-interaction", category: "snapshot_static", roomId: "sessions", tone: "neutral", count: 0, safeLabel: "static snapshot", detail: "safe static aggregate", redacted: true, rawSource: false },
+    ] as const);
+    const overlay = buildOfficeCharacterStateRoomOverlay(stateProjection);
+
+    const posture = buildOfficeCharacterRoomInteractionPosture(overlay);
+
+    expect(posture.stageLabel).toBe("Character Room Interaction Posture 1");
+    expect(posture.detailKind).toBe("character_room_interaction_posture");
+    expect(posture.sourceDetailKind).toBe("character_state_room_overlay");
+    expect(posture.postureCount).toBe(6);
+    expect(posture.postures.map((item) => item.role)).toEqual(["user_boss", "orchestrator", "search_worker", "reviewer", "wiki_writer", "nas_keeper"]);
+    expect(posture.postures.every((item) => item.clickInspectionPosture === "display_only" && item.keyboardInspectionPosture === "display_only")).toBe(true);
+    expect(posture.postures.every((item) => item.inspectable === true && item.executable === false && item.rawExcluded === true)).toBe(true);
+    expect(posture.enabledControls).toBe(0);
+    expect(posture.clickHandlerEnabled).toBe(false);
+    expect(posture.keyboardHandlerEnabled).toBe(false);
+    expect(posture.eventPersistenceEnabled).toBe(false);
+    expect(posture.backendStreamEnabled).toBe(false);
+    expect(posture.animationStatePersistenceEnabled).toBe(false);
+    expect(posture.requestCreationEnabled).toBe(false);
+    expect(posture.workAssignmentEnabled).toBe(false);
+    expect(posture.dispatchEnabled).toBe(false);
+    expect(posture.auditWriteEnabled).toBe(false);
+    expect(posture.nasSaveEnabled).toBe(false);
+    expect(posture.safeProjectionOnly).toBe(true);
+    expect(posture.rawExcluded).toBe(true);
+    expect(JSON.stringify(posture)).not.toMatch(/raw character interaction prompt|raw character interaction task|Traceback|\/Users\/lidises|token-shaped-room-interaction|private-character-interaction-provider/i);
   });
 });
 
