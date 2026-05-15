@@ -110,6 +110,7 @@ import {
   buildOfficeControlledMutationAuthoritySummary,
   buildOfficeControlledMutationExecutionReadinessSummary,
   buildOfficeControlledMutationContractPostureProjection,
+  buildOfficeControlledMutationContractPosturePolish,
   buildOfficeDeskRpgWorkerRoleVisibility,
   buildOfficeDisabledApprovalDialoguePosture,
   buildOfficeReviewerWikiHandoffPosture,
@@ -179,6 +180,7 @@ import {
   type OfficeNasKeeperRollbackEvidencePreview,
   type OfficeDeskRpgReadOnlyChainCompletionReview,
   type OfficeControlledMutationContractPostureProjection,
+  type OfficeControlledMutationContractPosturePolish,
   type OfficeEventDrivenCharacterStateProjection,
   type OfficeCharacterStateRoomOverlay,
   type OfficeCharacterRoomInteractionPosture,
@@ -3538,6 +3540,51 @@ export function ControlledMutationContractPostureProjectionPanel({ projection }:
   );
 }
 
+export function ControlledMutationContractPosturePolishPanel({ polish }: { polish: OfficeControlledMutationContractPosturePolish }) {
+  return (
+    <section
+      className="border border-sky-300/20 bg-sky-950/10 p-4"
+      data-office-controlled-mutation-contract-posture-polish="true"
+      data-office-controlled-mutation-contract-posture-polish-enabled-controls={polish.enabledControls}
+      data-office-controlled-mutation-contract-posture-polish-form-control-enabled={String(polish.formControlEnabled)}
+      data-office-controlled-mutation-contract-posture-polish-browser-executable-controls-enabled={String(polish.browserExecutableControlsEnabled)}
+      data-office-controlled-mutation-contract-posture-polish-backend-mutation-enabled={String(polish.backendMutationEnabled)}
+      data-office-controlled-mutation-contract-posture-polish-storage-write-enabled={String(polish.storageWriteEnabled)}
+      data-office-controlled-mutation-contract-posture-polish-event-append-enabled={String(polish.eventAppendEnabled)}
+      data-office-controlled-mutation-contract-posture-polish-event-readback-enabled={String(polish.eventReadbackEnabled)}
+      data-office-controlled-mutation-contract-posture-polish-audit-write-enabled={String(polish.auditWriteEnabled)}
+      data-office-controlled-mutation-contract-posture-polish-execution-enabled={String(polish.executionEnabled)}
+      data-office-controlled-mutation-contract-posture-polish-dry-run-execution-enabled={String(polish.dryRunExecutionEnabled)}
+      data-office-controlled-mutation-contract-posture-polish-dispatch-enabled={String(polish.dispatchEnabled)}
+      data-office-controlled-mutation-contract-posture-polish-authority-adapter-binding-enabled={String(polish.authorityAdapterBindingEnabled)}
+      data-office-controlled-mutation-contract-posture-polish-credential-change-enabled={String(polish.credentialChangeEnabled)}
+      data-office-controlled-mutation-contract-posture-polish-nas-mutation-enabled={String(polish.nasMutationEnabled)}
+      data-office-controlled-mutation-contract-posture-polish-safe-projection-only={String(polish.safeProjectionOnly)}
+      data-office-controlled-mutation-contract-posture-polish-raw-excluded={String(polish.rawExcluded)}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-200/70">{polish.stageLabel}</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">{polish.title}</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">{polish.safeBoundary}</p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          disabled: {polish.disabledSurfaceSummary.blockedCards}/{polish.disabledSurfaceSummary.cards} · controls: {polish.disabledSurfaceSummary.enabledControls}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 lg:grid-cols-4" data-office-controlled-mutation-contract-posture-polish-rows="true">
+        {polish.polishRows.map((row) => (
+          <div key={row.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-contract-posture-polish-row={row.id} data-office-controlled-mutation-contract-posture-polish-row-status={row.status}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{row.status}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{row.label}</div>
+            <div className="mt-2 text-xs leading-5 text-midground/70">{row.detail}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -3931,6 +3978,7 @@ export default function OfficePage() {
   const controlledMutationAuthoritySummary = useMemo(() => buildOfficeControlledMutationAuthoritySummary(controlledMutationHumanApprovalPlan), [controlledMutationHumanApprovalPlan]);
   const controlledMutationExecutionReadinessSummary = useMemo(() => buildOfficeControlledMutationExecutionReadinessSummary(controlledMutationAuthoritySummary), [controlledMutationAuthoritySummary]);
   const controlledMutationContractPostureProjection = useMemo(() => buildOfficeControlledMutationContractPostureProjection(controlledMutationExecutionReadinessSummary), [controlledMutationExecutionReadinessSummary]);
+  const controlledMutationContractPosturePolish = useMemo(() => buildOfficeControlledMutationContractPosturePolish(controlledMutationContractPostureProjection), [controlledMutationContractPostureProjection]);
   const deskRpgProjection = useMemo(() => buildOfficeDeskRpgProjectionModel(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const deskRpgWorkerRoleVisibility = useMemo(() => buildOfficeDeskRpgWorkerRoleVisibility(deskRpgProjection), [deskRpgProjection]);
   const disabledApprovalDialoguePosture = useMemo(() => buildOfficeDisabledApprovalDialoguePosture(deskRpgProjection), [deskRpgProjection]);
@@ -5094,6 +5142,7 @@ export default function OfficePage() {
       </section>
 
       <ControlledMutationContractPostureProjectionPanel projection={controlledMutationContractPostureProjection} />
+      <ControlledMutationContractPosturePolishPanel polish={controlledMutationContractPosturePolish} />
 
       {showOverview ? (
         <OfficeRpgMap

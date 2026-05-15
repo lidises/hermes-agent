@@ -2855,6 +2855,7 @@ export type OfficeControlledMutationContractPostureProjection = {
   sourceStageLabel: OfficeControlledMutationExecutionReadinessSummary["stageLabel"];
   detailKind: "controlled_mutation_contract_posture_projection";
   title: string;
+  safeBoundary: string;
   enabledControls: 0;
   formControlEnabled: false;
   browserExecutableControlsEnabled: false;
@@ -2869,10 +2870,49 @@ export type OfficeControlledMutationContractPostureProjection = {
   authorityAdapterBindingEnabled: false;
   credentialChangeEnabled: false;
   nasMutationEnabled: false;
-  safeBoundary: string;
   safeProjectionOnly: true;
   rawExcluded: true;
   postureCards: OfficeControlledMutationContractPostureProjectionCard[];
+};
+
+export type OfficeControlledMutationContractPosturePolishRowId = "browser_surface" | "mutation_backplane" | "authority_and_credentials" | "nas_vps_kanban";
+
+export type OfficeControlledMutationContractPosturePolishRow = {
+  id: OfficeControlledMutationContractPosturePolishRowId;
+  label: string;
+  status: "disabled";
+  detail: string;
+  rawExcluded: true;
+};
+
+export type OfficeControlledMutationContractPosturePolish = {
+  stageLabel: "Frontend Contract Posture Polish 2";
+  sourceStageLabel: OfficeControlledMutationContractPostureProjection["stageLabel"];
+  detailKind: "controlled_mutation_contract_posture_polish";
+  title: string;
+  safeBoundary: string;
+  enabledControls: 0;
+  formControlEnabled: false;
+  browserExecutableControlsEnabled: false;
+  backendMutationEnabled: false;
+  storageWriteEnabled: false;
+  eventAppendEnabled: false;
+  eventReadbackEnabled: false;
+  auditWriteEnabled: false;
+  executionEnabled: false;
+  dryRunExecutionEnabled: false;
+  dispatchEnabled: false;
+  authorityAdapterBindingEnabled: false;
+  credentialChangeEnabled: false;
+  nasMutationEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+  disabledSurfaceSummary: {
+    cards: number;
+    blockedCards: number;
+    enabledControls: 0;
+  };
+  polishRows: OfficeControlledMutationContractPosturePolishRow[];
 };
 
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
@@ -6528,6 +6568,49 @@ export function buildOfficeControlledMutationContractPostureProjection(execution
     postureCards: postureCards.map((card) => ({
       ...card,
       status: "blocked",
+      rawExcluded: true,
+    })),
+  };
+}
+
+export function buildOfficeControlledMutationContractPosturePolish(projection: OfficeControlledMutationContractPostureProjection): OfficeControlledMutationContractPosturePolish {
+  const polishRows: Array<{ id: OfficeControlledMutationContractPosturePolishRowId; label: string; detail: string }> = [
+    { id: "browser_surface", label: "Browser surface", detail: "Static status copy only; no form controls, click handlers, submit handlers, or browser-side mutation calls" },
+    { id: "mutation_backplane", label: "Mutation backplane", detail: "Backend schema, API routes, event append/readback, storage writes, audit writes, execution, dry-run, dispatch, and target mutation stay absent" },
+    { id: "authority_and_credentials", label: "Authority and credentials", detail: "Authority adapter implementation/binding, credential access, auth changes, and environment changes stay absent" },
+    { id: "nas_vps_kanban", label: "NAS/VPS/Kanban/Cron", detail: "NAS write preparation, NAS save, VPS changes, Kanban mutation, cron mutation, deploy, restart, push, and merge stay outside this slice" },
+  ];
+  const blockedCards = projection.postureCards.filter((card) => card.status === "blocked").length;
+  return {
+    stageLabel: "Frontend Contract Posture Polish 2",
+    sourceStageLabel: projection.stageLabel,
+    detailKind: "controlled_mutation_contract_posture_polish",
+    title: "제어형 변경 계약 자세 정리 · 읽기 전용",
+    safeBoundary: "read-only posture polish only · clarifies existing disabled surfaces · no forms/buttons/inputs · no browser executable controls · no backend/schema/API route/service changes · no storage/write path · no event append/readback · no audit write · no execution/dry-run/dispatch/target mutation · no authority adapter binding · no credential/auth/env change · no NAS/VPS/Kanban/cron mutation",
+    enabledControls: 0,
+    formControlEnabled: false,
+    browserExecutableControlsEnabled: false,
+    backendMutationEnabled: false,
+    storageWriteEnabled: false,
+    eventAppendEnabled: false,
+    eventReadbackEnabled: false,
+    auditWriteEnabled: false,
+    executionEnabled: false,
+    dryRunExecutionEnabled: false,
+    dispatchEnabled: false,
+    authorityAdapterBindingEnabled: false,
+    credentialChangeEnabled: false,
+    nasMutationEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+    disabledSurfaceSummary: {
+      cards: projection.postureCards.length,
+      blockedCards,
+      enabledControls: 0,
+    },
+    polishRows: polishRows.map((row) => ({
+      ...row,
+      status: "disabled",
       rawExcluded: true,
     })),
   };
