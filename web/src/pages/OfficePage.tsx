@@ -123,6 +123,7 @@ import {
   buildOfficeTimelineWorkerHandoffDrilldown,
   buildOfficeApprovalRequestDetailDeepening,
   buildOfficeWorkerFacilityLanePolish,
+  buildOfficeWorkerRequestHandoffDetail,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -149,6 +150,7 @@ import {
   type OfficeTimelineWorkerHandoffDrilldown,
   type OfficeApprovalRequestDetailDeepening,
   type OfficeWorkerFacilityLanePolish,
+  type OfficeWorkerRequestHandoffDetail,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -2437,6 +2439,55 @@ export function WorkerFacilityLanePolishPanel({ polish }: { polish: OfficeWorker
   );
 }
 
+export function WorkerRequestHandoffDetailPanel({ detail }: { detail: OfficeWorkerRequestHandoffDetail }) {
+  return (
+    <Card
+      data-office-worker-request-handoff-detail="true"
+      data-office-worker-request-handoff-detail-enabled-controls={detail.enabledControls}
+      data-office-worker-request-handoff-detail-request-creation-enabled={String(detail.requestCreationEnabled)}
+      data-office-worker-request-handoff-detail-work-assignment-enabled={String(detail.workAssignmentEnabled)}
+      data-office-worker-request-handoff-detail-dispatch-enabled={String(detail.dispatchEnabled)}
+      data-office-worker-request-handoff-detail-audit-write-enabled={String(detail.auditWriteEnabled)}
+      data-office-worker-request-handoff-detail-nas-save-enabled={String(detail.nasSaveEnabled)}
+      data-office-worker-request-handoff-detail-safe-projection-only={String(detail.safeProjectionOnly)}
+      data-office-worker-request-handoff-detail-raw-excluded={String(detail.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Route className="h-4 w-4" /> Worker request handoff detail
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-cyan-300/20 bg-cyan-950/10 p-3">
+            <div className="font-semibold text-cyan-100">request-to-worker handoff · projection only</div>
+            <div className="mt-1 leading-5">
+              Approval detail과 worker facility lane을 연결해 handoff posture만 보여줍니다. request creation, worker assignment, dispatch, audit write, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {detail.sections.map((section) => (
+              <div
+                key={section.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-worker-request-handoff-section={section.id}
+                data-office-worker-request-handoff-section-tone={section.tone}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{section.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{section.label}</div>
+                <div className="mt-2 leading-5">{section.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-worker-request-handoff-detail-boundary="true">
+            source {detail.sourceApprovalDetailKind} / {detail.sourceLanePolishKind} · request sections {detail.requestSectionCount} · worker lanes {detail.workerLaneCount} · prerequisites {detail.handoffPrerequisiteCount} · warnings {detail.warningCount} · controls {detail.enabledControls} · raw excluded {String(detail.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -2881,6 +2932,10 @@ export default function OfficePage() {
     () => buildOfficeWorkerFacilityLanePolish(timelineWorkerHandoffDrilldown, workerFacilityReadiness),
     [timelineWorkerHandoffDrilldown, workerFacilityReadiness],
   );
+  const workerRequestHandoffDetail = useMemo(
+    () => buildOfficeWorkerRequestHandoffDetail(approvalRequestDetailDeepening, workerFacilityLanePolish),
+    [approvalRequestDetailDeepening, workerFacilityLanePolish],
+  );
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -3127,6 +3182,8 @@ export default function OfficePage() {
       <ApprovalRequestDetailDeepeningPanel detail={approvalRequestDetailDeepening} />
 
       <WorkerFacilityLanePolishPanel polish={workerFacilityLanePolish} />
+
+      <WorkerRequestHandoffDetailPanel detail={workerRequestHandoffDetail} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 

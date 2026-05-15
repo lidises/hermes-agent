@@ -1740,6 +1740,35 @@ export type OfficeWorkerFacilityLanePolish = {
   rawExcluded: true;
 };
 
+export type OfficeWorkerRequestHandoffSection = {
+  id: "request_detail" | "worker_lanes" | "handoff_boundary" | "nas_boundary";
+  label: string;
+  summary: string;
+  tone: "info" | "warning" | "blocked";
+  rawExcluded: true;
+};
+
+export type OfficeWorkerRequestHandoffDetail = {
+  stageLabel: "Worker Request Handoff Detail 1";
+  title: string;
+  detailKind: "worker_request_handoff_detail";
+  sections: OfficeWorkerRequestHandoffSection[];
+  sourceApprovalDetailKind: OfficeApprovalRequestDetailDeepening["detailKind"];
+  sourceLanePolishKind: OfficeWorkerFacilityLanePolish["detailKind"];
+  requestSectionCount: number;
+  workerLaneCount: number;
+  handoffPrerequisiteCount: number;
+  warningCount: number;
+  enabledControls: 0;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeWorkerAssignmentCandidateBlockedReason = {
   id: "facility_prerequisites_missing" | "approval_execution_blocked" | "authority_adapter_missing" | "audit_write_disabled" | "human_confirmation_missing";
   label: string;
@@ -3230,6 +3259,63 @@ export function buildOfficeWorkerFacilityLanePolish(
     facilityWriteEnabled: false,
     workAssignmentEnabled: false,
     requestCreationEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    nasSaveEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+
+export function buildOfficeWorkerRequestHandoffDetail(
+  approvalDetail: OfficeApprovalRequestDetailDeepening,
+  lanePolish: OfficeWorkerFacilityLanePolish,
+): OfficeWorkerRequestHandoffDetail {
+  const warningCount = approvalDetail.warningCount + lanePolish.lanes.filter((lane) => lane.tone === "warning" || lane.tone === "blocked").length;
+  return {
+    stageLabel: "Worker Request Handoff Detail 1",
+    title: "Worker request handoff detail",
+    detailKind: "worker_request_handoff_detail",
+    sections: [
+      {
+        id: "request_detail",
+        label: "request detail",
+        summary: `${approvalDetail.routeCardCount} safe route card(s), ${approvalDetail.timelineEventCount} timeline event marker(s), and ${approvalDetail.handoffStepCount} worker handoff step(s) remain request detail only.`,
+        tone: approvalDetail.blockedWorkCount > 0 ? "warning" : "info",
+        rawExcluded: true,
+      },
+      {
+        id: "worker_lanes",
+        label: "worker lanes",
+        summary: `${lanePolish.laneCount} worker facility lane(s) stay mapped to readiness prerequisites without assignment, request creation, or dispatch.`,
+        tone: lanePolish.prerequisiteCount > 0 ? "warning" : "info",
+        rawExcluded: true,
+      },
+      {
+        id: "handoff_boundary",
+        label: "handoff boundary",
+        summary: "The browser shows request-to-worker handoff posture only; it does not create worker requests, assign work, or dispatch adapters.",
+        tone: "blocked",
+        rawExcluded: true,
+      },
+      {
+        id: "nas_boundary",
+        label: "NAS boundary",
+        summary: "NAS save remains a future approval-gated action and is not available from this read-only detail surface.",
+        tone: "blocked",
+        rawExcluded: true,
+      },
+    ],
+    sourceApprovalDetailKind: approvalDetail.detailKind,
+    sourceLanePolishKind: lanePolish.detailKind,
+    requestSectionCount: approvalDetail.sections.length,
+    workerLaneCount: lanePolish.laneCount,
+    handoffPrerequisiteCount: lanePolish.prerequisiteCount,
+    warningCount,
+    enabledControls: 0,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
     dispatchEnabled: false,
     auditWriteEnabled: false,
     nasSaveEnabled: false,

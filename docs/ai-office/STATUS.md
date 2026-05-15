@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-15 11:29 KST
+Last updated: 2026-05-15 12:09 KST
 
 ## AI Office 통합 운영실 umbrella summary
 
@@ -148,6 +148,14 @@ Safety/non-actions: frontend/read-only only; no backend/schema/mutation/NAS/VPS/
 Verification 2026-05-15 KST: focused `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx -t "Worker Facility Lane Polish 1"` first failed with `buildOfficeWorkerFacilityLanePolish is not a function`, then passed after helper/panel implementation (2 passed, 133 skipped); combined `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx` passed (135 passed); focused ESLint passed for `src/pages/OfficePage.tsx`, `src/pages/OfficePage.test.ts`, `src/pages/OfficePage.rpg.test.tsx`, and `src/pages/officeView.ts`; `npm run build` passed with only the existing Vite large-chunk warning; `git diff --check` passed. Added-line static scan hits were limited to documentation safety copy and intentional negative sentinel tests. Local preview `/office?worker-facility-lane-polish=1` returned HTTP 200; browser smoke found the worker facility lane polish panel, 4 lane hooks, `enabledControls=0`, no forms/buttons/inputs inside the panel, raw-leak probe false, and zero console/JS errors.
 
 Safety/non-actions: frontend/read-only only; no backend/schema/mutation/NAS/VPS/service change, no renderer dependency, no forms/buttons/inputs in the component, no facility write, no worker assignment, no request creation, no dispatch, no audit write, no NAS save, and no raw prompt/task body/transcript/path/token/provider projection.
+
+## Worker Request Handoff Detail 1 completed locally
+
+`Worker Request Handoff Detail 1` adds a safe helper, `buildOfficeWorkerRequestHandoffDetail(approvalDetail, lanePolish)`, plus `WorkerRequestHandoffDetailPanel` in `/office`. It composes only the existing read-only approval-request detail deepening and worker facility lane polish DTOs into four safe sections: request detail, worker lanes, handoff boundary, and NAS boundary. It keeps `enabledControls=0`, `requestCreationEnabled=false`, `workAssignmentEnabled=false`, `dispatchEnabled=false`, `auditWriteEnabled=false`, `nasSaveEnabled=false`, `safeProjectionOnly=true`, and `rawExcluded=true` through stable `data-office-worker-request-handoff-detail*` and `data-office-worker-request-handoff-section*` hooks.
+
+Verification 2026-05-15 12:09 KST: focused `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx -t "Worker Request Handoff Detail 1"` first failed with `buildOfficeWorkerRequestHandoffDetail is not a function`, then passed after helper/panel implementation (2 passed, 135 skipped); combined `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx` passed (137 passed); focused ESLint passed with existing unrelated warnings only; `npm run build` passed with only the existing Vite large-chunk warning; `git diff --check` passed. Browser smoke `/office?worker-request-handoff-detail=1` returned HTTP 200 and found the worker request handoff detail panel, four section hooks, `enabledControls=0`, all request/assignment/dispatch/audit/NAS flags false, no panel form controls, raw-leak probe false, and zero console/JS errors.
+
+Safety/non-actions: frontend/read-only only; no backend/schema/mutation/NAS/VPS/service change, no renderer dependency, no forms/buttons/inputs in the component, no request creation, no worker assignment, no dispatch, no audit write, no NAS save, and no raw prompt/task body/transcript/path/token/provider projection.
 
 ## Desk RPG Boss Command Console 1 completed locally
 

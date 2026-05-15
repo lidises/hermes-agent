@@ -18,7 +18,7 @@ vi.mock("@/lib/api", () => ({
 
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
-import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerFacilityLanePolish, buildOfficeRpgScene } from "./officeView";
+import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeRpgScene } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
@@ -923,6 +923,66 @@ describe("WorkerFacilityLanePolishPanel", () => {
     expect(markup).not.toContain("<select");
     expect(markup).not.toContain("<textarea");
     expect(markup).not.toMatch(/raw worker lane prompt|raw worker lane task|Traceback|\/Users\/lidises|token-shaped-worker-lane-polish|private-worker-lane-provider/i);
+  });
+});
+
+
+describe("WorkerRequestHandoffDetailPanel", () => {
+  it("Worker Request Handoff Detail 1 renders request-to-worker handoff as read-only posture", () => {
+    const WorkerRequestHandoffDetailPanel = (OfficePageModule as unknown as {
+      WorkerRequestHandoffDetailPanel: React.ComponentType<{ detail: ReturnType<typeof buildOfficeWorkerRequestHandoffDetail> }>;
+    }).WorkerRequestHandoffDetailPanel;
+    const state = officeFixture({
+      agents: [{ id: "agent-request-handoff", status: "active", prompt: "raw worker request handoff prompt", provider: "private-worker-request-provider", api_key: "token-shaped-worker-request-handoff" }],
+      work_items: [
+        { id: "task-request-handoff", status: "blocked", title: "raw worker request handoff task", body: "/Users/lidises/private/request-handoff.md", transcript: "Traceback worker request handoff transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-15T00:00:00Z", item_count: 9, warning_count: 3, error_summary: "Traceback worker request handoff source" },
+      ],
+    });
+    const projection = buildOfficeDeskRpgProjectionModel(state);
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const posture = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
+    const envelope = buildOfficeOrchestratorRequestEnvelopeDetail(projection, posture);
+    const route = buildOfficeApprovalRequestRouteDetail(envelope, dialogue);
+    const contract = buildOfficeEventRequestContractProjection(route);
+    const inspector = buildOfficeApprovalDialogueRouteInspector(dialogue, route, contract);
+    const timeline = buildOfficeEventTimelineProjection(contract, inspector);
+    const workerRoles = buildOfficeDeskRpgWorkerRoleVisibility(projection);
+    const handoff = buildOfficeReviewerWikiHandoffPosture(projection);
+    const drilldown = buildOfficeTimelineWorkerHandoffDrilldown(timeline, workerRoles, handoff);
+    const approvalDetail = buildOfficeApprovalRequestDetailDeepening(route, timeline, drilldown);
+    const approvalView = buildOfficeApprovalRequestView(state);
+    const audit = buildOfficeApprovalAuditTimeline(approvalView);
+    const gate = buildOfficeApprovalExecutionGate(audit);
+    const authority = buildOfficeAuthorityAdapterContract(gate);
+    const queue = buildOfficeOrchestratorMediationQueue(authority);
+    const routing = buildOfficeWorkerIntentRouting(queue);
+    const readiness = buildOfficeWorkerFacilityReadiness(routing);
+    const lanePolish = buildOfficeWorkerFacilityLanePolish(drilldown, readiness);
+    const detail = buildOfficeWorkerRequestHandoffDetail(approvalDetail, lanePolish);
+
+    const markup = renderToStaticMarkup(<WorkerRequestHandoffDetailPanel detail={detail} />);
+
+    expect(markup).toContain("data-office-worker-request-handoff-detail=\"true\"");
+    expect(markup).toContain("data-office-worker-request-handoff-detail-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-worker-request-handoff-detail-request-creation-enabled=\"false\"");
+    expect(markup).toContain("data-office-worker-request-handoff-detail-work-assignment-enabled=\"false\"");
+    expect(markup).toContain("data-office-worker-request-handoff-detail-dispatch-enabled=\"false\"");
+    expect(markup).toContain("data-office-worker-request-handoff-detail-audit-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-worker-request-handoff-detail-nas-save-enabled=\"false\"");
+    expect(markup).toContain("data-office-worker-request-handoff-section=\"request_detail\"");
+    expect(markup).toContain("data-office-worker-request-handoff-section=\"worker_lanes\"");
+    expect(markup).toContain("data-office-worker-request-handoff-section=\"handoff_boundary\"");
+    expect(markup).toContain("data-office-worker-request-handoff-section=\"nas_boundary\"");
+    expect(markup).toContain("Worker request handoff detail");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw worker request handoff prompt|raw worker request handoff task|Traceback|\/Users\/lidises|token-shaped-worker-request-handoff|private-worker-request-provider/i);
   });
 });
 

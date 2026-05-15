@@ -113,6 +113,7 @@ import {
   buildOfficeTimelineWorkerHandoffDrilldown,
   buildOfficeApprovalRequestDetailDeepening,
   buildOfficeWorkerFacilityLanePolish,
+  buildOfficeWorkerRequestHandoffDetail,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -796,6 +797,60 @@ describe("Timeline/Worker Handoff Drill-down 1", () => {
     expect(drilldown.safeProjectionOnly).toBe(true);
     expect(drilldown.rawExcluded).toBe(true);
     expect(JSON.stringify(drilldown)).not.toMatch(/raw worker handoff prompt|raw worker handoff task|Traceback|\/Users\/lidises|token-shaped-worker-handoff|private-worker-handoff-provider/i);
+  });
+});
+
+
+describe("Worker Request Handoff Detail 1", () => {
+  it("builds a read-only worker/request handoff detail from safe approval and lane projections", () => {
+    const state = officeFixture({
+      agents: [{ id: "agent-request-handoff", status: "active", prompt: "raw worker request handoff prompt", provider: "private-worker-request-provider", api_key: "token-shaped-worker-request-handoff" }],
+      work_items: [
+        { id: "task-request-handoff", status: "blocked", title: "raw worker request handoff task", body: "/Users/lidises/private/request-handoff.md", transcript: "Traceback worker request handoff transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-15T00:00:00Z", item_count: 9, warning_count: 3, error_summary: "Traceback worker request handoff source" },
+      ],
+    });
+    const projection = buildOfficeDeskRpgProjectionModel(state);
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const posture = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
+    const envelope = buildOfficeOrchestratorRequestEnvelopeDetail(projection, posture);
+    const route = buildOfficeApprovalRequestRouteDetail(envelope, dialogue);
+    const contract = buildOfficeEventRequestContractProjection(route);
+    const inspector = buildOfficeApprovalDialogueRouteInspector(dialogue, route, contract);
+    const timeline = buildOfficeEventTimelineProjection(contract, inspector);
+    const workerRoles = buildOfficeDeskRpgWorkerRoleVisibility(projection);
+    const handoff = buildOfficeReviewerWikiHandoffPosture(projection);
+    const drilldown = buildOfficeTimelineWorkerHandoffDrilldown(timeline, workerRoles, handoff);
+    const approvalDetail = buildOfficeApprovalRequestDetailDeepening(route, timeline, drilldown);
+    const approvalView = buildOfficeApprovalRequestView(state);
+    const audit = buildOfficeApprovalAuditTimeline(approvalView);
+    const gate = buildOfficeApprovalExecutionGate(audit);
+    const authority = buildOfficeAuthorityAdapterContract(gate);
+    const queue = buildOfficeOrchestratorMediationQueue(authority);
+    const routing = buildOfficeWorkerIntentRouting(queue);
+    const readiness = buildOfficeWorkerFacilityReadiness(routing);
+    const lanePolish = buildOfficeWorkerFacilityLanePolish(drilldown, readiness);
+
+    const detail = buildOfficeWorkerRequestHandoffDetail(approvalDetail, lanePolish);
+
+    expect(detail.stageLabel).toBe("Worker Request Handoff Detail 1");
+    expect(detail.detailKind).toBe("worker_request_handoff_detail");
+    expect(detail.sections.map((section) => section.id)).toEqual(["request_detail", "worker_lanes", "handoff_boundary", "nas_boundary"]);
+    expect(detail.sourceApprovalDetailKind).toBe("approval_request_detail_deepening");
+    expect(detail.sourceLanePolishKind).toBe("worker_facility_lane_polish");
+    expect(detail.requestSectionCount).toBe(4);
+    expect(detail.workerLaneCount).toBe(4);
+    expect(detail.enabledControls).toBe(0);
+    expect(detail.requestCreationEnabled).toBe(false);
+    expect(detail.workAssignmentEnabled).toBe(false);
+    expect(detail.dispatchEnabled).toBe(false);
+    expect(detail.auditWriteEnabled).toBe(false);
+    expect(detail.nasSaveEnabled).toBe(false);
+    expect(detail.safeProjectionOnly).toBe(true);
+    expect(detail.rawExcluded).toBe(true);
+    expect(JSON.stringify(detail)).not.toMatch(/raw worker request handoff prompt|raw worker request handoff task|Traceback|\/Users\/lidises|token-shaped-worker-request-handoff|private-worker-request-provider/i);
   });
 });
 
