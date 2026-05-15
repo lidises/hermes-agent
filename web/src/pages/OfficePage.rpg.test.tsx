@@ -18,7 +18,7 @@ vi.mock("@/lib/api", () => ({
 
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
-import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeRpgScene } from "./officeView";
+import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeRpgScene } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
@@ -479,6 +479,290 @@ describe("BoardEvidenceInspectorDrilldownPanel", () => {
     expect(markup).not.toMatch(/raw drilldown prompt|raw drilldown task title|Traceback|\/Users\/lidises|token-shaped-drilldown-sentinel|private-drilldown-provider/i);
   });
 });
+
+describe("BossOrchestratorRequestPostureDetailPanel", () => {
+  it("Boss/Orchestrator Request Posture Detail 1 renders request posture without inputs or controls", () => {
+    const BossOrchestratorRequestPostureDetailPanel = (OfficePageModule as unknown as {
+      BossOrchestratorRequestPostureDetailPanel: React.ComponentType<{ detail: ReturnType<typeof buildOfficeBossOrchestratorRequestPostureDetail> }>;
+    }).BossOrchestratorRequestPostureDetailPanel;
+    const secretSentinel = ["token", "shaped", "boss", "sentinel"].join("-");
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [{ id: "agent-1", status: "active", prompt: "raw boss request prompt", provider: "private-boss-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw boss request task title", body: "/Users/lidises/private/boss-request.md", transcript: "Traceback boss request transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 5, warning_count: 2, error_summary: "Traceback boss request source" },
+      ],
+    }));
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const detail = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
+
+    const markup = renderToStaticMarkup(<BossOrchestratorRequestPostureDetailPanel detail={detail} />);
+
+    expect(markup).toContain("data-office-boss-orchestrator-request-posture-detail=\"true\"");
+    expect(markup).toContain("data-office-boss-orchestrator-request-posture-detail-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-boss-orchestrator-request-posture-detail-input-enabled=\"false\"");
+    expect(markup).toContain("data-office-boss-orchestrator-request-posture-detail-request-creation-enabled=\"false\"");
+    expect(markup).toContain("data-office-boss-orchestrator-request-posture-detail-orchestrator-required=\"true\"");
+    expect(markup).toContain("data-office-boss-orchestrator-request-posture-detail-work-assignment-enabled=\"false\"");
+    expect(markup).toContain("data-office-boss-orchestrator-request-posture-detail-dispatch-enabled=\"false\"");
+    expect(markup).toContain("data-office-boss-orchestrator-request-posture-detail-audit-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-boss-orchestrator-request-posture-detail-nas-save-enabled=\"false\"");
+    expect(markup).toContain("data-office-boss-orchestrator-request-posture-detail-safe-projection-only=\"true\"");
+    expect(markup).toContain("data-office-boss-orchestrator-request-posture-detail-raw-excluded=\"true\"");
+    expect(markup).toContain("data-office-boss-orchestrator-request-posture-detail-card=\"boss_instruction_point\"");
+    expect(markup).toContain("data-office-boss-orchestrator-request-posture-detail-card=\"orchestrator_mediation\"");
+    expect(markup).toContain("data-office-boss-orchestrator-request-posture-detail-card=\"request_envelope\"");
+    expect(markup).toContain("data-office-boss-orchestrator-request-posture-detail-card=\"approval_boundary\"");
+    expect(markup).toContain("Boss/orchestrator request posture detail");
+    expect(markup).toContain("사장 instruction → Orchestrator mediation");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toMatch(/raw boss request prompt|raw boss request task title|Traceback|\/Users\/lidises|token-shaped-boss-sentinel|private-boss-provider/i);
+  });
+});
+
+describe("OrchestratorRequestEnvelopeDetailPanel", () => {
+  it("Orchestrator Request Envelope Detail 1 renders disabled envelope posture without controls", () => {
+    const OrchestratorRequestEnvelopeDetailPanel = (OfficePageModule as unknown as {
+      OrchestratorRequestEnvelopeDetailPanel: React.ComponentType<{ envelope: ReturnType<typeof buildOfficeOrchestratorRequestEnvelopeDetail> }>;
+    }).OrchestratorRequestEnvelopeDetailPanel;
+    const secretSentinel = ["token", "shaped", "envelope", "sentinel"].join("-");
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [{ id: "agent-1", status: "active", prompt: "raw envelope prompt", provider: "private-envelope-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw envelope task title", body: "/Users/lidises/private/envelope.md", transcript: "Traceback envelope transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 7, warning_count: 3, error_summary: "Traceback envelope source" },
+      ],
+    }));
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const posture = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
+    const envelope = buildOfficeOrchestratorRequestEnvelopeDetail(projection, posture);
+
+    const markup = renderToStaticMarkup(<OrchestratorRequestEnvelopeDetailPanel envelope={envelope} />);
+
+    expect(markup).toContain("data-office-orchestrator-request-envelope-detail=\"true\"");
+    expect(markup).toContain("data-office-orchestrator-request-envelope-detail-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-orchestrator-request-envelope-detail-envelope-creation-enabled=\"false\"");
+    expect(markup).toContain("data-office-orchestrator-request-envelope-detail-kanban-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-orchestrator-request-envelope-detail-work-assignment-enabled=\"false\"");
+    expect(markup).toContain("data-office-orchestrator-request-envelope-detail-dispatch-enabled=\"false\"");
+    expect(markup).toContain("data-office-orchestrator-request-envelope-detail-audit-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-orchestrator-request-envelope-detail-nas-save-enabled=\"false\"");
+    expect(markup).toContain("data-office-orchestrator-request-envelope-detail-safe-projection-only=\"true\"");
+    expect(markup).toContain("data-office-orchestrator-request-envelope-detail-raw-excluded=\"true\"");
+    expect(markup).toContain("data-office-orchestrator-request-envelope-detail-card=\"instruction_intake\"");
+    expect(markup).toContain("data-office-orchestrator-request-envelope-detail-card=\"mediation_guard\"");
+    expect(markup).toContain("data-office-orchestrator-request-envelope-detail-card=\"safe_context_envelope\"");
+    expect(markup).toContain("data-office-orchestrator-request-envelope-detail-card=\"approval_request_boundary\"");
+    expect(markup).toContain("Orchestrator request envelope detail");
+    expect(markup).toContain("Orchestrator envelope · disabled request preview");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toMatch(/raw envelope prompt|raw envelope task title|Traceback|\/Users\/lidises|token-shaped-envelope-sentinel|private-envelope-provider/i);
+  });
+});
+
+
+describe("ApprovalRequestRouteDetailPanel", () => {
+  it("Approval Request Route Detail 1 renders read-only route boundaries without controls", () => {
+    const ApprovalRequestRouteDetailPanel = (OfficePageModule as unknown as {
+      ApprovalRequestRouteDetailPanel: React.ComponentType<{ route: ReturnType<typeof buildOfficeApprovalRequestRouteDetail> }>;
+    }).ApprovalRequestRouteDetailPanel;
+    const secretSentinel = ["token", "shaped", "route", "sentinel"].join("-");
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [{ id: "agent-1", status: "active", prompt: "raw route prompt", provider: "private-route-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw route task title", body: "/Users/lidises/private/route.md", transcript: "Traceback route transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 9, warning_count: 4, error_summary: "Traceback route source" },
+      ],
+    }));
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const posture = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
+    const envelope = buildOfficeOrchestratorRequestEnvelopeDetail(projection, posture);
+    const route = buildOfficeApprovalRequestRouteDetail(envelope, dialogue);
+
+    const markup = renderToStaticMarkup(<ApprovalRequestRouteDetailPanel route={route} />);
+
+    expect(markup).toContain("data-office-approval-request-route-detail=\"true\"");
+    expect(markup).toContain("data-office-approval-request-route-detail-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-approval-request-route-detail-intent-event-creation-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-request-route-detail-approval-request-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-request-route-detail-kanban-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-request-route-detail-audit-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-request-route-detail-dispatch-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-request-route-detail-nas-save-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-request-route-detail-safe-projection-only=\"true\"");
+    expect(markup).toContain("data-office-approval-request-route-detail-raw-excluded=\"true\"");
+    expect(markup).toContain("data-office-approval-request-route-detail-card=\"intent_event_boundary\"");
+    expect(markup).toContain("data-office-approval-request-route-detail-card=\"orchestrator_plan_boundary\"");
+    expect(markup).toContain("data-office-approval-request-route-detail-card=\"approval_request_boundary\"");
+    expect(markup).toContain("data-office-approval-request-route-detail-card=\"write_audit_boundary\"");
+    expect(markup).toContain("Approval request route detail");
+    expect(markup).toContain("Intent → Orchestrator plan → Approval request · read-only route");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toMatch(/raw route prompt|raw route task title|Traceback|\/Users\/lidises|token-shaped-route-sentinel|private-route-provider/i);
+  });
+});
+
+
+describe("EventRequestContractProjectionPanel", () => {
+  it("Event Request Contract Projection 1 renders future event contract without controls", () => {
+    const EventRequestContractProjectionPanel = (OfficePageModule as unknown as {
+      EventRequestContractProjectionPanel: React.ComponentType<{ contract: ReturnType<typeof buildOfficeEventRequestContractProjection> }>;
+    }).EventRequestContractProjectionPanel;
+    const secretSentinel = ["token", "shaped", "event", "sentinel"].join("-");
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [{ id: "agent-1", status: "active", prompt: "raw event prompt", provider: "private-event-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw event task title", body: "/Users/lidises/private/event.md", transcript: "Traceback event transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 11, warning_count: 5, error_summary: "Traceback event source" },
+      ],
+    }));
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const posture = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
+    const envelope = buildOfficeOrchestratorRequestEnvelopeDetail(projection, posture);
+    const route = buildOfficeApprovalRequestRouteDetail(envelope, dialogue);
+    const contract = buildOfficeEventRequestContractProjection(route);
+
+    const markup = renderToStaticMarkup(<EventRequestContractProjectionPanel contract={contract} />);
+
+    expect(markup).toContain("data-office-event-request-contract-projection=\"true\"");
+    expect(markup).toContain("data-office-event-request-contract-projection-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-event-request-contract-projection-schema-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-event-request-contract-projection-event-creation-enabled=\"false\"");
+    expect(markup).toContain("data-office-event-request-contract-projection-event-persistence-enabled=\"false\"");
+    expect(markup).toContain("data-office-event-request-contract-projection-runtime-dispatch-enabled=\"false\"");
+    expect(markup).toContain("data-office-event-request-contract-projection-audit-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-event-request-contract-projection-nas-save-enabled=\"false\"");
+    expect(markup).toContain("data-office-event-request-contract-projection-safe-projection-only=\"true\"");
+    expect(markup).toContain("data-office-event-request-contract-projection-raw-excluded=\"true\"");
+    expect(markup).toContain("data-office-event-request-contract-projection-card=\"user_instruction_submitted\"");
+    expect(markup).toContain("data-office-event-request-contract-projection-card=\"orchestrator_plan_requested\"");
+    expect(markup).toContain("data-office-event-request-contract-projection-card=\"approval_requested\"");
+    expect(markup).toContain("data-office-event-request-contract-projection-card=\"write_audit_projection\"");
+    expect(markup).toContain("Event request contract projection");
+    expect(markup).toContain("Future event contract · projection only");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toMatch(/raw event prompt|raw event task title|Traceback|\/Users\/lidises|token-shaped-event-sentinel|private-event-provider/i);
+  });
+});
+
+
+describe("ApprovalDialogueRouteInspectorPanel", () => {
+  it("Approval Dialogue Route Inspector 1 renders route inspector without controls", () => {
+    const ApprovalDialogueRouteInspectorPanel = (OfficePageModule as unknown as {
+      ApprovalDialogueRouteInspectorPanel: React.ComponentType<{ inspector: ReturnType<typeof buildOfficeApprovalDialogueRouteInspector> }>;
+    }).ApprovalDialogueRouteInspectorPanel;
+    const secretSentinel = ["token", "shaped", "dialogue", "route", "sentinel"].join("-");
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [{ id: "agent-1", status: "active", prompt: "raw dialogue route prompt", provider: "private-dialogue-route-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw dialogue route task title", body: "/Users/lidises/private/dialogue-route.md", transcript: "Traceback dialogue route transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 13, warning_count: 6, error_summary: "Traceback dialogue route source" },
+      ],
+    }));
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const posture = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
+    const envelope = buildOfficeOrchestratorRequestEnvelopeDetail(projection, posture);
+    const route = buildOfficeApprovalRequestRouteDetail(envelope, dialogue);
+    const contract = buildOfficeEventRequestContractProjection(route);
+    const inspector = buildOfficeApprovalDialogueRouteInspector(dialogue, route, contract);
+
+    const markup = renderToStaticMarkup(<ApprovalDialogueRouteInspectorPanel inspector={inspector} />);
+
+    expect(markup).toContain("data-office-approval-dialogue-route-inspector=\"true\"");
+    expect(markup).toContain("data-office-approval-dialogue-route-inspector-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-approval-dialogue-route-inspector-approve-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-dialogue-route-inspector-reject-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-dialogue-route-inspector-hold-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-dialogue-route-inspector-request-creation-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-dialogue-route-inspector-event-creation-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-dialogue-route-inspector-event-persistence-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-dialogue-route-inspector-audit-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-dialogue-route-inspector-dispatch-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-dialogue-route-inspector-nas-save-enabled=\"false\"");
+    expect(markup).toContain("data-office-approval-dialogue-route-inspector-safe-projection-only=\"true\"");
+    expect(markup).toContain("data-office-approval-dialogue-route-inspector-raw-excluded=\"true\"");
+    expect(markup).toContain("data-office-approval-dialogue-route-inspector-card=\"dialogue_posture\"");
+    expect(markup).toContain("data-office-approval-dialogue-route-inspector-card=\"route_boundaries\"");
+    expect(markup).toContain("data-office-approval-dialogue-route-inspector-card=\"event_contract\"");
+    expect(markup).toContain("data-office-approval-dialogue-route-inspector-card=\"write_lock\"");
+    expect(markup).toContain("Approval dialogue route inspector");
+    expect(markup).toContain("Dialogue → route → event contract · inspector only");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toMatch(/raw dialogue route prompt|raw dialogue route task title|Traceback|\/Users\/lidises|token-shaped-dialogue-route-sentinel|private-dialogue-route-provider/i);
+  });
+});
+
+
+describe("EventTimelineProjectionPanel", () => {
+  it("Event Timeline Projection 1 renders a read-only event timeline without controls", () => {
+    const EventTimelineProjectionPanel = (OfficePageModule as unknown as {
+      EventTimelineProjectionPanel: React.ComponentType<{ timeline: ReturnType<typeof buildOfficeEventTimelineProjection> }>;
+    }).EventTimelineProjectionPanel;
+    const secretSentinel = ["token", "shaped", "timeline", "sentinel"].join("-");
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [{ id: "agent-1", status: "active", prompt: "raw timeline prompt", provider: "private-timeline-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw timeline task title", body: "/Users/lidises/private/event-timeline.md", transcript: "Traceback event timeline transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 21, warning_count: 8, error_summary: "Traceback event timeline source" },
+      ],
+    }));
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const posture = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
+    const envelope = buildOfficeOrchestratorRequestEnvelopeDetail(projection, posture);
+    const route = buildOfficeApprovalRequestRouteDetail(envelope, dialogue);
+    const contract = buildOfficeEventRequestContractProjection(route);
+    const inspector = buildOfficeApprovalDialogueRouteInspector(dialogue, route, contract);
+    const timeline = buildOfficeEventTimelineProjection(contract, inspector);
+
+    const markup = renderToStaticMarkup(<EventTimelineProjectionPanel timeline={timeline} />);
+
+    expect(markup).toContain("data-office-event-timeline-projection=\"true\"");
+    expect(markup).toContain("data-office-event-timeline-projection-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-event-timeline-projection-runtime-event-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-event-timeline-projection-intent-event-creation-enabled=\"false\"");
+    expect(markup).toContain("data-office-event-timeline-projection-visual-event-creation-enabled=\"false\"");
+    expect(markup).toContain("data-office-event-timeline-projection-event-persistence-enabled=\"false\"");
+    expect(markup).toContain("data-office-event-timeline-projection-timeline-append-enabled=\"false\"");
+    expect(markup).toContain("data-office-event-timeline-projection-audit-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-event-timeline-projection-dispatch-enabled=\"false\"");
+    expect(markup).toContain("data-office-event-timeline-projection-nas-save-enabled=\"false\"");
+    expect(markup).toContain("data-office-event-timeline-projection-safe-projection-only=\"true\"");
+    expect(markup).toContain("data-office-event-timeline-projection-raw-excluded=\"true\"");
+    expect(markup).toContain("data-office-event-timeline-projection-event=\"user_instruction_submitted\"");
+    expect(markup).toContain("data-office-event-timeline-projection-event=\"orchestrator_plan_requested\"");
+    expect(markup).toContain("data-office-event-timeline-projection-event=\"approval_requested\"");
+    expect(markup).toContain("data-office-event-timeline-projection-event=\"nas_save_approval_pending\"");
+    expect(markup).toContain("Event timeline projection");
+    expect(markup).toContain("Runtime → intent → visual projection · no event writes");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toMatch(/raw timeline prompt|raw timeline task title|Traceback|\/Users\/lidises|token-shaped-timeline-sentinel|private-timeline-provider/i);
+  });
+});
+
 
 describe("OfficeDeskRpgBossCommandConsolePanel", () => {
   it("Desk RPG Boss Command Console 1 shows user-avatar instruction posture without executable controls", () => {

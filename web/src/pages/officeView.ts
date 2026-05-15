@@ -1142,6 +1142,194 @@ export type OfficeBoardEvidenceInspectorDrilldown = {
   rawExcluded: true;
 };
 
+export type OfficeBossOrchestratorRequestPostureDetailCard = {
+  id: "boss_instruction_point" | "orchestrator_mediation" | "request_envelope" | "approval_boundary";
+  label: string;
+  summary: string;
+  tone: "info" | "warning" | "blocked";
+  rawExcluded: true;
+};
+
+export type OfficeBossOrchestratorRequestPostureDetail = {
+  stageLabel: "Boss/Orchestrator Request Posture Detail 1";
+  title: string;
+  detailKind: "boss_orchestrator_request_posture_detail";
+  cards: OfficeBossOrchestratorRequestPostureDetailCard[];
+  speakerRole: Extract<OfficeDeskRpgProjectionActorRole, "user_boss">;
+  orchestratorRole: Extract<OfficeDeskRpgProjectionActorRole, "orchestrator">;
+  targetFacilityId: Extract<OfficeDeskRpgProjectionFacilityId, "orchestrator_desk">;
+  evidenceCount: number;
+  blockedWorkCount: number;
+  dialogueLineCount: number;
+  inputEnabled: false;
+  requestCreationEnabled: false;
+  orchestratorRequired: true;
+  workAssignmentEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  enabledControls: 0;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
+export type OfficeOrchestratorRequestEnvelopeDetailCard = {
+  id: "instruction_intake" | "mediation_guard" | "safe_context_envelope" | "approval_request_boundary";
+  label: string;
+  summary: string;
+  tone: "info" | "warning" | "blocked";
+  rawExcluded: true;
+};
+
+export type OfficeOrchestratorRequestEnvelopeDetail = {
+  stageLabel: "Orchestrator Request Envelope Detail 1";
+  title: string;
+  detailKind: "orchestrator_request_envelope_detail";
+  cards: OfficeOrchestratorRequestEnvelopeDetailCard[];
+  sourcePostureKind: OfficeBossOrchestratorRequestPostureDetail["detailKind"];
+  envelopeState: "disabled_preview";
+  targetFacilityId: Extract<OfficeDeskRpgProjectionFacilityId, "orchestrator_desk">;
+  evidenceCount: number;
+  blockedWorkCount: number;
+  dialogueLineCount: number;
+  envelopeCreationEnabled: false;
+  kanbanWriteEnabled: false;
+  workAssignmentEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  enabledControls: 0;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
+export type OfficeApprovalRequestRouteDetailCard = {
+  id: "intent_event_boundary" | "orchestrator_plan_boundary" | "approval_request_boundary" | "write_audit_boundary";
+  label: string;
+  summary: string;
+  tone: "info" | "warning" | "blocked";
+  rawExcluded: true;
+};
+
+export type OfficeApprovalRequestRouteDetail = {
+  stageLabel: "Approval Request Route Detail 1";
+  title: string;
+  detailKind: "approval_request_route_detail";
+  cards: OfficeApprovalRequestRouteDetailCard[];
+  sourceEnvelopeKind: OfficeOrchestratorRequestEnvelopeDetail["detailKind"];
+  routeState: "read_only_preview";
+  evidenceCount: number;
+  blockedWorkCount: number;
+  dialogueLineCount: number;
+  intentEventCreationEnabled: false;
+  approvalRequestEnabled: false;
+  kanbanWriteEnabled: false;
+  auditWriteEnabled: false;
+  dispatchEnabled: false;
+  nasSaveEnabled: false;
+  enabledControls: 0;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
+export type OfficeEventRequestContractProjectionCard = {
+  id: "user_instruction_submitted" | "orchestrator_plan_requested" | "approval_requested" | "write_audit_projection";
+  label: string;
+  summary: string;
+  tone: "info" | "warning" | "blocked";
+  rawExcluded: true;
+};
+
+export type OfficeEventRequestContractProjection = {
+  stageLabel: "Event Request Contract Projection 1";
+  title: string;
+  detailKind: "event_request_contract_projection";
+  cards: OfficeEventRequestContractProjectionCard[];
+  sourceRouteKind: OfficeApprovalRequestRouteDetail["detailKind"];
+  contractState: "read_only_projection";
+  evidenceCount: number;
+  blockedWorkCount: number;
+  dialogueLineCount: number;
+  schemaWriteEnabled: false;
+  eventCreationEnabled: false;
+  eventPersistenceEnabled: false;
+  runtimeDispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  enabledControls: 0;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
+export type OfficeApprovalDialogueRouteInspectorCard = {
+  id: "dialogue_posture" | "route_boundaries" | "event_contract" | "write_lock";
+  label: string;
+  summary: string;
+  tone: "info" | "warning" | "blocked";
+  rawExcluded: true;
+};
+
+export type OfficeApprovalDialogueRouteInspector = {
+  stageLabel: "Approval Dialogue Route Inspector 1";
+  title: string;
+  detailKind: "approval_dialogue_route_inspector";
+  cards: OfficeApprovalDialogueRouteInspectorCard[];
+  sourceDialogueKind: "disabled_approval_dialogue_posture";
+  sourceRouteKind: OfficeApprovalRequestRouteDetail["detailKind"];
+  sourceContractKind: OfficeEventRequestContractProjection["detailKind"];
+  dialogueLineCount: number;
+  routeCardCount: number;
+  contractCardCount: number;
+  evidenceCount: number;
+  blockedWorkCount: number;
+  approveEnabled: false;
+  rejectEnabled: false;
+  holdEnabled: false;
+  requestCreationEnabled: false;
+  eventCreationEnabled: false;
+  eventPersistenceEnabled: false;
+  auditWriteEnabled: false;
+  dispatchEnabled: false;
+  nasSaveEnabled: false;
+  enabledControls: 0;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
+export type OfficeEventTimelineProjectionEvent = {
+  id: "user_instruction_submitted" | "orchestrator_plan_requested" | "approval_requested" | "nas_save_approval_pending";
+  label: string;
+  summary: string;
+  lane: "intent" | "orchestrator" | "approval" | "storage";
+  tone: "info" | "warning" | "blocked";
+  rawExcluded: true;
+};
+
+export type OfficeEventTimelineProjection = {
+  stageLabel: "Event Timeline Projection 1";
+  title: string;
+  detailKind: "event_timeline_projection";
+  events: OfficeEventTimelineProjectionEvent[];
+  sourceContractKind: OfficeEventRequestContractProjection["detailKind"];
+  sourceInspectorKind: OfficeApprovalDialogueRouteInspector["detailKind"];
+  timelineState: "projection_only";
+  eventCount: number;
+  evidenceCount: number;
+  blockedWorkCount: number;
+  dialogueLineCount: number;
+  runtimeEventWriteEnabled: false;
+  intentEventCreationEnabled: false;
+  visualEventCreationEnabled: false;
+  eventPersistenceEnabled: false;
+  timelineAppendEnabled: false;
+  auditWriteEnabled: false;
+  dispatchEnabled: false;
+  nasSaveEnabled: false;
+  enabledControls: 0;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeRpgMissionStoryboardStep = {
   id: "request" | "orchestrate" | "board" | "evidence" | "review" | "approval";
   label: string;
@@ -2394,6 +2582,356 @@ export function buildOfficeBoardEvidenceInspectorDrilldown(
     requestCreationEnabled: false,
     dispatchEnabled: false,
     auditWriteEnabled: false,
+    nasSaveEnabled: false,
+    enabledControls: 0,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeBossOrchestratorRequestPostureDetail(
+  projection: OfficeDeskRpgProjectionModel,
+  dialogue: OfficeDisabledApprovalDialoguePosture,
+): OfficeBossOrchestratorRequestPostureDetail {
+  return {
+    stageLabel: "Boss/Orchestrator Request Posture Detail 1",
+    title: "Boss/orchestrator request posture detail",
+    detailKind: "boss_orchestrator_request_posture_detail",
+    cards: [
+      {
+        id: "boss_instruction_point",
+        label: "boss instruction point",
+        summary: "The user-boss seat is visible as the natural-language instruction point, but input and request creation remain disabled in this read-only slice.",
+        tone: "info",
+        rawExcluded: true,
+      },
+      {
+        id: "orchestrator_mediation",
+        label: "orchestrator mediation",
+        summary: "Instructions route through the Orchestrator posture first so worker assignment, duplicate work, and authority bypass are not implied by the browser view.",
+        tone: "info",
+        rawExcluded: true,
+      },
+      {
+        id: "request_envelope",
+        label: "request envelope disabled",
+        summary: `A hypothetical request envelope may reference ${projection.evidenceState.sourceCount} safe evidence aggregate(s) and ${projection.boardState.blockedCount} blocked signal(s), but no record is created.`,
+        tone: projection.boardState.blockedCount > 0 ? "warning" : "info",
+        rawExcluded: true,
+      },
+      {
+        id: "approval_boundary",
+        label: "approval boundary",
+        summary: "Request creation, work assignment, dispatch, audit write, and NAS save stay false until a separate authority/event model explicitly enables them.",
+        tone: "blocked",
+        rawExcluded: true,
+      },
+    ],
+    speakerRole: "user_boss",
+    orchestratorRole: "orchestrator",
+    targetFacilityId: "orchestrator_desk",
+    evidenceCount: projection.evidenceState.sourceCount,
+    blockedWorkCount: projection.boardState.blockedCount,
+    dialogueLineCount: dialogue.dialogueLines.length,
+    inputEnabled: false,
+    requestCreationEnabled: false,
+    orchestratorRequired: true,
+    workAssignmentEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    nasSaveEnabled: false,
+    enabledControls: 0,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeOrchestratorRequestEnvelopeDetail(
+  projection: OfficeDeskRpgProjectionModel,
+  posture: OfficeBossOrchestratorRequestPostureDetail,
+): OfficeOrchestratorRequestEnvelopeDetail {
+  return {
+    stageLabel: "Orchestrator Request Envelope Detail 1",
+    title: "Orchestrator request envelope detail",
+    detailKind: "orchestrator_request_envelope_detail",
+    cards: [
+      {
+        id: "instruction_intake",
+        label: "instruction intake preview",
+        summary: "The boss instruction is represented only as a disabled intake preview; no natural-language body, request row, or browser input is created.",
+        tone: "info",
+        rawExcluded: true,
+      },
+      {
+        id: "mediation_guard",
+        label: "orchestrator mediation guard",
+        summary: "The Orchestrator remains the only visible routing posture before any future worker assignment or duplicate-work decision.",
+        tone: "info",
+        rawExcluded: true,
+      },
+      {
+        id: "safe_context_envelope",
+        label: "safe context envelope",
+        summary: `Envelope context is limited to ${projection.evidenceState.sourceCount} evidence aggregate(s), ${projection.evidenceState.warningCount} warning signal(s), and ${projection.boardState.blockedCount} blocked work signal(s).`,
+        tone: projection.evidenceState.warningCount > 0 || projection.boardState.blockedCount > 0 ? "warning" : "info",
+        rawExcluded: true,
+      },
+      {
+        id: "approval_request_boundary",
+        label: "approval request boundary",
+        summary: "Kanban write, request persistence, worker assignment, dispatch, audit write, and NAS save remain unavailable until the separate authority/event/approval model enables them.",
+        tone: "blocked",
+        rawExcluded: true,
+      },
+    ],
+    sourcePostureKind: posture.detailKind,
+    envelopeState: "disabled_preview",
+    targetFacilityId: posture.targetFacilityId,
+    evidenceCount: posture.evidenceCount,
+    blockedWorkCount: posture.blockedWorkCount,
+    dialogueLineCount: posture.dialogueLineCount,
+    envelopeCreationEnabled: false,
+    kanbanWriteEnabled: false,
+    workAssignmentEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    nasSaveEnabled: false,
+    enabledControls: 0,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeApprovalRequestRouteDetail(
+  envelope: OfficeOrchestratorRequestEnvelopeDetail,
+  dialogue: OfficeDisabledApprovalDialoguePosture,
+): OfficeApprovalRequestRouteDetail {
+  return {
+    stageLabel: "Approval Request Route Detail 1",
+    title: "Approval request route detail",
+    detailKind: "approval_request_route_detail",
+    cards: [
+      {
+        id: "intent_event_boundary",
+        label: "intent event boundary",
+        summary: "UserInstructionSubmitted is shown only as a future event boundary; this browser slice does not create or persist an intent event.",
+        tone: "info",
+        rawExcluded: true,
+      },
+      {
+        id: "orchestrator_plan_boundary",
+        label: "orchestrator plan boundary",
+        summary: "OrchestratorPlanRequested remains a read-only mediation route before worker assignment, Kanban mutation, or dispatch can exist.",
+        tone: "info",
+        rawExcluded: true,
+      },
+      {
+        id: "approval_request_boundary",
+        label: "approval request boundary",
+        summary: `ApprovalRequested is represented by ${dialogue.dialogueLines.length} safe dialogue line(s), ${envelope.evidenceCount} evidence aggregate(s), and ${envelope.blockedWorkCount} blocked signal(s), without approve/reject controls.`,
+        tone: envelope.blockedWorkCount > 0 ? "warning" : "info",
+        rawExcluded: true,
+      },
+      {
+        id: "write_audit_boundary",
+        label: "write/audit boundary",
+        summary: "No request event, approval row, Kanban update, audit sink write, dispatch, or NAS save is created from this detail view.",
+        tone: "blocked",
+        rawExcluded: true,
+      },
+    ],
+    sourceEnvelopeKind: envelope.detailKind,
+    routeState: "read_only_preview",
+    evidenceCount: envelope.evidenceCount,
+    blockedWorkCount: envelope.blockedWorkCount,
+    dialogueLineCount: dialogue.dialogueLines.length,
+    intentEventCreationEnabled: false,
+    approvalRequestEnabled: false,
+    kanbanWriteEnabled: false,
+    auditWriteEnabled: false,
+    dispatchEnabled: false,
+    nasSaveEnabled: false,
+    enabledControls: 0,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeEventRequestContractProjection(
+  route: OfficeApprovalRequestRouteDetail,
+): OfficeEventRequestContractProjection {
+  return {
+    stageLabel: "Event Request Contract Projection 1",
+    title: "Event request contract projection",
+    detailKind: "event_request_contract_projection",
+    cards: [
+      {
+        id: "user_instruction_submitted",
+        label: "UserInstructionSubmitted contract",
+        summary: "The user/boss instruction is documented as a future event contract only; no browser event, schema write, or persisted payload is created.",
+        tone: "info",
+        rawExcluded: true,
+      },
+      {
+        id: "orchestrator_plan_requested",
+        label: "OrchestratorPlanRequested contract",
+        summary: "The Orchestrator planning request remains a safe projection before duplicate-work checks, worker assignment, or runtime dispatch can exist.",
+        tone: "info",
+        rawExcluded: true,
+      },
+      {
+        id: "approval_requested",
+        label: "ApprovalRequested contract",
+        summary: `Approval request context is limited to ${route.dialogueLineCount} dialogue line(s), ${route.evidenceCount} evidence aggregate(s), and ${route.blockedWorkCount} blocked signal(s).`,
+        tone: route.blockedWorkCount > 0 ? "warning" : "info",
+        rawExcluded: true,
+      },
+      {
+        id: "write_audit_projection",
+        label: "write/audit projection boundary",
+        summary: "Schema write, event creation, event persistence, runtime dispatch, audit write, and NAS save all remain unavailable in this projection.",
+        tone: "blocked",
+        rawExcluded: true,
+      },
+    ],
+    sourceRouteKind: route.detailKind,
+    contractState: "read_only_projection",
+    evidenceCount: route.evidenceCount,
+    blockedWorkCount: route.blockedWorkCount,
+    dialogueLineCount: route.dialogueLineCount,
+    schemaWriteEnabled: false,
+    eventCreationEnabled: false,
+    eventPersistenceEnabled: false,
+    runtimeDispatchEnabled: false,
+    auditWriteEnabled: false,
+    nasSaveEnabled: false,
+    enabledControls: 0,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeApprovalDialogueRouteInspector(
+  dialogue: OfficeDisabledApprovalDialoguePosture,
+  route: OfficeApprovalRequestRouteDetail,
+  contract: OfficeEventRequestContractProjection,
+): OfficeApprovalDialogueRouteInspector {
+  return {
+    stageLabel: "Approval Dialogue Route Inspector 1",
+    title: "Approval dialogue route inspector",
+    detailKind: "approval_dialogue_route_inspector",
+    cards: [
+      {
+        id: "dialogue_posture",
+        label: "disabled dialogue posture",
+        summary: `The approval dialogue is inspectable as ${dialogue.dialogueLines.length} generated safe line(s), without approve, reject, hold, or request creation controls.`,
+        tone: dialogue.blockedWorkCount > 0 ? "warning" : "info",
+        rawExcluded: true,
+      },
+      {
+        id: "route_boundaries",
+        label: "approval route boundaries",
+        summary: `The route keeps ${route.cards.length} read-only boundary card(s) for intent, Orchestrator plan, approval request, and write/audit separation.`,
+        tone: route.blockedWorkCount > 0 ? "warning" : "info",
+        rawExcluded: true,
+      },
+      {
+        id: "event_contract",
+        label: "future event contract",
+        summary: `The event contract remains a projection with ${contract.cards.length} card(s); no event schema, browser event, persisted event, or runtime dispatch is created.`,
+        tone: contract.blockedWorkCount > 0 ? "warning" : "info",
+        rawExcluded: true,
+      },
+      {
+        id: "write_lock",
+        label: "write and dispatch lock",
+        summary: "Approve/reject/hold, request creation, event creation, event persistence, audit write, dispatch, and NAS save are all locked in this inspector.",
+        tone: "blocked",
+        rawExcluded: true,
+      },
+    ],
+    sourceDialogueKind: "disabled_approval_dialogue_posture",
+    sourceRouteKind: route.detailKind,
+    sourceContractKind: contract.detailKind,
+    dialogueLineCount: dialogue.dialogueLines.length,
+    routeCardCount: route.cards.length,
+    contractCardCount: contract.cards.length,
+    evidenceCount: Math.max(dialogue.evidenceCount, route.evidenceCount, contract.evidenceCount),
+    blockedWorkCount: Math.max(dialogue.blockedWorkCount, route.blockedWorkCount, contract.blockedWorkCount),
+    approveEnabled: false,
+    rejectEnabled: false,
+    holdEnabled: false,
+    requestCreationEnabled: false,
+    eventCreationEnabled: false,
+    eventPersistenceEnabled: false,
+    auditWriteEnabled: false,
+    dispatchEnabled: false,
+    nasSaveEnabled: false,
+    enabledControls: 0,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeEventTimelineProjection(
+  contract: OfficeEventRequestContractProjection,
+  inspector: OfficeApprovalDialogueRouteInspector,
+): OfficeEventTimelineProjection {
+  const blockedWorkCount = Math.max(contract.blockedWorkCount, inspector.blockedWorkCount);
+  const events: OfficeEventTimelineProjectionEvent[] = [
+    {
+      id: "user_instruction_submitted",
+      label: "UserInstructionSubmitted",
+      summary: "The boss instruction is represented as a safe intent marker only; the browser does not create or persist an event.",
+      lane: "intent",
+      tone: "info",
+      rawExcluded: true,
+    },
+    {
+      id: "orchestrator_plan_requested",
+      label: "OrchestratorPlanRequested",
+      summary: "Orchestrator mediation is shown as the next projected timeline step before worker assignment or dispatch can exist.",
+      lane: "orchestrator",
+      tone: "info",
+      rawExcluded: true,
+    },
+    {
+      id: "approval_requested",
+      label: "ApprovalRequested",
+      summary: `Approval posture summarizes ${inspector.dialogueLineCount} safe dialogue line(s) and ${Math.max(contract.evidenceCount, inspector.evidenceCount)} evidence aggregate(s), without decision controls.`,
+      lane: "approval",
+      tone: blockedWorkCount > 0 ? "warning" : "info",
+      rawExcluded: true,
+    },
+    {
+      id: "nas_save_approval_pending",
+      label: "NAS save approval pending",
+      summary: "Final NAS save remains a future approval boundary; no save request, audit append, dispatch, or timeline append is performed here.",
+      lane: "storage",
+      tone: "blocked",
+      rawExcluded: true,
+    },
+  ];
+
+  return {
+    stageLabel: "Event Timeline Projection 1",
+    title: "Event timeline projection",
+    detailKind: "event_timeline_projection",
+    events,
+    sourceContractKind: contract.detailKind,
+    sourceInspectorKind: inspector.detailKind,
+    timelineState: "projection_only",
+    eventCount: events.length,
+    evidenceCount: Math.max(contract.evidenceCount, inspector.evidenceCount),
+    blockedWorkCount,
+    dialogueLineCount: Math.max(contract.dialogueLineCount, inspector.dialogueLineCount),
+    runtimeEventWriteEnabled: false,
+    intentEventCreationEnabled: false,
+    visualEventCreationEnabled: false,
+    eventPersistenceEnabled: false,
+    timelineAppendEnabled: false,
+    auditWriteEnabled: false,
+    dispatchEnabled: false,
     nasSaveEnabled: false,
     enabledControls: 0,
     safeProjectionOnly: true,

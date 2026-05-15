@@ -104,6 +104,12 @@ import {
   buildOfficeApprovalDialogueInspectorDetail,
   buildOfficeReviewerWikiEvidenceDetailPosture,
   buildOfficeBoardEvidenceInspectorDrilldown,
+  buildOfficeBossOrchestratorRequestPostureDetail,
+  buildOfficeOrchestratorRequestEnvelopeDetail,
+  buildOfficeApprovalRequestRouteDetail,
+  buildOfficeEventRequestContractProjection,
+  buildOfficeApprovalDialogueRouteInspector,
+  buildOfficeEventTimelineProjection,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -373,6 +379,267 @@ describe("Board Evidence-to-Inspector Drill-down 1", () => {
     expect(JSON.stringify(drilldown)).not.toMatch(/raw drilldown prompt|raw drilldown task title|Traceback|\/Users\/lidises|token-shaped-drilldown-sentinel|private-drilldown-provider/i);
   });
 });
+
+describe("Boss/Orchestrator Request Posture Detail 1", () => {
+  it("builds safe request posture detail without creating requests or exposing raw instruction material", () => {
+    const secretSentinel = ["token", "shaped", "boss", "sentinel"].join("-");
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [
+        { id: "agent-1", status: "active", prompt: "raw boss request prompt", provider: "private-boss-provider", api_key: secretSentinel },
+      ],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw boss request task title", body: "/Users/lidises/private/boss-request.md", transcript: "Traceback boss request transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 5, warning_count: 2, error_summary: "Traceback boss request source" },
+      ],
+    }));
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const detail = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
+
+    expect(detail.stageLabel).toBe("Boss/Orchestrator Request Posture Detail 1");
+    expect(detail.detailKind).toBe("boss_orchestrator_request_posture_detail");
+    expect(detail.cards.map((card) => card.id)).toEqual(["boss_instruction_point", "orchestrator_mediation", "request_envelope", "approval_boundary"]);
+    expect(detail.speakerRole).toBe("user_boss");
+    expect(detail.orchestratorRole).toBe("orchestrator");
+    expect(detail.targetFacilityId).toBe("orchestrator_desk");
+    expect(detail.evidenceCount).toBe(1);
+    expect(detail.blockedWorkCount).toBe(1);
+    expect(detail.dialogueLineCount).toBe(3);
+    expect(detail.enabledControls).toBe(0);
+    expect(detail.inputEnabled).toBe(false);
+    expect(detail.requestCreationEnabled).toBe(false);
+    expect(detail.orchestratorRequired).toBe(true);
+    expect(detail.workAssignmentEnabled).toBe(false);
+    expect(detail.dispatchEnabled).toBe(false);
+    expect(detail.auditWriteEnabled).toBe(false);
+    expect(detail.nasSaveEnabled).toBe(false);
+    expect(detail.safeProjectionOnly).toBe(true);
+    expect(detail.rawExcluded).toBe(true);
+    expect(JSON.stringify(detail)).not.toMatch(/raw boss request prompt|raw boss request task title|Traceback|\/Users\/lidises|token-shaped-boss-sentinel|private-boss-provider/i);
+  });
+});
+
+describe("Orchestrator Request Envelope Detail 1", () => {
+  it("builds a safe disabled request envelope detail without writing request records", () => {
+    const secretSentinel = ["token", "shaped", "envelope", "sentinel"].join("-");
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [
+        { id: "agent-1", status: "active", prompt: "raw envelope prompt", provider: "private-envelope-provider", api_key: secretSentinel },
+      ],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw envelope task title", body: "/Users/lidises/private/envelope.md", transcript: "Traceback envelope transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 7, warning_count: 3, error_summary: "Traceback envelope source" },
+      ],
+    }));
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const posture = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
+    const envelope = buildOfficeOrchestratorRequestEnvelopeDetail(projection, posture);
+
+    expect(envelope.stageLabel).toBe("Orchestrator Request Envelope Detail 1");
+    expect(envelope.detailKind).toBe("orchestrator_request_envelope_detail");
+    expect(envelope.cards.map((card) => card.id)).toEqual(["instruction_intake", "mediation_guard", "safe_context_envelope", "approval_request_boundary"]);
+    expect(envelope.sourcePostureKind).toBe("boss_orchestrator_request_posture_detail");
+    expect(envelope.envelopeState).toBe("disabled_preview");
+    expect(envelope.targetFacilityId).toBe("orchestrator_desk");
+    expect(envelope.evidenceCount).toBe(1);
+    expect(envelope.blockedWorkCount).toBe(1);
+    expect(envelope.dialogueLineCount).toBe(3);
+    expect(envelope.enabledControls).toBe(0);
+    expect(envelope.envelopeCreationEnabled).toBe(false);
+    expect(envelope.kanbanWriteEnabled).toBe(false);
+    expect(envelope.workAssignmentEnabled).toBe(false);
+    expect(envelope.dispatchEnabled).toBe(false);
+    expect(envelope.auditWriteEnabled).toBe(false);
+    expect(envelope.nasSaveEnabled).toBe(false);
+    expect(envelope.safeProjectionOnly).toBe(true);
+    expect(envelope.rawExcluded).toBe(true);
+    expect(JSON.stringify(envelope)).not.toMatch(/raw envelope prompt|raw envelope task title|Traceback|\/Users\/lidises|token-shaped-envelope-sentinel|private-envelope-provider/i);
+  });
+});
+
+
+describe("Approval Request Route Detail 1", () => {
+  it("builds a safe approval route detail without creating events, approvals, or writes", () => {
+    const secretSentinel = ["token", "shaped", "route", "sentinel"].join("-");
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [
+        { id: "agent-1", status: "active", prompt: "raw route prompt", provider: "private-route-provider", api_key: secretSentinel },
+      ],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw route task title", body: "/Users/lidises/private/route.md", transcript: "Traceback route transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 9, warning_count: 4, error_summary: "Traceback route source" },
+      ],
+    }));
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const posture = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
+    const envelope = buildOfficeOrchestratorRequestEnvelopeDetail(projection, posture);
+    const route = buildOfficeApprovalRequestRouteDetail(envelope, dialogue);
+
+    expect(route.stageLabel).toBe("Approval Request Route Detail 1");
+    expect(route.detailKind).toBe("approval_request_route_detail");
+    expect(route.cards.map((card) => card.id)).toEqual(["intent_event_boundary", "orchestrator_plan_boundary", "approval_request_boundary", "write_audit_boundary"]);
+    expect(route.sourceEnvelopeKind).toBe("orchestrator_request_envelope_detail");
+    expect(route.routeState).toBe("read_only_preview");
+    expect(route.evidenceCount).toBe(1);
+    expect(route.blockedWorkCount).toBe(1);
+    expect(route.dialogueLineCount).toBe(3);
+    expect(route.enabledControls).toBe(0);
+    expect(route.intentEventCreationEnabled).toBe(false);
+    expect(route.approvalRequestEnabled).toBe(false);
+    expect(route.kanbanWriteEnabled).toBe(false);
+    expect(route.auditWriteEnabled).toBe(false);
+    expect(route.dispatchEnabled).toBe(false);
+    expect(route.nasSaveEnabled).toBe(false);
+    expect(route.safeProjectionOnly).toBe(true);
+    expect(route.rawExcluded).toBe(true);
+    expect(JSON.stringify(route)).not.toMatch(/raw route prompt|raw route task title|Traceback|\/Users\/lidises|token-shaped-route-sentinel|private-route-provider/i);
+  });
+});
+
+
+describe("Event Request Contract Projection 1", () => {
+  it("projects the future request event contract without creating schemas, events, or writes", () => {
+    const secretSentinel = ["token", "shaped", "event", "sentinel"].join("-");
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [
+        { id: "agent-1", status: "active", prompt: "raw event prompt", provider: "private-event-provider", api_key: secretSentinel },
+      ],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw event task title", body: "/Users/lidises/private/event.md", transcript: "Traceback event transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 11, warning_count: 5, error_summary: "Traceback event source" },
+      ],
+    }));
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const posture = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
+    const envelope = buildOfficeOrchestratorRequestEnvelopeDetail(projection, posture);
+    const route = buildOfficeApprovalRequestRouteDetail(envelope, dialogue);
+    const contract = buildOfficeEventRequestContractProjection(route);
+
+    expect(contract.stageLabel).toBe("Event Request Contract Projection 1");
+    expect(contract.detailKind).toBe("event_request_contract_projection");
+    expect(contract.cards.map((card) => card.id)).toEqual(["user_instruction_submitted", "orchestrator_plan_requested", "approval_requested", "write_audit_projection"]);
+    expect(contract.sourceRouteKind).toBe("approval_request_route_detail");
+    expect(contract.contractState).toBe("read_only_projection");
+    expect(contract.evidenceCount).toBe(1);
+    expect(contract.blockedWorkCount).toBe(1);
+    expect(contract.dialogueLineCount).toBe(3);
+    expect(contract.enabledControls).toBe(0);
+    expect(contract.schemaWriteEnabled).toBe(false);
+    expect(contract.eventCreationEnabled).toBe(false);
+    expect(contract.eventPersistenceEnabled).toBe(false);
+    expect(contract.runtimeDispatchEnabled).toBe(false);
+    expect(contract.auditWriteEnabled).toBe(false);
+    expect(contract.nasSaveEnabled).toBe(false);
+    expect(contract.safeProjectionOnly).toBe(true);
+    expect(contract.rawExcluded).toBe(true);
+    expect(JSON.stringify(contract)).not.toMatch(/raw event prompt|raw event task title|Traceback|\/Users\/lidises|token-shaped-event-sentinel|private-event-provider/i);
+  });
+});
+
+
+describe("Approval Dialogue Route Inspector 1", () => {
+  it("builds a read-only approval dialogue route inspector without creating requests, events, or writes", () => {
+    const secretSentinel = ["token", "shaped", "dialogue", "route", "sentinel"].join("-");
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [
+        { id: "agent-1", status: "active", prompt: "raw dialogue route prompt", provider: "private-dialogue-route-provider", api_key: secretSentinel },
+      ],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw dialogue route task title", body: "/Users/lidises/private/dialogue-route.md", transcript: "Traceback dialogue route transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 13, warning_count: 6, error_summary: "Traceback dialogue route source" },
+      ],
+    }));
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const posture = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
+    const envelope = buildOfficeOrchestratorRequestEnvelopeDetail(projection, posture);
+    const route = buildOfficeApprovalRequestRouteDetail(envelope, dialogue);
+    const contract = buildOfficeEventRequestContractProjection(route);
+    const inspector = buildOfficeApprovalDialogueRouteInspector(dialogue, route, contract);
+
+    expect(inspector.stageLabel).toBe("Approval Dialogue Route Inspector 1");
+    expect(inspector.detailKind).toBe("approval_dialogue_route_inspector");
+    expect(inspector.cards.map((card) => card.id)).toEqual(["dialogue_posture", "route_boundaries", "event_contract", "write_lock"]);
+    expect(inspector.sourceDialogueKind).toBe("disabled_approval_dialogue_posture");
+    expect(inspector.sourceRouteKind).toBe("approval_request_route_detail");
+    expect(inspector.sourceContractKind).toBe("event_request_contract_projection");
+    expect(inspector.dialogueLineCount).toBe(3);
+    expect(inspector.routeCardCount).toBe(4);
+    expect(inspector.contractCardCount).toBe(4);
+    expect(inspector.evidenceCount).toBe(1);
+    expect(inspector.blockedWorkCount).toBe(1);
+    expect(inspector.enabledControls).toBe(0);
+    expect(inspector.approveEnabled).toBe(false);
+    expect(inspector.rejectEnabled).toBe(false);
+    expect(inspector.holdEnabled).toBe(false);
+    expect(inspector.requestCreationEnabled).toBe(false);
+    expect(inspector.eventCreationEnabled).toBe(false);
+    expect(inspector.eventPersistenceEnabled).toBe(false);
+    expect(inspector.auditWriteEnabled).toBe(false);
+    expect(inspector.dispatchEnabled).toBe(false);
+    expect(inspector.nasSaveEnabled).toBe(false);
+    expect(inspector.safeProjectionOnly).toBe(true);
+    expect(inspector.rawExcluded).toBe(true);
+    expect(JSON.stringify(inspector)).not.toMatch(/raw dialogue route prompt|raw dialogue route task title|Traceback|\/Users\/lidises|token-shaped-dialogue-route-sentinel|private-dialogue-route-provider/i);
+  });
+});
+
+
+describe("Event Timeline Projection 1", () => {
+  it("builds a read-only event timeline from the safe contract and inspector without persisting events", () => {
+    const secretSentinel = ["token", "shaped", "timeline", "sentinel"].join("-");
+    const projection = buildOfficeDeskRpgProjectionModel(officeFixture({
+      agents: [
+        { id: "agent-1", status: "active", prompt: "raw timeline prompt", provider: "private-timeline-provider", api_key: secretSentinel },
+      ],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw timeline task title", body: "/Users/lidises/private/event-timeline.md", transcript: "Traceback event timeline transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 21, warning_count: 8, error_summary: "Traceback event timeline source" },
+      ],
+    }));
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const posture = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
+    const envelope = buildOfficeOrchestratorRequestEnvelopeDetail(projection, posture);
+    const route = buildOfficeApprovalRequestRouteDetail(envelope, dialogue);
+    const contract = buildOfficeEventRequestContractProjection(route);
+    const inspector = buildOfficeApprovalDialogueRouteInspector(dialogue, route, contract);
+    const timeline = buildOfficeEventTimelineProjection(contract, inspector);
+
+    expect(timeline.stageLabel).toBe("Event Timeline Projection 1");
+    expect(timeline.detailKind).toBe("event_timeline_projection");
+    expect(timeline.events.map((event) => event.id)).toEqual(["user_instruction_submitted", "orchestrator_plan_requested", "approval_requested", "nas_save_approval_pending"]);
+    expect(timeline.sourceContractKind).toBe("event_request_contract_projection");
+    expect(timeline.sourceInspectorKind).toBe("approval_dialogue_route_inspector");
+    expect(timeline.timelineState).toBe("projection_only");
+    expect(timeline.eventCount).toBe(4);
+    expect(timeline.evidenceCount).toBe(1);
+    expect(timeline.blockedWorkCount).toBe(1);
+    expect(timeline.dialogueLineCount).toBe(3);
+    expect(timeline.enabledControls).toBe(0);
+    expect(timeline.runtimeEventWriteEnabled).toBe(false);
+    expect(timeline.intentEventCreationEnabled).toBe(false);
+    expect(timeline.visualEventCreationEnabled).toBe(false);
+    expect(timeline.eventPersistenceEnabled).toBe(false);
+    expect(timeline.timelineAppendEnabled).toBe(false);
+    expect(timeline.auditWriteEnabled).toBe(false);
+    expect(timeline.dispatchEnabled).toBe(false);
+    expect(timeline.nasSaveEnabled).toBe(false);
+    expect(timeline.safeProjectionOnly).toBe(true);
+    expect(timeline.rawExcluded).toBe(true);
+    expect(JSON.stringify(timeline)).not.toMatch(/raw timeline prompt|raw timeline task title|Traceback|\/Users\/lidises|token-shaped-timeline-sentinel|private-timeline-provider/i);
+  });
+});
+
 
 describe("Desk RPG Projection ViewModel Helper 1", () => {
   it("builds a safe RPG operating-room projection without raw task/provider/path material", () => {

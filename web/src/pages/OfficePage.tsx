@@ -114,6 +114,12 @@ import {
   buildOfficeApprovalDialogueInspectorDetail,
   buildOfficeReviewerWikiEvidenceDetailPosture,
   buildOfficeBoardEvidenceInspectorDrilldown,
+  buildOfficeBossOrchestratorRequestPostureDetail,
+  buildOfficeOrchestratorRequestEnvelopeDetail,
+  buildOfficeApprovalRequestRouteDetail,
+  buildOfficeEventRequestContractProjection,
+  buildOfficeApprovalDialogueRouteInspector,
+  buildOfficeEventTimelineProjection,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -131,6 +137,12 @@ import {
   type OfficeApprovalDialogueInspectorDetail,
   type OfficeReviewerWikiEvidenceDetailPosture,
   type OfficeBoardEvidenceInspectorDrilldown,
+  type OfficeBossOrchestratorRequestPostureDetail,
+  type OfficeOrchestratorRequestEnvelopeDetail,
+  type OfficeApprovalRequestRouteDetail,
+  type OfficeEventRequestContractProjection,
+  type OfficeApprovalDialogueRouteInspector,
+  type OfficeEventTimelineProjection,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -1948,6 +1960,313 @@ export function BoardEvidenceInspectorDrilldownPanel({ drilldown }: { drilldown:
   );
 }
 
+export function BossOrchestratorRequestPostureDetailPanel({ detail }: { detail: OfficeBossOrchestratorRequestPostureDetail }) {
+  return (
+    <Card
+      data-office-boss-orchestrator-request-posture-detail="true"
+      data-office-boss-orchestrator-request-posture-detail-enabled-controls={detail.enabledControls}
+      data-office-boss-orchestrator-request-posture-detail-input-enabled={String(detail.inputEnabled)}
+      data-office-boss-orchestrator-request-posture-detail-request-creation-enabled={String(detail.requestCreationEnabled)}
+      data-office-boss-orchestrator-request-posture-detail-orchestrator-required={String(detail.orchestratorRequired)}
+      data-office-boss-orchestrator-request-posture-detail-work-assignment-enabled={String(detail.workAssignmentEnabled)}
+      data-office-boss-orchestrator-request-posture-detail-dispatch-enabled={String(detail.dispatchEnabled)}
+      data-office-boss-orchestrator-request-posture-detail-audit-write-enabled={String(detail.auditWriteEnabled)}
+      data-office-boss-orchestrator-request-posture-detail-nas-save-enabled={String(detail.nasSaveEnabled)}
+      data-office-boss-orchestrator-request-posture-detail-safe-projection-only={String(detail.safeProjectionOnly)}
+      data-office-boss-orchestrator-request-posture-detail-raw-excluded={String(detail.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Bot className="h-4 w-4" /> Boss/orchestrator request posture detail
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-amber-300/20 bg-amber-950/10 p-3">
+            <div className="font-semibold text-amber-100">사장 instruction → Orchestrator mediation · detail posture</div>
+            <div className="mt-1 leading-5">
+              자연어 지시가 만들어질 자리와 Orchestrator desk로 넘어가는 request envelope만 보여줍니다. 입력, request 생성, worker 배정, dispatch, audit write, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {detail.cards.map((card) => (
+              <div
+                key={card.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-boss-orchestrator-request-posture-detail-card={card.id}
+                data-office-boss-orchestrator-request-posture-detail-card-tone={card.tone}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{card.label}</div>
+                <div className="mt-2 leading-5">{card.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-boss-orchestrator-request-posture-detail-boundary="true">
+            speaker {detail.speakerRole} · orchestrator {detail.orchestratorRole} · target {detail.targetFacilityId} · evidence {detail.evidenceCount} · blocked {detail.blockedWorkCount} · dialogue lines {detail.dialogueLineCount} · controls {detail.enabledControls} · raw excluded {String(detail.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function OrchestratorRequestEnvelopeDetailPanel({ envelope }: { envelope: OfficeOrchestratorRequestEnvelopeDetail }) {
+  return (
+    <Card
+      data-office-orchestrator-request-envelope-detail="true"
+      data-office-orchestrator-request-envelope-detail-enabled-controls={envelope.enabledControls}
+      data-office-orchestrator-request-envelope-detail-envelope-creation-enabled={String(envelope.envelopeCreationEnabled)}
+      data-office-orchestrator-request-envelope-detail-kanban-write-enabled={String(envelope.kanbanWriteEnabled)}
+      data-office-orchestrator-request-envelope-detail-work-assignment-enabled={String(envelope.workAssignmentEnabled)}
+      data-office-orchestrator-request-envelope-detail-dispatch-enabled={String(envelope.dispatchEnabled)}
+      data-office-orchestrator-request-envelope-detail-audit-write-enabled={String(envelope.auditWriteEnabled)}
+      data-office-orchestrator-request-envelope-detail-nas-save-enabled={String(envelope.nasSaveEnabled)}
+      data-office-orchestrator-request-envelope-detail-safe-projection-only={String(envelope.safeProjectionOnly)}
+      data-office-orchestrator-request-envelope-detail-raw-excluded={String(envelope.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Bot className="h-4 w-4" /> Orchestrator request envelope detail
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-sky-300/20 bg-sky-950/10 p-3">
+            <div className="font-semibold text-sky-100">Orchestrator envelope · disabled request preview</div>
+            <div className="mt-1 leading-5">
+              사장 instruction posture 다음 단계의 request envelope 구조만 표시합니다. Envelope 생성, Kanban write, worker 배정, dispatch, audit write, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {envelope.cards.map((card) => (
+              <div
+                key={card.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-orchestrator-request-envelope-detail-card={card.id}
+                data-office-orchestrator-request-envelope-detail-card-tone={card.tone}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{card.label}</div>
+                <div className="mt-2 leading-5">{card.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-orchestrator-request-envelope-detail-boundary="true">
+            source {envelope.sourcePostureKind} · state {envelope.envelopeState} · target {envelope.targetFacilityId} · evidence {envelope.evidenceCount} · blocked {envelope.blockedWorkCount} · dialogue lines {envelope.dialogueLineCount} · controls {envelope.enabledControls} · raw excluded {String(envelope.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function ApprovalRequestRouteDetailPanel({ route }: { route: OfficeApprovalRequestRouteDetail }) {
+  return (
+    <Card
+      data-office-approval-request-route-detail="true"
+      data-office-approval-request-route-detail-enabled-controls={route.enabledControls}
+      data-office-approval-request-route-detail-intent-event-creation-enabled={String(route.intentEventCreationEnabled)}
+      data-office-approval-request-route-detail-approval-request-enabled={String(route.approvalRequestEnabled)}
+      data-office-approval-request-route-detail-kanban-write-enabled={String(route.kanbanWriteEnabled)}
+      data-office-approval-request-route-detail-audit-write-enabled={String(route.auditWriteEnabled)}
+      data-office-approval-request-route-detail-dispatch-enabled={String(route.dispatchEnabled)}
+      data-office-approval-request-route-detail-nas-save-enabled={String(route.nasSaveEnabled)}
+      data-office-approval-request-route-detail-safe-projection-only={String(route.safeProjectionOnly)}
+      data-office-approval-request-route-detail-raw-excluded={String(route.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Bot className="h-4 w-4" /> Approval request route detail
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-violet-300/20 bg-violet-950/10 p-3">
+            <div className="font-semibold text-violet-100">Intent → Orchestrator plan → Approval request · read-only route</div>
+            <div className="mt-1 leading-5">
+              Master Spec event route를 safe projection으로만 보여줍니다. Intent event 생성, approval request 생성, Kanban write, audit write, dispatch, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {route.cards.map((card) => (
+              <div
+                key={card.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-approval-request-route-detail-card={card.id}
+                data-office-approval-request-route-detail-card-tone={card.tone}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{card.label}</div>
+                <div className="mt-2 leading-5">{card.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-approval-request-route-detail-boundary="true">
+            source {route.sourceEnvelopeKind} · state {route.routeState} · evidence {route.evidenceCount} · blocked {route.blockedWorkCount} · dialogue lines {route.dialogueLineCount} · controls {route.enabledControls} · raw excluded {String(route.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function EventRequestContractProjectionPanel({ contract }: { contract: OfficeEventRequestContractProjection }) {
+  return (
+    <Card
+      data-office-event-request-contract-projection="true"
+      data-office-event-request-contract-projection-enabled-controls={contract.enabledControls}
+      data-office-event-request-contract-projection-schema-write-enabled={String(contract.schemaWriteEnabled)}
+      data-office-event-request-contract-projection-event-creation-enabled={String(contract.eventCreationEnabled)}
+      data-office-event-request-contract-projection-event-persistence-enabled={String(contract.eventPersistenceEnabled)}
+      data-office-event-request-contract-projection-runtime-dispatch-enabled={String(contract.runtimeDispatchEnabled)}
+      data-office-event-request-contract-projection-audit-write-enabled={String(contract.auditWriteEnabled)}
+      data-office-event-request-contract-projection-nas-save-enabled={String(contract.nasSaveEnabled)}
+      data-office-event-request-contract-projection-safe-projection-only={String(contract.safeProjectionOnly)}
+      data-office-event-request-contract-projection-raw-excluded={String(contract.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Bot className="h-4 w-4" /> Event request contract projection
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-fuchsia-300/20 bg-fuchsia-950/10 p-3">
+            <div className="font-semibold text-fuchsia-100">Future event contract · projection only</div>
+            <div className="mt-1 leading-5">
+              Master Spec의 request event 이름과 경계를 DTO처럼 보이게만 합니다. Schema write, event 생성/저장, runtime dispatch, audit write, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {contract.cards.map((card) => (
+              <div
+                key={card.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-event-request-contract-projection-card={card.id}
+                data-office-event-request-contract-projection-card-tone={card.tone}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{card.label}</div>
+                <div className="mt-2 leading-5">{card.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-event-request-contract-projection-boundary="true">
+            source {contract.sourceRouteKind} · state {contract.contractState} · evidence {contract.evidenceCount} · blocked {contract.blockedWorkCount} · dialogue lines {contract.dialogueLineCount} · controls {contract.enabledControls} · raw excluded {String(contract.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function ApprovalDialogueRouteInspectorPanel({ inspector }: { inspector: OfficeApprovalDialogueRouteInspector }) {
+  return (
+    <Card
+      data-office-approval-dialogue-route-inspector="true"
+      data-office-approval-dialogue-route-inspector-enabled-controls={inspector.enabledControls}
+      data-office-approval-dialogue-route-inspector-approve-enabled={String(inspector.approveEnabled)}
+      data-office-approval-dialogue-route-inspector-reject-enabled={String(inspector.rejectEnabled)}
+      data-office-approval-dialogue-route-inspector-hold-enabled={String(inspector.holdEnabled)}
+      data-office-approval-dialogue-route-inspector-request-creation-enabled={String(inspector.requestCreationEnabled)}
+      data-office-approval-dialogue-route-inspector-event-creation-enabled={String(inspector.eventCreationEnabled)}
+      data-office-approval-dialogue-route-inspector-event-persistence-enabled={String(inspector.eventPersistenceEnabled)}
+      data-office-approval-dialogue-route-inspector-audit-write-enabled={String(inspector.auditWriteEnabled)}
+      data-office-approval-dialogue-route-inspector-dispatch-enabled={String(inspector.dispatchEnabled)}
+      data-office-approval-dialogue-route-inspector-nas-save-enabled={String(inspector.nasSaveEnabled)}
+      data-office-approval-dialogue-route-inspector-safe-projection-only={String(inspector.safeProjectionOnly)}
+      data-office-approval-dialogue-route-inspector-raw-excluded={String(inspector.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Bot className="h-4 w-4" /> Approval dialogue route inspector
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-rose-300/20 bg-rose-950/10 p-3">
+            <div className="font-semibold text-rose-100">Dialogue → route → event contract · inspector only</div>
+            <div className="mt-1 leading-5">
+              승인 대화가 어떤 read-only route와 future event contract로 이어질지만 inspect합니다. Approve/reject/hold, request/event creation, event persistence, audit write, dispatch, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {inspector.cards.map((card) => (
+              <div
+                key={card.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-approval-dialogue-route-inspector-card={card.id}
+                data-office-approval-dialogue-route-inspector-card-tone={card.tone}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{card.label}</div>
+                <div className="mt-2 leading-5">{card.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-approval-dialogue-route-inspector-boundary="true">
+            dialogue {inspector.dialogueLineCount} · route cards {inspector.routeCardCount} · event cards {inspector.contractCardCount} · evidence {inspector.evidenceCount} · blocked {inspector.blockedWorkCount} · controls {inspector.enabledControls} · raw excluded {String(inspector.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function EventTimelineProjectionPanel({ timeline }: { timeline: OfficeEventTimelineProjection }) {
+  return (
+    <Card
+      data-office-event-timeline-projection="true"
+      data-office-event-timeline-projection-enabled-controls={timeline.enabledControls}
+      data-office-event-timeline-projection-runtime-event-write-enabled={String(timeline.runtimeEventWriteEnabled)}
+      data-office-event-timeline-projection-intent-event-creation-enabled={String(timeline.intentEventCreationEnabled)}
+      data-office-event-timeline-projection-visual-event-creation-enabled={String(timeline.visualEventCreationEnabled)}
+      data-office-event-timeline-projection-event-persistence-enabled={String(timeline.eventPersistenceEnabled)}
+      data-office-event-timeline-projection-timeline-append-enabled={String(timeline.timelineAppendEnabled)}
+      data-office-event-timeline-projection-audit-write-enabled={String(timeline.auditWriteEnabled)}
+      data-office-event-timeline-projection-dispatch-enabled={String(timeline.dispatchEnabled)}
+      data-office-event-timeline-projection-nas-save-enabled={String(timeline.nasSaveEnabled)}
+      data-office-event-timeline-projection-safe-projection-only={String(timeline.safeProjectionOnly)}
+      data-office-event-timeline-projection-raw-excluded={String(timeline.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Bot className="h-4 w-4" /> Event timeline projection
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-cyan-300/20 bg-cyan-950/10 p-3">
+            <div className="font-semibold text-cyan-100">Runtime → intent → visual projection · no event writes</div>
+            <div className="mt-1 leading-5">
+              Master Spec의 event 흐름을 안전한 타임라인처럼 보여주지만 runtime event write, intent/visual event creation, persistence, audit append, dispatch, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {timeline.events.map((event) => (
+              <div
+                key={event.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-event-timeline-projection-event={event.id}
+                data-office-event-timeline-projection-event-lane={event.lane}
+                data-office-event-timeline-projection-event-tone={event.tone}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{event.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{event.label}</div>
+                <div className="mt-2 leading-5">{event.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-event-timeline-projection-boundary="true">
+            state {timeline.timelineState} · source {timeline.sourceContractKind} / {timeline.sourceInspectorKind} · events {timeline.eventCount} · evidence {timeline.evidenceCount} · blocked {timeline.blockedWorkCount} · dialogue lines {timeline.dialogueLineCount} · controls {timeline.enabledControls} · raw excluded {String(timeline.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -2356,6 +2675,30 @@ export default function OfficePage() {
     () => buildOfficeBoardEvidenceInspectorDrilldown(deskRpgProjection, reviewerWikiEvidenceDetailPosture),
     [deskRpgProjection, reviewerWikiEvidenceDetailPosture],
   );
+  const bossOrchestratorRequestPostureDetail = useMemo(
+    () => buildOfficeBossOrchestratorRequestPostureDetail(deskRpgProjection, disabledApprovalDialoguePosture),
+    [deskRpgProjection, disabledApprovalDialoguePosture],
+  );
+  const orchestratorRequestEnvelopeDetail = useMemo(
+    () => buildOfficeOrchestratorRequestEnvelopeDetail(deskRpgProjection, bossOrchestratorRequestPostureDetail),
+    [deskRpgProjection, bossOrchestratorRequestPostureDetail],
+  );
+  const approvalRequestRouteDetail = useMemo(
+    () => buildOfficeApprovalRequestRouteDetail(orchestratorRequestEnvelopeDetail, disabledApprovalDialoguePosture),
+    [orchestratorRequestEnvelopeDetail, disabledApprovalDialoguePosture],
+  );
+  const eventRequestContractProjection = useMemo(
+    () => buildOfficeEventRequestContractProjection(approvalRequestRouteDetail),
+    [approvalRequestRouteDetail],
+  );
+  const approvalDialogueRouteInspector = useMemo(
+    () => buildOfficeApprovalDialogueRouteInspector(disabledApprovalDialoguePosture, approvalRequestRouteDetail, eventRequestContractProjection),
+    [disabledApprovalDialoguePosture, approvalRequestRouteDetail, eventRequestContractProjection],
+  );
+  const eventTimelineProjection = useMemo(
+    () => buildOfficeEventTimelineProjection(eventRequestContractProjection, approvalDialogueRouteInspector),
+    [eventRequestContractProjection, approvalDialogueRouteInspector],
+  );
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -2584,6 +2927,18 @@ export default function OfficePage() {
       <ReviewerWikiEvidenceDetailPosturePanel detail={reviewerWikiEvidenceDetailPosture} />
 
       <BoardEvidenceInspectorDrilldownPanel drilldown={boardEvidenceInspectorDrilldown} />
+
+      <BossOrchestratorRequestPostureDetailPanel detail={bossOrchestratorRequestPostureDetail} />
+
+      <OrchestratorRequestEnvelopeDetailPanel envelope={orchestratorRequestEnvelopeDetail} />
+
+      <ApprovalRequestRouteDetailPanel route={approvalRequestRouteDetail} />
+
+      <EventRequestContractProjectionPanel contract={eventRequestContractProjection} />
+
+      <ApprovalDialogueRouteInspectorPanel inspector={approvalDialogueRouteInspector} />
+
+      <EventTimelineProjectionPanel timeline={eventTimelineProjection} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 
