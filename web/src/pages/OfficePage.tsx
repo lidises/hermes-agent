@@ -122,6 +122,7 @@ import {
   buildOfficeEventTimelineProjection,
   buildOfficeTimelineWorkerHandoffDrilldown,
   buildOfficeApprovalRequestDetailDeepening,
+  buildOfficeWorkerFacilityLanePolish,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -147,6 +148,7 @@ import {
   type OfficeEventTimelineProjection,
   type OfficeTimelineWorkerHandoffDrilldown,
   type OfficeApprovalRequestDetailDeepening,
+  type OfficeWorkerFacilityLanePolish,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -2380,6 +2382,61 @@ export function ApprovalRequestDetailDeepeningPanel({ detail }: { detail: Office
   );
 }
 
+export function WorkerFacilityLanePolishPanel({ polish }: { polish: OfficeWorkerFacilityLanePolish }) {
+  return (
+    <Card
+      data-office-worker-facility-lane-polish="true"
+      data-office-worker-facility-lane-polish-enabled-controls={polish.enabledControls}
+      data-office-worker-facility-lane-polish-facility-write-enabled={String(polish.facilityWriteEnabled)}
+      data-office-worker-facility-lane-polish-assignment-enabled={String(polish.workAssignmentEnabled)}
+      data-office-worker-facility-lane-polish-request-creation-enabled={String(polish.requestCreationEnabled)}
+      data-office-worker-facility-lane-polish-dispatch-enabled={String(polish.dispatchEnabled)}
+      data-office-worker-facility-lane-polish-audit-write-enabled={String(polish.auditWriteEnabled)}
+      data-office-worker-facility-lane-polish-nas-save-enabled={String(polish.nasSaveEnabled)}
+      data-office-worker-facility-lane-polish-safe-projection-only={String(polish.safeProjectionOnly)}
+      data-office-worker-facility-lane-polish-raw-excluded={String(polish.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Users className="h-4 w-4" /> Worker facility lane polish
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-teal-300/20 bg-teal-950/10 p-3">
+            <div className="font-semibold text-teal-100">작업자 facility lane · projection only</div>
+            <div className="mt-1 leading-5">
+              Timeline/worker handoff를 worker facility readiness와 연결해 lane별 선행조건을 보여줍니다. facility write, worker assignment, request creation, dispatch, audit write, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {polish.lanes.map((lane) => (
+              <div
+                key={lane.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-worker-facility-lane={lane.id}
+                data-office-worker-facility-lane-role={lane.workerRole}
+                data-office-worker-facility-lane-readiness={lane.readinessFacilityId}
+                data-office-worker-facility-lane-status={lane.readinessStatus}
+                data-office-worker-facility-lane-assignment-enabled={String(lane.assignmentEnabled)}
+                data-office-worker-facility-lane-dispatch-enabled={String(lane.dispatchEnabled)}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{lane.workerRole}</div>
+                <div className="mt-1 font-semibold text-foreground">{lane.label}</div>
+                <div className="mt-1 text-midground/60">facility: {lane.readinessFacilityId} · source event: {lane.sourceEventId}</div>
+                <div className="mt-2 leading-5">{lane.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-worker-facility-lane-polish-boundary="true">
+            source {polish.sourceDrilldownKind} / {polish.sourceReadinessStage} · lanes {polish.laneCount} · readiness facilities {polish.readinessFacilityCount} · prerequisites {polish.prerequisiteCount} · controls {polish.enabledControls} · raw excluded {String(polish.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
   const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
   const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
@@ -2820,6 +2877,10 @@ export default function OfficePage() {
     () => buildOfficeApprovalRequestDetailDeepening(approvalRequestRouteDetail, eventTimelineProjection, timelineWorkerHandoffDrilldown),
     [approvalRequestRouteDetail, eventTimelineProjection, timelineWorkerHandoffDrilldown],
   );
+  const workerFacilityLanePolish = useMemo(
+    () => buildOfficeWorkerFacilityLanePolish(timelineWorkerHandoffDrilldown, workerFacilityReadiness),
+    [timelineWorkerHandoffDrilldown, workerFacilityReadiness],
+  );
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -3064,6 +3125,8 @@ export default function OfficePage() {
       <TimelineWorkerHandoffDrilldownPanel drilldown={timelineWorkerHandoffDrilldown} />
 
       <ApprovalRequestDetailDeepeningPanel detail={approvalRequestDetailDeepening} />
+
+      <WorkerFacilityLanePolishPanel polish={workerFacilityLanePolish} />
 
       <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
 

@@ -1701,6 +1701,45 @@ export type OfficeWorkerFacilityReadiness = {
   safeProjectionOnly: true;
 };
 
+export type OfficeWorkerFacilityLanePolishLane = {
+  id: `lane_${OfficeTimelineWorkerHandoffDrilldownStep["id"]}`;
+  workerRole: OfficeTimelineWorkerHandoffDrilldownStep["id"];
+  label: string;
+  facilityId: OfficeTimelineWorkerHandoffDrilldownStep["facilityId"];
+  readinessFacilityId: OfficeWorkerFacilityReadinessFacility["id"];
+  sourceEventId: OfficeTimelineWorkerHandoffDrilldownStep["sourceEventId"];
+  lane: OfficeTimelineWorkerHandoffDrilldownStep["lane"];
+  readinessStatus: OfficeWorkerFacilityReadinessFacility["status"];
+  prerequisiteCount: number;
+  summary: string;
+  tone: "info" | "warning" | "blocked";
+  assignmentEnabled: false;
+  requestCreationEnabled: false;
+  dispatchEnabled: false;
+  rawExcluded: true;
+};
+
+export type OfficeWorkerFacilityLanePolish = {
+  stageLabel: "Worker Facility Lane Polish 1";
+  title: string;
+  detailKind: "worker_facility_lane_polish";
+  lanes: OfficeWorkerFacilityLanePolishLane[];
+  sourceDrilldownKind: OfficeTimelineWorkerHandoffDrilldown["detailKind"];
+  sourceReadinessStage: OfficeWorkerFacilityReadiness["stageLabel"];
+  laneCount: number;
+  readinessFacilityCount: number;
+  prerequisiteCount: number;
+  enabledControls: 0;
+  facilityWriteEnabled: false;
+  workAssignmentEnabled: false;
+  requestCreationEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeWorkerAssignmentCandidateBlockedReason = {
   id: "facility_prerequisites_missing" | "approval_execution_blocked" | "authority_adapter_missing" | "audit_write_disabled" | "human_confirmation_missing";
   label: string;
@@ -3143,6 +3182,62 @@ export function buildOfficeApprovalRequestDetailDeepening(
     rawExcluded: true,
   };
 }
+
+export function buildOfficeWorkerFacilityLanePolish(
+  drilldown: OfficeTimelineWorkerHandoffDrilldown,
+  readiness: OfficeWorkerFacilityReadiness,
+): OfficeWorkerFacilityLanePolish {
+  const readinessByWorkerRole = Object.fromEntries(readiness.facilities.map((facility) => [facility.workerRole, facility])) as Partial<Record<string, OfficeWorkerFacilityReadinessFacility>>;
+  const fallbackFacilityByRole: Record<OfficeTimelineWorkerHandoffDrilldownStep["id"], OfficeWorkerFacilityReadinessFacility["id"]> = {
+    search_worker: "agent_desks",
+    reviewer: "incident_corner",
+    wiki_writer: "agent_desks",
+    nas_keeper: "orchestrator_desk",
+  };
+  const lanes = drilldown.handoffSteps.map((step): OfficeWorkerFacilityLanePolishLane => {
+    const readinessFacility = readinessByWorkerRole[step.id] ?? readiness.facilities.find((facility) => facility.id === fallbackFacilityByRole[step.id]) ?? readiness.facilities[0];
+    const prerequisiteCount = readinessFacility?.prerequisites.length ?? 0;
+    return {
+      id: `lane_${step.id}`,
+      workerRole: step.id,
+      label: step.label,
+      facilityId: step.facilityId,
+      readinessFacilityId: readinessFacility?.id ?? fallbackFacilityByRole[step.id],
+      sourceEventId: step.sourceEventId,
+      lane: step.lane,
+      readinessStatus: readinessFacility?.status ?? "prerequisites_missing",
+      prerequisiteCount,
+      summary: `${step.label} lane stays mapped to ${readinessFacility?.id ?? fallbackFacilityByRole[step.id]} with ${prerequisiteCount} safe prerequisite(s); assignment, request creation, and dispatch stay disabled.`,
+      tone: step.tone,
+      assignmentEnabled: false,
+      requestCreationEnabled: false,
+      dispatchEnabled: false,
+      rawExcluded: true,
+    };
+  });
+
+  return {
+    stageLabel: "Worker Facility Lane Polish 1",
+    title: "Worker facility lane polish",
+    detailKind: "worker_facility_lane_polish",
+    lanes,
+    sourceDrilldownKind: drilldown.detailKind,
+    sourceReadinessStage: readiness.stageLabel,
+    laneCount: lanes.length,
+    readinessFacilityCount: readiness.facilities.length,
+    prerequisiteCount: readiness.facilities.reduce((total, facility) => total + facility.prerequisites.length, 0),
+    enabledControls: 0,
+    facilityWriteEnabled: false,
+    workAssignmentEnabled: false,
+    requestCreationEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    nasSaveEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
 
 export function buildOfficeRpgScene(state: OfficeState): OfficeRpgScene {
   const entities: OfficeRpgSceneEntity[] = [];

@@ -18,7 +18,7 @@ vi.mock("@/lib/api", () => ({
 
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
-import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeRpgScene } from "./officeView";
+import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerFacilityLanePolish, buildOfficeRpgScene } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
@@ -865,6 +865,64 @@ describe("ApprovalRequestDetailDeepeningPanel", () => {
     expect(markup).not.toContain("<select");
     expect(markup).not.toContain("<textarea");
     expect(markup).not.toMatch(/raw approval detail prompt|raw approval detail task|Traceback|\/Users\/lidises|token-shaped-approval-detail|private-approval-detail-provider/i);
+  });
+});
+
+
+describe("WorkerFacilityLanePolishPanel", () => {
+  it("Worker Facility Lane Polish 1 renders facility lanes as read-only posture", () => {
+    const WorkerFacilityLanePolishPanel = (OfficePageModule as unknown as {
+      WorkerFacilityLanePolishPanel: React.ComponentType<{ polish: ReturnType<typeof buildOfficeWorkerFacilityLanePolish> }>;
+    }).WorkerFacilityLanePolishPanel;
+    const state = officeFixture({
+      agents: [{ id: "agent-worker-lane", status: "active", prompt: "raw worker lane prompt", provider: "private-worker-lane-provider", api_key: "token-shaped-worker-lane-polish" }],
+      work_items: [
+        { id: "task-worker-lane", status: "blocked", title: "raw worker lane task", body: "/Users/lidises/private/worker-lane.md", transcript: "Traceback worker lane transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-15T00:00:00Z", item_count: 7, warning_count: 2, error_summary: "Traceback worker lane source" },
+      ],
+    });
+    const projection = buildOfficeDeskRpgProjectionModel(state);
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const posture = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
+    const envelope = buildOfficeOrchestratorRequestEnvelopeDetail(projection, posture);
+    const route = buildOfficeApprovalRequestRouteDetail(envelope, dialogue);
+    const contract = buildOfficeEventRequestContractProjection(route);
+    const inspector = buildOfficeApprovalDialogueRouteInspector(dialogue, route, contract);
+    const timeline = buildOfficeEventTimelineProjection(contract, inspector);
+    const workerRoles = buildOfficeDeskRpgWorkerRoleVisibility(projection);
+    const handoff = buildOfficeReviewerWikiHandoffPosture(projection);
+    const drilldown = buildOfficeTimelineWorkerHandoffDrilldown(timeline, workerRoles, handoff);
+    const approvalView = buildOfficeApprovalRequestView(state);
+    const audit = buildOfficeApprovalAuditTimeline(approvalView);
+    const gate = buildOfficeApprovalExecutionGate(audit);
+    const authority = buildOfficeAuthorityAdapterContract(gate);
+    const queue = buildOfficeOrchestratorMediationQueue(authority);
+    const routing = buildOfficeWorkerIntentRouting(queue);
+    const readiness = buildOfficeWorkerFacilityReadiness(routing);
+    const polish = buildOfficeWorkerFacilityLanePolish(drilldown, readiness);
+
+    const markup = renderToStaticMarkup(<WorkerFacilityLanePolishPanel polish={polish} />);
+
+    expect(markup).toContain("data-office-worker-facility-lane-polish=\"true\"");
+    expect(markup).toContain("data-office-worker-facility-lane-polish-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-worker-facility-lane-polish-assignment-enabled=\"false\"");
+    expect(markup).toContain("data-office-worker-facility-lane-polish-request-creation-enabled=\"false\"");
+    expect(markup).toContain("data-office-worker-facility-lane-polish-dispatch-enabled=\"false\"");
+    expect(markup).toContain("data-office-worker-facility-lane-polish-audit-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-worker-facility-lane-polish-nas-save-enabled=\"false\"");
+    expect(markup).toContain("data-office-worker-facility-lane=\"lane_search_worker\"");
+    expect(markup).toContain("data-office-worker-facility-lane=\"lane_reviewer\"");
+    expect(markup).toContain("data-office-worker-facility-lane=\"lane_wiki_writer\"");
+    expect(markup).toContain("data-office-worker-facility-lane=\"lane_nas_keeper\"");
+    expect(markup).toContain("Worker facility lane polish");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw worker lane prompt|raw worker lane task|Traceback|\/Users\/lidises|token-shaped-worker-lane-polish|private-worker-lane-provider/i);
   });
 });
 

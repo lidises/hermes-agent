@@ -112,6 +112,7 @@ import {
   buildOfficeEventTimelineProjection,
   buildOfficeTimelineWorkerHandoffDrilldown,
   buildOfficeApprovalRequestDetailDeepening,
+  buildOfficeWorkerFacilityLanePolish,
   buildOfficeUnifiedWorkbenchView,
 } from "./officeView";
 import type { OfficeState } from "@/lib/api";
@@ -155,6 +156,61 @@ function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
 }
 
 describe("OfficePage view helpers", () => {
+
+
+describe("Worker Facility Lane Polish 1", () => {
+  it("builds safe facility-level worker lane polish without assignment or dispatch controls", () => {
+    const secretSentinel = ["token", "shaped", "worker", "lane", "polish"].join("-");
+    const state = officeFixture({
+      agents: [{ id: "agent-worker-lane", status: "active", prompt: "raw worker lane prompt", provider: "private-worker-lane-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-worker-lane", status: "blocked", title: "raw worker lane task", body: "/Users/lidises/private/worker-lane.md", transcript: "Traceback worker lane transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-15T00:00:00Z", item_count: 7, warning_count: 2, error_summary: "Traceback worker lane source" },
+      ],
+    });
+    const projection = buildOfficeDeskRpgProjectionModel(state);
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const posture = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
+    const envelope = buildOfficeOrchestratorRequestEnvelopeDetail(projection, posture);
+    const route = buildOfficeApprovalRequestRouteDetail(envelope, dialogue);
+    const contract = buildOfficeEventRequestContractProjection(route);
+    const inspector = buildOfficeApprovalDialogueRouteInspector(dialogue, route, contract);
+    const timeline = buildOfficeEventTimelineProjection(contract, inspector);
+    const workerRoles = buildOfficeDeskRpgWorkerRoleVisibility(projection);
+    const handoff = buildOfficeReviewerWikiHandoffPosture(projection);
+    const drilldown = buildOfficeTimelineWorkerHandoffDrilldown(timeline, workerRoles, handoff);
+    const approvalView = buildOfficeApprovalRequestView(state);
+    const audit = buildOfficeApprovalAuditTimeline(approvalView);
+    const gate = buildOfficeApprovalExecutionGate(audit);
+    const authority = buildOfficeAuthorityAdapterContract(gate);
+    const queue = buildOfficeOrchestratorMediationQueue(authority);
+    const routing = buildOfficeWorkerIntentRouting(queue);
+    const readiness = buildOfficeWorkerFacilityReadiness(routing);
+
+    const polish = buildOfficeWorkerFacilityLanePolish(drilldown, readiness);
+
+    expect(polish.stageLabel).toBe("Worker Facility Lane Polish 1");
+    expect(polish.detailKind).toBe("worker_facility_lane_polish");
+    expect(polish.lanes.map((lane) => lane.workerRole)).toEqual(["search_worker", "reviewer", "wiki_writer", "nas_keeper"]);
+    expect(polish.lanes.map((lane) => lane.id)).toEqual(["lane_search_worker", "lane_reviewer", "lane_wiki_writer", "lane_nas_keeper"]);
+    expect(polish.laneCount).toBe(4);
+    expect(polish.readinessFacilityCount).toBe(3);
+    expect(polish.prerequisiteCount).toBe(9);
+    expect(polish.enabledControls).toBe(0);
+    expect(polish.facilityWriteEnabled).toBe(false);
+    expect(polish.workAssignmentEnabled).toBe(false);
+    expect(polish.requestCreationEnabled).toBe(false);
+    expect(polish.dispatchEnabled).toBe(false);
+    expect(polish.auditWriteEnabled).toBe(false);
+    expect(polish.nasSaveEnabled).toBe(false);
+    expect(polish.safeProjectionOnly).toBe(true);
+    expect(polish.rawExcluded).toBe(true);
+    expect(polish.lanes.every((lane) => lane.assignmentEnabled === false && lane.dispatchEnabled === false && lane.rawExcluded === true)).toBe(true);
+    expect(JSON.stringify(polish)).not.toMatch(/raw worker lane prompt|raw worker lane task|Traceback|\/Users\/lidises|token-shaped-worker-lane-polish|private-worker-lane-provider/i);
+  });
+});
 
 
 describe("Approval-request Detail Deepening 1", () => {
