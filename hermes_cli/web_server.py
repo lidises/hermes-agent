@@ -53,12 +53,14 @@ from hermes_cli.office_controlled_mutation import (
     append_office_controlled_mutation_authority_adapter_registry_event,
     append_office_controlled_mutation_decision_event,
     append_office_controlled_mutation_dry_run_result_event,
+    append_office_controlled_mutation_nas_evidence_package_event,
     append_office_controlled_mutation_request_event,
     build_office_controlled_mutation_contract_schema,
     build_office_controlled_mutation_nas_evidence_package_contract,
     build_office_controlled_mutation_nas_save_preparation_contract,
     list_office_controlled_mutation_decision_events,
     list_office_controlled_mutation_dry_run_result_events,
+    list_office_controlled_mutation_nas_evidence_package_events,
     list_office_controlled_mutation_audit_events,
     list_office_controlled_mutation_authority_adapter_registry_events,
     list_office_controlled_mutation_request_events,
@@ -588,6 +590,20 @@ async def validate_office_controlled_mutation_nas_save_preparation_route(payload
 async def validate_office_controlled_mutation_nas_evidence_package_route(payload: Any = Body(None)):
     """Validate a NAS evidence package DTO without persistence or NAS access."""
     return validate_office_controlled_mutation_nas_evidence_package(payload)
+
+
+@app.post("/api/office/controlled-mutation/nas-evidence-package")
+async def append_office_controlled_mutation_nas_evidence_package(payload: Any = Body(None)):
+    """Append safe NAS evidence package metadata without NAS path or mount access."""
+    return append_office_controlled_mutation_nas_evidence_package_event(payload)
+
+
+@app.get("/api/office/controlled-mutation/nas-evidence-packages")
+async def list_office_controlled_mutation_nas_evidence_packages(
+    limit: int = 50, request_ref: str | None = None
+):
+    """Read back stored safe NAS evidence package metadata from local Hermes JSONL."""
+    return list_office_controlled_mutation_nas_evidence_package_events(limit=limit, request_ref=request_ref)
 
 
 @app.post("/api/office/controlled-mutation/request/validate")

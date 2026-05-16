@@ -1,6 +1,6 @@
-# NAS Save/Write Preparation + Evidence Contract/Validation Ladder 1
+# NAS Save/Write Preparation + Evidence Contract/Validation/Store Ladder 1
 
-Date: 2026-05-16 12:31 KST
+Date: 2026-05-16 12:44 KST
 
 ## Approved scope
 
@@ -36,7 +36,7 @@ After that validate-only slice was committed clean, user approved:
 - No evidence package persistence or rollback point creation.
 - No actual NAS save/write/preparation runtime.
 
-This document now records the NAS preparation contract helper/route slice, validate-only DTO slice, evidence package contract-only slice, and evidence package validate-only DTO slice.
+This document now records the NAS preparation contract helper/route slice, validate-only DTO slice, evidence package contract-only slice, evidence package validate-only DTO slice, and local metadata store/readback slice.
 
 ## Added RED tests
 
@@ -349,15 +349,87 @@ Independent review: PASS, no security concern, logic error, or scope violation.
 
 No package creation, package persistence, evidence package persistence, storage/write path, NAS path resolution, NAS mount access, rollback point creation, actual NAS save/write/preparation runtime, audit write, event append, credential/auth/env change, target dispatch/runtime mutation, real authority adapter binding/dispatch, migration, VPS/NAS/Kanban/cron mutation, deploy/restart, push/PR/merge, or browser executable control was performed.
 
+## NAS Evidence Package Local Metadata Store RED/GREEN
+
+Additional test file:
+
+- `tests/hermes_cli/test_office_controlled_mutation_nas_evidence_package_store.py`
+
+The local metadata store RED tests define the approved boundary:
+
+- Future append helper: `append_office_controlled_mutation_nas_evidence_package_event(...)`.
+- Future readback helper: `list_office_controlled_mutation_nas_evidence_package_events(...)`.
+- Future protected routes: `POST /api/office/controlled-mutation/nas-evidence-package` and `GET /api/office/controlled-mutation/nas-evidence-packages`.
+- Storage is profile-scoped local JSONL only under `HERMES_HOME/office/controlled-mutation/nas-evidence-packages.jsonl`.
+- Append validates with the existing safe DTO validator before writing, rejects unsupported raw fields without echo or write, rejects duplicate `package_ref` without a second write, and writes only one JSONL line per accepted DTO.
+- Readback revalidates/normalizes stored records, supports safe `request_ref` filtering, clamps `limit` to 200, and skips malformed/invalid lines without raw echo.
+- Capability flags keep NAS path resolution, NAS mount access, NAS write/save, storage write outside local metadata JSONL, evidence persistence to NAS, rollback point creation, credentials, audit write, event append, target mutation, authority binding, and dry-run execution disabled.
+
+RED command/result:
+
+```bash
+.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_evidence_package_store.py -q -o 'addopts='
+# 5 failed, 1 passed in 0.50s
+```
+
+Expected RED failures were missing append/readback helper imports and missing POST store route returning 405.
+
+GREEN implementation:
+
+- `hermes_cli/office_controlled_mutation.py`
+  - Added `_default_nas_evidence_package_store_path()`.
+  - Added `_with_nas_evidence_package_persistence_capabilities(...)`.
+  - Added `_normalize_stored_nas_evidence_package(...)` and `_read_nas_evidence_package_store(...)`.
+  - Added `append_office_controlled_mutation_nas_evidence_package_event(...)`.
+  - Added `list_office_controlled_mutation_nas_evidence_package_events(...)`.
+- `hermes_cli/web_server.py`
+  - Added protected `POST /api/office/controlled-mutation/nas-evidence-package`.
+  - Added protected `GET /api/office/controlled-mutation/nas-evidence-packages`.
+
+GREEN verification:
+
+```bash
+.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_evidence_package_store.py -q -o 'addopts='
+# 6 passed in 0.44s
+
+.venv/bin/python -m pytest tests/hermes_cli/test_office_api.py tests/hermes_cli/test_office_controlled_mutation_*.py -q -o 'addopts='
+# 125 passed in 1.11s
+
+.venv/bin/python -m py_compile hermes_cli/office_controlled_mutation.py hermes_cli/web_server.py
+# passed
+
+git diff --check
+# passed
+
+git diff --cached --check
+# passed
+```
+
+Evidence package store production safety scan:
+
+```text
+hardcoded_secret_assignment: 0
+shell_exec: 0
+sql_format: 0
+nas_path_resolution_or_mount_access: 0
+credential_capability_enabled: 0
+unapproved_mutation_routes: 0
+```
+
+Independent review: PASS, no security concern, logic error, or scope violation.
+
+## Safety / non-actions for evidence package local metadata store slice
+
+No NAS path resolution, NAS mount access, actual NAS save/write/preparation runtime, evidence file persistence to NAS, rollback point creation, credential/auth/env change, target dispatch/runtime mutation, real authority adapter binding/dispatch, migration, VPS/NAS/Kanban/cron mutation, deploy/restart, push/PR/merge, or browser executable control was performed.
+
 ## Next boundary
 
 A separate explicit approval is required before any of:
 
-- Package creation or persistence.
-- Persistence/storage/write path.
 - NAS path resolution or mount access.
-- Evidence package persistence or rollback point creation.
 - Actual NAS save/write/preparation runtime.
+- Evidence file persistence to NAS.
+- Rollback point creation.
 - Credential/auth/env change.
 - Target dispatch/runtime mutation.
 - Real authority adapter binding/dispatch.

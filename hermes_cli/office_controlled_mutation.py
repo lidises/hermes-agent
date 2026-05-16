@@ -1975,6 +1975,158 @@ def validate_office_controlled_mutation_nas_evidence_package(payload: object) ->
 
 
 
+def _default_nas_evidence_package_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "nas-evidence-packages.jsonl"
+
+
+
+def _with_nas_evidence_package_persistence_capabilities(dto: Mapping[str, Any]) -> dict[str, object]:
+    stored_dto = dict(dto)
+    capabilities = dict(stored_dto.get("capabilities", {}))
+    capabilities.update(
+        {
+            "validation_enabled": True,
+            "package_creation_enabled": True,
+            "package_persistence_enabled": True,
+            "evidence_persistence_enabled": False,
+            "storage_write_enabled": False,
+            "nas_path_resolution_enabled": False,
+            "nas_mount_access_enabled": False,
+            "rollback_point_creation_enabled": False,
+            "nas_save_preparation_enabled": False,
+            "nas_save_enabled": False,
+            "nas_write_enabled": False,
+            "credential_access_enabled": False,
+            "audit_write_enabled": False,
+            "event_append_enabled": False,
+            "target_mutation_enabled": False,
+            "authority_binding_enabled": False,
+            "dry_run_execution_enabled": False,
+        }
+    )
+    stored_dto["capabilities"] = capabilities
+    return stored_dto
+
+
+
+def _normalize_stored_nas_evidence_package(item: object) -> dict[str, object] | None:
+    if not isinstance(item, Mapping):
+        return None
+    payload = {field: item.get(field) for field in _NAS_EVIDENCE_PACKAGE_FIELDS if field in item}
+    validation = validate_office_controlled_mutation_nas_evidence_package(payload)
+    if not validation["valid"]:
+        return None
+    return _with_nas_evidence_package_persistence_capabilities(cast(Mapping[str, Any], validation["dto"]))
+
+
+
+def _read_nas_evidence_package_store(path: Path) -> tuple[list[dict[str, object]], int]:
+    events: list[dict[str, object]] = []
+    skipped_count = 0
+    if not path.exists():
+        return events, skipped_count
+
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped_count += 1
+                continue
+            normalized = _normalize_stored_nas_evidence_package(item)
+            if normalized is None:
+                skipped_count += 1
+                continue
+            events.append(normalized)
+    return events, skipped_count
+
+
+
+def append_office_controlled_mutation_nas_evidence_package_event(
+    payload: object, *, store_path: Path | None = None
+) -> dict[str, object]:
+    """Validate and append safe NAS evidence package metadata to local Hermes JSONL."""
+
+    validation = validate_office_controlled_mutation_nas_evidence_package(payload)
+    if not validation["valid"]:
+        return {"stored": False, "errors": validation["errors"], "dto": None}
+
+    dto = _with_nas_evidence_package_persistence_capabilities(cast(Mapping[str, Any], validation["dto"]))
+    path = store_path or _default_nas_evidence_package_store_path()
+    existing_events, _ = _read_nas_evidence_package_store(path)
+    if any(event.get("package_ref") == dto["package_ref"] for event in existing_events):
+        return {"stored": False, "errors": [_error("package_ref", "duplicate_package_ref")], "dto": None}
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(dto, sort_keys=True, separators=(",", ":")) + "\n")
+    return {"stored": True, "errors": [], "dto": dto}
+
+
+
+def list_office_controlled_mutation_nas_evidence_package_events(
+    *, store_path: Path | None = None, limit: int = 50, request_ref: str | None = None
+) -> dict[str, object]:
+    """Read back safe stored NAS evidence package metadata without exposing raw inputs."""
+
+    path = store_path or _default_nas_evidence_package_store_path()
+    max_events = max(0, min(limit, 200))
+    events, skipped_count = _read_nas_evidence_package_store(path)
+    response_request_ref: str | None = None
+    errors: list[dict[str, str]] = []
+
+    if request_ref is not None:
+        if _is_opaque_ref(request_ref):
+            response_request_ref = request_ref
+            events = [event for event in events if event.get("request_ref") == request_ref]
+        else:
+            errors.append(_error("request_ref", "invalid_opaque_ref"))
+            events = []
+
+    events = events[-max_events:] if max_events else []
+    response: dict[str, object] = {
+        "schema_version": 1,
+        "mode": "stored_nas_evidence_packages_readback",
+        "count": len(events),
+        "limit": max_events,
+        "skipped_count": skipped_count,
+        "events": events,
+        "capabilities": {
+            "package_readback_enabled": True,
+            "duplicate_detection_enabled": True,
+            "request_filter_enabled": True,
+            "malformed_line_resilience_enabled": True,
+            "package_persistence_enabled": True,
+            "evidence_persistence_enabled": False,
+            "storage_write_enabled": False,
+            "nas_path_resolution_enabled": False,
+            "nas_mount_access_enabled": False,
+            "rollback_point_creation_enabled": False,
+            "nas_save_preparation_enabled": False,
+            "nas_save_enabled": False,
+            "nas_write_enabled": False,
+            "credential_access_enabled": False,
+            "audit_write_enabled": False,
+            "event_append_enabled": False,
+            "target_mutation_enabled": False,
+            "authority_binding_enabled": False,
+            "dry_run_execution_enabled": False,
+        },
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "opaque_refs_only": True,
+            "safe_summaries_only": True,
+            "unsupported_values_echoed": False,
+        },
+        "errors": errors,
+    }
+    if response_request_ref is not None:
+        response["request_ref"] = response_request_ref
+    return response
+
+
+
 def build_office_controlled_mutation_execution_readiness_contract(
     *, unsafe_examples: Mapping[str, Any] | None = None
 ) -> dict[str, object]:
