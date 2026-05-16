@@ -104,6 +104,7 @@ import {
   buildOfficeControlledMutationRequestStoreHardeningPlan,
   buildOfficeControlledMutationNextApprovalBoundary,
   buildOfficeControlledMutationPostDecisionApprovalBoundary,
+  buildOfficeControlledMutationPostRegistryApprovalBoundary,
   buildOfficeRpgScene,
   buildOfficeDeskRpgProjectionModel,
   buildOfficeDeskRpgWorkerRoleVisibility,
@@ -2975,6 +2976,66 @@ describe("Desk RPG Projection ViewModel Helper 1", () => {
     expect(boundary.safeBoundary).toContain("frontend read-only post-decision approval boundary only");
     expect(JSON.stringify(boundary)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw post decision|private-post-decision|token-shaped-value|provider/i);
   });
+
+  it("builds Controlled Mutation Post Registry Approval Boundary 1 as read-only fallback after authority registry approval timeout", () => {
+    const executionReadiness = buildOfficeControlledMutationExecutionReadinessSummary(buildOfficeControlledMutationAuthoritySummary(buildOfficeControlledMutationHumanApprovalPlan(buildOfficeControlledMutationRollbackVerificationPlan(buildOfficeControlledMutationAuditSinkPlan(buildOfficeControlledMutationDryRunPlan(buildOfficeControlledMutationProposalContract(buildOfficeWorkerFinalGateChecklist(buildOfficeWorkerRollbackPreviewEnvelope(buildOfficeWorkerAuditPreviewEnvelope(buildOfficeWorkerDispatchDryRunEnvelope(buildOfficeWorkerAuthorityHandoffEnvelope(buildOfficeWorkerHumanConfirmationEnvelope(buildOfficeWorkerRequestDraftPreview(buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-16T10:05:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/post-registry-boundary", status: "partial", checked_at: "2026-05-16T10:00:00Z", item_count: 1, warning_count: 1, error_summary: "raw post registry token" } as unknown as OfficeState["data_sources"][number]],
+      agents: [{ id: "agent-post-registry-boundary", status: "active", prompt: "raw post registry boundary prompt token-shaped-value", provider: "private-post-registry-provider" }],
+      work_items: [{ id: "w-post-registry-boundary", status: "blocked", title: "raw post registry boundary task", body: "/Users/lidises/private/post-registry-boundary.md" } as unknown as OfficeState["work_items"][number]],
+    })))))))))))))))))))))));
+    const projection = buildOfficeControlledMutationContractPostureProjection(executionReadiness);
+    const polish = buildOfficeControlledMutationContractPosturePolish(projection);
+    const ribbon = buildOfficeControlledMutationReadinessHandoffRibbon(polish);
+    const summary = buildOfficeControlledMutationReadinessSummaryPolish(ribbon);
+    const posture = buildOfficeControlledMutationRequestStorePosture(summary);
+    const hardening = buildOfficeControlledMutationRequestStoreHardeningPlan(posture);
+    const nextBoundary = buildOfficeControlledMutationNextApprovalBoundary(hardening);
+    const postDecisionBoundary = buildOfficeControlledMutationPostDecisionApprovalBoundary(nextBoundary);
+    const boundary = buildOfficeControlledMutationPostRegistryApprovalBoundary(postDecisionBoundary);
+
+    expect(boundary.stageLabel).toBe("Controlled Mutation Post Registry Approval Boundary 1");
+    expect(boundary.sourceStageLabel).toBe("Controlled Mutation Post Decision Approval Boundary 1");
+    expect(boundary.detailKind).toBe("controlled_mutation_post_registry_approval_boundary");
+    expect(boundary.enabledControls).toBe(0);
+    expect(boundary.approvalGranted).toBe(false);
+    expect(boundary.requestStoreHardeningCompleted).toBe(true);
+    expect(boundary.humanDecisionStoreCompleted).toBe(true);
+    expect(boundary.dryRunResultStorageCompleted).toBe(true);
+    expect(boundary.auditAppendSinkCompleted).toBe(true);
+    expect(boundary.authorityBindingContractCompleted).toBe(true);
+    expect(boundary.authorityAdapterRegistryCompleted).toBe(true);
+    expect(boundary.newBackendMutationEnabled).toBe(false);
+    expect(boundary.newStorageWriteEnabled).toBe(false);
+    expect(boundary.auditWriteEnabled).toBe(false);
+    expect(boundary.executionEnabled).toBe(false);
+    expect(boundary.dispatchEnabled).toBe(false);
+    expect(boundary.targetMutationEnabled).toBe(false);
+    expect(boundary.authorityAdapterBindingEnabled).toBe(false);
+    expect(boundary.credentialChangeEnabled).toBe(false);
+    expect(boundary.nasMutationEnabled).toBe(false);
+    expect(boundary.safeProjectionOnly).toBe(true);
+    expect(boundary.rawExcluded).toBe(true);
+    expect(boundary.completedLocalSubsets.map((item) => item.id)).toEqual([
+      "request_store_hardening",
+      "human_decision_store",
+      "dry_run_result_storage",
+      "audit_append_sink",
+      "authority_binding_contract",
+      "authority_adapter_registry",
+    ]);
+    expect(boundary.boundaryOptions.map((item) => item.id)).toEqual([
+      "target_dispatch_runtime",
+      "nas_save_write_preparation",
+      "credential_auth_env_change",
+      "real_authority_adapter_binding",
+    ]);
+    expect(boundary.boundaryOptions.every((item) => item.status === "approval_required" && item.rawExcluded)).toBe(true);
+    expect(boundary.disabledSurfaceSummary).toEqual({ completedSubsets: 6, boundaryOptions: 4, enabledControls: 0 });
+    expect(boundary.safeBoundary).toContain("frontend read-only post-registry approval boundary only");
+    expect(JSON.stringify(boundary)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw post registry|private-post-registry|token-shaped-value|provider/i);
+  });
+
 
   it("builds a disabled Authority Adapter Contract 1 before any execution adapter exists", () => {
     const contract = buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({

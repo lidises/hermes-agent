@@ -3166,6 +3166,68 @@ export type OfficeControlledMutationPostDecisionApprovalBoundary = {
   boundaryOptions: OfficeControlledMutationPostDecisionApprovalBoundaryOption[];
 };
 
+export type OfficeControlledMutationPostRegistryApprovalBoundaryOptionId =
+  | "target_dispatch_runtime"
+  | "nas_save_write_preparation"
+  | "credential_auth_env_change"
+  | "real_authority_adapter_binding";
+
+export type OfficeControlledMutationPostRegistryCompletedSubset = {
+  id:
+    | "request_store_hardening"
+    | "human_decision_store"
+    | "dry_run_result_storage"
+    | "audit_append_sink"
+    | "authority_binding_contract"
+    | "authority_adapter_registry";
+  label: string;
+  status: "completed_locally";
+  detail: string;
+  rawExcluded: true;
+};
+
+export type OfficeControlledMutationPostRegistryApprovalBoundaryOption = {
+  id: OfficeControlledMutationPostRegistryApprovalBoundaryOptionId;
+  label: string;
+  status: "approval_required";
+  detail: string;
+  rawExcluded: true;
+};
+
+export type OfficeControlledMutationPostRegistryApprovalBoundary = {
+  stageLabel: "Controlled Mutation Post Registry Approval Boundary 1";
+  sourceStageLabel: OfficeControlledMutationPostDecisionApprovalBoundary["stageLabel"];
+  detailKind: "controlled_mutation_post_registry_approval_boundary";
+  title: string;
+  safeBoundary: string;
+  enabledControls: 0;
+  approvalGranted: false;
+  requestStoreHardeningCompleted: true;
+  humanDecisionStoreCompleted: true;
+  dryRunResultStorageCompleted: true;
+  auditAppendSinkCompleted: true;
+  authorityBindingContractCompleted: true;
+  authorityAdapterRegistryCompleted: true;
+  newBackendMutationEnabled: false;
+  newStorageWriteEnabled: false;
+  auditWriteEnabled: false;
+  executionEnabled: false;
+  dispatchEnabled: false;
+  targetMutationEnabled: false;
+  authorityAdapterBindingEnabled: false;
+  credentialChangeEnabled: false;
+  nasMutationEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+  disabledSurfaceSummary: {
+    completedSubsets: number;
+    boundaryOptions: number;
+    enabledControls: 0;
+  };
+  completedLocalSubsets: OfficeControlledMutationPostRegistryCompletedSubset[];
+  boundaryOptions: OfficeControlledMutationPostRegistryApprovalBoundaryOption[];
+};
+
 
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
@@ -7118,6 +7180,86 @@ export function buildOfficeControlledMutationPostDecisionApprovalBoundary(bounda
     auditWriteEnabled: false,
     executionEnabled: false,
     dryRunResultStorageEnabled: false,
+    dispatchEnabled: false,
+    targetMutationEnabled: false,
+    authorityAdapterBindingEnabled: false,
+    credentialChangeEnabled: false,
+    nasMutationEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+    disabledSurfaceSummary: {
+      completedSubsets: completedLocalSubsets.length,
+      boundaryOptions: boundaryOptions.length,
+      enabledControls: 0,
+    },
+    completedLocalSubsets,
+    boundaryOptions: boundaryOptions.map((item) => ({
+      ...item,
+      status: "approval_required",
+      rawExcluded: true,
+    })),
+  };
+}
+
+
+export function buildOfficeControlledMutationPostRegistryApprovalBoundary(
+  boundary: OfficeControlledMutationPostDecisionApprovalBoundary,
+): OfficeControlledMutationPostRegistryApprovalBoundary {
+  const completedLocalSubsets: OfficeControlledMutationPostRegistryCompletedSubset[] = [
+    ...boundary.completedLocalSubsets,
+    {
+      id: "dry_run_result_storage",
+      label: "Dry-run result store",
+      status: "completed_locally",
+      detail: "Safe simulation result metadata record/readback is locally implemented; real execution remains disabled",
+      rawExcluded: true,
+    },
+    {
+      id: "audit_append_sink",
+      label: "Audit append store",
+      status: "completed_locally",
+      detail: "Safe audit metadata append/readback is locally implemented; execution and target mutation remain disabled",
+      rawExcluded: true,
+    },
+    {
+      id: "authority_binding_contract",
+      label: "Authority binding contract",
+      status: "completed_locally",
+      detail: "The binding shape is documented as contract-only metadata with no adapter binding or credential access",
+      rawExcluded: true,
+    },
+    {
+      id: "authority_adapter_registry",
+      label: "Authority adapter registry store",
+      status: "completed_locally",
+      detail: "Safe adapter registry metadata record/readback is locally implemented without credentials, dispatch, binding, or target mutation",
+      rawExcluded: true,
+    },
+  ];
+  const boundaryOptions: Array<{ id: OfficeControlledMutationPostRegistryApprovalBoundaryOptionId; label: string; detail: string }> = [
+    { id: "target_dispatch_runtime", label: "Target dispatch/runtime mutation", detail: "Needs explicit approval before any dispatch, target mutation, Kanban/VPS/cron change, service restart, push, PR, or merge" },
+    { id: "nas_save_write_preparation", label: "NAS save/write preparation", detail: "Needs explicit approval before NAS save requests, NAS write preparation, NAS credentials, or NAS raw reads are introduced" },
+    { id: "credential_auth_env_change", label: "Credential/auth/env change", detail: "Needs explicit approval before any credential, auth, environment, or secret binding is read or changed" },
+    { id: "real_authority_adapter_binding", label: "Real authority adapter binding", detail: "Needs explicit approval before adapters are implemented, bound, registered for dispatch, or connected to targets" },
+  ];
+  return {
+    stageLabel: "Controlled Mutation Post Registry Approval Boundary 1",
+    sourceStageLabel: boundary.stageLabel,
+    detailKind: "controlled_mutation_post_registry_approval_boundary",
+    title: "후속 승인 경계 · registry 이후 dispatch/NAS/credentials/real adapter 미승인",
+    safeBoundary: "frontend read-only post-registry approval boundary only · reflects that request-store hardening, human-decision store, dry-run result store, audit append store, authority binding contract, and authority adapter registry store are completed locally while every dispatch, target mutation, NAS write, credential/auth/env change, real adapter binding, deploy, restart, push, PR, merge, and browser executable control remains disabled until separate explicit approval",
+    enabledControls: 0,
+    approvalGranted: false,
+    requestStoreHardeningCompleted: true,
+    humanDecisionStoreCompleted: true,
+    dryRunResultStorageCompleted: true,
+    auditAppendSinkCompleted: true,
+    authorityBindingContractCompleted: true,
+    authorityAdapterRegistryCompleted: true,
+    newBackendMutationEnabled: false,
+    newStorageWriteEnabled: false,
+    auditWriteEnabled: false,
+    executionEnabled: false,
     dispatchEnabled: false,
     targetMutationEnabled: false,
     authorityAdapterBindingEnabled: false,

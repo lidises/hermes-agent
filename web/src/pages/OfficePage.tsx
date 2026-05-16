@@ -117,6 +117,7 @@ import {
   buildOfficeControlledMutationRequestStoreHardeningPlan,
   buildOfficeControlledMutationNextApprovalBoundary,
   buildOfficeControlledMutationPostDecisionApprovalBoundary,
+  buildOfficeControlledMutationPostRegistryApprovalBoundary,
   buildOfficeDeskRpgWorkerRoleVisibility,
   buildOfficeDisabledApprovalDialoguePosture,
   buildOfficeReviewerWikiHandoffPosture,
@@ -193,6 +194,7 @@ import {
   type OfficeControlledMutationRequestStoreHardeningPlan,
   type OfficeControlledMutationNextApprovalBoundary,
   type OfficeControlledMutationPostDecisionApprovalBoundary,
+  type OfficeControlledMutationPostRegistryApprovalBoundary,
   type OfficeEventDrivenCharacterStateProjection,
   type OfficeCharacterStateRoomOverlay,
   type OfficeCharacterRoomInteractionPosture,
@@ -903,6 +905,59 @@ export function ControlledMutationPostDecisionApprovalBoundaryPanel({ boundary }
       <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-controlled-mutation-post-decision-approval-boundary-options="true">
         {boundary.boundaryOptions.map((item) => (
           <div key={item.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-post-decision-approval-boundary-option={item.id} data-office-controlled-mutation-post-decision-approval-boundary-option-status={item.status}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.status}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+            <div className="mt-2 text-xs leading-5 text-midground/70">{item.detail}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+
+export function ControlledMutationPostRegistryApprovalBoundaryPanel({ boundary }: { boundary: OfficeControlledMutationPostRegistryApprovalBoundary }) {
+  return (
+    <section
+      className="border border-cyan-300/20 bg-cyan-950/10 p-4"
+      data-office-controlled-mutation-post-registry-approval-boundary="true"
+      data-office-controlled-mutation-post-registry-approval-boundary-enabled-controls={boundary.enabledControls}
+      data-office-controlled-mutation-post-registry-approval-boundary-approval-granted={String(boundary.approvalGranted)}
+      data-office-controlled-mutation-post-registry-approval-boundary-authority-adapter-registry-completed={String(boundary.authorityAdapterRegistryCompleted)}
+      data-office-controlled-mutation-post-registry-approval-boundary-new-backend-mutation-enabled={String(boundary.newBackendMutationEnabled)}
+      data-office-controlled-mutation-post-registry-approval-boundary-new-storage-write-enabled={String(boundary.newStorageWriteEnabled)}
+      data-office-controlled-mutation-post-registry-approval-boundary-audit-write-enabled={String(boundary.auditWriteEnabled)}
+      data-office-controlled-mutation-post-registry-approval-boundary-execution-enabled={String(boundary.executionEnabled)}
+      data-office-controlled-mutation-post-registry-approval-boundary-dispatch-enabled={String(boundary.dispatchEnabled)}
+      data-office-controlled-mutation-post-registry-approval-boundary-target-mutation-enabled={String(boundary.targetMutationEnabled)}
+      data-office-controlled-mutation-post-registry-approval-boundary-authority-adapter-binding-enabled={String(boundary.authorityAdapterBindingEnabled)}
+      data-office-controlled-mutation-post-registry-approval-boundary-credential-change-enabled={String(boundary.credentialChangeEnabled)}
+      data-office-controlled-mutation-post-registry-approval-boundary-nas-mutation-enabled={String(boundary.nasMutationEnabled)}
+      data-office-controlled-mutation-post-registry-approval-boundary-safe-projection-only={String(boundary.safeProjectionOnly)}
+      data-office-controlled-mutation-post-registry-approval-boundary-raw-excluded={String(boundary.rawExcluded)}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-200/70">{boundary.stageLabel}</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">{boundary.title}</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">{boundary.safeBoundary}</p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          completed: {boundary.disabledSurfaceSummary.completedSubsets} · next approvals: {boundary.disabledSurfaceSummary.boundaryOptions} · controls: {boundary.disabledSurfaceSummary.enabledControls}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-3" data-office-controlled-mutation-post-registry-approval-boundary-completed-subsets="true">
+        {boundary.completedLocalSubsets.map((item) => (
+          <div key={item.id} className="border border-emerald-300/20 bg-emerald-950/10 p-3" data-office-controlled-mutation-post-registry-approval-boundary-completed-subset={item.id} data-office-controlled-mutation-post-registry-approval-boundary-completed-subset-status={item.status}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-200/70">{item.status}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+            <div className="mt-2 text-xs leading-5 text-midground/70">{item.detail}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-controlled-mutation-post-registry-approval-boundary-options="true">
+        {boundary.boundaryOptions.map((item) => (
+          <div key={item.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-post-registry-approval-boundary-option={item.id} data-office-controlled-mutation-post-registry-approval-boundary-option-status={item.status}>
             <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.status}</div>
             <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
             <div className="mt-2 text-xs leading-5 text-midground/70">{item.detail}</div>
@@ -4280,6 +4335,7 @@ export default function OfficePage() {
   const controlledMutationRequestStoreHardeningPlan = useMemo(() => buildOfficeControlledMutationRequestStoreHardeningPlan(controlledMutationRequestStorePosture), [controlledMutationRequestStorePosture]);
   const controlledMutationNextApprovalBoundary = useMemo(() => buildOfficeControlledMutationNextApprovalBoundary(controlledMutationRequestStoreHardeningPlan), [controlledMutationRequestStoreHardeningPlan]);
   const controlledMutationPostDecisionApprovalBoundary = useMemo(() => buildOfficeControlledMutationPostDecisionApprovalBoundary(controlledMutationNextApprovalBoundary), [controlledMutationNextApprovalBoundary]);
+  const controlledMutationPostRegistryApprovalBoundary = useMemo(() => buildOfficeControlledMutationPostRegistryApprovalBoundary(controlledMutationPostDecisionApprovalBoundary), [controlledMutationPostDecisionApprovalBoundary]);
   const deskRpgProjection = useMemo(() => buildOfficeDeskRpgProjectionModel(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const deskRpgWorkerRoleVisibility = useMemo(() => buildOfficeDeskRpgWorkerRoleVisibility(deskRpgProjection), [deskRpgProjection]);
   const disabledApprovalDialoguePosture = useMemo(() => buildOfficeDisabledApprovalDialoguePosture(deskRpgProjection), [deskRpgProjection]);
@@ -5450,6 +5506,7 @@ export default function OfficePage() {
       <ControlledMutationRequestStoreHardeningPlanPanel plan={controlledMutationRequestStoreHardeningPlan} />
       <ControlledMutationNextApprovalBoundaryPanel boundary={controlledMutationNextApprovalBoundary} />
       <ControlledMutationPostDecisionApprovalBoundaryPanel boundary={controlledMutationPostDecisionApprovalBoundary} />
+      <ControlledMutationPostRegistryApprovalBoundaryPanel boundary={controlledMutationPostRegistryApprovalBoundary} />
 
       {showOverview ? (
         <OfficeRpgMap
