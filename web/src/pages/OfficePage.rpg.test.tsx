@@ -18,7 +18,7 @@ vi.mock("@/lib/api", () => ({
 
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
-import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerAssignmentCandidateGate, buildOfficeWorkerRequestDraftPreview, buildOfficeWorkerHumanConfirmationEnvelope, buildOfficeWorkerAuthorityHandoffEnvelope, buildOfficeWorkerDispatchDryRunEnvelope, buildOfficeWorkerAuditPreviewEnvelope, buildOfficeWorkerRollbackPreviewEnvelope, buildOfficeWorkerFinalGateChecklist, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeNasKeeperSaveRequestGate, buildOfficeNasKeeperRollbackEvidencePreview, buildOfficeDeskRpgReadOnlyChainCompletionReview, buildOfficeEventDrivenCharacterStateProjection, buildOfficeCharacterStateRoomOverlay, buildOfficeCharacterRoomInteractionPosture, buildOfficeCharacterInspectorDetailPosture, buildOfficeCharacterDetailSafeDialogueCopy, buildOfficeCharacterBubbleInspectorAlignment, buildOfficeCharacterPanelBoundarySummary, buildOfficeCharacterFacilityRoleLegend, buildOfficeCharacterFacilityBoundaryStrip, buildOfficeCharacterFacilitySourceLedgerStrip, buildOfficeCharacterFacilityCompletionReview, buildOfficeControlledMutationProposalContract, buildOfficeControlledMutationDryRunPlan, buildOfficeControlledMutationAuditSinkPlan, buildOfficeControlledMutationRollbackVerificationPlan, buildOfficeControlledMutationHumanApprovalPlan, buildOfficeControlledMutationAuthoritySummary, buildOfficeControlledMutationExecutionReadinessSummary, buildOfficeControlledMutationContractPostureProjection, buildOfficeControlledMutationContractPosturePolish, buildOfficeControlledMutationReadinessHandoffRibbon, buildOfficeControlledMutationReadinessSummaryPolish, buildOfficeControlledMutationRequestStorePosture, buildOfficeControlledMutationRequestStoreHardeningPlan, buildOfficeControlledMutationNextApprovalBoundary, buildOfficeRpgScene } from "./officeView";
+import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerAssignmentCandidateGate, buildOfficeWorkerRequestDraftPreview, buildOfficeWorkerHumanConfirmationEnvelope, buildOfficeWorkerAuthorityHandoffEnvelope, buildOfficeWorkerDispatchDryRunEnvelope, buildOfficeWorkerAuditPreviewEnvelope, buildOfficeWorkerRollbackPreviewEnvelope, buildOfficeWorkerFinalGateChecklist, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeNasKeeperSaveRequestGate, buildOfficeNasKeeperRollbackEvidencePreview, buildOfficeDeskRpgReadOnlyChainCompletionReview, buildOfficeEventDrivenCharacterStateProjection, buildOfficeCharacterStateRoomOverlay, buildOfficeCharacterRoomInteractionPosture, buildOfficeCharacterInspectorDetailPosture, buildOfficeCharacterDetailSafeDialogueCopy, buildOfficeCharacterBubbleInspectorAlignment, buildOfficeCharacterPanelBoundarySummary, buildOfficeCharacterFacilityRoleLegend, buildOfficeCharacterFacilityBoundaryStrip, buildOfficeCharacterFacilitySourceLedgerStrip, buildOfficeCharacterFacilityCompletionReview, buildOfficeControlledMutationProposalContract, buildOfficeControlledMutationDryRunPlan, buildOfficeControlledMutationAuditSinkPlan, buildOfficeControlledMutationRollbackVerificationPlan, buildOfficeControlledMutationHumanApprovalPlan, buildOfficeControlledMutationAuthoritySummary, buildOfficeControlledMutationExecutionReadinessSummary, buildOfficeControlledMutationContractPostureProjection, buildOfficeControlledMutationContractPosturePolish, buildOfficeControlledMutationReadinessHandoffRibbon, buildOfficeControlledMutationReadinessSummaryPolish, buildOfficeControlledMutationRequestStorePosture, buildOfficeControlledMutationRequestStoreHardeningPlan, buildOfficeControlledMutationNextApprovalBoundary, buildOfficeControlledMutationPostDecisionApprovalBoundary, buildOfficeRpgScene } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
@@ -2207,5 +2207,55 @@ describe("OfficeDeskRpgBossCommandConsolePanel", () => {
     expect(markup).not.toContain("<button");
     expect(markup).not.toContain("<input");
     expect(markup).not.toMatch(/raw boss prompt|raw boss task title|Traceback|\/Users\/lidises|token-shaped-boss-sentinel|private-boss-provider/i);
+  });
+});
+
+describe("ControlledMutationPostDecisionApprovalBoundaryPanel", () => {
+  it("Controlled Mutation Post Decision Approval Boundary 1 renders approval-required posture without executable controls", () => {
+    const ControlledMutationPostDecisionApprovalBoundaryPanel = (OfficePageModule as unknown as {
+      ControlledMutationPostDecisionApprovalBoundaryPanel: React.ComponentType<{ boundary: ReturnType<typeof buildOfficeControlledMutationPostDecisionApprovalBoundary> }>;
+    }).ControlledMutationPostDecisionApprovalBoundaryPanel;
+    const executionReadiness = buildOfficeControlledMutationExecutionReadinessSummary(buildOfficeControlledMutationAuthoritySummary(buildOfficeControlledMutationHumanApprovalPlan(buildOfficeControlledMutationRollbackVerificationPlan(buildOfficeControlledMutationAuditSinkPlan(buildOfficeControlledMutationDryRunPlan(buildOfficeControlledMutationProposalContract(buildOfficeWorkerFinalGateChecklist(buildOfficeWorkerRollbackPreviewEnvelope(buildOfficeWorkerAuditPreviewEnvelope(buildOfficeWorkerDispatchDryRunEnvelope(buildOfficeWorkerAuthorityHandoffEnvelope(buildOfficeWorkerHumanConfirmationEnvelope(buildOfficeWorkerRequestDraftPreview(buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-16T02:05:00Z",
+      agents: [{ id: "agent-post-decision-panel", status: "active", prompt: "raw post decision panel prompt token-shaped-value", provider: "private-post-decision-panel-provider" }],
+      work_items: [{ id: "w-post-decision-panel", status: "blocked", title: "raw post decision panel task", body: "/Users/lidises/private/post-decision-panel.md" } as unknown as OfficeState["work_items"][number]],
+      data_sources: [{ id: "paperclip:/Users/lidises/post-decision-panel", status: "partial", checked_at: "2026-05-16T02:00:00Z", item_count: 1, warning_count: 1, error_summary: "raw post decision panel token" } as unknown as OfficeState["data_sources"][number]],
+    })))))))))))))))))))))));
+    const projection = buildOfficeControlledMutationContractPostureProjection(executionReadiness);
+    const polish = buildOfficeControlledMutationContractPosturePolish(projection);
+    const ribbon = buildOfficeControlledMutationReadinessHandoffRibbon(polish);
+    const summary = buildOfficeControlledMutationReadinessSummaryPolish(ribbon);
+    const posture = buildOfficeControlledMutationRequestStorePosture(summary);
+    const hardening = buildOfficeControlledMutationRequestStoreHardeningPlan(posture);
+    const nextBoundary = buildOfficeControlledMutationNextApprovalBoundary(hardening);
+    const boundary = buildOfficeControlledMutationPostDecisionApprovalBoundary(nextBoundary);
+    const markup = renderToStaticMarkup(<ControlledMutationPostDecisionApprovalBoundaryPanel boundary={boundary} />);
+
+    expect(markup).toContain("data-office-controlled-mutation-post-decision-approval-boundary=\"true\"");
+    expect(markup).toContain("data-office-controlled-mutation-post-decision-approval-boundary-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-controlled-mutation-post-decision-approval-boundary-approval-granted=\"false\"");
+    expect(markup).toContain("data-office-controlled-mutation-post-decision-approval-boundary-request-store-hardening-completed=\"true\"");
+    expect(markup).toContain("data-office-controlled-mutation-post-decision-approval-boundary-human-decision-store-completed=\"true\"");
+    expect(markup).toContain("data-office-controlled-mutation-post-decision-approval-boundary-new-backend-mutation-enabled=\"false\"");
+    expect(markup).toContain("data-office-controlled-mutation-post-decision-approval-boundary-new-storage-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-controlled-mutation-post-decision-approval-boundary-audit-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-controlled-mutation-post-decision-approval-boundary-execution-enabled=\"false\"");
+    expect(markup).toContain("data-office-controlled-mutation-post-decision-approval-boundary-dry-run-result-storage-enabled=\"false\"");
+    expect(markup).toContain("data-office-controlled-mutation-post-decision-approval-boundary-dispatch-enabled=\"false\"");
+    expect(markup).toContain("data-office-controlled-mutation-post-decision-approval-boundary-target-mutation-enabled=\"false\"");
+    expect(markup).toContain("data-office-controlled-mutation-post-decision-approval-boundary-authority-adapter-binding-enabled=\"false\"");
+    expect(markup).toContain("data-office-controlled-mutation-post-decision-approval-boundary-credential-change-enabled=\"false\"");
+    expect(markup).toContain("data-office-controlled-mutation-post-decision-approval-boundary-nas-mutation-enabled=\"false\"");
+    expect(markup).toContain("data-office-controlled-mutation-post-decision-approval-boundary-safe-projection-only=\"true\"");
+    expect(markup).toContain("data-office-controlled-mutation-post-decision-approval-boundary-raw-excluded=\"true\"");
+    expect(markup.match(/data-office-controlled-mutation-post-decision-approval-boundary-option=/g)?.length).toBe(4);
+    for (const item of ["dry_run_result_storage", "audit_append_sink", "authority_adapter_binding", "target_dispatch_runtime"]) {
+      expect(markup).toContain(`data-office-controlled-mutation-post-decision-approval-boundary-option="${item}"`);
+    }
+    expect(markup.match(/data-office-controlled-mutation-post-decision-approval-boundary-completed-subset=/g)?.length).toBe(2);
+    expect(markup).toContain("Controlled Mutation Post Decision Approval Boundary 1");
+    expect(markup).not.toContain("onClick");
+    expect(markup).not.toMatch(/<button|<form|<input|<select|<textarea/i);
+    expect(markup).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw post decision|private-post-decision|token-shaped-value|provider/i);
   });
 });

@@ -103,6 +103,7 @@ import {
   buildOfficeControlledMutationRequestStorePosture,
   buildOfficeControlledMutationRequestStoreHardeningPlan,
   buildOfficeControlledMutationNextApprovalBoundary,
+  buildOfficeControlledMutationPostDecisionApprovalBoundary,
   buildOfficeRpgScene,
   buildOfficeDeskRpgProjectionModel,
   buildOfficeDeskRpgWorkerRoleVisibility,
@@ -2930,6 +2931,49 @@ describe("Desk RPG Projection ViewModel Helper 1", () => {
     expect(boundary.disabledSurfaceSummary).toEqual({ sourceItems: 4, boundaryOptions: 4, enabledControls: 0 });
     expect(boundary.safeBoundary).toContain("frontend read-only next approval boundary only");
     expect(JSON.stringify(boundary)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw next approval|private-next-approval|token-shaped-value|provider/i);
+  });
+
+  it("builds Controlled Mutation Post Decision Approval Boundary 1 as read-only fallback after the post-decision approval timeout", () => {
+    const executionReadiness = buildOfficeControlledMutationExecutionReadinessSummary(buildOfficeControlledMutationAuthoritySummary(buildOfficeControlledMutationHumanApprovalPlan(buildOfficeControlledMutationRollbackVerificationPlan(buildOfficeControlledMutationAuditSinkPlan(buildOfficeControlledMutationDryRunPlan(buildOfficeControlledMutationProposalContract(buildOfficeWorkerFinalGateChecklist(buildOfficeWorkerRollbackPreviewEnvelope(buildOfficeWorkerAuditPreviewEnvelope(buildOfficeWorkerDispatchDryRunEnvelope(buildOfficeWorkerAuthorityHandoffEnvelope(buildOfficeWorkerHumanConfirmationEnvelope(buildOfficeWorkerRequestDraftPreview(buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-16T02:05:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/post-decision-boundary", status: "partial", checked_at: "2026-05-16T02:00:00Z", item_count: 1, warning_count: 1, error_summary: "raw post decision token" } as unknown as OfficeState["data_sources"][number]],
+      agents: [{ id: "agent-post-decision-boundary", status: "active", prompt: "raw post decision boundary prompt token-shaped-value", provider: "private-post-decision-provider" }],
+      work_items: [{ id: "w-post-decision-boundary", status: "blocked", title: "raw post decision boundary task", body: "/Users/lidises/private/post-decision-boundary.md" } as unknown as OfficeState["work_items"][number]],
+    })))))))))))))))))))))));
+    const projection = buildOfficeControlledMutationContractPostureProjection(executionReadiness);
+    const polish = buildOfficeControlledMutationContractPosturePolish(projection);
+    const ribbon = buildOfficeControlledMutationReadinessHandoffRibbon(polish);
+    const summary = buildOfficeControlledMutationReadinessSummaryPolish(ribbon);
+    const posture = buildOfficeControlledMutationRequestStorePosture(summary);
+    const hardening = buildOfficeControlledMutationRequestStoreHardeningPlan(posture);
+    const nextBoundary = buildOfficeControlledMutationNextApprovalBoundary(hardening);
+    const boundary = buildOfficeControlledMutationPostDecisionApprovalBoundary(nextBoundary);
+
+    expect(boundary.stageLabel).toBe("Controlled Mutation Post Decision Approval Boundary 1");
+    expect(boundary.sourceStageLabel).toBe("Controlled Mutation Next Approval Boundary 1");
+    expect(boundary.detailKind).toBe("controlled_mutation_post_decision_approval_boundary");
+    expect(boundary.enabledControls).toBe(0);
+    expect(boundary.approvalGranted).toBe(false);
+    expect(boundary.requestStoreHardeningCompleted).toBe(true);
+    expect(boundary.humanDecisionStoreCompleted).toBe(true);
+    expect(boundary.newBackendMutationEnabled).toBe(false);
+    expect(boundary.newStorageWriteEnabled).toBe(false);
+    expect(boundary.auditWriteEnabled).toBe(false);
+    expect(boundary.executionEnabled).toBe(false);
+    expect(boundary.dryRunResultStorageEnabled).toBe(false);
+    expect(boundary.dispatchEnabled).toBe(false);
+    expect(boundary.targetMutationEnabled).toBe(false);
+    expect(boundary.authorityAdapterBindingEnabled).toBe(false);
+    expect(boundary.credentialChangeEnabled).toBe(false);
+    expect(boundary.nasMutationEnabled).toBe(false);
+    expect(boundary.safeProjectionOnly).toBe(true);
+    expect(boundary.rawExcluded).toBe(true);
+    expect(boundary.boundaryOptions.map((item) => item.id)).toEqual(["dry_run_result_storage", "audit_append_sink", "authority_adapter_binding", "target_dispatch_runtime"]);
+    expect(boundary.boundaryOptions.every((item) => item.status === "approval_required" && item.rawExcluded)).toBe(true);
+    expect(boundary.completedLocalSubsets.map((item) => item.id)).toEqual(["request_store_hardening", "human_decision_store"]);
+    expect(boundary.disabledSurfaceSummary).toEqual({ completedSubsets: 2, boundaryOptions: 4, enabledControls: 0 });
+    expect(boundary.safeBoundary).toContain("frontend read-only post-decision approval boundary only");
+    expect(JSON.stringify(boundary)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw post decision|private-post-decision|token-shaped-value|provider/i);
   });
 
   it("builds a disabled Authority Adapter Contract 1 before any execution adapter exists", () => {

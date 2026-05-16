@@ -3077,6 +3077,8 @@ export type OfficeControlledMutationRequestStoreHardeningPlan = {
 
 export type OfficeControlledMutationNextApprovalBoundaryOptionId = "request_store_hardening" | "human_decision_store" | "execution_audit_authority" | "ops_runtime_mutation";
 
+export type OfficeControlledMutationPostDecisionApprovalBoundaryOptionId = "dry_run_result_storage" | "audit_append_sink" | "authority_adapter_binding" | "target_dispatch_runtime";
+
 export type OfficeControlledMutationNextApprovalBoundaryOption = {
   id: OfficeControlledMutationNextApprovalBoundaryOptionId;
   label: string;
@@ -3117,6 +3119,53 @@ export type OfficeControlledMutationNextApprovalBoundary = {
   };
   boundaryOptions: OfficeControlledMutationNextApprovalBoundaryOption[];
 };
+export type OfficeControlledMutationPostDecisionApprovalBoundaryOption = {
+  id: OfficeControlledMutationPostDecisionApprovalBoundaryOptionId;
+  label: string;
+  status: "approval_required";
+  detail: string;
+  rawExcluded: true;
+};
+
+export type OfficeControlledMutationPostDecisionCompletedSubset = {
+  id: "request_store_hardening" | "human_decision_store";
+  label: string;
+  status: "completed_locally";
+  detail: string;
+  rawExcluded: true;
+};
+
+export type OfficeControlledMutationPostDecisionApprovalBoundary = {
+  stageLabel: "Controlled Mutation Post Decision Approval Boundary 1";
+  sourceStageLabel: OfficeControlledMutationNextApprovalBoundary["stageLabel"];
+  detailKind: "controlled_mutation_post_decision_approval_boundary";
+  title: string;
+  safeBoundary: string;
+  enabledControls: 0;
+  approvalGranted: false;
+  requestStoreHardeningCompleted: true;
+  humanDecisionStoreCompleted: true;
+  newBackendMutationEnabled: false;
+  newStorageWriteEnabled: false;
+  auditWriteEnabled: false;
+  executionEnabled: false;
+  dryRunResultStorageEnabled: false;
+  dispatchEnabled: false;
+  targetMutationEnabled: false;
+  authorityAdapterBindingEnabled: false;
+  credentialChangeEnabled: false;
+  nasMutationEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+  disabledSurfaceSummary: {
+    completedSubsets: number;
+    boundaryOptions: number;
+    enabledControls: 0;
+  };
+  completedLocalSubsets: OfficeControlledMutationPostDecisionCompletedSubset[];
+  boundaryOptions: OfficeControlledMutationPostDecisionApprovalBoundaryOption[];
+};
+
 
 const OFFICE_RPG_ROOMS: Array<{ id: OfficeRpgRoomId; label: string }> = [
   { id: "command", label: "Command Room" },
@@ -7023,6 +7072,65 @@ export function buildOfficeControlledMutationNextApprovalBoundary(plan: OfficeCo
       boundaryOptions: boundaryOptions.length,
       enabledControls: 0,
     },
+    boundaryOptions: boundaryOptions.map((item) => ({
+      ...item,
+      status: "approval_required",
+      rawExcluded: true,
+    })),
+  };
+}
+
+export function buildOfficeControlledMutationPostDecisionApprovalBoundary(boundary: OfficeControlledMutationNextApprovalBoundary): OfficeControlledMutationPostDecisionApprovalBoundary {
+  const completedLocalSubsets: OfficeControlledMutationPostDecisionCompletedSubset[] = [
+    {
+      id: "request_store_hardening",
+      label: "Request-store hardening",
+      status: "completed_locally",
+      detail: "Duplicate request detection, correlation readback filtering, effective limit reporting, and malformed JSONL skip-counting are completed in the local backend store slice",
+      rawExcluded: true,
+    },
+    {
+      id: "human_decision_store",
+      label: "Human-decision store",
+      status: "completed_locally",
+      detail: "Approve/reject/hold decision validation and local JSONL append/readback are completed in the local backend store slice",
+      rawExcluded: true,
+    },
+  ];
+  const boundaryOptions: Array<{ id: OfficeControlledMutationPostDecisionApprovalBoundaryOptionId; label: string; detail: string }> = [
+    { id: "dry_run_result_storage", label: "Dry-run result storage", detail: "Needs explicit approval before simulation outputs, result records, or result readback are stored" },
+    { id: "audit_append_sink", label: "Audit append sink", detail: "Needs explicit approval before audit events, retention posture, or audit readback are appended" },
+    { id: "authority_adapter_binding", label: "Authority adapter binding", detail: "Needs explicit approval before adapter implementation, binding, credentials, or dispatch authority exist" },
+    { id: "target_dispatch_runtime", label: "Target dispatch/runtime mutation", detail: "Needs explicit approval before dispatch, target mutation, NAS/VPS/Kanban/cron changes, deploy, restart, push, PR, or merge" },
+  ];
+  return {
+    stageLabel: "Controlled Mutation Post Decision Approval Boundary 1",
+    sourceStageLabel: boundary.stageLabel,
+    detailKind: "controlled_mutation_post_decision_approval_boundary",
+    title: "후속 승인 경계 · dry-run/audit/authority/dispatch 미승인",
+    safeBoundary: "frontend read-only post-decision approval boundary only · reflects that request-store hardening and human-decision local store slices are completed while every new backend/storage/audit/execution/authority/dispatch/ops surface remains disabled until separate explicit approval · no forms/buttons/inputs · no browser executable controls · no new backend/schema/API route/service changes · no new storage/write path · no audit write · no execution/dry-run/dispatch/target mutation · no authority adapter binding · no credential/auth/env change · no migration · no VPS/NAS/Kanban/cron mutation",
+    enabledControls: 0,
+    approvalGranted: false,
+    requestStoreHardeningCompleted: true,
+    humanDecisionStoreCompleted: true,
+    newBackendMutationEnabled: false,
+    newStorageWriteEnabled: false,
+    auditWriteEnabled: false,
+    executionEnabled: false,
+    dryRunResultStorageEnabled: false,
+    dispatchEnabled: false,
+    targetMutationEnabled: false,
+    authorityAdapterBindingEnabled: false,
+    credentialChangeEnabled: false,
+    nasMutationEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+    disabledSurfaceSummary: {
+      completedSubsets: completedLocalSubsets.length,
+      boundaryOptions: boundaryOptions.length,
+      enabledControls: 0,
+    },
+    completedLocalSubsets,
     boundaryOptions: boundaryOptions.map((item) => ({
       ...item,
       status: "approval_required",
