@@ -55,6 +55,7 @@ from hermes_cli.office_controlled_mutation import (
     append_office_controlled_mutation_dry_run_result_event,
     append_office_controlled_mutation_request_event,
     build_office_controlled_mutation_contract_schema,
+    build_office_controlled_mutation_nas_save_preparation_contract,
     list_office_controlled_mutation_decision_events,
     list_office_controlled_mutation_dry_run_result_events,
     list_office_controlled_mutation_audit_events,
@@ -560,6 +561,12 @@ async def get_office_state(request: Request):
 async def get_office_controlled_mutation_schema():
     """Return the non-executable AI Office controlled-mutation contract."""
     return build_office_controlled_mutation_contract_schema()
+
+
+@app.get("/api/office/controlled-mutation/nas-save-preparation/schema")
+async def get_office_controlled_mutation_nas_save_preparation_schema():
+    """Return the non-writing NAS save/write preparation contract."""
+    return build_office_controlled_mutation_nas_save_preparation_contract()
 
 
 @app.post("/api/office/controlled-mutation/request/validate")
