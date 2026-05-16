@@ -813,6 +813,73 @@ Independent review: PASS, no security/raw leak, logic, side-effect, UI-control, 
 
 No backend/schema/API route/service change, storage change, browser API/storage call, form/button/input/select/textarea, runtime filesystem path resolution, vault mapping, NAS mount discovery/access, filesystem/NAS read/write, actual NAS save/write/preparation runtime, evidence file persistence, rollback point creation, credential/auth/env change, audit write, target dispatch/runtime mutation, real authority adapter binding/dispatch, migration, VPS/NAS/Kanban/cron mutation, deploy/restart, push/PR/merge, browser executable control, or raw private value projection was performed.
 
+## NAS Path Preview Local Metadata Store RED/GREEN
+
+Additional backend test file:
+
+- `tests/hermes_cli/test_office_controlled_mutation_nas_path_resolution_preview_store.py`
+
+The store/readback RED tests define the approved boundary:
+
+- Future helper: `append_office_controlled_mutation_nas_path_resolution_preview_event(...)`.
+- Future helper: `list_office_controlled_mutation_nas_path_resolution_preview_events(...)`.
+- Future protected route: `POST /api/office/controlled-mutation/nas-path-resolution/preview-store`.
+- Future protected route: `GET /api/office/controlled-mutation/nas-path-resolution/previews`.
+- Local/profile-scoped metadata JSONL only under `HERMES_HOME/office/controlled-mutation/nas-path-resolution-previews.jsonl`.
+- Store only validator/preview-backed safe DTOs, reject unsupported raw/private fields without write or echo, reject duplicate `safe_logical_path`, clamp readback limit to 200, support safe `package_ref` filtering, and skip malformed/invalid JSONL without raw echo.
+- No runtime filesystem path resolution, vault mapping, mount discovery/access, filesystem/NAS read/write, evidence file persistence, rollback point creation, credentials, audit write, target mutation, authority binding, or dry-run execution.
+
+RED command/result:
+
+```bash
+.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_path_resolution_preview_store.py -q -o 'addopts='
+# 6 failed
+```
+
+Expected RED failures were missing helpers/imports and missing `preview-store` route returning 405.
+
+GREEN implementation:
+
+- `hermes_cli/office_controlled_mutation.py`
+  - Added `_default_nas_path_resolution_preview_store_path()`.
+  - Added preview persistence capability normalization.
+  - Added safe JSONL read/normalize helpers that re-run the preview validator and skip malformed/invalid/raw lines.
+  - Added `append_office_controlled_mutation_nas_path_resolution_preview_event(...)`.
+  - Added `list_office_controlled_mutation_nas_path_resolution_preview_events(...)` with `package_ref` filtering and `limit` clamping.
+- `hermes_cli/web_server.py`
+  - Imported the append/readback helpers.
+  - Added protected `POST /api/office/controlled-mutation/nas-path-resolution/preview-store`.
+  - Added protected `GET /api/office/controlled-mutation/nas-path-resolution/previews`.
+
+GREEN verification:
+
+```bash
+.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_path_resolution_preview_store.py -q -o 'addopts='
+# 6 passed in 0.44s
+
+.venv/bin/python -m pytest tests/hermes_cli/test_office_api.py tests/hermes_cli/test_office_controlled_mutation_*.py -q -o 'addopts='
+# 147 passed in 1.19s
+
+.venv/bin/python -m py_compile hermes_cli/office_controlled_mutation.py hermes_cli/web_server.py
+# passed
+
+git diff --check
+# passed
+```
+
+Path preview store/readback production safety scan:
+
+```text
+forbidden_filesystem_mount_network_or_raw_path_access_added: 0
+forbidden_runtime_capability_enabled: 0
+```
+
+Independent review: PASS, no security concern, logic error, raw data leak, target filesystem/NAS access, route exposure, or scope violation.
+
+## Safety / non-actions for NAS path preview local metadata store slice
+
+No runtime filesystem path resolution, vault mapping, NAS mount discovery/access, filesystem/NAS read/write, actual NAS save/write/preparation runtime, evidence file persistence, rollback point creation, credential/auth/env change, audit write, target dispatch/runtime mutation, real authority adapter binding/dispatch, migration, VPS/NAS/Kanban/cron mutation, deploy/restart, push/PR/merge, browser executable control, or raw private value projection was performed.
+
 ## Next boundary
 
 A separate explicit approval is required before any of:

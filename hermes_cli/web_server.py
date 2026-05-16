@@ -54,6 +54,7 @@ from hermes_cli.office_controlled_mutation import (
     append_office_controlled_mutation_decision_event,
     append_office_controlled_mutation_dry_run_result_event,
     append_office_controlled_mutation_nas_evidence_package_event,
+    append_office_controlled_mutation_nas_path_resolution_preview_event,
     append_office_controlled_mutation_request_event,
     build_office_controlled_mutation_contract_schema,
     build_office_controlled_mutation_nas_evidence_package_contract,
@@ -62,6 +63,7 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_decision_events,
     list_office_controlled_mutation_dry_run_result_events,
     list_office_controlled_mutation_nas_evidence_package_events,
+    list_office_controlled_mutation_nas_path_resolution_preview_events,
     list_office_controlled_mutation_audit_events,
     list_office_controlled_mutation_authority_adapter_registry_events,
     list_office_controlled_mutation_request_events,
@@ -599,6 +601,20 @@ async def validate_office_controlled_mutation_nas_path_resolution_route(payload:
 async def preview_office_controlled_mutation_nas_path_resolution_route(payload: Any = Body(None)):
     """Preview a safe NAS path resolution without mount or filesystem access."""
     return preview_office_controlled_mutation_nas_path_resolution(payload)
+
+
+@app.post("/api/office/controlled-mutation/nas-path-resolution/preview-store")
+async def append_office_controlled_mutation_nas_path_resolution_preview(payload: Any = Body(None)):
+    """Append safe NAS path preview metadata without resolving paths or accessing filesystems."""
+    return append_office_controlled_mutation_nas_path_resolution_preview_event(payload)
+
+
+@app.get("/api/office/controlled-mutation/nas-path-resolution/previews")
+async def list_office_controlled_mutation_nas_path_resolution_previews(
+    limit: int = 50, package_ref: str | None = None
+):
+    """Read back stored safe NAS path preview metadata from local Hermes JSONL."""
+    return list_office_controlled_mutation_nas_path_resolution_preview_events(limit=limit, package_ref=package_ref)
 
 
 @app.post("/api/office/controlled-mutation/nas-save-preparation/validate")

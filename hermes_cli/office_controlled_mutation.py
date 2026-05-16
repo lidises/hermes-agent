@@ -2031,6 +2031,147 @@ def preview_office_controlled_mutation_nas_path_resolution(payload: object) -> d
     return {"valid": True, "errors": [], "dto": dto}
 
 
+def _default_nas_path_resolution_preview_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "nas-path-resolution-previews.jsonl"
+
+
+def _with_nas_path_resolution_preview_persistence_capabilities(dto: Mapping[str, Any]) -> dict[str, object]:
+    stored_dto = dict(dto)
+    capabilities = dict(stored_dto.get("capabilities", {}))
+    capabilities.update(
+        {
+            "validation_enabled": True,
+            "path_resolution_preview_enabled": True,
+            "path_preview_persistence_enabled": True,
+            "path_preview_readback_enabled": False,
+            "path_resolution_runtime_enabled": False,
+            "vault_mapping_enabled": False,
+            "mount_discovery_enabled": False,
+            "mount_access_enabled": False,
+            "filesystem_read_enabled": False,
+            "filesystem_write_enabled": False,
+            "nas_save_preparation_enabled": False,
+            "nas_save_enabled": False,
+            "nas_write_enabled": False,
+            "evidence_file_persistence_enabled": False,
+            "rollback_point_creation_enabled": False,
+            "storage_write_enabled": False,
+            "credential_access_enabled": False,
+            "audit_write_enabled": False,
+            "event_append_enabled": False,
+            "target_mutation_enabled": False,
+            "authority_binding_enabled": False,
+            "dry_run_execution_enabled": False,
+        }
+    )
+    stored_dto["capabilities"] = capabilities
+    return stored_dto
+
+
+def _normalize_stored_nas_path_resolution_preview(item: object) -> dict[str, object] | None:
+    if not isinstance(item, Mapping):
+        return None
+    payload = {field: item.get(field) for field in _NAS_PATH_RESOLUTION_FIELDS if field in item}
+    preview = preview_office_controlled_mutation_nas_path_resolution(payload)
+    if not preview["valid"]:
+        return None
+    return _with_nas_path_resolution_preview_persistence_capabilities(cast(Mapping[str, Any], preview["dto"]))
+
+
+def _read_nas_path_resolution_preview_store(path: Path) -> tuple[list[dict[str, object]], int]:
+    events: list[dict[str, object]] = []
+    skipped_count = 0
+    if not path.exists():
+        return events, skipped_count
+
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped_count += 1
+                continue
+            normalized = _normalize_stored_nas_path_resolution_preview(item)
+            if normalized is None:
+                skipped_count += 1
+                continue
+            events.append(normalized)
+    return events, skipped_count
+
+
+def append_office_controlled_mutation_nas_path_resolution_preview_event(
+    payload: object, *, store_path: Path | None = None
+) -> dict[str, object]:
+    """Validate, preview, and append safe NAS path preview metadata to local Hermes JSONL."""
+
+    preview = preview_office_controlled_mutation_nas_path_resolution(payload)
+    if not preview["valid"]:
+        return {"stored": False, "errors": preview["errors"], "dto": None}
+
+    dto = _with_nas_path_resolution_preview_persistence_capabilities(cast(Mapping[str, Any], preview["dto"]))
+    path = store_path or _default_nas_path_resolution_preview_store_path()
+    existing_events, _ = _read_nas_path_resolution_preview_store(path)
+    if any(event.get("safe_logical_path") == dto["safe_logical_path"] for event in existing_events):
+        return {"stored": False, "errors": [_error("safe_logical_path", "duplicate_safe_logical_path")], "dto": None}
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(dto, sort_keys=True, separators=(",", ":")) + "\n")
+    return {"stored": True, "errors": [], "dto": dto}
+
+
+def list_office_controlled_mutation_nas_path_resolution_preview_events(
+    *, store_path: Path | None = None, limit: int = 50, package_ref: str | None = None
+) -> dict[str, object]:
+    """Read back safe stored NAS path preview metadata without resolving paths or exposing raw inputs."""
+
+    path = store_path or _default_nas_path_resolution_preview_store_path()
+    max_events = max(0, min(limit, 200))
+    events, skipped_count = _read_nas_path_resolution_preview_store(path)
+    response_package_ref: str | None = None
+    errors: list[dict[str, str]] = []
+
+    if package_ref is not None:
+        if _is_opaque_id(package_ref):
+            response_package_ref = package_ref
+            events = [event for event in events if event.get("package_ref") == package_ref]
+        else:
+            errors.append(_error("package_ref", "invalid_opaque_id"))
+            events = []
+
+    events = events[-max_events:] if max_events else []
+    return {
+        "schema_version": 1,
+        "mode": "stored_nas_path_resolution_previews_readback",
+        "count": len(events),
+        "limit": max_events,
+        "skipped_count": skipped_count,
+        "events": events,
+        "capabilities": {
+            "path_preview_readback_enabled": True,
+            "path_preview_persistence_enabled": True,
+            "path_resolution_preview_enabled": True,
+            "path_resolution_runtime_enabled": False,
+            "vault_mapping_enabled": False,
+            "mount_discovery_enabled": False,
+            "mount_access_enabled": False,
+            "filesystem_read_enabled": False,
+            "filesystem_write_enabled": False,
+            "nas_save_enabled": False,
+            "nas_write_enabled": False,
+            "storage_write_enabled": False,
+            "credential_access_enabled": False,
+            "audit_write_enabled": False,
+            "event_append_enabled": False,
+            "target_mutation_enabled": False,
+            "authority_binding_enabled": False,
+            "dry_run_execution_enabled": False,
+        },
+        "package_ref": response_package_ref,
+        "errors": errors,
+    }
+
+
 def validate_office_controlled_mutation_nas_save_preparation(payload: object) -> dict[str, object]:
     """Validate a safe, non-persisted NAS save/write preparation DTO."""
 
