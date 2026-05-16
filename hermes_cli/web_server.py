@@ -61,6 +61,7 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_audit_events,
     list_office_controlled_mutation_authority_adapter_registry_events,
     list_office_controlled_mutation_request_events,
+    validate_office_controlled_mutation_nas_save_preparation,
     validate_office_controlled_mutation_request_event,
 )
 from hermes_cli.office_state import build_office_safe_event_payload, build_office_state
@@ -567,6 +568,12 @@ async def get_office_controlled_mutation_schema():
 async def get_office_controlled_mutation_nas_save_preparation_schema():
     """Return the non-writing NAS save/write preparation contract."""
     return build_office_controlled_mutation_nas_save_preparation_contract()
+
+
+@app.post("/api/office/controlled-mutation/nas-save-preparation/validate")
+async def validate_office_controlled_mutation_nas_save_preparation_route(payload: Any = Body(None)):
+    """Validate a NAS save/write preparation DTO without persistence or NAS access."""
+    return validate_office_controlled_mutation_nas_save_preparation(payload)
 
 
 @app.post("/api/office/controlled-mutation/request/validate")
