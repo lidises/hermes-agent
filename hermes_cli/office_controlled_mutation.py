@@ -1328,6 +1328,79 @@ def build_office_controlled_mutation_authority_adapter_contract(
     }
 
 
+def build_office_controlled_mutation_authority_binding_contract(
+    *, unsafe_examples: Mapping[str, Any] | None = None
+) -> dict[str, object]:
+    """Return the non-binding authority adapter binding design descriptor."""
+
+    _ = unsafe_examples
+    return {
+        "schema_version": 1,
+        "mode": "authority_binding_contract_only",
+        "binding": {
+            "implementation_enabled": False,
+            "binding_enabled": False,
+            "dispatch_enabled": False,
+            "credential_access_enabled": False,
+            "adapter_registry_enabled": False,
+            "durable_storage_enabled": False,
+            "database_migration_required": False,
+        },
+        "required_binding_fields": [
+            "binding_candidate_ref",
+            "authority_candidate_ref",
+            "adapter_contract_ref",
+            "request_ref",
+            "decision_ref",
+            "audit_ref",
+            "actor_ref",
+            "risk_class",
+            "scope",
+            "expires_at",
+            "blocked_reasons",
+        ],
+        "allowed_binding_scopes": ["single_action", "read_only_projection"],
+        "required_adapter_fields": [
+            "adapter_ref",
+            "adapter_kind",
+            "permission_posture",
+            "credential_posture",
+            "dispatch_posture",
+            "target_posture",
+        ],
+        "allowed_adapter_kinds": ["kanban_comment", "status_note", "read_only_projection"],
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "opaque_refs_only": True,
+            "safe_summaries_only": True,
+            "unsupported_values_echoed": False,
+            "credentials_echoed": False,
+        },
+        "capabilities": {
+            "adapter_implementation_enabled": False,
+            "adapter_binding_enabled": False,
+            "adapter_dispatch_enabled": False,
+            "adapter_registry_enabled": False,
+            "credential_access_enabled": False,
+            "target_mutation_enabled": False,
+            "dry_run_execution_enabled": False,
+            "audit_write_enabled": False,
+            "event_append_enabled": False,
+            "request_creation_enabled": False,
+            "human_decision_recording_enabled": False,
+            "nas_save_enabled": False,
+        },
+        "adapter_endpoints": [],
+        "binding_endpoints": [],
+        "storage_endpoints": [],
+        "contract_notes": [
+            "contract describes future authority adapter binding shape only; no adapter is implemented, registered, or bound",
+            "adapter implementation, credential access, dispatch, target mutation, storage, and audit write require separate approval",
+        ],
+    }
+
+
 def build_office_controlled_mutation_execution_readiness_contract(
     *, unsafe_examples: Mapping[str, Any] | None = None
 ) -> dict[str, object]:
