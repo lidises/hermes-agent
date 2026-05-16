@@ -106,6 +106,7 @@ import {
   buildOfficeControlledMutationPostDecisionApprovalBoundary,
   buildOfficeControlledMutationPostRegistryApprovalBoundary,
   buildOfficeControlledMutationTargetDispatchForbiddenBoundary,
+  buildOfficeControlledMutationSafeContinuationCompletionReview,
   buildOfficeRpgScene,
   buildOfficeDeskRpgProjectionModel,
   buildOfficeDeskRpgWorkerRoleVisibility,
@@ -3085,6 +3086,64 @@ describe("Desk RPG Projection ViewModel Helper 1", () => {
     expect(boundary.disabledSurfaceSummary).toEqual({ completedSubsets: 6, forbiddenBoundaries: 1, boundaryOptions: 4, enabledControls: 0 });
     expect(boundary.safeBoundary).toContain("frontend read-only target-dispatch-forbidden boundary only");
     expect(JSON.stringify(boundary)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw target dispatch|private-target-dispatch|token-shaped-value|provider/i);
+  });
+
+
+  it("builds Controlled Mutation Safe Continuation Completion Review 1 as the frontend-only phase boundary", () => {
+    const executionReadiness = buildOfficeControlledMutationExecutionReadinessSummary(buildOfficeControlledMutationAuthoritySummary(buildOfficeControlledMutationHumanApprovalPlan(buildOfficeControlledMutationRollbackVerificationPlan(buildOfficeControlledMutationAuditSinkPlan(buildOfficeControlledMutationDryRunPlan(buildOfficeControlledMutationProposalContract(buildOfficeWorkerFinalGateChecklist(buildOfficeWorkerRollbackPreviewEnvelope(buildOfficeWorkerAuditPreviewEnvelope(buildOfficeWorkerDispatchDryRunEnvelope(buildOfficeWorkerAuthorityHandoffEnvelope(buildOfficeWorkerHumanConfirmationEnvelope(buildOfficeWorkerRequestDraftPreview(buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-16T11:00:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/safe-continuation", status: "partial", checked_at: "2026-05-16T11:00:00Z", item_count: 1, warning_count: 1, error_summary: "raw safe continuation token" } as unknown as OfficeState["data_sources"][number]],
+      agents: [{ id: "agent-safe-continuation", status: "active", prompt: "raw safe continuation prompt token-shaped-value", provider: "private-safe-continuation-provider" }],
+      work_items: [{ id: "w-safe-continuation", status: "blocked", title: "raw safe continuation task", body: "/Users/lidises/private/safe-continuation.md" } as unknown as OfficeState["work_items"][number]],
+    })))))))))))))))))))))));
+    const projection = buildOfficeControlledMutationContractPostureProjection(executionReadiness);
+    const polish = buildOfficeControlledMutationContractPosturePolish(projection);
+    const ribbon = buildOfficeControlledMutationReadinessHandoffRibbon(polish);
+    const summary = buildOfficeControlledMutationReadinessSummaryPolish(ribbon);
+    const posture = buildOfficeControlledMutationRequestStorePosture(summary);
+    const hardening = buildOfficeControlledMutationRequestStoreHardeningPlan(posture);
+    const nextBoundary = buildOfficeControlledMutationNextApprovalBoundary(hardening);
+    const postDecisionBoundary = buildOfficeControlledMutationPostDecisionApprovalBoundary(nextBoundary);
+    const postRegistryBoundary = buildOfficeControlledMutationPostRegistryApprovalBoundary(postDecisionBoundary);
+    const targetForbiddenBoundary = buildOfficeControlledMutationTargetDispatchForbiddenBoundary(postRegistryBoundary);
+    const review = buildOfficeControlledMutationSafeContinuationCompletionReview(targetForbiddenBoundary);
+
+    expect(review.stageLabel).toBe("Controlled Mutation Safe Continuation Completion Review 1");
+    expect(review.sourceStageLabel).toBe("Controlled Mutation Target Dispatch Forbidden Boundary 1");
+    expect(review.detailKind).toBe("controlled_mutation_safe_continuation_completion_review");
+    expect(review.readOnlyTargetLevelReached).toBe(true);
+    expect(review.nextRequiresExplicitApproval).toBe(true);
+    expect(review.enabledControls).toBe(0);
+    expect(review.approvalGranted).toBe(false);
+    expect(review.dispatchEnabled).toBe(false);
+    expect(review.targetMutationEnabled).toBe(false);
+    expect(review.executionEnabled).toBe(false);
+    expect(review.dryRunEnabled).toBe(false);
+    expect(review.auditWriteEnabled).toBe(false);
+    expect(review.authorityAdapterBindingEnabled).toBe(false);
+    expect(review.credentialChangeEnabled).toBe(false);
+    expect(review.nasMutationEnabled).toBe(false);
+    expect(review.deployRestartEnabled).toBe(false);
+    expect(review.pushPrMergeEnabled).toBe(false);
+    expect(review.safeProjectionOnly).toBe(true);
+    expect(review.rawExcluded).toBe(true);
+    expect(review.completedSlices.map((item) => item.id)).toEqual([
+      "request_store_hardening",
+      "human_decision_store",
+      "dry_run_result_storage",
+      "audit_append_sink",
+      "authority_binding_contract",
+      "authority_adapter_registry",
+      "target_dispatch_forbidden_boundary",
+    ]);
+    expect(review.explicitApprovalBoundaries.map((item) => item.id)).toEqual([
+      "nas_save_write_preparation",
+      "credential_auth_env_change",
+      "real_authority_adapter_binding",
+      "target_dispatch_runtime",
+    ]);
+    expect(review.disabledSurfaceSummary).toEqual({ completedSlices: 7, explicitApprovalBoundaries: 4, enabledControls: 0 });
+    expect(JSON.stringify(review)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw safe continuation|private-safe-continuation-provider|token-shaped-value/i);
   });
 
 

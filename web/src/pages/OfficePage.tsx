@@ -119,6 +119,7 @@ import {
   buildOfficeControlledMutationPostDecisionApprovalBoundary,
   buildOfficeControlledMutationPostRegistryApprovalBoundary,
   buildOfficeControlledMutationTargetDispatchForbiddenBoundary,
+  buildOfficeControlledMutationSafeContinuationCompletionReview,
   buildOfficeDeskRpgWorkerRoleVisibility,
   buildOfficeDisabledApprovalDialoguePosture,
   buildOfficeReviewerWikiHandoffPosture,
@@ -197,6 +198,7 @@ import {
   type OfficeControlledMutationPostDecisionApprovalBoundary,
   type OfficeControlledMutationPostRegistryApprovalBoundary,
   type OfficeControlledMutationTargetDispatchForbiddenBoundary,
+  type OfficeControlledMutationSafeContinuationCompletionReview,
   type OfficeEventDrivenCharacterStateProjection,
   type OfficeCharacterStateRoomOverlay,
   type OfficeCharacterRoomInteractionPosture,
@@ -1014,6 +1016,60 @@ export function ControlledMutationTargetDispatchForbiddenBoundaryPanel({ boundar
         {boundary.boundaryOptions.map((item) => (
           <div key={item.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-target-dispatch-forbidden-boundary-option={item.id} data-office-controlled-mutation-target-dispatch-forbidden-boundary-option-status={item.status}>
             <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.status}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+            <div className="mt-2 text-xs leading-5 text-midground/70">{item.detail}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+
+export function ControlledMutationSafeContinuationCompletionReviewPanel({ review }: { review: OfficeControlledMutationSafeContinuationCompletionReview }) {
+  return (
+    <section
+      className="border border-emerald-300/20 bg-emerald-950/10 p-4"
+      data-office-controlled-mutation-safe-continuation-completion-review="true"
+      data-office-controlled-mutation-safe-continuation-completion-review-enabled-controls={review.enabledControls}
+      data-office-controlled-mutation-safe-continuation-completion-review-next-requires-explicit-approval={String(review.nextRequiresExplicitApproval)}
+      data-office-controlled-mutation-safe-continuation-completion-review-read-only-target-level-reached={String(review.readOnlyTargetLevelReached)}
+      data-office-controlled-mutation-safe-continuation-completion-review-dispatch-enabled={String(review.dispatchEnabled)}
+      data-office-controlled-mutation-safe-continuation-completion-review-target-mutation-enabled={String(review.targetMutationEnabled)}
+      data-office-controlled-mutation-safe-continuation-completion-review-execution-enabled={String(review.executionEnabled)}
+      data-office-controlled-mutation-safe-continuation-completion-review-dry-run-enabled={String(review.dryRunEnabled)}
+      data-office-controlled-mutation-safe-continuation-completion-review-audit-write-enabled={String(review.auditWriteEnabled)}
+      data-office-controlled-mutation-safe-continuation-completion-review-authority-adapter-binding-enabled={String(review.authorityAdapterBindingEnabled)}
+      data-office-controlled-mutation-safe-continuation-completion-review-credential-change-enabled={String(review.credentialChangeEnabled)}
+      data-office-controlled-mutation-safe-continuation-completion-review-nas-mutation-enabled={String(review.nasMutationEnabled)}
+      data-office-controlled-mutation-safe-continuation-completion-review-deploy-restart-enabled={String(review.deployRestartEnabled)}
+      data-office-controlled-mutation-safe-continuation-completion-review-push-pr-merge-enabled={String(review.pushPrMergeEnabled)}
+      data-office-controlled-mutation-safe-continuation-completion-review-safe-projection-only={String(review.safeProjectionOnly)}
+      data-office-controlled-mutation-safe-continuation-completion-review-raw-excluded={String(review.rawExcluded)}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">{review.stageLabel}</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">{review.title}</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">{review.safeBoundary}</p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          completed: {review.disabledSurfaceSummary.completedSlices} · approvals: {review.disabledSurfaceSummary.explicitApprovalBoundaries} · controls: {review.disabledSurfaceSummary.enabledControls}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-controlled-mutation-safe-continuation-completion-review-completed-slices="true">
+        {review.completedSlices.map((item) => (
+          <div key={item.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-safe-continuation-completion-review-completed-slice={item.id} data-office-controlled-mutation-safe-continuation-completion-review-completed-slice-status={item.status}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-200/65">{item.status}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+            <div className="mt-2 text-xs leading-5 text-midground/70">{item.detail}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-controlled-mutation-safe-continuation-completion-review-explicit-approval-boundaries="true">
+        {review.explicitApprovalBoundaries.map((item) => (
+          <div key={item.id} className="border border-amber-300/20 bg-amber-950/10 p-3" data-office-controlled-mutation-safe-continuation-completion-review-explicit-approval-boundary={item.id} data-office-controlled-mutation-safe-continuation-completion-review-explicit-approval-boundary-status={item.status}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-200/70">{item.status}</div>
             <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
             <div className="mt-2 text-xs leading-5 text-midground/70">{item.detail}</div>
           </div>
@@ -4392,6 +4448,7 @@ export default function OfficePage() {
   const controlledMutationPostDecisionApprovalBoundary = useMemo(() => buildOfficeControlledMutationPostDecisionApprovalBoundary(controlledMutationNextApprovalBoundary), [controlledMutationNextApprovalBoundary]);
   const controlledMutationPostRegistryApprovalBoundary = useMemo(() => buildOfficeControlledMutationPostRegistryApprovalBoundary(controlledMutationPostDecisionApprovalBoundary), [controlledMutationPostDecisionApprovalBoundary]);
   const controlledMutationTargetDispatchForbiddenBoundary = useMemo(() => buildOfficeControlledMutationTargetDispatchForbiddenBoundary(controlledMutationPostRegistryApprovalBoundary), [controlledMutationPostRegistryApprovalBoundary]);
+  const controlledMutationSafeContinuationCompletionReview = useMemo(() => buildOfficeControlledMutationSafeContinuationCompletionReview(controlledMutationTargetDispatchForbiddenBoundary), [controlledMutationTargetDispatchForbiddenBoundary]);
   const deskRpgProjection = useMemo(() => buildOfficeDeskRpgProjectionModel(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const deskRpgWorkerRoleVisibility = useMemo(() => buildOfficeDeskRpgWorkerRoleVisibility(deskRpgProjection), [deskRpgProjection]);
   const disabledApprovalDialoguePosture = useMemo(() => buildOfficeDisabledApprovalDialoguePosture(deskRpgProjection), [deskRpgProjection]);
@@ -5564,6 +5621,7 @@ export default function OfficePage() {
       <ControlledMutationPostDecisionApprovalBoundaryPanel boundary={controlledMutationPostDecisionApprovalBoundary} />
       <ControlledMutationPostRegistryApprovalBoundaryPanel boundary={controlledMutationPostRegistryApprovalBoundary} />
       <ControlledMutationTargetDispatchForbiddenBoundaryPanel boundary={controlledMutationTargetDispatchForbiddenBoundary} />
+      <ControlledMutationSafeContinuationCompletionReviewPanel review={controlledMutationSafeContinuationCompletionReview} />
 
       {showOverview ? (
         <OfficeRpgMap
