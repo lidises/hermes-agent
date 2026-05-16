@@ -49,12 +49,14 @@ from hermes_cli.config import (
 )
 from gateway.status import get_running_pid, read_runtime_status
 from hermes_cli.office_controlled_mutation import (
+    append_office_controlled_mutation_audit_event,
     append_office_controlled_mutation_decision_event,
     append_office_controlled_mutation_dry_run_result_event,
     append_office_controlled_mutation_request_event,
     build_office_controlled_mutation_contract_schema,
     list_office_controlled_mutation_decision_events,
     list_office_controlled_mutation_dry_run_result_events,
+    list_office_controlled_mutation_audit_events,
     list_office_controlled_mutation_request_events,
     validate_office_controlled_mutation_request_event,
 )
@@ -609,6 +611,28 @@ async def list_office_controlled_mutation_dry_run_results(
         limit=limit,
         request_id=request_id,
         correlation_id=correlation_id,
+    )
+
+
+@app.post("/api/office/controlled-mutation/audit")
+async def append_office_controlled_mutation_audit(payload: Any = Body(None)):
+    """Append a validated safe audit DTO without executing or mutating targets."""
+    return append_office_controlled_mutation_audit_event(payload)
+
+
+@app.get("/api/office/controlled-mutation/audit")
+async def list_office_controlled_mutation_audit(
+    limit: int = 50,
+    request_id: str | None = None,
+    correlation_id: str | None = None,
+    event_kind: str | None = None,
+):
+    """Read back stored safe audit DTOs from the local Hermes JSONL store."""
+    return list_office_controlled_mutation_audit_events(
+        limit=limit,
+        request_id=request_id,
+        correlation_id=correlation_id,
+        event_kind=event_kind,
     )
 
 
