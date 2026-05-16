@@ -105,6 +105,7 @@ import {
   buildOfficeControlledMutationNextApprovalBoundary,
   buildOfficeControlledMutationPostDecisionApprovalBoundary,
   buildOfficeControlledMutationPostRegistryApprovalBoundary,
+  buildOfficeControlledMutationTargetDispatchForbiddenBoundary,
   buildOfficeRpgScene,
   buildOfficeDeskRpgProjectionModel,
   buildOfficeDeskRpgWorkerRoleVisibility,
@@ -3034,6 +3035,56 @@ describe("Desk RPG Projection ViewModel Helper 1", () => {
     expect(boundary.disabledSurfaceSummary).toEqual({ completedSubsets: 6, boundaryOptions: 4, enabledControls: 0 });
     expect(boundary.safeBoundary).toContain("frontend read-only post-registry approval boundary only");
     expect(JSON.stringify(boundary)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw post registry|private-post-registry|token-shaped-value|provider/i);
+  });
+
+
+  it("builds Controlled Mutation Target Dispatch Forbidden Boundary 1 as frontend-only read-only continuation", () => {
+    const executionReadiness = buildOfficeControlledMutationExecutionReadinessSummary(buildOfficeControlledMutationAuthoritySummary(buildOfficeControlledMutationHumanApprovalPlan(buildOfficeControlledMutationRollbackVerificationPlan(buildOfficeControlledMutationAuditSinkPlan(buildOfficeControlledMutationDryRunPlan(buildOfficeControlledMutationProposalContract(buildOfficeWorkerFinalGateChecklist(buildOfficeWorkerRollbackPreviewEnvelope(buildOfficeWorkerAuditPreviewEnvelope(buildOfficeWorkerDispatchDryRunEnvelope(buildOfficeWorkerAuthorityHandoffEnvelope(buildOfficeWorkerHumanConfirmationEnvelope(buildOfficeWorkerRequestDraftPreview(buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-16T10:30:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/target-dispatch-forbidden", status: "partial", checked_at: "2026-05-16T10:30:00Z", item_count: 1, warning_count: 1, error_summary: "raw target dispatch forbidden token" } as unknown as OfficeState["data_sources"][number]],
+      agents: [{ id: "agent-target-dispatch-forbidden", status: "active", prompt: "raw target dispatch forbidden prompt token-shaped-value", provider: "private-target-dispatch-provider" }],
+      work_items: [{ id: "w-target-dispatch-forbidden", status: "blocked", title: "raw target dispatch forbidden task", body: "/Users/lidises/private/target-dispatch-forbidden.md" } as unknown as OfficeState["work_items"][number]],
+    })))))))))))))))))))))));
+    const projection = buildOfficeControlledMutationContractPostureProjection(executionReadiness);
+    const polish = buildOfficeControlledMutationContractPosturePolish(projection);
+    const ribbon = buildOfficeControlledMutationReadinessHandoffRibbon(polish);
+    const summary = buildOfficeControlledMutationReadinessSummaryPolish(ribbon);
+    const posture = buildOfficeControlledMutationRequestStorePosture(summary);
+    const hardening = buildOfficeControlledMutationRequestStoreHardeningPlan(posture);
+    const nextBoundary = buildOfficeControlledMutationNextApprovalBoundary(hardening);
+    const postDecisionBoundary = buildOfficeControlledMutationPostDecisionApprovalBoundary(nextBoundary);
+    const postRegistryBoundary = buildOfficeControlledMutationPostRegistryApprovalBoundary(postDecisionBoundary);
+    const boundary = buildOfficeControlledMutationTargetDispatchForbiddenBoundary(postRegistryBoundary);
+
+    expect(boundary.stageLabel).toBe("Controlled Mutation Target Dispatch Forbidden Boundary 1");
+    expect(boundary.sourceStageLabel).toBe("Controlled Mutation Post Registry Approval Boundary 1");
+    expect(boundary.detailKind).toBe("controlled_mutation_target_dispatch_forbidden_boundary");
+    expect(boundary.userDecision).toBe("target_dispatch_runtime_forbidden_continue_frontend_readonly");
+    expect(boundary.targetDispatchRuntimeApprovalGranted).toBe(false);
+    expect(boundary.enabledControls).toBe(0);
+    expect(boundary.approvalGranted).toBe(false);
+    expect(boundary.dispatchEnabled).toBe(false);
+    expect(boundary.targetMutationEnabled).toBe(false);
+    expect(boundary.dryRunEnabled).toBe(false);
+    expect(boundary.executionEnabled).toBe(false);
+    expect(boundary.authorityAdapterBindingEnabled).toBe(false);
+    expect(boundary.credentialChangeEnabled).toBe(false);
+    expect(boundary.nasMutationEnabled).toBe(false);
+    expect(boundary.deployRestartEnabled).toBe(false);
+    expect(boundary.pushPrMergeEnabled).toBe(false);
+    expect(boundary.safeProjectionOnly).toBe(true);
+    expect(boundary.rawExcluded).toBe(true);
+    expect(boundary.forbiddenBoundaries.map((item) => item.id)).toEqual(["target_dispatch_runtime"]);
+    expect(boundary.boundaryOptions.map((item) => item.id)).toEqual([
+      "frontend_readonly_fallback_continue",
+      "nas_save_write_preparation",
+      "credential_auth_env_change",
+      "real_authority_adapter_binding",
+    ]);
+    expect(boundary.boundaryOptions.every((item) => item.rawExcluded)).toBe(true);
+    expect(boundary.disabledSurfaceSummary).toEqual({ completedSubsets: 6, forbiddenBoundaries: 1, boundaryOptions: 4, enabledControls: 0 });
+    expect(boundary.safeBoundary).toContain("frontend read-only target-dispatch-forbidden boundary only");
+    expect(JSON.stringify(boundary)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw target dispatch|private-target-dispatch|token-shaped-value|provider/i);
   });
 
 

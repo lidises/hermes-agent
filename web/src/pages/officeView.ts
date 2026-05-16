@@ -3194,6 +3194,68 @@ export type OfficeControlledMutationPostRegistryApprovalBoundaryOption = {
   rawExcluded: true;
 };
 
+
+export type OfficeControlledMutationTargetDispatchForbiddenBoundaryOptionId =
+  | "frontend_readonly_fallback_continue"
+  | "nas_save_write_preparation"
+  | "credential_auth_env_change"
+  | "real_authority_adapter_binding";
+
+export type OfficeControlledMutationTargetDispatchForbiddenBoundaryOption = {
+  id: OfficeControlledMutationTargetDispatchForbiddenBoundaryOptionId;
+  label: string;
+  status: "approval_required" | "frontend_readonly_only";
+  detail: string;
+  rawExcluded: true;
+};
+
+export type OfficeControlledMutationTargetDispatchForbiddenBoundary = {
+  stageLabel: "Controlled Mutation Target Dispatch Forbidden Boundary 1";
+  sourceStageLabel: OfficeControlledMutationPostRegistryApprovalBoundary["stageLabel"];
+  detailKind: "controlled_mutation_target_dispatch_forbidden_boundary";
+  title: string;
+  safeBoundary: string;
+  userDecision: "target_dispatch_runtime_forbidden_continue_frontend_readonly";
+  targetDispatchRuntimeApprovalGranted: false;
+  enabledControls: 0;
+  approvalGranted: false;
+  requestStoreHardeningCompleted: true;
+  humanDecisionStoreCompleted: true;
+  dryRunResultStorageCompleted: true;
+  auditAppendSinkCompleted: true;
+  authorityBindingContractCompleted: true;
+  authorityAdapterRegistryCompleted: true;
+  newBackendMutationEnabled: false;
+  newStorageWriteEnabled: false;
+  auditWriteEnabled: false;
+  executionEnabled: false;
+  dryRunEnabled: false;
+  dispatchEnabled: false;
+  targetMutationEnabled: false;
+  authorityAdapterBindingEnabled: false;
+  credentialChangeEnabled: false;
+  nasMutationEnabled: false;
+  deployRestartEnabled: false;
+  pushPrMergeEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+  disabledSurfaceSummary: {
+    completedSubsets: number;
+    forbiddenBoundaries: number;
+    boundaryOptions: number;
+    enabledControls: 0;
+  };
+  completedLocalSubsets: OfficeControlledMutationPostRegistryCompletedSubset[];
+  forbiddenBoundaries: Array<{
+    id: "target_dispatch_runtime";
+    label: string;
+    status: "forbidden_by_user";
+    detail: string;
+    rawExcluded: true;
+  }>;
+  boundaryOptions: OfficeControlledMutationTargetDispatchForbiddenBoundaryOption[];
+};
+
 export type OfficeControlledMutationPostRegistryApprovalBoundary = {
   stageLabel: "Controlled Mutation Post Registry Approval Boundary 1";
   sourceStageLabel: OfficeControlledMutationPostDecisionApprovalBoundary["stageLabel"];
@@ -7278,6 +7340,91 @@ export function buildOfficeControlledMutationPostRegistryApprovalBoundary(
       status: "approval_required",
       rawExcluded: true,
     })),
+  };
+}
+
+
+export function buildOfficeControlledMutationTargetDispatchForbiddenBoundary(
+  boundary: OfficeControlledMutationPostRegistryApprovalBoundary,
+): OfficeControlledMutationTargetDispatchForbiddenBoundary {
+  const forbiddenBoundaries: OfficeControlledMutationTargetDispatchForbiddenBoundary["forbiddenBoundaries"] = [
+    {
+      id: "target_dispatch_runtime",
+      label: "Target dispatch/runtime mutation",
+      status: "forbidden_by_user",
+      detail: "User explicitly kept target dispatch/runtime mutation forbidden; continue with frontend-only/read-only fallback posture",
+      rawExcluded: true,
+    },
+  ];
+  const boundaryOptions: OfficeControlledMutationTargetDispatchForbiddenBoundaryOption[] = [
+    {
+      id: "frontend_readonly_fallback_continue",
+      label: "Continue frontend-only/read-only fallback posture",
+      status: "frontend_readonly_only",
+      detail: "Safe review surfaces may continue without controls, routes, storage, events, dispatch, target mutation, credentials, NAS writes, deploys, pushes, PRs, or merges",
+      rawExcluded: true,
+    },
+    {
+      id: "nas_save_write_preparation",
+      label: "NAS save/write preparation",
+      status: "approval_required",
+      detail: "Requires separate explicit approval before any NAS save/write preparation, NAS credentials, NAS raw reads, or NAS mutation",
+      rawExcluded: true,
+    },
+    {
+      id: "credential_auth_env_change",
+      label: "Credential/auth/env change",
+      status: "approval_required",
+      detail: "Requires separate explicit approval before any credential, auth, environment, or secret binding is read or changed",
+      rawExcluded: true,
+    },
+    {
+      id: "real_authority_adapter_binding",
+      label: "Real authority adapter binding",
+      status: "approval_required",
+      detail: "Requires separate explicit approval before adapters are implemented, bound, registered for dispatch, or connected to targets",
+      rawExcluded: true,
+    },
+  ];
+  return {
+    stageLabel: "Controlled Mutation Target Dispatch Forbidden Boundary 1",
+    sourceStageLabel: boundary.stageLabel,
+    detailKind: "controlled_mutation_target_dispatch_forbidden_boundary",
+    title: "Target dispatch 금지 유지 · frontend-only/read-only continuation",
+    safeBoundary: "frontend read-only target-dispatch-forbidden boundary only · records that target dispatch/runtime mutation remains explicitly forbidden while safe review surfaces may continue without browser executable controls or backend/runtime mutation",
+    userDecision: "target_dispatch_runtime_forbidden_continue_frontend_readonly",
+    targetDispatchRuntimeApprovalGranted: false,
+    enabledControls: 0,
+    approvalGranted: false,
+    requestStoreHardeningCompleted: true,
+    humanDecisionStoreCompleted: true,
+    dryRunResultStorageCompleted: true,
+    auditAppendSinkCompleted: true,
+    authorityBindingContractCompleted: true,
+    authorityAdapterRegistryCompleted: true,
+    newBackendMutationEnabled: false,
+    newStorageWriteEnabled: false,
+    auditWriteEnabled: false,
+    executionEnabled: false,
+    dryRunEnabled: false,
+    dispatchEnabled: false,
+    targetMutationEnabled: false,
+    authorityAdapterBindingEnabled: false,
+    credentialChangeEnabled: false,
+    nasMutationEnabled: false,
+    deployRestartEnabled: false,
+    pushPrMergeEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+    disabledSurfaceSummary: {
+      completedSubsets: boundary.completedLocalSubsets.length,
+      forbiddenBoundaries: forbiddenBoundaries.length,
+      boundaryOptions: boundaryOptions.length,
+      enabledControls: 0,
+    },
+    completedLocalSubsets: boundary.completedLocalSubsets,
+    forbiddenBoundaries,
+    boundaryOptions,
   };
 }
 
