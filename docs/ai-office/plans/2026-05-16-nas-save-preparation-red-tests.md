@@ -1,6 +1,6 @@
-# NAS Save/Write Preparation Contract + Validate-Only DTO 1
+# NAS Save/Write Preparation + Evidence Contract Ladder 1
 
-Date: 2026-05-16 11:55 KST
+Date: 2026-05-16 12:17 KST
 
 ## Approved scope
 
@@ -26,7 +26,17 @@ After that contract slice was committed clean, user instructed to keep progressi
 - No evidence package persistence or rollback point creation.
 - No actual NAS save/write/preparation runtime.
 
-This document now records both the contract helper/route slice and the subsequent validate-only DTO slice.
+After that validate-only slice was committed clean, user approved:
+
+- `NAS evidence package contract-only helper + protected GET schema route; no POST/storage/write/NAS access`
+- No package validation.
+- No package creation or persistence.
+- No storage/write path.
+- No NAS path resolution or NAS mount access.
+- No evidence package persistence or rollback point creation.
+- No actual NAS save/write/preparation runtime.
+
+This document now records the NAS preparation contract helper/route slice, validate-only DTO slice, and subsequent evidence package contract-only slice.
 
 ## Added RED tests
 
@@ -193,10 +203,84 @@ Independent review: PASS, no security concern, logic error, or scope violation.
 
 No request creation, persistence, storage/write path, NAS path resolution, NAS mount access, evidence package persistence, rollback point creation, actual NAS save/write/preparation runtime, audit write, credential/auth/env change, target dispatch/runtime mutation, real authority adapter binding/dispatch, migration, VPS/NAS/Kanban/cron mutation, deploy/restart, push/PR/merge, or browser executable control was performed.
 
+## NAS Evidence Package Contract RED/GREEN
+
+Additional test file:
+
+- `tests/hermes_cli/test_office_controlled_mutation_nas_evidence_package_contract.py`
+
+The evidence package contract RED tests defined:
+
+- Future pure helper: `build_office_controlled_mutation_nas_evidence_package_contract(...)`.
+- Future protected contract route: `GET /api/office/controlled-mutation/nas-evidence-package/schema`.
+- Route must be dashboard-session protected, not public, and not under `/api/plugins/`.
+- Authenticated response must be JSON, not SPA HTML fallback.
+- POST/PUT/PATCH/DELETE on the route must remain rejected.
+- Contract must keep package validation, package creation, package persistence, evidence persistence, rollback point creation, storage write, NAS path resolution, NAS mount access, NAS save preparation, NAS save/write, credential access, audit write, event append, target mutation, authority binding, and dry-run execution disabled.
+- Unsafe examples must be ignored so raw prompts, task bodies, transcripts, private paths, source bodies, reviewer comments, provider ids, tokens, and credentials never echo.
+
+RED command/result:
+
+```bash
+.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_evidence_package_contract.py -q -o 'addopts='
+# 3 failed, 2 passed in 0.59s
+```
+
+Expected RED failures were missing helper import plus missing JSON API route falling through to SPA HTML.
+
+GREEN implementation:
+
+- `hermes_cli/office_controlled_mutation.py`
+  - Added pure `build_office_controlled_mutation_nas_evidence_package_contract(...)` descriptor helper.
+  - The helper ignores `unsafe_examples` and returns fixed contract metadata only.
+  - All package/persistence/write/NAS/credential/dispatch/audit/storage capabilities remain false.
+- `hermes_cli/web_server.py`
+  - Added only protected GET route `GET /api/office/controlled-mutation/nas-evidence-package/schema`.
+  - The route returns helper contract JSON and is protected by existing dashboard session-token middleware.
+
+GREEN verification:
+
+```bash
+.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_evidence_package_contract.py -q -o 'addopts='
+# 5 passed in 0.47s
+
+.venv/bin/python -m pytest tests/hermes_cli/test_office_api.py tests/hermes_cli/test_office_controlled_mutation_*.py -q -o 'addopts='
+# 110 passed in 1.12s
+
+.venv/bin/python -m py_compile hermes_cli/office_controlled_mutation.py hermes_cli/web_server.py
+# passed
+
+git diff --check
+# passed
+
+git diff --cached --check
+# passed
+```
+
+Evidence package contract production safety scan:
+
+```text
+hardcoded_secret_assignment: 0
+shell_exec: 0
+sql_format: 0
+storage_or_write_call: 0
+nas_path_resolution_or_mount_access: 0
+credential_capability_enabled: 0
+unapproved_mutation_routes: 0
+```
+
+Independent review: PASS, no security concern, logic error, or scope violation.
+
+## Safety / non-actions for evidence package contract slice
+
+No package validation, package creation, package persistence, evidence package persistence, storage/write path, NAS path resolution, NAS mount access, rollback point creation, actual NAS save/write/preparation runtime, audit write, event append, credential/auth/env change, target dispatch/runtime mutation, real authority adapter binding/dispatch, migration, VPS/NAS/Kanban/cron mutation, deploy/restart, push/PR/merge, or browser executable control was performed.
+
 ## Next boundary
 
 A separate explicit approval is required before any of:
 
+- Package validation.
+- Package creation or persistence.
 - Persistence/storage/write path.
 - NAS path resolution or mount access.
 - Evidence package persistence or rollback point creation.

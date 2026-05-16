@@ -1704,6 +1704,83 @@ def build_office_controlled_mutation_nas_save_preparation_contract(
 
 
 
+def build_office_controlled_mutation_nas_evidence_package_contract(
+    *, unsafe_examples: Mapping[str, Any] | None = None
+) -> dict[str, object]:
+    """Return the non-writing NAS evidence package contract descriptor."""
+
+    _ = unsafe_examples
+    return {
+        "schema_version": 1,
+        "mode": "nas_evidence_package_contract_only",
+        "required_package_fields": [
+            "package_ref",
+            "preparation_ref",
+            "request_ref",
+            "decision_ref",
+            "source_manifest_refs",
+            "review_evidence_refs",
+            "wiki_draft_ref",
+            "target_vault_ref",
+            "proposed_path_ref",
+            "safe_title",
+            "safe_summary",
+            "rollback_plan_ref",
+            "created_by",
+            "created_at",
+        ],
+        "package": {
+            "contract_enabled": True,
+            "package_validation_enabled": False,
+            "package_creation_enabled": False,
+            "package_persistence_enabled": False,
+            "evidence_persistence_enabled": False,
+            "rollback_point_creation_enabled": False,
+            "storage_write_enabled": False,
+            "nas_path_resolution_enabled": False,
+            "nas_mount_access_enabled": False,
+            "nas_save_preparation_enabled": False,
+            "nas_save_enabled": False,
+            "nas_write_enabled": False,
+            "database_migration_required": False,
+        },
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "opaque_refs_only": True,
+            "safe_summaries_only": True,
+            "unsupported_values_echoed": False,
+        },
+        "capabilities": {
+            "request_creation_enabled": False,
+            "package_validation_enabled": False,
+            "package_creation_enabled": False,
+            "package_persistence_enabled": False,
+            "evidence_package_persistence_enabled": False,
+            "rollback_point_creation_enabled": False,
+            "storage_write_enabled": False,
+            "nas_path_resolution_enabled": False,
+            "nas_mount_access_enabled": False,
+            "nas_save_preparation_enabled": False,
+            "nas_save_enabled": False,
+            "nas_write_enabled": False,
+            "credential_access_enabled": False,
+            "audit_write_enabled": False,
+            "event_append_enabled": False,
+            "target_mutation_enabled": False,
+            "authority_binding_enabled": False,
+            "dry_run_execution_enabled": False,
+        },
+        "package_endpoints": [],
+        "storage_endpoints": [],
+        "nas_endpoints": [],
+        "contract_notes": [
+            "contract describes future NAS evidence package metadata only; no evidence is persisted and no rollback point is created",
+            "actual package persistence, rollback point creation, NAS path resolution, NAS mount access, NAS save, and NAS write require separate approval",
+        ],
+    }
+
+
 def validate_office_controlled_mutation_nas_save_preparation(payload: object) -> dict[str, object]:
     """Validate a safe, non-persisted NAS save/write preparation DTO."""
 
