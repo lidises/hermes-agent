@@ -62,6 +62,7 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_audit_events,
     list_office_controlled_mutation_authority_adapter_registry_events,
     list_office_controlled_mutation_request_events,
+    validate_office_controlled_mutation_nas_evidence_package,
     validate_office_controlled_mutation_nas_save_preparation,
     validate_office_controlled_mutation_request_event,
 )
@@ -581,6 +582,12 @@ async def get_office_controlled_mutation_nas_evidence_package_schema():
 async def validate_office_controlled_mutation_nas_save_preparation_route(payload: Any = Body(None)):
     """Validate a NAS save/write preparation DTO without persistence or NAS access."""
     return validate_office_controlled_mutation_nas_save_preparation(payload)
+
+
+@app.post("/api/office/controlled-mutation/nas-evidence-package/validate")
+async def validate_office_controlled_mutation_nas_evidence_package_route(payload: Any = Body(None)):
+    """Validate a NAS evidence package DTO without persistence or NAS access."""
+    return validate_office_controlled_mutation_nas_evidence_package(payload)
 
 
 @app.post("/api/office/controlled-mutation/request/validate")

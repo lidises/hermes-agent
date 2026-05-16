@@ -1,6 +1,6 @@
-# NAS Save/Write Preparation + Evidence Contract Ladder 1
+# NAS Save/Write Preparation + Evidence Contract/Validation Ladder 1
 
-Date: 2026-05-16 12:17 KST
+Date: 2026-05-16 12:31 KST
 
 ## Approved scope
 
@@ -36,7 +36,7 @@ After that validate-only slice was committed clean, user approved:
 - No evidence package persistence or rollback point creation.
 - No actual NAS save/write/preparation runtime.
 
-This document now records the NAS preparation contract helper/route slice, validate-only DTO slice, and subsequent evidence package contract-only slice.
+This document now records the NAS preparation contract helper/route slice, validate-only DTO slice, evidence package contract-only slice, and evidence package validate-only DTO slice.
 
 ## Added RED tests
 
@@ -275,11 +275,84 @@ Independent review: PASS, no security concern, logic error, or scope violation.
 
 No package validation, package creation, package persistence, evidence package persistence, storage/write path, NAS path resolution, NAS mount access, rollback point creation, actual NAS save/write/preparation runtime, audit write, event append, credential/auth/env change, target dispatch/runtime mutation, real authority adapter binding/dispatch, migration, VPS/NAS/Kanban/cron mutation, deploy/restart, push/PR/merge, or browser executable control was performed.
 
+## NAS Evidence Package Validate-Only DTO RED/GREEN
+
+Additional test file:
+
+- `tests/hermes_cli/test_office_controlled_mutation_nas_evidence_package_validate.py`
+
+The evidence package validate-only RED tests defined:
+
+- Future pure helper: `validate_office_controlled_mutation_nas_evidence_package(...)`.
+- Future protected validate-only route: `POST /api/office/controlled-mutation/nas-evidence-package/validate`.
+- Route must be dashboard-session protected, not public, and not under `/api/plugins/`.
+- Safe allowlisted payloads produce `mode: validated_nas_evidence_package` DTOs.
+- Unsupported/raw fields and malformed top-level JSON return sanitized errors without raw echo.
+- Path-like or credential-like allowlisted values are rejected without raw echo.
+- PUT/PATCH/DELETE on the validate route remain rejected.
+- Capabilities keep package creation, package persistence, evidence persistence, storage write, NAS path resolution, NAS mount access, rollback point creation, NAS save preparation/save/write, credential access, audit write, event append, target mutation, authority binding, and dry-run execution disabled.
+
+RED command/result:
+
+```bash
+.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_evidence_package_validate.py -q -o 'addopts='
+# 7 failed, 2 passed in 0.51s
+```
+
+Expected RED failures were missing helper import plus missing POST validate route returning 405.
+
+GREEN implementation:
+
+- `hermes_cli/office_controlled_mutation.py`
+  - Added pure `validate_office_controlled_mutation_nas_evidence_package(...)` helper.
+  - Added `_NAS_EVIDENCE_PACKAGE_FIELDS` allowlist.
+  - The helper returns only sanitized field/code errors and a DTO when valid; it creates or persists nothing.
+  - All package/persistence/write/NAS/credential/dispatch/audit/storage capabilities remain false except `validation_enabled`.
+- `hermes_cli/web_server.py`
+  - Added only protected POST route `POST /api/office/controlled-mutation/nas-evidence-package/validate`.
+  - The route delegates to the pure validator using `payload: Any = Body(None)` so semantic validation/redaction remains in the helper.
+
+GREEN verification:
+
+```bash
+.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_evidence_package_validate.py -q -o 'addopts='
+# 9 passed in 0.49s
+
+.venv/bin/python -m pytest tests/hermes_cli/test_office_api.py tests/hermes_cli/test_office_controlled_mutation_*.py -q -o 'addopts='
+# 119 passed in 1.13s
+
+.venv/bin/python -m py_compile hermes_cli/office_controlled_mutation.py hermes_cli/web_server.py
+# passed
+
+git diff --check
+# passed
+
+git diff --cached --check
+# passed
+```
+
+Evidence package validate-only production safety scan:
+
+```text
+hardcoded_secret_assignment: 0
+shell_exec: 0
+sql_format: 0
+storage_or_write_call: 0
+nas_path_resolution_or_mount_access: 0
+credential_capability_enabled: 0
+unapproved_mutation_routes: 0
+```
+
+Independent review: PASS, no security concern, logic error, or scope violation.
+
+## Safety / non-actions for evidence package validate-only DTO slice
+
+No package creation, package persistence, evidence package persistence, storage/write path, NAS path resolution, NAS mount access, rollback point creation, actual NAS save/write/preparation runtime, audit write, event append, credential/auth/env change, target dispatch/runtime mutation, real authority adapter binding/dispatch, migration, VPS/NAS/Kanban/cron mutation, deploy/restart, push/PR/merge, or browser executable control was performed.
+
 ## Next boundary
 
 A separate explicit approval is required before any of:
 
-- Package validation.
 - Package creation or persistence.
 - Persistence/storage/write path.
 - NAS path resolution or mount access.

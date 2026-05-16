@@ -141,6 +141,22 @@ _NAS_PREPARATION_FIELDS = {
     "requested_by",
     "requested_at",
 }
+_NAS_EVIDENCE_PACKAGE_FIELDS = {
+    "package_ref",
+    "preparation_ref",
+    "request_ref",
+    "decision_ref",
+    "source_manifest_refs",
+    "review_evidence_refs",
+    "wiki_draft_ref",
+    "target_vault_ref",
+    "proposed_path_ref",
+    "safe_title",
+    "safe_summary",
+    "rollback_plan_ref",
+    "created_by",
+    "created_at",
+}
 _OPAQUE_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{2,119}$")
 _OPAQUE_REF_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_-]{1,40}:[A-Za-z0-9][A-Za-z0-9_.:-]{1,160}$")
 _SAFE_TEXT_RE = re.compile(r"^[^<>\\]{1,240}$")
@@ -1851,6 +1867,98 @@ def validate_office_controlled_mutation_nas_save_preparation(payload: object) ->
             "nas_write_enabled": False,
             "credential_access_enabled": False,
             "audit_write_enabled": False,
+            "target_mutation_enabled": False,
+            "authority_binding_enabled": False,
+            "dry_run_execution_enabled": False,
+        },
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "opaque_refs_only": True,
+            "safe_summaries_only": True,
+            "unsupported_values_echoed": False,
+        },
+    }
+    return {"valid": True, "errors": [], "dto": dto}
+
+
+
+def validate_office_controlled_mutation_nas_evidence_package(payload: object) -> dict[str, object]:
+    """Validate a safe, non-persisted NAS evidence package DTO."""
+
+    errors: list[dict[str, str]] = []
+    if not isinstance(payload, Mapping):
+        return {"valid": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+
+    if set(payload) - _NAS_EVIDENCE_PACKAGE_FIELDS:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+
+    for field in sorted(_NAS_EVIDENCE_PACKAGE_FIELDS):
+        if field not in payload:
+            errors.append(_error(field, "missing_field"))
+
+    if "package_ref" in payload and not _is_opaque_id(payload.get("package_ref")):
+        errors.append(_error("package_ref", "invalid_opaque_id"))
+    if "preparation_ref" in payload and not _is_opaque_id(payload.get("preparation_ref")):
+        errors.append(_error("preparation_ref", "invalid_opaque_id"))
+    for field in (
+        "request_ref",
+        "decision_ref",
+        "wiki_draft_ref",
+        "target_vault_ref",
+        "proposed_path_ref",
+        "rollback_plan_ref",
+        "created_by",
+    ):
+        if field in payload and not _is_opaque_ref(payload.get(field)):
+            errors.append(_error(field, "invalid_opaque_ref"))
+    for field in ("source_manifest_refs", "review_evidence_refs"):
+        if field in payload and not _validate_evidence_refs(payload.get(field)):
+            errors.append(_error(field, "invalid_opaque_ref"))
+    for field in ("safe_title", "safe_summary"):
+        if field in payload and not _is_safe_text(payload.get(field)):
+            errors.append(_error(field, "invalid_safe_text"))
+    if "created_at" in payload and not (
+        isinstance(payload.get("created_at"), str) and _ISO_UTC_RE.fullmatch(payload["created_at"])
+    ):
+        errors.append(_error("created_at", "invalid_timestamp"))
+
+    errors = sorted(errors, key=lambda item: (item["field"], item["code"]))
+    if errors:
+        return {"valid": False, "errors": errors, "dto": None}
+
+    dto = {
+        "schema_version": 1,
+        "mode": "validated_nas_evidence_package",
+        "package_ref": payload["package_ref"],
+        "preparation_ref": payload["preparation_ref"],
+        "request_ref": payload["request_ref"],
+        "decision_ref": payload["decision_ref"],
+        "source_manifest_refs": list(payload["source_manifest_refs"]),
+        "review_evidence_refs": list(payload["review_evidence_refs"]),
+        "wiki_draft_ref": payload["wiki_draft_ref"],
+        "target_vault_ref": payload["target_vault_ref"],
+        "proposed_path_ref": payload["proposed_path_ref"],
+        "safe_title": payload["safe_title"],
+        "safe_summary": payload["safe_summary"],
+        "rollback_plan_ref": payload["rollback_plan_ref"],
+        "created_by": payload["created_by"],
+        "created_at": payload["created_at"],
+        "capabilities": {
+            "validation_enabled": True,
+            "package_creation_enabled": False,
+            "package_persistence_enabled": False,
+            "evidence_persistence_enabled": False,
+            "storage_write_enabled": False,
+            "nas_path_resolution_enabled": False,
+            "nas_mount_access_enabled": False,
+            "rollback_point_creation_enabled": False,
+            "nas_save_preparation_enabled": False,
+            "nas_save_enabled": False,
+            "nas_write_enabled": False,
+            "credential_access_enabled": False,
+            "audit_write_enabled": False,
+            "event_append_enabled": False,
             "target_mutation_enabled": False,
             "authority_binding_enabled": False,
             "dry_run_execution_enabled": False,
