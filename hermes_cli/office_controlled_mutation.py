@@ -1966,6 +1966,71 @@ def validate_office_controlled_mutation_nas_path_resolution(payload: object) -> 
     return {"valid": True, "errors": [], "dto": dto}
 
 
+def preview_office_controlled_mutation_nas_path_resolution(payload: object) -> dict[str, object]:
+    """Build a safe local NAS path-resolution preview without touching mounts or files."""
+
+    validated = validate_office_controlled_mutation_nas_path_resolution(payload)
+    if not validated["valid"]:
+        return {"valid": False, "errors": validated["errors"], "dto": None}
+
+    source = validated["dto"]
+    assert isinstance(source, Mapping)
+    target_vault_ref = str(source["target_vault_ref"])
+    safe_slug = str(source["safe_slug"])
+    vault_labels = {
+        "vault_personal_operating_wiki": "Personal Operating Wiki",
+    }
+    safe_display_vault = vault_labels.get(target_vault_ref, target_vault_ref.replace("_", " ").title())
+    safe_logical_path = f"{target_vault_ref}::{safe_slug}.md"
+    safe_display_path = f"{safe_display_vault} / {safe_slug}.md"
+    dto = {
+        "schema_version": 1,
+        "mode": "previewed_nas_path_resolution",
+        "validated_mode": source["mode"],
+        "path_resolution_ref": source["path_resolution_ref"],
+        "package_ref": source["package_ref"],
+        "target_vault_ref": target_vault_ref,
+        "proposed_path_ref": source["proposed_path_ref"],
+        "safe_title": source["safe_title"],
+        "safe_slug": safe_slug,
+        "path_policy_ref": source["path_policy_ref"],
+        "created_by": source["created_by"],
+        "created_at": source["created_at"],
+        "safe_logical_path": safe_logical_path,
+        "safe_display_path": safe_display_path,
+        "path_preview": {
+            "target_vault_ref": target_vault_ref,
+            "proposed_path_ref": source["proposed_path_ref"],
+            "safe_slug": safe_slug,
+            "extension": ".md",
+            "raw_path_material_included": False,
+        },
+        "capabilities": {
+            "validation_enabled": True,
+            "path_resolution_preview_enabled": True,
+            "path_resolution_runtime_enabled": False,
+            "vault_mapping_enabled": False,
+            "mount_discovery_enabled": False,
+            "mount_access_enabled": False,
+            "filesystem_read_enabled": False,
+            "filesystem_write_enabled": False,
+            "nas_save_preparation_enabled": False,
+            "nas_save_enabled": False,
+            "nas_write_enabled": False,
+            "evidence_file_persistence_enabled": False,
+            "rollback_point_creation_enabled": False,
+            "storage_write_enabled": False,
+            "credential_access_enabled": False,
+            "audit_write_enabled": False,
+            "event_append_enabled": False,
+            "target_mutation_enabled": False,
+            "authority_binding_enabled": False,
+            "dry_run_execution_enabled": False,
+        },
+    }
+    return {"valid": True, "errors": [], "dto": dto}
+
+
 def validate_office_controlled_mutation_nas_save_preparation(payload: object) -> dict[str, object]:
     """Validate a safe, non-persisted NAS save/write preparation DTO."""
 

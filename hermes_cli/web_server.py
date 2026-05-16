@@ -65,6 +65,7 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_audit_events,
     list_office_controlled_mutation_authority_adapter_registry_events,
     list_office_controlled_mutation_request_events,
+    preview_office_controlled_mutation_nas_path_resolution,
     validate_office_controlled_mutation_nas_evidence_package,
     validate_office_controlled_mutation_nas_path_resolution,
     validate_office_controlled_mutation_nas_save_preparation,
@@ -592,6 +593,12 @@ async def get_office_controlled_mutation_nas_path_resolution_schema():
 async def validate_office_controlled_mutation_nas_path_resolution_route(payload: Any = Body(None)):
     """Validate a NAS path resolution DTO without resolving paths or accessing mounts."""
     return validate_office_controlled_mutation_nas_path_resolution(payload)
+
+
+@app.post("/api/office/controlled-mutation/nas-path-resolution/preview")
+async def preview_office_controlled_mutation_nas_path_resolution_route(payload: Any = Body(None)):
+    """Preview a safe NAS path resolution without mount or filesystem access."""
+    return preview_office_controlled_mutation_nas_path_resolution(payload)
 
 
 @app.post("/api/office/controlled-mutation/nas-save-preparation/validate")

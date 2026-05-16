@@ -684,6 +684,71 @@ Independent review: PASS, no security/raw leak, logic, side-effect, UI-control, 
 
 No backend/schema/API route/service change, storage change, browser API/storage call, form/button/input/select/textarea, runtime path resolution, vault mapping, NAS mount discovery/access, filesystem/NAS read/write, actual NAS save/write/preparation runtime, evidence file persistence, rollback point creation, credential/auth/env change, audit write, target dispatch/runtime mutation, real authority adapter binding/dispatch, migration, VPS/NAS/Kanban/cron mutation, deploy/restart, push/PR/merge, browser executable control, or raw private value projection was performed.
 
+## NAS Path Resolution Preview RED/GREEN
+
+Additional backend test file:
+
+- `tests/hermes_cli/test_office_controlled_mutation_nas_path_resolution_preview.py`
+
+The preview RED tests define the approved boundary:
+
+- Future helper: `preview_office_controlled_mutation_nas_path_resolution(...)`.
+- Future protected route: `POST /api/office/controlled-mutation/nas-path-resolution/preview`.
+- Pure/local preview only: derive safe logical/display path strings from validated opaque refs and safe slug.
+- Runtime/filesystem capabilities remain disabled: runtime path resolution, vault mapping, mount discovery/access, filesystem read/write, NAS save/write, storage/readback, evidence persistence, rollback point creation, credentials, audit write, target mutation, authority binding, and dry-run execution.
+- Unsupported raw prompt/task/transcript/path/provider/token/credential/mount-command values are rejected without echo through the validator.
+- No persistence/readback route, no mount access, and no filesystem access.
+
+RED command/result:
+
+```bash
+.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_path_resolution_preview.py -q -o 'addopts='
+# 3 failed, 2 passed in 0.45s
+```
+
+Expected RED failures were missing helper/import and missing preview route. The no-readback assertion accounts for the existing SPA fallback returning HTML on unknown GET routes.
+
+GREEN implementation:
+
+- `hermes_cli/office_controlled_mutation.py`
+  - Added `preview_office_controlled_mutation_nas_path_resolution(...)`.
+  - Reuses `validate_office_controlled_mutation_nas_path_resolution(...)` before deriving preview output.
+  - Produces safe `safe_logical_path` and `safe_display_path` from `target_vault_ref` and `safe_slug` only.
+- `hermes_cli/web_server.py`
+  - Imported the preview helper.
+  - Added protected `POST /api/office/controlled-mutation/nas-path-resolution/preview`.
+
+GREEN verification:
+
+```bash
+.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_path_resolution_preview.py -q -o 'addopts='
+# 5 passed in 0.52s
+
+.venv/bin/python -m pytest tests/hermes_cli/test_office_api.py tests/hermes_cli/test_office_controlled_mutation_*.py -q -o 'addopts='
+# 141 passed in 1.15s
+
+.venv/bin/python -m py_compile hermes_cli/office_controlled_mutation.py hermes_cli/web_server.py
+# passed
+
+git diff --check
+# passed
+```
+
+Path preview production safety scan:
+
+```text
+runtime_filesystem_or_mount_calls_added: 0
+runtime_network_calls_added: 0
+storage_or_readback_added: 0
+forbidden_runtime_capability_enabled: 0
+```
+
+Independent review: PASS, no security concern, logic error, raw data leak, filesystem/mount/network/storage access, or scope violation.
+
+## Safety / non-actions for NAS path resolution preview slice
+
+No runtime filesystem path resolution, vault mapping, NAS mount discovery/access, filesystem/NAS read/write, actual NAS save/write/preparation runtime, evidence file persistence, rollback point creation, storage/readback path, credential/auth/env change, audit write, target dispatch/runtime mutation, real authority adapter binding/dispatch, migration, VPS/NAS/Kanban/cron mutation, deploy/restart, push/PR/merge, browser executable control, or raw private value projection was performed.
+
 ## Next boundary
 
 A separate explicit approval is required before any of:
