@@ -1958,6 +1958,41 @@ export type OfficeNasKeeperRollbackEvidencePreview = {
   rawExcluded: true;
 };
 
+export type OfficeNasEvidencePackageStoreCapability = {
+  id: "local_metadata_store" | "safe_readback" | "duplicate_guard" | "next_nas_boundary";
+  label: string;
+  status: "available" | "guarded" | "approval_required";
+  summary: string;
+  rawExcluded: true;
+};
+
+export type OfficeNasEvidencePackageStoreReadbackStatus = {
+  stageLabel: "NAS Evidence Package Store Readback Status 1";
+  title: string;
+  detailKind: "nas_evidence_package_store_readback_status";
+  capabilities: OfficeNasEvidencePackageStoreCapability[];
+  sourceDetailKind: OfficeNasKeeperRollbackEvidencePreview["detailKind"];
+  sourceEvidenceCardCount: number;
+  storeCapabilityCount: number;
+  enabledControls: 0;
+  localMetadataStoreEnabled: true;
+  localMetadataReadbackEnabled: true;
+  backendApiChanged: false;
+  storageChanged: false;
+  nasPathResolutionEnabled: false;
+  nasMountAccessEnabled: false;
+  nasWriteEnabled: false;
+  evidenceFilePersistenceEnabled: false;
+  rollbackPointCreated: false;
+  credentialAccessEnabled: false;
+  auditWriteEnabled: false;
+  dispatchEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeDeskRpgReadOnlyChainCompletionReviewCard = {
   id: "request_to_orchestrator" | "evidence_to_review" | "approval_to_nas_keeper" | "next_projection_gap";
   label: string;
@@ -4787,6 +4822,65 @@ export function buildOfficeNasKeeperRollbackEvidencePreview(gate: OfficeNasKeepe
     nasTracePersisted: false,
     nasWritePrepared: false,
     nasSaveEnabled: false,
+    auditWriteEnabled: false,
+    dispatchEnabled: false,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeNasEvidencePackageStoreReadbackStatus(rollback: OfficeNasKeeperRollbackEvidencePreview): OfficeNasEvidencePackageStoreReadbackStatus {
+  const capabilities: OfficeNasEvidencePackageStoreCapability[] = [
+    {
+      id: "local_metadata_store",
+      label: "Local metadata JSONL store",
+      status: "available",
+      summary: "승인된 backend slice가 safe evidence package metadata만 profile-scoped JSONL에 저장합니다. 이 panel은 상태만 읽기 전용으로 표시합니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "safe_readback",
+      label: "Safe readback projection",
+      status: "available",
+      summary: "Readback은 validator-backed DTO만 노출하고 malformed/raw records는 skip합니다. UI는 새 API 호출이나 storage 변경을 추가하지 않습니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "duplicate_guard",
+      label: "Duplicate package guard",
+      status: "guarded",
+      summary: "중복 package_ref는 추가 write 없이 거절되는 guard로만 요약합니다. 이 화면에는 수정/삭제 control이 없습니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "next_nas_boundary",
+      label: "Next NAS runtime boundary",
+      status: "approval_required",
+      summary: "NAS path resolution, mount access, evidence file persistence, rollback point creation, actual NAS write는 다음 명시 승인 전까지 비활성입니다.",
+      rawExcluded: true,
+    },
+  ];
+  return {
+    stageLabel: "NAS Evidence Package Store Readback Status 1",
+    title: "NAS evidence package store readback status",
+    detailKind: "nas_evidence_package_store_readback_status",
+    capabilities,
+    sourceDetailKind: rollback.detailKind,
+    sourceEvidenceCardCount: rollback.evidenceCardCount,
+    storeCapabilityCount: capabilities.length,
+    enabledControls: 0,
+    localMetadataStoreEnabled: true,
+    localMetadataReadbackEnabled: true,
+    backendApiChanged: false,
+    storageChanged: false,
+    nasPathResolutionEnabled: false,
+    nasMountAccessEnabled: false,
+    nasWriteEnabled: false,
+    evidenceFilePersistenceEnabled: false,
+    rollbackPointCreated: false,
+    credentialAccessEnabled: false,
     auditWriteEnabled: false,
     dispatchEnabled: false,
     requestCreationEnabled: false,

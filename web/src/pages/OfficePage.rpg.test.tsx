@@ -18,7 +18,7 @@ vi.mock("@/lib/api", () => ({
 
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
-import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerAssignmentCandidateGate, buildOfficeWorkerRequestDraftPreview, buildOfficeWorkerHumanConfirmationEnvelope, buildOfficeWorkerAuthorityHandoffEnvelope, buildOfficeWorkerDispatchDryRunEnvelope, buildOfficeWorkerAuditPreviewEnvelope, buildOfficeWorkerRollbackPreviewEnvelope, buildOfficeWorkerFinalGateChecklist, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeNasKeeperSaveRequestGate, buildOfficeNasKeeperRollbackEvidencePreview, buildOfficeDeskRpgReadOnlyChainCompletionReview, buildOfficeEventDrivenCharacterStateProjection, buildOfficeCharacterStateRoomOverlay, buildOfficeCharacterRoomInteractionPosture, buildOfficeCharacterInspectorDetailPosture, buildOfficeCharacterDetailSafeDialogueCopy, buildOfficeCharacterBubbleInspectorAlignment, buildOfficeCharacterPanelBoundarySummary, buildOfficeCharacterFacilityRoleLegend, buildOfficeCharacterFacilityBoundaryStrip, buildOfficeCharacterFacilitySourceLedgerStrip, buildOfficeCharacterFacilityCompletionReview, buildOfficeControlledMutationProposalContract, buildOfficeControlledMutationDryRunPlan, buildOfficeControlledMutationAuditSinkPlan, buildOfficeControlledMutationRollbackVerificationPlan, buildOfficeControlledMutationHumanApprovalPlan, buildOfficeControlledMutationAuthoritySummary, buildOfficeControlledMutationExecutionReadinessSummary, buildOfficeControlledMutationContractPostureProjection, buildOfficeControlledMutationContractPosturePolish, buildOfficeControlledMutationReadinessHandoffRibbon, buildOfficeControlledMutationReadinessSummaryPolish, buildOfficeControlledMutationRequestStorePosture, buildOfficeControlledMutationRequestStoreHardeningPlan, buildOfficeControlledMutationNextApprovalBoundary, buildOfficeControlledMutationPostDecisionApprovalBoundary, buildOfficeControlledMutationPostRegistryApprovalBoundary, buildOfficeControlledMutationTargetDispatchForbiddenBoundary, buildOfficeControlledMutationSafeContinuationCompletionReview, buildOfficeRpgScene } from "./officeView";
+import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerAssignmentCandidateGate, buildOfficeWorkerRequestDraftPreview, buildOfficeWorkerHumanConfirmationEnvelope, buildOfficeWorkerAuthorityHandoffEnvelope, buildOfficeWorkerDispatchDryRunEnvelope, buildOfficeWorkerAuditPreviewEnvelope, buildOfficeWorkerRollbackPreviewEnvelope, buildOfficeWorkerFinalGateChecklist, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeNasKeeperSaveRequestGate, buildOfficeNasKeeperRollbackEvidencePreview, buildOfficeNasEvidencePackageStoreReadbackStatus, buildOfficeDeskRpgReadOnlyChainCompletionReview, buildOfficeEventDrivenCharacterStateProjection, buildOfficeCharacterStateRoomOverlay, buildOfficeCharacterRoomInteractionPosture, buildOfficeCharacterInspectorDetailPosture, buildOfficeCharacterDetailSafeDialogueCopy, buildOfficeCharacterBubbleInspectorAlignment, buildOfficeCharacterPanelBoundarySummary, buildOfficeCharacterFacilityRoleLegend, buildOfficeCharacterFacilityBoundaryStrip, buildOfficeCharacterFacilitySourceLedgerStrip, buildOfficeCharacterFacilityCompletionReview, buildOfficeControlledMutationProposalContract, buildOfficeControlledMutationDryRunPlan, buildOfficeControlledMutationAuditSinkPlan, buildOfficeControlledMutationRollbackVerificationPlan, buildOfficeControlledMutationHumanApprovalPlan, buildOfficeControlledMutationAuthoritySummary, buildOfficeControlledMutationExecutionReadinessSummary, buildOfficeControlledMutationContractPostureProjection, buildOfficeControlledMutationContractPosturePolish, buildOfficeControlledMutationReadinessHandoffRibbon, buildOfficeControlledMutationReadinessSummaryPolish, buildOfficeControlledMutationRequestStorePosture, buildOfficeControlledMutationRequestStoreHardeningPlan, buildOfficeControlledMutationNextApprovalBoundary, buildOfficeControlledMutationPostDecisionApprovalBoundary, buildOfficeControlledMutationPostRegistryApprovalBoundary, buildOfficeControlledMutationTargetDispatchForbiddenBoundary, buildOfficeControlledMutationSafeContinuationCompletionReview, buildOfficeRpgScene } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
@@ -1239,6 +1239,46 @@ describe("NasKeeperRollbackEvidencePreviewPanel", () => {
     expect(markup).not.toContain("<select");
     expect(markup).not.toContain("<textarea");
     expect(markup).not.toMatch(/raw rollback evidence prompt|raw rollback evidence task|Traceback|\/Users\/lidises|token-shaped-rollback-evidence|private-rollback-evidence-provider/i);
+  });
+});
+
+
+describe("NasEvidencePackageStoreReadbackStatusPanel", () => {
+  it("NAS Evidence Package Store Readback Status 1 renders local metadata status without controls", () => {
+    const NasEvidencePackageStoreReadbackStatusPanel = (OfficePageModule as unknown as {
+      NasEvidencePackageStoreReadbackStatusPanel: React.ComponentType<{ status: ReturnType<typeof buildOfficeNasEvidencePackageStoreReadbackStatus> }>;
+    }).NasEvidencePackageStoreReadbackStatusPanel;
+    const secretSentinel = ["token", "shaped", "package", "store"].join("-");
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishPanelFixture({
+      agents: [{ id: "agent-package-store", status: "active", prompt: "raw package store prompt", provider: "private-package-store-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-package-store", status: "blocked", title: "raw package store task", body: "/Users/lidises/nas/private/package-store.md", transcript: "Traceback package store transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+    const trace = buildOfficeApprovalDecisionAuditNasTracePreview(envelope);
+    const gate = buildOfficeNasKeeperSaveRequestGate(trace);
+    const rollback = buildOfficeNasKeeperRollbackEvidencePreview(gate);
+    const status = buildOfficeNasEvidencePackageStoreReadbackStatus(rollback);
+
+    const markup = renderToStaticMarkup(<NasEvidencePackageStoreReadbackStatusPanel status={status} />);
+
+    expect(markup).toContain('data-office-nas-evidence-package-store-readback-status="true"');
+    expect(markup).toContain('data-office-nas-evidence-package-store-enabled-controls="0"');
+    expect(markup).toContain('data-office-nas-evidence-package-store-backend-api-changed="false"');
+    expect(markup).toContain('data-office-nas-evidence-package-store-storage-changed="false"');
+    expect(markup).toContain('data-office-nas-evidence-package-store-nas-path-resolution-enabled="false"');
+    expect(markup).toContain('data-office-nas-evidence-package-store-nas-mount-access-enabled="false"');
+    expect(markup).toContain('data-office-nas-evidence-package-store-nas-write-enabled="false"');
+    expect(markup).toContain('data-office-nas-evidence-package-store-capability="local_metadata_store"');
+    expect(markup).toContain('data-office-nas-evidence-package-store-capability="safe_readback"');
+    expect(markup).toContain('NAS evidence package store readback status');
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw package store prompt|raw package store task|Traceback|\/Users\/lidises|token-shaped-package-store|private-package-store-provider/i);
   });
 });
 

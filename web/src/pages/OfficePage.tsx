@@ -142,6 +142,7 @@ import {
   buildOfficeApprovalDecisionAuditNasTracePreview,
   buildOfficeNasKeeperSaveRequestGate,
   buildOfficeNasKeeperRollbackEvidencePreview,
+  buildOfficeNasEvidencePackageStoreReadbackStatus,
   buildOfficeDeskRpgReadOnlyChainCompletionReview,
   buildOfficeEventDrivenCharacterStateProjection,
   buildOfficeCharacterStateRoomOverlay,
@@ -187,6 +188,7 @@ import {
   type OfficeApprovalDecisionAuditNasTracePreview,
   type OfficeNasKeeperSaveRequestGate,
   type OfficeNasKeeperRollbackEvidencePreview,
+  type OfficeNasEvidencePackageStoreReadbackStatus,
   type OfficeDeskRpgReadOnlyChainCompletionReview,
   type OfficeControlledMutationContractPostureProjection,
   type OfficeControlledMutationContractPosturePolish,
@@ -3225,6 +3227,65 @@ export function NasKeeperRollbackEvidencePreviewPanel({ rollback }: { rollback: 
   );
 }
 
+export function NasEvidencePackageStoreReadbackStatusPanel({ status }: { status: OfficeNasEvidencePackageStoreReadbackStatus }) {
+  return (
+    <Card
+      data-office-nas-evidence-package-store-readback-status="true"
+      data-office-nas-evidence-package-store-enabled-controls={status.enabledControls}
+      data-office-nas-evidence-package-store-local-metadata-store-enabled={String(status.localMetadataStoreEnabled)}
+      data-office-nas-evidence-package-store-local-metadata-readback-enabled={String(status.localMetadataReadbackEnabled)}
+      data-office-nas-evidence-package-store-backend-api-changed={String(status.backendApiChanged)}
+      data-office-nas-evidence-package-store-storage-changed={String(status.storageChanged)}
+      data-office-nas-evidence-package-store-nas-path-resolution-enabled={String(status.nasPathResolutionEnabled)}
+      data-office-nas-evidence-package-store-nas-mount-access-enabled={String(status.nasMountAccessEnabled)}
+      data-office-nas-evidence-package-store-nas-write-enabled={String(status.nasWriteEnabled)}
+      data-office-nas-evidence-package-store-evidence-file-persistence-enabled={String(status.evidenceFilePersistenceEnabled)}
+      data-office-nas-evidence-package-store-rollback-point-created={String(status.rollbackPointCreated)}
+      data-office-nas-evidence-package-store-credential-access-enabled={String(status.credentialAccessEnabled)}
+      data-office-nas-evidence-package-store-audit-write-enabled={String(status.auditWriteEnabled)}
+      data-office-nas-evidence-package-store-dispatch-enabled={String(status.dispatchEnabled)}
+      data-office-nas-evidence-package-store-request-creation-enabled={String(status.requestCreationEnabled)}
+      data-office-nas-evidence-package-store-work-assignment-enabled={String(status.workAssignmentEnabled)}
+      data-office-nas-evidence-package-store-safe-projection-only={String(status.safeProjectionOnly)}
+      data-office-nas-evidence-package-store-raw-excluded={String(status.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Database className="h-4 w-4" /> NAS evidence package store readback status
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-cyan-300/20 bg-cyan-950/10 p-3">
+            <div className="font-semibold text-cyan-100">local metadata store · safe readback only</div>
+            <div className="mt-1 leading-5">
+              승인된 local metadata JSONL store/readback 상태만 화면에 고정합니다. 이 frontend slice는 backend/API/storage를 바꾸지 않고, NAS path resolution·mount access·write runtime은 계속 닫혀 있습니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {status.capabilities.map((capability) => (
+              <div
+                key={capability.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-nas-evidence-package-store-capability={capability.id}
+                data-office-nas-evidence-package-store-capability-status={capability.status}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{capability.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{capability.label}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-cyan-100/80">{capability.status}</div>
+                <div className="mt-2 leading-5">{capability.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-nas-evidence-package-store-boundary="true">
+            source {status.sourceDetailKind} · source evidence cards {status.sourceEvidenceCardCount} · capabilities {status.storeCapabilityCount} · controls {status.enabledControls} · local store {String(status.localMetadataStoreEnabled)} · readback {String(status.localMetadataReadbackEnabled)} · backend changed {String(status.backendApiChanged)} · NAS write {String(status.nasWriteEnabled)} · raw excluded {String(status.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function DeskRpgReadOnlyChainCompletionReviewPanel({ review }: { review: OfficeDeskRpgReadOnlyChainCompletionReview }) {
   return (
     <Card
@@ -4529,6 +4590,10 @@ export default function OfficePage() {
     () => buildOfficeNasKeeperRollbackEvidencePreview(nasKeeperSaveRequestGate),
     [nasKeeperSaveRequestGate],
   );
+  const nasEvidencePackageStoreReadbackStatus = useMemo(
+    () => buildOfficeNasEvidencePackageStoreReadbackStatus(nasKeeperRollbackEvidencePreview),
+    [nasKeeperRollbackEvidencePreview],
+  );
   const deskRpgReadOnlyChainCompletionReview = useMemo(
     () => buildOfficeDeskRpgReadOnlyChainCompletionReview(nasKeeperRollbackEvidencePreview),
     [nasKeeperRollbackEvidencePreview],
@@ -4837,6 +4902,8 @@ export default function OfficePage() {
       <NasKeeperSaveRequestGatePanel gate={nasKeeperSaveRequestGate} />
 
       <NasKeeperRollbackEvidencePreviewPanel rollback={nasKeeperRollbackEvidencePreview} />
+
+      <NasEvidencePackageStoreReadbackStatusPanel status={nasEvidencePackageStoreReadbackStatus} />
 
       <DeskRpgReadOnlyChainCompletionReviewPanel review={deskRpgReadOnlyChainCompletionReview} />
 

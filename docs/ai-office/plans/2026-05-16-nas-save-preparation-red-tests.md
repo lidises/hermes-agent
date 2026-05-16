@@ -422,6 +422,75 @@ Independent review: PASS, no security concern, logic error, or scope violation.
 
 No NAS path resolution, NAS mount access, actual NAS save/write/preparation runtime, evidence file persistence to NAS, rollback point creation, credential/auth/env change, target dispatch/runtime mutation, real authority adapter binding/dispatch, migration, VPS/NAS/Kanban/cron mutation, deploy/restart, push/PR/merge, or browser executable control was performed.
 
+## Frontend NAS Evidence Package Store Readback Status RED/GREEN
+
+Changed frontend files:
+
+- `web/src/pages/officeView.ts`
+- `web/src/pages/OfficePage.tsx`
+- `web/src/pages/OfficePage.test.ts`
+- `web/src/pages/OfficePage.rpg.test.tsx`
+
+The frontend-only RED tests define the approved boundary:
+
+- Future helper: `buildOfficeNasEvidencePackageStoreReadbackStatus(...)`.
+- Future panel: `NasEvidencePackageStoreReadbackStatusPanel`.
+- Read-only `/office` status surface only; no backend/API/storage changes.
+- Surface may display local metadata store/readback posture but must keep backendApiChanged/storageChanged false.
+- Keep NAS path resolution, NAS mount access, NAS write/save, evidence file persistence, rollback point creation, credentials, audit write, dispatch/request/work-assignment, and browser executable controls disabled.
+- Do not project raw prompt/task/transcript/path/provider/token values.
+
+RED command/result:
+
+```bash
+npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx -t "NAS Evidence Package Store Readback Status|nas-evidence-package-store"
+# 2 failed, 195 skipped
+```
+
+Expected RED failures were missing helper and missing panel.
+
+GREEN implementation:
+
+- `web/src/pages/officeView.ts`
+  - Added `OfficeNasEvidencePackageStoreCapability` and `OfficeNasEvidencePackageStoreReadbackStatus`.
+  - Added `buildOfficeNasEvidencePackageStoreReadbackStatus(...)`.
+- `web/src/pages/OfficePage.tsx`
+  - Added `NasEvidencePackageStoreReadbackStatusPanel`.
+  - Added a memoized read-only status surface after rollback evidence preview.
+- `web/src/pages/OfficePage.test.ts`
+  - Added helper-level safety/flag/raw-leak coverage.
+- `web/src/pages/OfficePage.rpg.test.tsx`
+  - Added static markup coverage proving no form/button/input/select/textarea controls and no raw leaks.
+
+GREEN verification:
+
+```bash
+npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx -t "NAS Evidence Package Store Readback Status|nas-evidence-package-store"
+# 2 passed, 195 skipped
+
+npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx
+# 197 passed
+
+npm run build
+# passed; existing Vite large chunk warning only
+```
+
+Frontend production safety scan:
+
+```text
+changed_files_frontend_only: true
+new_api_calls: 0
+new_browser_storage_calls: 0
+new_forms_or_controls: 0
+backend_or_api_files_changed: 0
+```
+
+Independent review: PASS, no security concern, logic error, or scope violation.
+
+## Safety / non-actions for frontend store/readback status slice
+
+No backend/schema/API route/service change, storage change, browser API/storage use, forms/buttons/inputs/selects/textareas, NAS path resolution, NAS mount access, actual NAS save/write/preparation runtime, evidence file persistence to NAS, rollback point creation, credential/auth/env change, target dispatch/runtime mutation, real authority adapter binding/dispatch, migration, VPS/NAS/Kanban/cron mutation, deploy/restart, push/PR/merge, or raw private value projection was performed.
+
 ## Next boundary
 
 A separate explicit approval is required before any of:

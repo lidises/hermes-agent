@@ -131,6 +131,7 @@ import {
   buildOfficeApprovalDecisionAuditNasTracePreview,
   buildOfficeNasKeeperSaveRequestGate,
   buildOfficeNasKeeperRollbackEvidencePreview,
+  buildOfficeNasEvidencePackageStoreReadbackStatus,
   buildOfficeDeskRpgReadOnlyChainCompletionReview,
   buildOfficeEventDrivenCharacterStateProjection,
   buildOfficeCharacterStateRoomOverlay,
@@ -1121,6 +1122,42 @@ describe("NAS Keeper Rollback Evidence Preview 1", () => {
     expect(rollback.safeProjectionOnly).toBe(true);
     expect(rollback.rawExcluded).toBe(true);
     expect(JSON.stringify(rollback)).not.toMatch(/raw rollback evidence prompt|raw rollback evidence task|Traceback|\/Users\/lidises|token-shaped-rollback-evidence|private-rollback-evidence-provider/i);
+  });
+});
+
+
+describe("NAS Evidence Package Store Readback Status 1", () => {
+  it("builds a frontend-only readback status surface without backend/storage mutation controls", () => {
+    const secretSentinel = ["token", "shaped", "package", "store"].join("-");
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishFixture({
+      agents: [{ id: "agent-package-store", status: "active", prompt: "raw evidence package store prompt", provider: "private-package-store-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-package-store", status: "blocked", title: "raw package store task", body: "/Users/lidises/nas/private/package-store.md", transcript: "Traceback package store transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+    const trace = buildOfficeApprovalDecisionAuditNasTracePreview(envelope);
+    const gate = buildOfficeNasKeeperSaveRequestGate(trace);
+    const rollback = buildOfficeNasKeeperRollbackEvidencePreview(gate);
+
+    const status = buildOfficeNasEvidencePackageStoreReadbackStatus(rollback);
+
+    expect(status.stageLabel).toBe("NAS Evidence Package Store Readback Status 1");
+    expect(status.detailKind).toBe("nas_evidence_package_store_readback_status");
+    expect(status.storeCapabilityCount).toBe(4);
+    expect(status.localMetadataStoreEnabled).toBe(true);
+    expect(status.localMetadataReadbackEnabled).toBe(true);
+    expect(status.enabledControls).toBe(0);
+    expect(status.backendApiChanged).toBe(false);
+    expect(status.storageChanged).toBe(false);
+    expect(status.nasPathResolutionEnabled).toBe(false);
+    expect(status.nasMountAccessEnabled).toBe(false);
+    expect(status.nasWriteEnabled).toBe(false);
+    expect(status.evidenceFilePersistenceEnabled).toBe(false);
+    expect(status.rollbackPointCreated).toBe(false);
+    expect(status.safeProjectionOnly).toBe(true);
+    expect(status.rawExcluded).toBe(true);
+    expect(JSON.stringify(status)).not.toMatch(/raw evidence package store prompt|raw package store task|Traceback|\/Users\/lidises|token-shaped-package-store|private-package-store-provider/i);
   });
 });
 
