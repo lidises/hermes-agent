@@ -1993,6 +1993,45 @@ export type OfficeNasEvidencePackageStoreReadbackStatus = {
   rawExcluded: true;
 };
 
+export type OfficeNasPathValidationCapability = {
+  id: "safe_validate_only" | "safe_slug_policy" | "runtime_disabled" | "next_mount_boundary";
+  label: string;
+  status: "available" | "guarded" | "disabled" | "approval_required";
+  summary: string;
+  rawExcluded: true;
+};
+
+export type OfficeNasPathValidationStatusSurface = {
+  stageLabel: "NAS Path Validation Status Surface 1";
+  title: string;
+  detailKind: "nas_path_validation_status_surface";
+  capabilities: OfficeNasPathValidationCapability[];
+  sourceDetailKind: OfficeNasEvidencePackageStoreReadbackStatus["detailKind"];
+  sourceCapabilityCount: number;
+  capabilityCount: number;
+  enabledControls: 0;
+  frontendOnly: true;
+  validationEnabled: true;
+  backendApiChanged: false;
+  storageChanged: false;
+  pathResolutionRuntimeEnabled: false;
+  vaultMappingEnabled: false;
+  mountDiscoveryEnabled: false;
+  nasMountAccessEnabled: false;
+  filesystemReadEnabled: false;
+  filesystemWriteEnabled: false;
+  nasWriteEnabled: false;
+  evidenceFilePersistenceEnabled: false;
+  rollbackPointCreated: false;
+  credentialAccessEnabled: false;
+  auditWriteEnabled: false;
+  dispatchEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeDeskRpgReadOnlyChainCompletionReviewCard = {
   id: "request_to_orchestrator" | "evidence_to_review" | "approval_to_nas_keeper" | "next_projection_gap";
   label: string;
@@ -4877,6 +4916,69 @@ export function buildOfficeNasEvidencePackageStoreReadbackStatus(rollback: Offic
     storageChanged: false,
     nasPathResolutionEnabled: false,
     nasMountAccessEnabled: false,
+    nasWriteEnabled: false,
+    evidenceFilePersistenceEnabled: false,
+    rollbackPointCreated: false,
+    credentialAccessEnabled: false,
+    auditWriteEnabled: false,
+    dispatchEnabled: false,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeNasPathValidationStatusSurface(store: OfficeNasEvidencePackageStoreReadbackStatus): OfficeNasPathValidationStatusSurface {
+  const capabilities: OfficeNasPathValidationCapability[] = [
+    {
+      id: "safe_validate_only",
+      label: "Safe validate-only DTO",
+      status: "available",
+      summary: "승인된 backend validator는 opaque refs, safe title, safe slug, timestamp만 검사합니다. 이 frontend surface는 상태만 표시합니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "safe_slug_policy",
+      label: "Safe slug policy",
+      status: "guarded",
+      summary: "Path-like, mount-like, token-like value는 validate layer에서 reject되며 UI에는 raw path가 투영되지 않습니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "runtime_disabled",
+      label: "Runtime resolution disabled",
+      status: "disabled",
+      summary: "Path resolution, vault mapping, mount discovery/access, filesystem read/write, NAS write는 모두 비활성입니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "next_mount_boundary",
+      label: "Next mount/write boundary",
+      status: "approval_required",
+      summary: "Runtime path resolution, mount access, evidence file persistence, rollback point creation, actual NAS write는 다음 명시 승인 전까지 금지입니다.",
+      rawExcluded: true,
+    },
+  ];
+  return {
+    stageLabel: "NAS Path Validation Status Surface 1",
+    title: "NAS path validation status surface",
+    detailKind: "nas_path_validation_status_surface",
+    capabilities,
+    sourceDetailKind: store.detailKind,
+    sourceCapabilityCount: store.storeCapabilityCount,
+    capabilityCount: capabilities.length,
+    enabledControls: 0,
+    frontendOnly: true,
+    validationEnabled: true,
+    backendApiChanged: false,
+    storageChanged: false,
+    pathResolutionRuntimeEnabled: false,
+    vaultMappingEnabled: false,
+    mountDiscoveryEnabled: false,
+    nasMountAccessEnabled: false,
+    filesystemReadEnabled: false,
+    filesystemWriteEnabled: false,
     nasWriteEnabled: false,
     evidenceFilePersistenceEnabled: false,
     rollbackPointCreated: false,

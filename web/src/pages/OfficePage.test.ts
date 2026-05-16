@@ -132,6 +132,7 @@ import {
   buildOfficeNasKeeperSaveRequestGate,
   buildOfficeNasKeeperRollbackEvidencePreview,
   buildOfficeNasEvidencePackageStoreReadbackStatus,
+  buildOfficeNasPathValidationStatusSurface,
   buildOfficeDeskRpgReadOnlyChainCompletionReview,
   buildOfficeEventDrivenCharacterStateProjection,
   buildOfficeCharacterStateRoomOverlay,
@@ -1158,6 +1159,53 @@ describe("NAS Evidence Package Store Readback Status 1", () => {
     expect(status.safeProjectionOnly).toBe(true);
     expect(status.rawExcluded).toBe(true);
     expect(JSON.stringify(status)).not.toMatch(/raw evidence package store prompt|raw package store task|Traceback|\/Users\/lidises|token-shaped-package-store|private-package-store-provider/i);
+  });
+});
+
+
+describe("NAS Path Validation Status Surface 1", () => {
+  it("builds a frontend-only read-only path validation status without backend/storage mutation controls", () => {
+    const secretSentinel = ["token", "shaped", "path", "validate"].join("-");
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishFixture({
+      agents: [{ id: "agent-path-validate", status: "active", prompt: "raw path validate prompt", provider: "private-path-validate-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-path-validate", status: "blocked", title: "raw path validate task", body: "/Users/lidises/nas/private/path-validate.md", transcript: "Traceback path validate transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+    const trace = buildOfficeApprovalDecisionAuditNasTracePreview(envelope);
+    const gate = buildOfficeNasKeeperSaveRequestGate(trace);
+    const rollback = buildOfficeNasKeeperRollbackEvidencePreview(gate);
+    const store = buildOfficeNasEvidencePackageStoreReadbackStatus(rollback);
+
+    const status = buildOfficeNasPathValidationStatusSurface(store);
+
+    expect(status.stageLabel).toBe("NAS Path Validation Status Surface 1");
+    expect(status.detailKind).toBe("nas_path_validation_status_surface");
+    expect(status.sourceDetailKind).toBe("nas_evidence_package_store_readback_status");
+    expect(status.validationEnabled).toBe(true);
+    expect(status.enabledControls).toBe(0);
+    expect(status.frontendOnly).toBe(true);
+    expect(status.backendApiChanged).toBe(false);
+    expect(status.storageChanged).toBe(false);
+    expect(status.pathResolutionRuntimeEnabled).toBe(false);
+    expect(status.vaultMappingEnabled).toBe(false);
+    expect(status.mountDiscoveryEnabled).toBe(false);
+    expect(status.nasMountAccessEnabled).toBe(false);
+    expect(status.filesystemReadEnabled).toBe(false);
+    expect(status.filesystemWriteEnabled).toBe(false);
+    expect(status.nasWriteEnabled).toBe(false);
+    expect(status.evidenceFilePersistenceEnabled).toBe(false);
+    expect(status.rollbackPointCreated).toBe(false);
+    expect(status.credentialAccessEnabled).toBe(false);
+    expect(status.auditWriteEnabled).toBe(false);
+    expect(status.dispatchEnabled).toBe(false);
+    expect(status.requestCreationEnabled).toBe(false);
+    expect(status.workAssignmentEnabled).toBe(false);
+    expect(status.safeProjectionOnly).toBe(true);
+    expect(status.rawExcluded).toBe(true);
+    expect(status.capabilityCount).toBe(4);
+    expect(JSON.stringify(status)).not.toMatch(/raw path validate prompt|raw path validate task|Traceback|\/Users\/lidises|token-shaped-path-validate|private-path-validate-provider/i);
   });
 });
 
