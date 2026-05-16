@@ -88,6 +88,17 @@ _DECISION_EVENT_FIELDS = {
     "decided_at",
 }
 _DECISION_EVENT_DECISIONS = {"approve", "reject", "hold"}
+_DRY_RUN_RESULT_EVENT_FIELDS = {
+    "result_id",
+    "request_id",
+    "correlation_id",
+    "simulated_by",
+    "simulation_status",
+    "safe_summary",
+    "evidence_refs",
+    "completed_at",
+}
+_DRY_RUN_RESULT_STATUSES = {"passed", "blocked", "warning"}
 _OPAQUE_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{2,119}$")
 _OPAQUE_REF_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_-]{1,40}:[A-Za-z0-9][A-Za-z0-9_.:-]{1,160}$")
 _SAFE_TEXT_RE = re.compile(r"^[^<>\\]{1,240}$")
@@ -537,6 +548,207 @@ def list_office_controlled_mutation_decision_events(
             "decision_readback_enabled": True,
             "human_decision_recording_enabled": True,
             "decision_append_enabled": True,
+            "duplicate_detection_enabled": True,
+            "request_filter_enabled": True,
+            "correlation_filter_enabled": True,
+            "malformed_line_resilience_enabled": True,
+            "dry_run_execution_enabled": False,
+            "authority_adapter_enabled": False,
+            "target_mutation_enabled": False,
+            "audit_write_enabled": False,
+            "nas_save_enabled": False,
+        },
+        "redaction": dict(_REDACTION_POSTURE),
+        "errors": errors,
+    }
+    if response_request_id is not None:
+        response["request_id"] = response_request_id
+    if response_correlation_id is not None:
+        response["correlation_id"] = response_correlation_id
+    return response
+
+
+
+def _default_dry_run_result_event_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "dry_run_results.jsonl"
+
+
+def validate_office_controlled_mutation_dry_run_result_event(payload: object) -> dict[str, object]:
+    """Validate a safe dry-run result DTO without executing a dry run."""
+
+    errors: list[dict[str, str]] = []
+    if not isinstance(payload, Mapping):
+        return {"valid": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+
+    if set(payload) - _DRY_RUN_RESULT_EVENT_FIELDS:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+
+    for field in sorted(_DRY_RUN_RESULT_EVENT_FIELDS):
+        if field not in payload:
+            errors.append(_error(field, "missing_field"))
+
+    if "result_id" in payload and not _is_opaque_id(payload.get("result_id")):
+        errors.append(_error("result_id", "invalid_opaque_id"))
+    if "request_id" in payload and not _is_opaque_id(payload.get("request_id")):
+        errors.append(_error("request_id", "invalid_opaque_id"))
+    if "correlation_id" in payload and not _is_opaque_id(payload.get("correlation_id")):
+        errors.append(_error("correlation_id", "invalid_opaque_id"))
+    if "simulated_by" in payload and not _is_opaque_ref(payload.get("simulated_by")):
+        errors.append(_error("simulated_by", "invalid_opaque_ref"))
+    if "evidence_refs" in payload and not _validate_evidence_refs(payload.get("evidence_refs")):
+        errors.append(_error("evidence_refs", "invalid_opaque_ref"))
+    if "simulation_status" in payload and payload.get("simulation_status") not in _DRY_RUN_RESULT_STATUSES:
+        errors.append(_error("simulation_status", "unsupported_simulation_status"))
+    if "safe_summary" in payload and not _is_safe_text(payload.get("safe_summary")):
+        errors.append(_error("safe_summary", "invalid_safe_text"))
+    if "completed_at" in payload and not (
+        isinstance(payload.get("completed_at"), str) and _ISO_UTC_RE.fullmatch(payload["completed_at"])
+    ):
+        errors.append(_error("completed_at", "invalid_timestamp"))
+
+    errors = sorted(errors, key=lambda item: (item["field"], item["code"]))
+    if errors:
+        return {"valid": False, "errors": errors, "dto": None}
+
+    dto = {
+        "schema_version": 1,
+        "mode": "validated_dry_run_result_event",
+        "result_id": payload["result_id"],
+        "request_id": payload["request_id"],
+        "correlation_id": payload["correlation_id"],
+        "simulated_by": payload["simulated_by"],
+        "simulation_status": payload["simulation_status"],
+        "safe_summary": payload["safe_summary"],
+        "evidence_refs": list(payload["evidence_refs"]),
+        "completed_at": payload["completed_at"],
+        "capabilities": {
+            "dry_run_result_storage_enabled": False,
+            "dry_run_result_readback_enabled": False,
+            "dry_run_execution_enabled": False,
+            "authority_adapter_enabled": False,
+            "target_mutation_enabled": False,
+            "audit_write_enabled": False,
+            "nas_save_enabled": False,
+        },
+        "redaction": dict(_REDACTION_POSTURE),
+    }
+    return {"valid": True, "errors": [], "dto": dto}
+
+
+def _with_dry_run_result_event_persistence_capabilities(dto: Mapping[str, Any]) -> dict[str, object]:
+    stored_dto = dict(dto)
+    capabilities = dict(stored_dto.get("capabilities", {}))
+    capabilities.update(
+        {
+            "dry_run_result_storage_enabled": True,
+            "dry_run_result_readback_enabled": True,
+            "dry_run_execution_enabled": False,
+            "authority_adapter_enabled": False,
+            "target_mutation_enabled": False,
+            "audit_write_enabled": False,
+            "nas_save_enabled": False,
+        }
+    )
+    stored_dto["capabilities"] = capabilities
+    return stored_dto
+
+
+def _normalize_stored_dry_run_result_event(item: object) -> dict[str, object] | None:
+    if not isinstance(item, Mapping):
+        return None
+    payload = {field: item.get(field) for field in _DRY_RUN_RESULT_EVENT_FIELDS if field in item}
+    validation = validate_office_controlled_mutation_dry_run_result_event(payload)
+    if not validation["valid"]:
+        return None
+    return _with_dry_run_result_event_persistence_capabilities(cast(Mapping[str, Any], validation["dto"]))
+
+
+def _read_dry_run_result_event_store(path: Path) -> tuple[list[dict[str, object]], int]:
+    events: list[dict[str, object]] = []
+    skipped_count = 0
+    if not path.exists():
+        return events, skipped_count
+
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped_count += 1
+                continue
+            normalized = _normalize_stored_dry_run_result_event(item)
+            if normalized is None:
+                skipped_count += 1
+                continue
+            events.append(normalized)
+    return events, skipped_count
+
+
+def append_office_controlled_mutation_dry_run_result_event(
+    payload: object, *, store_path: Path | None = None
+) -> dict[str, object]:
+    """Validate and append a safe dry-run result DTO without executing a dry run."""
+
+    validation = validate_office_controlled_mutation_dry_run_result_event(payload)
+    if not validation["valid"]:
+        return {"stored": False, "errors": validation["errors"], "dto": None}
+
+    dto = _with_dry_run_result_event_persistence_capabilities(cast(Mapping[str, Any], validation["dto"]))
+    path = store_path or _default_dry_run_result_event_store_path()
+    existing_events, _ = _read_dry_run_result_event_store(path)
+    if any(event.get("result_id") == dto["result_id"] for event in existing_events):
+        return {"stored": False, "errors": [_error("result_id", "duplicate_result_id")], "dto": None}
+    if any(event.get("request_id") == dto["request_id"] for event in existing_events):
+        return {"stored": False, "errors": [_error("request_id", "duplicate_request_dry_run_result")], "dto": None}
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(dto, sort_keys=True, separators=(",", ":")) + "\n")
+    return {"stored": True, "errors": [], "dto": dto}
+
+
+def list_office_controlled_mutation_dry_run_result_events(
+    *,
+    store_path: Path | None = None,
+    limit: int = 50,
+    request_id: str | None = None,
+    correlation_id: str | None = None,
+) -> dict[str, object]:
+    """Read back safe stored dry-run result DTOs without exposing raw inputs."""
+
+    path = store_path or _default_dry_run_result_event_store_path()
+    max_events = max(0, min(limit, 200))
+    events, skipped_count = _read_dry_run_result_event_store(path)
+    errors: list[dict[str, str]] = []
+    response_request_id: str | None = None
+    response_correlation_id: str | None = None
+
+    if request_id is not None:
+        if _is_opaque_id(request_id):
+            response_request_id = request_id
+            events = [event for event in events if event.get("request_id") == request_id]
+        else:
+            errors.append(_error("request_id", "invalid_opaque_id"))
+            events = []
+    if correlation_id is not None:
+        if _is_opaque_id(correlation_id):
+            response_correlation_id = correlation_id
+            events = [event for event in events if event.get("correlation_id") == correlation_id]
+        else:
+            errors.append(_error("correlation_id", "invalid_opaque_id"))
+            events = []
+
+    events = events[-max_events:] if max_events else []
+    response: dict[str, object] = {
+        "schema_version": 1,
+        "mode": "stored_dry_run_result_events_readback",
+        "count": len(events),
+        "limit": max_events,
+        "skipped_count": skipped_count,
+        "events": events,
+        "capabilities": {
+            "dry_run_result_readback_enabled": True,
+            "dry_run_result_storage_enabled": True,
             "duplicate_detection_enabled": True,
             "request_filter_enabled": True,
             "correlation_filter_enabled": True,

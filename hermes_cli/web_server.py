@@ -50,9 +50,11 @@ from hermes_cli.config import (
 from gateway.status import get_running_pid, read_runtime_status
 from hermes_cli.office_controlled_mutation import (
     append_office_controlled_mutation_decision_event,
+    append_office_controlled_mutation_dry_run_result_event,
     append_office_controlled_mutation_request_event,
     build_office_controlled_mutation_contract_schema,
     list_office_controlled_mutation_decision_events,
+    list_office_controlled_mutation_dry_run_result_events,
     list_office_controlled_mutation_request_events,
     validate_office_controlled_mutation_request_event,
 )
@@ -586,6 +588,24 @@ async def list_office_controlled_mutation_decisions(
 ):
     """Read back stored safe human decision DTOs from the local Hermes JSONL store."""
     return list_office_controlled_mutation_decision_events(
+        limit=limit,
+        request_id=request_id,
+        correlation_id=correlation_id,
+    )
+
+
+@app.post("/api/office/controlled-mutation/dry-run-result")
+async def append_office_controlled_mutation_dry_run_result(payload: Any = Body(None)):
+    """Append a validated safe dry-run result DTO without executing a dry run."""
+    return append_office_controlled_mutation_dry_run_result_event(payload)
+
+
+@app.get("/api/office/controlled-mutation/dry-run-results")
+async def list_office_controlled_mutation_dry_run_results(
+    limit: int = 50, request_id: str | None = None, correlation_id: str | None = None
+):
+    """Read back stored safe dry-run result DTOs from the local Hermes JSONL store."""
+    return list_office_controlled_mutation_dry_run_result_events(
         limit=limit,
         request_id=request_id,
         correlation_id=correlation_id,
