@@ -997,8 +997,110 @@ Safety / non-actions for docs/spec-only boundary:
 
 No tests, production code, backend/schema/API route/service change, storage change, browser API/storage call, browser executable control, runtime filesystem/NAS path resolution, vault mapping, NAS mount discovery/access, filesystem/NAS read/write, actual NAS save/write/preparation runtime, evidence file persistence to NAS, rollback point creation, credential/auth/env change, audit write, target dispatch/runtime mutation, real authority adapter binding/dispatch, migration, VPS/NAS/Kanban/cron mutation, deploy/restart, push/PR/merge, or raw private value projection was performed.
 
-Next explicit approval boundary:
+Next explicit approval boundary after N0:
 
 - N1 runtime RED tests only; or
 - N2 runtime capability contract/helper/route; or
 - any validation/runtime/mount/read/write implementation, deployment, push/PR, service/VPS/Kanban/cron mutation, or browser executable control.
+
+## NAS Runtime Boundary N1 RED Tests 1
+
+Approved scope: `N1 runtime RED tests only; no production code, no runtime/filesystem/NAS access`.
+
+Test file added:
+
+- `tests/hermes_cli/test_office_controlled_mutation_nas_runtime_boundary_contract.py`
+
+The N1 RED tests define only the future runtime capability boundary:
+
+- Future pure helper: `build_office_controlled_mutation_nas_runtime_boundary_contract(...)`.
+- Future protected JSON route: `GET /api/office/controlled-mutation/nas-runtime/schema`.
+- Route must be dashboard-session protected, not public, and not under `/api/plugins/`.
+- Authenticated response must be JSON, not SPA HTML fallback.
+- POST/PUT/PATCH/DELETE must remain rejected.
+- Contract must keep all runtime/filesystem/NAS/write/credential/audit/target/authority capabilities disabled by default.
+- Unsafe examples must be ignored so raw prompts, task bodies, transcripts, NAS/local paths, mount commands, source bodies, provider IDs, tokens, credentials, and numeric topic IDs never echo.
+
+RED command/result:
+
+```bash
+.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_runtime_boundary_contract.py -q -o 'addopts='
+# 3 failed, 2 passed in 0.45s
+```
+
+Expected RED failures:
+
+1. ImportError for missing `build_office_controlled_mutation_nas_runtime_boundary_contract`.
+2. ImportError for the same missing helper in the raw/private material no-echo test.
+3. Authenticated future route fell through to SPA HTML (`text/html; charset=utf-8`) instead of returning JSON.
+
+Expected passes:
+
+1. Unauthenticated route access was protected with 401.
+2. Common mutation methods were rejected with 404/405.
+
+Verification/scope checks:
+
+```bash
+git diff --check
+# passed
+```
+
+Safety / non-actions for N1 RED-only slice:
+
+No production code, backend/schema/API route/service implementation, storage/write path, browser API/storage call, browser executable control, runtime filesystem/NAS path resolution, vault mapping, NAS mount discovery/access, filesystem/NAS read/write, actual NAS save/write/preparation runtime, evidence file persistence, rollback point creation, credential/auth/env change, audit write, target dispatch/runtime mutation, real authority adapter binding/dispatch, migration, VPS/NAS/Kanban/cron mutation, deploy/restart, push/PR/merge, or raw private value projection was performed.
+
+## NAS Runtime Boundary Capability Contract 1
+
+Approved scope: `N2 runtime capability contract/helper + protected GET schema route; no runtime/filesystem/NAS access`.
+
+Production files changed after separate approval:
+
+- `hermes_cli/office_controlled_mutation.py`
+  - Added pure `build_office_controlled_mutation_nas_runtime_boundary_contract(...)` descriptor helper.
+  - The helper ignores `unsafe_examples` and returns fixed contract metadata only.
+  - All runtime/filesystem/NAS/write/credential/audit/target/authority capabilities remain false.
+- `hermes_cli/web_server.py`
+  - Added protected GET route `GET /api/office/controlled-mutation/nas-runtime/schema`.
+  - The route returns helper contract JSON and is protected by existing dashboard session-token middleware.
+
+GREEN verification:
+
+```bash
+.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_runtime_boundary_contract.py -q -o 'addopts='
+# 5 passed in 0.43s
+
+.venv/bin/python -m pytest tests/hermes_cli/test_office_api.py tests/hermes_cli/test_office_controlled_mutation_*.py -q -o 'addopts='
+# 152 passed in 1.17s
+
+.venv/bin/python -m py_compile hermes_cli/office_controlled_mutation.py hermes_cli/web_server.py
+# passed
+
+git diff --check
+# passed
+```
+
+Production safety scan:
+
+```text
+hardcoded_secret_assignment: 0
+dangerous_exec: 0
+storage_write_call: 0
+forbidden_runtime_fs_probe: 0
+mutation_route_under_nas_runtime: 0
+```
+
+Independent review: PASS after correcting the metadata clarity note so `approved_gate` now reports `N2_runtime_capability_contract`.
+
+Safety / non-actions for N2 contract slice:
+
+No local path mapping validation, runtime filesystem/NAS path resolution, vault mapping, NAS mount discovery/access, mount health check, filesystem/NAS read/write, actual NAS save/write/preparation runtime, evidence file persistence, rollback point creation, credential/auth/env change, audit write, target dispatch/runtime mutation, real authority adapter binding/dispatch, migration, VPS/NAS/Kanban/cron mutation, deploy/restart, push/PR/merge, browser executable control, or raw private value projection was performed.
+
+Next explicit approval boundary:
+
+- N3 local path mapping validate-only; or
+- N4 runtime path resolution dry-run; or
+- N5 mount health read-only; or
+- N6 evidence package files dry-run; or
+- N7 single package write with rollback; or
+- any credential/auth/env change, audit write, target dispatch/runtime mutation, deploy/restart/push/PR/merge, VPS/NAS/Kanban/cron mutation, browser executable control, or real filesystem/NAS access.
