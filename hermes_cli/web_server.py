@@ -50,6 +50,7 @@ from hermes_cli.config import (
 from gateway.status import get_running_pid, read_runtime_status
 from hermes_cli.office_controlled_mutation import (
     append_office_controlled_mutation_audit_event,
+    append_office_controlled_mutation_authority_adapter_registry_event,
     append_office_controlled_mutation_decision_event,
     append_office_controlled_mutation_dry_run_result_event,
     append_office_controlled_mutation_request_event,
@@ -57,6 +58,7 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_decision_events,
     list_office_controlled_mutation_dry_run_result_events,
     list_office_controlled_mutation_audit_events,
+    list_office_controlled_mutation_authority_adapter_registry_events,
     list_office_controlled_mutation_request_events,
     validate_office_controlled_mutation_request_event,
 )
@@ -633,6 +635,23 @@ async def list_office_controlled_mutation_audit(
         request_id=request_id,
         correlation_id=correlation_id,
         event_kind=event_kind,
+    )
+
+
+@app.post("/api/office/controlled-mutation/authority-adapter-registry")
+async def append_office_controlled_mutation_authority_adapter_registry(payload: Any = Body(None)):
+    """Append safe authority adapter registry metadata without credentials or dispatch."""
+    return append_office_controlled_mutation_authority_adapter_registry_event(payload)
+
+
+@app.get("/api/office/controlled-mutation/authority-adapter-registry")
+async def list_office_controlled_mutation_authority_adapter_registry(
+    limit: int = 50, adapter_kind: str | None = None
+):
+    """Read back stored safe authority adapter registry metadata from local Hermes JSONL."""
+    return list_office_controlled_mutation_authority_adapter_registry_events(
+        limit=limit,
+        adapter_kind=adapter_kind,
     )
 
 

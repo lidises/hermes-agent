@@ -110,6 +110,23 @@ _AUDIT_EVENT_FIELDS = {
     "recorded_at",
 }
 _AUDIT_EVENT_KINDS = {"request_recorded", "decision_recorded", "dry_run_result_recorded", "execution_blocked"}
+_AUTHORITY_REGISTRY_FIELDS = {
+    "adapter_ref",
+    "adapter_kind",
+    "authority_candidate_ref",
+    "registered_by",
+    "permission_posture",
+    "credential_posture",
+    "dispatch_posture",
+    "target_posture",
+    "safe_summary",
+    "evidence_refs",
+    "registered_at",
+}
+_AUTHORITY_REGISTRY_ADAPTER_KINDS = {"kanban_comment", "status_note", "read_only_projection"}
+_AUTHORITY_REGISTRY_PERMISSION_POSTURES = {"metadata_only", "blocked"}
+_AUTHORITY_REGISTRY_CREDENTIAL_POSTURES = {"not_configured", "blocked"}
+_AUTHORITY_REGISTRY_EXECUTION_POSTURES = {"blocked"}
 _OPAQUE_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{2,119}$")
 _OPAQUE_REF_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_-]{1,40}:[A-Za-z0-9][A-Za-z0-9_.:-]{1,160}$")
 _SAFE_TEXT_RE = re.compile(r"^[^<>\\]{1,240}$")
@@ -121,7 +138,13 @@ def _error(field: str, code: str) -> dict[str, str]:
 
 
 def _is_opaque_id(value: object) -> bool:
-    return isinstance(value, str) and bool(_OPAQUE_ID_RE.fullmatch(value)) and "/" not in value and ".." not in value
+    return (
+        isinstance(value, str)
+        and bool(_OPAQUE_ID_RE.fullmatch(value))
+        and "/" not in value
+        and ".." not in value
+        and not _has_raw_marker(value)
+    )
 
 
 def _has_raw_marker(value: str) -> bool:
@@ -1014,6 +1037,205 @@ def list_office_controlled_mutation_audit_events(
         response["correlation_id"] = response_correlation_id
     if response_event_kind is not None:
         response["event_kind"] = response_event_kind
+    return response
+
+
+
+def _default_authority_adapter_registry_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "authority_adapters.jsonl"
+
+
+def validate_office_controlled_mutation_authority_adapter_registry_event(payload: object) -> dict[str, object]:
+    """Validate safe authority adapter registry metadata without credentials or binding."""
+
+    errors: list[dict[str, str]] = []
+    if not isinstance(payload, Mapping):
+        return {"valid": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+
+    if set(payload) - _AUTHORITY_REGISTRY_FIELDS:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+    for field in sorted(_AUTHORITY_REGISTRY_FIELDS):
+        if field not in payload:
+            errors.append(_error(field, "missing_field"))
+
+    if "adapter_ref" in payload and not _is_opaque_id(payload.get("adapter_ref")):
+        errors.append(_error("adapter_ref", "invalid_opaque_id"))
+    if "authority_candidate_ref" in payload and not _is_opaque_id(payload.get("authority_candidate_ref")):
+        errors.append(_error("authority_candidate_ref", "invalid_opaque_id"))
+    if "registered_by" in payload and not _is_opaque_ref(payload.get("registered_by")):
+        errors.append(_error("registered_by", "invalid_opaque_ref"))
+    if "evidence_refs" in payload and not _validate_evidence_refs(payload.get("evidence_refs")):
+        errors.append(_error("evidence_refs", "invalid_opaque_ref"))
+    if "adapter_kind" in payload and payload.get("adapter_kind") not in _AUTHORITY_REGISTRY_ADAPTER_KINDS:
+        errors.append(_error("adapter_kind", "unsupported_adapter_kind"))
+    if "permission_posture" in payload and payload.get("permission_posture") not in _AUTHORITY_REGISTRY_PERMISSION_POSTURES:
+        errors.append(_error("permission_posture", "unsupported_permission_posture"))
+    if "credential_posture" in payload and payload.get("credential_posture") not in _AUTHORITY_REGISTRY_CREDENTIAL_POSTURES:
+        errors.append(_error("credential_posture", "unsupported_credential_posture"))
+    if "dispatch_posture" in payload and payload.get("dispatch_posture") not in _AUTHORITY_REGISTRY_EXECUTION_POSTURES:
+        errors.append(_error("dispatch_posture", "unsupported_dispatch_posture"))
+    if "target_posture" in payload and payload.get("target_posture") not in _AUTHORITY_REGISTRY_EXECUTION_POSTURES:
+        errors.append(_error("target_posture", "unsupported_target_posture"))
+    if "safe_summary" in payload and not _is_safe_text(payload.get("safe_summary")):
+        errors.append(_error("safe_summary", "invalid_safe_text"))
+    if "registered_at" in payload and not (
+        isinstance(payload.get("registered_at"), str) and _ISO_UTC_RE.fullmatch(payload["registered_at"])
+    ):
+        errors.append(_error("registered_at", "invalid_timestamp"))
+
+    errors = sorted(errors, key=lambda item: (item["field"], item["code"]))
+    if errors:
+        return {"valid": False, "errors": errors, "dto": None}
+
+    dto = {
+        "schema_version": 1,
+        "mode": "validated_authority_adapter_registry_event",
+        "adapter_ref": payload["adapter_ref"],
+        "adapter_kind": payload["adapter_kind"],
+        "authority_candidate_ref": payload["authority_candidate_ref"],
+        "registered_by": payload["registered_by"],
+        "permission_posture": payload["permission_posture"],
+        "credential_posture": payload["credential_posture"],
+        "dispatch_posture": payload["dispatch_posture"],
+        "target_posture": payload["target_posture"],
+        "safe_summary": payload["safe_summary"],
+        "evidence_refs": list(payload["evidence_refs"]),
+        "registered_at": payload["registered_at"],
+        "capabilities": {
+            "adapter_registry_storage_enabled": False,
+            "adapter_registry_readback_enabled": False,
+            "adapter_implementation_enabled": False,
+            "adapter_binding_enabled": False,
+            "adapter_dispatch_enabled": False,
+            "credential_access_enabled": False,
+            "target_mutation_enabled": False,
+            "dry_run_execution_enabled": False,
+            "audit_write_enabled": False,
+            "nas_save_enabled": False,
+        },
+        "redaction": dict(_REDACTION_POSTURE),
+    }
+    return {"valid": True, "errors": [], "dto": dto}
+
+
+def _with_authority_registry_persistence_capabilities(dto: Mapping[str, Any]) -> dict[str, object]:
+    stored_dto = dict(dto)
+    capabilities = dict(stored_dto.get("capabilities", {}))
+    capabilities.update(
+        {
+            "adapter_registry_storage_enabled": True,
+            "adapter_registry_readback_enabled": True,
+            "adapter_implementation_enabled": False,
+            "adapter_binding_enabled": False,
+            "adapter_dispatch_enabled": False,
+            "credential_access_enabled": False,
+            "target_mutation_enabled": False,
+            "dry_run_execution_enabled": False,
+            "audit_write_enabled": False,
+            "nas_save_enabled": False,
+        }
+    )
+    stored_dto["capabilities"] = capabilities
+    return stored_dto
+
+
+def _normalize_stored_authority_registry_event(item: object) -> dict[str, object] | None:
+    if not isinstance(item, Mapping):
+        return None
+    payload = {field: item.get(field) for field in _AUTHORITY_REGISTRY_FIELDS if field in item}
+    validation = validate_office_controlled_mutation_authority_adapter_registry_event(payload)
+    if not validation["valid"]:
+        return None
+    return _with_authority_registry_persistence_capabilities(cast(Mapping[str, Any], validation["dto"]))
+
+
+def _read_authority_registry_store(path: Path) -> tuple[list[dict[str, object]], int]:
+    events: list[dict[str, object]] = []
+    skipped_count = 0
+    if not path.exists():
+        return events, skipped_count
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped_count += 1
+                continue
+            normalized = _normalize_stored_authority_registry_event(item)
+            if normalized is None:
+                skipped_count += 1
+                continue
+            events.append(normalized)
+    return events, skipped_count
+
+
+def append_office_controlled_mutation_authority_adapter_registry_event(
+    payload: object, *, store_path: Path | None = None
+) -> dict[str, object]:
+    """Validate and append safe authority adapter registry metadata only."""
+
+    validation = validate_office_controlled_mutation_authority_adapter_registry_event(payload)
+    if not validation["valid"]:
+        return {"stored": False, "errors": validation["errors"], "dto": None}
+    dto = _with_authority_registry_persistence_capabilities(cast(Mapping[str, Any], validation["dto"]))
+    path = store_path or _default_authority_adapter_registry_store_path()
+    existing_events, _ = _read_authority_registry_store(path)
+    if any(event.get("adapter_ref") == dto["adapter_ref"] for event in existing_events):
+        return {"stored": False, "errors": [_error("adapter_ref", "duplicate_adapter_ref")], "dto": None}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(dto, sort_keys=True, separators=(",", ":")) + "\n")
+    return {"stored": True, "errors": [], "dto": dto}
+
+
+def list_office_controlled_mutation_authority_adapter_registry_events(
+    *,
+    store_path: Path | None = None,
+    limit: int = 50,
+    adapter_kind: str | None = None,
+) -> dict[str, object]:
+    """Read back safe authority adapter registry metadata only."""
+
+    path = store_path or _default_authority_adapter_registry_store_path()
+    max_events = max(0, min(limit, 200))
+    events, skipped_count = _read_authority_registry_store(path)
+    errors: list[dict[str, str]] = []
+    response_adapter_kind: str | None = None
+    if adapter_kind is not None:
+        if adapter_kind in _AUTHORITY_REGISTRY_ADAPTER_KINDS:
+            response_adapter_kind = adapter_kind
+            events = [event for event in events if event.get("adapter_kind") == adapter_kind]
+        else:
+            errors.append(_error("adapter_kind", "unsupported_adapter_kind"))
+            events = []
+    events = events[-max_events:] if max_events else []
+    response: dict[str, object] = {
+        "schema_version": 1,
+        "mode": "stored_authority_adapter_registry_events_readback",
+        "count": len(events),
+        "limit": max_events,
+        "skipped_count": skipped_count,
+        "events": events,
+        "capabilities": {
+            "adapter_registry_readback_enabled": True,
+            "adapter_registry_storage_enabled": True,
+            "duplicate_detection_enabled": True,
+            "adapter_kind_filter_enabled": True,
+            "malformed_line_resilience_enabled": True,
+            "adapter_implementation_enabled": False,
+            "adapter_binding_enabled": False,
+            "adapter_dispatch_enabled": False,
+            "credential_access_enabled": False,
+            "target_mutation_enabled": False,
+            "dry_run_execution_enabled": False,
+            "audit_write_enabled": False,
+            "nas_save_enabled": False,
+        },
+        "redaction": dict(_REDACTION_POSTURE),
+        "errors": errors,
+    }
+    if response_adapter_kind is not None:
+        response["adapter_kind"] = response_adapter_kind
     return response
 
 
