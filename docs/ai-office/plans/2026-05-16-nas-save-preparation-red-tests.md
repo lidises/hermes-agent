@@ -491,6 +491,69 @@ Independent review: PASS, no security concern, logic error, or scope violation.
 
 No backend/schema/API route/service change, storage change, browser API/storage use, forms/buttons/inputs/selects/textareas, NAS path resolution, NAS mount access, actual NAS save/write/preparation runtime, evidence file persistence to NAS, rollback point creation, credential/auth/env change, target dispatch/runtime mutation, real authority adapter binding/dispatch, migration, VPS/NAS/Kanban/cron mutation, deploy/restart, push/PR/merge, or raw private value projection was performed.
 
+## NAS Path Resolution Contract RED/GREEN
+
+Additional test file:
+
+- `tests/hermes_cli/test_office_controlled_mutation_nas_path_resolution_contract.py`
+
+The path resolution contract RED tests define the approved boundary:
+
+- Future helper: `build_office_controlled_mutation_nas_path_resolution_contract(...)`.
+- Future protected route: `GET /api/office/controlled-mutation/nas-path-resolution/schema`.
+- Contract metadata only: no path validation, runtime path resolution, vault mapping, mount discovery/access, filesystem read/write, NAS save/write, storage/readback, evidence persistence, rollback point creation, credentials, audit write, target mutation, or dry-run execution.
+- No POST/PUT/PATCH/DELETE route on the schema path.
+- Unsafe raw prompt/task/transcript/path/provider/token/credential/mount-command examples must not echo.
+
+RED command/result:
+
+```bash
+.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_path_resolution_contract.py -q -o 'addopts='
+# 3 failed, 2 passed in 0.54s
+```
+
+Expected RED failures were missing helper imports and SPA HTML fallback for the missing protected route.
+
+GREEN implementation:
+
+- `hermes_cli/office_controlled_mutation.py`
+  - Added `build_office_controlled_mutation_nas_path_resolution_contract(...)`.
+- `hermes_cli/web_server.py`
+  - Imported the helper.
+  - Added protected `GET /api/office/controlled-mutation/nas-path-resolution/schema`.
+
+GREEN verification:
+
+```bash
+.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_path_resolution_contract.py -q -o 'addopts='
+# 5 passed in 0.43s
+
+.venv/bin/python -m pytest tests/hermes_cli/test_office_api.py tests/hermes_cli/test_office_controlled_mutation_*.py -q -o 'addopts='
+# 130 passed in 1.11s
+
+.venv/bin/python -m py_compile hermes_cli/office_controlled_mutation.py hermes_cli/web_server.py
+# passed
+
+git diff --check
+# passed
+```
+
+Path contract production safety scan:
+
+```text
+runtime_filesystem_or_mount_calls_added: 0
+runtime_network_calls_added: 0
+credential_capability_enabled: 0
+storage_or_readback_added: 0
+mutation_methods_added_for_schema_path: 0
+```
+
+Independent review: PASS, no security concern, logic error, or scope violation.
+
+## Safety / non-actions for NAS path resolution contract slice
+
+No path validation/runtime path resolution, NAS mount discovery/access, filesystem read/write, NAS save/write/preparation runtime, evidence file persistence, rollback point creation, storage/readback path, credential/auth/env change, audit write, target dispatch/runtime mutation, real authority adapter binding/dispatch, migration, VPS/NAS/Kanban/cron mutation, deploy/restart, push/PR/merge, browser executable control, or raw private value projection was performed.
+
 ## Next boundary
 
 A separate explicit approval is required before any of:

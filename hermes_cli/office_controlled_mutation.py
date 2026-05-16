@@ -1797,6 +1797,80 @@ def build_office_controlled_mutation_nas_evidence_package_contract(
     }
 
 
+def build_office_controlled_mutation_nas_path_resolution_contract(
+    *, unsafe_examples: Mapping[str, Any] | None = None
+) -> dict[str, object]:
+    """Return the non-runtime NAS path resolution contract descriptor."""
+
+    _ = unsafe_examples
+    return {
+        "schema_version": 1,
+        "mode": "nas_path_resolution_contract_only",
+        "required_path_fields": [
+            "path_resolution_ref",
+            "package_ref",
+            "target_vault_ref",
+            "proposed_path_ref",
+            "safe_title",
+            "safe_slug",
+            "path_policy_ref",
+            "created_by",
+            "created_at",
+        ],
+        "path_resolution": {
+            "contract_enabled": True,
+            "path_validation_enabled": False,
+            "path_resolution_enabled": False,
+            "vault_mapping_enabled": False,
+            "mount_discovery_enabled": False,
+            "mount_access_enabled": False,
+            "filesystem_read_enabled": False,
+            "filesystem_write_enabled": False,
+            "nas_save_preparation_enabled": False,
+            "nas_save_enabled": False,
+            "nas_write_enabled": False,
+            "evidence_file_persistence_enabled": False,
+            "rollback_point_creation_enabled": False,
+            "database_migration_required": False,
+        },
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "opaque_refs_only": True,
+            "safe_path_refs_only": True,
+            "unsupported_values_echoed": False,
+        },
+        "capabilities": {
+            "path_validation_enabled": False,
+            "nas_path_resolution_enabled": False,
+            "vault_mapping_enabled": False,
+            "mount_discovery_enabled": False,
+            "nas_mount_access_enabled": False,
+            "filesystem_read_enabled": False,
+            "filesystem_write_enabled": False,
+            "nas_save_preparation_enabled": False,
+            "nas_save_enabled": False,
+            "nas_write_enabled": False,
+            "evidence_file_persistence_enabled": False,
+            "rollback_point_creation_enabled": False,
+            "storage_write_enabled": False,
+            "credential_access_enabled": False,
+            "audit_write_enabled": False,
+            "event_append_enabled": False,
+            "target_mutation_enabled": False,
+            "authority_binding_enabled": False,
+            "dry_run_execution_enabled": False,
+        },
+        "path_resolution_endpoints": [],
+        "mount_endpoints": [],
+        "filesystem_endpoints": [],
+        "contract_notes": [
+            "contract describes future NAS path resolution metadata only; no path is resolved and no mount is accessed",
+            "actual path validation, path resolution, mount discovery/access, filesystem read/write, NAS save, and NAS write require separate approval",
+        ],
+    }
+
+
 def validate_office_controlled_mutation_nas_save_preparation(payload: object) -> dict[str, object]:
     """Validate a safe, non-persisted NAS save/write preparation DTO."""
 

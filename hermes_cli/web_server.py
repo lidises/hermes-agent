@@ -57,6 +57,7 @@ from hermes_cli.office_controlled_mutation import (
     append_office_controlled_mutation_request_event,
     build_office_controlled_mutation_contract_schema,
     build_office_controlled_mutation_nas_evidence_package_contract,
+    build_office_controlled_mutation_nas_path_resolution_contract,
     build_office_controlled_mutation_nas_save_preparation_contract,
     list_office_controlled_mutation_decision_events,
     list_office_controlled_mutation_dry_run_result_events,
@@ -578,6 +579,12 @@ async def get_office_controlled_mutation_nas_save_preparation_schema():
 async def get_office_controlled_mutation_nas_evidence_package_schema():
     """Return the non-writing NAS evidence package contract."""
     return build_office_controlled_mutation_nas_evidence_package_contract()
+
+
+@app.get("/api/office/controlled-mutation/nas-path-resolution/schema")
+async def get_office_controlled_mutation_nas_path_resolution_schema():
+    """Return the non-runtime NAS path resolution contract."""
+    return build_office_controlled_mutation_nas_path_resolution_contract()
 
 
 @app.post("/api/office/controlled-mutation/nas-save-preparation/validate")
