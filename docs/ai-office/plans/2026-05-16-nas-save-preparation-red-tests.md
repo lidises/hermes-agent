@@ -956,3 +956,49 @@ A separate explicit approval is required before any of:
 - Target dispatch/runtime mutation.
 - Real authority adapter binding/dispatch.
 - Migration, VPS/NAS/Kanban/cron mutation, deploy/restart, push/PR/merge, or browser executable controls.
+
+
+## NAS Runtime Boundary Contract docs/spec-only slice
+
+Approved scope: `docs/spec only for actual NAS mount/write runtime boundary; no tests/production code`.
+
+Documentation added:
+
+- `docs/ai-office/architecture/nas-runtime-boundary-contract.md`
+
+Handoff docs updated:
+
+- `docs/ai-office/NEXT.md`
+- `docs/ai-office/STATUS.md`
+
+Contract summary:
+
+- Defines the NAS runtime ladder N0-N7: `contract_only`, `runtime_red_tests_only`, `runtime_capability_contract`, `local_path_mapping_validate_only`, `runtime_path_resolution_dry_run`, `mount_health_read_only`, `evidence_package_files_dry_run`, and `single_package_write_with_rollback`.
+- Records that only N0 is approved by this slice.
+- Keeps N1-N7 separately approval-gated.
+- Preserves standing exclusions: no direct VPS NAS mount/direct NAS credentials by default, no raw NAS/local paths or private material in browser DTOs/prompts/logs, and no runtime filesystem/NAS behavior without separate approval.
+
+Verification:
+
+```bash
+git diff --name-only
+# docs/ai-office/NEXT.md
+# docs/ai-office/STATUS.md
+# docs/ai-office/architecture/nas-runtime-boundary-contract.md
+# docs/ai-office/plans/2026-05-16-nas-save-preparation-red-tests.md
+
+git diff --check
+# passed
+```
+
+Independent review: PASS for docs-only scope, boundary clarity, and no accidental permission to implement tests/production code/runtime behavior.
+
+Safety / non-actions for docs/spec-only boundary:
+
+No tests, production code, backend/schema/API route/service change, storage change, browser API/storage call, browser executable control, runtime filesystem/NAS path resolution, vault mapping, NAS mount discovery/access, filesystem/NAS read/write, actual NAS save/write/preparation runtime, evidence file persistence to NAS, rollback point creation, credential/auth/env change, audit write, target dispatch/runtime mutation, real authority adapter binding/dispatch, migration, VPS/NAS/Kanban/cron mutation, deploy/restart, push/PR/merge, or raw private value projection was performed.
+
+Next explicit approval boundary:
+
+- N1 runtime RED tests only; or
+- N2 runtime capability contract/helper/route; or
+- any validation/runtime/mount/read/write implementation, deployment, push/PR, service/VPS/Kanban/cron mutation, or browser executable control.
