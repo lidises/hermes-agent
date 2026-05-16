@@ -157,9 +157,21 @@ _NAS_EVIDENCE_PACKAGE_FIELDS = {
     "created_by",
     "created_at",
 }
+_NAS_PATH_RESOLUTION_FIELDS = {
+    "path_resolution_ref",
+    "package_ref",
+    "target_vault_ref",
+    "proposed_path_ref",
+    "safe_title",
+    "safe_slug",
+    "path_policy_ref",
+    "created_by",
+    "created_at",
+}
 _OPAQUE_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{2,119}$")
 _OPAQUE_REF_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_-]{1,40}:[A-Za-z0-9][A-Za-z0-9_.:-]{1,160}$")
 _SAFE_TEXT_RE = re.compile(r"^[^<>\\]{1,240}$")
+_SAFE_SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9-]{1,119}$")
 _ISO_UTC_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
 
 
@@ -182,6 +194,9 @@ def _has_raw_marker(value: str) -> bool:
     raw_markers = (
         "traceback",
         "/users/",
+        "/mnt/",
+        "smb://",
+        "mount -t",
         "token",
         "provider",
         "password",
@@ -1869,6 +1884,86 @@ def build_office_controlled_mutation_nas_path_resolution_contract(
             "actual path validation, path resolution, mount discovery/access, filesystem read/write, NAS save, and NAS write require separate approval",
         ],
     }
+
+
+def validate_office_controlled_mutation_nas_path_resolution(payload: object) -> dict[str, object]:
+    """Validate a safe, non-runtime NAS path resolution DTO."""
+
+    errors: list[dict[str, str]] = []
+    if not isinstance(payload, Mapping):
+        return {"valid": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+
+    if set(payload) - _NAS_PATH_RESOLUTION_FIELDS:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+
+    for field in sorted(_NAS_PATH_RESOLUTION_FIELDS):
+        if field not in payload:
+            errors.append(_error(field, "missing_field"))
+
+    for field in (
+        "path_resolution_ref",
+        "package_ref",
+        "target_vault_ref",
+        "proposed_path_ref",
+        "path_policy_ref",
+        "created_by",
+    ):
+        if field in payload and not _is_opaque_id(payload.get(field)):
+            errors.append(_error(field, "invalid_opaque_id"))
+    if "safe_title" in payload and not _is_safe_text(payload.get("safe_title")):
+        errors.append(_error("safe_title", "invalid_safe_text"))
+    if "safe_slug" in payload and not (
+        isinstance(payload.get("safe_slug"), str)
+        and _SAFE_SLUG_RE.fullmatch(payload["safe_slug"])
+        and not _has_raw_marker(payload["safe_slug"])
+        and ".." not in payload["safe_slug"]
+        and "/" not in payload["safe_slug"]
+    ):
+        errors.append(_error("safe_slug", "invalid_safe_slug"))
+    if "created_at" in payload and not (
+        isinstance(payload.get("created_at"), str) and _ISO_UTC_RE.fullmatch(payload["created_at"])
+    ):
+        errors.append(_error("created_at", "invalid_timestamp"))
+
+    errors = sorted(errors, key=lambda item: (item["field"], item["code"]))
+    if errors:
+        return {"valid": False, "errors": errors, "dto": None}
+
+    dto = {
+        "schema_version": 1,
+        "mode": "validated_nas_path_resolution",
+        "path_resolution_ref": payload["path_resolution_ref"],
+        "package_ref": payload["package_ref"],
+        "target_vault_ref": payload["target_vault_ref"],
+        "proposed_path_ref": payload["proposed_path_ref"],
+        "safe_title": payload["safe_title"],
+        "safe_slug": payload["safe_slug"],
+        "path_policy_ref": payload["path_policy_ref"],
+        "created_by": payload["created_by"],
+        "created_at": payload["created_at"],
+        "capabilities": {
+            "validation_enabled": True,
+            "path_resolution_enabled": False,
+            "vault_mapping_enabled": False,
+            "mount_discovery_enabled": False,
+            "mount_access_enabled": False,
+            "filesystem_read_enabled": False,
+            "filesystem_write_enabled": False,
+            "nas_save_preparation_enabled": False,
+            "nas_save_enabled": False,
+            "nas_write_enabled": False,
+            "evidence_file_persistence_enabled": False,
+            "rollback_point_creation_enabled": False,
+            "storage_write_enabled": False,
+            "credential_access_enabled": False,
+            "audit_write_enabled": False,
+            "event_append_enabled": False,
+            "target_mutation_enabled": False,
+            "authority_binding_enabled": False,
+            "dry_run_execution_enabled": False,
+        },
+    }
+    return {"valid": True, "errors": [], "dto": dto}
 
 
 def validate_office_controlled_mutation_nas_save_preparation(payload: object) -> dict[str, object]:

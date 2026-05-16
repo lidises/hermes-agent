@@ -554,6 +554,72 @@ Independent review: PASS, no security concern, logic error, or scope violation.
 
 No path validation/runtime path resolution, NAS mount discovery/access, filesystem read/write, NAS save/write/preparation runtime, evidence file persistence, rollback point creation, storage/readback path, credential/auth/env change, audit write, target dispatch/runtime mutation, real authority adapter binding/dispatch, migration, VPS/NAS/Kanban/cron mutation, deploy/restart, push/PR/merge, browser executable control, or raw private value projection was performed.
 
+## NAS Path Validation Validate-Only DTO RED/GREEN
+
+Additional test file:
+
+- `tests/hermes_cli/test_office_controlled_mutation_nas_path_resolution_validate.py`
+
+The path validation RED tests define the approved boundary:
+
+- Future helper: `validate_office_controlled_mutation_nas_path_resolution(...)`.
+- Future protected route: `POST /api/office/controlled-mutation/nas-path-resolution/validate`.
+- Validate-only DTO: allowlisted safe opaque IDs, safe title, safe slug, and timestamp only.
+- Runtime capabilities remain disabled: path resolution, vault mapping, mount discovery/access, filesystem read/write, NAS save/write, storage/readback, evidence persistence, rollback point creation, credentials, audit write, target mutation, authority binding, and dry-run execution.
+- Unsupported raw prompt/task/transcript/path/provider/token/credential/mount-command values are rejected without echo.
+- No schema mutation methods, persistence routes, readback routes, or NAS access.
+
+RED command/result:
+
+```bash
+.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_path_resolution_validate.py -q -o 'addopts='
+# 5 failed, 1 passed in 0.44s
+```
+
+Expected RED failures were missing helper/import and missing validate route. One test harness issue (`TestClient.delete(..., json=...)`) was fixed before GREEN.
+
+GREEN implementation:
+
+- `hermes_cli/office_controlled_mutation.py`
+  - Added `_NAS_PATH_RESOLUTION_FIELDS` and `_SAFE_SLUG_RE`.
+  - Tightened shared raw-marker rejection for `/mnt/`, `smb://`, and `mount -t`.
+  - Added `validate_office_controlled_mutation_nas_path_resolution(...)`.
+- `hermes_cli/web_server.py`
+  - Imported the validator.
+  - Added protected `POST /api/office/controlled-mutation/nas-path-resolution/validate`.
+
+GREEN verification:
+
+```bash
+.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_path_resolution_validate.py -q -o 'addopts='
+# 6 passed in 0.43s
+
+.venv/bin/python -m pytest tests/hermes_cli/test_office_api.py tests/hermes_cli/test_office_controlled_mutation_*.py -q -o 'addopts='
+# 136 passed in 1.11s
+
+.venv/bin/python -m py_compile hermes_cli/office_controlled_mutation.py hermes_cli/web_server.py
+# passed
+
+git diff --check
+# passed
+```
+
+Path validation production safety scan:
+
+```text
+runtime_filesystem_or_mount_calls_added: 0
+runtime_network_calls_added: 0
+forbidden_runtime_capability_enabled: 0
+storage_or_readback_added: 0
+schema_mutation_methods_added: 0
+```
+
+Independent review: PASS, no blocking security concern, logic error, or scope violation. Minor note: the new raw markers tighten every validator using `_has_raw_marker`, not only this new validator.
+
+## Safety / non-actions for NAS path validation slice
+
+No runtime path resolution, vault mapping, NAS mount discovery/access, filesystem read/write, NAS save/write/preparation runtime, evidence file persistence, rollback point creation, storage/readback path, credential/auth/env change, audit write, target dispatch/runtime mutation, real authority adapter binding/dispatch, migration, VPS/NAS/Kanban/cron mutation, deploy/restart, push/PR/merge, browser executable control, or raw private value projection was performed.
+
 ## Next boundary
 
 A separate explicit approval is required before any of:
