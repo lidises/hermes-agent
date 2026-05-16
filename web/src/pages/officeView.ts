@@ -2032,6 +2032,46 @@ export type OfficeNasPathValidationStatusSurface = {
   rawExcluded: true;
 };
 
+export type OfficeNasPathPreviewCapability = {
+  id: "safe_preview_only" | "safe_logical_path" | "runtime_disabled" | "next_filesystem_boundary";
+  label: string;
+  status: "available" | "guarded" | "disabled" | "approval_required";
+  summary: string;
+  rawExcluded: true;
+};
+
+export type OfficeNasPathPreviewStatusSurface = {
+  stageLabel: "NAS Path Preview Status Surface 1";
+  title: string;
+  detailKind: "nas_path_preview_status_surface";
+  capabilities: OfficeNasPathPreviewCapability[];
+  sourceDetailKind: OfficeNasPathValidationStatusSurface["detailKind"];
+  sourceCapabilityCount: number;
+  capabilityCount: number;
+  enabledControls: 0;
+  frontendOnly: true;
+  validationEnabled: true;
+  previewEnabled: true;
+  backendApiChanged: false;
+  storageChanged: false;
+  pathResolutionRuntimeEnabled: false;
+  vaultMappingEnabled: false;
+  mountDiscoveryEnabled: false;
+  nasMountAccessEnabled: false;
+  filesystemReadEnabled: false;
+  filesystemWriteEnabled: false;
+  nasWriteEnabled: false;
+  evidenceFilePersistenceEnabled: false;
+  rollbackPointCreated: false;
+  credentialAccessEnabled: false;
+  auditWriteEnabled: false;
+  dispatchEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeDeskRpgReadOnlyChainCompletionReviewCard = {
   id: "request_to_orchestrator" | "evidence_to_review" | "approval_to_nas_keeper" | "next_projection_gap";
   label: string;
@@ -4971,6 +5011,70 @@ export function buildOfficeNasPathValidationStatusSurface(store: OfficeNasEviden
     enabledControls: 0,
     frontendOnly: true,
     validationEnabled: true,
+    backendApiChanged: false,
+    storageChanged: false,
+    pathResolutionRuntimeEnabled: false,
+    vaultMappingEnabled: false,
+    mountDiscoveryEnabled: false,
+    nasMountAccessEnabled: false,
+    filesystemReadEnabled: false,
+    filesystemWriteEnabled: false,
+    nasWriteEnabled: false,
+    evidenceFilePersistenceEnabled: false,
+    rollbackPointCreated: false,
+    credentialAccessEnabled: false,
+    auditWriteEnabled: false,
+    dispatchEnabled: false,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeNasPathPreviewStatusSurface(validation: OfficeNasPathValidationStatusSurface): OfficeNasPathPreviewStatusSurface {
+  const capabilities: OfficeNasPathPreviewCapability[] = [
+    {
+      id: "safe_preview_only",
+      label: "Safe logical path preview",
+      status: "available",
+      summary: "승인된 backend preview는 opaque vault ref와 safe slug에서 safe logical/display path 문자열만 만듭니다. 이 frontend surface는 상태만 표시합니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "safe_logical_path",
+      label: "No raw mount path",
+      status: "guarded",
+      summary: "Preview는 raw filesystem path, mount path, token, provider, transcript를 포함하지 않는 safe logical path posture입니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "runtime_disabled",
+      label: "Filesystem runtime disabled",
+      status: "disabled",
+      summary: "Real path resolution, vault mapping, mount discovery/access, filesystem read/write, NAS write는 모두 비활성입니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "next_filesystem_boundary",
+      label: "Next filesystem/NAS boundary",
+      status: "approval_required",
+      summary: "Actual filesystem/NAS path resolution, mount access, evidence file persistence, rollback point creation, NAS write는 다음 명시 승인 전까지 금지입니다.",
+      rawExcluded: true,
+    },
+  ];
+  return {
+    stageLabel: "NAS Path Preview Status Surface 1",
+    title: "NAS path preview status surface",
+    detailKind: "nas_path_preview_status_surface",
+    capabilities,
+    sourceDetailKind: validation.detailKind,
+    sourceCapabilityCount: validation.capabilityCount,
+    capabilityCount: capabilities.length,
+    enabledControls: 0,
+    frontendOnly: true,
+    validationEnabled: true,
+    previewEnabled: true,
     backendApiChanged: false,
     storageChanged: false,
     pathResolutionRuntimeEnabled: false,

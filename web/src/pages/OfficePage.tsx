@@ -144,6 +144,7 @@ import {
   buildOfficeNasKeeperRollbackEvidencePreview,
   buildOfficeNasEvidencePackageStoreReadbackStatus,
   buildOfficeNasPathValidationStatusSurface,
+  buildOfficeNasPathPreviewStatusSurface,
   buildOfficeDeskRpgReadOnlyChainCompletionReview,
   buildOfficeEventDrivenCharacterStateProjection,
   buildOfficeCharacterStateRoomOverlay,
@@ -191,6 +192,7 @@ import {
   type OfficeNasKeeperRollbackEvidencePreview,
   type OfficeNasEvidencePackageStoreReadbackStatus,
   type OfficeNasPathValidationStatusSurface,
+  type OfficeNasPathPreviewStatusSurface,
   type OfficeDeskRpgReadOnlyChainCompletionReview,
   type OfficeControlledMutationContractPostureProjection,
   type OfficeControlledMutationContractPosturePolish,
@@ -3351,6 +3353,70 @@ export function NasPathValidationStatusSurfacePanel({ status }: { status: Office
   );
 }
 
+export function NasPathPreviewStatusSurfacePanel({ status }: { status: OfficeNasPathPreviewStatusSurface }) {
+  return (
+    <Card
+      data-office-nas-path-preview-status="true"
+      data-office-nas-path-preview-enabled-controls={status.enabledControls}
+      data-office-nas-path-preview-frontend-only={String(status.frontendOnly)}
+      data-office-nas-path-preview-validation-enabled={String(status.validationEnabled)}
+      data-office-nas-path-preview-preview-enabled={String(status.previewEnabled)}
+      data-office-nas-path-preview-backend-api-changed={String(status.backendApiChanged)}
+      data-office-nas-path-preview-storage-changed={String(status.storageChanged)}
+      data-office-nas-path-preview-runtime-enabled={String(status.pathResolutionRuntimeEnabled)}
+      data-office-nas-path-preview-vault-mapping-enabled={String(status.vaultMappingEnabled)}
+      data-office-nas-path-preview-mount-discovery-enabled={String(status.mountDiscoveryEnabled)}
+      data-office-nas-path-preview-mount-access-enabled={String(status.nasMountAccessEnabled)}
+      data-office-nas-path-preview-filesystem-read-enabled={String(status.filesystemReadEnabled)}
+      data-office-nas-path-preview-filesystem-write-enabled={String(status.filesystemWriteEnabled)}
+      data-office-nas-path-preview-nas-write-enabled={String(status.nasWriteEnabled)}
+      data-office-nas-path-preview-evidence-file-persistence-enabled={String(status.evidenceFilePersistenceEnabled)}
+      data-office-nas-path-preview-rollback-point-created={String(status.rollbackPointCreated)}
+      data-office-nas-path-preview-credential-access-enabled={String(status.credentialAccessEnabled)}
+      data-office-nas-path-preview-audit-write-enabled={String(status.auditWriteEnabled)}
+      data-office-nas-path-preview-dispatch-enabled={String(status.dispatchEnabled)}
+      data-office-nas-path-preview-request-creation-enabled={String(status.requestCreationEnabled)}
+      data-office-nas-path-preview-work-assignment-enabled={String(status.workAssignmentEnabled)}
+      data-office-nas-path-preview-safe-projection-only={String(status.safeProjectionOnly)}
+      data-office-nas-path-preview-raw-excluded={String(status.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Route className="h-4 w-4" /> NAS path preview status surface
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-teal-300/20 bg-teal-950/10 p-3">
+            <div className="font-semibold text-teal-100">preview-only logical path · frontend status only</div>
+            <div className="mt-1 leading-5">
+              승인된 NAS path preview posture만 읽기 전용으로 요약합니다. 이 frontend slice는 backend/API/storage를 바꾸지 않고 real path resolution, mount access, filesystem read/write, NAS write를 열지 않습니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {status.capabilities.map((capability) => (
+              <div
+                key={capability.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-nas-path-preview-capability={capability.id}
+                data-office-nas-path-preview-capability-status={capability.status}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{capability.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{capability.label}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-teal-100/80">{capability.status}</div>
+                <div className="mt-2 leading-5">{capability.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-nas-path-preview-boundary="true">
+            source {status.sourceDetailKind} · source capabilities {status.sourceCapabilityCount} · capabilities {status.capabilityCount} · controls {status.enabledControls} · preview {String(status.previewEnabled)} · runtime path resolution {String(status.pathResolutionRuntimeEnabled)} · mount access {String(status.nasMountAccessEnabled)} · filesystem write {String(status.filesystemWriteEnabled)} · raw excluded {String(status.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function DeskRpgReadOnlyChainCompletionReviewPanel({ review }: { review: OfficeDeskRpgReadOnlyChainCompletionReview }) {
   return (
     <Card
@@ -4663,6 +4729,10 @@ export default function OfficePage() {
     () => buildOfficeNasPathValidationStatusSurface(nasEvidencePackageStoreReadbackStatus),
     [nasEvidencePackageStoreReadbackStatus],
   );
+  const nasPathPreviewStatusSurface = useMemo(
+    () => buildOfficeNasPathPreviewStatusSurface(nasPathValidationStatusSurface),
+    [nasPathValidationStatusSurface],
+  );
   const deskRpgReadOnlyChainCompletionReview = useMemo(
     () => buildOfficeDeskRpgReadOnlyChainCompletionReview(nasKeeperRollbackEvidencePreview),
     [nasKeeperRollbackEvidencePreview],
@@ -4975,6 +5045,8 @@ export default function OfficePage() {
       <NasEvidencePackageStoreReadbackStatusPanel status={nasEvidencePackageStoreReadbackStatus} />
 
       <NasPathValidationStatusSurfacePanel status={nasPathValidationStatusSurface} />
+
+      <NasPathPreviewStatusSurfacePanel status={nasPathPreviewStatusSurface} />
 
       <DeskRpgReadOnlyChainCompletionReviewPanel review={deskRpgReadOnlyChainCompletionReview} />
 
