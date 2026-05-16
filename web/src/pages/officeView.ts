@@ -2072,6 +2072,50 @@ export type OfficeNasPathPreviewStatusSurface = {
   rawExcluded: true;
 };
 
+export type OfficeNasPathPreviewStoreReadbackCapability = {
+  id: "safe_preview_metadata_store" | "safe_readback_filter" | "runtime_disabled" | "next_filesystem_boundary";
+  label: string;
+  status: "available" | "guarded" | "disabled" | "approval_required";
+  summary: string;
+  rawExcluded: true;
+};
+
+export type OfficeNasPathPreviewStoreReadbackStatusSurface = {
+  stageLabel: "NAS Path Preview Store Readback Status Surface 1";
+  title: string;
+  detailKind: "nas_path_preview_store_readback_status_surface";
+  capabilities: OfficeNasPathPreviewStoreReadbackCapability[];
+  sourceDetailKind: OfficeNasPathPreviewStatusSurface["detailKind"];
+  sourceCapabilityCount: number;
+  capabilityCount: number;
+  enabledControls: 0;
+  frontendOnly: true;
+  validationEnabled: true;
+  previewEnabled: true;
+  localMetadataStoreEnabled: true;
+  safeReadbackEnabled: true;
+  duplicateGuardEnabled: true;
+  limitClampEnabled: true;
+  backendApiChanged: false;
+  storageChanged: false;
+  pathResolutionRuntimeEnabled: false;
+  vaultMappingEnabled: false;
+  mountDiscoveryEnabled: false;
+  nasMountAccessEnabled: false;
+  filesystemReadEnabled: false;
+  filesystemWriteEnabled: false;
+  nasWriteEnabled: false;
+  evidenceFilePersistenceEnabled: false;
+  rollbackPointCreated: false;
+  credentialAccessEnabled: false;
+  auditWriteEnabled: false;
+  dispatchEnabled: false;
+  requestCreationEnabled: false;
+  workAssignmentEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeDeskRpgReadOnlyChainCompletionReviewCard = {
   id: "request_to_orchestrator" | "evidence_to_review" | "approval_to_nas_keeper" | "next_projection_gap";
   label: string;
@@ -5075,6 +5119,74 @@ export function buildOfficeNasPathPreviewStatusSurface(validation: OfficeNasPath
     frontendOnly: true,
     validationEnabled: true,
     previewEnabled: true,
+    backendApiChanged: false,
+    storageChanged: false,
+    pathResolutionRuntimeEnabled: false,
+    vaultMappingEnabled: false,
+    mountDiscoveryEnabled: false,
+    nasMountAccessEnabled: false,
+    filesystemReadEnabled: false,
+    filesystemWriteEnabled: false,
+    nasWriteEnabled: false,
+    evidenceFilePersistenceEnabled: false,
+    rollbackPointCreated: false,
+    credentialAccessEnabled: false,
+    auditWriteEnabled: false,
+    dispatchEnabled: false,
+    requestCreationEnabled: false,
+    workAssignmentEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeNasPathPreviewStoreReadbackStatusSurface(preview: OfficeNasPathPreviewStatusSurface): OfficeNasPathPreviewStoreReadbackStatusSurface {
+  const capabilities: OfficeNasPathPreviewStoreReadbackCapability[] = [
+    {
+      id: "safe_preview_metadata_store",
+      label: "Local preview metadata JSONL",
+      status: "available",
+      summary: "승인된 backend store/readback은 safe path preview DTO metadata만 local Hermes profile JSONL에 기록합니다. 이 frontend surface는 상태만 표시합니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "safe_readback_filter",
+      label: "Safe readback + duplicate guard",
+      status: "guarded",
+      summary: "Readback은 package_ref filter, 200 limit clamp, duplicate safe_logical_path guard, malformed line skip을 projection copy로만 드러냅니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "runtime_disabled",
+      label: "Filesystem runtime disabled",
+      status: "disabled",
+      summary: "Real path resolution, vault mapping, mount discovery/access, filesystem read/write, NAS write는 모두 비활성입니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "next_filesystem_boundary",
+      label: "Next filesystem/NAS boundary",
+      status: "approval_required",
+      summary: "Actual filesystem/NAS path resolution, mount access, evidence file persistence, rollback point creation, NAS write는 다음 명시 승인 전까지 금지입니다.",
+      rawExcluded: true,
+    },
+  ];
+  return {
+    stageLabel: "NAS Path Preview Store Readback Status Surface 1",
+    title: "NAS path preview store/readback status surface",
+    detailKind: "nas_path_preview_store_readback_status_surface",
+    capabilities,
+    sourceDetailKind: preview.detailKind,
+    sourceCapabilityCount: preview.capabilityCount,
+    capabilityCount: capabilities.length,
+    enabledControls: 0,
+    frontendOnly: true,
+    validationEnabled: true,
+    previewEnabled: true,
+    localMetadataStoreEnabled: true,
+    safeReadbackEnabled: true,
+    duplicateGuardEnabled: true,
+    limitClampEnabled: true,
     backendApiChanged: false,
     storageChanged: false,
     pathResolutionRuntimeEnabled: false,

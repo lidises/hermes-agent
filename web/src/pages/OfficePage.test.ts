@@ -134,6 +134,7 @@ import {
   buildOfficeNasEvidencePackageStoreReadbackStatus,
   buildOfficeNasPathValidationStatusSurface,
   buildOfficeNasPathPreviewStatusSurface,
+  buildOfficeNasPathPreviewStoreReadbackStatusSurface,
   buildOfficeDeskRpgReadOnlyChainCompletionReview,
   buildOfficeEventDrivenCharacterStateProjection,
   buildOfficeCharacterStateRoomOverlay,
@@ -1256,6 +1257,60 @@ describe("NAS Path Preview Status Surface 1", () => {
     expect(status.rawExcluded).toBe(true);
     expect(status.capabilityCount).toBe(4);
     expect(JSON.stringify(status)).not.toMatch(/raw path preview prompt|raw path preview task|Traceback|\/Users\/lidises|token-shaped-path-preview|private-path-preview-provider/i);
+  });
+});
+
+
+describe("NAS Path Preview Store Readback Status Surface 1", () => {
+  it("builds a frontend-only read-only path preview store/readback status without backend/storage mutation controls", () => {
+    const secretSentinel = ["token", "shaped", "path", "preview", "store"].join("-");
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishFixture({
+      agents: [{ id: "agent-path-preview-store", status: "active", prompt: "raw path preview store prompt", provider: "private-path-preview-store-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-path-preview-store", status: "blocked", title: "raw path preview store task", body: "/Users/lidises/nas/private/path-preview-store.md", transcript: "Traceback path preview store transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+    const trace = buildOfficeApprovalDecisionAuditNasTracePreview(envelope);
+    const gate = buildOfficeNasKeeperSaveRequestGate(trace);
+    const rollback = buildOfficeNasKeeperRollbackEvidencePreview(gate);
+    const store = buildOfficeNasEvidencePackageStoreReadbackStatus(rollback);
+    const validation = buildOfficeNasPathValidationStatusSurface(store);
+    const preview = buildOfficeNasPathPreviewStatusSurface(validation);
+
+    const status = buildOfficeNasPathPreviewStoreReadbackStatusSurface(preview);
+
+    expect(status.stageLabel).toBe("NAS Path Preview Store Readback Status Surface 1");
+    expect(status.detailKind).toBe("nas_path_preview_store_readback_status_surface");
+    expect(status.sourceDetailKind).toBe("nas_path_preview_status_surface");
+    expect(status.validationEnabled).toBe(true);
+    expect(status.previewEnabled).toBe(true);
+    expect(status.localMetadataStoreEnabled).toBe(true);
+    expect(status.safeReadbackEnabled).toBe(true);
+    expect(status.duplicateGuardEnabled).toBe(true);
+    expect(status.limitClampEnabled).toBe(true);
+    expect(status.enabledControls).toBe(0);
+    expect(status.frontendOnly).toBe(true);
+    expect(status.backendApiChanged).toBe(false);
+    expect(status.storageChanged).toBe(false);
+    expect(status.pathResolutionRuntimeEnabled).toBe(false);
+    expect(status.vaultMappingEnabled).toBe(false);
+    expect(status.mountDiscoveryEnabled).toBe(false);
+    expect(status.nasMountAccessEnabled).toBe(false);
+    expect(status.filesystemReadEnabled).toBe(false);
+    expect(status.filesystemWriteEnabled).toBe(false);
+    expect(status.nasWriteEnabled).toBe(false);
+    expect(status.evidenceFilePersistenceEnabled).toBe(false);
+    expect(status.rollbackPointCreated).toBe(false);
+    expect(status.credentialAccessEnabled).toBe(false);
+    expect(status.auditWriteEnabled).toBe(false);
+    expect(status.dispatchEnabled).toBe(false);
+    expect(status.requestCreationEnabled).toBe(false);
+    expect(status.workAssignmentEnabled).toBe(false);
+    expect(status.safeProjectionOnly).toBe(true);
+    expect(status.rawExcluded).toBe(true);
+    expect(status.capabilityCount).toBe(4);
+    expect(JSON.stringify(status)).not.toMatch(/raw path preview store prompt|raw path preview store task|Traceback|\/Users\/lidises|token-shaped-path-preview-store|private-path-preview-store-provider/i);
   });
 });
 

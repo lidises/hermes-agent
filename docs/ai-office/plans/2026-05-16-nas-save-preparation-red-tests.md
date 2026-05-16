@@ -880,6 +880,70 @@ Independent review: PASS, no security concern, logic error, raw data leak, targe
 
 No runtime filesystem path resolution, vault mapping, NAS mount discovery/access, filesystem/NAS read/write, actual NAS save/write/preparation runtime, evidence file persistence, rollback point creation, credential/auth/env change, audit write, target dispatch/runtime mutation, real authority adapter binding/dispatch, migration, VPS/NAS/Kanban/cron mutation, deploy/restart, push/PR/merge, browser executable control, or raw private value projection was performed.
 
+## Frontend NAS Path Preview Store Readback Status Surface RED/GREEN
+
+Additional frontend tests:
+
+- `web/src/pages/OfficePage.test.ts`
+- `web/src/pages/OfficePage.rpg.test.tsx`
+
+The frontend RED tests define the approved read-only/status boundary:
+
+- Future helper: `buildOfficeNasPathPreviewStoreReadbackStatusSurface(...)`.
+- Future panel: `NasPathPreviewStoreReadbackStatusSurfacePanel`.
+- Surface must show the already-approved local metadata store/readback posture only: local metadata store enabled, safe readback enabled, duplicate guard enabled, limit clamp enabled, frontend-only, no backend/API/storage change.
+- Runtime/filesystem capabilities remain disabled: real path resolution, vault mapping, mount discovery/access, filesystem read/write, NAS write, evidence file persistence, rollback point creation, credentials, audit write, dispatch, request creation, and work assignment.
+- No forms/buttons/inputs/selects/textareas/handlers, no API/browser-storage calls, and no raw prompt/task/transcript/path/token/provider projection.
+
+RED command/result:
+
+```bash
+npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx -t "NAS Path Preview Store Readback Status Surface|nas-path-preview-store"
+# 2 failed: buildOfficeNasPathPreviewStoreReadbackStatusSurface is not a function / panel missing
+```
+
+GREEN implementation:
+
+- `web/src/pages/officeView.ts`
+  - Added `OfficeNasPathPreviewStoreReadbackCapability` and `OfficeNasPathPreviewStoreReadbackStatusSurface`.
+  - Added `buildOfficeNasPathPreviewStoreReadbackStatusSurface(...)`.
+- `web/src/pages/OfficePage.tsx`
+  - Imported the helper/type.
+  - Added read-only `NasPathPreviewStoreReadbackStatusSurfacePanel`.
+  - Derived status with `useMemo` from the existing NAS path preview status surface.
+  - Rendered the panel in `/office` after the preview status panel.
+
+GREEN verification:
+
+```bash
+npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx -t "NAS Path Preview Store Readback Status Surface|nas-path-preview-store"
+# 2 passed
+
+npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx
+# 203 passed
+
+npm run build
+# passed; existing Vite large chunk warning only
+
+git diff --check
+# passed
+```
+
+Frontend production safety scan:
+
+```text
+unexpected_changed_files: 0
+new_api_calls_or_browser_storage: 0
+new_forms_buttons_inputs_selects_textareas_handlers: 0
+backend_or_storage_files_changed: 0
+```
+
+Independent review: PASS, no security concern, logic error, raw data leakage, UI controls, side effects, API/storage calls, changed-file scope issue, or scope violation.
+
+## Safety / non-actions for frontend NAS path preview store/readback status slice
+
+No backend/schema/API route/service change, storage change, browser API/storage call, form/button/input/select/textarea/handler, runtime filesystem path resolution, vault mapping, NAS mount discovery/access, filesystem/NAS read/write, actual NAS save/write/preparation runtime, evidence file persistence, rollback point creation, credential/auth/env change, audit write, target dispatch/runtime mutation, real authority adapter binding/dispatch, migration, VPS/NAS/Kanban/cron mutation, deploy/restart, push/PR/merge, browser executable control, or raw private value projection was performed.
+
 ## Next boundary
 
 A separate explicit approval is required before any of:
