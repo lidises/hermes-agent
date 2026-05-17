@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-17 15:03 KST
+Last updated: 2026-05-17 15:16 KST
 
 ## AI Office 통합 운영실 umbrella summary
 
@@ -32,7 +32,9 @@ During real local NAS smoke, the configured root was present but root-level side
 
 Verification 2026-05-17 15:03 KST: initial RED frontend tests failed on missing API wrapper/action model/panel; GREEN `npm test -- --run src/lib/api.test.ts src/pages/OfficePage.test.ts src/pages/OfficePage.rpg.test.tsx` → `210 passed`; backend focused + API `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_runtime_write.py tests/hermes_cli/test_office_api.py -q` → `16 passed`; `npm run build` passed with the existing Vite large chunk warning only; `git diff --check` passed; real NAS smoke/readback/rollback fallback passed.
 
-Safety/non-actions: no raw root path displayed in API/UI result, no raw path/mount/token/credential input, no credential access, no public API exposure, no Telegram gateway restart, no watcher/cron, no VPS NAS mount/direct NAS credentials, and no target dispatch/authority adapter binding. Push/PR/VPS dashboard deploy/restart/smoke remains the next step under the same C approval after commit.
+Safety/non-actions: no raw root path displayed in API/UI result, no raw path/mount/token/credential input, no credential access, no public API exposure, no Telegram gateway restart, no watcher/cron, no VPS NAS mount/direct NAS credentials, and no target dispatch/authority adapter binding.
+
+Publish/deploy evidence 2026-05-17 15:16 KST: committed local branch and opened PR #5, then deployed to the restricted VPS dashboard worktree under dashboard-only scope. The VPS dashboard had existing local Life Compass changes, so those were preserved in a local rollback/preserve commit before applying the NAS write UI commit. Because the VPS dashboard worktree was behind the local AI Office branch and lacked the earlier protected write route, a VPS-local fix restored the protected `single-file-write` route while preserving Life Compass route code. VPS verification passed: frontend `210 passed`, `npm run build`, backend Office write/API `16 passed`, `py_compile`, `git diff --check`, dashboard service restart active, gateway service remained active/untouched, listener stayed Tailscale-private, browser `/office` smoke found the new single-file-write action hook, no raw path/secret leak, and authenticated route smoke returned safe `write_root_not_configured` because VPS NAS write root is intentionally not configured.
 
 ## NAS Runtime Single File Write 1 completed locally
 
