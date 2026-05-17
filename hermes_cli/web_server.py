@@ -59,6 +59,7 @@ from hermes_cli.office_controlled_mutation import (
     build_office_controlled_mutation_contract_schema,
     execute_office_controlled_mutation_nas_single_file_write,
     execute_office_controlled_mutation_nas_mac_relay_write,
+    dry_run_office_controlled_mutation_nas_keeper_mac_relay_claim,
     enqueue_office_controlled_mutation_nas_keeper_mac_relay_handoff,
     prepare_office_controlled_mutation_nas_mac_relay_write_request,
     build_office_controlled_mutation_nas_evidence_package_contract,
@@ -612,6 +613,12 @@ async def prepare_office_controlled_mutation_nas_mac_relay_write_request_route(p
 async def enqueue_office_controlled_mutation_nas_keeper_mac_relay_handoff_route(payload: Any = Body(None)):
     """Queue a safe NAS Keeper -> Mac relay handoff envelope without executing it."""
     return enqueue_office_controlled_mutation_nas_keeper_mac_relay_handoff(payload)
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-handoff-claim-dry-run")
+async def dry_run_office_controlled_mutation_nas_keeper_mac_relay_claim_route(payload: Any = Body(None)):
+    """Preview a Mac relay claim of one NAS Keeper handoff without mutating the queue."""
+    return dry_run_office_controlled_mutation_nas_keeper_mac_relay_claim(payload)
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/mac-relay-write-execute")

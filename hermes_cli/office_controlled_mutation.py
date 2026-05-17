@@ -181,6 +181,7 @@ _NAS_RUNTIME_WRITE_FIELDS = {
 }
 _NAS_MAC_RELAY_WRITE_REQUEST_FIELDS = _NAS_RUNTIME_WRITE_FIELDS | {"relay_request_ref", "nas_keeper_ref", "relay_node_ref"}
 _NAS_KEEPER_HANDOFF_QUEUE_FIELDS = _NAS_MAC_RELAY_WRITE_REQUEST_FIELDS | {"handoff_ref", "queued_by", "queued_at"}
+_NAS_KEEPER_HANDOFF_CLAIM_DRY_RUN_FIELDS = {"handoff_ref", "claim_ref", "relay_node_ref", "claimed_by", "claimed_at"}
 _OPAQUE_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{2,119}$")
 _OPAQUE_REF_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_-]{1,40}:[A-Za-z0-9][A-Za-z0-9_.:-]{1,160}$")
 _SAFE_TEXT_RE = re.compile(r"^[^<>\\]{1,240}$")
@@ -2088,12 +2089,9 @@ def enqueue_office_controlled_mutation_nas_keeper_mac_relay_handoff(
     if errors:
         return {"queued": False, "errors": errors, "dto": None}
 
-    if queue_dir is None:
-        queue_root = get_hermes_home() / "ai-office" / "nas-keeper-handoff"
-    else:
-        queue_root = Path(queue_dir).expanduser()
+    queue_file = _nas_keeper_handoff_queue_file(queue_dir)
+    queue_root = queue_file.parent
     queue_root.mkdir(parents=True, exist_ok=True)
-    queue_file = queue_root / "mac-relay-write-queue.jsonl"
 
     handoff_ref = str(payload["handoff_ref"])
     if queue_file.exists():
@@ -2154,6 +2152,116 @@ def enqueue_office_controlled_mutation_nas_keeper_mac_relay_handoff(
     dto = {k: v for k, v in queue_item.items() if k != "markdown_body"}
     dto["queue_storage_ref"] = "ai_office_local_profile::nas_keeper_mac_relay_handoff_queue"
     return {"queued": True, "errors": [], "dto": dto}
+
+
+
+def _nas_keeper_handoff_queue_file(queue_dir: Path | str | None = None) -> Path:
+    if queue_dir is None:
+        return get_hermes_home() / "ai-office" / "nas-keeper-handoff" / "mac-relay-write-queue.jsonl"
+    return Path(queue_dir).expanduser() / "mac-relay-write-queue.jsonl"
+
+
+def dry_run_office_controlled_mutation_nas_keeper_mac_relay_claim(
+    payload: object, *, queue_dir: Path | str | None = None
+) -> dict[str, object]:
+    """Preview a Mac relay claim of one NAS Keeper handoff queue item.
+
+    This is intentionally dry-run only: it reads the safe local queue and returns
+    the safe metadata a Mac relay would be allowed to claim, but it does not
+    mutate queue status, authorize execution, write NAS files, start watchers, or
+    bind any dispatch/authority adapter.
+    """
+
+    if not isinstance(payload, Mapping):
+        return {"claimed": False, "dry_run": True, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    errors: list[dict[str, str]] = []
+    if set(payload) - _NAS_KEEPER_HANDOFF_CLAIM_DRY_RUN_FIELDS:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+    for field in sorted(_NAS_KEEPER_HANDOFF_CLAIM_DRY_RUN_FIELDS):
+        if field not in payload:
+            errors.append(_error(field, "missing_field"))
+    for field in ("handoff_ref", "claim_ref", "relay_node_ref", "claimed_by"):
+        if field in payload and not _is_opaque_id(payload.get(field)):
+            errors.append(_error(field, "invalid_opaque_id"))
+    if "claimed_at" in payload and not (isinstance(payload.get("claimed_at"), str) and _ISO_UTC_RE.fullmatch(payload["claimed_at"])):
+        errors.append(_error("claimed_at", "invalid_timestamp"))
+    if errors:
+        return {"claimed": False, "dry_run": True, "errors": sorted(errors, key=lambda item: (item["field"], item["code"])), "dto": None}
+
+    queue_file = _nas_keeper_handoff_queue_file(queue_dir)
+    if not queue_file.exists():
+        return {"claimed": False, "dry_run": True, "errors": [_error("queue", "queue_not_found")], "dto": None}
+
+    wanted = str(payload["handoff_ref"])
+    matched: dict[str, object] | None = None
+    for line in queue_file.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            item = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(item, Mapping) and item.get("handoff_ref") == wanted:
+            matched = dict(item)
+            break
+    if matched is None:
+        return {"claimed": False, "dry_run": True, "errors": [_error("handoff_ref", "handoff_not_found")], "dto": None}
+    if matched.get("queue_status") != "pending_nas_keeper_authorization":
+        return {"claimed": False, "dry_run": True, "errors": [_error("queue_status", "unsupported_queue_status")], "dto": None}
+    if matched.get("relay_node_ref") != payload["relay_node_ref"]:
+        return {"claimed": False, "dry_run": True, "errors": [_error("relay_node_ref", "relay_node_mismatch")], "dto": None}
+
+    request_payload = {field: matched[field] for field in _NAS_MAC_RELAY_WRITE_REQUEST_FIELDS if field in matched}
+    prepared = prepare_office_controlled_mutation_nas_mac_relay_write_request(request_payload)
+    if prepared.get("errors"):
+        return {"claimed": False, "dry_run": True, "errors": cast(list[dict[str, str]], prepared.get("errors") or []), "dto": None}
+    prepared_dto = cast(dict[str, object], prepared["dto"])
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_mac_relay_handoff_claim_dry_run",
+        "dry_run": True,
+        "claim_status": "would_claim",
+        "handoff_ref": payload["handoff_ref"],
+        "claim_ref": payload["claim_ref"],
+        "queue_ref": matched.get("queue_ref"),
+        "queue_status_before": matched.get("queue_status"),
+        "queue_status_after": "pending_nas_keeper_authorization",
+        "claimed_by": payload["claimed_by"],
+        "claimed_at": payload["claimed_at"],
+        "relay_request_ref": matched["relay_request_ref"],
+        "write_ref": matched["write_ref"],
+        "package_ref": matched["package_ref"],
+        "target_vault_ref": matched["target_vault_ref"],
+        "safe_slug": matched["safe_slug"],
+        "safe_title": matched["safe_title"],
+        "requested_by": matched["requested_by"],
+        "requested_at": matched["requested_at"],
+        "nas_keeper_ref": matched["nas_keeper_ref"],
+        "relay_node_ref": matched["relay_node_ref"],
+        "execution_path": prepared_dto["execution_path"],
+        "claim_path": ["mac_relay_reads_queue", "nas_keeper_authorization_pending", "dry_run_only", "no_real_nas_write"],
+        "safe_logical_path": prepared_dto["safe_logical_path"],
+        "safe_display_path": prepared_dto["safe_display_path"],
+        "payload_bytes": prepared_dto["payload_bytes"],
+        "execution_payload_preview_fields": sorted(_NAS_MAC_RELAY_WRITE_REQUEST_FIELDS | {"relay_execution_ref", "relay_authorized_by", "relay_authorized_at"}),
+        "capabilities": {
+            "queue_read_enabled": True,
+            "claim_dry_run_enabled": True,
+            "queue_mutation_enabled": False,
+            "nas_keeper_authorization_recording_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_credential_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+            "mac_relay_write_enabled": False,
+            "actual_nas_write_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+        },
+        "next_required_boundary": "nas_keeper_authorizes_and_mac_relay_executes",
+    }
+    return {"claimed": False, "dry_run": True, "errors": [], "dto": dto}
 
 
 def execute_office_controlled_mutation_nas_mac_relay_write(
