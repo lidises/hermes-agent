@@ -10,14 +10,16 @@ import {
   Filter,
   Lock,
   MapPinned,
+  MessageSquareText,
   RefreshCw,
   Route,
   ShieldCheck,
+  Users,
 } from "lucide-react";
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeDataSource, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeDataSource, type OfficeNasSingleFileWritePayload, type OfficeNasSingleFileWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -27,6 +29,7 @@ import {
   buildOfficeCharacterTrackingCues,
   buildOfficeCharacterView,
   buildOfficeCharacters,
+  buildOfficeDeskRpgProjectionModel,
   buildOfficeEmptySourceCopyPlan,
   buildOfficeEmptyStateHints,
   buildOfficeMapDensityPlan,
@@ -76,7 +79,87 @@ import {
   buildOfficeProjectionCacheSummary,
   buildOfficeProjectionOrchestration,
   buildOfficeMutationControlReadiness,
+  buildOfficeRpgMissionStoryboard,
+  buildOfficeRpgOrchestratorDesk,
+  buildOfficeRpgKanbanBoardFacility,
+  buildOfficeRpgSourceArchiveFacility,
+  buildOfficeRpgReviewCornerFacility,
+  buildOfficeRpgApprovalConsoleFacility,
   buildOfficeRpgScene,
+  buildOfficeUnifiedWorkbenchView,
+  buildOfficeApprovalRequestView,
+  buildOfficeApprovalAuditTimeline,
+  buildOfficeApprovalExecutionGate,
+  buildOfficeAuthorityAdapterContract,
+  buildOfficeOrchestratorMediationQueue,
+  buildOfficeWorkerIntentRouting,
+  buildOfficeWorkerFacilityReadiness,
+  buildOfficeWorkerAssignmentCandidateGate,
+  buildOfficeWorkerRequestDraftPreview,
+  buildOfficeWorkerHumanConfirmationEnvelope,
+  buildOfficeWorkerAuthorityHandoffEnvelope,
+  buildOfficeWorkerDispatchDryRunEnvelope,
+  buildOfficeWorkerAuditPreviewEnvelope,
+  buildOfficeWorkerRollbackPreviewEnvelope,
+  buildOfficeWorkerFinalGateChecklist,
+  buildOfficeControlledMutationProposalContract,
+  buildOfficeControlledMutationDryRunPlan,
+  buildOfficeControlledMutationAuditSinkPlan,
+  buildOfficeControlledMutationRollbackVerificationPlan,
+  buildOfficeControlledMutationHumanApprovalPlan,
+  buildOfficeControlledMutationAuthoritySummary,
+  buildOfficeControlledMutationExecutionReadinessSummary,
+  buildOfficeControlledMutationContractPostureProjection,
+  buildOfficeControlledMutationContractPosturePolish,
+  buildOfficeControlledMutationReadinessHandoffRibbon,
+  buildOfficeControlledMutationReadinessSummaryPolish,
+  buildOfficeControlledMutationRequestStorePosture,
+  buildOfficeControlledMutationRequestStoreHardeningPlan,
+  buildOfficeControlledMutationNextApprovalBoundary,
+  buildOfficeControlledMutationPostDecisionApprovalBoundary,
+  buildOfficeControlledMutationPostRegistryApprovalBoundary,
+  buildOfficeControlledMutationTargetDispatchForbiddenBoundary,
+  buildOfficeControlledMutationSafeContinuationCompletionReview,
+  buildOfficeDeskRpgWorkerRoleVisibility,
+  buildOfficeDisabledApprovalDialoguePosture,
+  buildOfficeReviewerWikiHandoffPosture,
+  buildOfficeApprovalDialogueInspectorDetail,
+  buildOfficeReviewerWikiEvidenceDetailPosture,
+  buildOfficeBoardEvidenceInspectorDrilldown,
+  buildOfficeBossOrchestratorRequestPostureDetail,
+  buildOfficeOrchestratorRequestEnvelopeDetail,
+  buildOfficeApprovalRequestRouteDetail,
+  buildOfficeEventRequestContractProjection,
+  buildOfficeApprovalDialogueRouteInspector,
+  buildOfficeEventTimelineProjection,
+  buildOfficeTimelineWorkerHandoffDrilldown,
+  buildOfficeApprovalRequestDetailDeepening,
+  buildOfficeWorkerFacilityLanePolish,
+  buildOfficeWorkerRequestHandoffDetail,
+  buildOfficeApprovalNasBoundaryPolish,
+  buildOfficeApprovalAuthorityReadinessDetail,
+  buildOfficeApprovalAuthorityDecisionEnvelopePreview,
+  buildOfficeApprovalDecisionAuditNasTracePreview,
+  buildOfficeNasKeeperSaveRequestGate,
+  buildOfficeNasKeeperRollbackEvidencePreview,
+  buildOfficeNasEvidencePackageStoreReadbackStatus,
+  buildOfficeNasPathValidationStatusSurface,
+  buildOfficeNasPathPreviewStatusSurface,
+  buildOfficeNasPathPreviewStoreReadbackStatusSurface,
+  buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface,
+  buildOfficeNasRuntimeSingleFileWriteApprovalAction,
+  buildOfficeDeskRpgReadOnlyChainCompletionReview,
+  buildOfficeEventDrivenCharacterStateProjection,
+  buildOfficeCharacterStateRoomOverlay,
+  buildOfficeCharacterRoomInteractionPosture,
+  buildOfficeCharacterInspectorDetailPosture,
+  buildOfficeCharacterDetailSafeDialogueCopy,
+  buildOfficeCharacterBubbleInspectorAlignment,
+  buildOfficeCharacterPanelBoundarySummary,
+  buildOfficeCharacterFacilityRoleLegend,
+  buildOfficeCharacterFacilityBoundaryStrip,
+  buildOfficeCharacterFacilitySourceLedgerStrip,
+  buildOfficeCharacterFacilityCompletionReview,
   buildOfficeStateDelta,
   buildOfficeTimeDisplayPolicy,
   buildOfficeUsabilitySummary,
@@ -87,6 +170,58 @@ import {
   resolveOfficeLiveTrackingInterval,
   textField,
   visibleRows,
+  type OfficeDeskRpgProjectionModel,
+  type OfficeDeskRpgWorkerRoleVisibility,
+  type OfficeDisabledApprovalDialoguePosture,
+  type OfficeReviewerWikiHandoffPosture,
+  type OfficeApprovalDialogueInspectorDetail,
+  type OfficeReviewerWikiEvidenceDetailPosture,
+  type OfficeBoardEvidenceInspectorDrilldown,
+  type OfficeBossOrchestratorRequestPostureDetail,
+  type OfficeOrchestratorRequestEnvelopeDetail,
+  type OfficeApprovalRequestRouteDetail,
+  type OfficeEventRequestContractProjection,
+  type OfficeApprovalDialogueRouteInspector,
+  type OfficeEventTimelineProjection,
+  type OfficeTimelineWorkerHandoffDrilldown,
+  type OfficeApprovalRequestDetailDeepening,
+  type OfficeWorkerFacilityLanePolish,
+  type OfficeWorkerRequestHandoffDetail,
+  type OfficeApprovalNasBoundaryPolish,
+  type OfficeApprovalAuthorityReadinessDetail,
+  type OfficeApprovalAuthorityDecisionEnvelopePreview,
+  type OfficeApprovalDecisionAuditNasTracePreview,
+  type OfficeNasKeeperSaveRequestGate,
+  type OfficeNasKeeperRollbackEvidencePreview,
+  type OfficeNasEvidencePackageStoreReadbackStatus,
+  type OfficeNasPathValidationStatusSurface,
+  type OfficeNasPathPreviewStatusSurface,
+  type OfficeNasPathPreviewStoreReadbackStatusSurface,
+  type OfficeNasRuntimeN3ApprovalBoundaryStatusSurface,
+  type OfficeNasRuntimeSingleFileWriteApprovalAction,
+  type OfficeDeskRpgReadOnlyChainCompletionReview,
+  type OfficeControlledMutationContractPostureProjection,
+  type OfficeControlledMutationContractPosturePolish,
+  type OfficeControlledMutationReadinessHandoffRibbon,
+  type OfficeControlledMutationReadinessSummaryPolish,
+  type OfficeControlledMutationRequestStorePosture,
+  type OfficeControlledMutationRequestStoreHardeningPlan,
+  type OfficeControlledMutationNextApprovalBoundary,
+  type OfficeControlledMutationPostDecisionApprovalBoundary,
+  type OfficeControlledMutationPostRegistryApprovalBoundary,
+  type OfficeControlledMutationTargetDispatchForbiddenBoundary,
+  type OfficeControlledMutationSafeContinuationCompletionReview,
+  type OfficeEventDrivenCharacterStateProjection,
+  type OfficeCharacterStateRoomOverlay,
+  type OfficeCharacterRoomInteractionPosture,
+  type OfficeCharacterInspectorDetailPosture,
+  type OfficeCharacterDetailSafeDialogueCopy,
+  type OfficeCharacterBubbleInspectorAlignment,
+  type OfficeCharacterPanelBoundarySummary,
+  type OfficeCharacterFacilityRoleLegend,
+  type OfficeCharacterFacilityBoundaryStrip,
+  type OfficeCharacterFacilitySourceLedgerStrip,
+  type OfficeCharacterFacilityCompletionReview,
   type OfficeCharacter,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
@@ -105,6 +240,17 @@ const LIST_LIMIT = 6;
 const EVENT_LIMIT = 12;
 const CHANGE_LIMIT = 6;
 type FocusOption = (typeof FOCUS_OPTIONS)[number];
+
+const DEFAULT_NAS_SINGLE_WRITE_DRAFT: OfficeNasSingleFileWritePayload = {
+  write_ref: "write_office_ui_smoke",
+  package_ref: "pkg_office_ui_smoke",
+  target_vault_ref: "vault_personal_wiki_demo",
+  safe_slug: "ai-office-ui-smoke",
+  safe_title: "AI Office UI smoke",
+  markdown_body: "# AI Office UI smoke\n\nControlled mutation UI smoke note.\n",
+  requested_by: "agent_nas_keeper",
+  requested_at: "2026-05-17T13:30:00Z",
+};
 
 const FOCUS_LABEL: Record<FocusOption, string> = {
   overview: "전체",
@@ -156,6 +302,91 @@ const SOURCE_LABEL: Record<OfficeSourceStatus, string> = {
   unavailable: "사용 불가",
   error: "오류",
 };
+
+export function OfficeDeskRpgRoomShell({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
+  return (
+    <section
+      className="border border-emerald-200/20 bg-gradient-to-br from-slate-950 via-emerald-950/10 to-black p-4"
+      data-office-desk-rpg-room-shell="true"
+      data-office-desk-rpg-safe-projection-only={String(projection.safeProjectionOnly)}
+      data-office-desk-rpg-enabled-controls={projection.enabledControls}
+      data-office-desk-rpg-raw-excluded={String(projection.rawExcluded)}
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-200/70">Desk RPG Room Shell 1</div>
+          <h2 className="mt-1 text-xl font-semibold text-foreground">읽기 전용 Desk RPG 운영실</h2>
+          <p className="mt-2 max-w-3xl text-xs leading-5 text-midground/70">
+            Boss desk에서 시작한 의도는 Orchestrator desk를 거쳐 worker cluster, central board, inspector, NAS vault, security/ops corner로 표시만 이동합니다.
+            NAS 저장은 승인 전 차단되며 이 shell은 실행·배정·요청 생성·감사 쓰기를 제공하지 않습니다.
+          </p>
+        </div>
+        <div className="grid gap-2 text-xs text-midground/70 sm:grid-cols-3 lg:min-w-[28rem]">
+          <div className="border border-current/15 bg-black/25 p-2">enabled controls: {projection.enabledControls}</div>
+          <div className="border border-current/15 bg-black/25 p-2">safe projection: {projection.safeProjectionOnly ? "true" : "false"}</div>
+          <div className="border border-current/15 bg-black/25 p-2">raw excluded: {projection.rawExcluded ? "true" : "false"}</div>
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-3 lg:grid-cols-[1.2fr_1fr]">
+        <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4" data-office-desk-rpg-facilities="true">
+          {projection.facilities.map((facility) => (
+            <div
+              key={facility.id}
+              className="min-h-28 border border-current/15 bg-black/20 p-3"
+              data-office-desk-rpg-facility={facility.id}
+              data-office-desk-rpg-facility-posture={facility.posture}
+            >
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{facility.posture}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{facility.label}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{facility.safeSummary}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid gap-2" data-office-desk-rpg-actors="true">
+          {projection.actors.map((actor) => (
+            <div
+              key={actor.role}
+              className="border border-current/15 bg-black/20 p-3"
+              data-office-desk-rpg-actor={actor.role}
+              data-office-desk-rpg-actor-facility={actor.facilityId}
+              data-office-desk-rpg-actor-status={actor.status}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-sm font-semibold text-foreground">{actor.label}</div>
+                  <div className="mt-1 text-xs text-midground/55">{actor.role} · {actor.facilityId}</div>
+                </div>
+                <div className="font-mono text-xs text-emerald-200">x{actor.visibleInstances}</div>
+              </div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{actor.safeSummary}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-2 md:grid-cols-4" data-office-desk-rpg-posture="true">
+        <div className="border border-current/15 bg-black/20 p-3" data-office-desk-rpg-board-state="true">
+          <div className="text-xs font-semibold text-foreground">{projection.boardState.label}</div>
+          <div className="mt-1 text-xs text-midground/65">work {projection.boardState.workItemCount} · blocked {projection.boardState.blockedCount}</div>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-3" data-office-desk-rpg-evidence-state="true">
+          <div className="text-xs font-semibold text-foreground">{projection.evidenceState.label}</div>
+          <div className="mt-1 text-xs text-midground/65">sources {projection.evidenceState.sourceCount} · warnings {projection.evidenceState.warningCount}</div>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-3" data-office-desk-rpg-vault-state="true" data-office-desk-rpg-vault-write-enabled={String(projection.vaultState.writeEnabled)}>
+          <div className="text-xs font-semibold text-foreground">{projection.vaultState.label}</div>
+          <div className="mt-1 text-xs text-midground/65">NAS 저장은 승인 전 차단</div>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-3" data-office-desk-rpg-ops-state="true" data-office-desk-rpg-service-controls-enabled={String(projection.opsState.serviceControlsEnabled)}>
+          <div className="text-xs font-semibold text-foreground">{projection.opsState.label}</div>
+          <div className="mt-1 text-xs text-midground/65">service controls disabled</div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 const EMPTY_STATE_DELTA: OfficeStateDelta = {
   hasChanges: false,
@@ -519,6 +750,357 @@ const OFFICE_ZONE_PANELS: Array<{ id: OfficeMapNode["id"]; label: string; classN
   { id: "automation", label: "기계실", className: "border-cyan-200/25 bg-[repeating-linear-gradient(90deg,rgba(34,211,238,0.13)_0_5px,rgba(34,211,238,0.055)_5px_11px)]", style: { left: "10%", top: "54%", width: "34%", height: "25%" } },
   { id: "routing", label: "우편실", className: "border-sky-200/25 bg-[repeating-linear-gradient(135deg,rgba(125,211,252,0.13)_0_6px,rgba(125,211,252,0.055)_6px_12px)]", style: { left: "56%", top: "54%", width: "34%", height: "25%" } },
 ];
+
+export function ControlledMutationRequestStorePosturePanel({ posture }: { posture: OfficeControlledMutationRequestStorePosture }) {
+  return (
+    <section
+      className="border border-cyan-300/20 bg-cyan-950/10 p-4"
+      data-office-controlled-mutation-request-store-posture="true"
+      data-office-controlled-mutation-request-store-posture-enabled-controls={posture.enabledControls}
+      data-office-controlled-mutation-request-store-posture-form-control-enabled={String(posture.formControlEnabled)}
+      data-office-controlled-mutation-request-store-posture-browser-executable-controls-enabled={String(posture.browserExecutableControlsEnabled)}
+      data-office-controlled-mutation-request-store-posture-backend-mutation-enabled={String(posture.backendMutationEnabled)}
+      data-office-controlled-mutation-request-store-posture-storage-write-enabled={String(posture.storageWriteEnabled)}
+      data-office-controlled-mutation-request-store-posture-event-append-enabled={String(posture.eventAppendEnabled)}
+      data-office-controlled-mutation-request-store-posture-event-readback-enabled={String(posture.eventReadbackEnabled)}
+      data-office-controlled-mutation-request-store-posture-request-creation-enabled={String(posture.requestCreationEnabled)}
+      data-office-controlled-mutation-request-store-posture-audit-write-enabled={String(posture.auditWriteEnabled)}
+      data-office-controlled-mutation-request-store-posture-execution-enabled={String(posture.executionEnabled)}
+      data-office-controlled-mutation-request-store-posture-dry-run-execution-enabled={String(posture.dryRunExecutionEnabled)}
+      data-office-controlled-mutation-request-store-posture-dispatch-enabled={String(posture.dispatchEnabled)}
+      data-office-controlled-mutation-request-store-posture-target-mutation-enabled={String(posture.targetMutationEnabled)}
+      data-office-controlled-mutation-request-store-posture-authority-adapter-binding-enabled={String(posture.authorityAdapterBindingEnabled)}
+      data-office-controlled-mutation-request-store-posture-credential-change-enabled={String(posture.credentialChangeEnabled)}
+      data-office-controlled-mutation-request-store-posture-nas-mutation-enabled={String(posture.nasMutationEnabled)}
+      data-office-controlled-mutation-request-store-posture-safe-projection-only={String(posture.safeProjectionOnly)}
+      data-office-controlled-mutation-request-store-posture-raw-excluded={String(posture.rawExcluded)}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-200/70">{posture.stageLabel}</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">{posture.title}</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">{posture.safeBoundary}</p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          cards: {posture.disabledSurfaceSummary.postureCards} · controls: {posture.disabledSurfaceSummary.enabledControls}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-controlled-mutation-request-store-posture-cards="true">
+        {posture.postureCards.map((card) => (
+          <div key={card.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-request-store-posture-card={card.id} data-office-controlled-mutation-request-store-posture-card-status={card.status}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.status}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{card.label}</div>
+            <div className="mt-2 text-xs leading-5 text-midground/70">{card.detail}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function ControlledMutationRequestStoreHardeningPlanPanel({ plan }: { plan: OfficeControlledMutationRequestStoreHardeningPlan }) {
+  return (
+    <section
+      className="border border-amber-300/20 bg-amber-950/10 p-4"
+      data-office-controlled-mutation-request-store-hardening-plan="true"
+      data-office-controlled-mutation-request-store-hardening-plan-enabled-controls={plan.enabledControls}
+      data-office-controlled-mutation-request-store-hardening-plan-backend-mutation-enabled={String(plan.backendMutationEnabled)}
+      data-office-controlled-mutation-request-store-hardening-plan-storage-write-enabled={String(plan.storageWriteEnabled)}
+      data-office-controlled-mutation-request-store-hardening-plan-event-append-enabled={String(plan.eventAppendEnabled)}
+      data-office-controlled-mutation-request-store-hardening-plan-event-readback-enabled={String(plan.eventReadbackEnabled)}
+      data-office-controlled-mutation-request-store-hardening-plan-hardening-implemented={String(plan.hardeningImplemented)}
+      data-office-controlled-mutation-request-store-hardening-plan-request-creation-enabled={String(plan.requestCreationEnabled)}
+      data-office-controlled-mutation-request-store-hardening-plan-audit-write-enabled={String(plan.auditWriteEnabled)}
+      data-office-controlled-mutation-request-store-hardening-plan-execution-enabled={String(plan.executionEnabled)}
+      data-office-controlled-mutation-request-store-hardening-plan-dispatch-enabled={String(plan.dispatchEnabled)}
+      data-office-controlled-mutation-request-store-hardening-plan-nas-mutation-enabled={String(plan.nasMutationEnabled)}
+      data-office-controlled-mutation-request-store-hardening-plan-safe-projection-only={String(plan.safeProjectionOnly)}
+      data-office-controlled-mutation-request-store-hardening-plan-raw-excluded={String(plan.rawExcluded)}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-200/70">{plan.stageLabel}</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">{plan.title}</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">{plan.safeBoundary}</p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          hardening items: {plan.disabledSurfaceSummary.hardeningItems} · controls: {plan.disabledSurfaceSummary.enabledControls}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-controlled-mutation-request-store-hardening-plan-items="true">
+        {plan.hardeningItems.map((item) => (
+          <div key={item.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-request-store-hardening-plan-item={item.id} data-office-controlled-mutation-request-store-hardening-plan-item-status={item.status}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.status}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+            <div className="mt-2 text-xs leading-5 text-midground/70">{item.detail}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function ControlledMutationNextApprovalBoundaryPanel({ boundary }: { boundary: OfficeControlledMutationNextApprovalBoundary }) {
+  return (
+    <section
+      className="border border-rose-300/20 bg-rose-950/10 p-4"
+      data-office-controlled-mutation-next-approval-boundary="true"
+      data-office-controlled-mutation-next-approval-boundary-enabled-controls={boundary.enabledControls}
+      data-office-controlled-mutation-next-approval-boundary-approval-granted={String(boundary.approvalGranted)}
+      data-office-controlled-mutation-next-approval-boundary-backend-mutation-enabled={String(boundary.backendMutationEnabled)}
+      data-office-controlled-mutation-next-approval-boundary-storage-write-enabled={String(boundary.storageWriteEnabled)}
+      data-office-controlled-mutation-next-approval-boundary-event-append-enabled={String(boundary.eventAppendEnabled)}
+      data-office-controlled-mutation-next-approval-boundary-event-readback-enabled={String(boundary.eventReadbackEnabled)}
+      data-office-controlled-mutation-next-approval-boundary-hardening-implemented={String(boundary.hardeningImplemented)}
+      data-office-controlled-mutation-next-approval-boundary-decision-store-enabled={String(boundary.decisionStoreEnabled)}
+      data-office-controlled-mutation-next-approval-boundary-request-creation-enabled={String(boundary.requestCreationEnabled)}
+      data-office-controlled-mutation-next-approval-boundary-audit-write-enabled={String(boundary.auditWriteEnabled)}
+      data-office-controlled-mutation-next-approval-boundary-execution-enabled={String(boundary.executionEnabled)}
+      data-office-controlled-mutation-next-approval-boundary-dry-run-execution-enabled={String(boundary.dryRunExecutionEnabled)}
+      data-office-controlled-mutation-next-approval-boundary-dispatch-enabled={String(boundary.dispatchEnabled)}
+      data-office-controlled-mutation-next-approval-boundary-target-mutation-enabled={String(boundary.targetMutationEnabled)}
+      data-office-controlled-mutation-next-approval-boundary-authority-adapter-binding-enabled={String(boundary.authorityAdapterBindingEnabled)}
+      data-office-controlled-mutation-next-approval-boundary-credential-change-enabled={String(boundary.credentialChangeEnabled)}
+      data-office-controlled-mutation-next-approval-boundary-nas-mutation-enabled={String(boundary.nasMutationEnabled)}
+      data-office-controlled-mutation-next-approval-boundary-safe-projection-only={String(boundary.safeProjectionOnly)}
+      data-office-controlled-mutation-next-approval-boundary-raw-excluded={String(boundary.rawExcluded)}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-rose-200/70">{boundary.stageLabel}</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">{boundary.title}</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">{boundary.safeBoundary}</p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          approval options: {boundary.disabledSurfaceSummary.boundaryOptions} · controls: {boundary.disabledSurfaceSummary.enabledControls}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-controlled-mutation-next-approval-boundary-options="true">
+        {boundary.boundaryOptions.map((item) => (
+          <div key={item.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-next-approval-boundary-option={item.id} data-office-controlled-mutation-next-approval-boundary-option-status={item.status}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.status}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+            <div className="mt-2 text-xs leading-5 text-midground/70">{item.detail}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function ControlledMutationPostDecisionApprovalBoundaryPanel({ boundary }: { boundary: OfficeControlledMutationPostDecisionApprovalBoundary }) {
+  return (
+    <section
+      className="border border-amber-300/20 bg-amber-950/10 p-4"
+      data-office-controlled-mutation-post-decision-approval-boundary="true"
+      data-office-controlled-mutation-post-decision-approval-boundary-enabled-controls={boundary.enabledControls}
+      data-office-controlled-mutation-post-decision-approval-boundary-approval-granted={String(boundary.approvalGranted)}
+      data-office-controlled-mutation-post-decision-approval-boundary-request-store-hardening-completed={String(boundary.requestStoreHardeningCompleted)}
+      data-office-controlled-mutation-post-decision-approval-boundary-human-decision-store-completed={String(boundary.humanDecisionStoreCompleted)}
+      data-office-controlled-mutation-post-decision-approval-boundary-new-backend-mutation-enabled={String(boundary.newBackendMutationEnabled)}
+      data-office-controlled-mutation-post-decision-approval-boundary-new-storage-write-enabled={String(boundary.newStorageWriteEnabled)}
+      data-office-controlled-mutation-post-decision-approval-boundary-audit-write-enabled={String(boundary.auditWriteEnabled)}
+      data-office-controlled-mutation-post-decision-approval-boundary-execution-enabled={String(boundary.executionEnabled)}
+      data-office-controlled-mutation-post-decision-approval-boundary-dry-run-result-storage-enabled={String(boundary.dryRunResultStorageEnabled)}
+      data-office-controlled-mutation-post-decision-approval-boundary-dispatch-enabled={String(boundary.dispatchEnabled)}
+      data-office-controlled-mutation-post-decision-approval-boundary-target-mutation-enabled={String(boundary.targetMutationEnabled)}
+      data-office-controlled-mutation-post-decision-approval-boundary-authority-adapter-binding-enabled={String(boundary.authorityAdapterBindingEnabled)}
+      data-office-controlled-mutation-post-decision-approval-boundary-credential-change-enabled={String(boundary.credentialChangeEnabled)}
+      data-office-controlled-mutation-post-decision-approval-boundary-nas-mutation-enabled={String(boundary.nasMutationEnabled)}
+      data-office-controlled-mutation-post-decision-approval-boundary-safe-projection-only={String(boundary.safeProjectionOnly)}
+      data-office-controlled-mutation-post-decision-approval-boundary-raw-excluded={String(boundary.rawExcluded)}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-200/70">{boundary.stageLabel}</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">{boundary.title}</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">{boundary.safeBoundary}</p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          completed: {boundary.disabledSurfaceSummary.completedSubsets} · next approvals: {boundary.disabledSurfaceSummary.boundaryOptions} · controls: {boundary.disabledSurfaceSummary.enabledControls}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-2" data-office-controlled-mutation-post-decision-approval-boundary-completed-subsets="true">
+        {boundary.completedLocalSubsets.map((item) => (
+          <div key={item.id} className="border border-emerald-300/20 bg-emerald-950/10 p-3" data-office-controlled-mutation-post-decision-approval-boundary-completed-subset={item.id} data-office-controlled-mutation-post-decision-approval-boundary-completed-subset-status={item.status}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-200/70">{item.status}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+            <div className="mt-2 text-xs leading-5 text-midground/70">{item.detail}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-controlled-mutation-post-decision-approval-boundary-options="true">
+        {boundary.boundaryOptions.map((item) => (
+          <div key={item.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-post-decision-approval-boundary-option={item.id} data-office-controlled-mutation-post-decision-approval-boundary-option-status={item.status}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.status}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+            <div className="mt-2 text-xs leading-5 text-midground/70">{item.detail}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+
+export function ControlledMutationPostRegistryApprovalBoundaryPanel({ boundary }: { boundary: OfficeControlledMutationPostRegistryApprovalBoundary }) {
+  return (
+    <section
+      className="border border-cyan-300/20 bg-cyan-950/10 p-4"
+      data-office-controlled-mutation-post-registry-approval-boundary="true"
+      data-office-controlled-mutation-post-registry-approval-boundary-enabled-controls={boundary.enabledControls}
+      data-office-controlled-mutation-post-registry-approval-boundary-approval-granted={String(boundary.approvalGranted)}
+      data-office-controlled-mutation-post-registry-approval-boundary-authority-adapter-registry-completed={String(boundary.authorityAdapterRegistryCompleted)}
+      data-office-controlled-mutation-post-registry-approval-boundary-new-backend-mutation-enabled={String(boundary.newBackendMutationEnabled)}
+      data-office-controlled-mutation-post-registry-approval-boundary-new-storage-write-enabled={String(boundary.newStorageWriteEnabled)}
+      data-office-controlled-mutation-post-registry-approval-boundary-audit-write-enabled={String(boundary.auditWriteEnabled)}
+      data-office-controlled-mutation-post-registry-approval-boundary-execution-enabled={String(boundary.executionEnabled)}
+      data-office-controlled-mutation-post-registry-approval-boundary-dispatch-enabled={String(boundary.dispatchEnabled)}
+      data-office-controlled-mutation-post-registry-approval-boundary-target-mutation-enabled={String(boundary.targetMutationEnabled)}
+      data-office-controlled-mutation-post-registry-approval-boundary-authority-adapter-binding-enabled={String(boundary.authorityAdapterBindingEnabled)}
+      data-office-controlled-mutation-post-registry-approval-boundary-credential-change-enabled={String(boundary.credentialChangeEnabled)}
+      data-office-controlled-mutation-post-registry-approval-boundary-nas-mutation-enabled={String(boundary.nasMutationEnabled)}
+      data-office-controlled-mutation-post-registry-approval-boundary-safe-projection-only={String(boundary.safeProjectionOnly)}
+      data-office-controlled-mutation-post-registry-approval-boundary-raw-excluded={String(boundary.rawExcluded)}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-200/70">{boundary.stageLabel}</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">{boundary.title}</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">{boundary.safeBoundary}</p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          completed: {boundary.disabledSurfaceSummary.completedSubsets} · next approvals: {boundary.disabledSurfaceSummary.boundaryOptions} · controls: {boundary.disabledSurfaceSummary.enabledControls}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-3" data-office-controlled-mutation-post-registry-approval-boundary-completed-subsets="true">
+        {boundary.completedLocalSubsets.map((item) => (
+          <div key={item.id} className="border border-emerald-300/20 bg-emerald-950/10 p-3" data-office-controlled-mutation-post-registry-approval-boundary-completed-subset={item.id} data-office-controlled-mutation-post-registry-approval-boundary-completed-subset-status={item.status}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-200/70">{item.status}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+            <div className="mt-2 text-xs leading-5 text-midground/70">{item.detail}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-controlled-mutation-post-registry-approval-boundary-options="true">
+        {boundary.boundaryOptions.map((item) => (
+          <div key={item.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-post-registry-approval-boundary-option={item.id} data-office-controlled-mutation-post-registry-approval-boundary-option-status={item.status}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.status}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+            <div className="mt-2 text-xs leading-5 text-midground/70">{item.detail}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+
+export function ControlledMutationTargetDispatchForbiddenBoundaryPanel({ boundary }: { boundary: OfficeControlledMutationTargetDispatchForbiddenBoundary }) {
+  return (
+    <section
+      className="border border-amber-300/20 bg-amber-950/10 p-4"
+      data-office-controlled-mutation-target-dispatch-forbidden-boundary="true"
+      data-office-controlled-mutation-target-dispatch-forbidden-boundary-enabled-controls={boundary.enabledControls}
+      data-office-controlled-mutation-target-dispatch-forbidden-boundary-approval-granted={String(boundary.approvalGranted)}
+      data-office-controlled-mutation-target-dispatch-forbidden-boundary-target-dispatch-runtime-approval-granted={String(boundary.targetDispatchRuntimeApprovalGranted)}
+      data-office-controlled-mutation-target-dispatch-forbidden-boundary-dispatch-enabled={String(boundary.dispatchEnabled)}
+      data-office-controlled-mutation-target-dispatch-forbidden-boundary-target-mutation-enabled={String(boundary.targetMutationEnabled)}
+      data-office-controlled-mutation-target-dispatch-forbidden-boundary-dry-run-enabled={String(boundary.dryRunEnabled)}
+      data-office-controlled-mutation-target-dispatch-forbidden-boundary-execution-enabled={String(boundary.executionEnabled)}
+      data-office-controlled-mutation-target-dispatch-forbidden-boundary-authority-adapter-binding-enabled={String(boundary.authorityAdapterBindingEnabled)}
+      data-office-controlled-mutation-target-dispatch-forbidden-boundary-credential-change-enabled={String(boundary.credentialChangeEnabled)}
+      data-office-controlled-mutation-target-dispatch-forbidden-boundary-nas-mutation-enabled={String(boundary.nasMutationEnabled)}
+      data-office-controlled-mutation-target-dispatch-forbidden-boundary-deploy-restart-enabled={String(boundary.deployRestartEnabled)}
+      data-office-controlled-mutation-target-dispatch-forbidden-boundary-push-pr-merge-enabled={String(boundary.pushPrMergeEnabled)}
+      data-office-controlled-mutation-target-dispatch-forbidden-boundary-safe-projection-only={String(boundary.safeProjectionOnly)}
+      data-office-controlled-mutation-target-dispatch-forbidden-boundary-raw-excluded={String(boundary.rawExcluded)}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-200/70">{boundary.stageLabel}</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">{boundary.title}</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">{boundary.safeBoundary}</p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          forbidden: {boundary.disabledSurfaceSummary.forbiddenBoundaries} · next approvals: {boundary.disabledSurfaceSummary.boundaryOptions} · controls: {boundary.disabledSurfaceSummary.enabledControls}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-2" data-office-controlled-mutation-target-dispatch-forbidden-boundary-forbidden-boundaries="true">
+        {boundary.forbiddenBoundaries.map((item) => (
+          <div key={item.id} className="border border-red-300/20 bg-red-950/10 p-3" data-office-controlled-mutation-target-dispatch-forbidden-boundary-forbidden-boundary={item.id} data-office-controlled-mutation-target-dispatch-forbidden-boundary-forbidden-boundary-status={item.status}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-red-200/70">{item.status}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+            <div className="mt-2 text-xs leading-5 text-midground/70">{item.detail}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-controlled-mutation-target-dispatch-forbidden-boundary-options="true">
+        {boundary.boundaryOptions.map((item) => (
+          <div key={item.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-target-dispatch-forbidden-boundary-option={item.id} data-office-controlled-mutation-target-dispatch-forbidden-boundary-option-status={item.status}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.status}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+            <div className="mt-2 text-xs leading-5 text-midground/70">{item.detail}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+
+export function ControlledMutationSafeContinuationCompletionReviewPanel({ review }: { review: OfficeControlledMutationSafeContinuationCompletionReview }) {
+  return (
+    <section
+      className="border border-emerald-300/20 bg-emerald-950/10 p-4"
+      data-office-controlled-mutation-safe-continuation-completion-review="true"
+      data-office-controlled-mutation-safe-continuation-completion-review-enabled-controls={review.enabledControls}
+      data-office-controlled-mutation-safe-continuation-completion-review-next-requires-explicit-approval={String(review.nextRequiresExplicitApproval)}
+      data-office-controlled-mutation-safe-continuation-completion-review-read-only-target-level-reached={String(review.readOnlyTargetLevelReached)}
+      data-office-controlled-mutation-safe-continuation-completion-review-dispatch-enabled={String(review.dispatchEnabled)}
+      data-office-controlled-mutation-safe-continuation-completion-review-target-mutation-enabled={String(review.targetMutationEnabled)}
+      data-office-controlled-mutation-safe-continuation-completion-review-execution-enabled={String(review.executionEnabled)}
+      data-office-controlled-mutation-safe-continuation-completion-review-dry-run-enabled={String(review.dryRunEnabled)}
+      data-office-controlled-mutation-safe-continuation-completion-review-audit-write-enabled={String(review.auditWriteEnabled)}
+      data-office-controlled-mutation-safe-continuation-completion-review-authority-adapter-binding-enabled={String(review.authorityAdapterBindingEnabled)}
+      data-office-controlled-mutation-safe-continuation-completion-review-credential-change-enabled={String(review.credentialChangeEnabled)}
+      data-office-controlled-mutation-safe-continuation-completion-review-nas-mutation-enabled={String(review.nasMutationEnabled)}
+      data-office-controlled-mutation-safe-continuation-completion-review-deploy-restart-enabled={String(review.deployRestartEnabled)}
+      data-office-controlled-mutation-safe-continuation-completion-review-push-pr-merge-enabled={String(review.pushPrMergeEnabled)}
+      data-office-controlled-mutation-safe-continuation-completion-review-safe-projection-only={String(review.safeProjectionOnly)}
+      data-office-controlled-mutation-safe-continuation-completion-review-raw-excluded={String(review.rawExcluded)}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">{review.stageLabel}</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">{review.title}</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">{review.safeBoundary}</p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          completed: {review.disabledSurfaceSummary.completedSlices} · approvals: {review.disabledSurfaceSummary.explicitApprovalBoundaries} · controls: {review.disabledSurfaceSummary.enabledControls}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-controlled-mutation-safe-continuation-completion-review-completed-slices="true">
+        {review.completedSlices.map((item) => (
+          <div key={item.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-safe-continuation-completion-review-completed-slice={item.id} data-office-controlled-mutation-safe-continuation-completion-review-completed-slice-status={item.status}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-200/65">{item.status}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+            <div className="mt-2 text-xs leading-5 text-midground/70">{item.detail}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-controlled-mutation-safe-continuation-completion-review-explicit-approval-boundaries="true">
+        {review.explicitApprovalBoundaries.map((item) => (
+          <div key={item.id} className="border border-amber-300/20 bg-amber-950/10 p-3" data-office-controlled-mutation-safe-continuation-completion-review-explicit-approval-boundary={item.id} data-office-controlled-mutation-safe-continuation-completion-review-explicit-approval-boundary-status={item.status}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-200/70">{item.status}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+            <div className="mt-2 text-xs leading-5 text-midground/70">{item.detail}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
 
 function OfficeMap({
   nodes,
@@ -1257,6 +1839,12 @@ export function OfficeRpgMap({
   const statusOptions = Array.from(new Set(scene.entities.map((entity) => entity.status)));
   const severityOptions = Array.from(new Set(scene.entities.map((entity) => entity.severity)));
   const roleOptions = Array.from(new Set(scene.entities.map((entity) => entity.kind)));
+  const missionStoryboard = buildOfficeRpgMissionStoryboard(scene);
+  const orchestratorDesk = buildOfficeRpgOrchestratorDesk(scene);
+  const kanbanBoardFacility = buildOfficeRpgKanbanBoardFacility(scene);
+  const sourceArchiveFacility = buildOfficeRpgSourceArchiveFacility(scene);
+  const reviewCornerFacility = buildOfficeRpgReviewCornerFacility(scene);
+  const approvalConsoleFacility = buildOfficeRpgApprovalConsoleFacility(scene);
 
   return (
     <Card className="overflow-hidden border-emerald-300/25 bg-black/25" data-office-rpg-map="true">
@@ -1277,14 +1865,147 @@ export function OfficeRpgMap({
         <nav className="flex flex-wrap gap-2 text-xs" aria-label="RPG 지도 이동">
           {[
             ["map", "지도"],
+            ["mission", "미션 흐름"],
             ["attention", "주의"],
             ["source_archive", "자료실"],
+            ["approval", "승인"],
             ["inspector", "검사"],
             ["fallback", "대체 목록"],
           ].map(([id, label]) => (
             <a key={id} href={id === "inspector" ? "#office-safe-inspector" : `#office-rpg-${id}`} className="border border-current/20 px-2 py-1 text-midground/70 hover:text-foreground" data-office-rpg-jump-target={id}>{label}</a>
           ))}
         </nav>
+        <section id="office-rpg-mission" className="office-rpg-mission" data-office-rpg-mission-storyboard="true" aria-label={missionStoryboard.title}>
+          <div className="office-rpg-mission__header">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">{missionStoryboard.stageLabel}</div>
+              <h3 className="text-sm font-semibold text-foreground">{missionStoryboard.title}</h3>
+              <p className="mt-1 text-xs leading-5 text-midground/70">{missionStoryboard.summary}</p>
+            </div>
+            <div className="border border-emerald-300/25 bg-emerald-950/15 px-3 py-2 text-xs text-emerald-100" data-office-rpg-approval-boundary="true">
+              {missionStoryboard.approvalBoundary}
+            </div>
+          </div>
+          <div className="office-rpg-mission__steps">
+            {missionStoryboard.steps.map((step, index) => (
+              <div key={step.id} className={`office-rpg-mission__step office-rpg-mission__step--${step.tone}`} data-office-rpg-mission-step={step.id}>
+                <div className="office-rpg-mission__node" aria-hidden="true">{index + 1}</div>
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-foreground">
+                    <span>{step.label}</span>
+                    <span className="text-[10px] font-normal uppercase tracking-[0.16em] text-midground/55">{step.room}</span>
+                  </div>
+                  <div className="mt-1 text-xs leading-5 text-midground/70">{step.detail}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+        <section id="office-rpg-orchestrator" className="office-rpg-orchestrator" data-office-rpg-orchestrator-desk="true" aria-label={orchestratorDesk.title}>
+          <div className="office-rpg-orchestrator__header">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-200/70">{orchestratorDesk.stageLabel}</div>
+              <h3 className="text-sm font-semibold text-foreground">{orchestratorDesk.title}</h3>
+              <p className="mt-1 text-xs leading-5 text-midground/70">{orchestratorDesk.intent}</p>
+            </div>
+            <div className="border border-sky-300/25 bg-sky-950/15 px-3 py-2 text-xs text-sky-100" data-office-rpg-orchestrator-boundary="true">
+              {orchestratorDesk.actionBoundary}
+            </div>
+          </div>
+          <div className="office-rpg-orchestrator__cards">
+            {orchestratorDesk.cards.map((card) => (
+              <div key={card.id} className={`office-rpg-orchestrator__card office-rpg-orchestrator__card--${card.tone}`} data-office-rpg-orchestrator-card={card.id}>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.label}</div>
+                <div className="mt-1 text-sm font-semibold text-foreground">{card.value}</div>
+                <div className="mt-1 text-xs leading-5 text-midground/70">{card.detail}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+        <section id="office-rpg-kanban-board" className="office-rpg-board" data-office-rpg-kanban-board="true" aria-label={kanbanBoardFacility.title}>
+          <div className="office-rpg-board__header">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-yellow-200/70">{kanbanBoardFacility.stageLabel}</div>
+              <h3 className="text-sm font-semibold text-foreground">{kanbanBoardFacility.title}</h3>
+              <p className="mt-1 text-xs leading-5 text-midground/70">source of truth: {kanbanBoardFacility.sourceOfTruth}</p>
+            </div>
+            <div className="border border-yellow-300/25 bg-yellow-950/15 px-3 py-2 text-xs text-yellow-100" data-office-rpg-kanban-boundary="true">
+              {kanbanBoardFacility.writeBoundary}
+            </div>
+          </div>
+          <div className="office-rpg-board__lanes">
+            {kanbanBoardFacility.lanes.map((lane) => (
+              <div key={lane.id} className={`office-rpg-board__lane office-rpg-board__lane--${lane.tone}`} data-office-rpg-kanban-lane={lane.id}>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{lane.label}</div>
+                <div className="mt-1 text-sm font-semibold text-foreground">{lane.value}</div>
+                <div className="mt-1 text-xs leading-5 text-midground/70">{lane.detail}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+        <section id="office-rpg-source-archive" className="office-rpg-source-archive" data-office-rpg-source-archive="true" aria-label={sourceArchiveFacility.title}>
+          <div className="office-rpg-source-archive__header">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-200/70">{sourceArchiveFacility.stageLabel}</div>
+              <h3 className="text-sm font-semibold text-foreground">{sourceArchiveFacility.title}</h3>
+              <p className="mt-1 text-xs leading-5 text-midground/70">Paperclip/sourceTags 근거 레이어를 원문 없이 운영실 자료실로 보여줍니다</p>
+            </div>
+            <div className="border border-cyan-300/25 bg-cyan-950/15 px-3 py-2 text-xs text-cyan-100" data-office-rpg-source-boundary="true">
+              {sourceArchiveFacility.rawBoundary}
+            </div>
+          </div>
+          <div className="office-rpg-source-archive__shelves">
+            {sourceArchiveFacility.shelves.map((shelf) => (
+              <div key={shelf.id} className={`office-rpg-source-archive__shelf office-rpg-source-archive__shelf--${shelf.tone}`} data-office-rpg-source-shelf={shelf.id}>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{shelf.label}</div>
+                <div className="mt-1 text-sm font-semibold text-foreground">{shelf.value}</div>
+                <div className="mt-1 text-xs leading-5 text-midground/70">{shelf.detail}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+        <section id="office-rpg-review-corner" className="office-rpg-review-corner" data-office-rpg-review-corner="true" aria-label={reviewCornerFacility.title}>
+          <div className="office-rpg-review-corner__header">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-rose-200/70">{reviewCornerFacility.stageLabel}</div>
+              <h3 className="text-sm font-semibold text-foreground">{reviewCornerFacility.title}</h3>
+              <p className="mt-1 text-xs leading-5 text-midground/70">검토/승인 신호를 실행 전 안전 대기 구역으로만 모읍니다</p>
+            </div>
+            <div className="border border-rose-300/25 bg-rose-950/15 px-3 py-2 text-xs text-rose-100" data-office-rpg-review-boundary="true">
+              {reviewCornerFacility.approvalBoundary}
+            </div>
+          </div>
+          <div className="office-rpg-review-corner__stations">
+            {reviewCornerFacility.stations.map((station) => (
+              <div key={station.id} className={`office-rpg-review-corner__station office-rpg-review-corner__station--${station.tone}`} data-office-rpg-review-station={station.id}>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{station.label}</div>
+                <div className="mt-1 text-sm font-semibold text-foreground">{station.value}</div>
+                <div className="mt-1 text-xs leading-5 text-midground/70">{station.detail}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+        <section id="office-rpg-approval" className="office-rpg-approval" data-office-rpg-approval-console="true" aria-label={approvalConsoleFacility.title}>
+          <div className="office-rpg-approval__header">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-violet-200/70">{approvalConsoleFacility.stageLabel}</div>
+              <h3 className="text-sm font-semibold text-foreground">{approvalConsoleFacility.title}</h3>
+              <p className="mt-1 text-xs leading-5 text-midground/70">승인/거절 실행이 아니라 사람이 판단하기 전 안전 자세만 표시합니다</p>
+            </div>
+            <div className="border border-violet-300/25 bg-violet-950/15 px-3 py-2 text-xs text-violet-100" data-office-rpg-approval-boundary="true">
+              {approvalConsoleFacility.decisionBoundary}
+            </div>
+          </div>
+          <div className="office-rpg-approval__controls" aria-label="비활성 승인 콘솔 컨트롤">
+            {approvalConsoleFacility.controls.map((control) => (
+              <div key={control.id} className={`office-rpg-approval__control office-rpg-approval__control--${control.tone}`} data-office-rpg-approval-control={control.id} aria-disabled={control.disabled}>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{control.label}</div>
+                <div className="mt-1 text-sm font-semibold text-foreground">{control.value}</div>
+                <div className="mt-1 text-xs leading-5 text-midground/70">{control.detail}</div>
+              </div>
+            ))}
+          </div>
+        </section>
         <div className="grid gap-2 text-xs md:grid-cols-4" data-office-rpg-filters="true">
           <label className="grid gap-1 text-midground/65">
             <span>방</span>
@@ -1391,6 +2112,2529 @@ export function OfficeRpgMap({
   );
 }
 
+export function OfficeDeskRpgWorkerRoleVisibilityPanel({ visibility }: { visibility: OfficeDeskRpgWorkerRoleVisibility }) {
+  return (
+    <Card
+      data-office-desk-rpg-worker-roles="true"
+      data-office-desk-rpg-worker-roles-enabled-controls={visibility.enabledControls}
+      data-office-desk-rpg-worker-roles-assignment-enabled={String(visibility.assignmentEnabled)}
+      data-office-desk-rpg-worker-roles-request-creation-enabled={String(visibility.requestCreationEnabled)}
+      data-office-desk-rpg-worker-roles-dispatch-enabled={String(visibility.dispatchEnabled)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Users className="h-4 w-4" /> Worker role visibility
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-sky-300/20 bg-sky-950/10 p-3">
+            <div className="font-semibold text-sky-100">역할 가시성 · assignment/dispatch disabled</div>
+            <div className="mt-1 leading-5">
+              Search Worker, Reviewer, Wiki Writer, NAS Keeper는 현재 읽기 전용 역할 posture로만 표시됩니다. 작업 배정, 요청 생성, adapter dispatch, NAS 저장은 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-4">
+            {visibility.roles.map((role) => (
+              <div
+                key={role.role}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-desk-rpg-worker-role={role.role}
+                data-office-desk-rpg-worker-role-lane={role.lane}
+                data-office-desk-rpg-worker-role-assignment-enabled={String(role.assignmentEnabled)}
+                data-office-desk-rpg-worker-role-dispatch-enabled={String(role.dispatchEnabled)}
+              >
+                <div className="font-semibold text-foreground">{role.label}</div>
+                <div className="mt-1 text-midground/60">{role.lane} · {role.status} · visible {role.visibleInstances}</div>
+                <div className="mt-2 leading-5">{role.safeSummary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-desk-rpg-worker-roles-boundary="true">
+            suppressed runtime instances: {visibility.suppressedRuntimeInstances} · enabled controls: {visibility.enabledControls} · raw excluded: {String(visibility.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function DisabledApprovalDialoguePosturePanel({ dialogue }: { dialogue: OfficeDisabledApprovalDialoguePosture }) {
+  return (
+    <Card
+      data-office-disabled-approval-dialogue="true"
+      data-office-disabled-approval-dialogue-enabled-controls={dialogue.enabledControls}
+      data-office-disabled-approval-dialogue-approve-enabled={String(dialogue.approveEnabled)}
+      data-office-disabled-approval-dialogue-reject-enabled={String(dialogue.rejectEnabled)}
+      data-office-disabled-approval-dialogue-hold-enabled={String(dialogue.holdEnabled)}
+      data-office-disabled-approval-dialogue-request-creation-enabled={String(dialogue.requestCreationEnabled)}
+      data-office-disabled-approval-dialogue-dispatch-enabled={String(dialogue.dispatchEnabled)}
+      data-office-disabled-approval-dialogue-nas-save-enabled={String(dialogue.nasSaveEnabled)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Bot className="h-4 w-4" /> Disabled approval dialogue posture
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-fuchsia-300/20 bg-fuchsia-950/10 p-3">
+            <div className="font-semibold text-fuchsia-100">승인 대화 posture · controls disabled</div>
+            <div className="mt-1 leading-5">
+              Orchestrator가 사장 캐릭터에게 승인 대기를 보고하는 대화 형태만 표시합니다. approve/reject/hold, request creation, dispatch, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3">
+            {dialogue.dialogueLines.map((line) => (
+              <div
+                key={line.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-disabled-approval-dialogue-line={line.id}
+                data-office-disabled-approval-dialogue-tone={line.tone}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{line.speaker}</div>
+                <div className="mt-1 font-semibold text-foreground">{line.label}</div>
+                <div className="mt-2 leading-5">{line.text}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-disabled-approval-dialogue-boundary="true">
+            evidence {dialogue.evidenceCount} · blocked {dialogue.blockedWorkCount} · enabled controls {dialogue.enabledControls} · raw excluded {String(dialogue.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function ReviewerWikiHandoffPosturePanel({ handoff }: { handoff: OfficeReviewerWikiHandoffPosture }) {
+  return (
+    <Card
+      data-office-reviewer-wiki-handoff="true"
+      data-office-reviewer-wiki-handoff-enabled-controls={handoff.enabledControls}
+      data-office-reviewer-wiki-handoff-review-enabled={String(handoff.reviewEnabled)}
+      data-office-reviewer-wiki-handoff-wiki-draft-enabled={String(handoff.wikiDraftEnabled)}
+      data-office-reviewer-wiki-handoff-assignment-enabled={String(handoff.assignmentEnabled)}
+      data-office-reviewer-wiki-handoff-request-creation-enabled={String(handoff.requestCreationEnabled)}
+      data-office-reviewer-wiki-handoff-dispatch-enabled={String(handoff.dispatchEnabled)}
+      data-office-reviewer-wiki-handoff-nas-save-enabled={String(handoff.nasSaveEnabled)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Users className="h-4 w-4" /> Reviewer/Wiki handoff posture
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-emerald-300/20 bg-emerald-950/10 p-3">
+            <div className="font-semibold text-emerald-100">검토 → 위키 작성 handoff · execution disabled</div>
+            <div className="mt-1 leading-5">
+              Search Worker가 모은 근거를 Reviewer와 Wiki Writer가 이어받는 순서만 표시합니다. review 실행, draft 생성, 작업 배정, request creation, dispatch, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {handoff.sequence.map((step) => (
+              <div
+                key={step.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-reviewer-wiki-handoff-step={step.id}
+                data-office-reviewer-wiki-handoff-step-role={step.actorRole}
+                data-office-reviewer-wiki-handoff-step-status={step.status}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{step.actorLabel}</div>
+                <div className="mt-1 font-semibold text-foreground">{step.label}</div>
+                <div className="mt-1 text-midground/60">facility: {step.facilityId} · {step.status}</div>
+                <div className="mt-2 leading-5">{step.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-reviewer-wiki-handoff-boundary="true">
+            evidence {handoff.evidenceCount} · warnings {handoff.warningCount} · blocked {handoff.blockedWorkCount} · enabled controls {handoff.enabledControls} · raw excluded {String(handoff.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function ApprovalDialogueInspectorDetailPanel({ inspector }: { inspector: OfficeApprovalDialogueInspectorDetail }) {
+  return (
+    <Card
+      data-office-approval-dialogue-inspector="true"
+      data-office-approval-dialogue-inspector-enabled-controls={inspector.enabledControls}
+      data-office-approval-dialogue-inspector-approve-enabled={String(inspector.approveEnabled)}
+      data-office-approval-dialogue-inspector-review-enabled={String(inspector.reviewEnabled)}
+      data-office-approval-dialogue-inspector-audit-write-enabled={String(inspector.auditWriteEnabled)}
+      data-office-approval-dialogue-inspector-nas-save-enabled={String(inspector.nasSaveEnabled)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4" /> Approval dialogue inspector detail
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-sky-300/20 bg-sky-950/10 p-3">
+            <div className="font-semibold text-sky-100">승인 대화 inspector · detail only</div>
+            <div className="mt-1 leading-5">
+              JRPG 승인 대화와 reviewer/wiki handoff를 오른쪽 inspector 수준으로만 풀어 보여줍니다. decision, review, draft, audit write, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {inspector.cards.map((card) => (
+              <div
+                key={card.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-approval-dialogue-inspector-card={card.id}
+                data-office-approval-dialogue-inspector-card-tone={card.tone}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{card.label}</div>
+                <div className="mt-2 leading-5">{card.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-approval-dialogue-inspector-boundary="true">
+            dialogue lines {inspector.dialogueLineCount} · handoff steps {inspector.handoffStepCount} · enabled controls {inspector.enabledControls} · raw excluded {String(inspector.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function ReviewerWikiEvidenceDetailPosturePanel({ detail }: { detail: OfficeReviewerWikiEvidenceDetailPosture }) {
+  return (
+    <Card
+      data-office-reviewer-wiki-evidence-detail="true"
+      data-office-reviewer-wiki-evidence-detail-enabled-controls={detail.enabledControls}
+      data-office-reviewer-wiki-evidence-detail-source-open-enabled={String(detail.sourceOpenEnabled)}
+      data-office-reviewer-wiki-evidence-detail-review-enabled={String(detail.reviewEnabled)}
+      data-office-reviewer-wiki-evidence-detail-wiki-draft-enabled={String(detail.wikiDraftEnabled)}
+      data-office-reviewer-wiki-evidence-detail-audit-write-enabled={String(detail.auditWriteEnabled)}
+      data-office-reviewer-wiki-evidence-detail-nas-save-enabled={String(detail.nasSaveEnabled)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4" /> Reviewer/Wiki evidence detail posture
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-emerald-300/20 bg-emerald-950/10 p-3">
+            <div className="font-semibold text-emerald-100">근거 detail posture · aggregate only</div>
+            <div className="mt-1 leading-5">
+              Reviewer와 Wiki Writer가 볼 근거 상태를 safe count와 경계 copy로만 표시합니다. source open, review execution, wiki draft, audit write, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {detail.cards.map((card) => (
+              <div
+                key={card.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-reviewer-wiki-evidence-detail-card={card.id}
+                data-office-reviewer-wiki-evidence-detail-card-tone={card.tone}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{card.label}</div>
+                <div className="mt-2 leading-5">{card.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-reviewer-wiki-evidence-detail-boundary="true">
+            evidence {detail.evidenceCount} · warnings {detail.warningCount} · blocked {detail.blockedWorkCount} · handoff steps {detail.handoffStepCount} · enabled controls {detail.enabledControls} · raw excluded {String(detail.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+
+
+export function BoardEvidenceInspectorDrilldownPanel({ drilldown }: { drilldown: OfficeBoardEvidenceInspectorDrilldown }) {
+  return (
+    <Card
+      data-office-board-evidence-inspector-drilldown="true"
+      data-office-board-evidence-inspector-drilldown-enabled-controls={drilldown.enabledControls}
+      data-office-board-evidence-inspector-drilldown-board-open-enabled={String(drilldown.boardOpenEnabled)}
+      data-office-board-evidence-inspector-drilldown-source-open-enabled={String(drilldown.sourceOpenEnabled)}
+      data-office-board-evidence-inspector-drilldown-inspector-write-enabled={String(drilldown.inspectorWriteEnabled)}
+      data-office-board-evidence-inspector-drilldown-request-creation-enabled={String(drilldown.requestCreationEnabled)}
+      data-office-board-evidence-inspector-drilldown-dispatch-enabled={String(drilldown.dispatchEnabled)}
+      data-office-board-evidence-inspector-drilldown-audit-write-enabled={String(drilldown.auditWriteEnabled)}
+      data-office-board-evidence-inspector-drilldown-nas-save-enabled={String(drilldown.nasSaveEnabled)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Database className="h-4 w-4" /> Board evidence-to-inspector drill-down
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-sky-300/20 bg-sky-950/10 p-3">
+            <div className="font-semibold text-sky-100">중앙 board → right inspector · read-only route</div>
+            <div className="mt-1 leading-5">
+              중앙 board/evidence aggregate에서 right inspector detail로 이어지는 길만 보여줍니다. board open, source open, inspector write, request creation, audit write, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {drilldown.cards.map((card) => (
+              <div
+                key={card.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-board-evidence-inspector-drilldown-card={card.id}
+                data-office-board-evidence-inspector-drilldown-card-tone={card.tone}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{card.label}</div>
+                <div className="mt-2 leading-5">{card.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-board-evidence-inspector-drilldown-boundary="true">
+            work {drilldown.boardWorkCount} · blocked {drilldown.boardBlockedCount} · evidence {drilldown.evidenceCount} · warnings {drilldown.warningCount} · inspector cards {drilldown.inspectorCardCount} · enabled controls {drilldown.enabledControls} · raw excluded {String(drilldown.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function BossOrchestratorRequestPostureDetailPanel({ detail }: { detail: OfficeBossOrchestratorRequestPostureDetail }) {
+  return (
+    <Card
+      data-office-boss-orchestrator-request-posture-detail="true"
+      data-office-boss-orchestrator-request-posture-detail-enabled-controls={detail.enabledControls}
+      data-office-boss-orchestrator-request-posture-detail-input-enabled={String(detail.inputEnabled)}
+      data-office-boss-orchestrator-request-posture-detail-request-creation-enabled={String(detail.requestCreationEnabled)}
+      data-office-boss-orchestrator-request-posture-detail-orchestrator-required={String(detail.orchestratorRequired)}
+      data-office-boss-orchestrator-request-posture-detail-work-assignment-enabled={String(detail.workAssignmentEnabled)}
+      data-office-boss-orchestrator-request-posture-detail-dispatch-enabled={String(detail.dispatchEnabled)}
+      data-office-boss-orchestrator-request-posture-detail-audit-write-enabled={String(detail.auditWriteEnabled)}
+      data-office-boss-orchestrator-request-posture-detail-nas-save-enabled={String(detail.nasSaveEnabled)}
+      data-office-boss-orchestrator-request-posture-detail-safe-projection-only={String(detail.safeProjectionOnly)}
+      data-office-boss-orchestrator-request-posture-detail-raw-excluded={String(detail.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Bot className="h-4 w-4" /> Boss/orchestrator request posture detail
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-amber-300/20 bg-amber-950/10 p-3">
+            <div className="font-semibold text-amber-100">사장 instruction → Orchestrator mediation · detail posture</div>
+            <div className="mt-1 leading-5">
+              자연어 지시가 만들어질 자리와 Orchestrator desk로 넘어가는 request envelope만 보여줍니다. 입력, request 생성, worker 배정, dispatch, audit write, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {detail.cards.map((card) => (
+              <div
+                key={card.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-boss-orchestrator-request-posture-detail-card={card.id}
+                data-office-boss-orchestrator-request-posture-detail-card-tone={card.tone}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{card.label}</div>
+                <div className="mt-2 leading-5">{card.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-boss-orchestrator-request-posture-detail-boundary="true">
+            speaker {detail.speakerRole} · orchestrator {detail.orchestratorRole} · target {detail.targetFacilityId} · evidence {detail.evidenceCount} · blocked {detail.blockedWorkCount} · dialogue lines {detail.dialogueLineCount} · controls {detail.enabledControls} · raw excluded {String(detail.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function OrchestratorRequestEnvelopeDetailPanel({ envelope }: { envelope: OfficeOrchestratorRequestEnvelopeDetail }) {
+  return (
+    <Card
+      data-office-orchestrator-request-envelope-detail="true"
+      data-office-orchestrator-request-envelope-detail-enabled-controls={envelope.enabledControls}
+      data-office-orchestrator-request-envelope-detail-envelope-creation-enabled={String(envelope.envelopeCreationEnabled)}
+      data-office-orchestrator-request-envelope-detail-kanban-write-enabled={String(envelope.kanbanWriteEnabled)}
+      data-office-orchestrator-request-envelope-detail-work-assignment-enabled={String(envelope.workAssignmentEnabled)}
+      data-office-orchestrator-request-envelope-detail-dispatch-enabled={String(envelope.dispatchEnabled)}
+      data-office-orchestrator-request-envelope-detail-audit-write-enabled={String(envelope.auditWriteEnabled)}
+      data-office-orchestrator-request-envelope-detail-nas-save-enabled={String(envelope.nasSaveEnabled)}
+      data-office-orchestrator-request-envelope-detail-safe-projection-only={String(envelope.safeProjectionOnly)}
+      data-office-orchestrator-request-envelope-detail-raw-excluded={String(envelope.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Bot className="h-4 w-4" /> Orchestrator request envelope detail
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-sky-300/20 bg-sky-950/10 p-3">
+            <div className="font-semibold text-sky-100">Orchestrator envelope · disabled request preview</div>
+            <div className="mt-1 leading-5">
+              사장 instruction posture 다음 단계의 request envelope 구조만 표시합니다. Envelope 생성, Kanban write, worker 배정, dispatch, audit write, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {envelope.cards.map((card) => (
+              <div
+                key={card.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-orchestrator-request-envelope-detail-card={card.id}
+                data-office-orchestrator-request-envelope-detail-card-tone={card.tone}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{card.label}</div>
+                <div className="mt-2 leading-5">{card.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-orchestrator-request-envelope-detail-boundary="true">
+            source {envelope.sourcePostureKind} · state {envelope.envelopeState} · target {envelope.targetFacilityId} · evidence {envelope.evidenceCount} · blocked {envelope.blockedWorkCount} · dialogue lines {envelope.dialogueLineCount} · controls {envelope.enabledControls} · raw excluded {String(envelope.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function ApprovalRequestRouteDetailPanel({ route }: { route: OfficeApprovalRequestRouteDetail }) {
+  return (
+    <Card
+      data-office-approval-request-route-detail="true"
+      data-office-approval-request-route-detail-enabled-controls={route.enabledControls}
+      data-office-approval-request-route-detail-intent-event-creation-enabled={String(route.intentEventCreationEnabled)}
+      data-office-approval-request-route-detail-approval-request-enabled={String(route.approvalRequestEnabled)}
+      data-office-approval-request-route-detail-kanban-write-enabled={String(route.kanbanWriteEnabled)}
+      data-office-approval-request-route-detail-audit-write-enabled={String(route.auditWriteEnabled)}
+      data-office-approval-request-route-detail-dispatch-enabled={String(route.dispatchEnabled)}
+      data-office-approval-request-route-detail-nas-save-enabled={String(route.nasSaveEnabled)}
+      data-office-approval-request-route-detail-safe-projection-only={String(route.safeProjectionOnly)}
+      data-office-approval-request-route-detail-raw-excluded={String(route.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Bot className="h-4 w-4" /> Approval request route detail
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-violet-300/20 bg-violet-950/10 p-3">
+            <div className="font-semibold text-violet-100">Intent → Orchestrator plan → Approval request · read-only route</div>
+            <div className="mt-1 leading-5">
+              Master Spec event route를 safe projection으로만 보여줍니다. Intent event 생성, approval request 생성, Kanban write, audit write, dispatch, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {route.cards.map((card) => (
+              <div
+                key={card.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-approval-request-route-detail-card={card.id}
+                data-office-approval-request-route-detail-card-tone={card.tone}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{card.label}</div>
+                <div className="mt-2 leading-5">{card.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-approval-request-route-detail-boundary="true">
+            source {route.sourceEnvelopeKind} · state {route.routeState} · evidence {route.evidenceCount} · blocked {route.blockedWorkCount} · dialogue lines {route.dialogueLineCount} · controls {route.enabledControls} · raw excluded {String(route.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function EventRequestContractProjectionPanel({ contract }: { contract: OfficeEventRequestContractProjection }) {
+  return (
+    <Card
+      data-office-event-request-contract-projection="true"
+      data-office-event-request-contract-projection-enabled-controls={contract.enabledControls}
+      data-office-event-request-contract-projection-schema-write-enabled={String(contract.schemaWriteEnabled)}
+      data-office-event-request-contract-projection-event-creation-enabled={String(contract.eventCreationEnabled)}
+      data-office-event-request-contract-projection-event-persistence-enabled={String(contract.eventPersistenceEnabled)}
+      data-office-event-request-contract-projection-runtime-dispatch-enabled={String(contract.runtimeDispatchEnabled)}
+      data-office-event-request-contract-projection-audit-write-enabled={String(contract.auditWriteEnabled)}
+      data-office-event-request-contract-projection-nas-save-enabled={String(contract.nasSaveEnabled)}
+      data-office-event-request-contract-projection-safe-projection-only={String(contract.safeProjectionOnly)}
+      data-office-event-request-contract-projection-raw-excluded={String(contract.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Bot className="h-4 w-4" /> Event request contract projection
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-fuchsia-300/20 bg-fuchsia-950/10 p-3">
+            <div className="font-semibold text-fuchsia-100">Future event contract · projection only</div>
+            <div className="mt-1 leading-5">
+              Master Spec의 request event 이름과 경계를 DTO처럼 보이게만 합니다. Schema write, event 생성/저장, runtime dispatch, audit write, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {contract.cards.map((card) => (
+              <div
+                key={card.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-event-request-contract-projection-card={card.id}
+                data-office-event-request-contract-projection-card-tone={card.tone}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{card.label}</div>
+                <div className="mt-2 leading-5">{card.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-event-request-contract-projection-boundary="true">
+            source {contract.sourceRouteKind} · state {contract.contractState} · evidence {contract.evidenceCount} · blocked {contract.blockedWorkCount} · dialogue lines {contract.dialogueLineCount} · controls {contract.enabledControls} · raw excluded {String(contract.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function ApprovalDialogueRouteInspectorPanel({ inspector }: { inspector: OfficeApprovalDialogueRouteInspector }) {
+  return (
+    <Card
+      data-office-approval-dialogue-route-inspector="true"
+      data-office-approval-dialogue-route-inspector-enabled-controls={inspector.enabledControls}
+      data-office-approval-dialogue-route-inspector-approve-enabled={String(inspector.approveEnabled)}
+      data-office-approval-dialogue-route-inspector-reject-enabled={String(inspector.rejectEnabled)}
+      data-office-approval-dialogue-route-inspector-hold-enabled={String(inspector.holdEnabled)}
+      data-office-approval-dialogue-route-inspector-request-creation-enabled={String(inspector.requestCreationEnabled)}
+      data-office-approval-dialogue-route-inspector-event-creation-enabled={String(inspector.eventCreationEnabled)}
+      data-office-approval-dialogue-route-inspector-event-persistence-enabled={String(inspector.eventPersistenceEnabled)}
+      data-office-approval-dialogue-route-inspector-audit-write-enabled={String(inspector.auditWriteEnabled)}
+      data-office-approval-dialogue-route-inspector-dispatch-enabled={String(inspector.dispatchEnabled)}
+      data-office-approval-dialogue-route-inspector-nas-save-enabled={String(inspector.nasSaveEnabled)}
+      data-office-approval-dialogue-route-inspector-safe-projection-only={String(inspector.safeProjectionOnly)}
+      data-office-approval-dialogue-route-inspector-raw-excluded={String(inspector.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Bot className="h-4 w-4" /> Approval dialogue route inspector
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-rose-300/20 bg-rose-950/10 p-3">
+            <div className="font-semibold text-rose-100">Dialogue → route → event contract · inspector only</div>
+            <div className="mt-1 leading-5">
+              승인 대화가 어떤 read-only route와 future event contract로 이어질지만 inspect합니다. Approve/reject/hold, request/event creation, event persistence, audit write, dispatch, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {inspector.cards.map((card) => (
+              <div
+                key={card.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-approval-dialogue-route-inspector-card={card.id}
+                data-office-approval-dialogue-route-inspector-card-tone={card.tone}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{card.label}</div>
+                <div className="mt-2 leading-5">{card.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-approval-dialogue-route-inspector-boundary="true">
+            dialogue {inspector.dialogueLineCount} · route cards {inspector.routeCardCount} · event cards {inspector.contractCardCount} · evidence {inspector.evidenceCount} · blocked {inspector.blockedWorkCount} · controls {inspector.enabledControls} · raw excluded {String(inspector.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function EventTimelineProjectionPanel({ timeline }: { timeline: OfficeEventTimelineProjection }) {
+  return (
+    <Card
+      data-office-event-timeline-projection="true"
+      data-office-event-timeline-projection-enabled-controls={timeline.enabledControls}
+      data-office-event-timeline-projection-runtime-event-write-enabled={String(timeline.runtimeEventWriteEnabled)}
+      data-office-event-timeline-projection-intent-event-creation-enabled={String(timeline.intentEventCreationEnabled)}
+      data-office-event-timeline-projection-visual-event-creation-enabled={String(timeline.visualEventCreationEnabled)}
+      data-office-event-timeline-projection-event-persistence-enabled={String(timeline.eventPersistenceEnabled)}
+      data-office-event-timeline-projection-timeline-append-enabled={String(timeline.timelineAppendEnabled)}
+      data-office-event-timeline-projection-audit-write-enabled={String(timeline.auditWriteEnabled)}
+      data-office-event-timeline-projection-dispatch-enabled={String(timeline.dispatchEnabled)}
+      data-office-event-timeline-projection-nas-save-enabled={String(timeline.nasSaveEnabled)}
+      data-office-event-timeline-projection-safe-projection-only={String(timeline.safeProjectionOnly)}
+      data-office-event-timeline-projection-raw-excluded={String(timeline.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Bot className="h-4 w-4" /> Event timeline projection
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-cyan-300/20 bg-cyan-950/10 p-3">
+            <div className="font-semibold text-cyan-100">Runtime → intent → visual projection · no event writes</div>
+            <div className="mt-1 leading-5">
+              Master Spec의 event 흐름을 안전한 타임라인처럼 보여주지만 runtime event write, intent/visual event creation, persistence, audit append, dispatch, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {timeline.events.map((event) => (
+              <div
+                key={event.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-event-timeline-projection-event={event.id}
+                data-office-event-timeline-projection-event-lane={event.lane}
+                data-office-event-timeline-projection-event-tone={event.tone}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{event.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{event.label}</div>
+                <div className="mt-2 leading-5">{event.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-event-timeline-projection-boundary="true">
+            state {timeline.timelineState} · source {timeline.sourceContractKind} / {timeline.sourceInspectorKind} · events {timeline.eventCount} · evidence {timeline.evidenceCount} · blocked {timeline.blockedWorkCount} · dialogue lines {timeline.dialogueLineCount} · controls {timeline.enabledControls} · raw excluded {String(timeline.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function TimelineWorkerHandoffDrilldownPanel({ drilldown }: { drilldown: OfficeTimelineWorkerHandoffDrilldown }) {
+  return (
+    <Card
+      data-office-timeline-worker-handoff-drilldown="true"
+      data-office-timeline-worker-handoff-drilldown-enabled-controls={drilldown.enabledControls}
+      data-office-timeline-worker-handoff-drilldown-write-enabled={String(drilldown.drilldownWriteEnabled)}
+      data-office-timeline-worker-handoff-drilldown-work-assignment-enabled={String(drilldown.workAssignmentEnabled)}
+      data-office-timeline-worker-handoff-drilldown-request-creation-enabled={String(drilldown.requestCreationEnabled)}
+      data-office-timeline-worker-handoff-drilldown-dispatch-enabled={String(drilldown.dispatchEnabled)}
+      data-office-timeline-worker-handoff-drilldown-audit-write-enabled={String(drilldown.auditWriteEnabled)}
+      data-office-timeline-worker-handoff-drilldown-nas-save-enabled={String(drilldown.nasSaveEnabled)}
+      data-office-timeline-worker-handoff-drilldown-safe-projection-only={String(drilldown.safeProjectionOnly)}
+      data-office-timeline-worker-handoff-drilldown-raw-excluded={String(drilldown.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Bot className="h-4 w-4" /> Timeline/worker handoff drill-down
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-sky-300/20 bg-sky-950/10 p-3">
+            <div className="font-semibold text-sky-100">Projected worker sequence · no assignment</div>
+            <div className="mt-1 leading-5">
+              Event timeline 다음에 어떤 worker lane이 등장하는지만 safe aggregate로 drill-down합니다. Work assignment, request creation, dispatch, audit write, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {drilldown.handoffSteps.map((step) => (
+              <div
+                key={step.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-timeline-worker-handoff-drilldown-step={step.id}
+                data-office-timeline-worker-handoff-drilldown-step-lane={step.lane}
+                data-office-timeline-worker-handoff-drilldown-step-tone={step.tone}
+                data-office-timeline-worker-handoff-drilldown-step-assignment-enabled={String(step.assignmentEnabled)}
+                data-office-timeline-worker-handoff-drilldown-step-dispatch-enabled={String(step.dispatchEnabled)}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{step.sourceEventId}</div>
+                <div className="mt-1 font-semibold text-foreground">{step.label}</div>
+                <div className="mt-1 text-midground/60">{step.id} · {step.facilityId}</div>
+                <div className="mt-2 leading-5">{step.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-timeline-worker-handoff-drilldown-boundary="true">
+            state {drilldown.handoffState} · source {drilldown.sourceTimelineKind} / {drilldown.sourceWorkerVisibilityKind} / {drilldown.sourceHandoffKind} · timeline events {drilldown.timelineEventCount} · visible workers {drilldown.visibleWorkerCount} · evidence {drilldown.evidenceCount} · blocked {drilldown.blockedWorkCount} · warnings {drilldown.warningCount} · controls {drilldown.enabledControls} · raw excluded {String(drilldown.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+
+export function ApprovalRequestDetailDeepeningPanel({ detail }: { detail: OfficeApprovalRequestDetailDeepening }) {
+  return (
+    <Card
+      data-office-approval-request-detail-deepening="true"
+      data-office-approval-request-detail-deepening-enabled-controls={detail.enabledControls}
+      data-office-approval-request-detail-deepening-approve-enabled={String(detail.approveEnabled)}
+      data-office-approval-request-detail-deepening-reject-enabled={String(detail.rejectEnabled)}
+      data-office-approval-request-detail-deepening-hold-enabled={String(detail.holdEnabled)}
+      data-office-approval-request-detail-deepening-request-creation-enabled={String(detail.requestCreationEnabled)}
+      data-office-approval-request-detail-deepening-event-creation-enabled={String(detail.eventCreationEnabled)}
+      data-office-approval-request-detail-deepening-event-persistence-enabled={String(detail.eventPersistenceEnabled)}
+      data-office-approval-request-detail-deepening-work-assignment-enabled={String(detail.workAssignmentEnabled)}
+      data-office-approval-request-detail-deepening-dispatch-enabled={String(detail.dispatchEnabled)}
+      data-office-approval-request-detail-deepening-audit-write-enabled={String(detail.auditWriteEnabled)}
+      data-office-approval-request-detail-deepening-nas-save-enabled={String(detail.nasSaveEnabled)}
+      data-office-approval-request-detail-deepening-safe-projection-only={String(detail.safeProjectionOnly)}
+      data-office-approval-request-detail-deepening-raw-excluded={String(detail.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Bot className="h-4 w-4" /> Approval-request detail deepening
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-amber-300/20 bg-amber-950/10 p-3">
+            <div className="font-semibold text-amber-100">Approval request detail · projection only</div>
+            <div className="mt-1 leading-5">
+              Approval request를 route, event timeline, worker handoff 기준으로 한 단계 더 풀어 보여줍니다. 승인/보류, request/event 생성, worker 배정, dispatch, audit write, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {detail.sections.map((section) => (
+              <div
+                key={section.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-approval-request-detail-deepening-section={section.id}
+                data-office-approval-request-detail-deepening-section-tone={section.tone}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{section.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{section.label}</div>
+                <div className="mt-2 leading-5">{section.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-approval-request-detail-deepening-boundary="true">
+            state {detail.requestState} · source {detail.sourceRouteKind} / {detail.sourceTimelineKind} / {detail.sourceDrilldownKind} · route cards {detail.routeCardCount} · timeline events {detail.timelineEventCount} · handoff steps {detail.handoffStepCount} · evidence {detail.evidenceCount} · blocked {detail.blockedWorkCount} · warnings {detail.warningCount} · controls {detail.enabledControls} · raw excluded {String(detail.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function WorkerFacilityLanePolishPanel({ polish }: { polish: OfficeWorkerFacilityLanePolish }) {
+  return (
+    <Card
+      data-office-worker-facility-lane-polish="true"
+      data-office-worker-facility-lane-polish-enabled-controls={polish.enabledControls}
+      data-office-worker-facility-lane-polish-facility-write-enabled={String(polish.facilityWriteEnabled)}
+      data-office-worker-facility-lane-polish-assignment-enabled={String(polish.workAssignmentEnabled)}
+      data-office-worker-facility-lane-polish-request-creation-enabled={String(polish.requestCreationEnabled)}
+      data-office-worker-facility-lane-polish-dispatch-enabled={String(polish.dispatchEnabled)}
+      data-office-worker-facility-lane-polish-audit-write-enabled={String(polish.auditWriteEnabled)}
+      data-office-worker-facility-lane-polish-nas-save-enabled={String(polish.nasSaveEnabled)}
+      data-office-worker-facility-lane-polish-safe-projection-only={String(polish.safeProjectionOnly)}
+      data-office-worker-facility-lane-polish-raw-excluded={String(polish.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Users className="h-4 w-4" /> Worker facility lane polish
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-teal-300/20 bg-teal-950/10 p-3">
+            <div className="font-semibold text-teal-100">작업자 facility lane · projection only</div>
+            <div className="mt-1 leading-5">
+              Timeline/worker handoff를 worker facility readiness와 연결해 lane별 선행조건을 보여줍니다. facility write, worker assignment, request creation, dispatch, audit write, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {polish.lanes.map((lane) => (
+              <div
+                key={lane.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-worker-facility-lane={lane.id}
+                data-office-worker-facility-lane-role={lane.workerRole}
+                data-office-worker-facility-lane-readiness={lane.readinessFacilityId}
+                data-office-worker-facility-lane-status={lane.readinessStatus}
+                data-office-worker-facility-lane-assignment-enabled={String(lane.assignmentEnabled)}
+                data-office-worker-facility-lane-dispatch-enabled={String(lane.dispatchEnabled)}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{lane.workerRole}</div>
+                <div className="mt-1 font-semibold text-foreground">{lane.label}</div>
+                <div className="mt-1 text-midground/60">facility: {lane.readinessFacilityId} · source event: {lane.sourceEventId}</div>
+                <div className="mt-2 leading-5">{lane.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-worker-facility-lane-polish-boundary="true">
+            source {polish.sourceDrilldownKind} / {polish.sourceReadinessStage} · lanes {polish.laneCount} · readiness facilities {polish.readinessFacilityCount} · prerequisites {polish.prerequisiteCount} · controls {polish.enabledControls} · raw excluded {String(polish.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function WorkerRequestHandoffDetailPanel({ detail }: { detail: OfficeWorkerRequestHandoffDetail }) {
+  return (
+    <Card
+      data-office-worker-request-handoff-detail="true"
+      data-office-worker-request-handoff-detail-enabled-controls={detail.enabledControls}
+      data-office-worker-request-handoff-detail-request-creation-enabled={String(detail.requestCreationEnabled)}
+      data-office-worker-request-handoff-detail-work-assignment-enabled={String(detail.workAssignmentEnabled)}
+      data-office-worker-request-handoff-detail-dispatch-enabled={String(detail.dispatchEnabled)}
+      data-office-worker-request-handoff-detail-audit-write-enabled={String(detail.auditWriteEnabled)}
+      data-office-worker-request-handoff-detail-nas-save-enabled={String(detail.nasSaveEnabled)}
+      data-office-worker-request-handoff-detail-safe-projection-only={String(detail.safeProjectionOnly)}
+      data-office-worker-request-handoff-detail-raw-excluded={String(detail.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Route className="h-4 w-4" /> Worker request handoff detail
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-cyan-300/20 bg-cyan-950/10 p-3">
+            <div className="font-semibold text-cyan-100">request-to-worker handoff · projection only</div>
+            <div className="mt-1 leading-5">
+              Approval detail과 worker facility lane을 연결해 handoff posture만 보여줍니다. request creation, worker assignment, dispatch, audit write, NAS save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {detail.sections.map((section) => (
+              <div
+                key={section.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-worker-request-handoff-section={section.id}
+                data-office-worker-request-handoff-section-tone={section.tone}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{section.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{section.label}</div>
+                <div className="mt-2 leading-5">{section.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-worker-request-handoff-detail-boundary="true">
+            source {detail.sourceApprovalDetailKind} / {detail.sourceLanePolishKind} · request sections {detail.requestSectionCount} · worker lanes {detail.workerLaneCount} · prerequisites {detail.handoffPrerequisiteCount} · warnings {detail.warningCount} · controls {detail.enabledControls} · raw excluded {String(detail.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+
+export function ApprovalNasBoundaryPolishPanel({ polish }: { polish: OfficeApprovalNasBoundaryPolish }) {
+  return (
+    <Card
+      data-office-approval-nas-boundary-polish="true"
+      data-office-approval-nas-boundary-polish-enabled-controls={polish.enabledControls}
+      data-office-approval-nas-boundary-polish-approve-enabled={String(polish.approveEnabled)}
+      data-office-approval-nas-boundary-polish-reject-enabled={String(polish.rejectEnabled)}
+      data-office-approval-nas-boundary-polish-hold-enabled={String(polish.holdEnabled)}
+      data-office-approval-nas-boundary-polish-request-creation-enabled={String(polish.requestCreationEnabled)}
+      data-office-approval-nas-boundary-polish-work-assignment-enabled={String(polish.workAssignmentEnabled)}
+      data-office-approval-nas-boundary-polish-dispatch-enabled={String(polish.dispatchEnabled)}
+      data-office-approval-nas-boundary-polish-audit-write-enabled={String(polish.auditWriteEnabled)}
+      data-office-approval-nas-boundary-polish-nas-save-enabled={String(polish.nasSaveEnabled)}
+      data-office-approval-nas-boundary-polish-safe-projection-only={String(polish.safeProjectionOnly)}
+      data-office-approval-nas-boundary-polish-raw-excluded={String(polish.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4" /> Approval/NAS boundary polish
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-amber-300/20 bg-amber-950/10 p-3">
+            <div className="font-semibold text-amber-100">approval gate · NAS vault locked · projection only</div>
+            <div className="mt-1 leading-5">
+              Approval, audit, NAS 저장 경계를 더 선명하게 표시합니다. 이 slice는 approve/reject/hold, audit write, NAS save, worker assignment를 모두 비활성으로 둡니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {polish.cards.map((card) => (
+              <div
+                key={card.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-approval-nas-boundary-card={card.id}
+                data-office-approval-nas-boundary-card-tone={card.tone}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{card.label}</div>
+                <div className="mt-2 leading-5">{card.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-approval-nas-boundary-polish-boundary="true">
+            source {polish.sourceDetailKind} · sections {polish.sourceSectionCount} · warnings {polish.sourceWarningCount} · boundaries {polish.boundaryCount} · controls {polish.enabledControls} · raw excluded {String(polish.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function ApprovalAuthorityReadinessDetailPanel({ readiness }: { readiness: OfficeApprovalAuthorityReadinessDetail }) {
+  return (
+    <Card
+      data-office-approval-authority-readiness-detail="true"
+      data-office-approval-authority-readiness-enabled-controls={readiness.enabledControls}
+      data-office-approval-authority-readiness-authority-granted={String(readiness.authorityGranted)}
+      data-office-approval-authority-readiness-approve-enabled={String(readiness.approveEnabled)}
+      data-office-approval-authority-readiness-reject-enabled={String(readiness.rejectEnabled)}
+      data-office-approval-authority-readiness-hold-enabled={String(readiness.holdEnabled)}
+      data-office-approval-authority-readiness-request-creation-enabled={String(readiness.requestCreationEnabled)}
+      data-office-approval-authority-readiness-work-assignment-enabled={String(readiness.workAssignmentEnabled)}
+      data-office-approval-authority-readiness-dispatch-enabled={String(readiness.dispatchEnabled)}
+      data-office-approval-authority-readiness-audit-write-enabled={String(readiness.auditWriteEnabled)}
+      data-office-approval-authority-readiness-nas-save-enabled={String(readiness.nasSaveEnabled)}
+      data-office-approval-authority-readiness-safe-projection-only={String(readiness.safeProjectionOnly)}
+      data-office-approval-authority-readiness-raw-excluded={String(readiness.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4" /> Approval authority readiness
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-violet-300/20 bg-violet-950/10 p-3">
+            <div className="font-semibold text-violet-100">human authority · orchestrator mediation · audit/NAS prerequisites</div>
+            <div className="mt-1 leading-5">
+              Approval 권한이 실제 실행 가능해지기 전에 필요한 사람 승인, Orchestrator 중재, audit sink, NAS Keeper 권한을 표시합니다. 현재 slice는 authority granted=false, controls=0인 projection-only 상태입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {readiness.cards.map((card) => (
+              <div
+                key={card.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-approval-authority-readiness-card={card.id}
+                data-office-approval-authority-readiness-card-status={card.status}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{card.label}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-violet-100/80">{card.status}</div>
+                <div className="mt-2 leading-5">{card.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-approval-authority-readiness-boundary="true">
+            source {readiness.sourceDetailKind} · boundaries {readiness.sourceBoundaryCount} · warnings {readiness.sourceWarningCount} · prerequisites {readiness.authorityPrerequisiteCount} · controls {readiness.enabledControls} · authority granted {String(readiness.authorityGranted)} · raw excluded {String(readiness.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function ApprovalAuthorityDecisionEnvelopePreviewPanel({ envelope }: { envelope: OfficeApprovalAuthorityDecisionEnvelopePreview }) {
+  return (
+    <Card
+      data-office-approval-authority-decision-envelope="true"
+      data-office-approval-authority-decision-envelope-enabled-controls={envelope.enabledControls}
+      data-office-approval-authority-decision-envelope-record-created={String(envelope.decisionRecordCreated)}
+      data-office-approval-authority-decision-envelope-approve-enabled={String(envelope.approveEnabled)}
+      data-office-approval-authority-decision-envelope-reject-enabled={String(envelope.rejectEnabled)}
+      data-office-approval-authority-decision-envelope-hold-enabled={String(envelope.holdEnabled)}
+      data-office-approval-authority-decision-envelope-request-creation-enabled={String(envelope.requestCreationEnabled)}
+      data-office-approval-authority-decision-envelope-work-assignment-enabled={String(envelope.workAssignmentEnabled)}
+      data-office-approval-authority-decision-envelope-dispatch-enabled={String(envelope.dispatchEnabled)}
+      data-office-approval-authority-decision-envelope-audit-write-enabled={String(envelope.auditWriteEnabled)}
+      data-office-approval-authority-decision-envelope-nas-save-enabled={String(envelope.nasSaveEnabled)}
+      data-office-approval-authority-decision-envelope-safe-projection-only={String(envelope.safeProjectionOnly)}
+      data-office-approval-authority-decision-envelope-raw-excluded={String(envelope.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4" /> Approval authority decision envelope
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-violet-300/20 bg-violet-950/10 p-3">
+            <div className="font-semibold text-violet-100">approve · reject · hold envelope preview</div>
+            <div className="mt-1 leading-5">
+              사용자 결정이 나중에 어떤 envelope로 표현될지만 보여줍니다. 현재는 decision record 생성, audit write, worker dispatch, NAS save가 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3">
+            {envelope.options.map((option) => (
+              <div
+                key={option.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-approval-authority-decision-option={option.id}
+                data-office-approval-authority-decision-option-status={option.status}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{option.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{option.label}</div>
+                <div className="mt-1 text-midground/60">prerequisite: {option.prerequisite}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-violet-100/80">{option.status}</div>
+                <div className="mt-2 leading-5">{option.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-approval-authority-decision-envelope-boundary="true">
+            source {envelope.sourceDetailKind} · prerequisites {envelope.sourcePrerequisiteCount} · warnings {envelope.sourceWarningCount} · options {envelope.decisionOptionCount} · controls {envelope.enabledControls} · record created {String(envelope.decisionRecordCreated)} · raw excluded {String(envelope.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function ApprovalDecisionAuditNasTracePreviewPanel({ trace }: { trace: OfficeApprovalDecisionAuditNasTracePreview }) {
+  return (
+    <Card
+      data-office-approval-decision-audit-nas-trace="true"
+      data-office-approval-decision-audit-nas-trace-enabled-controls={trace.enabledControls}
+      data-office-approval-decision-audit-nas-trace-decision-record-created={String(trace.decisionRecordCreated)}
+      data-office-approval-decision-audit-nas-trace-audit-event-appended={String(trace.auditEventAppended)}
+      data-office-approval-decision-audit-nas-trace-nas-trace-persisted={String(trace.nasTracePersisted)}
+      data-office-approval-decision-audit-nas-trace-approve-enabled={String(trace.approveEnabled)}
+      data-office-approval-decision-audit-nas-trace-reject-enabled={String(trace.rejectEnabled)}
+      data-office-approval-decision-audit-nas-trace-hold-enabled={String(trace.holdEnabled)}
+      data-office-approval-decision-audit-nas-trace-request-creation-enabled={String(trace.requestCreationEnabled)}
+      data-office-approval-decision-audit-nas-trace-work-assignment-enabled={String(trace.workAssignmentEnabled)}
+      data-office-approval-decision-audit-nas-trace-dispatch-enabled={String(trace.dispatchEnabled)}
+      data-office-approval-decision-audit-nas-trace-audit-write-enabled={String(trace.auditWriteEnabled)}
+      data-office-approval-decision-audit-nas-trace-nas-save-enabled={String(trace.nasSaveEnabled)}
+      data-office-approval-decision-audit-nas-trace-safe-projection-only={String(trace.safeProjectionOnly)}
+      data-office-approval-decision-audit-nas-trace-raw-excluded={String(trace.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4" /> Approval decision audit/NAS trace
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-violet-300/20 bg-violet-950/10 p-3">
+            <div className="font-semibold text-violet-100">post-decision audit · NAS trace preview</div>
+            <div className="mt-1 leading-5">
+              approve/reject/hold 이후 남아야 할 audit/NAS trace shape만 보여줍니다. 현재는 decision record, audit append, NAS trace persistence, NAS save가 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {trace.traceSteps.map((step) => (
+              <div
+                key={step.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-approval-decision-audit-nas-step={step.id}
+                data-office-approval-decision-audit-nas-step-status={step.status}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{step.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{step.label}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-violet-100/80">{step.status}</div>
+                <div className="mt-2 leading-5">{step.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-approval-decision-audit-nas-trace-boundary="true">
+            source {trace.sourceDetailKind} · options {trace.sourceDecisionOptionCount} · warnings {trace.sourceWarningCount} · trace steps {trace.traceStepCount} · controls {trace.enabledControls} · decision record {String(trace.decisionRecordCreated)} · audit appended {String(trace.auditEventAppended)} · NAS trace persisted {String(trace.nasTracePersisted)} · raw excluded {String(trace.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function NasKeeperSaveRequestGatePanel({ gate }: { gate: OfficeNasKeeperSaveRequestGate }) {
+  return (
+    <Card
+      data-office-nas-keeper-save-request-gate="true"
+      data-office-nas-keeper-save-request-gate-enabled-controls={gate.enabledControls}
+      data-office-nas-keeper-save-request-gate-save-request-created={String(gate.saveRequestCreated)}
+      data-office-nas-keeper-save-request-gate-save-request-persisted={String(gate.saveRequestPersisted)}
+      data-office-nas-keeper-save-request-gate-rollback-point-created={String(gate.rollbackPointCreated)}
+      data-office-nas-keeper-save-request-gate-nas-write-prepared={String(gate.nasWritePrepared)}
+      data-office-nas-keeper-save-request-gate-nas-save-enabled={String(gate.nasSaveEnabled)}
+      data-office-nas-keeper-save-request-gate-audit-write-enabled={String(gate.auditWriteEnabled)}
+      data-office-nas-keeper-save-request-gate-dispatch-enabled={String(gate.dispatchEnabled)}
+      data-office-nas-keeper-save-request-gate-request-creation-enabled={String(gate.requestCreationEnabled)}
+      data-office-nas-keeper-save-request-gate-work-assignment-enabled={String(gate.workAssignmentEnabled)}
+      data-office-nas-keeper-save-request-gate-safe-projection-only={String(gate.safeProjectionOnly)}
+      data-office-nas-keeper-save-request-gate-raw-excluded={String(gate.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Database className="h-4 w-4" /> NAS Keeper save request gate
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-emerald-300/20 bg-emerald-950/10 p-3">
+            <div className="font-semibold text-emerald-100">SaveRequested · NAS Keeper gate preview</div>
+            <div className="mt-1 leading-5">
+              승인 trace 이후 NAS Keeper에게 넘어갈 저장 요청 gate shape만 보여줍니다. save request 생성, audit write, dispatch, rollback point 생성, NAS write는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {gate.gateSteps.map((step) => (
+              <div
+                key={step.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-nas-keeper-save-request-gate-step={step.id}
+                data-office-nas-keeper-save-request-gate-step-status={step.status}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{step.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{step.label}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-emerald-100/80">{step.status}</div>
+                <div className="mt-2 leading-5">{step.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-nas-keeper-save-request-gate-boundary="true">
+            source {gate.sourceDetailKind} · trace steps {gate.sourceTraceStepCount} · warnings {gate.sourceWarningCount} · gate steps {gate.gateStepCount} · controls {gate.enabledControls} · save request {String(gate.saveRequestCreated)} · rollback point {String(gate.rollbackPointCreated)} · NAS write prepared {String(gate.nasWritePrepared)} · raw excluded {String(gate.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function NasKeeperRollbackEvidencePreviewPanel({ rollback }: { rollback: OfficeNasKeeperRollbackEvidencePreview }) {
+  return (
+    <Card
+      data-office-nas-keeper-rollback-evidence="true"
+      data-office-nas-keeper-rollback-evidence-enabled-controls={rollback.enabledControls}
+      data-office-nas-keeper-rollback-evidence-rollback-point-created={String(rollback.rollbackPointCreated)}
+      data-office-nas-keeper-rollback-evidence-rollback-evidence-persisted={String(rollback.rollbackEvidencePersisted)}
+      data-office-nas-keeper-rollback-evidence-audit-event-appended={String(rollback.auditEventAppended)}
+      data-office-nas-keeper-rollback-evidence-nas-trace-persisted={String(rollback.nasTracePersisted)}
+      data-office-nas-keeper-rollback-evidence-nas-write-prepared={String(rollback.nasWritePrepared)}
+      data-office-nas-keeper-rollback-evidence-nas-save-enabled={String(rollback.nasSaveEnabled)}
+      data-office-nas-keeper-rollback-evidence-audit-write-enabled={String(rollback.auditWriteEnabled)}
+      data-office-nas-keeper-rollback-evidence-dispatch-enabled={String(rollback.dispatchEnabled)}
+      data-office-nas-keeper-rollback-evidence-request-creation-enabled={String(rollback.requestCreationEnabled)}
+      data-office-nas-keeper-rollback-evidence-work-assignment-enabled={String(rollback.workAssignmentEnabled)}
+      data-office-nas-keeper-rollback-evidence-safe-projection-only={String(rollback.safeProjectionOnly)}
+      data-office-nas-keeper-rollback-evidence-raw-excluded={String(rollback.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Database className="h-4 w-4" /> NAS Keeper rollback evidence preview
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-cyan-300/20 bg-cyan-950/10 p-3">
+            <div className="font-semibold text-cyan-100">rollback point · evidence package preview</div>
+            <div className="mt-1 leading-5">
+              NAS 저장 전에 남겨야 할 rollback/evidence package의 안전한 shape만 보여줍니다. rollback point 생성, audit append, NAS trace persistence, NAS write/save는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {rollback.evidenceCards.map((card) => (
+              <div
+                key={card.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-nas-keeper-rollback-evidence-card={card.id}
+                data-office-nas-keeper-rollback-evidence-card-status={card.status}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{card.label}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-cyan-100/80">{card.status}</div>
+                <div className="mt-2 leading-5">{card.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-nas-keeper-rollback-evidence-boundary="true">
+            source {rollback.sourceDetailKind} · gate steps {rollback.sourceGateStepCount} · warnings {rollback.sourceWarningCount} · evidence cards {rollback.evidenceCardCount} · controls {rollback.enabledControls} · rollback point {String(rollback.rollbackPointCreated)} · audit appended {String(rollback.auditEventAppended)} · NAS trace persisted {String(rollback.nasTracePersisted)} · raw excluded {String(rollback.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function NasEvidencePackageStoreReadbackStatusPanel({ status }: { status: OfficeNasEvidencePackageStoreReadbackStatus }) {
+  return (
+    <Card
+      data-office-nas-evidence-package-store-readback-status="true"
+      data-office-nas-evidence-package-store-enabled-controls={status.enabledControls}
+      data-office-nas-evidence-package-store-local-metadata-store-enabled={String(status.localMetadataStoreEnabled)}
+      data-office-nas-evidence-package-store-local-metadata-readback-enabled={String(status.localMetadataReadbackEnabled)}
+      data-office-nas-evidence-package-store-backend-api-changed={String(status.backendApiChanged)}
+      data-office-nas-evidence-package-store-storage-changed={String(status.storageChanged)}
+      data-office-nas-evidence-package-store-nas-path-resolution-enabled={String(status.nasPathResolutionEnabled)}
+      data-office-nas-evidence-package-store-nas-mount-access-enabled={String(status.nasMountAccessEnabled)}
+      data-office-nas-evidence-package-store-nas-write-enabled={String(status.nasWriteEnabled)}
+      data-office-nas-evidence-package-store-evidence-file-persistence-enabled={String(status.evidenceFilePersistenceEnabled)}
+      data-office-nas-evidence-package-store-rollback-point-created={String(status.rollbackPointCreated)}
+      data-office-nas-evidence-package-store-credential-access-enabled={String(status.credentialAccessEnabled)}
+      data-office-nas-evidence-package-store-audit-write-enabled={String(status.auditWriteEnabled)}
+      data-office-nas-evidence-package-store-dispatch-enabled={String(status.dispatchEnabled)}
+      data-office-nas-evidence-package-store-request-creation-enabled={String(status.requestCreationEnabled)}
+      data-office-nas-evidence-package-store-work-assignment-enabled={String(status.workAssignmentEnabled)}
+      data-office-nas-evidence-package-store-safe-projection-only={String(status.safeProjectionOnly)}
+      data-office-nas-evidence-package-store-raw-excluded={String(status.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Database className="h-4 w-4" /> NAS evidence package store readback status
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-cyan-300/20 bg-cyan-950/10 p-3">
+            <div className="font-semibold text-cyan-100">local metadata store · safe readback only</div>
+            <div className="mt-1 leading-5">
+              승인된 local metadata JSONL store/readback 상태만 화면에 고정합니다. 이 frontend slice는 backend/API/storage를 바꾸지 않고, NAS path resolution·mount access·write runtime은 계속 닫혀 있습니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {status.capabilities.map((capability) => (
+              <div
+                key={capability.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-nas-evidence-package-store-capability={capability.id}
+                data-office-nas-evidence-package-store-capability-status={capability.status}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{capability.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{capability.label}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-cyan-100/80">{capability.status}</div>
+                <div className="mt-2 leading-5">{capability.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-nas-evidence-package-store-boundary="true">
+            source {status.sourceDetailKind} · source evidence cards {status.sourceEvidenceCardCount} · capabilities {status.storeCapabilityCount} · controls {status.enabledControls} · local store {String(status.localMetadataStoreEnabled)} · readback {String(status.localMetadataReadbackEnabled)} · backend changed {String(status.backendApiChanged)} · NAS write {String(status.nasWriteEnabled)} · raw excluded {String(status.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function NasPathValidationStatusSurfacePanel({ status }: { status: OfficeNasPathValidationStatusSurface }) {
+  return (
+    <Card
+      data-office-nas-path-validation-status="true"
+      data-office-nas-path-validation-enabled-controls={status.enabledControls}
+      data-office-nas-path-validation-frontend-only={String(status.frontendOnly)}
+      data-office-nas-path-validation-validation-enabled={String(status.validationEnabled)}
+      data-office-nas-path-validation-backend-api-changed={String(status.backendApiChanged)}
+      data-office-nas-path-validation-storage-changed={String(status.storageChanged)}
+      data-office-nas-path-validation-runtime-enabled={String(status.pathResolutionRuntimeEnabled)}
+      data-office-nas-path-validation-vault-mapping-enabled={String(status.vaultMappingEnabled)}
+      data-office-nas-path-validation-mount-discovery-enabled={String(status.mountDiscoveryEnabled)}
+      data-office-nas-path-validation-mount-access-enabled={String(status.nasMountAccessEnabled)}
+      data-office-nas-path-validation-filesystem-read-enabled={String(status.filesystemReadEnabled)}
+      data-office-nas-path-validation-filesystem-write-enabled={String(status.filesystemWriteEnabled)}
+      data-office-nas-path-validation-nas-write-enabled={String(status.nasWriteEnabled)}
+      data-office-nas-path-validation-evidence-file-persistence-enabled={String(status.evidenceFilePersistenceEnabled)}
+      data-office-nas-path-validation-rollback-point-created={String(status.rollbackPointCreated)}
+      data-office-nas-path-validation-credential-access-enabled={String(status.credentialAccessEnabled)}
+      data-office-nas-path-validation-audit-write-enabled={String(status.auditWriteEnabled)}
+      data-office-nas-path-validation-dispatch-enabled={String(status.dispatchEnabled)}
+      data-office-nas-path-validation-request-creation-enabled={String(status.requestCreationEnabled)}
+      data-office-nas-path-validation-work-assignment-enabled={String(status.workAssignmentEnabled)}
+      data-office-nas-path-validation-safe-projection-only={String(status.safeProjectionOnly)}
+      data-office-nas-path-validation-raw-excluded={String(status.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <MapPinned className="h-4 w-4" /> NAS path validation status surface
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-emerald-300/20 bg-emerald-950/10 p-3">
+            <div className="font-semibold text-emerald-100">validate-only DTO · frontend status only</div>
+            <div className="mt-1 leading-5">
+              승인된 NAS path validation DTO 상태만 읽기 전용으로 요약합니다. 이 frontend slice는 backend/API/storage를 바꾸지 않고 runtime path resolution, mount access, filesystem read/write, NAS write를 열지 않습니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {status.capabilities.map((capability) => (
+              <div
+                key={capability.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-nas-path-validation-capability={capability.id}
+                data-office-nas-path-validation-capability-status={capability.status}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{capability.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{capability.label}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-emerald-100/80">{capability.status}</div>
+                <div className="mt-2 leading-5">{capability.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-nas-path-validation-boundary="true">
+            source {status.sourceDetailKind} · source capabilities {status.sourceCapabilityCount} · capabilities {status.capabilityCount} · controls {status.enabledControls} · validation {String(status.validationEnabled)} · runtime path resolution {String(status.pathResolutionRuntimeEnabled)} · mount access {String(status.nasMountAccessEnabled)} · filesystem write {String(status.filesystemWriteEnabled)} · raw excluded {String(status.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function NasPathPreviewStatusSurfacePanel({ status }: { status: OfficeNasPathPreviewStatusSurface }) {
+  return (
+    <Card
+      data-office-nas-path-preview-status="true"
+      data-office-nas-path-preview-enabled-controls={status.enabledControls}
+      data-office-nas-path-preview-frontend-only={String(status.frontendOnly)}
+      data-office-nas-path-preview-validation-enabled={String(status.validationEnabled)}
+      data-office-nas-path-preview-preview-enabled={String(status.previewEnabled)}
+      data-office-nas-path-preview-backend-api-changed={String(status.backendApiChanged)}
+      data-office-nas-path-preview-storage-changed={String(status.storageChanged)}
+      data-office-nas-path-preview-runtime-enabled={String(status.pathResolutionRuntimeEnabled)}
+      data-office-nas-path-preview-vault-mapping-enabled={String(status.vaultMappingEnabled)}
+      data-office-nas-path-preview-mount-discovery-enabled={String(status.mountDiscoveryEnabled)}
+      data-office-nas-path-preview-mount-access-enabled={String(status.nasMountAccessEnabled)}
+      data-office-nas-path-preview-filesystem-read-enabled={String(status.filesystemReadEnabled)}
+      data-office-nas-path-preview-filesystem-write-enabled={String(status.filesystemWriteEnabled)}
+      data-office-nas-path-preview-nas-write-enabled={String(status.nasWriteEnabled)}
+      data-office-nas-path-preview-evidence-file-persistence-enabled={String(status.evidenceFilePersistenceEnabled)}
+      data-office-nas-path-preview-rollback-point-created={String(status.rollbackPointCreated)}
+      data-office-nas-path-preview-credential-access-enabled={String(status.credentialAccessEnabled)}
+      data-office-nas-path-preview-audit-write-enabled={String(status.auditWriteEnabled)}
+      data-office-nas-path-preview-dispatch-enabled={String(status.dispatchEnabled)}
+      data-office-nas-path-preview-request-creation-enabled={String(status.requestCreationEnabled)}
+      data-office-nas-path-preview-work-assignment-enabled={String(status.workAssignmentEnabled)}
+      data-office-nas-path-preview-safe-projection-only={String(status.safeProjectionOnly)}
+      data-office-nas-path-preview-raw-excluded={String(status.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Route className="h-4 w-4" /> NAS path preview status surface
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-teal-300/20 bg-teal-950/10 p-3">
+            <div className="font-semibold text-teal-100">preview-only logical path · frontend status only</div>
+            <div className="mt-1 leading-5">
+              승인된 NAS path preview posture만 읽기 전용으로 요약합니다. 이 frontend slice는 backend/API/storage를 바꾸지 않고 real path resolution, mount access, filesystem read/write, NAS write를 열지 않습니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {status.capabilities.map((capability) => (
+              <div
+                key={capability.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-nas-path-preview-capability={capability.id}
+                data-office-nas-path-preview-capability-status={capability.status}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{capability.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{capability.label}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-teal-100/80">{capability.status}</div>
+                <div className="mt-2 leading-5">{capability.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-nas-path-preview-boundary="true">
+            source {status.sourceDetailKind} · source capabilities {status.sourceCapabilityCount} · capabilities {status.capabilityCount} · controls {status.enabledControls} · preview {String(status.previewEnabled)} · runtime path resolution {String(status.pathResolutionRuntimeEnabled)} · mount access {String(status.nasMountAccessEnabled)} · filesystem write {String(status.filesystemWriteEnabled)} · raw excluded {String(status.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function NasPathPreviewStoreReadbackStatusSurfacePanel({ status }: { status: OfficeNasPathPreviewStoreReadbackStatusSurface }) {
+  return (
+    <Card
+      data-office-nas-path-preview-store-status="true"
+      data-office-nas-path-preview-store-enabled-controls={status.enabledControls}
+      data-office-nas-path-preview-store-frontend-only={String(status.frontendOnly)}
+      data-office-nas-path-preview-store-validation-enabled={String(status.validationEnabled)}
+      data-office-nas-path-preview-store-preview-enabled={String(status.previewEnabled)}
+      data-office-nas-path-preview-store-local-metadata-enabled={String(status.localMetadataStoreEnabled)}
+      data-office-nas-path-preview-store-readback-enabled={String(status.safeReadbackEnabled)}
+      data-office-nas-path-preview-store-duplicate-guard-enabled={String(status.duplicateGuardEnabled)}
+      data-office-nas-path-preview-store-limit-clamp-enabled={String(status.limitClampEnabled)}
+      data-office-nas-path-preview-store-backend-api-changed={String(status.backendApiChanged)}
+      data-office-nas-path-preview-store-storage-changed={String(status.storageChanged)}
+      data-office-nas-path-preview-store-runtime-enabled={String(status.pathResolutionRuntimeEnabled)}
+      data-office-nas-path-preview-store-vault-mapping-enabled={String(status.vaultMappingEnabled)}
+      data-office-nas-path-preview-store-mount-discovery-enabled={String(status.mountDiscoveryEnabled)}
+      data-office-nas-path-preview-store-mount-access-enabled={String(status.nasMountAccessEnabled)}
+      data-office-nas-path-preview-store-filesystem-read-enabled={String(status.filesystemReadEnabled)}
+      data-office-nas-path-preview-store-filesystem-write-enabled={String(status.filesystemWriteEnabled)}
+      data-office-nas-path-preview-store-nas-write-enabled={String(status.nasWriteEnabled)}
+      data-office-nas-path-preview-store-evidence-file-persistence-enabled={String(status.evidenceFilePersistenceEnabled)}
+      data-office-nas-path-preview-store-rollback-point-created={String(status.rollbackPointCreated)}
+      data-office-nas-path-preview-store-credential-access-enabled={String(status.credentialAccessEnabled)}
+      data-office-nas-path-preview-store-audit-write-enabled={String(status.auditWriteEnabled)}
+      data-office-nas-path-preview-store-dispatch-enabled={String(status.dispatchEnabled)}
+      data-office-nas-path-preview-store-request-creation-enabled={String(status.requestCreationEnabled)}
+      data-office-nas-path-preview-store-work-assignment-enabled={String(status.workAssignmentEnabled)}
+      data-office-nas-path-preview-store-safe-projection-only={String(status.safeProjectionOnly)}
+      data-office-nas-path-preview-store-raw-excluded={String(status.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4 text-emerald-300" /> {status.title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="grid gap-2 md:grid-cols-2">
+            {status.capabilities.map((capability) => (
+              <div
+                key={capability.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-nas-path-preview-store-capability={capability.id}
+                data-office-nas-path-preview-store-capability-status={capability.status}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{capability.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{capability.label}</div>
+                <div className="mt-1 leading-5">{capability.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-nas-path-preview-store-boundary="true">
+            source {status.sourceDetailKind} · source capabilities {status.sourceCapabilityCount} · capabilities {status.capabilityCount} · controls {status.enabledControls} · local metadata {String(status.localMetadataStoreEnabled)} · safe readback {String(status.safeReadbackEnabled)} · runtime path resolution {String(status.pathResolutionRuntimeEnabled)} · mount access {String(status.nasMountAccessEnabled)} · filesystem write {String(status.filesystemWriteEnabled)} · raw excluded {String(status.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function NasRuntimeN3ApprovalBoundaryStatusSurfacePanel({ boundary }: { boundary: OfficeNasRuntimeN3ApprovalBoundaryStatusSurface }) {
+  return (
+    <Card
+      data-office-nas-runtime-n3-boundary="true"
+      data-office-nas-runtime-n3-boundary-enabled-controls={boundary.enabledControls}
+      data-office-nas-runtime-n3-boundary-approval-status={boundary.approvalStatus}
+      data-office-nas-runtime-n3-boundary-fallback-reason={boundary.fallbackReason}
+      data-office-nas-runtime-n3-boundary-frontend-only={String(boundary.frontendOnly)}
+      data-office-nas-runtime-n3-boundary-backend-api-changed={String(boundary.backendApiChanged)}
+      data-office-nas-runtime-n3-boundary-schema-route-added={String(boundary.schemaRouteAdded)}
+      data-office-nas-runtime-n3-boundary-validation-route-added={String(boundary.validationRouteAdded)}
+      data-office-nas-runtime-n3-boundary-local-path-mapping-validation-enabled={String(boundary.localPathMappingValidationEnabled)}
+      data-office-nas-runtime-n3-boundary-runtime-enabled={String(boundary.pathResolutionRuntimeEnabled)}
+      data-office-nas-runtime-n3-boundary-vault-mapping-enabled={String(boundary.vaultMappingEnabled)}
+      data-office-nas-runtime-n3-boundary-mount-discovery-enabled={String(boundary.mountDiscoveryEnabled)}
+      data-office-nas-runtime-n3-boundary-mount-access-enabled={String(boundary.nasMountAccessEnabled)}
+      data-office-nas-runtime-n3-boundary-filesystem-read-enabled={String(boundary.filesystemReadEnabled)}
+      data-office-nas-runtime-n3-boundary-filesystem-write-enabled={String(boundary.filesystemWriteEnabled)}
+      data-office-nas-runtime-n3-boundary-nas-write-enabled={String(boundary.nasWriteEnabled)}
+      data-office-nas-runtime-n3-boundary-evidence-file-persistence-enabled={String(boundary.evidenceFilePersistenceEnabled)}
+      data-office-nas-runtime-n3-boundary-rollback-point-created={String(boundary.rollbackPointCreated)}
+      data-office-nas-runtime-n3-boundary-credential-access-enabled={String(boundary.credentialAccessEnabled)}
+      data-office-nas-runtime-n3-boundary-audit-write-enabled={String(boundary.auditWriteEnabled)}
+      data-office-nas-runtime-n3-boundary-dispatch-enabled={String(boundary.dispatchEnabled)}
+      data-office-nas-runtime-n3-boundary-request-creation-enabled={String(boundary.requestCreationEnabled)}
+      data-office-nas-runtime-n3-boundary-safe-projection-only={String(boundary.safeProjectionOnly)}
+      data-office-nas-runtime-n3-boundary-raw-excluded={String(boundary.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4 text-amber-300" /> {boundary.title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-dashed border-amber-300/30 bg-amber-300/5 p-3">
+            {boundary.requestedBoundary} · {boundary.approvalStatus} · fallback {boundary.fallbackReason} · safe fallback {String(boundary.safeFallbackSelected)}
+          </div>
+          <div className="grid gap-2 md:grid-cols-2">
+            {boundary.nextApprovalOptions.map((option) => (
+              <div
+                key={option.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-nas-runtime-n3-boundary-option={option.id}
+                data-office-nas-runtime-n3-boundary-option-status={option.status}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{option.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{option.label}</div>
+                <div className="mt-1 leading-5">{option.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-nas-runtime-n3-boundary-summary="true">
+            source {boundary.sourceDetailKind} · options {boundary.optionCount} · controls {boundary.enabledControls} · validation route {String(boundary.validationRouteAdded)} · local path mapping validation {String(boundary.localPathMappingValidationEnabled)} · runtime path resolution {String(boundary.pathResolutionRuntimeEnabled)} · mount access {String(boundary.nasMountAccessEnabled)} · filesystem write {String(boundary.filesystemWriteEnabled)} · raw excluded {String(boundary.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function NasRuntimeSingleFileWriteApprovalActionPanel({
+  action,
+  draft,
+  approved,
+  busy,
+  result,
+  error,
+  onDraftChange,
+  onApprovalChange,
+  onExecute,
+}: {
+  action: OfficeNasRuntimeSingleFileWriteApprovalAction;
+  draft: OfficeNasSingleFileWritePayload;
+  approved: boolean;
+  busy: boolean;
+  result: OfficeNasSingleFileWriteResult | null;
+  error: string | null;
+  onDraftChange: (field: keyof OfficeNasSingleFileWritePayload, value: string) => void;
+  onApprovalChange: (approved: boolean) => void;
+  onExecute: () => void;
+}) {
+  const fields: Array<keyof OfficeNasSingleFileWritePayload> = ["write_ref", "package_ref", "target_vault_ref", "safe_slug", "safe_title", "requested_by", "requested_at"];
+  return (
+    <Card
+      data-office-nas-runtime-single-file-write-action="true"
+      data-office-nas-runtime-single-file-write-endpoint={action.endpoint}
+      data-office-nas-runtime-single-file-write-enabled-controls={action.enabledControls}
+      data-office-nas-runtime-single-file-write-raw-path-input-enabled={String(action.rawPathInputEnabled)}
+      data-office-nas-runtime-single-file-write-credential-input-enabled={String(action.credentialInputEnabled)}
+      data-office-nas-runtime-single-file-write-mount-path-input-enabled={String(action.mountPathInputEnabled)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4 text-emerald-300" /> {action.title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-emerald-300/20 bg-emerald-950/10 p-3">
+            <div className="font-semibold text-emerald-100">단일 파일 쓰기 · 승인 후 1회 실행</div>
+            <div className="mt-1 leading-5">raw 경로/토큰 입력 금지. safe vault ref, safe slug, safe title, markdown body만 protected API로 보냅니다.</div>
+            <div className="mt-1 font-mono text-[10px] text-emerald-100/70">{action.endpoint}</div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-2">
+            {fields.map((field) => (
+              <label key={field} className="grid gap-1 border border-current/15 bg-black/15 p-2">
+                <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-midground/55">{field}</span>
+                <input
+                  name={field}
+                  value={draft[field]}
+                  onChange={(event) => onDraftChange(field, event.target.value)}
+                  className="border border-current/15 bg-black/30 px-2 py-1 text-xs text-foreground"
+                />
+              </label>
+            ))}
+          </div>
+          <label className="grid gap-1 border border-current/15 bg-black/15 p-2">
+            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-midground/55">markdown_body</span>
+            <textarea
+              name="markdown_body"
+              value={draft.markdown_body}
+              onChange={(event) => onDraftChange("markdown_body", event.target.value)}
+              className="min-h-24 border border-current/15 bg-black/30 px-2 py-1 text-xs text-foreground"
+            />
+          </label>
+          <label className="flex items-center gap-2 border border-amber-300/20 bg-amber-950/10 p-3 text-amber-100/80">
+            <input type="checkbox" name="approved" checked={approved} onChange={(event) => onApprovalChange(event.target.checked)} />
+            승인: 이 safe payload를 protected API로 1회 실행
+          </label>
+          <button
+            type="button"
+            disabled={!approved || busy}
+            onClick={onExecute}
+            className="border border-emerald-300/30 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-100 disabled:opacity-40"
+          >
+            {busy ? "실행 중" : "승인된 단일 파일 쓰기 실행"}
+          </button>
+          {error ? <div className="border border-red-300/25 bg-red-950/10 p-3 text-red-100" data-office-nas-runtime-single-file-write-error="true">{error}</div> : null}
+          {result ? (
+            <div className="border border-sky-300/20 bg-sky-950/10 p-3" data-office-nas-runtime-single-file-write-result="true">
+              <div>written {String(result.written)}</div>
+              {result.dto ? (
+                <div className="mt-1 grid gap-1">
+                  <span>safe display path {result.dto.safe_display_path}</span>
+                  <span>safe logical path {result.dto.safe_logical_path}</span>
+                  <span>bytes {result.dto.bytes_written} · rollback {String(result.dto.rollback_created)} · {result.dto.rollback_ref ?? "rollback_none"}</span>
+                </div>
+              ) : null}
+              {result.errors.length > 0 ? <div className="mt-1">errors {result.errors.map((item) => `${item.field}:${item.code}`).join(" · ")}</div> : null}
+            </div>
+          ) : null}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function DeskRpgReadOnlyChainCompletionReviewPanel({ review }: { review: OfficeDeskRpgReadOnlyChainCompletionReview }) {
+  return (
+    <Card
+      data-office-desk-rpg-readonly-chain-completion-review="true"
+      data-office-desk-rpg-readonly-chain-completion-review-enabled-controls={review.enabledControls}
+      data-office-desk-rpg-readonly-chain-completion-review-mutation-controls-added={String(review.mutationControlsAdded)}
+      data-office-desk-rpg-readonly-chain-completion-review-runtime-write-enabled={String(review.runtimeWriteEnabled)}
+      data-office-desk-rpg-readonly-chain-completion-review-request-creation-enabled={String(review.requestCreationEnabled)}
+      data-office-desk-rpg-readonly-chain-completion-review-work-assignment-enabled={String(review.workAssignmentEnabled)}
+      data-office-desk-rpg-readonly-chain-completion-review-dispatch-enabled={String(review.dispatchEnabled)}
+      data-office-desk-rpg-readonly-chain-completion-review-audit-write-enabled={String(review.auditWriteEnabled)}
+      data-office-desk-rpg-readonly-chain-completion-review-nas-save-enabled={String(review.nasSaveEnabled)}
+      data-office-desk-rpg-readonly-chain-completion-review-safe-projection-only={String(review.safeProjectionOnly)}
+      data-office-desk-rpg-readonly-chain-completion-review-raw-excluded={String(review.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4" /> Desk RPG read-only chain completion review
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-violet-300/20 bg-violet-950/10 p-3">
+            <div className="font-semibold text-violet-100">Master Spec v0.1 alignment · next projection-only gap</div>
+            <div className="mt-1 leading-5">
+              완료된 request/approval/NAS Keeper 읽기 전용 체인을 Master Spec 성공 장면과 대조하고, 다음 최소 slice를 mutation이 아닌 캐릭터 상태 projection으로 고정합니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {review.reviewCards.map((card) => (
+              <div
+                key={card.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-desk-rpg-readonly-chain-completion-review-card={card.id}
+                data-office-desk-rpg-readonly-chain-completion-review-card-status={card.status}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{card.label}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-violet-100/80">{card.status}</div>
+                <div className="mt-2 leading-5">{card.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-desk-rpg-readonly-chain-completion-review-boundary="true">
+            source {review.sourceDetailKind} · source evidence cards {review.sourceEvidenceCardCount} · chain steps {review.completedChainStepCount} · master spec checkpoints {review.masterSpecCheckpointCount} · next {review.nextRecommendedSlice} · controls {review.enabledControls} · raw excluded {String(review.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function EventDrivenCharacterStateProjectionPanel({ projection }: { projection: OfficeEventDrivenCharacterStateProjection }) {
+  return (
+    <Card
+      data-office-event-driven-character-state-projection="true"
+      data-office-event-driven-character-state-enabled-controls={projection.enabledControls}
+      data-office-event-driven-character-state-runtime-write-enabled={String(projection.runtimeEventWriteEnabled)}
+      data-office-event-driven-character-state-event-persistence-enabled={String(projection.eventPersistenceEnabled)}
+      data-office-event-driven-character-state-request-creation-enabled={String(projection.requestCreationEnabled)}
+      data-office-event-driven-character-state-dispatch-enabled={String(projection.dispatchEnabled)}
+      data-office-event-driven-character-state-nas-save-enabled={String(projection.nasSaveEnabled)}
+      data-office-event-driven-character-state-safe-projection-only={String(projection.safeProjectionOnly)}
+      data-office-event-driven-character-state-raw-excluded={String(projection.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Activity className="h-4 w-4" /> Event-driven character state projection
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-sky-300/20 bg-sky-950/10 p-3">
+            <div className="font-semibold text-sky-100">runtime/intent/visual events → display-only character states</div>
+            <div className="mt-1 leading-5">
+              safe event aggregate를 Desk RPG 캐릭터 상태로만 축약합니다. event 생성·persist, state machine 저장, request 생성, dispatch, NAS 저장은 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3">
+            {projection.characterStates.map((state) => (
+              <div
+                key={state.role}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-event-driven-character-state-role={state.role}
+                data-office-event-driven-character-state-event-class={state.eventClass}
+                data-office-event-driven-character-state-state={state.state}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{state.eventClass}</div>
+                <div className="mt-1 font-semibold text-foreground">{state.label}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-sky-100/80">{state.state}</div>
+                <div className="mt-2 leading-5">{state.safeSummary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-event-driven-character-state-boundary="true">
+            source {projection.sourceReviewKind} · next {projection.sourceNextRecommendedSlice} · event categories {projection.eventCategoryCount} · controls {projection.enabledControls} · raw excluded {String(projection.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function CharacterStateRoomOverlayPanel({ overlay }: { overlay: OfficeCharacterStateRoomOverlay }) {
+  return (
+    <Card
+      data-office-character-state-room-overlay="true"
+      data-office-character-state-room-overlay-enabled-controls={overlay.enabledControls}
+      data-office-character-state-room-overlay-event-persistence-enabled={String(overlay.eventPersistenceEnabled)}
+      data-office-character-state-room-overlay-backend-stream-enabled={String(overlay.backendStreamEnabled)}
+      data-office-character-state-room-overlay-animation-state-persistence-enabled={String(overlay.animationStatePersistenceEnabled)}
+      data-office-character-state-room-overlay-request-creation-enabled={String(overlay.requestCreationEnabled)}
+      data-office-character-state-room-overlay-dispatch-enabled={String(overlay.dispatchEnabled)}
+      data-office-character-state-room-overlay-nas-save-enabled={String(overlay.nasSaveEnabled)}
+      data-office-character-state-room-overlay-safe-projection-only={String(overlay.safeProjectionOnly)}
+      data-office-character-state-room-overlay-raw-excluded={String(overlay.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <MapPinned className="h-4 w-4" /> Character state room overlay
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-cyan-300/20 bg-cyan-950/10 p-3">
+            <div className="font-semibold text-cyan-100">safe character states → room presence markers</div>
+            <div className="mt-1 leading-5">
+              여섯 캐릭터 상태를 기존 Desk RPG room/facility 표면의 non-interactive marker로만 올립니다. backend stream, event persist, animation state 저장, request 생성, dispatch, NAS 저장은 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3">
+            {overlay.markers.map((marker) => (
+              <div
+                key={marker.role}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-character-state-room-overlay-marker={marker.role}
+                data-office-character-state-room-overlay-room={marker.roomSurfaceId}
+                data-office-character-state-room-overlay-marker-kind={marker.markerKind}
+                data-office-character-state-room-overlay-interactive={String(marker.interactive)}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{marker.roomSurfaceId}</div>
+                <div className="mt-1 font-semibold text-foreground">{marker.label}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-cyan-100/80">{marker.state}</div>
+                <div className="mt-2 leading-5">{marker.safeSummary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-character-state-room-overlay-boundary="true">
+            source {overlay.sourceDetailKind} · states {overlay.sourceCharacterStateCount} · markers {overlay.markerCount} · controls {overlay.enabledControls} · raw excluded {String(overlay.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function CharacterRoomInteractionPosturePanel({ posture }: { posture: OfficeCharacterRoomInteractionPosture }) {
+  return (
+    <Card
+      data-office-character-room-interaction-posture="true"
+      data-office-character-room-interaction-posture-enabled-controls={posture.enabledControls}
+      data-office-character-room-interaction-posture-click-handler-enabled={String(posture.clickHandlerEnabled)}
+      data-office-character-room-interaction-posture-keyboard-handler-enabled={String(posture.keyboardHandlerEnabled)}
+      data-office-character-room-interaction-posture-event-persistence-enabled={String(posture.eventPersistenceEnabled)}
+      data-office-character-room-interaction-posture-backend-stream-enabled={String(posture.backendStreamEnabled)}
+      data-office-character-room-interaction-posture-animation-state-persistence-enabled={String(posture.animationStatePersistenceEnabled)}
+      data-office-character-room-interaction-posture-request-creation-enabled={String(posture.requestCreationEnabled)}
+      data-office-character-room-interaction-posture-dispatch-enabled={String(posture.dispatchEnabled)}
+      data-office-character-room-interaction-posture-nas-save-enabled={String(posture.nasSaveEnabled)}
+      data-office-character-room-interaction-posture-safe-projection-only={String(posture.safeProjectionOnly)}
+      data-office-character-room-interaction-posture-raw-excluded={String(posture.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Eye className="h-4 w-4" /> Click/keyboard inspection posture
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-violet-300/20 bg-violet-950/10 p-3">
+            <div className="font-semibold text-violet-100">표시용 inspection contract only</div>
+            <div className="mt-1 leading-5">
+              overlay marker별 click/keyboard inspection affordance를 계약으로만 표시합니다. handler, request creation, assignment, dispatch, audit, NAS save는 모두 false입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3">
+            {posture.postures.map((item) => (
+              <div
+                key={item.role}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-character-room-interaction-posture-marker={item.role}
+                data-office-character-room-interaction-posture-room={item.roomSurfaceId}
+                data-office-character-room-interaction-posture-click={item.clickInspectionPosture}
+                data-office-character-room-interaction-posture-keyboard={item.keyboardInspectionPosture}
+                data-office-character-room-interaction-posture-executable={String(item.executable)}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.inspectTargetId}</div>
+                <div className="mt-1 font-semibold text-foreground">{item.label}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-violet-100/80">{item.clickInspectionPosture} · {item.keyboardInspectionPosture}</div>
+                <div className="mt-2 leading-5">{item.safeSummary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-character-room-interaction-posture-boundary="true">
+            source {posture.sourceDetailKind} · markers {posture.sourceMarkerCount} · postures {posture.postureCount} · controls {posture.enabledControls} · handlers false
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function CharacterInspectorDetailPosturePanel({ detail }: { detail: OfficeCharacterInspectorDetailPosture }) {
+  return (
+    <Card
+      data-office-character-inspector-detail-posture="true"
+      data-office-character-inspector-detail-posture-enabled-controls={detail.enabledControls}
+      data-office-character-inspector-detail-posture-selected-marker-persistence-enabled={String(detail.selectedMarkerPersistenceEnabled)}
+      data-office-character-inspector-detail-posture-click-handler-enabled={String(detail.clickHandlerEnabled)}
+      data-office-character-inspector-detail-posture-keyboard-handler-enabled={String(detail.keyboardHandlerEnabled)}
+      data-office-character-inspector-detail-posture-inspector-write-enabled={String(detail.inspectorWriteEnabled)}
+      data-office-character-inspector-detail-posture-event-persistence-enabled={String(detail.eventPersistenceEnabled)}
+      data-office-character-inspector-detail-posture-backend-stream-enabled={String(detail.backendStreamEnabled)}
+      data-office-character-inspector-detail-posture-animation-state-persistence-enabled={String(detail.animationStatePersistenceEnabled)}
+      data-office-character-inspector-detail-posture-request-creation-enabled={String(detail.requestCreationEnabled)}
+      data-office-character-inspector-detail-posture-dispatch-enabled={String(detail.dispatchEnabled)}
+      data-office-character-inspector-detail-posture-nas-save-enabled={String(detail.nasSaveEnabled)}
+      data-office-character-inspector-detail-posture-safe-projection-only={String(detail.safeProjectionOnly)}
+      data-office-character-inspector-detail-posture-raw-excluded={String(detail.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Eye className="h-4 w-4" /> Character inspector detail posture
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-violet-300/20 bg-violet-950/10 p-3">
+            <div className="font-semibold text-violet-100">Right inspector static detail cards</div>
+            <div className="mt-1 leading-5">
+              selected marker 결과를 오른쪽 inspector detail card 계약으로만 표시합니다. 선택 상태 저장, handler, inspector write, request creation, dispatch, audit, NAS save는 모두 false입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3">
+            {detail.cards.map((item) => (
+              <div
+                key={item.role}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-character-inspector-detail-posture-card={item.role}
+                data-office-character-inspector-detail-posture-room={item.roomSurfaceId}
+                data-office-character-inspector-detail-posture-target={item.inspectTargetId}
+                data-office-character-inspector-detail-posture-surface={item.inspectorSurfaceId}
+                data-office-character-inspector-detail-posture-executable={String(item.executable)}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.detailCardId}</div>
+                <div className="mt-1 font-semibold text-foreground">{item.label}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-violet-100/80">{item.selectionPosture} · {item.inspectorSurfaceId}</div>
+                <div className="mt-2 leading-5">{item.safeSummary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-character-inspector-detail-posture-boundary="true">
+            source {detail.sourceDetailKind} · source postures {detail.sourcePostureCount} · detail cards {detail.detailCardCount} · controls {detail.enabledControls} · persistence false
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function CharacterDetailSafeDialogueCopyPanel({ dialogue }: { dialogue: OfficeCharacterDetailSafeDialogueCopy }) {
+  return (
+    <Card
+      data-office-character-detail-safe-dialogue-copy="true"
+      data-office-character-detail-safe-dialogue-copy-enabled-controls={dialogue.enabledControls}
+      data-office-character-detail-safe-dialogue-copy-click-handler-enabled={String(dialogue.clickHandlerEnabled)}
+      data-office-character-detail-safe-dialogue-copy-keyboard-handler-enabled={String(dialogue.keyboardHandlerEnabled)}
+      data-office-character-detail-safe-dialogue-copy-form-control-enabled={String(dialogue.formControlEnabled)}
+      data-office-character-detail-safe-dialogue-copy-event-persistence-enabled={String(dialogue.eventPersistenceEnabled)}
+      data-office-character-detail-safe-dialogue-copy-backend-stream-enabled={String(dialogue.backendStreamEnabled)}
+      data-office-character-detail-safe-dialogue-copy-animation-state-persistence-enabled={String(dialogue.animationStatePersistenceEnabled)}
+      data-office-character-detail-safe-dialogue-copy-request-creation-enabled={String(dialogue.requestCreationEnabled)}
+      data-office-character-detail-safe-dialogue-copy-dispatch-enabled={String(dialogue.dispatchEnabled)}
+      data-office-character-detail-safe-dialogue-copy-nas-save-enabled={String(dialogue.nasSaveEnabled)}
+      data-office-character-detail-safe-dialogue-copy-safe-projection-only={String(dialogue.safeProjectionOnly)}
+      data-office-character-detail-safe-dialogue-copy-raw-excluded={String(dialogue.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <MessageSquareText className="h-4 w-4" /> Character detail safe dialogue copy
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-cyan-300/20 bg-cyan-950/10 p-3">
+            <div className="font-semibold text-cyan-100">Safe generated bubble posture</div>
+            <div className="mt-1 leading-5">
+              말풍선은 raw instruction, task body, transcript, path, source title, provider를 표시하지 않고 역할별 생성 copy만 보여줍니다. 입력/버튼/저장/요청/배정/dispatch는 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3">
+            {dialogue.bubbles.map((bubble) => (
+              <div
+                key={bubble.role}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-character-detail-safe-dialogue-copy-bubble={bubble.role}
+                data-office-character-detail-safe-dialogue-copy-kind={bubble.copyKind}
+                data-office-character-detail-safe-dialogue-copy-tone={bubble.safeTone}
+                data-office-character-detail-safe-dialogue-copy-raw-text-visible={String(bubble.rawTextVisible)}
+                data-office-character-detail-safe-dialogue-copy-executable={String(bubble.executable)}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{bubble.sourceDetailCardId}</div>
+                <div className="mt-1 font-semibold text-foreground">{bubble.generatedCopy}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-cyan-100/80">{bubble.copyKind}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-character-detail-safe-dialogue-copy-boundary="true">
+            source {dialogue.sourceDetailKind} · cards {dialogue.sourceCardCount} · bubbles {dialogue.bubbleCount} · controls {dialogue.enabledControls} · raw text false
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function CharacterBubbleInspectorAlignmentPanel({ alignment }: { alignment: OfficeCharacterBubbleInspectorAlignment }) {
+  return (
+    <Card
+      data-office-character-bubble-inspector-alignment="true"
+      data-office-character-bubble-inspector-alignment-enabled-controls={alignment.enabledControls}
+      data-office-character-bubble-inspector-alignment-click-handler-enabled={String(alignment.clickHandlerEnabled)}
+      data-office-character-bubble-inspector-alignment-keyboard-handler-enabled={String(alignment.keyboardHandlerEnabled)}
+      data-office-character-bubble-inspector-alignment-form-control-enabled={String(alignment.formControlEnabled)}
+      data-office-character-bubble-inspector-alignment-event-persistence-enabled={String(alignment.eventPersistenceEnabled)}
+      data-office-character-bubble-inspector-alignment-backend-stream-enabled={String(alignment.backendStreamEnabled)}
+      data-office-character-bubble-inspector-alignment-animation-state-persistence-enabled={String(alignment.animationStatePersistenceEnabled)}
+      data-office-character-bubble-inspector-alignment-request-creation-enabled={String(alignment.requestCreationEnabled)}
+      data-office-character-bubble-inspector-alignment-dispatch-enabled={String(alignment.dispatchEnabled)}
+      data-office-character-bubble-inspector-alignment-nas-save-enabled={String(alignment.nasSaveEnabled)}
+      data-office-character-bubble-inspector-alignment-safe-projection-only={String(alignment.safeProjectionOnly)}
+      data-office-character-bubble-inspector-alignment-raw-excluded={String(alignment.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <MessageSquareText className="h-4 w-4" /> Character bubble-to-inspector alignment
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-sky-300/20 bg-sky-950/10 p-3">
+            <div className="font-semibold text-sky-100">Generated bubble ↔ right inspector alignment</div>
+            <div className="mt-1 leading-5">
+              역할별 생성 말풍선을 오른쪽 inspector card, route label, boundary label과 맞춰 표시합니다. source title/provider/path/raw body는 여전히 제외하고 요청/배정/dispatch/NAS 저장은 모두 비활성입니다.
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3">
+            {alignment.alignments.map((item) => (
+              <div
+                key={item.role}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-character-bubble-inspector-alignment-item={item.role}
+                data-office-character-bubble-inspector-alignment-route={item.routeLabel}
+                data-office-character-bubble-inspector-alignment-boundary={item.boundaryLabel}
+                data-office-character-bubble-inspector-alignment-surface={item.inspectorSurfaceId}
+                data-office-character-bubble-inspector-alignment-raw-text-visible={String(item.rawTextVisible)}
+                data-office-character-bubble-inspector-alignment-executable={String(item.executable)}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.sourceDetailCardId} · {item.inspectorSurfaceId}</div>
+                <div className="mt-1 font-semibold text-foreground">{item.generatedCopy}</div>
+                <div className="mt-1 leading-5 text-midground/70">{item.inspectorCardLabel}</div>
+                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.14em] text-sky-100/80">{item.routeLabel} · {item.boundaryLabel}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-character-bubble-inspector-alignment-boundary-summary="true">
+            dialogue {alignment.sourceDialogueKind} · inspector {alignment.sourceInspectorKind} · bubbles {alignment.sourceBubbleCount} · cards {alignment.sourceInspectorCardCount} · aligned {alignment.alignmentCount} · controls {alignment.enabledControls}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function CharacterPanelBoundarySummaryPanel({ summary }: { summary: OfficeCharacterPanelBoundarySummary }) {
+  return (
+    <Card
+      data-office-character-panel-boundary-summary="true"
+      data-office-character-panel-boundary-summary-enabled-controls={summary.enabledControls}
+      data-office-character-panel-boundary-summary-click-handler-enabled={String(summary.clickHandlerEnabled)}
+      data-office-character-panel-boundary-summary-keyboard-handler-enabled={String(summary.keyboardHandlerEnabled)}
+      data-office-character-panel-boundary-summary-form-control-enabled={String(summary.formControlEnabled)}
+      data-office-character-panel-boundary-summary-event-persistence-enabled={String(summary.eventPersistenceEnabled)}
+      data-office-character-panel-boundary-summary-backend-stream-enabled={String(summary.backendStreamEnabled)}
+      data-office-character-panel-boundary-summary-animation-state-persistence-enabled={String(summary.animationStatePersistenceEnabled)}
+      data-office-character-panel-boundary-summary-request-creation-enabled={String(summary.requestCreationEnabled)}
+      data-office-character-panel-boundary-summary-dispatch-enabled={String(summary.dispatchEnabled)}
+      data-office-character-panel-boundary-summary-nas-save-enabled={String(summary.nasSaveEnabled)}
+      data-office-character-panel-boundary-summary-safe-projection-only={String(summary.safeProjectionOnly)}
+      data-office-character-panel-boundary-summary-raw-excluded={String(summary.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4" /> Character panel boundary summary
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-emerald-300/20 bg-emerald-950/10 p-3">
+            <div className="font-semibold text-emerald-100">Compact read-only boundary strip</div>
+            <div className="mt-1 leading-5">Inspector detail, generated dialogue copy, and bubble alignment are summarized as display-only panels. No request creation, assignment, dispatch, audit write, or NAS save is enabled.</div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3">
+            {summary.panels.map((panel) => (
+              <div
+                key={panel.panelKind}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-character-panel-boundary-summary-panel={panel.panelKind}
+                data-office-character-panel-boundary-summary-boundary={panel.boundaryLabel}
+                data-office-character-panel-boundary-summary-executable={String(panel.executable)}
+              >
+                <div className="font-semibold text-foreground">{panel.label}</div>
+                <div className="mt-1 text-midground/70">{panel.boundaryLabel}</div>
+                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.14em] text-emerald-100/80">{panel.sourceKind} · roles {panel.roleCount} · controls {panel.enabledControls}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-character-panel-boundary-summary-boundaries="true">
+            panels {summary.panelCount} · roles {summary.totalRoleCount} · boundaries {summary.boundaryLabels.join(" / ")} · controls {summary.enabledControls}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function CharacterFacilityRoleLegendPanel({ legend }: { legend: OfficeCharacterFacilityRoleLegend }) {
+  return (
+    <Card
+      data-office-character-facility-role-legend="true"
+      data-office-character-facility-role-legend-enabled-controls={legend.enabledControls}
+      data-office-character-facility-role-legend-click-handler-enabled={String(legend.clickHandlerEnabled)}
+      data-office-character-facility-role-legend-keyboard-handler-enabled={String(legend.keyboardHandlerEnabled)}
+      data-office-character-facility-role-legend-form-control-enabled={String(legend.formControlEnabled)}
+      data-office-character-facility-role-legend-event-persistence-enabled={String(legend.eventPersistenceEnabled)}
+      data-office-character-facility-role-legend-backend-stream-enabled={String(legend.backendStreamEnabled)}
+      data-office-character-facility-role-legend-animation-state-persistence-enabled={String(legend.animationStatePersistenceEnabled)}
+      data-office-character-facility-role-legend-request-creation-enabled={String(legend.requestCreationEnabled)}
+      data-office-character-facility-role-legend-dispatch-enabled={String(legend.dispatchEnabled)}
+      data-office-character-facility-role-legend-nas-save-enabled={String(legend.nasSaveEnabled)}
+      data-office-character-facility-role-legend-safe-projection-only={String(legend.safeProjectionOnly)}
+      data-office-character-facility-role-legend-raw-excluded={String(legend.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <MapPinned className="h-4 w-4" /> Character facility role legend
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-cyan-300/20 bg-cyan-950/10 p-3">
+            <div className="font-semibold text-cyan-100">Role ↔ facility zone legend</div>
+            <div className="mt-1 leading-5">Six Desk RPG roles are mapped to their display-only facility zones. This legend explains posture only; it does not create requests, assign workers, dispatch, write audit records, or save to NAS.</div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3">
+            {legend.legendItems.map((item) => (
+              <div
+                key={item.role}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-character-facility-role-legend-role={item.role}
+                data-office-character-facility-role-legend-facility={item.facilityZoneId}
+                data-office-character-facility-role-legend-boundary={item.boundaryLabel}
+                data-office-character-facility-role-legend-executable={String(item.executable)}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.role} · {item.facilityZoneId}</div>
+                <div className="mt-1 font-semibold text-foreground">{item.label}</div>
+                <div className="mt-1 text-midground/70">{item.facilityLabel}</div>
+                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.14em] text-cyan-100/80">{item.boundaryLabel} · controls {item.enabledControls}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-character-facility-role-legend-summary="true">
+            source {legend.sourceSummaryKind} / {legend.sourceOverlayKind} · roles {legend.roleCount} · facilities {legend.facilityCount} · controls {legend.enabledControls}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function CharacterFacilityBoundaryStripPanel({ strip }: { strip: OfficeCharacterFacilityBoundaryStrip }) {
+  return (
+    <Card
+      data-office-character-facility-boundary-strip="true"
+      data-office-character-facility-boundary-strip-enabled-controls={strip.enabledControls}
+      data-office-character-facility-boundary-strip-click-handler-enabled={String(strip.clickHandlerEnabled)}
+      data-office-character-facility-boundary-strip-keyboard-handler-enabled={String(strip.keyboardHandlerEnabled)}
+      data-office-character-facility-boundary-strip-form-control-enabled={String(strip.formControlEnabled)}
+      data-office-character-facility-boundary-strip-event-persistence-enabled={String(strip.eventPersistenceEnabled)}
+      data-office-character-facility-boundary-strip-backend-stream-enabled={String(strip.backendStreamEnabled)}
+      data-office-character-facility-boundary-strip-animation-state-persistence-enabled={String(strip.animationStatePersistenceEnabled)}
+      data-office-character-facility-boundary-strip-request-creation-enabled={String(strip.requestCreationEnabled)}
+      data-office-character-facility-boundary-strip-dispatch-enabled={String(strip.dispatchEnabled)}
+      data-office-character-facility-boundary-strip-nas-save-enabled={String(strip.nasSaveEnabled)}
+      data-office-character-facility-boundary-strip-safe-projection-only={String(strip.safeProjectionOnly)}
+      data-office-character-facility-boundary-strip-raw-excluded={String(strip.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4" /> Character facility boundary strip
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-amber-300/20 bg-amber-950/10 p-3">
+            <div className="font-semibold text-amber-100">Facility mutation boundary strip</div>
+            <div className="mt-1 leading-5">Facility zones summarize disabled mutation posture only. Instruction intake, mediation writes, assignment, inspector writes, draft creation, and NAS save remain disabled.</div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3">
+            {strip.safeZones.map((zone) => (
+              <div
+                key={zone.facilityZoneId}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-character-facility-boundary-strip-zone={zone.facilityZoneId}
+                data-office-character-facility-boundary-strip-mutation-boundary={zone.mutationBoundary}
+                data-office-character-facility-boundary-strip-executable={String(zone.executable)}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{zone.facilityZoneId} · roles {zone.roleCount}</div>
+                <div className="mt-1 font-semibold text-foreground">{zone.facilityLabel}</div>
+                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.14em] text-amber-100/80">{zone.mutationBoundary} · controls {zone.enabledControls}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-character-facility-boundary-strip-summary="true">
+            source {strip.sourceLegendKind} / {strip.sourceOverlayKind} · zones {strip.zoneCount} · boundaries {strip.boundaryCount} · controls {strip.enabledControls}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function CharacterFacilitySourceLedgerStripPanel({ ledger }: { ledger: OfficeCharacterFacilitySourceLedgerStrip }) {
+  return (
+    <Card
+      data-office-character-facility-source-ledger-strip="true"
+      data-office-character-facility-source-ledger-strip-enabled-controls={ledger.enabledControls}
+      data-office-character-facility-source-ledger-strip-click-handler-enabled={String(ledger.clickHandlerEnabled)}
+      data-office-character-facility-source-ledger-strip-keyboard-handler-enabled={String(ledger.keyboardHandlerEnabled)}
+      data-office-character-facility-source-ledger-strip-form-control-enabled={String(ledger.formControlEnabled)}
+      data-office-character-facility-source-ledger-strip-source-ledger-persistence-enabled={String(ledger.sourceLedgerPersistenceEnabled)}
+      data-office-character-facility-source-ledger-strip-event-persistence-enabled={String(ledger.eventPersistenceEnabled)}
+      data-office-character-facility-source-ledger-strip-backend-stream-enabled={String(ledger.backendStreamEnabled)}
+      data-office-character-facility-source-ledger-strip-animation-state-persistence-enabled={String(ledger.animationStatePersistenceEnabled)}
+      data-office-character-facility-source-ledger-strip-request-creation-enabled={String(ledger.requestCreationEnabled)}
+      data-office-character-facility-source-ledger-strip-work-assignment-enabled={String(ledger.workAssignmentEnabled)}
+      data-office-character-facility-source-ledger-strip-dispatch-enabled={String(ledger.dispatchEnabled)}
+      data-office-character-facility-source-ledger-strip-audit-write-enabled={String(ledger.auditWriteEnabled)}
+      data-office-character-facility-source-ledger-strip-nas-save-enabled={String(ledger.nasSaveEnabled)}
+      data-office-character-facility-source-ledger-strip-safe-projection-only={String(ledger.safeProjectionOnly)}
+      data-office-character-facility-source-ledger-strip-raw-excluded={String(ledger.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4" /> Character facility source ledger strip
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-sky-300/20 bg-sky-950/10 p-3">
+            <div className="font-semibold text-sky-100">Aggregate provenance only</div>
+            <div className="mt-1 leading-5">Facility zones point back to safe aggregate DTOs only. Raw sources, source titles, paths, providers, transcripts, prompts, and credentials are not projected.</div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3">
+            {ledger.ledgerItems.map((item) => (
+              <div
+                key={item.facilityZoneId}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-character-facility-source-ledger-strip-zone={item.facilityZoneId}
+                data-office-character-facility-source-ledger-strip-provenance={item.provenanceLabel}
+                data-office-character-facility-source-ledger-strip-raw-source-projected={String(item.rawSourceProjected)}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.facilityZoneId} · markers {item.aggregateMarkerCount}</div>
+                <div className="mt-1 font-semibold text-foreground">{item.facilityLabel}</div>
+                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.14em] text-sky-100/80">{item.provenanceLabel}</div>
+                <div className="mt-1 text-[10px] text-midground/55">{item.mutationBoundary} · controls {item.enabledControls}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-character-facility-source-ledger-strip-summary="true">
+            source {ledger.sourceBoundaryStripKind} / {ledger.sourceOverlayKind} · zones {ledger.zoneCount} · controls {ledger.enabledControls}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function CharacterFacilityCompletionReviewPanel({ review }: { review: OfficeCharacterFacilityCompletionReview }) {
+  return (
+    <Card
+      data-office-character-facility-completion-review="true"
+      data-office-character-facility-completion-review-enabled-controls={review.enabledControls}
+      data-office-character-facility-completion-review-target-reached={String(review.readOnlyTargetLevelReached)}
+      data-office-character-facility-completion-review-next-requires-approval={String(review.nextRequiresExplicitApproval)}
+      data-office-character-facility-completion-review-safe-projection-only={String(review.safeProjectionOnly)}
+      data-office-character-facility-completion-review-raw-excluded={String(review.rawExcluded)}
+      data-office-character-facility-completion-review-event-persistence-enabled={String(review.eventPersistenceEnabled)}
+      data-office-character-facility-completion-review-request-creation-enabled={String(review.requestCreationEnabled)}
+      data-office-character-facility-completion-review-dispatch-enabled={String(review.dispatchEnabled)}
+      data-office-character-facility-completion-review-audit-write-enabled={String(review.auditWriteEnabled)}
+      data-office-character-facility-completion-review-nas-save-enabled={String(review.nasSaveEnabled)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4" /> Character facility completion review
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-emerald-300/20 bg-emerald-950/10 p-3">
+            <div className="font-semibold text-emerald-100">Read-only character facility target reached</div>
+            <div className="mt-1 leading-5">The character/facility read-only chain is complete at this target level. The next boundary is the event schema and controlled mutation approval boundary, which requires explicit approval before any executable work.</div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-2">
+            {review.completedSlices.map((slice) => (
+              <div key={slice} className="border border-current/15 bg-black/15 p-3" data-office-character-facility-completion-review-slice={slice}>
+                <div className="font-semibold text-foreground">{slice}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-emerald-100/80">completed · controls {review.enabledControls}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-character-facility-completion-review-boundary="true">
+            source {review.sourceLedgerKind} · zones {review.zoneCount} · next {review.nextLargePhaseBoundary} · explicit approval {String(review.nextRequiresExplicitApproval)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function ControlledMutationContractPostureProjectionPanel({ projection }: { projection: OfficeControlledMutationContractPostureProjection }) {
+  return (
+    <section
+      className="border border-cyan-300/20 bg-cyan-950/10 p-4"
+      data-office-controlled-mutation-contract-posture-projection="true"
+      data-office-controlled-mutation-contract-posture-projection-enabled-controls={projection.enabledControls}
+      data-office-controlled-mutation-contract-posture-projection-form-control-enabled={String(projection.formControlEnabled)}
+      data-office-controlled-mutation-contract-posture-projection-browser-executable-controls-enabled={String(projection.browserExecutableControlsEnabled)}
+      data-office-controlled-mutation-contract-posture-projection-backend-mutation-enabled={String(projection.backendMutationEnabled)}
+      data-office-controlled-mutation-contract-posture-projection-storage-write-enabled={String(projection.storageWriteEnabled)}
+      data-office-controlled-mutation-contract-posture-projection-event-append-enabled={String(projection.eventAppendEnabled)}
+      data-office-controlled-mutation-contract-posture-projection-event-readback-enabled={String(projection.eventReadbackEnabled)}
+      data-office-controlled-mutation-contract-posture-projection-audit-write-enabled={String(projection.auditWriteEnabled)}
+      data-office-controlled-mutation-contract-posture-projection-execution-enabled={String(projection.executionEnabled)}
+      data-office-controlled-mutation-contract-posture-projection-dry-run-execution-enabled={String(projection.dryRunExecutionEnabled)}
+      data-office-controlled-mutation-contract-posture-projection-dispatch-enabled={String(projection.dispatchEnabled)}
+      data-office-controlled-mutation-contract-posture-projection-authority-adapter-binding-enabled={String(projection.authorityAdapterBindingEnabled)}
+      data-office-controlled-mutation-contract-posture-projection-credential-change-enabled={String(projection.credentialChangeEnabled)}
+      data-office-controlled-mutation-contract-posture-projection-nas-mutation-enabled={String(projection.nasMutationEnabled)}
+      data-office-controlled-mutation-contract-posture-projection-safe-projection-only={String(projection.safeProjectionOnly)}
+      data-office-controlled-mutation-contract-posture-projection-raw-excluded={String(projection.rawExcluded)}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-200/70">{projection.stageLabel}</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">{projection.title}</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">{projection.safeBoundary}</p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">controls: {projection.enabledControls}</div>
+      </div>
+      <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-controlled-mutation-contract-posture-projection-cards="true">
+        {projection.postureCards.map((card) => (
+          <div key={card.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-contract-posture-projection-card={card.id} data-office-controlled-mutation-contract-posture-projection-card-status={card.status}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.status}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{card.label}</div>
+            <div className="mt-2 text-xs leading-5 text-midground/70">{card.detail}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function ControlledMutationContractPosturePolishPanel({ polish }: { polish: OfficeControlledMutationContractPosturePolish }) {
+  return (
+    <section
+      className="border border-sky-300/20 bg-sky-950/10 p-4"
+      data-office-controlled-mutation-contract-posture-polish="true"
+      data-office-controlled-mutation-contract-posture-polish-enabled-controls={polish.enabledControls}
+      data-office-controlled-mutation-contract-posture-polish-form-control-enabled={String(polish.formControlEnabled)}
+      data-office-controlled-mutation-contract-posture-polish-browser-executable-controls-enabled={String(polish.browserExecutableControlsEnabled)}
+      data-office-controlled-mutation-contract-posture-polish-backend-mutation-enabled={String(polish.backendMutationEnabled)}
+      data-office-controlled-mutation-contract-posture-polish-storage-write-enabled={String(polish.storageWriteEnabled)}
+      data-office-controlled-mutation-contract-posture-polish-event-append-enabled={String(polish.eventAppendEnabled)}
+      data-office-controlled-mutation-contract-posture-polish-event-readback-enabled={String(polish.eventReadbackEnabled)}
+      data-office-controlled-mutation-contract-posture-polish-audit-write-enabled={String(polish.auditWriteEnabled)}
+      data-office-controlled-mutation-contract-posture-polish-execution-enabled={String(polish.executionEnabled)}
+      data-office-controlled-mutation-contract-posture-polish-dry-run-execution-enabled={String(polish.dryRunExecutionEnabled)}
+      data-office-controlled-mutation-contract-posture-polish-dispatch-enabled={String(polish.dispatchEnabled)}
+      data-office-controlled-mutation-contract-posture-polish-authority-adapter-binding-enabled={String(polish.authorityAdapterBindingEnabled)}
+      data-office-controlled-mutation-contract-posture-polish-credential-change-enabled={String(polish.credentialChangeEnabled)}
+      data-office-controlled-mutation-contract-posture-polish-nas-mutation-enabled={String(polish.nasMutationEnabled)}
+      data-office-controlled-mutation-contract-posture-polish-safe-projection-only={String(polish.safeProjectionOnly)}
+      data-office-controlled-mutation-contract-posture-polish-raw-excluded={String(polish.rawExcluded)}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-200/70">{polish.stageLabel}</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">{polish.title}</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">{polish.safeBoundary}</p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          disabled: {polish.disabledSurfaceSummary.blockedCards}/{polish.disabledSurfaceSummary.cards} · controls: {polish.disabledSurfaceSummary.enabledControls}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 lg:grid-cols-4" data-office-controlled-mutation-contract-posture-polish-rows="true">
+        {polish.polishRows.map((row) => (
+          <div key={row.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-contract-posture-polish-row={row.id} data-office-controlled-mutation-contract-posture-polish-row-status={row.status}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{row.status}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{row.label}</div>
+            <div className="mt-2 text-xs leading-5 text-midground/70">{row.detail}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function ControlledMutationReadinessHandoffRibbonPanel({ ribbon }: { ribbon: OfficeControlledMutationReadinessHandoffRibbon }) {
+  return (
+    <section
+      className="border border-indigo-300/20 bg-indigo-950/10 p-4"
+      data-office-controlled-mutation-readiness-handoff-ribbon="true"
+      data-office-controlled-mutation-readiness-handoff-ribbon-enabled-controls={ribbon.enabledControls}
+      data-office-controlled-mutation-readiness-handoff-ribbon-form-control-enabled={String(ribbon.formControlEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-browser-executable-controls-enabled={String(ribbon.browserExecutableControlsEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-backend-mutation-enabled={String(ribbon.backendMutationEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-storage-write-enabled={String(ribbon.storageWriteEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-event-append-enabled={String(ribbon.eventAppendEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-event-readback-enabled={String(ribbon.eventReadbackEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-audit-write-enabled={String(ribbon.auditWriteEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-execution-enabled={String(ribbon.executionEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-dry-run-execution-enabled={String(ribbon.dryRunExecutionEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-dispatch-enabled={String(ribbon.dispatchEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-target-mutation-enabled={String(ribbon.targetMutationEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-authority-adapter-binding-enabled={String(ribbon.authorityAdapterBindingEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-credential-change-enabled={String(ribbon.credentialChangeEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-nas-mutation-enabled={String(ribbon.nasMutationEnabled)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-safe-projection-only={String(ribbon.safeProjectionOnly)}
+      data-office-controlled-mutation-readiness-handoff-ribbon-raw-excluded={String(ribbon.rawExcluded)}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-indigo-200/70">{ribbon.stageLabel}</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">{ribbon.title}</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">{ribbon.safeBoundary}</p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          steps: {ribbon.disabledSurfaceSummary.rows} · controls: {ribbon.disabledSurfaceSummary.enabledControls}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-controlled-mutation-readiness-handoff-ribbon-steps="true">
+        {ribbon.handoffSteps.map((step) => (
+          <div key={step.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-readiness-handoff-ribbon-step={step.id} data-office-controlled-mutation-readiness-handoff-ribbon-step-status={step.status}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{step.status}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{step.label}</div>
+            <div className="mt-2 text-xs leading-5 text-midground/70">{step.detail}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function ControlledMutationReadinessSummaryPolishPanel({ summary }: { summary: OfficeControlledMutationReadinessSummaryPolish }) {
+  return (
+    <section
+      className="border border-violet-300/20 bg-violet-950/10 p-4"
+      data-office-controlled-mutation-readiness-summary-polish="true"
+      data-office-controlled-mutation-readiness-summary-polish-enabled-controls={summary.enabledControls}
+      data-office-controlled-mutation-readiness-summary-polish-form-control-enabled={String(summary.formControlEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-browser-executable-controls-enabled={String(summary.browserExecutableControlsEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-backend-mutation-enabled={String(summary.backendMutationEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-storage-write-enabled={String(summary.storageWriteEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-event-append-enabled={String(summary.eventAppendEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-event-readback-enabled={String(summary.eventReadbackEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-audit-write-enabled={String(summary.auditWriteEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-execution-enabled={String(summary.executionEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-dry-run-execution-enabled={String(summary.dryRunExecutionEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-dispatch-enabled={String(summary.dispatchEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-target-mutation-enabled={String(summary.targetMutationEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-authority-adapter-binding-enabled={String(summary.authorityAdapterBindingEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-credential-change-enabled={String(summary.credentialChangeEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-nas-mutation-enabled={String(summary.nasMutationEnabled)}
+      data-office-controlled-mutation-readiness-summary-polish-safe-projection-only={String(summary.safeProjectionOnly)}
+      data-office-controlled-mutation-readiness-summary-polish-raw-excluded={String(summary.rawExcluded)}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-violet-200/70">{summary.stageLabel}</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">{summary.title}</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">{summary.safeBoundary}</p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          cards: {summary.disabledSurfaceSummary.summaryCards} · controls: {summary.disabledSurfaceSummary.enabledControls}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-3" data-office-controlled-mutation-readiness-summary-polish-cards="true">
+        {summary.summaryCards.map((card) => (
+          <div key={card.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-readiness-summary-polish-card={card.id} data-office-controlled-mutation-readiness-summary-polish-card-status={card.status}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.status}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{card.label}</div>
+            <div className="mt-2 text-xs leading-5 text-midground/70">{card.detail}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function OfficeDeskRpgBossCommandConsolePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
+  const bossActor = projection.actors.find((actor) => actor.role === "user_boss");
+  const orchestratorActor = projection.actors.find((actor) => actor.role === "orchestrator");
+  return (
+    <Card
+      data-office-desk-rpg-boss-console="true"
+      data-office-desk-rpg-boss-console-safe-projection-only={String(projection.safeProjectionOnly)}
+      data-office-desk-rpg-boss-console-enabled-controls={projection.enabledControls}
+      data-office-desk-rpg-boss-console-request-creation-enabled="false"
+      data-office-desk-rpg-boss-console-orchestrator-required="true"
+      data-office-desk-rpg-boss-console-nas-save-enabled="false"
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Bot className="h-4 w-4" /> Boss command console
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-amber-300/20 bg-amber-950/10 p-3">
+            <div className="font-semibold text-amber-100">사장 캐릭터 · Orchestrator-level instruction posture</div>
+            <div className="mt-1 leading-5">
+              자연어 지시는 이 자리에서 바로 실행되지 않고 Orchestrator에게 전달될 request posture로만 표시됩니다. 현재 slice는 입력 생성, 요청 저장, 작업 배정, NAS 저장을 모두 비활성으로 둡니다.
+            </div>
+          </div>
+
+          <div className="grid gap-2 sm:grid-cols-3">
+            <div className="border border-current/15 bg-black/15 p-3" data-office-desk-rpg-boss-console-avatar="true">
+              <div className="font-semibold text-foreground">{bossActor?.label ?? "User Avatar"}</div>
+              <div className="mt-1 text-midground/60">role: user_boss · facility: {bossActor?.facilityId ?? "boss_desk"}</div>
+            </div>
+            <div className="border border-current/15 bg-black/15 p-3" data-office-desk-rpg-boss-console-orchestrator="true">
+              <div className="font-semibold text-foreground">{orchestratorActor?.label ?? "Orchestrator"}</div>
+              <div className="mt-1 text-midground/60">중복 작업과 권한 우회를 막는 중앙 mediation 경로</div>
+            </div>
+            <div className="border border-current/15 bg-black/15 p-3" data-office-desk-rpg-boss-console-boundary="true">
+              <div className="font-semibold text-foreground">approval boundary</div>
+              <div className="mt-1 text-midground/60">request creation false · NAS save false · controls 0</div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function OfficeDeskRpgBoardEvidencePanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
+  return (
+    <Card
+      data-office-desk-rpg-board="true"
+      data-office-desk-rpg-board-tab="evidence"
+      data-office-desk-rpg-board-safe-projection-only={String(projection.safeProjectionOnly)}
+      data-office-desk-rpg-board-enabled-controls={projection.enabledControls}
+      data-office-desk-rpg-board-raw-excluded={String(projection.rawExcluded)}
+      data-office-desk-rpg-board-work-count={projection.boardState.workItemCount}
+      data-office-desk-rpg-board-blocked-count={projection.boardState.blockedCount}
+      data-office-desk-rpg-board-source-count={projection.evidenceState.sourceCount}
+      data-office-desk-rpg-board-warning-count={projection.evidenceState.warningCount}
+      data-office-desk-rpg-board-raw-bodies-visible={String(projection.evidenceState.rawBodiesVisible)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Database className="h-4 w-4" /> Central board evidence tab
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-emerald-300/20 bg-emerald-950/10 p-3">
+            <div className="font-semibold text-emerald-100">Desk RPG Board Evidence Tab 1 · aggregate-only</div>
+            <div className="mt-1 leading-5">
+              중앙 보드는 safe DTO count/posture만 묶어 보여줍니다. 작업 본문, 프롬프트, transcript, 경로, token, provider 세부값은 표시하지 않습니다.
+            </div>
+          </div>
+
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div className="border border-current/15 bg-black/15 p-3" data-office-desk-rpg-board-work="true">
+              <div className="font-semibold text-foreground">{projection.boardState.label}</div>
+              <div className="mt-1">업무 {projection.boardState.workItemCount} · blocked {projection.boardState.blockedCount}</div>
+              <div className="mt-1 text-midground/60">{projection.boardState.safeSummary}</div>
+            </div>
+            <div className="border border-current/15 bg-black/15 p-3" data-office-desk-rpg-board-evidence="true">
+              <div className="font-semibold text-foreground">{projection.evidenceState.label}</div>
+              <div className="mt-1">sources {projection.evidenceState.sourceCount} · warnings {projection.evidenceState.warningCount}</div>
+              <div className="mt-1 text-midground/60">raw bodies visible: {String(projection.evidenceState.rawBodiesVisible)}</div>
+            </div>
+          </div>
+
+          <div className="grid gap-2 sm:grid-cols-3" data-office-desk-rpg-board-boundary="true">
+            <div className="border border-current/15 bg-black/15 p-2">enabled controls: {projection.enabledControls}</div>
+            <div className="border border-current/15 bg-black/15 p-2">safe projection: {projection.safeProjectionOnly ? "true" : "false"}</div>
+            <div className="border border-current/15 bg-black/15 p-2">raw excluded: {projection.rawExcluded ? "true" : "false"}</div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function OfficeDeskRpgInspectorPanel({ projection }: { projection: OfficeDeskRpgProjectionModel }) {
+  const rightInspector = projection.facilities.find((facility) => facility.id === "right_inspector");
+  return (
+    <Card
+      data-office-desk-rpg-inspector="true"
+      data-office-desk-rpg-inspector-safe-projection-only={String(projection.safeProjectionOnly)}
+      data-office-desk-rpg-inspector-enabled-controls={projection.enabledControls}
+      data-office-desk-rpg-inspector-raw-excluded={String(projection.rawExcluded)}
+      data-office-desk-rpg-inspector-suppressed-search-worker={projection.suppressedCounts.search_worker}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Eye className="h-4 w-4" /> Right inspector posture
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-emerald-300/20 bg-emerald-950/10 p-3" data-office-desk-rpg-inspector-targets="true">
+            <div className="font-semibold text-emerald-100">Desk RPG inspector migration · aggregate-only</div>
+            <div className="mt-1 leading-5">선택 세부 정보는 safe DTO target/count/posture만 사용합니다. 원문 작업명, 프롬프트, 경로, 토큰, provider 세부값은 제외됩니다.</div>
+            <div className="mt-2 grid max-h-48 gap-1 overflow-auto">
+              {projection.inspectorTargets.map((target) => (
+                <div
+                  key={target.id}
+                  className="grid grid-cols-[7rem_1fr] gap-2 border border-current/10 bg-black/15 px-2 py-1"
+                  data-office-desk-rpg-inspector-target={target.id}
+                  data-office-desk-rpg-inspector-target-type={target.targetType}
+                >
+                  <span className="text-midground/50">{target.targetType}</span>
+                  <span className="break-words text-midground/85">{target.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div className="border border-current/15 bg-black/15 p-3" data-office-desk-rpg-inspector-board="true">
+              <div className="font-semibold text-foreground">{projection.boardState.label}</div>
+              <div className="mt-1">업무 {projection.boardState.workItemCount} · blocked {projection.boardState.blockedCount}</div>
+              <div className="mt-1 text-midground/60">{projection.boardState.safeSummary}</div>
+            </div>
+            <div className="border border-current/15 bg-black/15 p-3" data-office-desk-rpg-inspector-evidence="true">
+              <div className="font-semibold text-foreground">{projection.evidenceState.label}</div>
+              <div className="mt-1">sources {projection.evidenceState.sourceCount} · warnings {projection.evidenceState.warningCount}</div>
+              <div className="mt-1 text-midground/60">raw bodies visible: {String(projection.evidenceState.rawBodiesVisible)}</div>
+            </div>
+            <div className="border border-current/15 bg-black/15 p-3" data-office-desk-rpg-inspector-vault="true" data-office-desk-rpg-inspector-vault-write-enabled={String(projection.vaultState.writeEnabled)}>
+              <div className="font-semibold text-foreground">{projection.vaultState.label}</div>
+              <div className="mt-1">승인 전 NAS 저장 차단</div>
+              <div className="mt-1 text-midground/60">posture: {projection.vaultState.posture}</div>
+            </div>
+            <div className="border border-current/15 bg-black/15 p-3" data-office-desk-rpg-inspector-ops="true" data-office-desk-rpg-inspector-service-controls-enabled={String(projection.opsState.serviceControlsEnabled)}>
+              <div className="font-semibold text-foreground">{projection.opsState.label}</div>
+              <div className="mt-1">service controls disabled</div>
+              <div className="mt-1 text-midground/60">right inspector: {rightInspector?.posture ?? "watching"}</div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function InspectorPanel({ selection }: { selection: InspectorSelection | null }) {
   return (
     <Card id="office-safe-inspector" tabIndex={-1} className="scroll-mt-24 focus:outline-none focus:ring-2 focus:ring-emerald-200/70">
@@ -1449,6 +4693,11 @@ export default function OfficePage() {
   const [viewportWidth, setViewportWidth] = useState<number | undefined>(undefined);
   const [tabVisible, setTabVisible] = useState(true);
   const [liveFailureCount, setLiveFailureCount] = useState(0);
+  const [nasSingleWriteDraft, setNasSingleWriteDraft] = useState<OfficeNasSingleFileWritePayload>(DEFAULT_NAS_SINGLE_WRITE_DRAFT);
+  const [nasSingleWriteApproved, setNasSingleWriteApproved] = useState(false);
+  const [nasSingleWriteBusy, setNasSingleWriteBusy] = useState(false);
+  const [nasSingleWriteResult, setNasSingleWriteResult] = useState<OfficeNasSingleFileWriteResult | null>(null);
+  const [nasSingleWriteError, setNasSingleWriteError] = useState<string | null>(null);
   const previousStateRef = useRef<OfficeState | null>(null);
   const liveFailureCountRef = useRef(0);
 
@@ -1494,6 +4743,37 @@ export default function OfficePage() {
       setRefreshing(false);
     }
   }, [applyNextState, loadSafeEvents]);
+
+  const updateNasSingleWriteDraft = useCallback((field: keyof OfficeNasSingleFileWritePayload, value: string) => {
+    setNasSingleWriteDraft((current) => ({ ...current, [field]: value }));
+  }, []);
+
+  const executeNasSingleFileWrite = useCallback(async () => {
+    if (!nasSingleWriteApproved) {
+      setNasSingleWriteError("approval_required");
+      return;
+    }
+    setNasSingleWriteBusy(true);
+    setNasSingleWriteError(null);
+    try {
+      const result = await api.executeOfficeControlledMutationNasSingleFileWrite({
+        write_ref: nasSingleWriteDraft.write_ref,
+        package_ref: nasSingleWriteDraft.package_ref,
+        target_vault_ref: nasSingleWriteDraft.target_vault_ref,
+        safe_slug: nasSingleWriteDraft.safe_slug,
+        safe_title: nasSingleWriteDraft.safe_title,
+        markdown_body: nasSingleWriteDraft.markdown_body,
+        requested_by: nasSingleWriteDraft.requested_by,
+        requested_at: nasSingleWriteDraft.requested_at,
+      });
+      setNasSingleWriteResult(result);
+      setNasSingleWriteApproved(false);
+    } catch (err) {
+      setNasSingleWriteError(String(err).replace(/Traceback|\/Users\/[^\s]+|\/home\/[^\s]+|token=[^\s]+|sk-[A-Za-z0-9_-]+/gi, "request failed"));
+    } finally {
+      setNasSingleWriteBusy(false);
+    }
+  }, [nasSingleWriteApproved, nasSingleWriteDraft]);
 
   useEffect(() => {
     let cancelled = false;
@@ -1599,6 +4879,148 @@ export default function OfficePage() {
 
   const needsAttention = useMemo(() => (state ? buildOfficeAttentionItems(state) : []), [state]);
   const rpgScene = useMemo(() => buildOfficeRpgScene(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
+  const unifiedWorkbenchView = useMemo(() => buildOfficeUnifiedWorkbenchView(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
+  const approvalRequestView = useMemo(() => buildOfficeApprovalRequestView(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
+  const approvalAuditTimeline = useMemo(() => buildOfficeApprovalAuditTimeline(approvalRequestView), [approvalRequestView]);
+  const approvalExecutionGate = useMemo(() => buildOfficeApprovalExecutionGate(approvalAuditTimeline), [approvalAuditTimeline]);
+  const authorityAdapterContract = useMemo(() => buildOfficeAuthorityAdapterContract(approvalExecutionGate), [approvalExecutionGate]);
+  const orchestratorMediationQueue = useMemo(() => buildOfficeOrchestratorMediationQueue(authorityAdapterContract), [authorityAdapterContract]);
+  const workerIntentRouting = useMemo(() => buildOfficeWorkerIntentRouting(orchestratorMediationQueue), [orchestratorMediationQueue]);
+  const workerFacilityReadiness = useMemo(() => buildOfficeWorkerFacilityReadiness(workerIntentRouting), [workerIntentRouting]);
+  const workerAssignmentCandidateGate = useMemo(() => buildOfficeWorkerAssignmentCandidateGate(workerFacilityReadiness), [workerFacilityReadiness]);
+  const workerRequestDraftPreview = useMemo(() => buildOfficeWorkerRequestDraftPreview(workerAssignmentCandidateGate), [workerAssignmentCandidateGate]);
+  const workerHumanConfirmationEnvelope = useMemo(() => buildOfficeWorkerHumanConfirmationEnvelope(workerRequestDraftPreview), [workerRequestDraftPreview]);
+  const workerAuthorityHandoffEnvelope = useMemo(() => buildOfficeWorkerAuthorityHandoffEnvelope(workerHumanConfirmationEnvelope), [workerHumanConfirmationEnvelope]);
+  const workerDispatchDryRunEnvelope = useMemo(() => buildOfficeWorkerDispatchDryRunEnvelope(workerAuthorityHandoffEnvelope), [workerAuthorityHandoffEnvelope]);
+  const workerAuditPreviewEnvelope = useMemo(() => buildOfficeWorkerAuditPreviewEnvelope(workerDispatchDryRunEnvelope), [workerDispatchDryRunEnvelope]);
+  const workerRollbackPreviewEnvelope = useMemo(() => buildOfficeWorkerRollbackPreviewEnvelope(workerAuditPreviewEnvelope), [workerAuditPreviewEnvelope]);
+  const workerFinalGateChecklist = useMemo(() => buildOfficeWorkerFinalGateChecklist(workerRollbackPreviewEnvelope), [workerRollbackPreviewEnvelope]);
+  const controlledMutationProposalContract = useMemo(() => buildOfficeControlledMutationProposalContract(workerFinalGateChecklist), [workerFinalGateChecklist]);
+  const controlledMutationDryRunPlan = useMemo(() => buildOfficeControlledMutationDryRunPlan(controlledMutationProposalContract), [controlledMutationProposalContract]);
+  const controlledMutationAuditSinkPlan = useMemo(() => buildOfficeControlledMutationAuditSinkPlan(controlledMutationDryRunPlan), [controlledMutationDryRunPlan]);
+  const controlledMutationRollbackVerificationPlan = useMemo(() => buildOfficeControlledMutationRollbackVerificationPlan(controlledMutationAuditSinkPlan), [controlledMutationAuditSinkPlan]);
+  const controlledMutationHumanApprovalPlan = useMemo(() => buildOfficeControlledMutationHumanApprovalPlan(controlledMutationRollbackVerificationPlan), [controlledMutationRollbackVerificationPlan]);
+  const controlledMutationAuthoritySummary = useMemo(() => buildOfficeControlledMutationAuthoritySummary(controlledMutationHumanApprovalPlan), [controlledMutationHumanApprovalPlan]);
+  const controlledMutationExecutionReadinessSummary = useMemo(() => buildOfficeControlledMutationExecutionReadinessSummary(controlledMutationAuthoritySummary), [controlledMutationAuthoritySummary]);
+  const controlledMutationContractPostureProjection = useMemo(() => buildOfficeControlledMutationContractPostureProjection(controlledMutationExecutionReadinessSummary), [controlledMutationExecutionReadinessSummary]);
+  const controlledMutationContractPosturePolish = useMemo(() => buildOfficeControlledMutationContractPosturePolish(controlledMutationContractPostureProjection), [controlledMutationContractPostureProjection]);
+  const controlledMutationReadinessHandoffRibbon = useMemo(() => buildOfficeControlledMutationReadinessHandoffRibbon(controlledMutationContractPosturePolish), [controlledMutationContractPosturePolish]);
+  const controlledMutationReadinessSummaryPolish = useMemo(() => buildOfficeControlledMutationReadinessSummaryPolish(controlledMutationReadinessHandoffRibbon), [controlledMutationReadinessHandoffRibbon]);
+  const controlledMutationRequestStorePosture = useMemo(() => buildOfficeControlledMutationRequestStorePosture(controlledMutationReadinessSummaryPolish), [controlledMutationReadinessSummaryPolish]);
+  const controlledMutationRequestStoreHardeningPlan = useMemo(() => buildOfficeControlledMutationRequestStoreHardeningPlan(controlledMutationRequestStorePosture), [controlledMutationRequestStorePosture]);
+  const controlledMutationNextApprovalBoundary = useMemo(() => buildOfficeControlledMutationNextApprovalBoundary(controlledMutationRequestStoreHardeningPlan), [controlledMutationRequestStoreHardeningPlan]);
+  const controlledMutationPostDecisionApprovalBoundary = useMemo(() => buildOfficeControlledMutationPostDecisionApprovalBoundary(controlledMutationNextApprovalBoundary), [controlledMutationNextApprovalBoundary]);
+  const controlledMutationPostRegistryApprovalBoundary = useMemo(() => buildOfficeControlledMutationPostRegistryApprovalBoundary(controlledMutationPostDecisionApprovalBoundary), [controlledMutationPostDecisionApprovalBoundary]);
+  const controlledMutationTargetDispatchForbiddenBoundary = useMemo(() => buildOfficeControlledMutationTargetDispatchForbiddenBoundary(controlledMutationPostRegistryApprovalBoundary), [controlledMutationPostRegistryApprovalBoundary]);
+  const controlledMutationSafeContinuationCompletionReview = useMemo(() => buildOfficeControlledMutationSafeContinuationCompletionReview(controlledMutationTargetDispatchForbiddenBoundary), [controlledMutationTargetDispatchForbiddenBoundary]);
+  const deskRpgProjection = useMemo(() => buildOfficeDeskRpgProjectionModel(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
+  const deskRpgWorkerRoleVisibility = useMemo(() => buildOfficeDeskRpgWorkerRoleVisibility(deskRpgProjection), [deskRpgProjection]);
+  const disabledApprovalDialoguePosture = useMemo(() => buildOfficeDisabledApprovalDialoguePosture(deskRpgProjection), [deskRpgProjection]);
+  const reviewerWikiHandoffPosture = useMemo(() => buildOfficeReviewerWikiHandoffPosture(deskRpgProjection), [deskRpgProjection]);
+  const approvalDialogueInspectorDetail = useMemo(
+    () => buildOfficeApprovalDialogueInspectorDetail(disabledApprovalDialoguePosture, reviewerWikiHandoffPosture),
+    [disabledApprovalDialoguePosture, reviewerWikiHandoffPosture],
+  );
+  const reviewerWikiEvidenceDetailPosture = useMemo(
+    () => buildOfficeReviewerWikiEvidenceDetailPosture(deskRpgProjection, reviewerWikiHandoffPosture),
+    [deskRpgProjection, reviewerWikiHandoffPosture],
+  );
+  const boardEvidenceInspectorDrilldown = useMemo(
+    () => buildOfficeBoardEvidenceInspectorDrilldown(deskRpgProjection, reviewerWikiEvidenceDetailPosture),
+    [deskRpgProjection, reviewerWikiEvidenceDetailPosture],
+  );
+  const bossOrchestratorRequestPostureDetail = useMemo(
+    () => buildOfficeBossOrchestratorRequestPostureDetail(deskRpgProjection, disabledApprovalDialoguePosture),
+    [deskRpgProjection, disabledApprovalDialoguePosture],
+  );
+  const orchestratorRequestEnvelopeDetail = useMemo(
+    () => buildOfficeOrchestratorRequestEnvelopeDetail(deskRpgProjection, bossOrchestratorRequestPostureDetail),
+    [deskRpgProjection, bossOrchestratorRequestPostureDetail],
+  );
+  const approvalRequestRouteDetail = useMemo(
+    () => buildOfficeApprovalRequestRouteDetail(orchestratorRequestEnvelopeDetail, disabledApprovalDialoguePosture),
+    [orchestratorRequestEnvelopeDetail, disabledApprovalDialoguePosture],
+  );
+  const eventRequestContractProjection = useMemo(
+    () => buildOfficeEventRequestContractProjection(approvalRequestRouteDetail),
+    [approvalRequestRouteDetail],
+  );
+  const approvalDialogueRouteInspector = useMemo(
+    () => buildOfficeApprovalDialogueRouteInspector(disabledApprovalDialoguePosture, approvalRequestRouteDetail, eventRequestContractProjection),
+    [disabledApprovalDialoguePosture, approvalRequestRouteDetail, eventRequestContractProjection],
+  );
+  const eventTimelineProjection = useMemo(
+    () => buildOfficeEventTimelineProjection(eventRequestContractProjection, approvalDialogueRouteInspector),
+    [eventRequestContractProjection, approvalDialogueRouteInspector],
+  );
+  const timelineWorkerHandoffDrilldown = useMemo(
+    () => buildOfficeTimelineWorkerHandoffDrilldown(eventTimelineProjection, deskRpgWorkerRoleVisibility, reviewerWikiHandoffPosture),
+    [eventTimelineProjection, deskRpgWorkerRoleVisibility, reviewerWikiHandoffPosture],
+  );
+  const approvalRequestDetailDeepening = useMemo(
+    () => buildOfficeApprovalRequestDetailDeepening(approvalRequestRouteDetail, eventTimelineProjection, timelineWorkerHandoffDrilldown),
+    [approvalRequestRouteDetail, eventTimelineProjection, timelineWorkerHandoffDrilldown],
+  );
+  const workerFacilityLanePolish = useMemo(
+    () => buildOfficeWorkerFacilityLanePolish(timelineWorkerHandoffDrilldown, workerFacilityReadiness),
+    [timelineWorkerHandoffDrilldown, workerFacilityReadiness],
+  );
+  const workerRequestHandoffDetail = useMemo(
+    () => buildOfficeWorkerRequestHandoffDetail(approvalRequestDetailDeepening, workerFacilityLanePolish),
+    [approvalRequestDetailDeepening, workerFacilityLanePolish],
+  );
+  const approvalNasBoundaryPolish = useMemo(
+    () => buildOfficeApprovalNasBoundaryPolish(workerRequestHandoffDetail),
+    [workerRequestHandoffDetail],
+  );
+  const approvalAuthorityReadinessDetail = useMemo(
+    () => buildOfficeApprovalAuthorityReadinessDetail(approvalNasBoundaryPolish),
+    [approvalNasBoundaryPolish],
+  );
+  const approvalAuthorityDecisionEnvelopePreview = useMemo(
+    () => buildOfficeApprovalAuthorityDecisionEnvelopePreview(approvalAuthorityReadinessDetail),
+    [approvalAuthorityReadinessDetail],
+  );
+  const approvalDecisionAuditNasTracePreview = useMemo(
+    () => buildOfficeApprovalDecisionAuditNasTracePreview(approvalAuthorityDecisionEnvelopePreview),
+    [approvalAuthorityDecisionEnvelopePreview],
+  );
+  const nasKeeperSaveRequestGate = useMemo(
+    () => buildOfficeNasKeeperSaveRequestGate(approvalDecisionAuditNasTracePreview),
+    [approvalDecisionAuditNasTracePreview],
+  );
+  const nasKeeperRollbackEvidencePreview = useMemo(
+    () => buildOfficeNasKeeperRollbackEvidencePreview(nasKeeperSaveRequestGate),
+    [nasKeeperSaveRequestGate],
+  );
+  const nasEvidencePackageStoreReadbackStatus = useMemo(
+    () => buildOfficeNasEvidencePackageStoreReadbackStatus(nasKeeperRollbackEvidencePreview),
+    [nasKeeperRollbackEvidencePreview],
+  );
+  const nasPathValidationStatusSurface = useMemo(
+    () => buildOfficeNasPathValidationStatusSurface(nasEvidencePackageStoreReadbackStatus),
+    [nasEvidencePackageStoreReadbackStatus],
+  );
+  const nasPathPreviewStatusSurface = useMemo(
+    () => buildOfficeNasPathPreviewStatusSurface(nasPathValidationStatusSurface),
+    [nasPathValidationStatusSurface],
+  );
+  const nasPathPreviewStoreReadbackStatusSurface = useMemo(
+    () => buildOfficeNasPathPreviewStoreReadbackStatusSurface(nasPathPreviewStatusSurface),
+    [nasPathPreviewStatusSurface],
+  );
+  const nasRuntimeN3ApprovalBoundaryStatusSurface = useMemo(
+    () => buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface(nasPathPreviewStoreReadbackStatusSurface),
+    [nasPathPreviewStoreReadbackStatusSurface],
+  );
+  const nasRuntimeSingleFileWriteApprovalAction = useMemo(
+    () => buildOfficeNasRuntimeSingleFileWriteApprovalAction(nasRuntimeN3ApprovalBoundaryStatusSurface),
+    [nasRuntimeN3ApprovalBoundaryStatusSurface],
+  );
+  const deskRpgReadOnlyChainCompletionReview = useMemo(
+    () => buildOfficeDeskRpgReadOnlyChainCompletionReview(nasKeeperRollbackEvidencePreview),
+    [nasKeeperRollbackEvidencePreview],
+  );
   const mapNodes = useMemo(() => (state ? buildOfficeMapNodes(state) : []), [state]);
   const mapFlows = useMemo(() => buildOfficeMapFlows(mapNodes), [mapNodes]);
   const officeCharacters = useMemo(() => (state ? buildOfficeCharacters(state, mapNodes) : []), [state, mapNodes]);
@@ -1640,6 +5062,50 @@ export default function OfficePage() {
       localSafeEventSubstrate,
     ),
     [localSafeEventSubstrate, safeEvents, safeEventsStatus],
+  );
+  const eventDrivenCharacterStateProjection = useMemo(
+    () => buildOfficeEventDrivenCharacterStateProjection(deskRpgReadOnlyChainCompletionReview, safeStreamPosture.events),
+    [deskRpgReadOnlyChainCompletionReview, safeStreamPosture.events],
+  );
+  const characterStateRoomOverlay = useMemo(
+    () => buildOfficeCharacterStateRoomOverlay(eventDrivenCharacterStateProjection),
+    [eventDrivenCharacterStateProjection],
+  );
+  const characterRoomInteractionPosture = useMemo(
+    () => buildOfficeCharacterRoomInteractionPosture(characterStateRoomOverlay),
+    [characterStateRoomOverlay],
+  );
+  const characterInspectorDetailPosture = useMemo(
+    () => buildOfficeCharacterInspectorDetailPosture(characterRoomInteractionPosture),
+    [characterRoomInteractionPosture],
+  );
+  const characterDetailSafeDialogueCopy = useMemo(
+    () => buildOfficeCharacterDetailSafeDialogueCopy(characterInspectorDetailPosture),
+    [characterInspectorDetailPosture],
+  );
+  const characterBubbleInspectorAlignment = useMemo(
+    () => buildOfficeCharacterBubbleInspectorAlignment(characterDetailSafeDialogueCopy, characterInspectorDetailPosture),
+    [characterDetailSafeDialogueCopy, characterInspectorDetailPosture],
+  );
+  const characterPanelBoundarySummary = useMemo(
+    () => buildOfficeCharacterPanelBoundarySummary(characterInspectorDetailPosture, characterDetailSafeDialogueCopy, characterBubbleInspectorAlignment),
+    [characterInspectorDetailPosture, characterDetailSafeDialogueCopy, characterBubbleInspectorAlignment],
+  );
+  const characterFacilityRoleLegend = useMemo(
+    () => buildOfficeCharacterFacilityRoleLegend(characterPanelBoundarySummary, characterStateRoomOverlay),
+    [characterPanelBoundarySummary, characterStateRoomOverlay],
+  );
+  const characterFacilityBoundaryStrip = useMemo(
+    () => buildOfficeCharacterFacilityBoundaryStrip(characterFacilityRoleLegend, characterStateRoomOverlay),
+    [characterFacilityRoleLegend, characterStateRoomOverlay],
+  );
+  const characterFacilitySourceLedgerStrip = useMemo(
+    () => buildOfficeCharacterFacilitySourceLedgerStrip(characterFacilityBoundaryStrip, characterStateRoomOverlay),
+    [characterFacilityBoundaryStrip, characterStateRoomOverlay],
+  );
+  const characterFacilityCompletionReview = useMemo(
+    () => buildOfficeCharacterFacilityCompletionReview(characterFacilitySourceLedgerStrip),
+    [characterFacilitySourceLedgerStrip],
   );
   const safeMotionHeartbeat = useMemo(
     () => buildOfficeSafeMotionHeartbeat(safeStreamPosture, {
@@ -1772,6 +5238,901 @@ export default function OfficePage() {
 
   return (
     <div className="flex flex-col gap-6 normal-case">
+      <section
+        className="border border-emerald-300/25 bg-gradient-to-br from-emerald-950/25 via-black/30 to-sky-950/20 p-5"
+        data-office-unified-workbench="true"
+        data-office-unified-approval-status={unifiedWorkbenchView.safetyPosture.approvalModel.status}
+      >
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+          <div className="max-w-3xl">
+            <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.22em] text-emerald-300">
+              <ShieldCheck className="h-4 w-4" /> 읽기 전용 · AI Office 통합 운영실
+            </div>
+            <h1 className="mt-3 text-3xl font-semibold tracking-wide text-foreground md:text-4xl">{unifiedWorkbenchView.title}</h1>
+            <p className="mt-3 text-sm leading-6 text-midground/80">{unifiedWorkbenchView.subtitle}</p>
+            <div className="mt-3 text-xs text-midground/55">
+              표시 순서: {unifiedWorkbenchView.renderOrder.join(" → ")} · 승인 모델 {unifiedWorkbenchView.safetyPosture.approvalModel.status} · 실행 컨트롤 {unifiedWorkbenchView.safetyPosture.approvalModel.enabledControls}개
+            </div>
+          </div>
+          <div className="grid min-w-72 gap-2 text-xs text-midground/70 sm:grid-cols-2 xl:grid-cols-1">
+            <div className="border border-current/15 bg-black/20 p-3">생성 시각: {fmt(unifiedWorkbenchView.generatedAt)}</div>
+            <div className="border border-current/15 bg-black/20 p-3">raw 제외: {unifiedWorkbenchView.safetyPosture.rawExcluded ? "true" : "false"}</div>
+          </div>
+        </div>
+        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4" data-office-unified-layers="true">
+          {unifiedWorkbenchView.layers.map((layer) => (
+            <div
+              key={layer.id}
+              className="border border-current/15 bg-black/25 p-3"
+              data-office-unified-layer={layer.id}
+              data-office-unified-layer-tone={layer.tone}
+            >
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{layer.source}</div>
+              <div className="mt-1 flex items-center justify-between gap-2">
+                <div className="text-sm font-semibold text-foreground">{layer.label}</div>
+                <div className="font-mono text-xs tabular-nums text-emerald-200">{layer.count}</div>
+              </div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{layer.summary}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <OfficeDeskRpgRoomShell projection={deskRpgProjection} />
+
+      <OfficeDeskRpgBossCommandConsolePanel projection={deskRpgProjection} />
+
+      <OfficeDeskRpgWorkerRoleVisibilityPanel visibility={deskRpgWorkerRoleVisibility} />
+
+      <DisabledApprovalDialoguePosturePanel dialogue={disabledApprovalDialoguePosture} />
+
+      <ReviewerWikiHandoffPosturePanel handoff={reviewerWikiHandoffPosture} />
+
+      <ApprovalDialogueInspectorDetailPanel inspector={approvalDialogueInspectorDetail} />
+
+      <ReviewerWikiEvidenceDetailPosturePanel detail={reviewerWikiEvidenceDetailPosture} />
+
+      <BoardEvidenceInspectorDrilldownPanel drilldown={boardEvidenceInspectorDrilldown} />
+
+      <BossOrchestratorRequestPostureDetailPanel detail={bossOrchestratorRequestPostureDetail} />
+
+      <OrchestratorRequestEnvelopeDetailPanel envelope={orchestratorRequestEnvelopeDetail} />
+
+      <ApprovalRequestRouteDetailPanel route={approvalRequestRouteDetail} />
+
+      <EventRequestContractProjectionPanel contract={eventRequestContractProjection} />
+
+      <ApprovalDialogueRouteInspectorPanel inspector={approvalDialogueRouteInspector} />
+
+      <EventTimelineProjectionPanel timeline={eventTimelineProjection} />
+
+      <TimelineWorkerHandoffDrilldownPanel drilldown={timelineWorkerHandoffDrilldown} />
+
+      <ApprovalRequestDetailDeepeningPanel detail={approvalRequestDetailDeepening} />
+
+      <WorkerFacilityLanePolishPanel polish={workerFacilityLanePolish} />
+
+      <WorkerRequestHandoffDetailPanel detail={workerRequestHandoffDetail} />
+
+      <ApprovalNasBoundaryPolishPanel polish={approvalNasBoundaryPolish} />
+
+      <ApprovalAuthorityReadinessDetailPanel readiness={approvalAuthorityReadinessDetail} />
+
+      <ApprovalAuthorityDecisionEnvelopePreviewPanel envelope={approvalAuthorityDecisionEnvelopePreview} />
+
+      <ApprovalDecisionAuditNasTracePreviewPanel trace={approvalDecisionAuditNasTracePreview} />
+
+      <NasKeeperSaveRequestGatePanel gate={nasKeeperSaveRequestGate} />
+
+      <NasKeeperRollbackEvidencePreviewPanel rollback={nasKeeperRollbackEvidencePreview} />
+
+      <NasEvidencePackageStoreReadbackStatusPanel status={nasEvidencePackageStoreReadbackStatus} />
+
+      <NasPathValidationStatusSurfacePanel status={nasPathValidationStatusSurface} />
+
+      <NasPathPreviewStatusSurfacePanel status={nasPathPreviewStatusSurface} />
+
+      <NasPathPreviewStoreReadbackStatusSurfacePanel status={nasPathPreviewStoreReadbackStatusSurface} />
+
+      <NasRuntimeN3ApprovalBoundaryStatusSurfacePanel boundary={nasRuntimeN3ApprovalBoundaryStatusSurface} />
+
+      <NasRuntimeSingleFileWriteApprovalActionPanel
+        action={nasRuntimeSingleFileWriteApprovalAction}
+        draft={nasSingleWriteDraft}
+        approved={nasSingleWriteApproved}
+        busy={nasSingleWriteBusy}
+        result={nasSingleWriteResult}
+        error={nasSingleWriteError}
+        onDraftChange={updateNasSingleWriteDraft}
+        onApprovalChange={setNasSingleWriteApproved}
+        onExecute={executeNasSingleFileWrite}
+      />
+
+      <DeskRpgReadOnlyChainCompletionReviewPanel review={deskRpgReadOnlyChainCompletionReview} />
+
+      <EventDrivenCharacterStateProjectionPanel projection={eventDrivenCharacterStateProjection} />
+
+      <CharacterStateRoomOverlayPanel overlay={characterStateRoomOverlay} />
+
+      <CharacterRoomInteractionPosturePanel posture={characterRoomInteractionPosture} />
+
+      <CharacterInspectorDetailPosturePanel detail={characterInspectorDetailPosture} />
+
+      <CharacterDetailSafeDialogueCopyPanel dialogue={characterDetailSafeDialogueCopy} />
+
+      <CharacterBubbleInspectorAlignmentPanel alignment={characterBubbleInspectorAlignment} />
+
+      <CharacterPanelBoundarySummaryPanel summary={characterPanelBoundarySummary} />
+
+      <CharacterFacilityRoleLegendPanel legend={characterFacilityRoleLegend} />
+
+      <CharacterFacilityBoundaryStripPanel strip={characterFacilityBoundaryStrip} />
+
+      <CharacterFacilitySourceLedgerStripPanel ledger={characterFacilitySourceLedgerStrip} />
+
+      <CharacterFacilityCompletionReviewPanel review={characterFacilityCompletionReview} />
+
+      <OfficeDeskRpgBoardEvidencePanel projection={deskRpgProjection} />
+
+      <section
+        className="border border-violet-300/20 bg-violet-950/10 p-4"
+        data-office-approval-request-view="true"
+        data-office-approval-authority={approvalRequestView.authorityLevel}
+        data-office-approval-enabled-controls={approvalRequestView.enabledControls}
+      >
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-violet-200/70">{approvalRequestView.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{approvalRequestView.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{approvalRequestView.auditReadiness.safeSummary}</p>
+          </div>
+          <div className="grid gap-2 text-xs text-midground/70 sm:grid-cols-3 lg:min-w-[24rem]">
+            <div className="border border-current/15 bg-black/20 p-2">authority: {approvalRequestView.authorityLevel}</div>
+            <div className="border border-current/15 bg-black/20 p-2">dry-run: {approvalRequestView.dryRunEvidence.result}</div>
+            <div className="border border-current/15 bg-black/20 p-2">decision: {approvalRequestView.humanDecision.status}</div>
+          </div>
+        </div>
+        <div className="mt-3 grid gap-2 md:grid-cols-3" data-office-approval-request-list="true">
+          {approvalRequestView.requests.map((request) => (
+            <div key={request.requestRef} className="border border-current/15 bg-black/20 p-3" data-office-approval-request={request.actionKind}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{request.actionKind}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{request.targetKind}</div>
+              <div className="mt-1 font-mono text-xs text-violet-100">{request.targetRef}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{request.reasonSummary}</div>
+              <div className="mt-2 text-[10px] text-midground/55">evidence {request.evidenceCount} · orchestrator {request.orchestratorRequired ? "required" : "n/a"} · enabled controls 0</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-fuchsia-300/20 bg-fuchsia-950/10 p-4"
+        data-office-approval-audit-timeline="true"
+        data-office-approval-audit-writes={String(approvalAuditTimeline.writesAuditEvents)}
+        data-office-approval-audit-enabled-controls={approvalAuditTimeline.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-fuchsia-200/70">{approvalAuditTimeline.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{approvalAuditTimeline.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{approvalAuditTimeline.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">audit writes: {approvalAuditTimeline.writesAuditEvents ? "true" : "false"}</div>
+        </div>
+        <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-approval-audit-steps="true">
+          {approvalAuditTimeline.steps.map((step) => (
+            <div key={step.id} className="border border-current/15 bg-black/20 p-3" data-office-approval-audit-step={step.eventKind} data-office-approval-audit-status={step.status}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{step.eventKind}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{step.status}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{step.safeSummary}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-rose-300/20 bg-rose-950/10 p-4"
+        data-office-approval-execution-gate="true"
+        data-office-approval-execution-allowed={String(approvalExecutionGate.executionAllowed)}
+        data-office-approval-execution-enabled-controls={approvalExecutionGate.enabledControls}
+        data-office-approval-browser-affordance={approvalExecutionGate.browserAffordance}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-rose-200/70">{approvalExecutionGate.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{approvalExecutionGate.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{approvalExecutionGate.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">execution allowed: {approvalExecutionGate.executionAllowed ? "true" : "false"}</div>
+        </div>
+        <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-approval-execution-prerequisites="true">
+          {approvalExecutionGate.requiredPrerequisites.map((item) => (
+            <div key={item.id} className="border border-current/15 bg-black/20 p-3" data-office-approval-execution-prerequisite={item.id} data-office-approval-execution-prerequisite-status={item.status}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.status}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{item.safeSummary}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-amber-300/20 bg-amber-950/10 p-4"
+        data-office-authority-adapter-contract="true"
+        data-office-authority-dispatch-enabled={String(authorityAdapterContract.dispatchEnabled)}
+        data-office-authority-enabled-controls={authorityAdapterContract.enabledControls}
+        data-office-authority-adapters-installed={String(authorityAdapterContract.adaptersInstalled)}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-200/70">{authorityAdapterContract.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{authorityAdapterContract.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{authorityAdapterContract.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">dispatch enabled: {authorityAdapterContract.dispatchEnabled ? "true" : "false"}</div>
+        </div>
+        <div className="mt-3 grid gap-2 md:grid-cols-5" data-office-authority-required-fields="true">
+          {authorityAdapterContract.requiredFields.map((field) => (
+            <div key={field.id} className="border border-current/15 bg-black/20 p-3" data-office-authority-required-field={field.id} data-office-authority-required-field-status={field.status}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{field.status}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{field.label}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{field.safeSummary}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-sky-300/20 bg-sky-950/10 p-4"
+        data-office-orchestrator-mediation-queue="true"
+        data-office-orchestrator-enqueue-enabled={String(orchestratorMediationQueue.enqueueEnabled)}
+        data-office-orchestrator-candidate-promotion-enabled={String(orchestratorMediationQueue.candidatePromotionEnabled)}
+        data-office-orchestrator-enabled-controls={orchestratorMediationQueue.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-200/70">{orchestratorMediationQueue.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{orchestratorMediationQueue.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{orchestratorMediationQueue.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">enqueue enabled: {orchestratorMediationQueue.enqueueEnabled ? "true" : "false"}</div>
+        </div>
+        <div className="mt-3 grid gap-2 md:grid-cols-3" data-office-orchestrator-mediation-items="true">
+          {orchestratorMediationQueue.items.map((item) => (
+            <div key={item.id} className="border border-current/15 bg-black/20 p-3" data-office-orchestrator-mediation-item={item.intentKind} data-office-orchestrator-mediation-status={item.status}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.intentKind}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{item.status}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{item.safeSummary}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-cyan-300/20 bg-cyan-950/10 p-4"
+        data-office-worker-intent-routing="true"
+        data-office-worker-routing-assignment-enabled={String(workerIntentRouting.workAssignmentEnabled)}
+        data-office-worker-routing-request-creation-enabled={String(workerIntentRouting.requestCreationEnabled)}
+        data-office-worker-routing-dispatch-enabled={String(workerIntentRouting.dispatchEnabled)}
+        data-office-worker-routing-enabled-controls={workerIntentRouting.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-200/70">{workerIntentRouting.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{workerIntentRouting.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{workerIntentRouting.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">assignment enabled: {workerIntentRouting.workAssignmentEnabled ? "true" : "false"}</div>
+        </div>
+        <div className="mt-3 grid gap-2 md:grid-cols-3" data-office-worker-intent-routes="true">
+          {workerIntentRouting.routes.map((route) => (
+            <div key={route.id} className="border border-current/15 bg-black/20 p-3" data-office-worker-intent-route={route.intentKind} data-office-worker-intent-route-status={route.status} data-office-worker-intent-target-facility={route.targetFacility}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{route.intentKind}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{route.targetFacility}</div>
+              <div className="mt-1 text-xs text-midground/60">{route.workerRole} · {route.assignmentStatus}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{route.safeSummary}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-teal-300/20 bg-teal-950/10 p-4"
+        data-office-worker-facility-readiness="true"
+        data-office-worker-facility-assignment-enabled={String(workerFacilityReadiness.workAssignmentEnabled)}
+        data-office-worker-facility-request-creation-enabled={String(workerFacilityReadiness.requestCreationEnabled)}
+        data-office-worker-facility-dispatch-enabled={String(workerFacilityReadiness.dispatchEnabled)}
+        data-office-worker-facility-audit-write-enabled={String(workerFacilityReadiness.auditWriteEnabled)}
+        data-office-worker-facility-enabled-controls={workerFacilityReadiness.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-teal-200/70">{workerFacilityReadiness.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{workerFacilityReadiness.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{workerFacilityReadiness.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">enabled controls: {workerFacilityReadiness.enabledControls}</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-worker-facilities="true">
+          {workerFacilityReadiness.facilities.map((facility) => (
+            <div key={facility.id} className="border border-current/15 bg-black/20 p-3" data-office-worker-facility={facility.id} data-office-worker-facility-status={facility.status} data-office-worker-facility-assignment-ready={String(facility.assignmentReady)}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{facility.workerRole}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{facility.id}</div>
+              <div className="mt-1 text-xs text-midground/60">routes: {facility.routeCount} · assignment ready: {facility.assignmentReady ? "true" : "false"}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{facility.safeSummary}</div>
+              <div className="mt-3 space-y-1" data-office-worker-facility-prerequisites="true">
+                {facility.prerequisites.map((item) => (
+                  <div key={item.id} className="border border-current/10 bg-black/20 px-2 py-1 text-xs text-midground/70" data-office-worker-facility-prerequisite={item.id} data-office-worker-facility-prerequisite-status={item.status}>
+                    <span className="font-semibold text-foreground/80">{item.label}</span> · {item.safeSummary}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-emerald-300/20 bg-emerald-950/10 p-4"
+        data-office-worker-assignment-candidate-gate="true"
+        data-office-worker-candidate-enabled={String(workerAssignmentCandidateGate.assignmentCandidateEnabled)}
+        data-office-worker-candidate-assignment-enabled={String(workerAssignmentCandidateGate.workAssignmentEnabled)}
+        data-office-worker-candidate-request-creation-enabled={String(workerAssignmentCandidateGate.requestCreationEnabled)}
+        data-office-worker-candidate-dispatch-enabled={String(workerAssignmentCandidateGate.dispatchEnabled)}
+        data-office-worker-candidate-audit-write-enabled={String(workerAssignmentCandidateGate.auditWriteEnabled)}
+        data-office-worker-candidate-enabled-controls={workerAssignmentCandidateGate.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">{workerAssignmentCandidateGate.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{workerAssignmentCandidateGate.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{workerAssignmentCandidateGate.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">candidate enabled: {workerAssignmentCandidateGate.assignmentCandidateEnabled ? "true" : "false"}</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-worker-assignment-candidates="true">
+          {workerAssignmentCandidateGate.candidates.map((candidate) => (
+            <div key={candidate.id} className="border border-current/15 bg-black/20 p-3" data-office-worker-assignment-candidate={candidate.facilityId} data-office-worker-assignment-candidate-status={candidate.status} data-office-worker-assignment-candidate-ready={String(candidate.assignmentReady)}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{candidate.workerRole}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{candidate.id}</div>
+              <div className="mt-1 text-xs text-midground/60">assignment ready: {candidate.assignmentReady ? "true" : "false"}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{candidate.safeSummary}</div>
+              <div className="mt-3 space-y-1" data-office-worker-assignment-blockers="true">
+                {candidate.blockedBy.map((item) => (
+                  <div key={item.id} className="border border-current/10 bg-black/20 px-2 py-1 text-xs text-midground/70" data-office-worker-assignment-blocker={item.id} data-office-worker-assignment-blocker-status={item.status}>
+                    <span className="font-semibold text-foreground/80">{item.label}</span> · {item.safeSummary}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-sky-300/20 bg-sky-950/10 p-4"
+        data-office-worker-request-draft-preview="true"
+        data-office-worker-request-creation-enabled={String(workerRequestDraftPreview.requestCreationEnabled)}
+        data-office-worker-request-persistence-enabled={String(workerRequestDraftPreview.requestPersistenceEnabled)}
+        data-office-worker-request-assignment-enabled={String(workerRequestDraftPreview.workAssignmentEnabled)}
+        data-office-worker-request-dispatch-enabled={String(workerRequestDraftPreview.dispatchEnabled)}
+        data-office-worker-request-audit-write-enabled={String(workerRequestDraftPreview.auditWriteEnabled)}
+        data-office-worker-request-enabled-controls={workerRequestDraftPreview.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-200/70">{workerRequestDraftPreview.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{workerRequestDraftPreview.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{workerRequestDraftPreview.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">created requests: 0</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-worker-request-drafts="true">
+          {workerRequestDraftPreview.drafts.map((draft) => (
+            <div key={draft.id} className="border border-current/15 bg-black/20 p-3" data-office-worker-request-draft={draft.facilityId} data-office-worker-request-draft-status={draft.status} data-office-worker-request-draft-persistence={draft.persistenceStatus}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{draft.workerRole}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{draft.id}</div>
+              <div className="mt-1 text-xs text-midground/60">candidate: {draft.candidateRef} · blockers: {draft.blockedReasonCount}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{draft.safeSummary}</div>
+              <div className="mt-3 flex flex-wrap gap-1" data-office-worker-request-draft-fields="true">
+                {draft.safeFields.map((field) => (
+                  <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-worker-request-draft-field={field}>{field}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-violet-300/20 bg-violet-950/10 p-4"
+        data-office-worker-human-confirmation-envelope="true"
+        data-office-worker-confirmation-decision-recording-enabled={String(workerHumanConfirmationEnvelope.decisionRecordingEnabled)}
+        data-office-worker-confirmation-request-creation-enabled={String(workerHumanConfirmationEnvelope.requestCreationEnabled)}
+        data-office-worker-confirmation-request-persistence-enabled={String(workerHumanConfirmationEnvelope.requestPersistenceEnabled)}
+        data-office-worker-confirmation-assignment-enabled={String(workerHumanConfirmationEnvelope.workAssignmentEnabled)}
+        data-office-worker-confirmation-dispatch-enabled={String(workerHumanConfirmationEnvelope.dispatchEnabled)}
+        data-office-worker-confirmation-audit-write-enabled={String(workerHumanConfirmationEnvelope.auditWriteEnabled)}
+        data-office-worker-confirmation-enabled-controls={workerHumanConfirmationEnvelope.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-violet-200/70">{workerHumanConfirmationEnvelope.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{workerHumanConfirmationEnvelope.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{workerHumanConfirmationEnvelope.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">recorded decisions: 0</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-worker-confirmation-envelopes="true">
+          {workerHumanConfirmationEnvelope.envelopes.map((envelope) => (
+            <div key={envelope.id} className="border border-current/15 bg-black/20 p-3" data-office-worker-confirmation-envelope={envelope.facilityId} data-office-worker-confirmation-status={envelope.status} data-office-worker-confirmation-decision-state={envelope.decisionState}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{envelope.workerRole}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{envelope.id}</div>
+              <div className="mt-1 text-xs text-midground/60">draft: {envelope.draftRef} · decision: {envelope.decisionState}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{envelope.safeSummary}</div>
+              <div className="mt-3 flex flex-wrap gap-1" data-office-worker-confirmation-fields="true">
+                {envelope.requiredFields.map((field) => (
+                  <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-worker-confirmation-field={field}>{field}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-amber-300/20 bg-amber-950/10 p-4"
+        data-office-worker-authority-handoff-envelope="true"
+        data-office-worker-handoff-adapter-installation-enabled={String(workerAuthorityHandoffEnvelope.adapterInstallationEnabled)}
+        data-office-worker-handoff-dispatch-enabled={String(workerAuthorityHandoffEnvelope.dispatchEnabled)}
+        data-office-worker-handoff-request-creation-enabled={String(workerAuthorityHandoffEnvelope.requestCreationEnabled)}
+        data-office-worker-handoff-assignment-enabled={String(workerAuthorityHandoffEnvelope.workAssignmentEnabled)}
+        data-office-worker-handoff-audit-write-enabled={String(workerAuthorityHandoffEnvelope.auditWriteEnabled)}
+        data-office-worker-handoff-enabled-controls={workerAuthorityHandoffEnvelope.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-200/70">{workerAuthorityHandoffEnvelope.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{workerAuthorityHandoffEnvelope.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{workerAuthorityHandoffEnvelope.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">dispatched actions: 0</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-worker-handoffs="true">
+          {workerAuthorityHandoffEnvelope.handoffs.map((handoff) => (
+            <div key={handoff.id} className="border border-current/15 bg-black/20 p-3" data-office-worker-handoff={handoff.facilityId} data-office-worker-handoff-status={handoff.status} data-office-worker-handoff-adapter-state={handoff.adapterState}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{handoff.workerRole}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{handoff.id}</div>
+              <div className="mt-1 text-xs text-midground/60">confirmation: {handoff.confirmationRef} · adapter: {handoff.adapterState}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{handoff.safeSummary}</div>
+              <div className="mt-3 flex flex-wrap gap-1" data-office-worker-handoff-fields="true">
+                {handoff.requiredFields.map((field) => (
+                  <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-worker-handoff-field={field}>{field}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-rose-300/20 bg-rose-950/10 p-4"
+        data-office-worker-dispatch-dry-run-envelope="true"
+        data-office-worker-dry-run-execution-enabled={String(workerDispatchDryRunEnvelope.dryRunExecutionEnabled)}
+        data-office-worker-dry-run-dispatch-enabled={String(workerDispatchDryRunEnvelope.dispatchEnabled)}
+        data-office-worker-dry-run-adapter-installation-enabled={String(workerDispatchDryRunEnvelope.adapterInstallationEnabled)}
+        data-office-worker-dry-run-request-creation-enabled={String(workerDispatchDryRunEnvelope.requestCreationEnabled)}
+        data-office-worker-dry-run-assignment-enabled={String(workerDispatchDryRunEnvelope.workAssignmentEnabled)}
+        data-office-worker-dry-run-audit-write-enabled={String(workerDispatchDryRunEnvelope.auditWriteEnabled)}
+        data-office-worker-dry-run-enabled-controls={workerDispatchDryRunEnvelope.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-rose-200/70">{workerDispatchDryRunEnvelope.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{workerDispatchDryRunEnvelope.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{workerDispatchDryRunEnvelope.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">dry runs executed: 0</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-worker-dry-runs="true">
+          {workerDispatchDryRunEnvelope.dryRuns.map((dryRun) => (
+            <div key={dryRun.id} className="border border-current/15 bg-black/20 p-3" data-office-worker-dry-run={dryRun.facilityId} data-office-worker-dry-run-status={dryRun.status} data-office-worker-dry-run-execution-state={dryRun.executionState}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{dryRun.workerRole}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{dryRun.id}</div>
+              <div className="mt-1 text-xs text-midground/60">handoff: {dryRun.handoffRef} · execution: {dryRun.executionState}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{dryRun.safeSummary}</div>
+              <div className="mt-3 flex flex-wrap gap-1" data-office-worker-dry-run-fields="true">
+                {dryRun.requiredFields.map((field) => (
+                  <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-worker-dry-run-field={field}>{field}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-cyan-300/20 bg-cyan-950/10 p-4"
+        data-office-worker-audit-preview-envelope="true"
+        data-office-worker-audit-preview-write-enabled={String(workerAuditPreviewEnvelope.auditWriteEnabled)}
+        data-office-worker-audit-preview-execution-enabled={String(workerAuditPreviewEnvelope.executionEnabled)}
+        data-office-worker-audit-preview-dispatch-enabled={String(workerAuditPreviewEnvelope.dispatchEnabled)}
+        data-office-worker-audit-preview-adapter-installation-enabled={String(workerAuditPreviewEnvelope.adapterInstallationEnabled)}
+        data-office-worker-audit-preview-request-creation-enabled={String(workerAuditPreviewEnvelope.requestCreationEnabled)}
+        data-office-worker-audit-preview-assignment-enabled={String(workerAuditPreviewEnvelope.workAssignmentEnabled)}
+        data-office-worker-audit-preview-enabled-controls={workerAuditPreviewEnvelope.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-200/70">{workerAuditPreviewEnvelope.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{workerAuditPreviewEnvelope.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{workerAuditPreviewEnvelope.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">audit events written: 0</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-worker-audit-previews="true">
+          {workerAuditPreviewEnvelope.previews.map((preview) => (
+            <div key={preview.id} className="border border-current/15 bg-black/20 p-3" data-office-worker-audit-preview={preview.facilityId} data-office-worker-audit-preview-status={preview.status} data-office-worker-audit-preview-sink-state={preview.auditSinkState}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{preview.workerRole}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{preview.id}</div>
+              <div className="mt-1 text-xs text-midground/60">dry-run: {preview.dryRunRef} · sink: {preview.auditSinkState}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{preview.safeSummary}</div>
+              <div className="mt-3 flex flex-wrap gap-1" data-office-worker-audit-preview-fields="true">
+                {preview.requiredFields.map((field) => (
+                  <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-worker-audit-preview-field={field}>{field}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-emerald-300/20 bg-emerald-950/10 p-4"
+        data-office-worker-rollback-preview-envelope="true"
+        data-office-worker-rollback-preview-execution-enabled={String(workerRollbackPreviewEnvelope.rollbackExecutionEnabled)}
+        data-office-worker-rollback-preview-audit-write-enabled={String(workerRollbackPreviewEnvelope.auditWriteEnabled)}
+        data-office-worker-rollback-preview-action-execution-enabled={String(workerRollbackPreviewEnvelope.executionEnabled)}
+        data-office-worker-rollback-preview-dispatch-enabled={String(workerRollbackPreviewEnvelope.dispatchEnabled)}
+        data-office-worker-rollback-preview-adapter-installation-enabled={String(workerRollbackPreviewEnvelope.adapterInstallationEnabled)}
+        data-office-worker-rollback-preview-request-creation-enabled={String(workerRollbackPreviewEnvelope.requestCreationEnabled)}
+        data-office-worker-rollback-preview-assignment-enabled={String(workerRollbackPreviewEnvelope.workAssignmentEnabled)}
+        data-office-worker-rollback-preview-enabled-controls={workerRollbackPreviewEnvelope.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">{workerRollbackPreviewEnvelope.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{workerRollbackPreviewEnvelope.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{workerRollbackPreviewEnvelope.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">rollback executions: 0</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-worker-rollback-previews="true">
+          {workerRollbackPreviewEnvelope.previews.map((preview) => (
+            <div key={preview.id} className="border border-current/15 bg-black/20 p-3" data-office-worker-rollback-preview={preview.facilityId} data-office-worker-rollback-preview-status={preview.status} data-office-worker-rollback-preview-state={preview.rollbackState}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{preview.workerRole}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{preview.id}</div>
+              <div className="mt-1 text-xs text-midground/60">audit preview: {preview.auditPreviewRef} · rollback: {preview.rollbackState}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{preview.safeSummary}</div>
+              <div className="mt-3 flex flex-wrap gap-1" data-office-worker-rollback-preview-fields="true">
+                {preview.requiredFields.map((field) => (
+                  <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-worker-rollback-preview-field={field}>{field}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-lime-300/20 bg-lime-950/10 p-4"
+        data-office-worker-final-gate-checklist="true"
+        data-office-worker-final-gate-control-proposal-enabled={String(workerFinalGateChecklist.controlProposalEnabled)}
+        data-office-worker-final-gate-rollback-execution-enabled={String(workerFinalGateChecklist.rollbackExecutionEnabled)}
+        data-office-worker-final-gate-audit-write-enabled={String(workerFinalGateChecklist.auditWriteEnabled)}
+        data-office-worker-final-gate-action-execution-enabled={String(workerFinalGateChecklist.executionEnabled)}
+        data-office-worker-final-gate-dispatch-enabled={String(workerFinalGateChecklist.dispatchEnabled)}
+        data-office-worker-final-gate-adapter-installation-enabled={String(workerFinalGateChecklist.adapterInstallationEnabled)}
+        data-office-worker-final-gate-request-creation-enabled={String(workerFinalGateChecklist.requestCreationEnabled)}
+        data-office-worker-final-gate-assignment-enabled={String(workerFinalGateChecklist.workAssignmentEnabled)}
+        data-office-worker-final-gate-enabled-controls={workerFinalGateChecklist.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-lime-200/70">{workerFinalGateChecklist.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{workerFinalGateChecklist.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{workerFinalGateChecklist.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">enabled controls: 0</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-worker-final-gates="true">
+          {workerFinalGateChecklist.gates.map((gate) => (
+            <div key={gate.id} className="border border-current/15 bg-black/20 p-3" data-office-worker-final-gate={gate.id} data-office-worker-final-gate-status={gate.status}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{gate.status}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{gate.label}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{gate.safeSummary}</div>
+              <div className="mt-3 flex flex-wrap gap-1" data-office-worker-final-gate-fields="true">
+                {gate.requiredFields.map((field) => (
+                  <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-worker-final-gate-field={field}>{field}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-sky-300/20 bg-sky-950/10 p-4"
+        data-office-controlled-mutation-proposal-contract="true"
+        data-office-controlled-mutation-proposal-creation-enabled={String(controlledMutationProposalContract.proposalCreationEnabled)}
+        data-office-controlled-mutation-proposal-persistence-enabled={String(controlledMutationProposalContract.proposalPersistenceEnabled)}
+        data-office-controlled-mutation-route-enabled={String(controlledMutationProposalContract.mutationRouteEnabled)}
+        data-office-controlled-mutation-control-proposal-enabled={String(controlledMutationProposalContract.controlProposalEnabled)}
+        data-office-controlled-mutation-rollback-execution-enabled={String(controlledMutationProposalContract.rollbackExecutionEnabled)}
+        data-office-controlled-mutation-audit-write-enabled={String(controlledMutationProposalContract.auditWriteEnabled)}
+        data-office-controlled-mutation-action-execution-enabled={String(controlledMutationProposalContract.executionEnabled)}
+        data-office-controlled-mutation-dispatch-enabled={String(controlledMutationProposalContract.dispatchEnabled)}
+        data-office-controlled-mutation-request-creation-enabled={String(controlledMutationProposalContract.requestCreationEnabled)}
+        data-office-controlled-mutation-enabled-controls={controlledMutationProposalContract.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-200/70">{controlledMutationProposalContract.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{controlledMutationProposalContract.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{controlledMutationProposalContract.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">proposal creations: 0</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-controlled-mutation-contracts="true">
+          {controlledMutationProposalContract.contracts.map((contract) => (
+            <div key={contract.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-contract={contract.id} data-office-controlled-mutation-contract-status={contract.status}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{contract.status}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{contract.label}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{contract.safeSummary}</div>
+              <div className="mt-3 flex flex-wrap gap-1" data-office-controlled-mutation-contract-fields="true">
+                {contract.requiredFields.map((field) => (
+                  <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-controlled-mutation-contract-field={field}>{field}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-indigo-300/20 bg-indigo-950/10 p-4"
+        data-office-controlled-mutation-dry-run-plan="true"
+        data-office-controlled-mutation-dry-run-execution-enabled={String(controlledMutationDryRunPlan.dryRunExecutionEnabled)}
+        data-office-controlled-mutation-dry-run-proposal-creation-enabled={String(controlledMutationDryRunPlan.proposalCreationEnabled)}
+        data-office-controlled-mutation-dry-run-route-enabled={String(controlledMutationDryRunPlan.mutationRouteEnabled)}
+        data-office-controlled-mutation-dry-run-rollback-execution-enabled={String(controlledMutationDryRunPlan.rollbackExecutionEnabled)}
+        data-office-controlled-mutation-dry-run-audit-write-enabled={String(controlledMutationDryRunPlan.auditWriteEnabled)}
+        data-office-controlled-mutation-dry-run-action-execution-enabled={String(controlledMutationDryRunPlan.executionEnabled)}
+        data-office-controlled-mutation-dry-run-dispatch-enabled={String(controlledMutationDryRunPlan.dispatchEnabled)}
+        data-office-controlled-mutation-dry-run-enabled-controls={controlledMutationDryRunPlan.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-indigo-200/70">{controlledMutationDryRunPlan.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{controlledMutationDryRunPlan.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{controlledMutationDryRunPlan.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">dry-run executions: 0</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-controlled-mutation-dry-run-items="true">
+          {controlledMutationDryRunPlan.planItems.map((item) => (
+            <div key={item.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-dry-run-item={item.id} data-office-controlled-mutation-dry-run-item-status={item.status}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.status}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{item.safeSummary}</div>
+              <div className="mt-3 flex flex-wrap gap-1" data-office-controlled-mutation-dry-run-fields="true">
+                {item.requiredFields.map((field) => (
+                  <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-controlled-mutation-dry-run-field={field}>{field}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-amber-300/20 bg-amber-950/10 p-4"
+        data-office-controlled-mutation-audit-sink-plan="true"
+        data-office-controlled-mutation-audit-sink-write-enabled={String(controlledMutationAuditSinkPlan.auditWriteEnabled)}
+        data-office-controlled-mutation-audit-sink-dry-run-execution-enabled={String(controlledMutationAuditSinkPlan.dryRunExecutionEnabled)}
+        data-office-controlled-mutation-audit-sink-proposal-creation-enabled={String(controlledMutationAuditSinkPlan.proposalCreationEnabled)}
+        data-office-controlled-mutation-audit-sink-route-enabled={String(controlledMutationAuditSinkPlan.mutationRouteEnabled)}
+        data-office-controlled-mutation-audit-sink-rollback-execution-enabled={String(controlledMutationAuditSinkPlan.rollbackExecutionEnabled)}
+        data-office-controlled-mutation-audit-sink-action-execution-enabled={String(controlledMutationAuditSinkPlan.executionEnabled)}
+        data-office-controlled-mutation-audit-sink-dispatch-enabled={String(controlledMutationAuditSinkPlan.dispatchEnabled)}
+        data-office-controlled-mutation-audit-sink-enabled-controls={controlledMutationAuditSinkPlan.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-200/70">{controlledMutationAuditSinkPlan.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{controlledMutationAuditSinkPlan.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{controlledMutationAuditSinkPlan.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">audit writes: 0</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-controlled-mutation-audit-sink-items="true">
+          {controlledMutationAuditSinkPlan.sinkItems.map((item) => (
+            <div key={item.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-audit-sink-item={item.id} data-office-controlled-mutation-audit-sink-item-status={item.status}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.status}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{item.safeSummary}</div>
+              <div className="mt-3 flex flex-wrap gap-1" data-office-controlled-mutation-audit-sink-fields="true">
+                {item.requiredFields.map((field) => (
+                  <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-controlled-mutation-audit-sink-field={field}>{field}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-rose-300/20 bg-rose-950/10 p-4"
+        data-office-controlled-mutation-rollback-verification-plan="true"
+        data-office-controlled-mutation-rollback-verification-execution-enabled={String(controlledMutationRollbackVerificationPlan.rollbackExecutionEnabled)}
+        data-office-controlled-mutation-rollback-verification-audit-write-enabled={String(controlledMutationRollbackVerificationPlan.auditWriteEnabled)}
+        data-office-controlled-mutation-rollback-verification-dry-run-execution-enabled={String(controlledMutationRollbackVerificationPlan.dryRunExecutionEnabled)}
+        data-office-controlled-mutation-rollback-verification-proposal-creation-enabled={String(controlledMutationRollbackVerificationPlan.proposalCreationEnabled)}
+        data-office-controlled-mutation-rollback-verification-route-enabled={String(controlledMutationRollbackVerificationPlan.mutationRouteEnabled)}
+        data-office-controlled-mutation-rollback-verification-action-execution-enabled={String(controlledMutationRollbackVerificationPlan.executionEnabled)}
+        data-office-controlled-mutation-rollback-verification-dispatch-enabled={String(controlledMutationRollbackVerificationPlan.dispatchEnabled)}
+        data-office-controlled-mutation-rollback-verification-enabled-controls={controlledMutationRollbackVerificationPlan.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-rose-200/70">{controlledMutationRollbackVerificationPlan.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{controlledMutationRollbackVerificationPlan.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{controlledMutationRollbackVerificationPlan.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">rollback executions: 0</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-controlled-mutation-rollback-verification-items="true">
+          {controlledMutationRollbackVerificationPlan.verificationItems.map((item) => (
+            <div key={item.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-rollback-verification-item={item.id} data-office-controlled-mutation-rollback-verification-item-status={item.status}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.status}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{item.safeSummary}</div>
+              <div className="mt-3 flex flex-wrap gap-1" data-office-controlled-mutation-rollback-verification-fields="true">
+                {item.requiredFields.map((field) => (
+                  <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-controlled-mutation-rollback-verification-field={field}>{field}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-fuchsia-300/20 bg-fuchsia-950/10 p-4"
+        data-office-controlled-mutation-human-approval-plan="true"
+        data-office-controlled-mutation-human-approval-recording-enabled={String(controlledMutationHumanApprovalPlan.approvalRecordingEnabled)}
+        data-office-controlled-mutation-human-approval-rollback-execution-enabled={String(controlledMutationHumanApprovalPlan.rollbackExecutionEnabled)}
+        data-office-controlled-mutation-human-approval-audit-write-enabled={String(controlledMutationHumanApprovalPlan.auditWriteEnabled)}
+        data-office-controlled-mutation-human-approval-dry-run-execution-enabled={String(controlledMutationHumanApprovalPlan.dryRunExecutionEnabled)}
+        data-office-controlled-mutation-human-approval-proposal-creation-enabled={String(controlledMutationHumanApprovalPlan.proposalCreationEnabled)}
+        data-office-controlled-mutation-human-approval-route-enabled={String(controlledMutationHumanApprovalPlan.mutationRouteEnabled)}
+        data-office-controlled-mutation-human-approval-action-execution-enabled={String(controlledMutationHumanApprovalPlan.executionEnabled)}
+        data-office-controlled-mutation-human-approval-dispatch-enabled={String(controlledMutationHumanApprovalPlan.dispatchEnabled)}
+        data-office-controlled-mutation-human-approval-enabled-controls={controlledMutationHumanApprovalPlan.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-fuchsia-200/70">{controlledMutationHumanApprovalPlan.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{controlledMutationHumanApprovalPlan.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{controlledMutationHumanApprovalPlan.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">approval records: 0</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-controlled-mutation-human-approval-items="true">
+          {controlledMutationHumanApprovalPlan.approvalItems.map((item) => (
+            <div key={item.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-human-approval-item={item.id} data-office-controlled-mutation-human-approval-item-status={item.status}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.status}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{item.safeSummary}</div>
+              <div className="mt-3 flex flex-wrap gap-1" data-office-controlled-mutation-human-approval-fields="true">
+                {item.requiredFields.map((field) => (
+                  <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-controlled-mutation-human-approval-field={field}>{field}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-indigo-300/20 bg-indigo-950/10 p-4"
+        data-office-controlled-mutation-authority-summary="true"
+        data-office-controlled-mutation-authority-summary-grant-enabled={String(controlledMutationAuthoritySummary.authorityGrantEnabled)}
+        data-office-controlled-mutation-authority-summary-approval-recording-enabled={String(controlledMutationAuthoritySummary.approvalRecordingEnabled)}
+        data-office-controlled-mutation-authority-summary-rollback-execution-enabled={String(controlledMutationAuthoritySummary.rollbackExecutionEnabled)}
+        data-office-controlled-mutation-authority-summary-audit-write-enabled={String(controlledMutationAuthoritySummary.auditWriteEnabled)}
+        data-office-controlled-mutation-authority-summary-dry-run-execution-enabled={String(controlledMutationAuthoritySummary.dryRunExecutionEnabled)}
+        data-office-controlled-mutation-authority-summary-proposal-creation-enabled={String(controlledMutationAuthoritySummary.proposalCreationEnabled)}
+        data-office-controlled-mutation-authority-summary-route-enabled={String(controlledMutationAuthoritySummary.mutationRouteEnabled)}
+        data-office-controlled-mutation-authority-summary-action-execution-enabled={String(controlledMutationAuthoritySummary.executionEnabled)}
+        data-office-controlled-mutation-authority-summary-dispatch-enabled={String(controlledMutationAuthoritySummary.dispatchEnabled)}
+        data-office-controlled-mutation-authority-summary-enabled-controls={controlledMutationAuthoritySummary.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-indigo-200/70">{controlledMutationAuthoritySummary.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{controlledMutationAuthoritySummary.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{controlledMutationAuthoritySummary.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">authority grants: 0</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-controlled-mutation-authority-summary-items="true">
+          {controlledMutationAuthoritySummary.authorityItems.map((item) => (
+            <div key={item.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-authority-summary-item={item.id} data-office-controlled-mutation-authority-summary-item-status={item.status}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.status}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{item.safeSummary}</div>
+              <div className="mt-3 flex flex-wrap gap-1" data-office-controlled-mutation-authority-summary-fields="true">
+                {item.requiredFields.map((field) => (
+                  <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-controlled-mutation-authority-summary-field={field}>{field}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="border border-sky-300/20 bg-sky-950/10 p-4"
+        data-office-controlled-mutation-execution-readiness-summary="true"
+        data-office-controlled-mutation-execution-readiness-summary-enabled={String(controlledMutationExecutionReadinessSummary.executionReadinessEnabled)}
+        data-office-controlled-mutation-execution-readiness-summary-authority-grant-enabled={String(controlledMutationExecutionReadinessSummary.authorityGrantEnabled)}
+        data-office-controlled-mutation-execution-readiness-summary-approval-recording-enabled={String(controlledMutationExecutionReadinessSummary.approvalRecordingEnabled)}
+        data-office-controlled-mutation-execution-readiness-summary-rollback-execution-enabled={String(controlledMutationExecutionReadinessSummary.rollbackExecutionEnabled)}
+        data-office-controlled-mutation-execution-readiness-summary-audit-write-enabled={String(controlledMutationExecutionReadinessSummary.auditWriteEnabled)}
+        data-office-controlled-mutation-execution-readiness-summary-dry-run-execution-enabled={String(controlledMutationExecutionReadinessSummary.dryRunExecutionEnabled)}
+        data-office-controlled-mutation-execution-readiness-summary-proposal-creation-enabled={String(controlledMutationExecutionReadinessSummary.proposalCreationEnabled)}
+        data-office-controlled-mutation-execution-readiness-summary-route-enabled={String(controlledMutationExecutionReadinessSummary.mutationRouteEnabled)}
+        data-office-controlled-mutation-execution-readiness-summary-action-execution-enabled={String(controlledMutationExecutionReadinessSummary.executionEnabled)}
+        data-office-controlled-mutation-execution-readiness-summary-dispatch-enabled={String(controlledMutationExecutionReadinessSummary.dispatchEnabled)}
+        data-office-controlled-mutation-execution-readiness-summary-enabled-controls={controlledMutationExecutionReadinessSummary.enabledControls}
+      >
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-200/70">{controlledMutationExecutionReadinessSummary.stageLabel}</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{controlledMutationExecutionReadinessSummary.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-midground/70">{controlledMutationExecutionReadinessSummary.safeBoundary}</p>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">execution readiness: blocked</div>
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3" data-office-controlled-mutation-execution-readiness-summary-items="true">
+          {controlledMutationExecutionReadinessSummary.readinessItems.map((item) => (
+            <div key={item.id} className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-execution-readiness-summary-item={item.id} data-office-controlled-mutation-execution-readiness-summary-item-status={item.status}>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{item.status}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+              <div className="mt-2 text-xs leading-5 text-midground/70">{item.safeSummary}</div>
+              <div className="mt-3 flex flex-wrap gap-1" data-office-controlled-mutation-execution-readiness-summary-fields="true">
+                {item.requiredFields.map((field) => (
+                  <span key={field} className="border border-current/10 bg-black/20 px-2 py-1 text-[10px] text-midground/65" data-office-controlled-mutation-execution-readiness-summary-field={field}>{field}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <ControlledMutationContractPostureProjectionPanel projection={controlledMutationContractPostureProjection} />
+      <ControlledMutationContractPosturePolishPanel polish={controlledMutationContractPosturePolish} />
+      <ControlledMutationReadinessHandoffRibbonPanel ribbon={controlledMutationReadinessHandoffRibbon} />
+      <ControlledMutationReadinessSummaryPolishPanel summary={controlledMutationReadinessSummaryPolish} />
+      <ControlledMutationRequestStorePosturePanel posture={controlledMutationRequestStorePosture} />
+      <ControlledMutationRequestStoreHardeningPlanPanel plan={controlledMutationRequestStoreHardeningPlan} />
+      <ControlledMutationNextApprovalBoundaryPanel boundary={controlledMutationNextApprovalBoundary} />
+      <ControlledMutationPostDecisionApprovalBoundaryPanel boundary={controlledMutationPostDecisionApprovalBoundary} />
+      <ControlledMutationPostRegistryApprovalBoundaryPanel boundary={controlledMutationPostRegistryApprovalBoundary} />
+      <ControlledMutationTargetDispatchForbiddenBoundaryPanel boundary={controlledMutationTargetDispatchForbiddenBoundary} />
+      <ControlledMutationSafeContinuationCompletionReviewPanel review={controlledMutationSafeContinuationCompletionReview} />
+
       {showOverview ? (
         <OfficeRpgMap
           scene={rpgScene}
@@ -2650,7 +7011,10 @@ export default function OfficePage() {
           <div className="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-midground/55">
             <Filter className="h-3 w-3" /> 보기: {FOCUS_LABEL[focus]}
           </div>
-          <InspectorPanel selection={selection} />
+          <OfficeDeskRpgInspectorPanel projection={deskRpgProjection} />
+          <div className="mt-3">
+            <InspectorPanel selection={selection} />
+          </div>
         </div>
       </div>
     </div>

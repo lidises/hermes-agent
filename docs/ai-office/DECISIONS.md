@@ -296,3 +296,26 @@ Implications:
 - Stage 5 should define display modes and defaults.
 - Serializers should separate internal join ids from browser display ids.
 - Remote mode is deferred and should not be accidentally enabled by Stage 6.
+---
+
+## D014 — Controlled mutation requires request, dry-run, human decision, authority adapter, and audit contracts
+
+Date: 2026-05-14
+Status: accepted
+
+Decision:
+
+AI Office `/office` must remain display-only until any future controlled mutation path has an explicit contract for safe action requests, target refs, dry-run evidence, human decisions, server-side execution authority, and audit events. `docs/ai-office/architecture/approval-model-contract.md` is the current contract baseline.
+
+Rationale:
+
+The Desk RPG/JRPG operating-room target should not be locked into passive read-only forever, but enabling GUI actions without a prior authority model would risk Kanban corruption, projection promote mistakes, service restarts, NAS write mistakes, and privacy leaks.
+
+Implications:
+
+- `Approval Console 1` stays disabled/display-only.
+- Future controls must be capability-gated server-side, not inferred from UI copy.
+- Dry-run success never equals execution permission.
+- Human approval is single-action, expiring, and tied to one dry-run result.
+- Audit write failure blocks execution.
+- NAS save remains mediated by a NAS Keeper role; browser/VPS dashboard direct NAS credentials remain excluded.

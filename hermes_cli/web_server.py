@@ -48,10 +48,37 @@ from hermes_cli.config import (
     redact_key,
 )
 from gateway.status import get_running_pid, read_runtime_status
+from hermes_cli.office_controlled_mutation import (
+    append_office_controlled_mutation_audit_event,
+    append_office_controlled_mutation_authority_adapter_registry_event,
+    append_office_controlled_mutation_decision_event,
+    append_office_controlled_mutation_dry_run_result_event,
+    append_office_controlled_mutation_nas_evidence_package_event,
+    append_office_controlled_mutation_nas_path_resolution_preview_event,
+    append_office_controlled_mutation_request_event,
+    build_office_controlled_mutation_contract_schema,
+    execute_office_controlled_mutation_nas_single_file_write,
+    build_office_controlled_mutation_nas_evidence_package_contract,
+    build_office_controlled_mutation_nas_path_resolution_contract,
+    build_office_controlled_mutation_nas_runtime_boundary_contract,
+    build_office_controlled_mutation_nas_save_preparation_contract,
+    list_office_controlled_mutation_decision_events,
+    list_office_controlled_mutation_dry_run_result_events,
+    list_office_controlled_mutation_nas_evidence_package_events,
+    list_office_controlled_mutation_nas_path_resolution_preview_events,
+    list_office_controlled_mutation_audit_events,
+    list_office_controlled_mutation_authority_adapter_registry_events,
+    list_office_controlled_mutation_request_events,
+    preview_office_controlled_mutation_nas_path_resolution,
+    validate_office_controlled_mutation_nas_evidence_package,
+    validate_office_controlled_mutation_nas_path_resolution,
+    validate_office_controlled_mutation_nas_save_preparation,
+    validate_office_controlled_mutation_request_event,
+)
 from hermes_cli.office_state import build_office_safe_event_payload, build_office_state
 
 try:
-    from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
+    from fastapi import Body, FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
     from fastapi.middleware.cors import CORSMiddleware
     from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
     from fastapi.staticfiles import StaticFiles
@@ -540,6 +567,190 @@ async def get_office_state(request: Request):
     """Return the redacted read-only AI OfficeState projection."""
     mode = _validate_office_display_mode(request)
     return build_office_state(display_mode=mode).to_dict()
+
+
+@app.get("/api/office/controlled-mutation/schema")
+async def get_office_controlled_mutation_schema():
+    """Return the non-executable AI Office controlled-mutation contract."""
+    return build_office_controlled_mutation_contract_schema()
+
+
+@app.get("/api/office/controlled-mutation/nas-save-preparation/schema")
+async def get_office_controlled_mutation_nas_save_preparation_schema():
+    """Return the non-writing NAS save/write preparation contract."""
+    return build_office_controlled_mutation_nas_save_preparation_contract()
+
+
+@app.get("/api/office/controlled-mutation/nas-evidence-package/schema")
+async def get_office_controlled_mutation_nas_evidence_package_schema():
+    """Return the non-writing NAS evidence package contract."""
+    return build_office_controlled_mutation_nas_evidence_package_contract()
+
+
+@app.get("/api/office/controlled-mutation/nas-path-resolution/schema")
+async def get_office_controlled_mutation_nas_path_resolution_schema():
+    """Return the non-runtime NAS path resolution contract."""
+    return build_office_controlled_mutation_nas_path_resolution_contract()
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/schema")
+async def get_office_controlled_mutation_nas_runtime_boundary_schema():
+    """Return the disabled NAS runtime capability contract."""
+    return build_office_controlled_mutation_nas_runtime_boundary_contract()
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/single-file-write")
+async def execute_office_controlled_mutation_nas_single_file_write_route(payload: Any = Body(None)):
+    """Write one safe markdown file under the configured AI Office NAS root."""
+    return execute_office_controlled_mutation_nas_single_file_write(
+        payload,
+        root_path=os.environ.get("HERMES_AI_OFFICE_NAS_WRITE_ROOT"),
+    )
+
+
+@app.post("/api/office/controlled-mutation/nas-path-resolution/validate")
+async def validate_office_controlled_mutation_nas_path_resolution_route(payload: Any = Body(None)):
+    """Validate a NAS path resolution DTO without resolving paths or accessing mounts."""
+    return validate_office_controlled_mutation_nas_path_resolution(payload)
+
+
+@app.post("/api/office/controlled-mutation/nas-path-resolution/preview")
+async def preview_office_controlled_mutation_nas_path_resolution_route(payload: Any = Body(None)):
+    """Preview a safe NAS path resolution without mount or filesystem access."""
+    return preview_office_controlled_mutation_nas_path_resolution(payload)
+
+
+@app.post("/api/office/controlled-mutation/nas-path-resolution/preview-store")
+async def append_office_controlled_mutation_nas_path_resolution_preview(payload: Any = Body(None)):
+    """Append safe NAS path preview metadata without resolving paths or accessing filesystems."""
+    return append_office_controlled_mutation_nas_path_resolution_preview_event(payload)
+
+
+@app.get("/api/office/controlled-mutation/nas-path-resolution/previews")
+async def list_office_controlled_mutation_nas_path_resolution_previews(
+    limit: int = 50, package_ref: str | None = None
+):
+    """Read back stored safe NAS path preview metadata from local Hermes JSONL."""
+    return list_office_controlled_mutation_nas_path_resolution_preview_events(limit=limit, package_ref=package_ref)
+
+
+@app.post("/api/office/controlled-mutation/nas-save-preparation/validate")
+async def validate_office_controlled_mutation_nas_save_preparation_route(payload: Any = Body(None)):
+    """Validate a NAS save/write preparation DTO without persistence or NAS access."""
+    return validate_office_controlled_mutation_nas_save_preparation(payload)
+
+
+@app.post("/api/office/controlled-mutation/nas-evidence-package/validate")
+async def validate_office_controlled_mutation_nas_evidence_package_route(payload: Any = Body(None)):
+    """Validate a NAS evidence package DTO without persistence or NAS access."""
+    return validate_office_controlled_mutation_nas_evidence_package(payload)
+
+
+@app.post("/api/office/controlled-mutation/nas-evidence-package")
+async def append_office_controlled_mutation_nas_evidence_package(payload: Any = Body(None)):
+    """Append safe NAS evidence package metadata without NAS path or mount access."""
+    return append_office_controlled_mutation_nas_evidence_package_event(payload)
+
+
+@app.get("/api/office/controlled-mutation/nas-evidence-packages")
+async def list_office_controlled_mutation_nas_evidence_packages(
+    limit: int = 50, request_ref: str | None = None
+):
+    """Read back stored safe NAS evidence package metadata from local Hermes JSONL."""
+    return list_office_controlled_mutation_nas_evidence_package_events(limit=limit, request_ref=request_ref)
+
+
+@app.post("/api/office/controlled-mutation/request/validate")
+async def validate_office_controlled_mutation_request(payload: Any = Body(None)):
+    """Validate a safe request-event DTO without creating or persisting it."""
+    return validate_office_controlled_mutation_request_event(payload)
+
+
+@app.post("/api/office/controlled-mutation/request")
+async def append_office_controlled_mutation_request(payload: Any = Body(None)):
+    """Append a validated safe request-event DTO to the local Hermes JSONL store."""
+    return append_office_controlled_mutation_request_event(payload)
+
+
+@app.get("/api/office/controlled-mutation/requests")
+async def list_office_controlled_mutation_requests(limit: int = 50, correlation_id: str | None = None):
+    """Read back stored safe request-event DTOs from the local Hermes JSONL store."""
+    return list_office_controlled_mutation_request_events(limit=limit, correlation_id=correlation_id)
+
+
+@app.post("/api/office/controlled-mutation/decision")
+async def append_office_controlled_mutation_decision(payload: Any = Body(None)):
+    """Append a validated safe human decision DTO to the local Hermes JSONL store."""
+    return append_office_controlled_mutation_decision_event(payload)
+
+
+@app.get("/api/office/controlled-mutation/decisions")
+async def list_office_controlled_mutation_decisions(
+    limit: int = 50, request_id: str | None = None, correlation_id: str | None = None
+):
+    """Read back stored safe human decision DTOs from the local Hermes JSONL store."""
+    return list_office_controlled_mutation_decision_events(
+        limit=limit,
+        request_id=request_id,
+        correlation_id=correlation_id,
+    )
+
+
+@app.post("/api/office/controlled-mutation/dry-run-result")
+async def append_office_controlled_mutation_dry_run_result(payload: Any = Body(None)):
+    """Append a validated safe dry-run result DTO without executing a dry run."""
+    return append_office_controlled_mutation_dry_run_result_event(payload)
+
+
+@app.get("/api/office/controlled-mutation/dry-run-results")
+async def list_office_controlled_mutation_dry_run_results(
+    limit: int = 50, request_id: str | None = None, correlation_id: str | None = None
+):
+    """Read back stored safe dry-run result DTOs from the local Hermes JSONL store."""
+    return list_office_controlled_mutation_dry_run_result_events(
+        limit=limit,
+        request_id=request_id,
+        correlation_id=correlation_id,
+    )
+
+
+@app.post("/api/office/controlled-mutation/audit")
+async def append_office_controlled_mutation_audit(payload: Any = Body(None)):
+    """Append a validated safe audit DTO without executing or mutating targets."""
+    return append_office_controlled_mutation_audit_event(payload)
+
+
+@app.get("/api/office/controlled-mutation/audit")
+async def list_office_controlled_mutation_audit(
+    limit: int = 50,
+    request_id: str | None = None,
+    correlation_id: str | None = None,
+    event_kind: str | None = None,
+):
+    """Read back stored safe audit DTOs from the local Hermes JSONL store."""
+    return list_office_controlled_mutation_audit_events(
+        limit=limit,
+        request_id=request_id,
+        correlation_id=correlation_id,
+        event_kind=event_kind,
+    )
+
+
+@app.post("/api/office/controlled-mutation/authority-adapter-registry")
+async def append_office_controlled_mutation_authority_adapter_registry(payload: Any = Body(None)):
+    """Append safe authority adapter registry metadata without credentials or dispatch."""
+    return append_office_controlled_mutation_authority_adapter_registry_event(payload)
+
+
+@app.get("/api/office/controlled-mutation/authority-adapter-registry")
+async def list_office_controlled_mutation_authority_adapter_registry(
+    limit: int = 50, adapter_kind: str | None = None
+):
+    """Read back stored safe authority adapter registry metadata from local Hermes JSONL."""
+    return list_office_controlled_mutation_authority_adapter_registry_events(
+        limit=limit,
+        adapter_kind=adapter_kind,
+    )
 
 
 @app.get("/api/office/events")
