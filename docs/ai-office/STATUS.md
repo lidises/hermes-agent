@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-17 21:58 KST
+Last updated: 2026-05-17 23:27 KST
 
 ## AI Office 통합 운영실 umbrella summary
 
@@ -22,6 +22,14 @@ Phase 0 consolidation docs:
 - `docs/ai-office/plans/2026-05-14-desk-rpg-master-spec-review.md`
 - `docs/ai-office/architecture/approval-model-contract.md`
 
+
+## Mac relay execution payload preview implemented locally
+
+After PR #11 was merged, added the authorized-handoff execution-payload preview boundary: `preview_office_controlled_mutation_nas_keeper_mac_relay_execution_payload(...)` and protected route `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-execution-payload-preview`. The route reads exactly one `authorized_for_mac_relay_execution` queue item, validates `handoff_ref`, `relay_execution_ref`, `nas_keeper_ref`, `relay_node_ref`, `relay_authorized_by`, and `relay_authorized_at`, revalidates the queued safe request envelope and authorization metadata, then returns the safe refs/metadata needed by a future Mac-local execution call.
+
+Boundary: preview only. It does not mutate queue state, mark execution started, execute a Mac relay write, write NAS files, start watcher/cron/daemon automation, bind dispatch/authority adapters, grant VPS NAS mounts/credentials, or expose raw markdown content. The response DTO returns `markdown_body_included=false` plus a queued body ref, byte count, and SHA-256; `mac_relay_write_enabled=false` and `actual_nas_write_enabled=false` remain fail-closed. Next boundary is `mac_relay_authenticated_execution_from_previewed_payload`.
+
+Verification 2026-05-17 23:27 KST: focused+combined backend `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_payload_preview.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_authorize_handoff.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_claim_dry_run.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_handoff_queue.py tests/hermes_cli/test_office_controlled_mutation_nas_mac_relay_write_execute.py tests/hermes_cli/test_office_controlled_mutation_nas_mac_relay_write_request.py tests/hermes_cli/test_office_controlled_mutation_nas_runtime_write.py tests/hermes_cli/test_office_api.py -q` -> `35 passed`; `py_compile` and `git diff --check` passed.
 
 ## NAS Keeper authorization state recording implemented locally
 

@@ -61,6 +61,7 @@ from hermes_cli.office_controlled_mutation import (
     execute_office_controlled_mutation_nas_mac_relay_write,
     dry_run_office_controlled_mutation_nas_keeper_mac_relay_claim,
     authorize_office_controlled_mutation_nas_keeper_mac_relay_handoff,
+    preview_office_controlled_mutation_nas_keeper_mac_relay_execution_payload,
     enqueue_office_controlled_mutation_nas_keeper_mac_relay_handoff,
     prepare_office_controlled_mutation_nas_mac_relay_write_request,
     build_office_controlled_mutation_nas_evidence_package_contract,
@@ -626,6 +627,12 @@ async def dry_run_office_controlled_mutation_nas_keeper_mac_relay_claim_route(pa
 async def authorize_office_controlled_mutation_nas_keeper_mac_relay_handoff_route(payload: Any = Body(None)):
     """Record NAS Keeper authorization for one handoff without executing a relay write."""
     return authorize_office_controlled_mutation_nas_keeper_mac_relay_handoff(payload)
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-execution-payload-preview")
+async def preview_office_controlled_mutation_nas_keeper_mac_relay_execution_payload_route(payload: Any = Body(None)):
+    """Preview the safe execution payload for an authorized handoff without writing NAS files."""
+    return preview_office_controlled_mutation_nas_keeper_mac_relay_execution_payload(payload)
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/mac-relay-write-execute")
