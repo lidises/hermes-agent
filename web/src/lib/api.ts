@@ -73,6 +73,38 @@ export interface OfficeNasSingleFileWriteResult {
   };
 }
 
+export interface OfficeNasMacRelayWritePayload extends OfficeNasSingleFileWritePayload {
+  relay_request_ref: string;
+  relay_execution_ref: string;
+  nas_keeper_ref: string;
+  relay_node_ref: string;
+  relay_authorized_by: string;
+  relay_authorized_at: string;
+}
+
+export interface OfficeNasMacRelayWriteResult {
+  executed: boolean;
+  written: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: null | {
+    mode: string;
+    relay_request_ref: string;
+    relay_execution_ref: string;
+    write_ref: string;
+    safe_logical_path: string;
+    safe_display_path: string;
+    bytes_written: number;
+    readback_verified: boolean;
+    readback_sha256: string;
+    readback_first_line: string;
+    rollback_created: boolean;
+    rollback_ref: string | null;
+    audit_written: boolean;
+    audit_ref: string | null;
+    capabilities: Record<string, boolean>;
+  };
+}
+
 export async function fetchJSON<T>(url: string, init?: RequestInit): Promise<T> {
   // Inject the session token into all /api/ requests.
   const headers = new Headers(init?.headers);
@@ -109,6 +141,12 @@ export const api = {
   getOfficeEvents: () => fetchJSON<OfficeSafeEventsResponse>("/api/office/events"),
   executeOfficeControlledMutationNasSingleFileWrite: (body: OfficeNasSingleFileWritePayload) =>
     fetchJSON<OfficeNasSingleFileWriteResult>("/api/office/controlled-mutation/nas-runtime/single-file-write", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
+  executeOfficeControlledMutationNasMacRelayWrite: (body: OfficeNasMacRelayWritePayload) =>
+    fetchJSON<OfficeNasMacRelayWriteResult>("/api/office/controlled-mutation/nas-runtime/mac-relay-write-execute", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),

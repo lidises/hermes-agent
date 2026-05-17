@@ -2161,14 +2161,14 @@ export type OfficeNasRuntimeN3ApprovalBoundaryStatusSurface = {
 
 
 export type OfficeNasRuntimeSingleFileWriteApprovalAction = {
-  stageLabel: "NAS Runtime Single File Write Approval Action 1";
+  stageLabel: "NAS Keeper Mac Relay Write Execution Action 1";
   title: string;
   detailKind: "nas_runtime_single_file_write_approval_action";
   sourceDetailKind: OfficeNasRuntimeN3ApprovalBoundaryStatusSurface["detailKind"];
-  endpoint: "/api/office/controlled-mutation/nas-runtime/single-file-write";
+  endpoint: "/api/office/controlled-mutation/nas-runtime/mac-relay-write-execute";
   approvalRequired: true;
   singleActionOnly: true;
-  safeFields: ["write_ref", "package_ref", "target_vault_ref", "safe_slug", "safe_title", "markdown_body", "requested_by", "requested_at"];
+  safeFields: ["relay_request_ref", "relay_execution_ref", "write_ref", "package_ref", "target_vault_ref", "safe_slug", "safe_title", "markdown_body", "requested_by", "requested_at", "nas_keeper_ref", "relay_node_ref", "relay_authorized_by", "relay_authorized_at"];
   enabledControls: 1;
   browserExecutableControlsEnabled: true;
   rawPathInputEnabled: false;
@@ -5340,14 +5340,14 @@ export function buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface(previewStor
 
 export function buildOfficeNasRuntimeSingleFileWriteApprovalAction(boundary: OfficeNasRuntimeN3ApprovalBoundaryStatusSurface): OfficeNasRuntimeSingleFileWriteApprovalAction {
   return {
-    stageLabel: "NAS Runtime Single File Write Approval Action 1",
-    title: "NAS runtime single-file write approval action",
+    stageLabel: "NAS Keeper Mac Relay Write Execution Action 1",
+    title: "NAS Keeper Mac relay write execution action",
     detailKind: "nas_runtime_single_file_write_approval_action",
     sourceDetailKind: boundary.detailKind,
-    endpoint: "/api/office/controlled-mutation/nas-runtime/single-file-write",
+    endpoint: "/api/office/controlled-mutation/nas-runtime/mac-relay-write-execute",
     approvalRequired: true,
     singleActionOnly: true,
-    safeFields: ["write_ref", "package_ref", "target_vault_ref", "safe_slug", "safe_title", "markdown_body", "requested_by", "requested_at"],
+    safeFields: ["relay_request_ref", "relay_execution_ref", "write_ref", "package_ref", "target_vault_ref", "safe_slug", "safe_title", "markdown_body", "requested_by", "requested_at", "nas_keeper_ref", "relay_node_ref", "relay_authorized_by", "relay_authorized_at"],
     enabledControls: 1,
     browserExecutableControlsEnabled: true,
     rawPathInputEnabled: false,
@@ -5356,7 +5356,7 @@ export function buildOfficeNasRuntimeSingleFileWriteApprovalAction(boundary: Off
     targetMutationEnabled: false,
     auditWriteEnabled: false,
     rawExcluded: true,
-    safeSummary: "승인 후 1회 실행되는 safe field 기반 단일 markdown 파일 쓰기입니다. raw 경로, mount 경로, credential 입력은 받지 않습니다.",
+    safeSummary: "NAS Keeper 승인 envelope를 Mac relay 실행 route로 1회 전달합니다. VPS는 direct NAS mount/credential/write를 갖지 않으며 Mac relay root가 없으면 안전하게 not-configured로 닫힙니다.",
   };
 }
 

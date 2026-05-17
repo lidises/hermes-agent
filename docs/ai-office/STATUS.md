@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-17 15:34 KST
+Last updated: 2026-05-17 21:11 KST
 
 ## AI Office 통합 운영실 umbrella summary
 
@@ -24,7 +24,13 @@ Phase 0 consolidation docs:
 
 
 
+## Mac relay execution UI wiring verified locally
 
+After PR #7 was merged, rewired `/office` frontend API/action model from the earlier direct runtime single-file-write endpoint to the protected Mac relay execution route `POST /api/office/controlled-mutation/nas-runtime/mac-relay-write-execute`. The browser action now sends the safe NAS Keeper + Mac relay refs (`relay_request_ref`, `relay_execution_ref`, `nas_keeper_ref`, `relay_node_ref`, authorization refs) plus the safe markdown fields only; raw path, mount path, token, and credential fields remain absent.
+
+Local verification 2026-05-17 21:11 KST: frontend focused tests `211 passed`; `npm run build` passed with the existing large chunk warning only; backend focused NAS relay/runtime/API tests `23 passed`; `py_compile` and `git diff --check` passed. Browser/server smoke with `HERMES_AI_OFFICE_MAC_RELAY_NAS_ROOT` configured found `data-office-nas-mac-relay-write-execute-action="true"`, relay safe fields, console/js errors 0, and route execution against the real Mac NAS mount returned `executed=true`, `written=true`, `readback_verified=true`, `audit_written=true`, and raw leak false for `Hermes::ai-office-ui-mac-relay-browser-smoke.md`.
+
+Publish/deploy evidence 2026-05-17 21:15 KST: committed branch `ai-office-mac-relay-ui-wiring`, opened PR #8, deployed that branch to the restricted VPS dashboard worktree, rebuilt frontend, restarted only `hermes-agent-dashboard.service`, and left `hermes-gateway.service` active/untouched. VPS frontend verification passed (`211 passed`, `npm run build`), backend focused NAS relay/runtime/API verification passed after restoring baseline pytest infrastructure in a restricted-user `.venv` (`23 passed`, `py_compile`, `git diff --check`). VPS browser smoke found `data-office-nas-mac-relay-write-execute-action="true"`, endpoint `/api/office/controlled-mutation/nas-runtime/mac-relay-write-execute`, relay safe fields only, console/js errors 0, and raw leak false. Authenticated VPS route smoke returned safe `mac_relay_root_not_configured` with `executed=false`, `written=false`, and raw leak false because the VPS intentionally has no Mac relay NAS root/credentials.
 
 ## Mac Relay Authenticated NAS Write Execution 1 completed locally
 
