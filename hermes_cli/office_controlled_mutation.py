@@ -2557,6 +2557,114 @@ def preview_office_controlled_mutation_nas_keeper_mac_relay_execution_payload(
     return {"previewed": True, "errors": [], "dto": dto}
 
 
+def execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_preview(
+    payload: object, *, queue_dir: Path | str | None = None, root_path: Path | str | None = None
+) -> dict[str, object]:
+    """Execute an authorized handoff using its previewed Mac relay payload.
+
+    This is a Mac-local execution bridge: it rereads the authorized queue item,
+    reuses the preview boundary for safe refs/authorization continuity, verifies
+    the queued markdown hash, then calls the Mac relay writer only when a local
+    relay root is configured. It does not mutate queue state, start automation,
+    dispatch to a daemon, expose markdown content in the response, or grant VPS
+    NAS authority.
+    """
+
+    if root_path is None:
+        return {
+            "executed": False,
+            "written": False,
+            "errors": [_error("mac_relay_root", "mac_relay_root_not_configured")],
+            "dto": None,
+        }
+
+    previewed = preview_office_controlled_mutation_nas_keeper_mac_relay_execution_payload(payload, queue_dir=queue_dir)
+    if not previewed.get("previewed"):
+        return {
+            "executed": False,
+            "written": False,
+            "errors": cast(list[dict[str, str]], previewed.get("errors") or []),
+            "dto": None,
+        }
+    preview_dto = cast(dict[str, object], previewed["dto"])
+
+    queue_file = _nas_keeper_handoff_queue_file(queue_dir)
+    wanted = str(cast(Mapping[str, object], payload)["handoff_ref"])
+    matched: dict[str, object] | None = None
+    for line in queue_file.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            item = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(item, Mapping) and item.get("handoff_ref") == wanted:
+            matched = dict(item)
+            break
+    if matched is None:
+        return {"executed": False, "written": False, "errors": [_error("handoff_ref", "handoff_not_found")], "dto": None}
+
+    markdown_body = str(matched.get("markdown_body", ""))
+    markdown_body_sha256 = hashlib.sha256(markdown_body.encode("utf-8")).hexdigest()
+    if markdown_body_sha256 != preview_dto.get("markdown_body_sha256"):
+        return {
+            "executed": False,
+            "written": False,
+            "errors": [_error("markdown_body_sha256", "queued_markdown_hash_mismatch")],
+            "dto": None,
+        }
+
+    execution_payload = dict(cast(dict[str, object], preview_dto["execution_payload_preview"]))
+    execution_payload["markdown_body"] = markdown_body
+    executed = execute_office_controlled_mutation_nas_mac_relay_write(execution_payload, root_path=root_path)
+    if not executed.get("executed"):
+        return {
+            "executed": False,
+            "written": False,
+            "errors": cast(list[dict[str, str]], executed.get("errors") or []),
+            "dto": None,
+        }
+    execution_dto = cast(dict[str, object], executed["dto"])
+
+    capabilities = dict(cast(dict[str, object], execution_dto["capabilities"]))
+    capabilities.update(
+        {
+            "queue_read_enabled": True,
+            "execution_payload_preview_enabled": True,
+            "queue_mutation_enabled": False,
+            "nas_keeper_authorization_recording_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+        }
+    )
+    dto = dict(execution_dto)
+    dto.update(
+        {
+            "mode": "nas_keeper_mac_relay_execution_from_preview_completed",
+            "handoff_ref": wanted,
+            "queue_ref": preview_dto.get("queue_ref"),
+            "queue_status": preview_dto.get("queue_status"),
+            "authorization_ref": preview_dto.get("authorization_ref"),
+            "previewed_payload_verified": True,
+            "markdown_body_ref": preview_dto.get("markdown_body_ref"),
+            "markdown_body_bytes": preview_dto.get("markdown_body_bytes"),
+            "markdown_body_sha256": markdown_body_sha256,
+            "markdown_body_included": False,
+            "execution_bridge_path": [
+                "authorized_queue_item_read",
+                "safe_execution_payload_previewed",
+                "mac_local_root_checked",
+                "mac_relay_execution_completed",
+            ],
+            "capabilities": capabilities,
+        }
+    )
+    return {"executed": True, "written": True, "errors": [], "dto": dto}
+
+
+
 def execute_office_controlled_mutation_nas_mac_relay_write(
     payload: object, *, root_path: Path | str | None = None
 ) -> dict[str, object]:

@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-17 15:34 KST
+Last updated: 2026-05-17 23:46 KST
 
 ## Start here after `/new`
 
@@ -73,6 +73,8 @@ When not to rely on `/goal` alone:
 The user approved A-G approval buckets for future AI Office work while excluding H public exposure changes and permanently excluding VPS NAS mounts/direct NAS credentials/VPS direct NAS raw reads. Use the prepared prompt and guardrails in `docs/ai-office/plans/2026-05-13-goal-a-g-approval-handoff.md` for the next `/goal` session. A-G are permission buckets, not standalone tasks: the next session must first identify the exact concrete task list from current NEXT/STATUS/evidence before implementing.
 
 ## Current next stage
+
+Immediate state 2026-05-17 23:46 KST: PR #12 is merged. The current local branch implements `Mac relay execution-from-preview bridge`: `execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_preview(...)` plus protected route `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-execution-from-preview`. It executes from an authorized queue item only after the preview boundary verifies safe refs/authorization continuity and markdown SHA-256, writes only when a Mac-local relay root is configured, and otherwise fails closed with `mac_relay_root_not_configured`. It does not mutate queue state, start watcher/cron/daemon automation, dispatch, bind authority adapters, grant VPS NAS mounts/credentials/direct writes, or echo markdown body in responses. VPS dashboard safe smoke at `fc255233` passed and confirmed `mac_relay_root_not_configured` on the restricted VPS. Recommended next after PR #13 merge: separately approve either queue execution-state recording or a harmless real Mac NAS smoke; keep VPS direct NAS authority forbidden.
 
 Current umbrella project: `AI Office Unified Operating Workbench` / `AI Office 통합 운영실`.
 
