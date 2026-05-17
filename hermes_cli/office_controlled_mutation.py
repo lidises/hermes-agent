@@ -182,6 +182,15 @@ _NAS_RUNTIME_WRITE_FIELDS = {
 _NAS_MAC_RELAY_WRITE_REQUEST_FIELDS = _NAS_RUNTIME_WRITE_FIELDS | {"relay_request_ref", "nas_keeper_ref", "relay_node_ref"}
 _NAS_KEEPER_HANDOFF_QUEUE_FIELDS = _NAS_MAC_RELAY_WRITE_REQUEST_FIELDS | {"handoff_ref", "queued_by", "queued_at"}
 _NAS_KEEPER_HANDOFF_CLAIM_DRY_RUN_FIELDS = {"handoff_ref", "claim_ref", "relay_node_ref", "claimed_by", "claimed_at"}
+_NAS_KEEPER_HANDOFF_AUTHORIZE_FIELDS = {
+    "handoff_ref",
+    "authorization_ref",
+    "nas_keeper_ref",
+    "relay_node_ref",
+    "authorized_by",
+    "authorized_at",
+    "authorization_decision",
+}
 _OPAQUE_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{2,119}$")
 _OPAQUE_REF_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_-]{1,40}:[A-Za-z0-9][A-Za-z0-9_.:-]{1,160}$")
 _SAFE_TEXT_RE = re.compile(r"^[^<>\\]{1,240}$")
@@ -2262,6 +2271,147 @@ def dry_run_office_controlled_mutation_nas_keeper_mac_relay_claim(
         "next_required_boundary": "nas_keeper_authorizes_and_mac_relay_executes",
     }
     return {"claimed": False, "dry_run": True, "errors": [], "dto": dto}
+
+
+
+def authorize_office_controlled_mutation_nas_keeper_mac_relay_handoff(
+    payload: object, *, queue_dir: Path | str | None = None
+) -> dict[str, object]:
+    """Record NAS Keeper authorization for one queued Mac relay handoff.
+
+    This is the first queue-mutation boundary after dry-run claim preview. It
+    marks one safe queued handoff as authorized for later Mac relay execution,
+    but it still does not execute a relay write, write NAS files, start
+    automation, or bind dispatch/authority adapters.
+    """
+
+    if not isinstance(payload, Mapping):
+        return {"authorized": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    errors: list[dict[str, str]] = []
+    if set(payload) - _NAS_KEEPER_HANDOFF_AUTHORIZE_FIELDS:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+    for field in sorted(_NAS_KEEPER_HANDOFF_AUTHORIZE_FIELDS):
+        if field not in payload:
+            errors.append(_error(field, "missing_field"))
+    for field in ("handoff_ref", "authorization_ref", "nas_keeper_ref", "relay_node_ref", "authorized_by"):
+        if field in payload and not _is_opaque_id(payload.get(field)):
+            errors.append(_error(field, "invalid_opaque_id"))
+    if payload.get("authorization_decision") != "authorize_mac_relay_execution":
+        errors.append(_error("authorization_decision", "unsupported_authorization_decision"))
+    if "authorized_at" in payload and not (isinstance(payload.get("authorized_at"), str) and _ISO_UTC_RE.fullmatch(payload["authorized_at"])):
+        errors.append(_error("authorized_at", "invalid_timestamp"))
+    if errors:
+        return {"authorized": False, "errors": sorted(errors, key=lambda item: (item["field"], item["code"])), "dto": None}
+
+    queue_file = _nas_keeper_handoff_queue_file(queue_dir)
+    if not queue_file.exists():
+        return {"authorized": False, "errors": [_error("queue", "queue_not_found")], "dto": None}
+
+    wanted = str(payload["handoff_ref"])
+    items: list[dict[str, object]] = []
+    matched_index: int | None = None
+    for line in queue_file.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            item = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(item, Mapping):
+            continue
+        item_dict = dict(item)
+        if item_dict.get("handoff_ref") == wanted and matched_index is None:
+            matched_index = len(items)
+        items.append(item_dict)
+
+    if matched_index is None:
+        return {"authorized": False, "errors": [_error("handoff_ref", "handoff_not_found")], "dto": None}
+
+    matched = items[matched_index]
+    if matched.get("queue_status") != "pending_nas_keeper_authorization":
+        return {"authorized": False, "errors": [_error("queue_status", "unsupported_queue_status")], "dto": None}
+    if matched.get("nas_keeper_ref") != payload["nas_keeper_ref"]:
+        return {"authorized": False, "errors": [_error("nas_keeper_ref", "nas_keeper_mismatch")], "dto": None}
+    if matched.get("relay_node_ref") != payload["relay_node_ref"]:
+        return {"authorized": False, "errors": [_error("relay_node_ref", "relay_node_mismatch")], "dto": None}
+
+    request_payload = {field: matched[field] for field in _NAS_MAC_RELAY_WRITE_REQUEST_FIELDS if field in matched}
+    prepared = prepare_office_controlled_mutation_nas_mac_relay_write_request(request_payload)
+    if prepared.get("errors"):
+        return {"authorized": False, "errors": cast(list[dict[str, str]], prepared.get("errors") or []), "dto": None}
+    prepared_dto = cast(dict[str, object], prepared["dto"])
+
+    updated = dict(matched)
+    updated.update(
+        {
+            "queue_status": "authorized_for_mac_relay_execution",
+            "authorization_ref": payload["authorization_ref"],
+            "authorization_decision": payload["authorization_decision"],
+            "authorized_by": payload["authorized_by"],
+            "authorized_at": payload["authorized_at"],
+            "authorization_path": [
+                "nas_keeper_review",
+                "authorization_recorded",
+                "mac_relay_execution_pending",
+                "no_real_nas_write",
+            ],
+            "capabilities": {
+                "queue_read_enabled": True,
+                "queue_mutation_enabled": True,
+                "nas_keeper_authorization_recording_enabled": True,
+                "execution_payload_preparation_enabled": True,
+                "vps_nas_mount_enabled": False,
+                "vps_credential_access_enabled": False,
+                "direct_vps_nas_write_enabled": False,
+                "mac_relay_write_enabled": False,
+                "actual_nas_write_enabled": False,
+                "watcher_enabled": False,
+                "cron_enabled": False,
+                "dispatch_enabled": False,
+                "authority_adapter_binding_enabled": False,
+            },
+            "next_required_boundary": "mac_relay_authenticated_execution_from_authorized_handoff",
+        }
+    )
+    items[matched_index] = updated
+    tmp_file = queue_file.with_suffix(queue_file.suffix + ".tmp")
+    with tmp_file.open("w", encoding="utf-8") as handle:
+        for item in items:
+            handle.write(json.dumps(item, sort_keys=True, ensure_ascii=False) + "\n")
+    tmp_file.replace(queue_file)
+
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_mac_relay_handoff_authorized",
+        "authorized": True,
+        "handoff_ref": payload["handoff_ref"],
+        "authorization_ref": payload["authorization_ref"],
+        "authorization_decision": payload["authorization_decision"],
+        "queue_ref": updated.get("queue_ref"),
+        "queue_status_before": "pending_nas_keeper_authorization",
+        "queue_status_after": "authorized_for_mac_relay_execution",
+        "authorized_by": payload["authorized_by"],
+        "authorized_at": payload["authorized_at"],
+        "relay_request_ref": updated["relay_request_ref"],
+        "write_ref": updated["write_ref"],
+        "package_ref": updated["package_ref"],
+        "target_vault_ref": updated["target_vault_ref"],
+        "safe_slug": updated["safe_slug"],
+        "safe_title": updated["safe_title"],
+        "requested_by": updated["requested_by"],
+        "requested_at": updated["requested_at"],
+        "nas_keeper_ref": updated["nas_keeper_ref"],
+        "relay_node_ref": updated["relay_node_ref"],
+        "execution_path": prepared_dto["execution_path"],
+        "authorization_path": updated["authorization_path"],
+        "safe_logical_path": prepared_dto["safe_logical_path"],
+        "safe_display_path": prepared_dto["safe_display_path"],
+        "payload_bytes": prepared_dto["payload_bytes"],
+        "execution_payload_preview_fields": sorted(_NAS_MAC_RELAY_WRITE_REQUEST_FIELDS | {"relay_execution_ref", "relay_authorized_by", "relay_authorized_at"}),
+        "capabilities": updated["capabilities"],
+        "next_required_boundary": updated["next_required_boundary"],
+    }
+    return {"authorized": True, "errors": [], "dto": dto}
 
 
 def execute_office_controlled_mutation_nas_mac_relay_write(
