@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-17 15:22 KST
+Last updated: 2026-05-17 15:34 KST
 
 ## AI Office 통합 운영실 umbrella summary
 
@@ -24,6 +24,19 @@ Phase 0 consolidation docs:
 
 
 
+
+
+## Mac Relay Authenticated NAS Write Execution 1 completed locally
+
+After verifying and merging PR #6, implemented the first actual Mac-relay execution slice for real NAS writes without giving the VPS direct NAS authority. Added `execute_office_controlled_mutation_nas_mac_relay_write(...)` in `hermes_cli/office_controlled_mutation.py`, protected route `POST /api/office/controlled-mutation/nas-runtime/mac-relay-write-execute` in `hermes_cli/web_server.py`, and focused tests in `tests/hermes_cli/test_office_controlled_mutation_nas_mac_relay_write_execute.py`.
+
+The route/helper requires the already-safe NAS Keeper request envelope plus `relay_execution_ref`, `relay_authorized_by`, and `relay_authorized_at`. It executes only when a Mac-local `HERMES_AI_OFFICE_MAC_RELAY_NAS_ROOT` is configured; otherwise it returns safe `mac_relay_root_not_configured`. Execution writes one markdown file under the Mac-local NAS root, performs readback SHA-256 + first-line verification, creates rollback material on replace, writes a safe vault-local `.ai-office-audit/<write_ref>.json`, and returns only safe logical/display path, byte count, readback hash/first line, rollback ref/status, audit ref/status, and capability flags. Direct VPS NAS mount/credential/write capabilities remain false.
+
+Real Mac NAS smoke 2026-05-17 15:34 KST wrote and then replaced `Hermes::ai-office-mac-relay-smoke.md` under the local NAS mount, verified readback, verified rollback on replacement, verified audit write, and verified no raw Mac/VPS path leak in result DTOs.
+
+Verification: `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_mac_relay_write_execute.py tests/hermes_cli/test_office_controlled_mutation_nas_mac_relay_write_request.py tests/hermes_cli/test_office_controlled_mutation_nas_runtime_write.py tests/hermes_cli/test_office_api.py -q` -> `23 passed`; `.venv/bin/python -m py_compile hermes_cli/office_controlled_mutation.py hermes_cli/web_server.py` passed; `git diff --check` passed.
+
+Safety/non-actions: no direct VPS NAS mount, credential, raw root path, or write authority; no Telegram gateway restart; no public exposure; no watcher/cron; no target dispatch/authority adapter binding; no VPS deploy/restart in this slice. Next practical boundary: wire `/office` UI to create the NAS Keeper request envelope and, on Mac relay context only, call the authenticated execution route; then publish/deploy the backend with the VPS route still safely returning `mac_relay_root_not_configured` unless a Mac-local relay root is present.
 
 ## NAS Keeper Mac Relay Write Request 1 completed locally
 

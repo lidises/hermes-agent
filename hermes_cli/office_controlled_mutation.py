@@ -8,6 +8,7 @@ Hermes profile storage, before any future authority implementation exists.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from collections.abc import Mapping, Sequence
@@ -2051,6 +2052,139 @@ def prepare_office_controlled_mutation_nas_mac_relay_write_request(payload: obje
         "next_required_boundary": "mac_relay_authenticated_execution",
     }
     return {"prepared": True, "errors": [], "dto": dto}
+
+
+
+def execute_office_controlled_mutation_nas_mac_relay_write(
+    payload: object, *, root_path: Path | str | None = None
+) -> dict[str, object]:
+    """Execute an authenticated NAS Keeper -> Mac relay write on the Mac side.
+
+    This helper is intentionally Mac-local: callers must provide a locally
+    configured NAS root. It never grants the VPS a NAS mount, credential, raw
+    root path, or direct write authority. Results contain only safe metadata.
+    """
+
+    if root_path is None:
+        return {"executed": False, "written": False, "errors": [_error("mac_relay_root", "mac_relay_root_not_configured")], "dto": None}
+    errors: list[dict[str, str]] = []
+    if not isinstance(payload, Mapping):
+        return {"executed": False, "written": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    required_execution_fields = {"relay_execution_ref", "relay_authorized_by", "relay_authorized_at"}
+    allowed_fields = _NAS_MAC_RELAY_WRITE_REQUEST_FIELDS | required_execution_fields
+    if set(payload) - allowed_fields:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+    for field in sorted(required_execution_fields):
+        if field not in payload:
+            errors.append(_error(field, "missing_field"))
+    for field in ("relay_execution_ref", "relay_authorized_by"):
+        if field in payload and not _is_opaque_id(payload.get(field)):
+            errors.append(_error(field, "invalid_opaque_id"))
+    if "relay_authorized_at" in payload and not (
+        isinstance(payload.get("relay_authorized_at"), str) and _ISO_UTC_RE.fullmatch(payload["relay_authorized_at"])
+    ):
+        errors.append(_error("relay_authorized_at", "invalid_timestamp"))
+
+    request_payload = {field: payload[field] for field in _NAS_MAC_RELAY_WRITE_REQUEST_FIELDS if field in payload}
+    prepared = prepare_office_controlled_mutation_nas_mac_relay_write_request(request_payload)
+    errors.extend(cast(list[dict[str, str]], prepared.get("errors") or []))
+    errors = sorted(errors, key=lambda item: (item["field"], item["code"]))
+    if errors:
+        return {"executed": False, "written": False, "errors": errors, "dto": None}
+
+    write_payload = {field: payload[field] for field in _NAS_RUNTIME_WRITE_FIELDS}
+    write_result = execute_office_controlled_mutation_nas_single_file_write(write_payload, root_path=root_path)
+    if not write_result.get("written"):
+        return {"executed": False, "written": False, "errors": cast(list[dict[str, str]], write_result.get("errors") or []), "dto": None}
+
+    root = Path(root_path).expanduser().resolve()
+    target = (root / str(payload["target_vault_ref"]) / f"{payload['safe_slug']}.md").resolve()
+    try:
+        target.relative_to(root)
+    except ValueError:
+        return {"executed": False, "written": False, "errors": [_error("safe_slug", "path_escape_blocked")], "dto": None}
+    readback = target.read_text(encoding="utf-8")
+    readback_sha256 = hashlib.sha256(readback.encode("utf-8")).hexdigest()
+    readback_first_line = readback.splitlines()[0] if readback.splitlines() else ""
+    if not _is_safe_text(readback_first_line):
+        readback_first_line = ""
+
+    write_dto = cast(dict[str, object], write_result["dto"])
+    audit_ref = f"audit_{payload['write_ref']}"
+    audit_dir = target.parent / ".ai-office-audit"
+    audit_path = audit_dir / f"{payload['write_ref']}.json"
+    audit_body = {
+        "schema_version": 1,
+        "mode": "nas_keeper_mac_relay_write_audit",
+        "audit_ref": audit_ref,
+        "relay_request_ref": payload["relay_request_ref"],
+        "relay_execution_ref": payload["relay_execution_ref"],
+        "write_ref": payload["write_ref"],
+        "package_ref": payload["package_ref"],
+        "target_vault_ref": payload["target_vault_ref"],
+        "safe_slug": payload["safe_slug"],
+        "safe_logical_path": write_dto["safe_logical_path"],
+        "safe_display_path": write_dto["safe_display_path"],
+        "requested_by": payload["requested_by"],
+        "requested_at": payload["requested_at"],
+        "nas_keeper_ref": payload["nas_keeper_ref"],
+        "relay_node_ref": payload["relay_node_ref"],
+        "relay_authorized_by": payload["relay_authorized_by"],
+        "relay_authorized_at": payload["relay_authorized_at"],
+        "bytes_written": write_dto["bytes_written"],
+        "readback_sha256": readback_sha256,
+        "rollback_created": write_dto["rollback_created"],
+        "rollback_ref": write_dto["rollback_ref"],
+    }
+    try:
+        audit_dir.mkdir(parents=True, exist_ok=True)
+        audit_path.write_text(json.dumps(audit_body, sort_keys=True, ensure_ascii=False) + "\n", encoding="utf-8")
+        audit_written = True
+    except PermissionError:
+        audit_written = False
+
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_mac_relay_write_completed",
+        "relay_request_ref": payload["relay_request_ref"],
+        "relay_execution_ref": payload["relay_execution_ref"],
+        "write_ref": payload["write_ref"],
+        "package_ref": payload["package_ref"],
+        "target_vault_ref": payload["target_vault_ref"],
+        "safe_slug": payload["safe_slug"],
+        "safe_title": payload["safe_title"],
+        "requested_by": payload["requested_by"],
+        "requested_at": payload["requested_at"],
+        "nas_keeper_ref": payload["nas_keeper_ref"],
+        "relay_node_ref": payload["relay_node_ref"],
+        "relay_authorized_by": payload["relay_authorized_by"],
+        "relay_authorized_at": payload["relay_authorized_at"],
+        "execution_path": ["ai_office_request", "nas_keeper", "mac_relay", "real_nas"],
+        "safe_logical_path": write_dto["safe_logical_path"],
+        "safe_display_path": write_dto["safe_display_path"],
+        "bytes_written": write_dto["bytes_written"],
+        "readback_verified": readback == str(payload["markdown_body"]),
+        "readback_sha256": readback_sha256,
+        "readback_first_line": readback_first_line,
+        "rollback_created": write_dto["rollback_created"],
+        "rollback_ref": write_dto["rollback_ref"],
+        "audit_written": audit_written,
+        "audit_ref": audit_ref if audit_written else None,
+        "capabilities": {
+            "nas_keeper_required": True,
+            "mac_relay_required": True,
+            "vps_nas_mount_enabled": False,
+            "vps_credential_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+            "mac_relay_write_enabled": True,
+            "actual_nas_write_enabled": True,
+            "filesystem_write_enabled": True,
+            "filesystem_read_enabled": True,
+            "audit_write_enabled": audit_written,
+            "target_mutation_enabled": False,
+        },
+    }
+    return {"executed": True, "written": True, "errors": [], "dto": dto}
 
 def execute_office_controlled_mutation_nas_single_file_write(
     payload: object, *, root_path: Path | str | None = None
