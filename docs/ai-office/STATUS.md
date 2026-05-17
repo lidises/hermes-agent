@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-17 21:33 KST
+Last updated: 2026-05-17 21:46 KST
 
 ## AI Office 통합 운영실 umbrella summary
 
@@ -22,6 +22,14 @@ Phase 0 consolidation docs:
 - `docs/ai-office/plans/2026-05-14-desk-rpg-master-spec-review.md`
 - `docs/ai-office/architecture/approval-model-contract.md`
 
+
+## Mac relay claim dry-run boundary implemented locally
+
+After PR #9 was merged, added the first Mac relay pull/claim preview boundary before any queue mutation or actual NAS execution. New helper `dry_run_office_controlled_mutation_nas_keeper_mac_relay_claim(...)` and protected route `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-handoff-claim-dry-run` read one queued handoff by `handoff_ref`, validate `claim_ref`, `relay_node_ref`, `claimed_by`, and `claimed_at`, revalidate the queued safe request envelope, require the relay node to match, and return only safe claim metadata.
+
+Boundary: dry-run only. It does not mutate the JSONL queue, mark an item claimed, authorize execution, write NAS files, start watcher/cron/daemon automation, bind dispatch/authority adapters, grant VPS NAS mounts/credentials, or expose `markdown_body` in the response. The DTO returns `claim_status=would_claim`, preserves `queue_status_after=pending_nas_keeper_authorization`, and keeps `mac_relay_write_enabled=false` / `actual_nas_write_enabled=false`.
+
+Verification 2026-05-17 21:46 KST: focused+combined backend `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_claim_dry_run.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_handoff_queue.py tests/hermes_cli/test_office_controlled_mutation_nas_mac_relay_write_execute.py tests/hermes_cli/test_office_controlled_mutation_nas_mac_relay_write_request.py tests/hermes_cli/test_office_controlled_mutation_nas_runtime_write.py tests/hermes_cli/test_office_api.py -q` -> `29 passed`; `py_compile` and `git diff --check` passed. VPS safe deploy smoke 2026-05-17 21:48 KST: deployed branch to restricted dashboard worktree, focused backend `29 passed`, `py_compile`/`git diff --check` passed, restarted only `hermes-agent-dashboard.service`, left `hermes-gateway.service` active/untouched, `/office` HTML 200 with raw leak false, authenticated enqueue+claim dry-run returned `claimed=false`, `dry_run=true`, `claim_status=would_claim`, `queue_status_after=pending_nas_keeper_authorization`, `actual_nas_write_enabled=false`, raw leak false. Next practical boundary is explicit NAS Keeper authorization/claim state recording, still without watcher/cron automation.
 
 ## NAS Keeper handoff queue semantics implemented locally
 
