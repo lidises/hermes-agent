@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-17 15:16 KST
+Last updated: 2026-05-17 15:22 KST
 
 ## AI Office 통합 운영실 umbrella summary
 
@@ -23,6 +23,17 @@ Phase 0 consolidation docs:
 - `docs/ai-office/architecture/approval-model-contract.md`
 
 
+
+
+## NAS Keeper Mac Relay Write Request 1 completed locally
+
+After PR #5 was merged, the user clarified the standing architecture: real NAS writes must flow through the AI Office NAS Keeper via a Mac relay, not by giving the VPS direct NAS mounts, credentials, or filesystem write authority. Implemented the next request-only boundary for that direction. Added `prepare_office_controlled_mutation_nas_mac_relay_write_request(...)` in `hermes_cli/office_controlled_mutation.py`, protected dashboard route `POST /api/office/controlled-mutation/nas-runtime/mac-relay-write-request` in `hermes_cli/web_server.py`, and focused tests in `tests/hermes_cli/test_office_controlled_mutation_nas_mac_relay_write_request.py`.
+
+The new boundary validates the same safe write fields plus `relay_request_ref`, `nas_keeper_ref`, and `relay_node_ref`, then returns a safe envelope with execution path `ai_office_request -> nas_keeper -> mac_relay -> real_nas`. It prepares only a request envelope: no file is written, no audit is appended, no VPS NAS mount/credential/root path is accepted, and `direct_vps_nas_write_enabled`, `mac_relay_write_enabled`, and `actual_nas_write_enabled` remain false until a separate authenticated Mac relay execution boundary is implemented. Unsupported/raw fields are rejected without echo.
+
+Verification 2026-05-17 15:22 KST: focused+combined backend `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_mac_relay_write_request.py tests/hermes_cli/test_office_controlled_mutation_nas_runtime_write.py tests/hermes_cli/test_office_api.py -q` -> `19 passed`; `.venv/bin/python -m py_compile hermes_cli/office_controlled_mutation.py hermes_cli/web_server.py` passed; `git diff --check` passed.
+
+Safety/non-actions: no direct VPS NAS mount/credentials/write, no real Mac relay daemon or credential exchange, no actual NAS write in this slice, no Telegram gateway restart, no public exposure, no watcher/cron, no target dispatch/authority adapter binding, and no raw path/token echo. Next boundary is `mac_relay_authenticated_execution`: Mac-local execution by NAS Keeper using local configured NAS root, with audit/readback/rollback and a safe result relay back to AI Office.
 
 ## NAS Runtime Single File Write UI + real local NAS smoke completed locally
 

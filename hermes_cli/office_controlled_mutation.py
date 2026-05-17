@@ -178,6 +178,7 @@ _NAS_RUNTIME_WRITE_FIELDS = {
     "requested_by",
     "requested_at",
 }
+_NAS_MAC_RELAY_WRITE_REQUEST_FIELDS = _NAS_RUNTIME_WRITE_FIELDS | {"relay_request_ref", "nas_keeper_ref", "relay_node_ref"}
 _OPAQUE_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{2,119}$")
 _OPAQUE_REF_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_-]{1,40}:[A-Za-z0-9][A-Za-z0-9_.:-]{1,160}$")
 _SAFE_TEXT_RE = re.compile(r"^[^<>\\]{1,240}$")
@@ -1973,6 +1974,83 @@ def _is_safe_markdown_body(value: object) -> bool:
         return False
     return not _has_raw_marker(value)
 
+
+
+def prepare_office_controlled_mutation_nas_mac_relay_write_request(payload: object) -> dict[str, object]:
+    """Validate a NAS Keeper -> Mac relay write request without writing files.
+
+    This is the VPS-safe request boundary for real NAS writes: the dashboard can
+    prepare a safe envelope for a Mac relay owned by the NAS Keeper, but the VPS
+    receives no NAS mount, credential, root path, or direct filesystem authority.
+    """
+
+    errors: list[dict[str, str]] = []
+    if not isinstance(payload, Mapping):
+        return {"prepared": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+
+    if set(payload) - _NAS_MAC_RELAY_WRITE_REQUEST_FIELDS:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+    required = sorted(_NAS_RUNTIME_WRITE_FIELDS | {"relay_request_ref", "nas_keeper_ref", "relay_node_ref"})
+    for field in required:
+        if field not in payload:
+            errors.append(_error(field, "missing_field"))
+    for field in ("relay_request_ref", "write_ref", "package_ref", "target_vault_ref", "requested_by", "nas_keeper_ref", "relay_node_ref"):
+        if field in payload and not _is_opaque_id(payload.get(field)):
+            errors.append(_error(field, "invalid_opaque_id"))
+    if "safe_slug" in payload and not (
+        isinstance(payload.get("safe_slug"), str)
+        and _SAFE_SLUG_RE.fullmatch(payload["safe_slug"])
+        and not _has_raw_marker(payload["safe_slug"])
+        and ".." not in payload["safe_slug"]
+        and "/" not in payload["safe_slug"]
+    ):
+        errors.append(_error("safe_slug", "invalid_safe_slug"))
+    if "safe_title" in payload and not _is_safe_text(payload.get("safe_title")):
+        errors.append(_error("safe_title", "invalid_safe_text"))
+    if "markdown_body" in payload and not _is_safe_markdown_body(payload.get("markdown_body")):
+        errors.append(_error("markdown_body", "raw_marker_detected"))
+    if "requested_at" in payload and not (
+        isinstance(payload.get("requested_at"), str) and _ISO_UTC_RE.fullmatch(payload["requested_at"])
+    ):
+        errors.append(_error("requested_at", "invalid_timestamp"))
+
+    errors = sorted(errors, key=lambda item: (item["field"], item["code"]))
+    if errors:
+        return {"prepared": False, "errors": errors, "dto": None}
+
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_mac_relay_write_request_prepared",
+        "relay_request_ref": payload["relay_request_ref"],
+        "write_ref": payload["write_ref"],
+        "package_ref": payload["package_ref"],
+        "target_vault_ref": payload["target_vault_ref"],
+        "safe_slug": payload["safe_slug"],
+        "safe_title": payload["safe_title"],
+        "requested_by": payload["requested_by"],
+        "requested_at": payload["requested_at"],
+        "nas_keeper_ref": payload["nas_keeper_ref"],
+        "relay_node_ref": payload["relay_node_ref"],
+        "execution_path": ["ai_office_request", "nas_keeper", "mac_relay", "real_nas"],
+        "safe_logical_path": f"{payload['target_vault_ref']}::{payload['safe_slug']}.md",
+        "safe_display_path": f"{payload['target_vault_ref']} / {payload['safe_slug']}.md",
+        "payload_bytes": len(str(payload["markdown_body"]).encode("utf-8")),
+        "capabilities": {
+            "request_prepared": True,
+            "nas_keeper_required": True,
+            "mac_relay_required": True,
+            "vps_nas_mount_enabled": False,
+            "vps_credential_access_enabled": False,
+            "vps_filesystem_write_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+            "mac_relay_write_enabled": False,
+            "actual_nas_write_enabled": False,
+            "audit_write_enabled": False,
+            "target_mutation_enabled": False,
+        },
+        "next_required_boundary": "mac_relay_authenticated_execution",
+    }
+    return {"prepared": True, "errors": [], "dto": dto}
 
 def execute_office_controlled_mutation_nas_single_file_write(
     payload: object, *, root_path: Path | str | None = None
