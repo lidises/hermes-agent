@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-17 23:27 KST
+Last updated: 2026-05-17 23:43 KST
 
 ## AI Office 통합 운영실 umbrella summary
 
@@ -22,6 +22,14 @@ Phase 0 consolidation docs:
 - `docs/ai-office/plans/2026-05-14-desk-rpg-master-spec-review.md`
 - `docs/ai-office/architecture/approval-model-contract.md`
 
+
+## Mac relay execution-from-preview bridge implemented locally
+
+After PR #12 was merged, added the next Mac-local execution bridge: `execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_preview(...)` and protected route `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-execution-from-preview`. The helper rereads exactly one `authorized_for_mac_relay_execution` queue item, reuses the payload-preview boundary for authorization continuity and safe refs, verifies the queued markdown SHA-256 against the preview DTO, injects the queued markdown body only into the internal Mac relay execution call, and writes through the existing Mac-local relay writer only when `HERMES_AI_OFFICE_MAC_RELAY_NAS_ROOT` is configured.
+
+Boundary: Mac-local execution bridge only. It does not mutate queue state, mark queue execution completed, start watcher/cron/daemon automation, dispatch to a relay service, bind authority adapters, grant VPS NAS mounts/credentials/direct write authority, or expose raw markdown content in the response. With no Mac relay root configured it fails closed with `mac_relay_root_not_configured`; with a tmp root it performs a bounded single-file write/readback/audit via the existing relay writer. Next boundary is queue execution-state recording and/or real Mac NAS smoke, still without VPS direct NAS authority.
+
+Verification 2026-05-17 23:43 KST: focused RED first failed on missing helper/import and missing route (`3 failed`); GREEN focused `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_from_preview.py -q -o 'addopts='` -> `3 passed`; combined backend `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_from_preview.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_payload_preview.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_authorize_handoff.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_claim_dry_run.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_handoff_queue.py tests/hermes_cli/test_office_controlled_mutation_nas_mac_relay_write_execute.py tests/hermes_cli/test_office_controlled_mutation_nas_mac_relay_write_request.py tests/hermes_cli/test_office_controlled_mutation_nas_runtime_write.py tests/hermes_cli/test_office_api.py -q` -> `38 passed`.
 
 ## Mac relay execution payload preview implemented locally
 
