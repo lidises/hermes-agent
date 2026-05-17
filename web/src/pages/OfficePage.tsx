@@ -146,6 +146,7 @@ import {
   buildOfficeNasPathValidationStatusSurface,
   buildOfficeNasPathPreviewStatusSurface,
   buildOfficeNasPathPreviewStoreReadbackStatusSurface,
+  buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface,
   buildOfficeDeskRpgReadOnlyChainCompletionReview,
   buildOfficeEventDrivenCharacterStateProjection,
   buildOfficeCharacterStateRoomOverlay,
@@ -195,6 +196,7 @@ import {
   type OfficeNasPathValidationStatusSurface,
   type OfficeNasPathPreviewStatusSurface,
   type OfficeNasPathPreviewStoreReadbackStatusSurface,
+  type OfficeNasRuntimeN3ApprovalBoundaryStatusSurface,
   type OfficeDeskRpgReadOnlyChainCompletionReview,
   type OfficeControlledMutationContractPostureProjection,
   type OfficeControlledMutationContractPosturePolish,
@@ -3480,6 +3482,67 @@ export function NasPathPreviewStoreReadbackStatusSurfacePanel({ status }: { stat
   );
 }
 
+export function NasRuntimeN3ApprovalBoundaryStatusSurfacePanel({ boundary }: { boundary: OfficeNasRuntimeN3ApprovalBoundaryStatusSurface }) {
+  return (
+    <Card
+      data-office-nas-runtime-n3-boundary="true"
+      data-office-nas-runtime-n3-boundary-enabled-controls={boundary.enabledControls}
+      data-office-nas-runtime-n3-boundary-approval-status={boundary.approvalStatus}
+      data-office-nas-runtime-n3-boundary-fallback-reason={boundary.fallbackReason}
+      data-office-nas-runtime-n3-boundary-frontend-only={String(boundary.frontendOnly)}
+      data-office-nas-runtime-n3-boundary-backend-api-changed={String(boundary.backendApiChanged)}
+      data-office-nas-runtime-n3-boundary-schema-route-added={String(boundary.schemaRouteAdded)}
+      data-office-nas-runtime-n3-boundary-validation-route-added={String(boundary.validationRouteAdded)}
+      data-office-nas-runtime-n3-boundary-local-path-mapping-validation-enabled={String(boundary.localPathMappingValidationEnabled)}
+      data-office-nas-runtime-n3-boundary-runtime-enabled={String(boundary.pathResolutionRuntimeEnabled)}
+      data-office-nas-runtime-n3-boundary-vault-mapping-enabled={String(boundary.vaultMappingEnabled)}
+      data-office-nas-runtime-n3-boundary-mount-discovery-enabled={String(boundary.mountDiscoveryEnabled)}
+      data-office-nas-runtime-n3-boundary-mount-access-enabled={String(boundary.nasMountAccessEnabled)}
+      data-office-nas-runtime-n3-boundary-filesystem-read-enabled={String(boundary.filesystemReadEnabled)}
+      data-office-nas-runtime-n3-boundary-filesystem-write-enabled={String(boundary.filesystemWriteEnabled)}
+      data-office-nas-runtime-n3-boundary-nas-write-enabled={String(boundary.nasWriteEnabled)}
+      data-office-nas-runtime-n3-boundary-evidence-file-persistence-enabled={String(boundary.evidenceFilePersistenceEnabled)}
+      data-office-nas-runtime-n3-boundary-rollback-point-created={String(boundary.rollbackPointCreated)}
+      data-office-nas-runtime-n3-boundary-credential-access-enabled={String(boundary.credentialAccessEnabled)}
+      data-office-nas-runtime-n3-boundary-audit-write-enabled={String(boundary.auditWriteEnabled)}
+      data-office-nas-runtime-n3-boundary-dispatch-enabled={String(boundary.dispatchEnabled)}
+      data-office-nas-runtime-n3-boundary-request-creation-enabled={String(boundary.requestCreationEnabled)}
+      data-office-nas-runtime-n3-boundary-safe-projection-only={String(boundary.safeProjectionOnly)}
+      data-office-nas-runtime-n3-boundary-raw-excluded={String(boundary.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4 text-amber-300" /> {boundary.title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-dashed border-amber-300/30 bg-amber-300/5 p-3">
+            {boundary.requestedBoundary} · {boundary.approvalStatus} · fallback {boundary.fallbackReason} · safe fallback {String(boundary.safeFallbackSelected)}
+          </div>
+          <div className="grid gap-2 md:grid-cols-2">
+            {boundary.nextApprovalOptions.map((option) => (
+              <div
+                key={option.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-nas-runtime-n3-boundary-option={option.id}
+                data-office-nas-runtime-n3-boundary-option-status={option.status}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{option.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{option.label}</div>
+                <div className="mt-1 leading-5">{option.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-nas-runtime-n3-boundary-summary="true">
+            source {boundary.sourceDetailKind} · options {boundary.optionCount} · controls {boundary.enabledControls} · validation route {String(boundary.validationRouteAdded)} · local path mapping validation {String(boundary.localPathMappingValidationEnabled)} · runtime path resolution {String(boundary.pathResolutionRuntimeEnabled)} · mount access {String(boundary.nasMountAccessEnabled)} · filesystem write {String(boundary.filesystemWriteEnabled)} · raw excluded {String(boundary.rawExcluded)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function DeskRpgReadOnlyChainCompletionReviewPanel({ review }: { review: OfficeDeskRpgReadOnlyChainCompletionReview }) {
   return (
     <Card
@@ -4800,6 +4863,10 @@ export default function OfficePage() {
     () => buildOfficeNasPathPreviewStoreReadbackStatusSurface(nasPathPreviewStatusSurface),
     [nasPathPreviewStatusSurface],
   );
+  const nasRuntimeN3ApprovalBoundaryStatusSurface = useMemo(
+    () => buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface(nasPathPreviewStoreReadbackStatusSurface),
+    [nasPathPreviewStoreReadbackStatusSurface],
+  );
   const deskRpgReadOnlyChainCompletionReview = useMemo(
     () => buildOfficeDeskRpgReadOnlyChainCompletionReview(nasKeeperRollbackEvidencePreview),
     [nasKeeperRollbackEvidencePreview],
@@ -5116,6 +5183,8 @@ export default function OfficePage() {
       <NasPathPreviewStatusSurfacePanel status={nasPathPreviewStatusSurface} />
 
       <NasPathPreviewStoreReadbackStatusSurfacePanel status={nasPathPreviewStoreReadbackStatusSurface} />
+
+      <NasRuntimeN3ApprovalBoundaryStatusSurfacePanel boundary={nasRuntimeN3ApprovalBoundaryStatusSurface} />
 
       <DeskRpgReadOnlyChainCompletionReviewPanel review={deskRpgReadOnlyChainCompletionReview} />
 

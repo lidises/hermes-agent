@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-17 00:16 KST
+Last updated: 2026-05-17 11:18 KST
 
 ## AI Office 통합 운영실 umbrella summary
 
@@ -21,6 +21,19 @@ Phase 0 consolidation docs:
 - `docs/ai-office/architecture/unified-operating-workbench.md`
 - `docs/ai-office/plans/2026-05-14-desk-rpg-master-spec-review.md`
 - `docs/ai-office/architecture/approval-model-contract.md`
+
+
+## NAS Runtime N3 Approval Boundary Status Surface 1 completed locally
+
+After the N3 approval prompt timed out, proceeded with the safe frontend-only/read-only fallback instead of implementing `N3 local path mapping validate-only`. Added `OfficeNasRuntimeN3ApprovalBoundaryStatusSurface` and `buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface(...)` in `web/src/pages/officeView.ts`, rendered `NasRuntimeN3ApprovalBoundaryStatusSurfacePanel` in `web/src/pages/OfficePage.tsx`, and covered helper/component behavior in `web/src/pages/OfficePage.test.ts` and `web/src/pages/OfficePage.rpg.test.tsx`.
+
+The surface records `N3 local path mapping validate-only` as `approval_required`, `fallbackReason=approval_prompt_timed_out`, and lists the next explicit approval options (`n3_validate_only`, `n3_red_tests_only`, `runtime_path_resolution_dry_run`, `frontend_fallback_continue`). It keeps `enabledControls=0`, `frontendOnly=true`, `backendApiChanged=false`, `schemaRouteAdded=false`, `validationRouteAdded=false`, `localPathMappingValidationEnabled=false`, `pathResolutionRuntimeEnabled=false`, `vaultMappingEnabled=false`, `mountDiscoveryEnabled=false`, `nasMountAccessEnabled=false`, `filesystemReadEnabled=false`, `filesystemWriteEnabled=false`, `nasWriteEnabled=false`, `evidenceFilePersistenceEnabled=false`, `rollbackPointCreated=false`, `credentialAccessEnabled=false`, `auditWriteEnabled=false`, `dispatchEnabled=false`, `requestCreationEnabled=false`, `safeProjectionOnly=true`, and `rawExcluded=true`.
+
+Verification 2026-05-17 11:18 KST: RED first failed as expected with missing `buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface(...)`; GREEN focused `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx -t "NAS Runtime N3 Approval Boundary"` → `2 passed`; full Office frontend `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx` → `205 passed`; `npm run build` passed with the existing Vite large chunk warning only; `git diff --check` passed; diff-only safety scan found no browser/network APIs, no executable controls (only negative test assertions), no storage/runtime enablement, and no secret assignment.
+
+Safety/non-actions: no backend/schema/API route/service change, no storage change, no browser API/storage calls, no forms/buttons/inputs/selects/textareas/handlers, no local path mapping validation implementation, no runtime filesystem/NAS path resolution, no vault mapping, no NAS mount discovery/access, no filesystem/NAS read/write, no actual NAS save/write/preparation runtime, no evidence file persistence, no rollback point creation, no credential/auth/env change, no audit write, no target dispatch/runtime mutation, no real authority adapter binding/dispatch, no migration, no VPS/NAS/Kanban/cron mutation, no deploy/restart, no push/PR/merge, and no raw private value projection.
+
+Next boundary requiring explicit approval: N3 local path mapping validate-only, N3 RED tests only, N4 runtime path resolution dry-run, N5 mount health read-only, N6 evidence package files dry-run, N7 single-package write with rollback, credential/auth/env change, audit write, target dispatch/runtime mutation, real authority adapter binding/dispatch, migration, VPS/NAS/Kanban/cron mutation, deploy/restart/push/PR/merge, or browser executable control.
 
 ## NAS Runtime Boundary Capability Contract 1 completed locally
 

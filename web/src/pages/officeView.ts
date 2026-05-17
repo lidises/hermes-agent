@@ -2116,6 +2116,49 @@ export type OfficeNasPathPreviewStoreReadbackStatusSurface = {
   rawExcluded: true;
 };
 
+
+export type OfficeNasRuntimeN3ApprovalOption = {
+  id: "n3_validate_only" | "n3_red_tests_only" | "runtime_path_resolution_dry_run" | "frontend_fallback_continue";
+  label: string;
+  status: "approval_required" | "available_without_backend";
+  summary: string;
+  rawExcluded: true;
+};
+
+export type OfficeNasRuntimeN3ApprovalBoundaryStatusSurface = {
+  stageLabel: "NAS Runtime N3 Approval Boundary Status Surface 1";
+  title: string;
+  detailKind: "nas_runtime_n3_approval_boundary_status_surface";
+  sourceDetailKind: OfficeNasPathPreviewStoreReadbackStatusSurface["detailKind"];
+  requestedBoundary: "N3 local path mapping validate-only";
+  approvalStatus: "approval_required";
+  fallbackReason: "approval_prompt_timed_out";
+  safeFallbackSelected: true;
+  nextApprovalOptions: OfficeNasRuntimeN3ApprovalOption[];
+  optionCount: number;
+  enabledControls: 0;
+  frontendOnly: true;
+  backendApiChanged: false;
+  schemaRouteAdded: false;
+  validationRouteAdded: false;
+  localPathMappingValidationEnabled: false;
+  pathResolutionRuntimeEnabled: false;
+  vaultMappingEnabled: false;
+  mountDiscoveryEnabled: false;
+  nasMountAccessEnabled: false;
+  filesystemReadEnabled: false;
+  filesystemWriteEnabled: false;
+  nasWriteEnabled: false;
+  evidenceFilePersistenceEnabled: false;
+  rollbackPointCreated: false;
+  credentialAccessEnabled: false;
+  auditWriteEnabled: false;
+  dispatchEnabled: false;
+  requestCreationEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeDeskRpgReadOnlyChainCompletionReviewCard = {
   id: "request_to_orchestrator" | "evidence_to_review" | "approval_to_nas_keeper" | "next_projection_gap";
   label: string;
@@ -5203,6 +5246,72 @@ export function buildOfficeNasPathPreviewStoreReadbackStatusSurface(preview: Off
     dispatchEnabled: false,
     requestCreationEnabled: false,
     workAssignmentEnabled: false,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface(previewStore: OfficeNasPathPreviewStoreReadbackStatusSurface): OfficeNasRuntimeN3ApprovalBoundaryStatusSurface {
+  const nextApprovalOptions: OfficeNasRuntimeN3ApprovalOption[] = [
+    {
+      id: "n3_validate_only",
+      label: "N3 validate-only helper + protected POST",
+      status: "approval_required",
+      summary: "Local path mapping validation can be added only after explicit approval; it must still avoid runtime path resolution, mount access, filesystem read/write, NAS writes, credentials, audit, dispatch, and raw echo.",
+      rawExcluded: true,
+    },
+    {
+      id: "n3_red_tests_only",
+      label: "N3 RED tests only",
+      status: "approval_required",
+      summary: "A RED-only artifact may describe the future validate-only contract, but production code remains untouched unless separately approved.",
+      rawExcluded: true,
+    },
+    {
+      id: "runtime_path_resolution_dry_run",
+      label: "N4+ runtime path resolution dry-run",
+      status: "approval_required",
+      summary: "Runtime path resolution, vault mapping, mount health, evidence file dry-run, rollback, or single-package write all remain later approval gates.",
+      rawExcluded: true,
+    },
+    {
+      id: "frontend_fallback_continue",
+      label: "Frontend-only fallback continuation",
+      status: "available_without_backend",
+      summary: "When approval is absent or timed out, continue only with read-only posture surfaces that add no API, storage, filesystem, NAS, credential, audit, dispatch, or browser controls.",
+      rawExcluded: true,
+    },
+  ];
+  return {
+    stageLabel: "NAS Runtime N3 Approval Boundary Status Surface 1",
+    title: "NAS runtime N3 approval boundary status surface",
+    detailKind: "nas_runtime_n3_approval_boundary_status_surface",
+    sourceDetailKind: previewStore.detailKind,
+    requestedBoundary: "N3 local path mapping validate-only",
+    approvalStatus: "approval_required",
+    fallbackReason: "approval_prompt_timed_out",
+    safeFallbackSelected: true,
+    nextApprovalOptions,
+    optionCount: nextApprovalOptions.length,
+    enabledControls: 0,
+    frontendOnly: true,
+    backendApiChanged: false,
+    schemaRouteAdded: false,
+    validationRouteAdded: false,
+    localPathMappingValidationEnabled: false,
+    pathResolutionRuntimeEnabled: false,
+    vaultMappingEnabled: false,
+    mountDiscoveryEnabled: false,
+    nasMountAccessEnabled: false,
+    filesystemReadEnabled: false,
+    filesystemWriteEnabled: false,
+    nasWriteEnabled: false,
+    evidenceFilePersistenceEnabled: false,
+    rollbackPointCreated: false,
+    credentialAccessEnabled: false,
+    auditWriteEnabled: false,
+    dispatchEnabled: false,
+    requestCreationEnabled: false,
     safeProjectionOnly: true,
     rawExcluded: true,
   };

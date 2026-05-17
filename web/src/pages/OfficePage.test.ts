@@ -135,6 +135,7 @@ import {
   buildOfficeNasPathValidationStatusSurface,
   buildOfficeNasPathPreviewStatusSurface,
   buildOfficeNasPathPreviewStoreReadbackStatusSurface,
+  buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface,
   buildOfficeDeskRpgReadOnlyChainCompletionReview,
   buildOfficeEventDrivenCharacterStateProjection,
   buildOfficeCharacterStateRoomOverlay,
@@ -1311,6 +1312,60 @@ describe("NAS Path Preview Store Readback Status Surface 1", () => {
     expect(status.rawExcluded).toBe(true);
     expect(status.capabilityCount).toBe(4);
     expect(JSON.stringify(status)).not.toMatch(/raw path preview store prompt|raw path preview store task|Traceback|\/Users\/lidises|token-shaped-path-preview-store|private-path-preview-store-provider/i);
+  });
+});
+
+
+describe("NAS Runtime N3 Approval Boundary Status Surface 1", () => {
+  it("projects the timed-out N3 approval boundary without enabling runtime capabilities", () => {
+    const secretSentinel = ["token", "shaped", "n3", "boundary"].join("-");
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishFixture({
+      agents: [{ id: "agent-n3-boundary", status: "active", prompt: "raw n3 boundary prompt", provider: "private-n3-boundary-provider", api_key: secretSentinel }],
+      work_items: [
+        { id: "task-n3-boundary", status: "blocked", title: "raw n3 boundary task", body: "/Users/lidises/private/n3-boundary.md", transcript: "Traceback n3 boundary transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+    }));
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+    const trace = buildOfficeApprovalDecisionAuditNasTracePreview(envelope);
+    const gate = buildOfficeNasKeeperSaveRequestGate(trace);
+    const rollback = buildOfficeNasKeeperRollbackEvidencePreview(gate);
+    const store = buildOfficeNasEvidencePackageStoreReadbackStatus(rollback);
+    const validation = buildOfficeNasPathValidationStatusSurface(store);
+    const preview = buildOfficeNasPathPreviewStatusSurface(validation);
+    const previewStore = buildOfficeNasPathPreviewStoreReadbackStatusSurface(preview);
+
+    const boundary = buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface(previewStore);
+
+    expect(boundary.stageLabel).toBe("NAS Runtime N3 Approval Boundary Status Surface 1");
+    expect(boundary.detailKind).toBe("nas_runtime_n3_approval_boundary_status_surface");
+    expect(boundary.sourceDetailKind).toBe("nas_path_preview_store_readback_status_surface");
+    expect(boundary.requestedBoundary).toBe("N3 local path mapping validate-only");
+    expect(boundary.approvalStatus).toBe("approval_required");
+    expect(boundary.fallbackReason).toBe("approval_prompt_timed_out");
+    expect(boundary.safeFallbackSelected).toBe(true);
+    expect(boundary.enabledControls).toBe(0);
+    expect(boundary.frontendOnly).toBe(true);
+    expect(boundary.backendApiChanged).toBe(false);
+    expect(boundary.schemaRouteAdded).toBe(false);
+    expect(boundary.validationRouteAdded).toBe(false);
+    expect(boundary.localPathMappingValidationEnabled).toBe(false);
+    expect(boundary.pathResolutionRuntimeEnabled).toBe(false);
+    expect(boundary.vaultMappingEnabled).toBe(false);
+    expect(boundary.mountDiscoveryEnabled).toBe(false);
+    expect(boundary.nasMountAccessEnabled).toBe(false);
+    expect(boundary.filesystemReadEnabled).toBe(false);
+    expect(boundary.filesystemWriteEnabled).toBe(false);
+    expect(boundary.nasWriteEnabled).toBe(false);
+    expect(boundary.evidenceFilePersistenceEnabled).toBe(false);
+    expect(boundary.rollbackPointCreated).toBe(false);
+    expect(boundary.credentialAccessEnabled).toBe(false);
+    expect(boundary.auditWriteEnabled).toBe(false);
+    expect(boundary.dispatchEnabled).toBe(false);
+    expect(boundary.requestCreationEnabled).toBe(false);
+    expect(boundary.safeProjectionOnly).toBe(true);
+    expect(boundary.rawExcluded).toBe(true);
+    expect(boundary.nextApprovalOptions.map((option) => option.id)).toEqual(["n3_validate_only", "n3_red_tests_only", "runtime_path_resolution_dry_run", "frontend_fallback_continue"]);
+    expect(JSON.stringify(boundary)).not.toMatch(/raw n3 boundary prompt|raw n3 boundary task|Traceback|\/Users\/lidises|token-shaped-n3-boundary|private-n3-boundary-provider/i);
   });
 });
 
