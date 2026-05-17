@@ -46,6 +46,33 @@ function safeErrorDetail(text: string, statusText: string): string {
   return trimmed;
 }
 
+
+export interface OfficeNasSingleFileWritePayload {
+  write_ref: string;
+  package_ref: string;
+  target_vault_ref: string;
+  safe_slug: string;
+  safe_title: string;
+  markdown_body: string;
+  requested_by: string;
+  requested_at: string;
+}
+
+export interface OfficeNasSingleFileWriteResult {
+  written: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: null | {
+    mode: string;
+    write_ref: string;
+    safe_logical_path: string;
+    safe_display_path: string;
+    bytes_written: number;
+    rollback_created: boolean;
+    rollback_ref: string | null;
+    capabilities: Record<string, boolean>;
+  };
+}
+
 export async function fetchJSON<T>(url: string, init?: RequestInit): Promise<T> {
   // Inject the session token into all /api/ requests.
   const headers = new Headers(init?.headers);
@@ -80,6 +107,12 @@ export const api = {
   getStatus: () => fetchJSON<StatusResponse>("/api/status"),
   getOfficeState: () => fetchJSON<OfficeState>("/api/office/state"),
   getOfficeEvents: () => fetchJSON<OfficeSafeEventsResponse>("/api/office/events"),
+  executeOfficeControlledMutationNasSingleFileWrite: (body: OfficeNasSingleFileWritePayload) =>
+    fetchJSON<OfficeNasSingleFileWriteResult>("/api/office/controlled-mutation/nas-runtime/single-file-write", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
   getSessions: (limit = 20, offset = 0) =>
     fetchJSON<PaginatedSessions>(`/api/sessions?limit=${limit}&offset=${offset}`),
   getSessionMessages: (id: string) =>

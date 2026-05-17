@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeDataSource, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeDataSource, type OfficeNasSingleFileWritePayload, type OfficeNasSingleFileWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -147,6 +147,7 @@ import {
   buildOfficeNasPathPreviewStatusSurface,
   buildOfficeNasPathPreviewStoreReadbackStatusSurface,
   buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface,
+  buildOfficeNasRuntimeSingleFileWriteApprovalAction,
   buildOfficeDeskRpgReadOnlyChainCompletionReview,
   buildOfficeEventDrivenCharacterStateProjection,
   buildOfficeCharacterStateRoomOverlay,
@@ -197,6 +198,7 @@ import {
   type OfficeNasPathPreviewStatusSurface,
   type OfficeNasPathPreviewStoreReadbackStatusSurface,
   type OfficeNasRuntimeN3ApprovalBoundaryStatusSurface,
+  type OfficeNasRuntimeSingleFileWriteApprovalAction,
   type OfficeDeskRpgReadOnlyChainCompletionReview,
   type OfficeControlledMutationContractPostureProjection,
   type OfficeControlledMutationContractPosturePolish,
@@ -238,6 +240,17 @@ const LIST_LIMIT = 6;
 const EVENT_LIMIT = 12;
 const CHANGE_LIMIT = 6;
 type FocusOption = (typeof FOCUS_OPTIONS)[number];
+
+const DEFAULT_NAS_SINGLE_WRITE_DRAFT: OfficeNasSingleFileWritePayload = {
+  write_ref: "write_office_ui_smoke",
+  package_ref: "pkg_office_ui_smoke",
+  target_vault_ref: "vault_personal_wiki_demo",
+  safe_slug: "ai-office-ui-smoke",
+  safe_title: "AI Office UI smoke",
+  markdown_body: "# AI Office UI smoke\n\nControlled mutation UI smoke note.\n",
+  requested_by: "agent_nas_keeper",
+  requested_at: "2026-05-17T13:30:00Z",
+};
 
 const FOCUS_LABEL: Record<FocusOption, string> = {
   overview: "전체",
@@ -3543,6 +3556,103 @@ export function NasRuntimeN3ApprovalBoundaryStatusSurfacePanel({ boundary }: { b
   );
 }
 
+export function NasRuntimeSingleFileWriteApprovalActionPanel({
+  action,
+  draft,
+  approved,
+  busy,
+  result,
+  error,
+  onDraftChange,
+  onApprovalChange,
+  onExecute,
+}: {
+  action: OfficeNasRuntimeSingleFileWriteApprovalAction;
+  draft: OfficeNasSingleFileWritePayload;
+  approved: boolean;
+  busy: boolean;
+  result: OfficeNasSingleFileWriteResult | null;
+  error: string | null;
+  onDraftChange: (field: keyof OfficeNasSingleFileWritePayload, value: string) => void;
+  onApprovalChange: (approved: boolean) => void;
+  onExecute: () => void;
+}) {
+  const fields: Array<keyof OfficeNasSingleFileWritePayload> = ["write_ref", "package_ref", "target_vault_ref", "safe_slug", "safe_title", "requested_by", "requested_at"];
+  return (
+    <Card
+      data-office-nas-runtime-single-file-write-action="true"
+      data-office-nas-runtime-single-file-write-endpoint={action.endpoint}
+      data-office-nas-runtime-single-file-write-enabled-controls={action.enabledControls}
+      data-office-nas-runtime-single-file-write-raw-path-input-enabled={String(action.rawPathInputEnabled)}
+      data-office-nas-runtime-single-file-write-credential-input-enabled={String(action.credentialInputEnabled)}
+      data-office-nas-runtime-single-file-write-mount-path-input-enabled={String(action.mountPathInputEnabled)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4 text-emerald-300" /> {action.title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-emerald-300/20 bg-emerald-950/10 p-3">
+            <div className="font-semibold text-emerald-100">단일 파일 쓰기 · 승인 후 1회 실행</div>
+            <div className="mt-1 leading-5">raw 경로/토큰 입력 금지. safe vault ref, safe slug, safe title, markdown body만 protected API로 보냅니다.</div>
+            <div className="mt-1 font-mono text-[10px] text-emerald-100/70">{action.endpoint}</div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-2">
+            {fields.map((field) => (
+              <label key={field} className="grid gap-1 border border-current/15 bg-black/15 p-2">
+                <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-midground/55">{field}</span>
+                <input
+                  name={field}
+                  value={draft[field]}
+                  onChange={(event) => onDraftChange(field, event.target.value)}
+                  className="border border-current/15 bg-black/30 px-2 py-1 text-xs text-foreground"
+                />
+              </label>
+            ))}
+          </div>
+          <label className="grid gap-1 border border-current/15 bg-black/15 p-2">
+            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-midground/55">markdown_body</span>
+            <textarea
+              name="markdown_body"
+              value={draft.markdown_body}
+              onChange={(event) => onDraftChange("markdown_body", event.target.value)}
+              className="min-h-24 border border-current/15 bg-black/30 px-2 py-1 text-xs text-foreground"
+            />
+          </label>
+          <label className="flex items-center gap-2 border border-amber-300/20 bg-amber-950/10 p-3 text-amber-100/80">
+            <input type="checkbox" name="approved" checked={approved} onChange={(event) => onApprovalChange(event.target.checked)} />
+            승인: 이 safe payload를 protected API로 1회 실행
+          </label>
+          <button
+            type="button"
+            disabled={!approved || busy}
+            onClick={onExecute}
+            className="border border-emerald-300/30 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-100 disabled:opacity-40"
+          >
+            {busy ? "실행 중" : "승인된 단일 파일 쓰기 실행"}
+          </button>
+          {error ? <div className="border border-red-300/25 bg-red-950/10 p-3 text-red-100" data-office-nas-runtime-single-file-write-error="true">{error}</div> : null}
+          {result ? (
+            <div className="border border-sky-300/20 bg-sky-950/10 p-3" data-office-nas-runtime-single-file-write-result="true">
+              <div>written {String(result.written)}</div>
+              {result.dto ? (
+                <div className="mt-1 grid gap-1">
+                  <span>safe display path {result.dto.safe_display_path}</span>
+                  <span>safe logical path {result.dto.safe_logical_path}</span>
+                  <span>bytes {result.dto.bytes_written} · rollback {String(result.dto.rollback_created)} · {result.dto.rollback_ref ?? "rollback_none"}</span>
+                </div>
+              ) : null}
+              {result.errors.length > 0 ? <div className="mt-1">errors {result.errors.map((item) => `${item.field}:${item.code}`).join(" · ")}</div> : null}
+            </div>
+          ) : null}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function DeskRpgReadOnlyChainCompletionReviewPanel({ review }: { review: OfficeDeskRpgReadOnlyChainCompletionReview }) {
   return (
     <Card
@@ -4583,6 +4693,11 @@ export default function OfficePage() {
   const [viewportWidth, setViewportWidth] = useState<number | undefined>(undefined);
   const [tabVisible, setTabVisible] = useState(true);
   const [liveFailureCount, setLiveFailureCount] = useState(0);
+  const [nasSingleWriteDraft, setNasSingleWriteDraft] = useState<OfficeNasSingleFileWritePayload>(DEFAULT_NAS_SINGLE_WRITE_DRAFT);
+  const [nasSingleWriteApproved, setNasSingleWriteApproved] = useState(false);
+  const [nasSingleWriteBusy, setNasSingleWriteBusy] = useState(false);
+  const [nasSingleWriteResult, setNasSingleWriteResult] = useState<OfficeNasSingleFileWriteResult | null>(null);
+  const [nasSingleWriteError, setNasSingleWriteError] = useState<string | null>(null);
   const previousStateRef = useRef<OfficeState | null>(null);
   const liveFailureCountRef = useRef(0);
 
@@ -4628,6 +4743,37 @@ export default function OfficePage() {
       setRefreshing(false);
     }
   }, [applyNextState, loadSafeEvents]);
+
+  const updateNasSingleWriteDraft = useCallback((field: keyof OfficeNasSingleFileWritePayload, value: string) => {
+    setNasSingleWriteDraft((current) => ({ ...current, [field]: value }));
+  }, []);
+
+  const executeNasSingleFileWrite = useCallback(async () => {
+    if (!nasSingleWriteApproved) {
+      setNasSingleWriteError("approval_required");
+      return;
+    }
+    setNasSingleWriteBusy(true);
+    setNasSingleWriteError(null);
+    try {
+      const result = await api.executeOfficeControlledMutationNasSingleFileWrite({
+        write_ref: nasSingleWriteDraft.write_ref,
+        package_ref: nasSingleWriteDraft.package_ref,
+        target_vault_ref: nasSingleWriteDraft.target_vault_ref,
+        safe_slug: nasSingleWriteDraft.safe_slug,
+        safe_title: nasSingleWriteDraft.safe_title,
+        markdown_body: nasSingleWriteDraft.markdown_body,
+        requested_by: nasSingleWriteDraft.requested_by,
+        requested_at: nasSingleWriteDraft.requested_at,
+      });
+      setNasSingleWriteResult(result);
+      setNasSingleWriteApproved(false);
+    } catch (err) {
+      setNasSingleWriteError(String(err).replace(/Traceback|\/Users\/[^\s]+|\/home\/[^\s]+|token=[^\s]+|sk-[A-Za-z0-9_-]+/gi, "request failed"));
+    } finally {
+      setNasSingleWriteBusy(false);
+    }
+  }, [nasSingleWriteApproved, nasSingleWriteDraft]);
 
   useEffect(() => {
     let cancelled = false;
@@ -4866,6 +5012,10 @@ export default function OfficePage() {
   const nasRuntimeN3ApprovalBoundaryStatusSurface = useMemo(
     () => buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface(nasPathPreviewStoreReadbackStatusSurface),
     [nasPathPreviewStoreReadbackStatusSurface],
+  );
+  const nasRuntimeSingleFileWriteApprovalAction = useMemo(
+    () => buildOfficeNasRuntimeSingleFileWriteApprovalAction(nasRuntimeN3ApprovalBoundaryStatusSurface),
+    [nasRuntimeN3ApprovalBoundaryStatusSurface],
   );
   const deskRpgReadOnlyChainCompletionReview = useMemo(
     () => buildOfficeDeskRpgReadOnlyChainCompletionReview(nasKeeperRollbackEvidencePreview),
@@ -5185,6 +5335,18 @@ export default function OfficePage() {
       <NasPathPreviewStoreReadbackStatusSurfacePanel status={nasPathPreviewStoreReadbackStatusSurface} />
 
       <NasRuntimeN3ApprovalBoundaryStatusSurfacePanel boundary={nasRuntimeN3ApprovalBoundaryStatusSurface} />
+
+      <NasRuntimeSingleFileWriteApprovalActionPanel
+        action={nasRuntimeSingleFileWriteApprovalAction}
+        draft={nasSingleWriteDraft}
+        approved={nasSingleWriteApproved}
+        busy={nasSingleWriteBusy}
+        result={nasSingleWriteResult}
+        error={nasSingleWriteError}
+        onDraftChange={updateNasSingleWriteDraft}
+        onApprovalChange={setNasSingleWriteApproved}
+        onExecute={executeNasSingleFileWrite}
+      />
 
       <DeskRpgReadOnlyChainCompletionReviewPanel review={deskRpgReadOnlyChainCompletionReview} />
 

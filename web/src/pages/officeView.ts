@@ -2159,6 +2159,27 @@ export type OfficeNasRuntimeN3ApprovalBoundaryStatusSurface = {
   rawExcluded: true;
 };
 
+
+export type OfficeNasRuntimeSingleFileWriteApprovalAction = {
+  stageLabel: "NAS Runtime Single File Write Approval Action 1";
+  title: string;
+  detailKind: "nas_runtime_single_file_write_approval_action";
+  sourceDetailKind: OfficeNasRuntimeN3ApprovalBoundaryStatusSurface["detailKind"];
+  endpoint: "/api/office/controlled-mutation/nas-runtime/single-file-write";
+  approvalRequired: true;
+  singleActionOnly: true;
+  safeFields: ["write_ref", "package_ref", "target_vault_ref", "safe_slug", "safe_title", "markdown_body", "requested_by", "requested_at"];
+  enabledControls: 1;
+  browserExecutableControlsEnabled: true;
+  rawPathInputEnabled: false;
+  credentialInputEnabled: false;
+  mountPathInputEnabled: false;
+  targetMutationEnabled: false;
+  auditWriteEnabled: false;
+  rawExcluded: true;
+  safeSummary: string;
+};
+
 export type OfficeDeskRpgReadOnlyChainCompletionReviewCard = {
   id: "request_to_orchestrator" | "evidence_to_review" | "approval_to_nas_keeper" | "next_projection_gap";
   label: string;
@@ -5314,6 +5335,28 @@ export function buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface(previewStor
     requestCreationEnabled: false,
     safeProjectionOnly: true,
     rawExcluded: true,
+  };
+}
+
+export function buildOfficeNasRuntimeSingleFileWriteApprovalAction(boundary: OfficeNasRuntimeN3ApprovalBoundaryStatusSurface): OfficeNasRuntimeSingleFileWriteApprovalAction {
+  return {
+    stageLabel: "NAS Runtime Single File Write Approval Action 1",
+    title: "NAS runtime single-file write approval action",
+    detailKind: "nas_runtime_single_file_write_approval_action",
+    sourceDetailKind: boundary.detailKind,
+    endpoint: "/api/office/controlled-mutation/nas-runtime/single-file-write",
+    approvalRequired: true,
+    singleActionOnly: true,
+    safeFields: ["write_ref", "package_ref", "target_vault_ref", "safe_slug", "safe_title", "markdown_body", "requested_by", "requested_at"],
+    enabledControls: 1,
+    browserExecutableControlsEnabled: true,
+    rawPathInputEnabled: false,
+    credentialInputEnabled: false,
+    mountPathInputEnabled: false,
+    targetMutationEnabled: false,
+    auditWriteEnabled: false,
+    rawExcluded: true,
+    safeSummary: "승인 후 1회 실행되는 safe field 기반 단일 markdown 파일 쓰기입니다. raw 경로, mount 경로, credential 입력은 받지 않습니다.",
   };
 }
 

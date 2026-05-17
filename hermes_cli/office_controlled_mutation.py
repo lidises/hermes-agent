@@ -2031,7 +2031,14 @@ def execute_office_controlled_mutation_nas_single_file_write(
     if target.exists():
         rollback_ref = f"rollback_{payload['write_ref']}"
         rollback_path = (root / ".ai-office-rollbacks" / str(payload["write_ref"]) / target.name).resolve()
-        rollback_path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            rollback_path.parent.mkdir(parents=True, exist_ok=True)
+        except PermissionError:
+            rollback_path = (target.parent / ".ai-office-rollbacks" / str(payload["write_ref"]) / target.name).resolve()
+            try:
+                rollback_path.parent.mkdir(parents=True, exist_ok=True)
+            except PermissionError:
+                return {"written": False, "errors": [_error("rollback", "rollback_unavailable")], "dto": None}
         rollback_path.write_bytes(target.read_bytes())
         rollback_created = True
 

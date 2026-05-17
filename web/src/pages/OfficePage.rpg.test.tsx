@@ -18,7 +18,7 @@ vi.mock("@/lib/api", () => ({
 
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
-import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerAssignmentCandidateGate, buildOfficeWorkerRequestDraftPreview, buildOfficeWorkerHumanConfirmationEnvelope, buildOfficeWorkerAuthorityHandoffEnvelope, buildOfficeWorkerDispatchDryRunEnvelope, buildOfficeWorkerAuditPreviewEnvelope, buildOfficeWorkerRollbackPreviewEnvelope, buildOfficeWorkerFinalGateChecklist, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeNasKeeperSaveRequestGate, buildOfficeNasKeeperRollbackEvidencePreview, buildOfficeNasEvidencePackageStoreReadbackStatus, buildOfficeNasPathValidationStatusSurface, buildOfficeNasPathPreviewStatusSurface, buildOfficeNasPathPreviewStoreReadbackStatusSurface, buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface, buildOfficeDeskRpgReadOnlyChainCompletionReview, buildOfficeEventDrivenCharacterStateProjection, buildOfficeCharacterStateRoomOverlay, buildOfficeCharacterRoomInteractionPosture, buildOfficeCharacterInspectorDetailPosture, buildOfficeCharacterDetailSafeDialogueCopy, buildOfficeCharacterBubbleInspectorAlignment, buildOfficeCharacterPanelBoundarySummary, buildOfficeCharacterFacilityRoleLegend, buildOfficeCharacterFacilityBoundaryStrip, buildOfficeCharacterFacilitySourceLedgerStrip, buildOfficeCharacterFacilityCompletionReview, buildOfficeControlledMutationProposalContract, buildOfficeControlledMutationDryRunPlan, buildOfficeControlledMutationAuditSinkPlan, buildOfficeControlledMutationRollbackVerificationPlan, buildOfficeControlledMutationHumanApprovalPlan, buildOfficeControlledMutationAuthoritySummary, buildOfficeControlledMutationExecutionReadinessSummary, buildOfficeControlledMutationContractPostureProjection, buildOfficeControlledMutationContractPosturePolish, buildOfficeControlledMutationReadinessHandoffRibbon, buildOfficeControlledMutationReadinessSummaryPolish, buildOfficeControlledMutationRequestStorePosture, buildOfficeControlledMutationRequestStoreHardeningPlan, buildOfficeControlledMutationNextApprovalBoundary, buildOfficeControlledMutationPostDecisionApprovalBoundary, buildOfficeControlledMutationPostRegistryApprovalBoundary, buildOfficeControlledMutationTargetDispatchForbiddenBoundary, buildOfficeControlledMutationSafeContinuationCompletionReview, buildOfficeRpgScene } from "./officeView";
+import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerAssignmentCandidateGate, buildOfficeWorkerRequestDraftPreview, buildOfficeWorkerHumanConfirmationEnvelope, buildOfficeWorkerAuthorityHandoffEnvelope, buildOfficeWorkerDispatchDryRunEnvelope, buildOfficeWorkerAuditPreviewEnvelope, buildOfficeWorkerRollbackPreviewEnvelope, buildOfficeWorkerFinalGateChecklist, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeNasKeeperSaveRequestGate, buildOfficeNasKeeperRollbackEvidencePreview, buildOfficeNasEvidencePackageStoreReadbackStatus, buildOfficeNasPathValidationStatusSurface, buildOfficeNasPathPreviewStatusSurface, buildOfficeNasPathPreviewStoreReadbackStatusSurface, buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface, buildOfficeNasRuntimeSingleFileWriteApprovalAction, buildOfficeDeskRpgReadOnlyChainCompletionReview, buildOfficeEventDrivenCharacterStateProjection, buildOfficeCharacterStateRoomOverlay, buildOfficeCharacterRoomInteractionPosture, buildOfficeCharacterInspectorDetailPosture, buildOfficeCharacterDetailSafeDialogueCopy, buildOfficeCharacterBubbleInspectorAlignment, buildOfficeCharacterPanelBoundarySummary, buildOfficeCharacterFacilityRoleLegend, buildOfficeCharacterFacilityBoundaryStrip, buildOfficeCharacterFacilitySourceLedgerStrip, buildOfficeCharacterFacilityCompletionReview, buildOfficeControlledMutationProposalContract, buildOfficeControlledMutationDryRunPlan, buildOfficeControlledMutationAuditSinkPlan, buildOfficeControlledMutationRollbackVerificationPlan, buildOfficeControlledMutationHumanApprovalPlan, buildOfficeControlledMutationAuthoritySummary, buildOfficeControlledMutationExecutionReadinessSummary, buildOfficeControlledMutationContractPostureProjection, buildOfficeControlledMutationContractPosturePolish, buildOfficeControlledMutationReadinessHandoffRibbon, buildOfficeControlledMutationReadinessSummaryPolish, buildOfficeControlledMutationRequestStorePosture, buildOfficeControlledMutationRequestStoreHardeningPlan, buildOfficeControlledMutationNextApprovalBoundary, buildOfficeControlledMutationPostDecisionApprovalBoundary, buildOfficeControlledMutationPostRegistryApprovalBoundary, buildOfficeControlledMutationTargetDispatchForbiddenBoundary, buildOfficeControlledMutationSafeContinuationCompletionReview, buildOfficeRpgScene } from "./officeView";
 import type { OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
@@ -1448,6 +1448,67 @@ describe("NasRuntimeN3ApprovalBoundaryStatusSurfacePanel", () => {
     expect(markup).not.toContain("<form");
     expect(markup).not.toContain("<button");
     expect(markup).not.toMatch(/raw n3 panel prompt|raw n3 panel task|Traceback|\/Users\/lidises|token-shaped-n3-panel|private-n3-panel-provider/i);
+  });
+});
+
+
+describe("NasRuntimeSingleFileWriteApprovalActionPanel", () => {
+  it("renders a safe approved single-file write action panel with one control boundary", () => {
+    const NasRuntimeSingleFileWriteApprovalActionPanel = (OfficePageModule as unknown as {
+      NasRuntimeSingleFileWriteApprovalActionPanel: React.ComponentType<{
+        action: ReturnType<typeof buildOfficeNasRuntimeSingleFileWriteApprovalAction>;
+        draft: Record<string, string>;
+        approved: boolean;
+        busy: boolean;
+        result: null;
+        error: null;
+        onDraftChange: (field: string, value: string) => void;
+        onApprovalChange: (approved: boolean) => void;
+        onExecute: () => void;
+      }>;
+    }).NasRuntimeSingleFileWriteApprovalActionPanel;
+    const readiness = buildOfficeApprovalAuthorityReadinessDetail(buildApprovalNasBoundaryPolishPanelFixture());
+    const envelope = buildOfficeApprovalAuthorityDecisionEnvelopePreview(readiness);
+    const trace = buildOfficeApprovalDecisionAuditNasTracePreview(envelope);
+    const gate = buildOfficeNasKeeperSaveRequestGate(trace);
+    const rollback = buildOfficeNasKeeperRollbackEvidencePreview(gate);
+    const store = buildOfficeNasEvidencePackageStoreReadbackStatus(rollback);
+    const validation = buildOfficeNasPathValidationStatusSurface(store);
+    const preview = buildOfficeNasPathPreviewStatusSurface(validation);
+    const previewStore = buildOfficeNasPathPreviewStoreReadbackStatusSurface(preview);
+    const boundary = buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface(previewStore);
+    const action = buildOfficeNasRuntimeSingleFileWriteApprovalAction(boundary);
+
+    const markup = renderToStaticMarkup(
+      <NasRuntimeSingleFileWriteApprovalActionPanel
+        action={action}
+        draft={{ write_ref: "write_ui", package_ref: "pkg_ui", target_vault_ref: "vault_personal_wiki_demo", safe_slug: "ai-office-ui-smoke", safe_title: "AI Office UI smoke", markdown_body: "# AI Office UI smoke", requested_by: "agent_nas_keeper", requested_at: "2026-05-17T13:30:00Z" }}
+        approved={false}
+        busy={false}
+        result={null}
+        error={null}
+        onDraftChange={() => undefined}
+        onApprovalChange={() => undefined}
+        onExecute={() => undefined}
+      />,
+    );
+
+    expect(markup).toContain('data-office-nas-runtime-single-file-write-action="true"');
+    expect(markup).toContain('data-office-nas-runtime-single-file-write-endpoint="/api/office/controlled-mutation/nas-runtime/single-file-write"');
+    expect(markup).toContain('data-office-nas-runtime-single-file-write-enabled-controls="1"');
+    expect(markup).toContain('data-office-nas-runtime-single-file-write-raw-path-input-enabled="false"');
+    expect(markup).toContain('data-office-nas-runtime-single-file-write-credential-input-enabled="false"');
+    expect(markup).toContain('data-office-nas-runtime-single-file-write-mount-path-input-enabled="false"');
+    expect(markup).toContain("단일 파일 쓰기");
+    expect(markup).toContain("raw 경로/토큰 입력 금지");
+    expect(markup).toContain("승인 후 1회 실행");
+    expect(markup).toContain('name="safe_slug"');
+    expect(markup).not.toContain('name="path"');
+    expect(markup).not.toContain('name="root"');
+    expect(markup).not.toContain('name="mount"');
+    expect(markup).not.toContain('name="secret"');
+    expect(markup).not.toContain('name="token"');
+    expect(markup).not.toMatch(/\/Users\/|\/home\/|sk-|token=|private-provider/i);
   });
 });
 

@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-17 14:40 KST
+Last updated: 2026-05-17 15:03 KST
 
 ## AI Office 통합 운영실 umbrella summary
 
@@ -23,6 +23,16 @@ Phase 0 consolidation docs:
 - `docs/ai-office/architecture/approval-model-contract.md`
 
 
+
+## NAS Runtime Single File Write UI + real local NAS smoke completed locally
+
+After the user approved the larger C scope (local UI + real safe NAS smoke + push/PR/VPS dashboard deploy/restart/smoke, excluding VPS NAS mount/credentials, Telegram gateway restart, public exposure, watcher/cron), wired the existing protected single-file-write backend into `/office`. Added a typed frontend API wrapper `api.executeOfficeControlledMutationNasSingleFileWrite(...)`, `OfficeNasRuntimeSingleFileWriteApprovalAction` / `buildOfficeNasRuntimeSingleFileWriteApprovalAction(...)`, and `NasRuntimeSingleFileWriteApprovalActionPanel` with a separate approval checkbox, one execute button, safe-field-only inputs, and result readback limited to `written`, safe logical/display path, bytes, rollback boolean/ref, and field/code errors. The prior read-only `NAS Runtime N3 Approval Boundary Status Surface 1` remains unchanged with `enabledControls=0`; the executable control is isolated in the new approved action panel with `enabledControls=1`.
+
+During real local NAS smoke, the configured root was present but root-level sidecar rollback creation was not writable, so the backend helper was hardened to fall back to vault-local `.ai-office-rollbacks/<write_ref>/` for rollback copies when the NAS root sidecar cannot be created. Regression coverage now includes the root-sidecar-unwritable fallback. Real smoke wrote and then replaced the safe note `Hermes::ai-office-ui-smoke.md`, verified readback first line `# AI Office UI smoke`, verified `rollback_created=True` on replacement, and verified no raw filesystem path leaked in the result DTO.
+
+Verification 2026-05-17 15:03 KST: initial RED frontend tests failed on missing API wrapper/action model/panel; GREEN `npm test -- --run src/lib/api.test.ts src/pages/OfficePage.test.ts src/pages/OfficePage.rpg.test.tsx` → `210 passed`; backend focused + API `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_runtime_write.py tests/hermes_cli/test_office_api.py -q` → `16 passed`; `npm run build` passed with the existing Vite large chunk warning only; `git diff --check` passed; real NAS smoke/readback/rollback fallback passed.
+
+Safety/non-actions: no raw root path displayed in API/UI result, no raw path/mount/token/credential input, no credential access, no public API exposure, no Telegram gateway restart, no watcher/cron, no VPS NAS mount/direct NAS credentials, and no target dispatch/authority adapter binding. Push/PR/VPS dashboard deploy/restart/smoke remains the next step under the same C approval after commit.
 
 ## NAS Runtime Single File Write 1 completed locally
 

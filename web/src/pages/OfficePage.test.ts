@@ -136,6 +136,7 @@ import {
   buildOfficeNasPathPreviewStatusSurface,
   buildOfficeNasPathPreviewStoreReadbackStatusSurface,
   buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface,
+  buildOfficeNasRuntimeSingleFileWriteApprovalAction,
   buildOfficeDeskRpgReadOnlyChainCompletionReview,
   buildOfficeEventDrivenCharacterStateProjection,
   buildOfficeCharacterStateRoomOverlay,
@@ -191,6 +192,28 @@ function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
 }
 
 describe("OfficePage view helpers", () => {
+
+
+describe("NAS Runtime Single File Write Approval Action 1", () => {
+  it("builds a safe single-action approval model for the protected NAS write endpoint", () => {
+    const boundary = { detailKind: "nas_runtime_n3_approval_boundary_status_surface" } as ReturnType<typeof buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface>;
+
+    const action = buildOfficeNasRuntimeSingleFileWriteApprovalAction(boundary);
+
+    expect(action.stageLabel).toBe("NAS Runtime Single File Write Approval Action 1");
+    expect(action.detailKind).toBe("nas_runtime_single_file_write_approval_action");
+    expect(action.endpoint).toBe("/api/office/controlled-mutation/nas-runtime/single-file-write");
+    expect(action.approvalRequired).toBe(true);
+    expect(action.singleActionOnly).toBe(true);
+    expect(action.enabledControls).toBe(1);
+    expect(action.safeFields).toEqual(["write_ref", "package_ref", "target_vault_ref", "safe_slug", "safe_title", "markdown_body", "requested_by", "requested_at"]);
+    expect(action.rawPathInputEnabled).toBe(false);
+    expect(action.credentialInputEnabled).toBe(false);
+    expect(action.mountPathInputEnabled).toBe(false);
+    expect(action.rawExcluded).toBe(true);
+    expect(JSON.stringify(action)).not.toMatch(/raw write action prompt|raw write action task|Traceback|\/Users\/lidises|token-shaped-write-action|private-write-action-provider/i);
+  });
+});
 
 
 describe("Worker Facility Lane Polish 1", () => {

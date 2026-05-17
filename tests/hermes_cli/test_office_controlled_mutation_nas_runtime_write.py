@@ -68,6 +68,30 @@ def test_nas_runtime_single_file_write_replaces_existing_file_and_creates_rollba
     assert target.read_text(encoding="utf-8") == safe_write_payload()["markdown_body"]
 
 
+def test_nas_runtime_single_file_write_falls_back_to_vault_local_rollback_when_root_sidecar_unwritable(tmp_path):
+    from hermes_cli.office_controlled_mutation import execute_office_controlled_mutation_nas_single_file_write
+
+    root_path = tmp_path / "nas-root"
+    target = root_path / "vault_personal_wiki_demo" / "usable-ai-office-demo.md"
+    target.parent.mkdir(parents=True)
+    target.write_text("# Previous safe note\n", encoding="utf-8")
+    root_path.chmod(0o555)
+    try:
+        result = execute_office_controlled_mutation_nas_single_file_write(safe_write_payload(), root_path=root_path)
+    finally:
+        root_path.chmod(0o755)
+
+    assert result["written"] is True
+    dto = result["dto"]
+    assert dto["rollback_created"] is True
+    assert dto["rollback_ref"] == "rollback_write_20260517_demo"
+    rollback = target.parent / ".ai-office-rollbacks" / "write_20260517_demo" / "usable-ai-office-demo.md"
+    assert rollback.read_text(encoding="utf-8") == "# Previous safe note\n"
+    assert target.read_text(encoding="utf-8") == safe_write_payload()["markdown_body"]
+    serialized = json.dumps(dto, sort_keys=True).lower()
+    assert str(root_path).lower() not in serialized
+
+
 def test_nas_runtime_single_file_write_rejects_raw_paths_and_tokens_without_write_or_echo(tmp_path):
     from hermes_cli.office_controlled_mutation import execute_office_controlled_mutation_nas_single_file_write
 
