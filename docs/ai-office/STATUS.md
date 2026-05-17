@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-17 21:46 KST
+Last updated: 2026-05-17 21:58 KST
 
 ## AI Office 통합 운영실 umbrella summary
 
@@ -22,6 +22,14 @@ Phase 0 consolidation docs:
 - `docs/ai-office/plans/2026-05-14-desk-rpg-master-spec-review.md`
 - `docs/ai-office/architecture/approval-model-contract.md`
 
+
+## NAS Keeper authorization state recording implemented locally
+
+After PR #10 was merged, added the next queue mutation boundary: `authorize_office_controlled_mutation_nas_keeper_mac_relay_handoff(...)` and protected route `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-handoff-authorize`. The route validates `handoff_ref`, `authorization_ref`, `nas_keeper_ref`, `relay_node_ref`, `authorized_by`, `authorized_at`, and `authorization_decision=authorize_mac_relay_execution`, revalidates the queued safe request envelope, requires NAS Keeper and relay-node matches, then rewrites exactly one local JSONL queue item from `pending_nas_keeper_authorization` to `authorized_for_mac_relay_execution`.
+
+Boundary: state recording only. It preserves queued `markdown_body` in storage for later Mac relay execution, but omits it from response DTOs. It does not execute a Mac relay write, write NAS files, start watcher/cron/daemon automation, bind dispatch/authority adapters, grant VPS NAS mounts/credentials, or expose raw paths/secrets. Capability flags keep `mac_relay_write_enabled=false` and `actual_nas_write_enabled=false`; the next boundary remains `mac_relay_authenticated_execution_from_authorized_handoff`.
+
+Verification 2026-05-17 21:58 KST: focused+combined backend `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_authorize_handoff.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_claim_dry_run.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_handoff_queue.py tests/hermes_cli/test_office_controlled_mutation_nas_mac_relay_write_execute.py tests/hermes_cli/test_office_controlled_mutation_nas_mac_relay_write_request.py tests/hermes_cli/test_office_controlled_mutation_nas_runtime_write.py tests/hermes_cli/test_office_api.py -q` -> `32 passed`; `py_compile` and `git diff --check` passed. VPS safe deploy smoke 2026-05-17 22:01 KST: deployed branch to restricted dashboard worktree, focused backend `32 passed`, `py_compile`/`git diff --check` passed, restarted only `hermes-agent-dashboard.service`, left `hermes-gateway.service` active/untouched, `/office` HTML 200 with raw leak false, authenticated enqueue+authorize returned `authorized=true`, `queue_status_after=authorized_for_mac_relay_execution`, `actual_nas_write_enabled=false`, `mac_relay_write_enabled=false`, raw leak false.
 
 ## Mac relay claim dry-run boundary implemented locally
 
