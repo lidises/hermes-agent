@@ -58,6 +58,7 @@ from hermes_cli.office_controlled_mutation import (
     append_office_controlled_mutation_request_event,
     build_office_controlled_mutation_contract_schema,
     execute_office_controlled_mutation_nas_single_file_write,
+    prepare_office_controlled_mutation_nas_mac_relay_write_request,
     build_office_controlled_mutation_nas_evidence_package_contract,
     build_office_controlled_mutation_nas_path_resolution_contract,
     build_office_controlled_mutation_nas_runtime_boundary_contract,
@@ -597,6 +598,12 @@ async def get_office_controlled_mutation_nas_path_resolution_schema():
 async def get_office_controlled_mutation_nas_runtime_boundary_schema():
     """Return the disabled NAS runtime capability contract."""
     return build_office_controlled_mutation_nas_runtime_boundary_contract()
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/mac-relay-write-request")
+async def prepare_office_controlled_mutation_nas_mac_relay_write_request_route(payload: Any = Body(None)):
+    """Prepare a NAS Keeper -> Mac relay write request without VPS NAS authority."""
+    return prepare_office_controlled_mutation_nas_mac_relay_write_request(payload)
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/single-file-write")
