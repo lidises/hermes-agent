@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-17 23:46 KST
+Last updated: 2026-05-17 23:57 KST
 
 ## Start here after `/new`
 
@@ -74,7 +74,7 @@ The user approved A-G approval buckets for future AI Office work while excluding
 
 ## Current next stage
 
-Immediate state 2026-05-17 23:46 KST: PR #12 is merged. The current local branch implements `Mac relay execution-from-preview bridge`: `execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_preview(...)` plus protected route `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-execution-from-preview`. It executes from an authorized queue item only after the preview boundary verifies safe refs/authorization continuity and markdown SHA-256, writes only when a Mac-local relay root is configured, and otherwise fails closed with `mac_relay_root_not_configured`. It does not mutate queue state, start watcher/cron/daemon automation, dispatch, bind authority adapters, grant VPS NAS mounts/credentials/direct writes, or echo markdown body in responses. VPS dashboard safe smoke at `fc255233` passed and confirmed `mac_relay_root_not_configured` on the restricted VPS. Recommended next after PR #13 merge: separately approve either queue execution-state recording or a harmless real Mac NAS smoke; keep VPS direct NAS authority forbidden.
+Immediate state 2026-05-17 23:57 KST: PR #13 is merged into `main` and the approved harmless real Mac NAS smoke for `Mac relay execution-from-preview bridge` passed. The smoke used a temporary local handoff queue, enqueued/authorized/previewed two safe handoffs, then executed them via `execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_preview(...)` against the Mac-local relay root. It wrote and replaced exactly one safe smoke note at logical path `Hermes::ai-office-exec-from-preview-smoke-20260517145703.md`, verified readback on both writes, verified audit sidecars, verified the second write produced rollback metadata, and verified no raw Mac/VPS path, token-looking string, or markdown-body echo in result DTOs. Focused/combined backend verification passed (`38 passed`), `py_compile` and `git diff --check` passed. Recommended next boundary: queue execution-state recording for success/failure/manual evidence, still without watcher/cron/daemon, dispatch, authority-adapter binding, VPS NAS mounts/credentials/direct writes, dashboard/gateway restart, or public exposure.
 
 Current umbrella project: `AI Office Unified Operating Workbench` / `AI Office 통합 운영실`.
 

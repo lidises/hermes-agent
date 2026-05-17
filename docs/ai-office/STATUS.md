@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-17 23:46 KST
+Last updated: 2026-05-17 23:57 KST
 
 ## AI Office 통합 운영실 umbrella summary
 
@@ -22,6 +22,14 @@ Phase 0 consolidation docs:
 - `docs/ai-office/plans/2026-05-14-desk-rpg-master-spec-review.md`
 - `docs/ai-office/architecture/approval-model-contract.md`
 
+
+## Real Mac NAS smoke for execution-from-preview bridge completed
+
+After PR #13 was merged, ran the approved harmless real Mac NAS smoke for the already-implemented `execution-from-preview` bridge. The smoke used a temporary local handoff queue, enqueued and authorized two safe NAS Keeper handoffs, previewed each execution payload, then executed both via `execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_preview(...)` against the Mac-local NAS relay root. It wrote and then replaced one safe smoke note at logical path `Hermes::ai-office-exec-from-preview-smoke-20260517145703.md`, verified readback on both writes, verified the second write created rollback metadata, verified both audit sidecars were written, and verified the execution responses contained no raw Mac/VPS path, token-looking string, or markdown-body echo.
+
+Boundary: real Mac-local NAS smoke only. It did not mutate the durable production NAS Keeper queue, did not record queue execution state, did not start watcher/cron/daemon automation, did not dispatch to a relay service, did not bind authority adapters, did not grant VPS NAS mounts/credentials/direct write authority, did not restart dashboard/gateway, and did not expose raw paths or markdown bodies in result DTOs. VPS remains intentionally unconfigured for Mac relay root and should continue to fail closed with `mac_relay_root_not_configured`.
+
+Verification 2026-05-17 23:57 KST: first write returned `queued=true`, `authorized=true`, `previewed=true`, `executed=true`, `written=true`, `readback_verified=true`, `audit_written=true`, and queue content unchanged by preview/execute. Second write to the same logical note returned the same success flags plus `rollback_created=true` and safe rollback ref `rollback_write_20260517145703_2`; rollback content hash matched the first write. Final readback SHA-256 was `02c547a2b9478a3d3e025504e32db7a5a356d166ebeff6f9951436e6e8d9a4de`. Focused/combined backend verification passed: `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_from_preview.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_payload_preview.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_authorize_handoff.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_claim_dry_run.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_handoff_queue.py tests/hermes_cli/test_office_controlled_mutation_nas_mac_relay_write_execute.py tests/hermes_cli/test_office_controlled_mutation_nas_mac_relay_write_request.py tests/hermes_cli/test_office_controlled_mutation_nas_runtime_write.py tests/hermes_cli/test_office_api.py -q -o 'addopts='` -> `38 passed`; `py_compile` and `git diff --check` passed. Recommended next boundary: queue execution-state recording for success/failure evidence, still without watcher/cron/dispatch or VPS NAS authority.
 
 ## Mac relay execution-from-preview bridge implemented locally
 
