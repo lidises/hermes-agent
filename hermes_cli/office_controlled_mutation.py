@@ -180,6 +180,7 @@ _NAS_RUNTIME_WRITE_FIELDS = {
     "requested_at",
 }
 _NAS_MAC_RELAY_WRITE_REQUEST_FIELDS = _NAS_RUNTIME_WRITE_FIELDS | {"relay_request_ref", "nas_keeper_ref", "relay_node_ref"}
+_NAS_KEEPER_HANDOFF_QUEUE_FIELDS = _NAS_MAC_RELAY_WRITE_REQUEST_FIELDS | {"handoff_ref", "queued_by", "queued_at"}
 _OPAQUE_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{2,119}$")
 _OPAQUE_REF_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_-]{1,40}:[A-Za-z0-9][A-Za-z0-9_.:-]{1,160}$")
 _SAFE_TEXT_RE = re.compile(r"^[^<>\\]{1,240}$")
@@ -2053,6 +2054,106 @@ def prepare_office_controlled_mutation_nas_mac_relay_write_request(payload: obje
     }
     return {"prepared": True, "errors": [], "dto": dto}
 
+
+
+
+def enqueue_office_controlled_mutation_nas_keeper_mac_relay_handoff(
+    payload: object, *, queue_dir: Path | str | None = None
+) -> dict[str, object]:
+    """Append a safe NAS Keeper handoff request to a local AI Office queue.
+
+    This is still a VPS-safe boundary: it stores only an already-validated safe
+    request envelope for NAS Keeper review/routing and grants no direct NAS
+    mount, credential, raw path, watcher, cron, dispatch, or execution authority.
+    """
+
+    if not isinstance(payload, Mapping):
+        return {"queued": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    errors: list[dict[str, str]] = []
+    if set(payload) - _NAS_KEEPER_HANDOFF_QUEUE_FIELDS:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+    for field in ("handoff_ref", "queued_by", "queued_at"):
+        if field not in payload:
+            errors.append(_error(field, "missing_field"))
+    for field in ("handoff_ref", "queued_by"):
+        if field in payload and not _is_opaque_id(payload.get(field)):
+            errors.append(_error(field, "invalid_opaque_id"))
+    if "queued_at" in payload and not (isinstance(payload.get("queued_at"), str) and _ISO_UTC_RE.fullmatch(payload["queued_at"])):
+        errors.append(_error("queued_at", "invalid_timestamp"))
+
+    request_payload = {field: payload[field] for field in _NAS_MAC_RELAY_WRITE_REQUEST_FIELDS if field in payload}
+    prepared = prepare_office_controlled_mutation_nas_mac_relay_write_request(request_payload)
+    errors.extend(cast(list[dict[str, str]], prepared.get("errors") or []))
+    errors = sorted(errors, key=lambda item: (item["field"], item["code"]))
+    if errors:
+        return {"queued": False, "errors": errors, "dto": None}
+
+    if queue_dir is None:
+        queue_root = get_hermes_home() / "ai-office" / "nas-keeper-handoff"
+    else:
+        queue_root = Path(queue_dir).expanduser()
+    queue_root.mkdir(parents=True, exist_ok=True)
+    queue_file = queue_root / "mac-relay-write-queue.jsonl"
+
+    handoff_ref = str(payload["handoff_ref"])
+    if queue_file.exists():
+        for line in queue_file.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if item.get("handoff_ref") == handoff_ref:
+                return {"queued": False, "errors": [_error("handoff_ref", "duplicate_handoff_ref")], "dto": None}
+
+    prepared_dto = cast(dict[str, object], prepared["dto"])
+    queue_item = {
+        "schema_version": 1,
+        "mode": "nas_keeper_mac_relay_handoff_queued",
+        "handoff_ref": handoff_ref,
+        "queue_ref": f"nas_keeper_mac_relay_handoff_queue::{handoff_ref}",
+        "queue_status": "pending_nas_keeper_authorization",
+        "queued_by": payload["queued_by"],
+        "queued_at": payload["queued_at"],
+        "relay_request_ref": payload["relay_request_ref"],
+        "write_ref": payload["write_ref"],
+        "package_ref": payload["package_ref"],
+        "target_vault_ref": payload["target_vault_ref"],
+        "safe_slug": payload["safe_slug"],
+        "safe_title": payload["safe_title"],
+        "requested_by": payload["requested_by"],
+        "requested_at": payload["requested_at"],
+        "nas_keeper_ref": payload["nas_keeper_ref"],
+        "relay_node_ref": payload["relay_node_ref"],
+        "execution_path": prepared_dto["execution_path"],
+        "handoff_path": ["vps_ai_office_queue", "nas_keeper_review", "mac_relay_execution", "real_nas"],
+        "safe_logical_path": prepared_dto["safe_logical_path"],
+        "safe_display_path": prepared_dto["safe_display_path"],
+        "payload_bytes": prepared_dto["payload_bytes"],
+        "markdown_body": payload["markdown_body"],
+        "capabilities": {
+            "queue_append_enabled": True,
+            "request_prepared": True,
+            "nas_keeper_required": True,
+            "mac_relay_required": True,
+            "vps_nas_mount_enabled": False,
+            "vps_credential_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+            "mac_relay_write_enabled": False,
+            "actual_nas_write_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+        },
+        "next_required_boundary": "nas_keeper_authorizes_mac_relay_execution",
+    }
+    with queue_file.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(queue_item, sort_keys=True, ensure_ascii=False) + "\n")
+    dto = {k: v for k, v in queue_item.items() if k != "markdown_body"}
+    dto["queue_storage_ref"] = "ai_office_local_profile::nas_keeper_mac_relay_handoff_queue"
+    return {"queued": True, "errors": [], "dto": dto}
 
 
 def execute_office_controlled_mutation_nas_mac_relay_write(
