@@ -1482,7 +1482,7 @@ describe("NasRuntimeSingleFileWriteApprovalActionPanel", () => {
     const markup = renderToStaticMarkup(
       <NasRuntimeSingleFileWriteApprovalActionPanel
         action={action}
-        draft={{ write_ref: "write_ui", package_ref: "pkg_ui", target_vault_ref: "vault_personal_wiki_demo", safe_slug: "ai-office-ui-smoke", safe_title: "AI Office UI smoke", markdown_body: "# AI Office UI smoke", requested_by: "agent_nas_keeper", requested_at: "2026-05-17T13:30:00Z" }}
+        draft={{ relay_request_ref: "relay_req_ui", relay_execution_ref: "relay_exec_ui", write_ref: "write_ui", package_ref: "pkg_ui", target_vault_ref: "vault_personal_wiki_demo", safe_slug: "ai-office-ui-smoke", safe_title: "AI Office UI smoke", markdown_body: "# AI Office UI smoke", requested_by: "agent_nas_keeper", requested_at: "2026-05-17T13:30:00Z", nas_keeper_ref: "agent_nas_keeper", relay_node_ref: "mac_relay_primary", relay_authorized_by: "agent_nas_keeper", relay_authorized_at: "2026-05-17T13:31:00Z" }}
         approved={false}
         busy={false}
         result={null}
@@ -1494,15 +1494,17 @@ describe("NasRuntimeSingleFileWriteApprovalActionPanel", () => {
     );
 
     expect(markup).toContain('data-office-nas-runtime-single-file-write-action="true"');
-    expect(markup).toContain('data-office-nas-runtime-single-file-write-endpoint="/api/office/controlled-mutation/nas-runtime/single-file-write"');
+    expect(markup).toContain('data-office-nas-runtime-single-file-write-endpoint="/api/office/controlled-mutation/nas-runtime/mac-relay-write-execute"');
+    expect(markup).toContain('data-office-nas-mac-relay-write-execute-action="true"');
     expect(markup).toContain('data-office-nas-runtime-single-file-write-enabled-controls="1"');
     expect(markup).toContain('data-office-nas-runtime-single-file-write-raw-path-input-enabled="false"');
     expect(markup).toContain('data-office-nas-runtime-single-file-write-credential-input-enabled="false"');
     expect(markup).toContain('data-office-nas-runtime-single-file-write-mount-path-input-enabled="false"');
     expect(markup).toContain("단일 파일 쓰기");
     expect(markup).toContain("raw 경로/토큰 입력 금지");
-    expect(markup).toContain("승인 후 1회 실행");
+    expect(markup).toContain("Mac relay 실행 route");
     expect(markup).toContain('name="safe_slug"');
+    expect(markup).toContain('name="relay_request_ref"');
     expect(markup).not.toContain('name="path"');
     expect(markup).not.toContain('name="root"');
     expect(markup).not.toContain('name="mount"');

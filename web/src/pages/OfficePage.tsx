@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeDataSource, type OfficeNasSingleFileWritePayload, type OfficeNasSingleFileWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeDataSource, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -241,7 +241,9 @@ const EVENT_LIMIT = 12;
 const CHANGE_LIMIT = 6;
 type FocusOption = (typeof FOCUS_OPTIONS)[number];
 
-const DEFAULT_NAS_SINGLE_WRITE_DRAFT: OfficeNasSingleFileWritePayload = {
+const DEFAULT_NAS_SINGLE_WRITE_DRAFT: OfficeNasMacRelayWritePayload = {
+  relay_request_ref: "relay_req_office_ui_smoke",
+  relay_execution_ref: "relay_exec_office_ui_smoke",
   write_ref: "write_office_ui_smoke",
   package_ref: "pkg_office_ui_smoke",
   target_vault_ref: "vault_personal_wiki_demo",
@@ -250,6 +252,10 @@ const DEFAULT_NAS_SINGLE_WRITE_DRAFT: OfficeNasSingleFileWritePayload = {
   markdown_body: "# AI Office UI smoke\n\nControlled mutation UI smoke note.\n",
   requested_by: "agent_nas_keeper",
   requested_at: "2026-05-17T13:30:00Z",
+  nas_keeper_ref: "agent_nas_keeper",
+  relay_node_ref: "mac_relay_primary",
+  relay_authorized_by: "agent_nas_keeper",
+  relay_authorized_at: "2026-05-17T13:31:00Z",
 };
 
 const FOCUS_LABEL: Record<FocusOption, string> = {
@@ -3568,19 +3574,20 @@ export function NasRuntimeSingleFileWriteApprovalActionPanel({
   onExecute,
 }: {
   action: OfficeNasRuntimeSingleFileWriteApprovalAction;
-  draft: OfficeNasSingleFileWritePayload;
+  draft: OfficeNasMacRelayWritePayload;
   approved: boolean;
   busy: boolean;
-  result: OfficeNasSingleFileWriteResult | null;
+  result: OfficeNasMacRelayWriteResult | null;
   error: string | null;
-  onDraftChange: (field: keyof OfficeNasSingleFileWritePayload, value: string) => void;
+  onDraftChange: (field: keyof OfficeNasMacRelayWritePayload, value: string) => void;
   onApprovalChange: (approved: boolean) => void;
   onExecute: () => void;
 }) {
-  const fields: Array<keyof OfficeNasSingleFileWritePayload> = ["write_ref", "package_ref", "target_vault_ref", "safe_slug", "safe_title", "requested_by", "requested_at"];
+  const fields: Array<keyof OfficeNasMacRelayWritePayload> = ["relay_request_ref", "relay_execution_ref", "write_ref", "package_ref", "target_vault_ref", "safe_slug", "safe_title", "requested_by", "requested_at", "nas_keeper_ref", "relay_node_ref", "relay_authorized_by", "relay_authorized_at"];
   return (
     <Card
       data-office-nas-runtime-single-file-write-action="true"
+      data-office-nas-mac-relay-write-execute-action="true"
       data-office-nas-runtime-single-file-write-endpoint={action.endpoint}
       data-office-nas-runtime-single-file-write-enabled-controls={action.enabledControls}
       data-office-nas-runtime-single-file-write-raw-path-input-enabled={String(action.rawPathInputEnabled)}
@@ -3596,7 +3603,7 @@ export function NasRuntimeSingleFileWriteApprovalActionPanel({
         <div className="space-y-3 text-xs text-midground/75">
           <div className="border border-emerald-300/20 bg-emerald-950/10 p-3">
             <div className="font-semibold text-emerald-100">단일 파일 쓰기 · 승인 후 1회 실행</div>
-            <div className="mt-1 leading-5">raw 경로/토큰 입력 금지. safe vault ref, safe slug, safe title, markdown body만 protected API로 보냅니다.</div>
+            <div className="mt-1 leading-5">raw 경로/토큰 입력 금지. NAS Keeper 승인 envelope와 relay authorization safe refs만 Mac relay 실행 route로 보냅니다.</div>
             <div className="mt-1 font-mono text-[10px] text-emerald-100/70">{action.endpoint}</div>
           </div>
           <div className="grid gap-2 md:grid-cols-2">
@@ -3631,17 +3638,19 @@ export function NasRuntimeSingleFileWriteApprovalActionPanel({
             onClick={onExecute}
             className="border border-emerald-300/30 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-100 disabled:opacity-40"
           >
-            {busy ? "실행 중" : "승인된 단일 파일 쓰기 실행"}
+            {busy ? "실행 중" : "NAS Keeper → Mac relay 쓰기 실행"}
           </button>
           {error ? <div className="border border-red-300/25 bg-red-950/10 p-3 text-red-100" data-office-nas-runtime-single-file-write-error="true">{error}</div> : null}
           {result ? (
             <div className="border border-sky-300/20 bg-sky-950/10 p-3" data-office-nas-runtime-single-file-write-result="true">
-              <div>written {String(result.written)}</div>
+              <div>executed {String(result.executed)} · written {String(result.written)}</div>
               {result.dto ? (
                 <div className="mt-1 grid gap-1">
                   <span>safe display path {result.dto.safe_display_path}</span>
                   <span>safe logical path {result.dto.safe_logical_path}</span>
-                  <span>bytes {result.dto.bytes_written} · rollback {String(result.dto.rollback_created)} · {result.dto.rollback_ref ?? "rollback_none"}</span>
+                  <span>bytes {result.dto.bytes_written} · readback {String(result.dto.readback_verified)} · audit {String(result.dto.audit_written)}</span>
+                  <span>sha {result.dto.readback_sha256.slice(0, 12)} · first line {result.dto.readback_first_line}</span>
+                  <span>rollback {String(result.dto.rollback_created)} · {result.dto.rollback_ref ?? "rollback_none"} · {result.dto.audit_ref ?? "audit_none"}</span>
                 </div>
               ) : null}
               {result.errors.length > 0 ? <div className="mt-1">errors {result.errors.map((item) => `${item.field}:${item.code}`).join(" · ")}</div> : null}
@@ -4693,10 +4702,10 @@ export default function OfficePage() {
   const [viewportWidth, setViewportWidth] = useState<number | undefined>(undefined);
   const [tabVisible, setTabVisible] = useState(true);
   const [liveFailureCount, setLiveFailureCount] = useState(0);
-  const [nasSingleWriteDraft, setNasSingleWriteDraft] = useState<OfficeNasSingleFileWritePayload>(DEFAULT_NAS_SINGLE_WRITE_DRAFT);
+  const [nasSingleWriteDraft, setNasSingleWriteDraft] = useState<OfficeNasMacRelayWritePayload>(DEFAULT_NAS_SINGLE_WRITE_DRAFT);
   const [nasSingleWriteApproved, setNasSingleWriteApproved] = useState(false);
   const [nasSingleWriteBusy, setNasSingleWriteBusy] = useState(false);
-  const [nasSingleWriteResult, setNasSingleWriteResult] = useState<OfficeNasSingleFileWriteResult | null>(null);
+  const [nasSingleWriteResult, setNasSingleWriteResult] = useState<OfficeNasMacRelayWriteResult | null>(null);
   const [nasSingleWriteError, setNasSingleWriteError] = useState<string | null>(null);
   const previousStateRef = useRef<OfficeState | null>(null);
   const liveFailureCountRef = useRef(0);
@@ -4744,7 +4753,7 @@ export default function OfficePage() {
     }
   }, [applyNextState, loadSafeEvents]);
 
-  const updateNasSingleWriteDraft = useCallback((field: keyof OfficeNasSingleFileWritePayload, value: string) => {
+  const updateNasSingleWriteDraft = useCallback((field: keyof OfficeNasMacRelayWritePayload, value: string) => {
     setNasSingleWriteDraft((current) => ({ ...current, [field]: value }));
   }, []);
 
@@ -4756,7 +4765,9 @@ export default function OfficePage() {
     setNasSingleWriteBusy(true);
     setNasSingleWriteError(null);
     try {
-      const result = await api.executeOfficeControlledMutationNasSingleFileWrite({
+      const result = await api.executeOfficeControlledMutationNasMacRelayWrite({
+        relay_request_ref: nasSingleWriteDraft.relay_request_ref,
+        relay_execution_ref: nasSingleWriteDraft.relay_execution_ref,
         write_ref: nasSingleWriteDraft.write_ref,
         package_ref: nasSingleWriteDraft.package_ref,
         target_vault_ref: nasSingleWriteDraft.target_vault_ref,
@@ -4765,6 +4776,10 @@ export default function OfficePage() {
         markdown_body: nasSingleWriteDraft.markdown_body,
         requested_by: nasSingleWriteDraft.requested_by,
         requested_at: nasSingleWriteDraft.requested_at,
+        nas_keeper_ref: nasSingleWriteDraft.nas_keeper_ref,
+        relay_node_ref: nasSingleWriteDraft.relay_node_ref,
+        relay_authorized_by: nasSingleWriteDraft.relay_authorized_by,
+        relay_authorized_at: nasSingleWriteDraft.relay_authorized_at,
       });
       setNasSingleWriteResult(result);
       setNasSingleWriteApproved(false);
