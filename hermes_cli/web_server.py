@@ -57,6 +57,7 @@ from hermes_cli.office_controlled_mutation import (
     append_office_controlled_mutation_nas_path_resolution_preview_event,
     append_office_controlled_mutation_request_event,
     build_office_controlled_mutation_contract_schema,
+    execute_office_controlled_mutation_nas_single_file_write,
     build_office_controlled_mutation_nas_evidence_package_contract,
     build_office_controlled_mutation_nas_path_resolution_contract,
     build_office_controlled_mutation_nas_runtime_boundary_contract,
@@ -596,6 +597,15 @@ async def get_office_controlled_mutation_nas_path_resolution_schema():
 async def get_office_controlled_mutation_nas_runtime_boundary_schema():
     """Return the disabled NAS runtime capability contract."""
     return build_office_controlled_mutation_nas_runtime_boundary_contract()
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/single-file-write")
+async def execute_office_controlled_mutation_nas_single_file_write_route(payload: Any = Body(None)):
+    """Write one safe markdown file under the configured AI Office NAS root."""
+    return execute_office_controlled_mutation_nas_single_file_write(
+        payload,
+        root_path=os.environ.get("HERMES_AI_OFFICE_NAS_WRITE_ROOT"),
+    )
 
 
 @app.post("/api/office/controlled-mutation/nas-path-resolution/validate")

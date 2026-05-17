@@ -168,6 +168,16 @@ _NAS_PATH_RESOLUTION_FIELDS = {
     "created_by",
     "created_at",
 }
+_NAS_RUNTIME_WRITE_FIELDS = {
+    "write_ref",
+    "package_ref",
+    "target_vault_ref",
+    "safe_slug",
+    "safe_title",
+    "markdown_body",
+    "requested_by",
+    "requested_at",
+}
 _OPAQUE_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{2,119}$")
 _OPAQUE_REF_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_-]{1,40}:[A-Za-z0-9][A-Za-z0-9_.:-]{1,160}$")
 _SAFE_TEXT_RE = re.compile(r"^[^<>\\]{1,240}$")
@@ -1952,6 +1962,121 @@ def build_office_controlled_mutation_nas_runtime_boundary_contract(
             "runtime path resolution, mount health checks, file reads, file writes, rollback points, and NAS writes require separate approval",
         ],
     }
+
+
+def _is_safe_markdown_body(value: object) -> bool:
+    if not isinstance(value, str):
+        return False
+    if not value or len(value.encode("utf-8")) > 50_000:
+        return False
+    if "\x00" in value or "<script" in value.lower():
+        return False
+    return not _has_raw_marker(value)
+
+
+def execute_office_controlled_mutation_nas_single_file_write(
+    payload: object, *, root_path: Path | str | None = None
+) -> dict[str, object]:
+    """Write one safe markdown file under a configured root with rollback.
+
+    This is the first intentionally executable NAS/local-file boundary: it is
+    constrained to one allowlisted markdown file path derived only from opaque
+    vault/slug fields, writes atomically, and returns no raw filesystem paths.
+    """
+
+    if root_path is None:
+        return {"written": False, "errors": [_error("write_root", "write_root_not_configured")], "dto": None}
+    errors: list[dict[str, str]] = []
+    if not isinstance(payload, Mapping):
+        return {"written": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+
+    if set(payload) - _NAS_RUNTIME_WRITE_FIELDS:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+    for field in sorted(_NAS_RUNTIME_WRITE_FIELDS):
+        if field not in payload:
+            errors.append(_error(field, "missing_field"))
+    for field in ("write_ref", "package_ref", "target_vault_ref", "requested_by"):
+        if field in payload and not _is_opaque_id(payload.get(field)):
+            errors.append(_error(field, "invalid_opaque_id"))
+    if "safe_slug" in payload and not (
+        isinstance(payload.get("safe_slug"), str)
+        and _SAFE_SLUG_RE.fullmatch(payload["safe_slug"])
+        and not _has_raw_marker(payload["safe_slug"])
+        and ".." not in payload["safe_slug"]
+        and "/" not in payload["safe_slug"]
+    ):
+        errors.append(_error("safe_slug", "invalid_safe_slug"))
+    if "safe_title" in payload and not _is_safe_text(payload.get("safe_title")):
+        errors.append(_error("safe_title", "invalid_safe_text"))
+    if "markdown_body" in payload and not _is_safe_markdown_body(payload.get("markdown_body")):
+        errors.append(_error("markdown_body", "raw_marker_detected"))
+    if "requested_at" in payload and not (
+        isinstance(payload.get("requested_at"), str) and _ISO_UTC_RE.fullmatch(payload["requested_at"])
+    ):
+        errors.append(_error("requested_at", "invalid_timestamp"))
+    errors = sorted(errors, key=lambda item: (item["field"], item["code"]))
+    if errors:
+        return {"written": False, "errors": errors, "dto": None}
+
+    root = Path(root_path).expanduser().resolve()
+    target = (root / str(payload["target_vault_ref"]) / f"{payload['safe_slug']}.md").resolve()
+    try:
+        target.relative_to(root)
+    except ValueError:
+        return {"written": False, "errors": [_error("safe_slug", "path_escape_blocked")], "dto": None}
+
+    target.parent.mkdir(parents=True, exist_ok=True)
+    rollback_created = False
+    rollback_ref = None
+    if target.exists():
+        rollback_ref = f"rollback_{payload['write_ref']}"
+        rollback_path = (root / ".ai-office-rollbacks" / str(payload["write_ref"]) / target.name).resolve()
+        rollback_path.parent.mkdir(parents=True, exist_ok=True)
+        rollback_path.write_bytes(target.read_bytes())
+        rollback_created = True
+
+    markdown_body = str(payload["markdown_body"])
+    temp_path = target.with_name(f".{target.name}.{payload['write_ref']}.tmp")
+    temp_path.write_text(markdown_body, encoding="utf-8")
+    temp_path.replace(target)
+
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_single_file_write_completed",
+        "write_ref": payload["write_ref"],
+        "package_ref": payload["package_ref"],
+        "target_vault_ref": payload["target_vault_ref"],
+        "safe_slug": payload["safe_slug"],
+        "safe_title": payload["safe_title"],
+        "requested_by": payload["requested_by"],
+        "requested_at": payload["requested_at"],
+        "safe_logical_path": f"{payload['target_vault_ref']}::{payload['safe_slug']}.md",
+        "safe_display_path": f"{payload['target_vault_ref']} / {payload['safe_slug']}.md",
+        "bytes_written": len(markdown_body.encode("utf-8")),
+        "rollback_created": rollback_created,
+        "rollback_ref": rollback_ref,
+        "capabilities": {
+            "validation_enabled": True,
+            "local_path_mapping_enabled": True,
+            "runtime_path_resolution_enabled": True,
+            "vault_mapping_enabled": True,
+            "mount_discovery_enabled": False,
+            "mount_access_enabled": False,
+            "filesystem_read_enabled": rollback_created,
+            "filesystem_write_enabled": True,
+            "evidence_file_persistence_enabled": True,
+            "rollback_point_creation_enabled": rollback_created,
+            "single_package_write_enabled": True,
+            "nas_write_enabled": True,
+            "credential_access_enabled": False,
+            "audit_write_enabled": False,
+            "event_append_enabled": False,
+            "target_mutation_enabled": False,
+            "authority_binding_enabled": False,
+            "dry_run_execution_enabled": False,
+        },
+    }
+    return {"written": True, "errors": [], "dto": dto}
 
 
 def validate_office_controlled_mutation_nas_path_resolution(payload: object) -> dict[str, object]:

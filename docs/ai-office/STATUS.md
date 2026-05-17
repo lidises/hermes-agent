@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-17 11:18 KST
+Last updated: 2026-05-17 14:40 KST
 
 ## AI Office 통합 운영실 umbrella summary
 
@@ -22,6 +22,19 @@ Phase 0 consolidation docs:
 - `docs/ai-office/plans/2026-05-14-desk-rpg-master-spec-review.md`
 - `docs/ai-office/architecture/approval-model-contract.md`
 
+
+
+## NAS Runtime Single File Write 1 completed locally
+
+After the user explicitly corrected the project direction that AI Office must become usable for real file modification instead of staying read-only, implemented the first constrained executable local/NAS write boundary. Added `execute_office_controlled_mutation_nas_single_file_write(...)` in `hermes_cli/office_controlled_mutation.py`, protected dashboard route `POST /api/office/controlled-mutation/nas-runtime/single-file-write` in `hermes_cli/web_server.py`, and regression tests in `tests/hermes_cli/test_office_controlled_mutation_nas_runtime_write.py`.
+
+The write is intentionally narrow but actually modifies files: it writes one safe markdown file under configured `HERMES_AI_OFFICE_NAS_WRITE_ROOT`, deriving the target only from allowlisted `target_vault_ref` + `safe_slug`, creating parent directories, atomically replacing the target file, and creating a rollback copy under `.ai-office-rollbacks/<write_ref>/` when replacing an existing file. API responses return only safe refs/logical/display paths, byte counts, and rollback refs; they do not echo raw filesystem roots or target paths. If `HERMES_AI_OFFICE_NAS_WRITE_ROOT` is unset, the route returns `write_root_not_configured` without writing.
+
+Verification 2026-05-17: RED first failed as expected with missing `execute_office_controlled_mutation_nas_single_file_write(...)` and missing route (`4 failed`). GREEN focused `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_runtime_write.py -q -o 'addopts='` → `4 passed`; combined Office API + controlled-mutation `.venv/bin/python -m pytest tests/hermes_cli/test_office_api.py tests/hermes_cli/test_office_controlled_mutation_*.py -q -o 'addopts='` → `156 passed`; `.venv/bin/python -m py_compile hermes_cli/office_controlled_mutation.py hermes_cli/web_server.py`, `git diff --check`, and targeted safety scan passed.
+
+Safety/non-actions: no credential access, no public API exposure, no gateway/VPS/Kanban/cron mutation, no service restart, no watcher/daemon, no NAS mount/direct credential setup, no target dispatch/authority adapter binding, no audit append in this slice, no push/PR/merge, and no raw absolute path returned in DTOs. This is nevertheless no longer read-only: with `HERMES_AI_OFFICE_NAS_WRITE_ROOT` configured, the protected route writes/replaces a markdown file and creates rollback material.
+
+Next practical boundary: wire this into an actual `/office` approval/action UI or set `HERMES_AI_OFFICE_NAS_WRITE_ROOT=/Users/lidises/nas` for the local dashboard and smoke a real safe write to a designated test note.
 
 ## NAS Runtime N3 Approval Boundary Status Surface 1 completed locally
 
