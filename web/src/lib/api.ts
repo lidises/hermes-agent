@@ -176,11 +176,16 @@ export interface OfficeNasKeeperExecutionFromPreviewPayload {
   relay_node_ref: string;
   relay_authorized_by: string;
   relay_authorized_at: string;
+  record_execution_state_after_write?: true;
+  execution_record_ref?: string;
+  recorded_by?: string;
+  recorded_at?: string;
 }
 
 export interface OfficeNasKeeperExecutionFromPreviewResult {
   executed: boolean;
   written: boolean;
+  recorded?: boolean;
   errors: Array<{ field: string; code: string }>;
   dto: null | (OfficeNasMacRelayWriteResult["dto"] & {
     mode: "nas_keeper_mac_relay_execution_from_preview_completed";
@@ -194,6 +199,8 @@ export interface OfficeNasKeeperExecutionFromPreviewResult {
     markdown_body_sha256: string;
     markdown_body_included: false;
     execution_bridge_path: string[];
+    execution_state_recorded?: boolean;
+    execution_state?: OfficeNasKeeperExecutionStateResult["dto"];
   });
 }
 

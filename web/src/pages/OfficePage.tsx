@@ -3716,6 +3716,8 @@ export function NasRuntimeSingleFileWriteApprovalActionPanel({
 }
 
 
+type NasKeeperExecutionFromPreviewDraftField = "handoff_ref" | "relay_execution_ref" | "nas_keeper_ref" | "relay_node_ref" | "relay_authorized_by" | "relay_authorized_at";
+
 export function NasKeeperExecutionOperatorActionPanel({
   action,
   draft,
@@ -3741,14 +3743,15 @@ export function NasKeeperExecutionOperatorActionPanel({
   stateBusy: boolean;
   stateResult: OfficeNasKeeperExecutionStateResult | null;
   error: string | null;
-  onDraftChange: (field: keyof OfficeNasKeeperExecutionFromPreviewPayload, value: string) => void;
+  onDraftChange: (field: NasKeeperExecutionFromPreviewDraftField, value: string) => void;
   onStateDraftChange: (field: keyof NasKeeperExecutionStateDraft, value: string) => void;
   onApprovalChange: (approved: boolean) => void;
   onExecute: () => void;
   onRecordState: () => void;
 }) {
-  const executionFields: Array<keyof OfficeNasKeeperExecutionFromPreviewPayload> = ["handoff_ref", "relay_execution_ref", "nas_keeper_ref", "relay_node_ref", "relay_authorized_by", "relay_authorized_at"];
+  const executionFields: NasKeeperExecutionFromPreviewDraftField[] = ["handoff_ref", "relay_execution_ref", "nas_keeper_ref", "relay_node_ref", "relay_authorized_by", "relay_authorized_at"];
   const stateFields: Array<keyof NasKeeperExecutionStateDraft> = ["execution_record_ref", "recorded_by", "recorded_at", "execution_status", "safe_summary", "evidence_refs"];
+
   return (
     <Card
       data-office-nas-keeper-execution-operator-action="true"
@@ -5133,7 +5136,7 @@ export default function OfficePage() {
   }, [loadNasKeeperQueueReadback, nasSingleWriteApproved, nasSingleWriteDraft]);
 
 
-  const updateNasKeeperExecutionDraft = useCallback((field: keyof OfficeNasKeeperExecutionFromPreviewPayload, value: string) => {
+  const updateNasKeeperExecutionDraft = useCallback((field: NasKeeperExecutionFromPreviewDraftField, value: string) => {
     setNasKeeperExecutionDraft((current) => ({ ...current, [field]: value }));
   }, []);
 

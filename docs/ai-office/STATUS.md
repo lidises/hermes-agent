@@ -1,6 +1,14 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 15:33 KST
+Last updated: 2026-05-18 15:56 KST
+
+## NAS Keeper inline execute-and-record write path
+
+Implemented the shortest next write-capable backend/API bridge after execution-state evidence prefill: `execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_preview(...)` now accepts optional safe inline recording refs (`record_execution_state_after_write=true`, `execution_record_ref`, `recorded_by`, `recorded_at`). When a Mac relay root is configured and execution-from-preview successfully writes and verifies readback, the helper immediately records queue execution state as `succeeded` with safe evidence refs derived from audit/readback/markdown/rollback metadata. The existing no-inline path remains queue-state preserving; unsupported/raw extra fields are still rejected without echo. This is one-call write + queue-state recording only: no watcher/cron/dispatch daemon, no authority-adapter binding, no VPS direct NAS mount/credential/write authority, no public exposure, and no raw markdown body/path projection.
+
+Verification 2026-05-18 15:56 KST: RED focused test first failed because inline recording fields were unsupported; GREEN focused passed. Backend focused/API regression `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_from_preview.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_state_record.py tests/hermes_cli/test_office_api.py -q -o 'addopts='` -> `19 passed`; frontend API wrapper regression `npm test -- --run src/lib/api.test.ts` -> `8 passed`; `py_compile` and `git diff --check` passed. Real Mac-local NAS smoke used a temporary handoff queue and `<local-nas-path>` Mac relay root, wrote `Hermes::ai-office-inline-record-smoke-20260518-1600.md`, recorded queue status `mac_relay_execution_succeeded` in the same helper call, verified readback SHA-256 `31f53ea90eb0fe8023231e505d854c2a52af844e5846558b4d95a79eb6cb5f5f`, audit write true, and scoped raw body/path/provider/token/Traceback leak probe false.
+
+Boundary: actual write was limited to a harmless Mac-local NAS smoke note through the NAS Keeper/Mac relay path. Durable production queue items were not executed, VPS direct NAS authority remains excluded, gateway/dashboard services were not restarted, and no automation daemon was started.
 
 ## NAS Keeper execution-state evidence prefill after real write
 

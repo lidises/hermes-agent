@@ -243,6 +243,42 @@ describe("fetchJSON", () => {
     expect(JSON.stringify(fetchMock.mock.calls[0]?.[1]?.body)).not.toMatch(/markdown_body|\/Users\/|\/home\/|token=|sk-|provider/i);
   });
 
+  it("posts optional inline execution-state recording refs without markdown or raw paths", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        __HERMES_SESSION_TOKEN__: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({ executed: true, written: true, recorded: true, errors: [], dto: null }),
+    } as Response);
+
+    const payload = {
+      handoff_ref: "handoff_ui_demo",
+      relay_execution_ref: "relay_exec_ui_demo",
+      nas_keeper_ref: "agent_nas_keeper",
+      relay_node_ref: "mac_relay_primary",
+      relay_authorized_by: "agent_nas_keeper",
+      relay_authorized_at: "2026-05-18T04:10:00Z",
+      record_execution_state_after_write: true as const,
+      execution_record_ref: "exec_record_ui_inline_demo",
+      recorded_by: "agent_nas_keeper",
+      recorded_at: "2026-05-18T06:50:00Z",
+    };
+
+    await api.executeOfficeControlledMutationNasKeeperExecutionFromPreview(payload);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/office/controlled-mutation/nas-runtime/nas-keeper-execution-from-preview",
+      expect.objectContaining({ method: "POST", headers: expect.any(Headers), body: JSON.stringify(payload) }),
+    );
+    expect(JSON.stringify(fetchMock.mock.calls[0]?.[1]?.body)).toContain("record_execution_state_after_write");
+    expect(JSON.stringify(fetchMock.mock.calls[0]?.[1]?.body)).not.toMatch(/markdown_body|\/Users\/|\/home\/|token=|sk-|provider/i);
+  });
+
   it("posts safe NAS Keeper execution-state record payload through the protected queue mutation route", async () => {
     Object.defineProperty(globalThis, "window", {
       configurable: true,

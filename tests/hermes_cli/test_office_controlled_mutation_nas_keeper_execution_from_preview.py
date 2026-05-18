@@ -63,6 +63,45 @@ def test_execution_from_preview_writes_to_mac_local_root_without_queue_mutation_
     assert "sk-" not in serialized
 
 
+def test_execution_from_preview_can_record_success_state_after_write_without_body_echo(tmp_path):
+    from hermes_cli.office_controlled_mutation import execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_preview
+
+    queue_dir = tmp_path / "queue"
+    root = tmp_path / "mac-relay-root"
+    prepare_authorized_handoff(queue_dir)
+
+    result = execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_preview(
+        {
+            **safe_preview_payload(),
+            "record_execution_state_after_write": True,
+            "execution_record_ref": "exec_record_20260518_inline_success_demo",
+            "recorded_by": "agent_nas_keeper",
+            "recorded_at": "2026-05-18T06:50:00Z",
+        },
+        queue_dir=queue_dir,
+        root_path=root,
+    )
+
+    assert result["executed"] is True
+    assert result["written"] is True
+    assert result["recorded"] is True
+    dto = result["dto"]
+    assert isinstance(dto, dict)
+    assert dto["mode"] == "nas_keeper_mac_relay_execution_from_preview_completed"
+    assert dto["execution_state_recorded"] is True
+    assert dto["execution_state"]["queue_status_after"] == "mac_relay_execution_succeeded"
+    assert dto["execution_state"]["execution_record_ref"] == "exec_record_20260518_inline_success_demo"
+    assert dto["capabilities"]["queue_mutation_enabled"] is True
+    queue_item = json.loads((queue_dir / "mac-relay-write-queue.jsonl").read_text(encoding="utf-8"))
+    assert queue_item["queue_status"] == "mac_relay_execution_succeeded"
+    assert queue_item["execution_record_ref"] == "exec_record_20260518_inline_success_demo"
+    serialized = json.dumps(result, sort_keys=True).lower()
+    assert "this safe note is ready" not in serialized
+    assert "/users/lidises" not in serialized
+    assert "/home/hermes" not in serialized
+    assert "sk-" not in serialized
+
+
 def test_execution_from_preview_fails_closed_without_mac_root_and_rejects_mismatches(tmp_path):
     from hermes_cli.office_controlled_mutation import execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_preview
 

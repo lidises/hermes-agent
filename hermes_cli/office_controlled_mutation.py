@@ -2812,18 +2812,69 @@ def execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_previ
             "dto": None,
         }
 
-    previewed = preview_office_controlled_mutation_nas_keeper_mac_relay_execution_payload(payload, queue_dir=queue_dir)
-    if not previewed.get("previewed"):
+    if not isinstance(payload, Mapping):
+        previewed = preview_office_controlled_mutation_nas_keeper_mac_relay_execution_payload(payload, queue_dir=queue_dir)
         return {
             "executed": False,
             "written": False,
             "errors": cast(list[dict[str, str]], previewed.get("errors") or []),
             "dto": None,
         }
+
+    inline_state_fields = {
+        "record_execution_state_after_write",
+        "execution_record_ref",
+        "recorded_by",
+        "recorded_at",
+    }
+    has_inline_state_fields = any(field in payload for field in inline_state_fields)
+    allowed_payload_fields = _NAS_KEEPER_HANDOFF_EXECUTION_PAYLOAD_PREVIEW_FIELDS | (inline_state_fields if has_inline_state_fields else set())
+    if set(payload) - allowed_payload_fields:
+        return {
+            "executed": False,
+            "written": False,
+            "recorded": False if has_inline_state_fields else None,
+            "errors": [_error("unsupported_fields", "unsupported_field")],
+            "dto": None,
+        }
+    record_after_write = payload.get("record_execution_state_after_write") is True
+    if has_inline_state_fields:
+        inline_errors: list[dict[str, str]] = []
+        if payload.get("record_execution_state_after_write") is not True:
+            inline_errors.append(_error("record_execution_state_after_write", "must_be_true"))
+        for field in ("execution_record_ref", "recorded_by", "recorded_at"):
+            if field not in payload:
+                inline_errors.append(_error(field, "missing_field"))
+        for field in ("execution_record_ref", "recorded_by"):
+            if field in payload and not _is_opaque_id(payload.get(field)):
+                inline_errors.append(_error(field, "invalid_opaque_id"))
+        if "recorded_at" in payload and not (
+            isinstance(payload.get("recorded_at"), str) and _ISO_UTC_RE.fullmatch(cast(str, payload["recorded_at"]))
+        ):
+            inline_errors.append(_error("recorded_at", "invalid_timestamp"))
+        if inline_errors:
+            return {
+                "executed": False,
+                "written": False,
+                "recorded": False,
+                "errors": sorted(inline_errors, key=lambda item: (item["field"], item["code"])),
+                "dto": None,
+            }
+
+    preview_payload = {field: payload[field] for field in _NAS_KEEPER_HANDOFF_EXECUTION_PAYLOAD_PREVIEW_FIELDS if field in payload}
+    previewed = preview_office_controlled_mutation_nas_keeper_mac_relay_execution_payload(preview_payload, queue_dir=queue_dir)
+    if not previewed.get("previewed"):
+        return {
+            "executed": False,
+            "written": False,
+            "recorded": False if record_after_write else None,
+            "errors": cast(list[dict[str, str]], previewed.get("errors") or []),
+            "dto": None,
+        }
     preview_dto = cast(dict[str, object], previewed["dto"])
 
     queue_file = _nas_keeper_handoff_queue_file(queue_dir)
-    wanted = str(cast(Mapping[str, object], payload)["handoff_ref"])
+    wanted = str(payload["handoff_ref"])
     matched: dict[str, object] | None = None
     for line in queue_file.read_text(encoding="utf-8").splitlines():
         if not line.strip():
@@ -2892,10 +2943,48 @@ def execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_previ
                 "mac_local_root_checked",
                 "mac_relay_execution_completed",
             ],
+            "execution_state_recorded": False,
             "capabilities": capabilities,
         }
     )
-    return {"executed": True, "written": True, "errors": [], "dto": dto}
+    if record_after_write:
+        evidence_refs = [
+            f"readback:{execution_dto['readback_sha256']}",
+            f"markdown:{markdown_body_sha256}",
+        ]
+        if execution_dto.get("audit_ref"):
+            evidence_refs.insert(0, f"audit:{execution_dto['audit_ref']}")
+        if execution_dto.get("rollback_ref"):
+            evidence_refs.append(f"rollback:{execution_dto['rollback_ref']}")
+        state_record = record_office_controlled_mutation_nas_keeper_mac_relay_execution_state(
+            {
+                "handoff_ref": wanted,
+                "execution_record_ref": payload["execution_record_ref"],
+                "relay_execution_ref": payload["relay_execution_ref"],
+                "nas_keeper_ref": payload["nas_keeper_ref"],
+                "relay_node_ref": payload["relay_node_ref"],
+                "recorded_by": payload["recorded_by"],
+                "recorded_at": payload["recorded_at"],
+                "execution_status": "succeeded",
+                "safe_summary": "Mac relay write completed and safe readback evidence was recorded.",
+                "evidence_refs": evidence_refs[:12],
+            },
+            queue_dir=queue_dir,
+        )
+        if not state_record.get("recorded"):
+            return {
+                "executed": True,
+                "written": True,
+                "recorded": False,
+                "errors": cast(list[dict[str, str]], state_record.get("errors") or []),
+                "dto": dto,
+            }
+        capabilities["queue_mutation_enabled"] = True
+        capabilities["execution_state_recording_enabled"] = True
+        dto["capabilities"] = capabilities
+        dto["execution_state_recorded"] = True
+        dto["execution_state"] = state_record["dto"]
+    return {"executed": True, "written": True, "recorded": record_after_write, "errors": [], "dto": dto}
 
 
 
