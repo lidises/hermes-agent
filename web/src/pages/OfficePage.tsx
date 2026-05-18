@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -4358,6 +4358,76 @@ export function RuntimeActivationReviewStatusPanel({
 }
 
 
+export function RuntimePreflightStatusPanel({
+  status,
+  error,
+}: {
+  status: OfficeRuntimePreflightStatus | null;
+  error?: string | null;
+}) {
+  const caps = status?.capabilities ?? {};
+  const readiness = status?.readiness ?? {};
+  const decisions = status?.preflight_decisions ?? {};
+  return (
+    <section
+      className="border border-amber-300/20 bg-amber-950/10 p-4"
+      data-office-runtime-preflight-status="true"
+      data-office-runtime-preflight-status-complete={String(Boolean(status?.runtime_preflight_complete))}
+      data-office-runtime-preflight-status-readback-enabled={String(Boolean(caps.runtime_preflight_readback_enabled))}
+      data-office-runtime-preflight-status-runtime-ready={String(Boolean(readiness.runtime_activation_ready))}
+      data-office-runtime-preflight-status-watcher-enabled={String(Boolean(caps.watcher_daemon_enabled))}
+      data-office-runtime-preflight-status-cron-enabled={String(Boolean(caps.cron_enabled))}
+      data-office-runtime-preflight-status-dispatch-enabled={String(Boolean(caps.adapter_dispatch_enabled))}
+      data-office-runtime-preflight-status-target-mutation-enabled={String(Boolean(caps.target_mutation_enabled))}
+      data-office-runtime-preflight-status-kanban-mutation-enabled={String(Boolean(caps.kanban_mutation_enabled))}
+      data-office-runtime-preflight-status-nas-save-enabled={String(Boolean(caps.nas_save_enabled))}
+      data-office-runtime-preflight-status-vps-file-change-enabled={String(Boolean(caps.vps_file_change_enabled))}
+      data-office-runtime-preflight-status-service-restart-enabled={String(Boolean(caps.service_restart_enabled))}
+      data-office-runtime-preflight-status-git-push-enabled={String(Boolean(caps.git_push_enabled))}
+      data-office-runtime-preflight-status-credential-access-enabled={String(Boolean(caps.credential_access_enabled))}
+      data-office-runtime-preflight-status-public-exposure-enabled={String(Boolean(caps.public_exposure_enabled))}
+      data-office-runtime-preflight-status-raw-excluded={String(Boolean(status?.redaction?.raw_excluded))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-200/70">Runtime preflight status</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">activation preflight · not ready to run</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Lists the prerequisites for any future watcher/cron runtime activation while keeping every runtime, dispatch, target, Kanban, NAS, VPS file, service, git, credential, and public-exposure path disabled.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "readback request failed" : `next ${status?.next_manual_lane ?? "manual_one_shot_runtime_dry_run"}`}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-3" data-office-runtime-preflight-status-checks="true">
+        {Object.entries(decisions).map(([check, decision]) => (
+          <div key={check} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-runtime-preflight-status-check={check}>
+            <div className="font-semibold text-amber-100/80">{check}</div>
+            <div className="mt-1 text-midground/60">{decision}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-runtime-preflight-status-readiness-list="true">
+        {Object.entries(readiness).map(([check, ready]) => (
+          <div key={check} className="border border-current/15 bg-black/20 p-2 text-xs" data-office-runtime-preflight-status-readiness={check} data-office-runtime-preflight-status-readiness-ready={String(Boolean(ready))}>
+            {check}: {String(Boolean(ready))}
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-2" data-office-runtime-preflight-status-forbidden-boundaries="true">
+        {(status?.forbidden_boundaries ?? []).map((boundary) => (
+          <div key={boundary} className="border border-red-300/20 bg-red-950/10 p-2 text-xs text-red-100/80" data-office-runtime-preflight-status-forbidden-boundary={boundary}>{boundary}</div>
+        ))}
+      </div>
+      <div className="mt-3 border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+        source: {status?.source_runtime_activation_lane ?? "runtime_activation_review_status"}
+      </div>
+    </section>
+  );
+}
+
+
 export function NasKeeperQueueManualEvidenceReviewSurfacePanel({
   surface,
   readback,
@@ -5577,6 +5647,8 @@ export default function OfficePage() {
   const [watcherCronContractStatusError, setWatcherCronContractStatusError] = useState<string | null>(null);
   const [runtimeActivationReviewStatus, setRuntimeActivationReviewStatus] = useState<OfficeRuntimeActivationReviewStatus | null>(null);
   const [runtimeActivationReviewStatusError, setRuntimeActivationReviewStatusError] = useState<string | null>(null);
+  const [runtimePreflightStatus, setRuntimePreflightStatus] = useState<OfficeRuntimePreflightStatus | null>(null);
+  const [runtimePreflightStatusError, setRuntimePreflightStatusError] = useState<string | null>(null);
   const [nasKeeperQueueReadbackLoading, setNasKeeperQueueReadbackLoading] = useState(false);
   const [nasKeeperQueueReadbackError, setNasKeeperQueueReadbackError] = useState<string | null>(null);
   const [nasKeeperExecutionDraft, setNasKeeperExecutionDraft] = useState<OfficeNasKeeperExecutionFromPreviewPayload>(DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT);
@@ -5933,6 +6005,20 @@ export default function OfficePage() {
         if (!cancelled) {
           setRuntimeActivationReviewStatus(null);
           setRuntimeActivationReviewStatusError("request failed");
+        }
+      });
+    api
+      .getOfficeControlledMutationRuntimePreflightStatus()
+      .then((next) => {
+        if (!cancelled) {
+          setRuntimePreflightStatus(next);
+          setRuntimePreflightStatusError(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setRuntimePreflightStatus(null);
+          setRuntimePreflightStatusError("request failed");
         }
       });
     api
@@ -6521,6 +6607,7 @@ export default function OfficePage() {
       <TargetDispatchContractStatusPanel status={targetDispatchContractStatus} error={targetDispatchContractStatusError} />
       <WatcherCronContractStatusPanel status={watcherCronContractStatus} error={watcherCronContractStatusError} />
       <RuntimeActivationReviewStatusPanel status={runtimeActivationReviewStatus} error={runtimeActivationReviewStatusError} />
+      <RuntimePreflightStatusPanel status={runtimePreflightStatus} error={runtimePreflightStatusError} />
 
       <NasKeeperExecutionOperatorActionPanel
         action={nasKeeperExecutionOperatorAction}

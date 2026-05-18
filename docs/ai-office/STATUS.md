@@ -1,6 +1,14 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-19 00:28 KST
+Last updated: 2026-05-19 00:49 KST
+
+## Runtime preflight status lane
+
+Implemented the recommended shortest follow-up after `runtime_activation_review_status`: a protected runtime preflight/readiness lane that lists the prerequisites for any future watcher/cron activation while creating no runtime artifacts. Backend adds `build_office_controlled_mutation_runtime_preflight_status(...)` plus protected GET `/api/office/controlled-mutation/runtime-preflight-status`; frontend adds a typed API wrapper and display-only `/office` panel with stable `data-office-runtime-preflight-status-*` hooks. It records required preflight decisions for systemd unit draft, cron schedule draft, disabled-by-default env gate, rollback/disable command, target allowlist, adapter dry-run, and metadata-only audit sink, with all readiness booleans false and `runtime_activation_ready=false`.
+
+Verification 2026-05-19 00:49 KST: RED backend tests first failed for missing helper/route; RED frontend tests first failed for missing API wrapper/panel. GREEN focused backend preflight+runtime-review tests passed (`4 passed`), and focused frontend runtime preflight API/panel tests passed (`2 passed`). Broader verification/deploy evidence should be appended after regression/build and VPS smoke.
+
+Boundary: this is preflight/readback/UI only. It does not create systemd units, install cron jobs, enable watcher/cron automation, dispatch adapters, mutate targets/Kanban/NAS/VPS files, restart services by itself, push from the lane, expose public routes, or grant VPS direct NAS mount/credential/write authority.
 
 ## Runtime activation review status lane
 

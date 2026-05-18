@@ -1887,6 +1887,83 @@ describe("DispatcherAuthorityMetadataRecordingDraftPanel", () => {
 
 
 describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
+  it("renders runtime preflight status with all activation prerequisites blocked", () => {
+    const RuntimePreflightStatusPanel = (OfficePageModule as unknown as {
+      RuntimePreflightStatusPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.RuntimePreflightStatusPanel>>;
+    }).RuntimePreflightStatusPanel;
+    const status = {
+      schema_version: 1,
+      mode: "runtime_preflight_status" as const,
+      runtime_preflight_complete: true,
+      source_runtime_activation_lane: "runtime_activation_review_status",
+      next_manual_lane: "manual_one_shot_runtime_dry_run",
+      preflight_decisions: {
+        systemd_unit_draft: "draft_required_not_created",
+        cron_schedule_draft: "draft_required_not_installed",
+        env_gate: "disabled_by_default_required",
+        rollback_disable_command: "required_before_activation",
+        target_allowlist: "required_before_dispatch",
+        adapter_dry_run: "required_before_dispatch",
+        audit_sink: "metadata_only_required_before_dispatch",
+      },
+      readiness: {
+        systemd_unit_ready: false,
+        cron_schedule_ready: false,
+        env_gate_ready: false,
+        rollback_ready: false,
+        target_allowlist_ready: false,
+        adapter_dry_run_ready: false,
+        audit_sink_ready: false,
+        runtime_activation_ready: false,
+      },
+      forbidden_boundaries: ["watcher_daemon_activation", "cron_job_installation", "adapter_dispatch", "target_mutation"],
+      capabilities: {
+        runtime_preflight_readback_enabled: true,
+        watcher_daemon_enabled: false,
+        cron_enabled: false,
+        adapter_dispatch_enabled: false,
+        target_mutation_enabled: false,
+        kanban_mutation_enabled: false,
+        nas_save_enabled: false,
+        vps_file_change_enabled: false,
+        service_restart_enabled: false,
+        git_push_enabled: false,
+        credential_access_enabled: false,
+        public_exposure_enabled: false,
+      },
+      redaction: { raw_excluded: true },
+      errors: [],
+    };
+
+    const markup = renderToStaticMarkup(<RuntimePreflightStatusPanel status={status} error={null} />);
+
+    expect(markup).toContain('data-office-runtime-preflight-status="true"');
+    expect(markup).toContain('data-office-runtime-preflight-status-complete="true"');
+    expect(markup).toContain('data-office-runtime-preflight-status-readback-enabled="true"');
+    expect(markup).toContain('data-office-runtime-preflight-status-runtime-ready="false"');
+    expect(markup).toContain('data-office-runtime-preflight-status-watcher-enabled="false"');
+    expect(markup).toContain('data-office-runtime-preflight-status-cron-enabled="false"');
+    expect(markup).toContain('data-office-runtime-preflight-status-dispatch-enabled="false"');
+    expect(markup).toContain('data-office-runtime-preflight-status-target-mutation-enabled="false"');
+    expect(markup).toContain('data-office-runtime-preflight-status-kanban-mutation-enabled="false"');
+    expect(markup).toContain('data-office-runtime-preflight-status-nas-save-enabled="false"');
+    expect(markup).toContain('data-office-runtime-preflight-status-vps-file-change-enabled="false"');
+    expect(markup).toContain('data-office-runtime-preflight-status-service-restart-enabled="false"');
+    expect(markup).toContain('data-office-runtime-preflight-status-git-push-enabled="false"');
+    expect(markup).toContain('data-office-runtime-preflight-status-credential-access-enabled="false"');
+    expect(markup).toContain('data-office-runtime-preflight-status-public-exposure-enabled="false"');
+    expect(markup).toContain('data-office-runtime-preflight-status-raw-excluded="true"');
+    expect(markup).toContain('data-office-runtime-preflight-status-check="systemd_unit_draft"');
+    expect(markup).toContain('data-office-runtime-preflight-status-readiness="runtime_activation_ready"');
+    expect(markup).toContain('data-office-runtime-preflight-status-forbidden-boundary="watcher_daemon_activation"');
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw runtime preflight|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
+  });
+
   it("renders the queue-state manual review surface without executable controls or raw markdown", () => {
     const NasKeeperQueueManualEvidenceReviewSurfacePanel = (OfficePageModule as unknown as { NasKeeperQueueManualEvidenceReviewSurfacePanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.NasKeeperQueueManualEvidenceReviewSurfacePanel>> }).NasKeeperQueueManualEvidenceReviewSurfacePanel;
     const boundary = { detailKind: "nas_runtime_n3_approval_boundary_status_surface" } as ReturnType<typeof buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface>;

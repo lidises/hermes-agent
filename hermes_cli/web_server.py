@@ -65,6 +65,7 @@ from hermes_cli.office_controlled_mutation import (
     build_office_controlled_mutation_target_dispatch_contract_status,
     build_office_controlled_mutation_watcher_cron_contract_status,
     build_office_controlled_mutation_runtime_activation_review_status,
+    build_office_controlled_mutation_runtime_preflight_status,
     build_office_controlled_mutation_contract_schema,
     execute_office_controlled_mutation_nas_single_file_write,
     execute_office_controlled_mutation_nas_mac_relay_write,
@@ -1013,6 +1014,12 @@ async def get_office_controlled_mutation_watcher_cron_contract_status():
 async def get_office_controlled_mutation_runtime_activation_review_status():
     """Review runtime activation posture while every runtime path remains disabled."""
     return build_office_controlled_mutation_runtime_activation_review_status()
+
+
+@app.get("/api/office/controlled-mutation/runtime-preflight-status")
+async def get_office_controlled_mutation_runtime_preflight_status():
+    """Project runtime activation preflight without creating daemon or cron artifacts."""
+    return build_office_controlled_mutation_runtime_preflight_status()
 
 
 @app.get("/api/office/events")

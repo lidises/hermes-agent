@@ -2066,6 +2066,76 @@ def build_office_controlled_mutation_runtime_activation_review_status(
     }
 
 
+def build_office_controlled_mutation_runtime_preflight_status(
+    *, unsafe_examples: Mapping[str, Any] | None = None
+) -> dict[str, object]:
+    """Project runtime activation preflight requirements without creating runtime artifacts."""
+
+    _ = unsafe_examples
+    return {
+        "schema_version": 1,
+        "mode": "runtime_preflight_status",
+        "runtime_preflight_complete": True,
+        "source_runtime_activation_lane": "runtime_activation_review_status",
+        "next_manual_lane": "manual_one_shot_runtime_dry_run",
+        "preflight_decisions": {
+            "systemd_unit_draft": "draft_required_not_created",
+            "cron_schedule_draft": "draft_required_not_installed",
+            "env_gate": "disabled_by_default_required",
+            "rollback_disable_command": "required_before_activation",
+            "target_allowlist": "required_before_dispatch",
+            "adapter_dry_run": "required_before_dispatch",
+            "audit_sink": "metadata_only_required_before_dispatch",
+        },
+        "readiness": {
+            "systemd_unit_ready": False,
+            "cron_schedule_ready": False,
+            "env_gate_ready": False,
+            "rollback_ready": False,
+            "target_allowlist_ready": False,
+            "adapter_dry_run_ready": False,
+            "audit_sink_ready": False,
+            "runtime_activation_ready": False,
+        },
+        "forbidden_boundaries": [
+            "watcher_daemon_activation",
+            "cron_job_installation",
+            "adapter_dispatch",
+            "target_mutation",
+            "kanban_mutation",
+            "nas_save",
+            "vps_file_change",
+            "service_restart",
+            "git_push",
+            "credential_access",
+            "public_exposure",
+        ],
+        "capabilities": {
+            "runtime_preflight_readback_enabled": True,
+            "watcher_daemon_enabled": False,
+            "cron_enabled": False,
+            "adapter_dispatch_enabled": False,
+            "target_mutation_enabled": False,
+            "kanban_mutation_enabled": False,
+            "nas_save_enabled": False,
+            "vps_file_change_enabled": False,
+            "service_restart_enabled": False,
+            "git_push_enabled": False,
+            "credential_access_enabled": False,
+            "public_exposure_enabled": False,
+        },
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "opaque_refs_only": True,
+            "safe_summaries_only": True,
+            "unsupported_values_echoed": False,
+            "credentials_echoed": False,
+        },
+        "errors": [],
+    }
+
+
 def _dispatcher_authority_metadata_append_status_capabilities() -> dict[str, bool]:
     return {
         "metadata_append_readback_enabled": True,
