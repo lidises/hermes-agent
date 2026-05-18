@@ -8,12 +8,11 @@ This handoff lets a later `/new` session restart from durable files and live rea
 
 - Local repo: `/Users/lidises/dev/hermes-agent`
 - Branch: `main`
-- Local HEAD: `7ddc8ba9` (`docs(office): record dispatcher completion review deploy`)
-- `origin/main`: `7ddc8ba9`
+- Local/origin baseline: at or after `7ddc8ba9` (`docs(office): record dispatcher completion review deploy`); live recheck should prefer the current `origin/main` HEAD because this handoff file may have later refresh commits.
 - Local git status before writing this handoff: clean (`## main...origin/main`)
 - Hermes CLI: `Hermes Agent v0.14.0 (2026.5.16)`, reported `Up to date`
 - Canonical VPS dashboard worktree: `/home/hermes/.hermes/ai-office-dashboard`
-- VPS dashboard HEAD: `7ddc8ba9`
+- VPS dashboard HEAD baseline: at or after `7ddc8ba9`; live recheck should prefer current `origin/main`/worktree HEAD.
 - VPS dashboard worktree status: clean
 - VPS services: `hermes-agent-dashboard.service=active`, `hermes-gateway.service=active`
 - VPS listeners: dashboard `100.122.57.85:8765`, gateway `100.122.57.85:8766`; both private/Tailscale-bound in the read-only listener check
@@ -49,8 +48,8 @@ AI Office has moved from a read-only RPG/control-room prototype into a guarded c
 
 5. Latest completed slice
    - Commit `419f0be6` added the dispatcher authority completion-review helper/API/UI panel.
-   - Commit `7ddc8ba9` documented the completion-review deploy evidence in `STATUS.md` and `NEXT.md`.
-   - VPS dashboard worktree is synced to `7ddc8ba9`; code slice `419f0be6` was browser-smoked with the verified `web_dist` fallback.
+   - Commit `7ddc8ba9` documented the completion-review deploy evidence in `STATUS.md` and `NEXT.md`; later handoff-refresh commits may sit on top.
+   - VPS dashboard worktree is synced at or after `7ddc8ba9`; code slice `419f0be6` was browser-smoked with the verified `web_dist` fallback.
    - Private `/office?completion-review=419f0be6` smoke passed: HTTP 200, completion-review panel rendered, complete=true, readback=true, four completed-lane hooks, controls 0, execution/dispatch/target/NAS false, raw leak false, console JS errors 0.
 
 ## What is not done / still intentionally excluded
@@ -142,8 +141,8 @@ AI Office/Hermes 이어서 해줘. 먼저 스킬 `hermes-agent`와 `ai-office-vp
 
 - Handoff: /Users/lidises/dev/hermes-agent/docs/ai-office/plans/2026-05-18-fresh-session-handoff.md
 - Repo: /Users/lidises/dev/hermes-agent
-- Expected local/origin HEAD: 7ddc8ba9
-- Expected VPS dashboard worktree: /home/hermes/.hermes/ai-office-dashboard at 7ddc8ba9
+- Expected local/origin HEAD: current `origin/main`, at least 7ddc8ba9
+- Expected VPS dashboard worktree: /home/hermes/.hermes/ai-office-dashboard at current `origin/main`, at least 7ddc8ba9
 - Canonical VPS Kanban board: ai-office; last observed 74 done, 0 active/blocked
 
 먼저 Mac/VPS/WSL Hermes 상태를 read-only로 확인하고, 실제로 진행되지 않은 구상/카드/문서를 요약해줘. 구현/서비스 재시작/게이트웨이 재시작/VPS 파일 변경/WSL 변경/commit/push/Kanban mutation/NAS write는 내가 승인하기 전에는 하지 마.
