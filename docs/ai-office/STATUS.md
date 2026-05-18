@@ -1,6 +1,14 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 16:22 KST
+Last updated: 2026-05-18 16:37 KST
+
+## NAS Keeper inline execute-and-record real Mac NAS smoke rerun
+
+After the user approved continuing by the shortest path and confirmed actual writes are acceptable, ran the real Mac-relay-context write smoke for the current one-call execute+record path. The smoke used a temporary handoff queue, enqueued and authorized two safe handoffs for one harmless logical note, previewed both payloads, and executed both through `execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_preview(...)` against the Mac-local NAS relay root with `record_execution_state_after_write=true`. Safe logical target: `vault_ai_office_smoke::ai-office-nas-keeper-real-write-smoke-20260518`. Create and replacement runs both returned executed/written/recorded true; queue readback showed both items at `mac_relay_execution_succeeded`; replacement readback SHA-256 matched expected content (`885904b9e8c205100a0860101d1d25604a32b405988bc7a4de8a796fbdd57d92`); replacement rollback ref and audit ref were present; `markdown_body_included=false`; scoped leak probes were false for raw markdown-body field, raw body text, raw Mac/VPS paths, token-shaped strings, provider IDs, and Traceback.
+
+Verification 2026-05-18 16:37 KST: backend focused/API regression `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_from_preview.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_state_record.py tests/hermes_cli/test_office_api.py -q -o 'addopts='` -> `19 passed`; `py_compile` for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py` passed; `git diff --check` passed.
+
+Boundary: actual write was limited to a harmless Mac-local NAS smoke note and a temporary isolated handoff queue. No durable production queue item was executed, no watcher/cron/dispatch daemon or authority adapter was started, no VPS direct NAS mount/credential/write authority was added, no public exposure was added, and dashboard/gateway services were not restarted in this smoke.
 
 ## NAS Keeper inline execute-and-record UI path
 
