@@ -1657,6 +1657,64 @@ describe("DispatcherAuthorityMetadataRecordingDraftPanel", () => {
     expect(markup).not.toContain("<textarea");
     expect(markup).not.toMatch(/raw markdown body|Traceback|\/Users\/lidises|\/home\/hermes|token-shaped-simulation|private-authority-provider/i);
   });
+
+  it("renders dispatcher completion review status without executable controls", () => {
+    const DispatcherCompletionReviewStatusPanel = (OfficePageModule as unknown as {
+      DispatcherCompletionReviewStatusPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.DispatcherCompletionReviewStatusPanel>>;
+    }).DispatcherCompletionReviewStatusPanel;
+    const status = {
+      schema_version: 1,
+      mode: "dispatcher_completion_review_status" as const,
+      request_id: "req_20260518_1255_dispatcher_execution_simulation",
+      correlation_id: "corr_20260518_1255_dispatcher_execution_simulation",
+      completion_review_complete: true,
+      execution_checkpoint_status: "blocked",
+      review_counts: { dry_run_results: 1, audit_events: 1 },
+      latest_refs: {
+        dry_run_result: "dryrun_20260518_1255_dispatcher_execution_simulation",
+        audit: "audit_20260518_1255_dispatcher_execution_simulation",
+      },
+      completed_lanes: [
+        "dispatcher_authority_dry_run_surface",
+        "dispatcher_metadata_recording_draft",
+        "dispatcher_metadata_append_checkpoint",
+        "dispatcher_execution_simulation_status",
+      ],
+      next_manual_lane: "authority_handoff_completion_review_only",
+      capabilities: {
+        completion_review_readback_enabled: true,
+        dry_run_execution_enabled: false,
+        adapter_binding_enabled: false,
+        adapter_dispatch_enabled: false,
+        target_mutation_enabled: false,
+        nas_save_enabled: false,
+        watcher_daemon_enabled: false,
+        cron_enabled: false,
+      },
+      errors: [],
+    };
+
+    const markup = renderToStaticMarkup(<DispatcherCompletionReviewStatusPanel status={status} error={null} />);
+
+    expect(markup).toContain('data-office-dispatcher-completion-review-status="true"');
+    expect(markup).toContain('data-office-dispatcher-completion-review-status-complete="true"');
+    expect(markup).toContain('data-office-dispatcher-completion-review-status-readback-enabled="true"');
+    expect(markup).toContain('data-office-dispatcher-completion-review-status-execution-enabled="false"');
+    expect(markup).toContain('data-office-dispatcher-completion-review-status-dispatch-enabled="false"');
+    expect(markup).toContain('data-office-dispatcher-completion-review-status-target-mutation-enabled="false"');
+    expect(markup).toContain('data-office-dispatcher-completion-review-status-nas-save-enabled="false"');
+    expect(markup).toContain('data-office-dispatcher-completion-review-status-lane="dispatcher_authority_dry_run_surface"');
+    expect(markup).toContain('data-office-dispatcher-completion-review-status-lane="dispatcher_execution_simulation_status"');
+    expect(markup).toContain("authority_handoff_completion_review_only");
+    expect(markup).toContain("dryrun_20260518_1255_dispatcher_execution_simulation");
+    expect(markup).toContain("audit_20260518_1255_dispatcher_execution_simulation");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw markdown body|Traceback|\/Users\/lidises|\/home\/hermes|token-shaped-completion|private-authority-provider/i);
+  });
 });
 
 

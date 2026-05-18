@@ -1825,6 +1825,60 @@ def build_office_controlled_mutation_dispatcher_execution_simulation_status(
     }
 
 
+def build_office_controlled_mutation_dispatcher_completion_review_status(
+    *,
+    store_paths: Mapping[str, Path] | None = None,
+    limit: int = 25,
+) -> dict[str, object]:
+    """Summarize the dispatcher authority handoff chain without enabling execution."""
+
+    simulation_status = build_office_controlled_mutation_dispatcher_execution_simulation_status(
+        store_paths=store_paths,
+        limit=limit,
+    )
+    capabilities_value = simulation_status.get("capabilities", {})
+    capabilities: dict[str, bool] = dict(capabilities_value) if isinstance(capabilities_value, dict) else {}
+    capabilities["completion_review_readback_enabled"] = True
+    for key in (
+        "dry_run_execution_enabled",
+        "adapter_implementation_enabled",
+        "adapter_binding_enabled",
+        "adapter_dispatch_enabled",
+        "credential_access_enabled",
+        "target_mutation_enabled",
+        "nas_save_enabled",
+        "watcher_daemon_enabled",
+        "cron_enabled",
+        "vps_direct_nas_authority_enabled",
+        "public_exposure_enabled",
+    ):
+        capabilities[key] = False
+    counts_value = simulation_status.get("simulation_counts", {"dry_run_results": 0, "audit_events": 0})
+    counts: dict[str, int] = dict(counts_value) if isinstance(counts_value, dict) else {"dry_run_results": 0, "audit_events": 0}
+    latest_refs_value = simulation_status.get("latest_refs", {})
+    latest_refs: dict[str, str] = dict(latest_refs_value) if isinstance(latest_refs_value, dict) else {}
+    return {
+        "schema_version": 1,
+        "mode": "dispatcher_completion_review_status",
+        "request_id": _DISPATCHER_EXECUTION_SIMULATION_REQUEST_ID,
+        "correlation_id": _DISPATCHER_EXECUTION_SIMULATION_CORRELATION_ID,
+        "completion_review_complete": bool(simulation_status.get("simulation_checkpoint_complete")),
+        "execution_checkpoint_status": simulation_status.get("checkpoint_status", "unknown"),
+        "review_counts": counts,
+        "latest_refs": latest_refs,
+        "completed_lanes": [
+            "dispatcher_authority_dry_run_surface",
+            "dispatcher_metadata_recording_draft",
+            "dispatcher_metadata_append_checkpoint",
+            "dispatcher_execution_simulation_status",
+        ],
+        "next_manual_lane": "authority_handoff_completion_review_only",
+        "capabilities": capabilities,
+        "redaction": dict(_REDACTION_POSTURE),
+        "errors": simulation_status.get("errors", []),
+    }
+
+
 def _dispatcher_authority_metadata_append_status_capabilities() -> dict[str, bool]:
     return {
         "metadata_append_readback_enabled": True,

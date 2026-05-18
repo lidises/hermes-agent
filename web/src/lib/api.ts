@@ -275,6 +275,25 @@ export interface OfficeDispatcherExecutionSimulationStatusParams {
   limit?: number;
 }
 
+export interface OfficeDispatcherCompletionReviewStatus {
+  schema_version: number;
+  mode: "dispatcher_completion_review_status";
+  request_id: string;
+  correlation_id: string;
+  completion_review_complete: boolean;
+  execution_checkpoint_status: string;
+  review_counts: Record<string, number>;
+  latest_refs: Record<string, string>;
+  completed_lanes: string[];
+  next_manual_lane: string;
+  capabilities: Record<string, boolean>;
+  errors: Array<{ field: string; code: string }>;
+}
+
+export interface OfficeDispatcherCompletionReviewStatusParams {
+  limit?: number;
+}
+
 export interface OfficeNasKeeperExecutionFromPreviewPayload {
   handoff_ref: string;
   relay_execution_ref: string;
@@ -429,6 +448,12 @@ export const api = {
     if (params.limit !== undefined) qs.set("limit", String(params.limit));
     const suffix = qs.toString() ? `?${qs.toString()}` : "";
     return fetchJSON<OfficeDispatcherExecutionSimulationStatus>(`/api/office/controlled-mutation/dispatcher-execution-simulation-status${suffix}`);
+  },
+  getOfficeControlledMutationDispatcherCompletionReviewStatus: (params: OfficeDispatcherCompletionReviewStatusParams = {}) => {
+    const qs = new URLSearchParams();
+    if (params.limit !== undefined) qs.set("limit", String(params.limit));
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+    return fetchJSON<OfficeDispatcherCompletionReviewStatus>(`/api/office/controlled-mutation/dispatcher-completion-review-status${suffix}`);
   },
   executeOfficeControlledMutationNasSingleFileWrite: (body: OfficeNasSingleFileWritePayload) =>
     fetchJSON<OfficeNasSingleFileWriteResult>("/api/office/controlled-mutation/nas-runtime/single-file-write", {

@@ -60,6 +60,7 @@ from hermes_cli.office_controlled_mutation import (
     build_office_controlled_mutation_dispatcher_authority_dry_run_surface,
     build_office_controlled_mutation_dispatcher_authority_metadata_append_status,
     build_office_controlled_mutation_dispatcher_authority_metadata_recording_draft,
+    build_office_controlled_mutation_dispatcher_completion_review_status,
     build_office_controlled_mutation_dispatcher_execution_simulation_status,
     build_office_controlled_mutation_contract_schema,
     execute_office_controlled_mutation_nas_single_file_write,
@@ -985,6 +986,12 @@ async def get_office_controlled_mutation_dispatcher_authority_metadata_append_st
 async def get_office_controlled_mutation_dispatcher_execution_simulation_status(limit: int = 25):
     """Read back the human-reviewed dispatcher execution simulation checkpoint."""
     return build_office_controlled_mutation_dispatcher_execution_simulation_status(limit=limit)
+
+
+@app.get("/api/office/controlled-mutation/dispatcher-completion-review-status")
+async def get_office_controlled_mutation_dispatcher_completion_review_status(limit: int = 25):
+    """Summarize the dispatcher authority handoff chain without enabling execution."""
+    return build_office_controlled_mutation_dispatcher_completion_review_status(limit=limit)
 
 
 @app.get("/api/office/events")

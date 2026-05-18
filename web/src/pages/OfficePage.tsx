@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -4117,6 +4117,68 @@ export function DispatcherExecutionSimulationStatusPanel({
 }
 
 
+export function DispatcherCompletionReviewStatusPanel({
+  status,
+  error,
+}: {
+  status: OfficeDispatcherCompletionReviewStatus | null;
+  error?: string | null;
+}) {
+  const counts = status?.review_counts ?? {};
+  const refs = status?.latest_refs ?? {};
+  const caps = status?.capabilities ?? {};
+  return (
+    <section
+      className="border border-lime-300/20 bg-lime-950/10 p-4"
+      data-office-dispatcher-completion-review-status="true"
+      data-office-dispatcher-completion-review-status-complete={String(Boolean(status?.completion_review_complete))}
+      data-office-dispatcher-completion-review-status-readback-enabled={String(Boolean(caps.completion_review_readback_enabled))}
+      data-office-dispatcher-completion-review-status-execution-enabled={String(Boolean(caps.dry_run_execution_enabled))}
+      data-office-dispatcher-completion-review-status-dispatch-enabled={String(Boolean(caps.adapter_dispatch_enabled))}
+      data-office-dispatcher-completion-review-status-target-mutation-enabled={String(Boolean(caps.target_mutation_enabled))}
+      data-office-dispatcher-completion-review-status-nas-save-enabled={String(Boolean(caps.nas_save_enabled))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-lime-200/70">Dispatcher completion review status</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">authority handoff completion readback</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Summarizes the completed dispatcher authority dry-run, metadata draft, append checkpoint, and execution-simulation readback lanes. This is still review-only: no real command execution, adapter binding, dispatch, target mutation, NAS save, watcher, cron, Kanban mutation, or public exposure.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? `readback ${error}` : `execution ${status?.execution_checkpoint_status ?? "unknown"}`}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-2" data-office-dispatcher-completion-review-status-counts="true">
+        {[
+          ["dry_run_results", "dry-run results"],
+          ["audit_events", "audit events"],
+        ].map(([key, label]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3" data-office-dispatcher-completion-review-status-count={key}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{label}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{counts[key] ?? 0}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 text-xs text-midground/70 md:grid-cols-3" data-office-dispatcher-completion-review-status-refs="true">
+        <div className="border border-current/15 bg-black/20 p-2">request: {status?.request_id ?? "safe-ref unavailable"}</div>
+        <div className="border border-current/15 bg-black/20 p-2">result: {refs.dry_run_result ?? "safe-ref unavailable"}</div>
+        <div className="border border-current/15 bg-black/20 p-2">audit: {refs.audit ?? "safe-ref unavailable"}</div>
+      </div>
+      <div className="mt-3 grid gap-2 text-xs text-midground/70 md:grid-cols-2" data-office-dispatcher-completion-review-status-lanes="true">
+        {(status?.completed_lanes ?? []).map((lane) => (
+          <div key={lane} className="border border-current/15 bg-black/20 p-2" data-office-dispatcher-completion-review-status-lane={lane}>{lane}</div>
+        ))}
+      </div>
+      <div className="mt-3 border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+        next: {status?.next_manual_lane ?? "authority_handoff_completion_review_only"}
+      </div>
+    </section>
+  );
+}
+
+
 export function NasKeeperQueueManualEvidenceReviewSurfacePanel({
   surface,
   readback,
@@ -5328,6 +5390,8 @@ export default function OfficePage() {
   const [dispatcherAuthorityMetadataAppendStatusError, setDispatcherAuthorityMetadataAppendStatusError] = useState<string | null>(null);
   const [dispatcherExecutionSimulationStatus, setDispatcherExecutionSimulationStatus] = useState<OfficeDispatcherExecutionSimulationStatus | null>(null);
   const [dispatcherExecutionSimulationStatusError, setDispatcherExecutionSimulationStatusError] = useState<string | null>(null);
+  const [dispatcherCompletionReviewStatus, setDispatcherCompletionReviewStatus] = useState<OfficeDispatcherCompletionReviewStatus | null>(null);
+  const [dispatcherCompletionReviewStatusError, setDispatcherCompletionReviewStatusError] = useState<string | null>(null);
   const [nasKeeperQueueReadbackLoading, setNasKeeperQueueReadbackLoading] = useState(false);
   const [nasKeeperQueueReadbackError, setNasKeeperQueueReadbackError] = useState<string | null>(null);
   const [nasKeeperExecutionDraft, setNasKeeperExecutionDraft] = useState<OfficeNasKeeperExecutionFromPreviewPayload>(DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT);
@@ -5628,6 +5692,20 @@ export default function OfficePage() {
         if (!cancelled) {
           setDispatcherExecutionSimulationStatus(null);
           setDispatcherExecutionSimulationStatusError("request failed");
+        }
+      });
+    api
+      .getOfficeControlledMutationDispatcherCompletionReviewStatus({ limit: 5 })
+      .then((next) => {
+        if (!cancelled) {
+          setDispatcherCompletionReviewStatus(next);
+          setDispatcherCompletionReviewStatusError(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setDispatcherCompletionReviewStatus(null);
+          setDispatcherCompletionReviewStatusError("request failed");
         }
       });
     api
@@ -6209,6 +6287,8 @@ export default function OfficePage() {
       <DispatcherAuthorityMetadataAppendStatusPanel status={dispatcherAuthorityMetadataAppendStatus} error={dispatcherAuthorityMetadataAppendStatusError} />
 
       <DispatcherExecutionSimulationStatusPanel status={dispatcherExecutionSimulationStatus} error={dispatcherExecutionSimulationStatusError} />
+
+      <DispatcherCompletionReviewStatusPanel status={dispatcherCompletionReviewStatus} error={dispatcherCompletionReviewStatusError} />
 
       <NasKeeperExecutionOperatorActionPanel
         action={nasKeeperExecutionOperatorAction}
