@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 22:10 KST
+Last updated: 2026-05-18 22:16 KST
 
 ## Human-reviewed dispatcher execution simulation status readback lane
 
@@ -8,7 +8,9 @@ Implemented the shortest follow-up after the safe metadata checkpoint: a dedicat
 
 Verification 2026-05-18 22:10 KST: RED backend test first failed for the missing helper/route, then GREEN focused simulation status tests passed (`2 passed`). Focused backend regression for simulation/append/draft/dry-run/API passed (`22 passed`), py_compile for changed backend modules passed, focused frontend API + Office RPG tests passed (`79 passed`), `npm run build` passed with the existing Vite large chunk warning only, and `git diff --check` passed.
 
-Boundary: this is status/readback/UI only over an already-written safe metadata checkpoint. It did not append another checkpoint, execute a dry-run command, bind or dispatch an authority adapter, mutate a target, write NAS, start watcher/cron, mutate Kanban, expose public routes, restart dashboard/gateway, or grant VPS direct NAS mount/credential/write authority.
+Deploy/smoke 2026-05-18 22:16 KST: committed and pushed `3ccfd896` (`feat(office): surface dispatcher simulation status`) to `origin/main`; restricted VPS dashboard worktree `/home/hermes/.hermes/ai-office-dashboard` was reset to `3ccfd896` with an explicit main refspec. Copied the locally verified `hermes_cli/web_dist` fallback to the VPS; normalized local/remote tree hash matched (`716c6cef85d0143a2b0b120dc7778ac3a95a8109b61b615a7f7917e41b52d955`). Restarted only `hermes-agent-dashboard.service`; `hermes-gateway.service` stayed active/untouched with main PID `510174`. VPS focused backend regression passed (`16 passed`). Private `/office?dispatcher-simulation=3ccfd896` returned HTTP 200 and browser smoke rendered the simulation status panel with complete=true, counts dry-run=1/audit=1, readback=true, execution/dispatch/target/NAS false, controls 0, scoped raw leak false, and console JS errors 0. Protected API returned 401 without a session header and 200 with the session header; public IPv4 probes to 8765/8766 returned `http=000`, and listeners remain Tailscale-only.
+
+Boundary: this is status/readback/UI only over an already-written safe metadata checkpoint. It did not append another checkpoint, execute a dry-run command, bind or dispatch an authority adapter, mutate a target, write NAS, start watcher/cron, mutate Kanban, expose public routes, restart gateway, or grant VPS direct NAS mount/credential/write authority.
 
 ## Human-reviewed dispatcher execution simulation checkpoint
 
