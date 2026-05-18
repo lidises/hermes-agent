@@ -112,6 +112,26 @@ def test_nas_runtime_single_file_write_rejects_raw_paths_and_tokens_without_writ
     assert "sk-redacted" not in serialized
 
 
+def test_nas_runtime_single_file_write_fails_closed_when_target_parent_unavailable(tmp_path):
+    from hermes_cli.office_controlled_mutation import execute_office_controlled_mutation_nas_single_file_write
+
+    root_path = tmp_path / "nas-root"
+    root_path.mkdir()
+    (root_path / "vault_personal_wiki_demo").write_text("not a directory", encoding="utf-8")
+
+    result = execute_office_controlled_mutation_nas_single_file_write(safe_write_payload(), root_path=root_path)
+
+    assert result == {
+        "written": False,
+        "errors": [{"field": "write_target", "code": "write_target_unavailable"}],
+        "dto": None,
+    }
+    serialized = json.dumps(result, sort_keys=True).lower()
+    assert str(root_path).lower() not in serialized
+    assert "/users/lidises" not in serialized
+    assert "traceback" not in serialized
+
+
 def test_nas_runtime_single_file_write_api_requires_root_and_session_token(monkeypatch, tmp_path):
     from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
 

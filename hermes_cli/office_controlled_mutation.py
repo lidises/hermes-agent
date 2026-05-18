@@ -3340,7 +3340,10 @@ def execute_office_controlled_mutation_nas_single_file_write(
     except ValueError:
         return {"written": False, "errors": [_error("safe_slug", "path_escape_blocked")], "dto": None}
 
-    target.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        target.parent.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        return {"written": False, "errors": [_error("write_target", "write_target_unavailable")], "dto": None}
     rollback_created = False
     rollback_ref = None
     if target.exists():

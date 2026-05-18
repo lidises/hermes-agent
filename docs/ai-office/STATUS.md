@@ -1,6 +1,14 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 16:37 KST
+Last updated: 2026-05-18 17:02 KST
+
+## NAS Keeper inline execute-and-record browser operator smoke
+
+After the user approved continuing by the shortest path and confirmed actual writes are acceptable, ran the guarded `/office` browser operator path in a Mac relay context with `HERMES_AI_OFFICE_MAC_RELAY_NAS_ROOT=/Users/lidises/nas` and an isolated temporary `HERMES_HOME` queue. The UI loaded an authorized queue item, prefilled safe refs into the execution panel, kept `record_execution_state_after_write` checked, required the explicit execution approval checkbox, then performed one browser-triggered execute+record call. Safe target: `Hermes::ai-office-inline-ui-browser-smoke-20260518.md`. Browser result showed `executed true`, `written true`, `readback true`, `audit true`, and inline state result `recorded true · mac_relay_execution_succeeded`; queue readback showed the Hermes smoke item in `mac_relay_execution_succeeded` with three safe evidence refs. Final file SHA-256: `4b58839dc5e62c27861556346da86a71225d29ae09609be1050f89e0115d5b33`.
+
+Verification 2026-05-18 17:02 KST: `npm run build` passed with the existing Vite large chunk warning only; browser DOM smoke found operator panel and queue panel, result/state success, approval checkbox reset unchecked after execution, inline record checkbox checked, succeeded triage lane present, scoped raw/body/path/provider/token/Traceback leak probes false, and console JS errors 0. Readback from `/Users/lidises/nas/Hermes/ai-office-inline-ui-browser-smoke-20260518.md` matched the SHA above; temporary queue contained two items, with only the intended writable Hermes item succeeded. While testing, an intentionally mis-targeted smoke item under an unwritable new vault produced a server-side `PermissionError`; added fail-closed hardening so an unavailable target parent returns safe `write_target_unavailable` instead of raising. Focused regression `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_runtime_write.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_from_preview.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_state_record.py tests/hermes_cli/test_office_api.py -q -o 'addopts='` -> `25 passed`.
+
+Boundary: actual write was limited to one harmless Mac-local NAS smoke note through the explicit browser operator flow and an isolated temporary queue. No durable production queue item was executed, no watcher/cron/dispatch daemon or authority adapter was started, no VPS direct NAS mount/credential/write authority was added, no public exposure was added, and dashboard/gateway services were not restarted in this smoke.
 
 ## NAS Keeper inline execute-and-record real Mac NAS smoke rerun
 
