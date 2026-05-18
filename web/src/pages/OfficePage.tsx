@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -4002,6 +4002,64 @@ export function DispatcherAuthorityMetadataRecordingDraftPanel({
 }
 
 
+export function DispatcherAuthorityMetadataAppendStatusPanel({
+  status,
+  error,
+}: {
+  status: OfficeDispatcherAuthorityMetadataAppendStatus | null;
+  error?: string | null;
+}) {
+  const counts = status?.append_counts ?? {};
+  const refs = status?.latest_refs ?? {};
+  const caps = status?.capabilities ?? {};
+  return (
+    <section
+      className="border border-emerald-300/20 bg-emerald-950/10 p-4"
+      data-office-dispatcher-authority-metadata-append-status="true"
+      data-office-dispatcher-authority-metadata-append-status-complete={String(Boolean(status?.append_checkpoint_complete))}
+      data-office-dispatcher-authority-metadata-append-status-readback-enabled={String(Boolean(caps.metadata_append_readback_enabled))}
+      data-office-dispatcher-authority-metadata-append-status-storage-enabled={String(Boolean(caps.dry_run_result_storage_enabled))}
+      data-office-dispatcher-authority-metadata-append-status-audit-write-enabled={String(Boolean(caps.audit_write_enabled))}
+      data-office-dispatcher-authority-metadata-append-status-execution-enabled={String(Boolean(caps.dry_run_execution_enabled))}
+      data-office-dispatcher-authority-metadata-append-status-target-mutation-enabled={String(Boolean(caps.target_mutation_enabled))}
+      data-office-dispatcher-authority-metadata-append-status-nas-save-enabled={String(Boolean(caps.nas_save_enabled))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">Dispatcher metadata append status</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">actual dry-run result / audit append checkpoint</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Reads back the already-appended safe metadata checkpoint. Execution, adapter binding, target mutation, NAS save, watcher, cron, and public exposure remain disabled.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? `readback ${error}` : `complete ${status?.append_checkpoint_complete ? "true" : "false"}`}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-2" data-office-dispatcher-authority-metadata-append-status-counts="true">
+        {[
+          ["dry_run_results", "dry-run results"],
+          ["audit_events", "audit events"],
+        ].map(([key, label]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3" data-office-dispatcher-authority-metadata-append-status-count={key}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{label}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{counts[key] ?? 0}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 text-xs text-midground/70 md:grid-cols-3" data-office-dispatcher-authority-metadata-append-status-refs="true">
+        <div className="border border-current/15 bg-black/20 p-2">request: {status?.request_id ?? "safe-ref unavailable"}</div>
+        <div className="border border-current/15 bg-black/20 p-2">result: {refs.dry_run_result ?? "safe-ref unavailable"}</div>
+        <div className="border border-current/15 bg-black/20 p-2">audit: {refs.audit ?? "safe-ref unavailable"}</div>
+      </div>
+      <div className="mt-3 border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+        next: {status?.next_manual_lane ?? "human_reviewed_dispatcher_execution_simulation_boundary"}
+      </div>
+    </section>
+  );
+}
+
+
 export function NasKeeperQueueManualEvidenceReviewSurfacePanel({
   surface,
   readback,
@@ -5209,6 +5267,8 @@ export default function OfficePage() {
   const [dispatcherAuthorityDryRunError, setDispatcherAuthorityDryRunError] = useState<string | null>(null);
   const [dispatcherAuthorityMetadataRecordingDraft, setDispatcherAuthorityMetadataRecordingDraft] = useState<OfficeDispatcherAuthorityMetadataRecordingDraft | null>(null);
   const [dispatcherAuthorityMetadataRecordingDraftError, setDispatcherAuthorityMetadataRecordingDraftError] = useState<string | null>(null);
+  const [dispatcherAuthorityMetadataAppendStatus, setDispatcherAuthorityMetadataAppendStatus] = useState<OfficeDispatcherAuthorityMetadataAppendStatus | null>(null);
+  const [dispatcherAuthorityMetadataAppendStatusError, setDispatcherAuthorityMetadataAppendStatusError] = useState<string | null>(null);
   const [nasKeeperQueueReadbackLoading, setNasKeeperQueueReadbackLoading] = useState(false);
   const [nasKeeperQueueReadbackError, setNasKeeperQueueReadbackError] = useState<string | null>(null);
   const [nasKeeperExecutionDraft, setNasKeeperExecutionDraft] = useState<OfficeNasKeeperExecutionFromPreviewPayload>(DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT);
@@ -5477,6 +5537,24 @@ export default function OfficePage() {
         if (!cancelled) {
           setDispatcherAuthorityMetadataRecordingDraft(null);
           setDispatcherAuthorityMetadataRecordingDraftError("request failed");
+        }
+      });
+    api
+      .getOfficeControlledMutationDispatcherAuthorityMetadataAppendStatus({
+        request_id: "req_20260518_1218_dispatcher_metadata_append",
+        correlation_id: "corr_20260518_1218_dispatcher_metadata_append",
+        limit: 5,
+      })
+      .then((next) => {
+        if (!cancelled) {
+          setDispatcherAuthorityMetadataAppendStatus(next);
+          setDispatcherAuthorityMetadataAppendStatusError(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setDispatcherAuthorityMetadataAppendStatus(null);
+          setDispatcherAuthorityMetadataAppendStatusError("request failed");
         }
       });
     api
@@ -6054,6 +6132,8 @@ export default function OfficePage() {
       <DispatcherAuthorityDryRunSurfacePanel surface={dispatcherAuthorityDryRun} error={dispatcherAuthorityDryRunError} />
 
       <DispatcherAuthorityMetadataRecordingDraftPanel draft={dispatcherAuthorityMetadataRecordingDraft} error={dispatcherAuthorityMetadataRecordingDraftError} />
+
+      <DispatcherAuthorityMetadataAppendStatusPanel status={dispatcherAuthorityMetadataAppendStatus} error={dispatcherAuthorityMetadataAppendStatusError} />
 
       <NasKeeperExecutionOperatorActionPanel
         action={nasKeeperExecutionOperatorAction}

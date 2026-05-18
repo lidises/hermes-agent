@@ -58,6 +58,7 @@ from hermes_cli.office_controlled_mutation import (
     append_office_controlled_mutation_request_event,
     build_office_controlled_mutation_authority_metadata_handoff_status,
     build_office_controlled_mutation_dispatcher_authority_dry_run_surface,
+    build_office_controlled_mutation_dispatcher_authority_metadata_append_status,
     build_office_controlled_mutation_dispatcher_authority_metadata_recording_draft,
     build_office_controlled_mutation_contract_schema,
     execute_office_controlled_mutation_nas_single_file_write,
@@ -962,6 +963,20 @@ async def get_office_controlled_mutation_dispatcher_authority_metadata_recording
         result_id=result_id,
         audit_id=audit_id,
         recorded_at=recorded_at,
+    )
+
+
+@app.get("/api/office/controlled-mutation/dispatcher-authority-metadata-append-status")
+async def get_office_controlled_mutation_dispatcher_authority_metadata_append_status(
+    request_id: str | None = None,
+    correlation_id: str | None = None,
+    limit: int = 25,
+):
+    """Read back actual dispatcher dry-run/audit metadata append checkpoints."""
+    return build_office_controlled_mutation_dispatcher_authority_metadata_append_status(
+        request_id=request_id,
+        correlation_id=correlation_id,
+        limit=limit,
     )
 
 

@@ -238,6 +238,25 @@ export interface OfficeDispatcherAuthorityMetadataRecordingDraftParams {
   recorded_at?: string;
 }
 
+export interface OfficeDispatcherAuthorityMetadataAppendStatus {
+  schema_version: number;
+  mode: "dispatcher_authority_metadata_append_status";
+  request_id?: string;
+  correlation_id?: string;
+  append_checkpoint_complete: boolean;
+  append_counts: Record<string, number>;
+  latest_refs: Record<string, string>;
+  next_manual_lane: string;
+  capabilities: Record<string, boolean>;
+  errors: Array<{ field: string; code: string }>;
+}
+
+export interface OfficeDispatcherAuthorityMetadataAppendStatusParams {
+  request_id?: string;
+  correlation_id?: string;
+  limit?: number;
+}
+
 export interface OfficeNasKeeperExecutionFromPreviewPayload {
   handoff_ref: string;
   relay_execution_ref: string;
@@ -378,6 +397,14 @@ export const api = {
     if (params.recorded_at) qs.set("recorded_at", params.recorded_at);
     const suffix = qs.toString() ? `?${qs.toString()}` : "";
     return fetchJSON<OfficeDispatcherAuthorityMetadataRecordingDraft>(`/api/office/controlled-mutation/dispatcher-authority-metadata-recording-draft${suffix}`);
+  },
+  getOfficeControlledMutationDispatcherAuthorityMetadataAppendStatus: (params: OfficeDispatcherAuthorityMetadataAppendStatusParams = {}) => {
+    const qs = new URLSearchParams();
+    if (params.request_id) qs.set("request_id", params.request_id);
+    if (params.correlation_id) qs.set("correlation_id", params.correlation_id);
+    if (params.limit !== undefined) qs.set("limit", String(params.limit));
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+    return fetchJSON<OfficeDispatcherAuthorityMetadataAppendStatus>(`/api/office/controlled-mutation/dispatcher-authority-metadata-append-status${suffix}`);
   },
   executeOfficeControlledMutationNasSingleFileWrite: (body: OfficeNasSingleFileWritePayload) =>
     fetchJSON<OfficeNasSingleFileWriteResult>("/api/office/controlled-mutation/nas-runtime/single-file-write", {

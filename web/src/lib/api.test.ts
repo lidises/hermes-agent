@@ -251,6 +251,51 @@ describe("fetchJSON", () => {
     expect(JSON.stringify(fetchMock.mock.calls[0]?.[1])).not.toMatch(/method|body|\/Users\/|\/home\/|token=|sk-|raw markdown body|provider/i);
   });
 
+  it("reads dispatcher authority metadata append status through a protected GET route", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        __HERMES_SESSION_TOKEN__: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        schema_version: 1,
+        mode: "dispatcher_authority_metadata_append_status",
+        request_id: "req_20260518_1218_dispatcher_metadata_append",
+        correlation_id: "corr_20260518_1218_dispatcher_metadata_append",
+        append_checkpoint_complete: true,
+        append_counts: { dry_run_results: 1, audit_events: 1 },
+        latest_refs: {
+          dry_run_result: "dryrun_20260518_1218_dispatcher_metadata_append",
+          audit: "audit_20260518_1218_dispatcher_metadata_append",
+        },
+        next_manual_lane: "human_reviewed_dispatcher_execution_simulation_boundary",
+        capabilities: { metadata_append_readback_enabled: true, dry_run_execution_enabled: false, target_mutation_enabled: false },
+        errors: [],
+      }),
+    } as Response);
+
+    const result = await api.getOfficeControlledMutationDispatcherAuthorityMetadataAppendStatus({
+      request_id: "req_20260518_1218_dispatcher_metadata_append",
+      correlation_id: "corr_20260518_1218_dispatcher_metadata_append",
+      limit: 5,
+    });
+
+    expect(result.mode).toBe("dispatcher_authority_metadata_append_status");
+    expect(result.append_checkpoint_complete).toBe(true);
+    expect(result.append_counts.audit_events).toBe(1);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/office/controlled-mutation/dispatcher-authority-metadata-append-status?request_id=req_20260518_1218_dispatcher_metadata_append&correlation_id=corr_20260518_1218_dispatcher_metadata_append&limit=5",
+      expect.objectContaining({ headers: expect.any(Headers) }),
+    );
+    const headers = fetchMock.mock.calls[0]?.[1]?.headers as Headers;
+    expect(headers.get("X-Hermes-Session-Token")).toBe("session-token-for-header-only");
+    expect(JSON.stringify(fetchMock.mock.calls[0]?.[1])).not.toMatch(/method|body|\/Users\/|\/home\/|token=|sk-|raw markdown body|provider/i);
+  });
+
   it("posts safe NAS Keeper Mac relay write payload through the protected execution route", async () => {
     Object.defineProperty(globalThis, "window", {
       configurable: true,

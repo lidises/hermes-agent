@@ -1,6 +1,14 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 21:21 KST
+Last updated: 2026-05-18 21:36 KST
+
+## Controlled-mutation dispatcher/authority metadata append status readback
+
+Implemented locally after the actual VPS safe metadata append checkpoint. This slice adds `build_office_controlled_mutation_dispatcher_authority_metadata_append_status(...)`, protected GET `/api/office/controlled-mutation/dispatcher-authority-metadata-append-status`, typed frontend API wrapper, and a display-only `/office` panel with stable `data-office-dispatcher-authority-metadata-append-status-*` hooks. It reads back the already-appended dry-run result/audit checkpoint for `req_20260518_1218_dispatcher_metadata_append` / `corr_20260518_1218_dispatcher_metadata_append` and surfaces safe counts/latest opaque refs only. It does not execute dry-runs, bind or dispatch an authority adapter, mutate targets, write NAS, start watcher/cron, mutate Kanban, expose public routes, or grant VPS direct NAS authority.
+
+Verification status 2026-05-18 21:36 KST: RED backend test failed first for missing helper/route, then GREEN focused backend append-status/API protection passed (`3 passed`). Focused backend regression for append status plus prior metadata recording/dry-run/audit/API suites passed (`34 passed`). Frontend API + Office RPG focused metadata append/recording tests passed (`3 passed`), and full frontend API/RPG regression passed (`77 passed`). `py_compile` for changed backend modules, `git diff --check`, and `npm run build` passed with the existing Vite large chunk warning only. Browser/VPS deploy smoke is the remaining verification step for this code slice.
+
+Boundary: this is readback/status observability for an already-approved append checkpoint. The actual append checkpoint remained limited to dry-run-result/audit metadata JSONL in the restricted VPS Hermes profile. Real dispatcher execution, authority-adapter binding, target mutation, NAS write, watcher/cron daemon, public exposure, Kanban mutation, gateway restart, and VPS direct NAS mount/credential/write authority remain separately gated unless explicitly approved.
 
 ## Controlled-mutation dispatcher/authority dry-run metadata recording draft
 

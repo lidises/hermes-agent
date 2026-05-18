@@ -1719,6 +1719,97 @@ def _dispatcher_authority_metadata_recording_draft_capabilities() -> dict[str, b
     }
 
 
+def build_office_controlled_mutation_dispatcher_authority_metadata_append_status(
+    *,
+    request_id: str | None = None,
+    correlation_id: str | None = None,
+    store_paths: Mapping[str, Path] | None = None,
+    limit: int = 25,
+) -> dict[str, object]:
+    """Read back actual dry-run result/audit metadata append checkpoints safely."""
+
+    errors: list[dict[str, str]] = []
+    safe_request_id: str | None = None
+    safe_correlation_id: str | None = None
+    if request_id is not None:
+        if _is_opaque_id(request_id):
+            safe_request_id = request_id
+        else:
+            errors.append(_error("request_id", "invalid_opaque_id"))
+    if correlation_id is not None:
+        if _is_opaque_id(correlation_id):
+            safe_correlation_id = correlation_id
+        else:
+            errors.append(_error("correlation_id", "invalid_opaque_id"))
+    errors = sorted(errors, key=lambda item: (item["field"], item["code"]))
+    base_response: dict[str, object] = {
+        "schema_version": 1,
+        "mode": "dispatcher_authority_metadata_append_status",
+        "append_checkpoint_complete": False,
+        "append_counts": {"dry_run_results": 0, "audit_events": 0},
+        "latest_refs": {},
+        "next_manual_lane": "human_reviewed_dispatcher_execution_simulation_boundary",
+        "capabilities": _dispatcher_authority_metadata_append_status_capabilities(),
+        "redaction": dict(_REDACTION_POSTURE),
+        "errors": errors,
+    }
+    if safe_request_id is not None:
+        base_response["request_id"] = safe_request_id
+    if safe_correlation_id is not None:
+        base_response["correlation_id"] = safe_correlation_id
+    if errors:
+        return base_response
+
+    paths = store_paths or {}
+    max_items = max(0, min(limit, 200))
+    dry_runs = list_office_controlled_mutation_dry_run_result_events(
+        store_path=paths.get("dry_run_results"), limit=max_items, request_id=safe_request_id, correlation_id=safe_correlation_id
+    )
+    audits = list_office_controlled_mutation_audit_events(
+        store_path=paths.get("audit_events"), limit=max_items, request_id=safe_request_id, correlation_id=safe_correlation_id
+    )
+    counts = {
+        "dry_run_results": _safe_count(dry_runs.get("count")),
+        "audit_events": _safe_count(audits.get("count")),
+    }
+    latest_refs: dict[str, str] = {}
+    for key, response, ref_field in (
+        ("dry_run_result", dry_runs, "result_id"),
+        ("audit", audits, "audit_id"),
+    ):
+        events = response.get("events")
+        if isinstance(events, list) and events and isinstance(events[-1], Mapping):
+            ref = events[-1].get(ref_field)
+            if isinstance(ref, str) and _is_opaque_id(ref):
+                latest_refs[key] = ref
+
+    base_response["append_checkpoint_complete"] = counts["dry_run_results"] > 0 and counts["audit_events"] > 0
+    base_response["append_counts"] = counts
+    base_response["latest_refs"] = latest_refs
+    return base_response
+
+
+def _dispatcher_authority_metadata_append_status_capabilities() -> dict[str, bool]:
+    return {
+        "metadata_append_readback_enabled": True,
+        "dry_run_result_readback_enabled": True,
+        "audit_readback_enabled": True,
+        "dry_run_result_storage_enabled": True,
+        "audit_write_enabled": True,
+        "adapter_implementation_enabled": False,
+        "adapter_binding_enabled": False,
+        "adapter_dispatch_enabled": False,
+        "credential_access_enabled": False,
+        "target_mutation_enabled": False,
+        "dry_run_execution_enabled": False,
+        "nas_save_enabled": False,
+        "watcher_daemon_enabled": False,
+        "cron_enabled": False,
+        "vps_direct_nas_authority_enabled": False,
+        "public_exposure_enabled": False,
+    }
+
+
 def _safe_count(value: object) -> int:
     return value if isinstance(value, int) else 0
 
