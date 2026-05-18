@@ -19,7 +19,7 @@ vi.mock("@/lib/api", () => ({
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
 import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerAssignmentCandidateGate, buildOfficeWorkerRequestDraftPreview, buildOfficeWorkerHumanConfirmationEnvelope, buildOfficeWorkerAuthorityHandoffEnvelope, buildOfficeWorkerDispatchDryRunEnvelope, buildOfficeWorkerAuditPreviewEnvelope, buildOfficeWorkerRollbackPreviewEnvelope, buildOfficeWorkerFinalGateChecklist, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeNasKeeperSaveRequestGate, buildOfficeNasKeeperRollbackEvidencePreview, buildOfficeNasEvidencePackageStoreReadbackStatus, buildOfficeNasPathValidationStatusSurface, buildOfficeNasPathPreviewStatusSurface, buildOfficeNasPathPreviewStoreReadbackStatusSurface, buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface, buildOfficeNasRuntimeSingleFileWriteApprovalAction, buildOfficeNasKeeperQueueManualEvidenceReviewSurface, buildOfficeNasKeeperExecutionOperatorAction, buildOfficeDeskRpgReadOnlyChainCompletionReview, buildOfficeEventDrivenCharacterStateProjection, buildOfficeCharacterStateRoomOverlay, buildOfficeCharacterRoomInteractionPosture, buildOfficeCharacterInspectorDetailPosture, buildOfficeCharacterDetailSafeDialogueCopy, buildOfficeCharacterBubbleInspectorAlignment, buildOfficeCharacterPanelBoundarySummary, buildOfficeCharacterFacilityRoleLegend, buildOfficeCharacterFacilityBoundaryStrip, buildOfficeCharacterFacilitySourceLedgerStrip, buildOfficeCharacterFacilityCompletionReview, buildOfficeControlledMutationProposalContract, buildOfficeControlledMutationDryRunPlan, buildOfficeControlledMutationAuditSinkPlan, buildOfficeControlledMutationRollbackVerificationPlan, buildOfficeControlledMutationHumanApprovalPlan, buildOfficeControlledMutationAuthoritySummary, buildOfficeControlledMutationExecutionReadinessSummary, buildOfficeControlledMutationContractPostureProjection, buildOfficeControlledMutationContractPosturePolish, buildOfficeControlledMutationReadinessHandoffRibbon, buildOfficeControlledMutationReadinessSummaryPolish, buildOfficeControlledMutationRequestStorePosture, buildOfficeControlledMutationRequestStoreHardeningPlan, buildOfficeControlledMutationNextApprovalBoundary, buildOfficeControlledMutationPostDecisionApprovalBoundary, buildOfficeControlledMutationPostRegistryApprovalBoundary, buildOfficeControlledMutationTargetDispatchForbiddenBoundary, buildOfficeControlledMutationSafeContinuationCompletionReview, buildOfficeRpgScene } from "./officeView";
-import type { OfficeState } from "@/lib/api";
+import type { OfficeNasKeeperHandoffQueueReadback, OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
   return {
@@ -1601,6 +1601,69 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
 
 
 describe("NasKeeperExecutionOperatorActionPanel", () => {
+  it("renders authorized queue item prefill affordance without exposing raw body fields", () => {
+    const NasKeeperQueueManualEvidenceReviewSurfacePanel = (OfficePageModule as unknown as { NasKeeperQueueManualEvidenceReviewSurfacePanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.NasKeeperQueueManualEvidenceReviewSurfacePanel>> }).NasKeeperQueueManualEvidenceReviewSurfacePanel;
+    const boundary = { detailKind: "nas_runtime_n3_approval_boundary_status_surface" } as ReturnType<typeof buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface>;
+    const action = buildOfficeNasRuntimeSingleFileWriteApprovalAction(boundary);
+    const queueSurface = buildOfficeNasKeeperQueueManualEvidenceReviewSurface(action);
+    const readback: OfficeNasKeeperHandoffQueueReadback = {
+      listed: true,
+      errors: [],
+      dto: {
+        schema_version: 1,
+        mode: "nas_keeper_mac_relay_handoff_queue_readback",
+        listed: true,
+        queue_storage_ref: "ai_office_local_profile::nas_keeper_mac_relay_handoff_queue",
+        filters: {},
+        effective_limit: 25,
+        available_count: 1,
+        count: 1,
+        skipped_count: 0,
+        markdown_body_included: false,
+        next_required_boundary: "manual_nas_keeper_execution_evidence_review_if_needed",
+        capabilities: { queue_read_enabled: true },
+        items: [{
+          schema_version: 1,
+          mode: "nas_keeper_mac_relay_handoff_queue_item_summary",
+          handoff_ref: "handoff_authorized_prefill_demo",
+          queue_ref: "nas_keeper_mac_relay_handoff_queue::handoff_authorized_prefill_demo",
+          queue_status: "authorized_for_mac_relay_execution",
+          relay_request_ref: "relay_req_authorized_prefill_demo",
+          write_ref: "write_authorized_prefill_demo",
+          package_ref: "pkg_authorized_prefill_demo",
+          target_vault_ref: "vault_personal_wiki_demo",
+          safe_slug: "authorized-prefill-demo",
+          safe_title: "Authorized prefill demo",
+          requested_by: "agent_orchestrator",
+          requested_at: "2026-05-18T06:00:00Z",
+          nas_keeper_ref: "agent_nas_keeper",
+          relay_node_ref: "mac_relay_primary",
+          safe_logical_path: "vault_personal_wiki_demo::authorized-prefill-demo.md",
+          safe_display_path: "vault_personal_wiki_demo / authorized-prefill-demo.md",
+          payload_bytes: 128,
+          markdown_body_included: false,
+          next_required_boundary: "mac_relay_authenticated_execution_from_authorized_handoff",
+          authorized_by: "agent_nas_keeper",
+          authorized_at: "2026-05-18T06:01:00Z",
+        }],
+      },
+    };
+
+    const markup = renderToStaticMarkup(
+      <NasKeeperQueueManualEvidenceReviewSurfacePanel
+        surface={queueSurface}
+        readback={readback}
+        onPrefillExecutionFromQueue={() => undefined}
+      />,
+    );
+
+    expect(markup).toContain('data-office-nas-keeper-queue-manual-review-prefill-enabled="true"');
+    expect(markup).toContain('data-office-nas-keeper-queue-manual-review-prefill-item="handoff_authorized_prefill_demo"');
+    expect(markup).toContain("실행 패널에 안전 refs 불러오기");
+    expect(markup).not.toContain('name="markdown_body"');
+    expect(markup).not.toMatch(/raw markdown body|\/Users\/lidises|token-shaped-prefill|Traceback/i);
+  });
+
   it("renders guarded execution-from-preview and state-record controls without markdown body projection", () => {
     const NasKeeperExecutionOperatorActionPanel = (OfficePageModule as unknown as { NasKeeperExecutionOperatorActionPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.NasKeeperExecutionOperatorActionPanel>> }).NasKeeperExecutionOperatorActionPanel;
     const boundary = { detailKind: "nas_runtime_n3_approval_boundary_status_surface" } as ReturnType<typeof buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface>;

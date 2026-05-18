@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeDataSource, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeDataSource, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -3797,13 +3797,16 @@ export function NasKeeperQueueManualEvidenceReviewSurfacePanel({
   readback,
   loading = false,
   error = null,
+  onPrefillExecutionFromQueue,
 }: {
   surface: OfficeNasKeeperQueueManualEvidenceReviewSurface;
   readback?: OfficeNasKeeperHandoffQueueReadback | null;
   loading?: boolean;
   error?: string | null;
+  onPrefillExecutionFromQueue?: (item: OfficeNasKeeperHandoffQueueItemSummary) => void;
 }) {
   const dto = readback?.dto ?? null;
+  const prefillEnabled = Boolean(onPrefillExecutionFromQueue);
   const triageLanes = dto
     ? Array.from(
         dto.items
@@ -3848,6 +3851,7 @@ export function NasKeeperQueueManualEvidenceReviewSurfacePanel({
       data-office-nas-keeper-queue-manual-review-readback-listed={String(readback?.listed ?? false)}
       data-office-nas-keeper-queue-manual-review-readback-count={dto?.count ?? 0}
       data-office-nas-keeper-queue-manual-review-readback-skipped-count={dto?.skipped_count ?? 0}
+      data-office-nas-keeper-queue-manual-review-prefill-enabled={String(prefillEnabled)}
       data-office-nas-keeper-queue-manual-review-raw-excluded={String(surface.rawExcluded)}
     >
       <CardHeader>
@@ -3918,6 +3922,16 @@ export function NasKeeperQueueManualEvidenceReviewSurfacePanel({
                       <div className="mt-1 text-midground/60">payload {item.payload_bytes} bytes · relay {item.relay_node_ref}</div>
                       {item.execution_status ? <div className="mt-1 text-cyan-100/80">execution {item.execution_status}</div> : null}
                       {item.execution_evidence_refs?.length ? <div className="mt-1 text-cyan-100/80">evidence refs {item.execution_evidence_refs.length}</div> : null}
+                      {prefillEnabled && item.queue_status === "authorized_for_mac_relay_execution" ? (
+                        <button
+                          type="button"
+                          className="mt-2 border border-amber-300/30 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-100"
+                          data-office-nas-keeper-queue-manual-review-prefill-item={item.handoff_ref}
+                          onClick={() => onPrefillExecutionFromQueue?.(item)}
+                        >
+                          실행 패널에 안전 refs 불러오기
+                        </button>
+                      ) : null}
                     </div>
                   ))}
                 </div>
@@ -5098,6 +5112,21 @@ export default function OfficePage() {
     setNasKeeperExecutionStateDraft((current) => ({ ...current, [field]: value }));
   }, []);
 
+  const prefillNasKeeperExecutionFromQueue = useCallback((item: OfficeNasKeeperHandoffQueueItemSummary) => {
+    if (item.queue_status !== "authorized_for_mac_relay_execution") return;
+    setNasKeeperExecutionDraft({
+      handoff_ref: item.handoff_ref,
+      relay_execution_ref: item.relay_execution_ref ?? `relay_exec_${item.handoff_ref}`,
+      nas_keeper_ref: item.nas_keeper_ref,
+      relay_node_ref: item.relay_node_ref,
+      relay_authorized_by: item.authorized_by ?? item.nas_keeper_ref,
+      relay_authorized_at: item.authorized_at ?? item.requested_at,
+    });
+    setNasKeeperExecutionResult(null);
+    setNasKeeperExecutionError(null);
+    setNasKeeperExecutionApproved(false);
+  }, []);
+
   const executeNasKeeperExecutionFromPreview = useCallback(async () => {
     if (!nasKeeperExecutionApproved) {
       setNasKeeperExecutionError("approval_required");
@@ -5742,6 +5771,7 @@ export default function OfficePage() {
         readback={nasKeeperQueueReadback}
         loading={nasKeeperQueueReadbackLoading}
         error={nasKeeperQueueReadbackError}
+        onPrefillExecutionFromQueue={prefillNasKeeperExecutionFromQueue}
       />
 
       <NasKeeperExecutionOperatorActionPanel
