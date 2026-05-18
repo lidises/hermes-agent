@@ -1,6 +1,12 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 12:49 KST
+Last updated: 2026-05-18 13:01 KST
+
+## NAS Keeper queue manual-review UX polish implemented locally
+
+Added a small read-only UX polish to the existing `/office` NAS Keeper queue manual-review surface: queue readback now groups safe items into status triage lanes with lane count, evidence-ref count, and next-boundary copy. This is display-only browser/UI polish over the already-protected queue readback DTO. It adds no forms/buttons/inputs, no browser mutation calls, no queue rewrite, no execution-state recording, no Mac relay execution, no NAS read/write, no watcher/cron/daemon automation, no authority-adapter binding, no VPS NAS mount/credential/direct write authority, no dashboard/gateway restart, and no queued markdown body/raw path/log/provider/token echo.
+
+Verification 2026-05-18 13:01 KST: RED first failed for the new triage-lane hook on `NasKeeperQueueManualEvidenceReviewSurfacePanel`; GREEN focused passed. Combined frontend verification `npm test -- --run src/pages/OfficePage.rpg.test.tsx src/pages/OfficePage.test.ts src/lib/api.test.ts` -> `214 passed`; `npm run build` passed with the existing Vite large chunk warning only; `git diff --check` passed. Mac dev `.venv` pytest baseline was restored with `ensurepip` + focused deps, then backend queue/API regression `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_queue_readback.py tests/hermes_cli/test_office_api.py -q -o 'addopts='` -> `15 passed`.
 
 ## AI Office 통합 운영실 umbrella summary
 

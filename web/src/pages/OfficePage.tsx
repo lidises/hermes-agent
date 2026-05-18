@@ -3676,6 +3676,29 @@ export function NasKeeperQueueManualEvidenceReviewSurfacePanel({
   error?: string | null;
 }) {
   const dto = readback?.dto ?? null;
+  const triageLanes = dto
+    ? Array.from(
+        dto.items
+          .reduce((lanes, item) => {
+            const existing = lanes.get(item.queue_status) ?? {
+              status: item.queue_status,
+              label: item.queue_status === "manual_review_required" ? "Manual review needed" : item.queue_status === "authorized_for_mac_relay_execution" ? "Authorized for Mac relay" : item.queue_status === "pending_nas_keeper_authorization" ? "Pending NAS Keeper" : item.queue_status,
+              count: 0,
+              nextBoundary: item.next_required_boundary,
+              evidenceRefCount: 0,
+            };
+            existing.count += 1;
+            existing.evidenceRefCount += item.execution_evidence_refs?.length ?? 0;
+            if (existing.nextBoundary === "none" || existing.nextBoundary === "none_terminal_execution_state_recorded") {
+              existing.nextBoundary = item.next_required_boundary;
+            }
+            lanes.set(item.queue_status, existing);
+            return lanes;
+          }, new Map<string, { status: string; label: string; count: number; nextBoundary: string; evidenceRefCount: number }>()
+          )
+          .values(),
+      )
+    : [];
   return (
     <Card
       data-office-nas-keeper-queue-manual-review="true"
@@ -3735,6 +3758,23 @@ export function NasKeeperQueueManualEvidenceReviewSurfacePanel({
             {dto ? (
               <>
                 <div className="mt-1 font-mono text-[10px] text-cyan-100/70">{dto.queue_storage_ref} · next {dto.next_required_boundary}</div>
+                {triageLanes.length ? (
+                  <div className="mt-2 grid gap-2 md:grid-cols-3" data-office-nas-keeper-queue-manual-review-triage="true">
+                    {triageLanes.map((lane) => (
+                      <div
+                        key={lane.status}
+                        className="border border-cyan-300/15 bg-cyan-950/10 p-2"
+                        data-office-nas-keeper-queue-manual-review-triage-lane={lane.status}
+                        data-office-nas-keeper-queue-manual-review-triage-lane-count={lane.count}
+                        data-office-nas-keeper-queue-manual-review-triage-lane-next-boundary={lane.nextBoundary}
+                      >
+                        <div className="font-semibold text-cyan-100">{lane.label}</div>
+                        <div className="mt-1 font-mono text-[10px] text-cyan-100/70">{lane.count} item(s) · evidence refs {lane.evidenceRefCount}</div>
+                        <div className="mt-1 text-midground/60">next {lane.nextBoundary}</div>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
                 <div className="mt-2 grid gap-2 md:grid-cols-2">
                   {dto.items.slice(0, 6).map((item) => (
                     <div

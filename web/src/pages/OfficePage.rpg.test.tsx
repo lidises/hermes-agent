@@ -1580,6 +1580,10 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(markup).toContain('data-office-nas-keeper-queue-manual-review-readback-count="1"');
     expect(markup).toContain('data-office-nas-keeper-queue-manual-review-readback-skipped-count="2"');
     expect(markup).toContain('data-office-nas-keeper-queue-manual-review-readback-item="handoff_queue_panel_demo"');
+    expect(markup).toContain('data-office-nas-keeper-queue-manual-review-triage-lane="manual_review_required"');
+    expect(markup).toContain('data-office-nas-keeper-queue-manual-review-triage-lane-count="1"');
+    expect(markup).toContain('data-office-nas-keeper-queue-manual-review-triage-lane-next-boundary="manual_nas_keeper_execution_evidence_review_if_needed"');
+    expect(markup).toContain("Manual review needed");
     expect(markup).toContain("Queue panel demo");
     expect(markup).toContain("manual_nas_keeper_execution_evidence_review_if_needed");
     expect(markup.match(/data-office-nas-keeper-queue-manual-review-card=/g)?.length).toBe(4);
