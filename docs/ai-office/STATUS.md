@@ -1,6 +1,16 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 22:16 KST
+Last updated: 2026-05-18 22:45 KST
+
+## Dispatcher authority completion review status lane
+
+Implemented the shortest completion-review follow-up after the dispatcher execution simulation readback. Backend adds `build_office_controlled_mutation_dispatcher_completion_review_status(...)` plus protected GET `/api/office/controlled-mutation/dispatcher-completion-review-status`; frontend adds a typed API wrapper and display-only `/office` panel with stable `data-office-dispatcher-completion-review-status-*` hooks. The lane summarizes the completed dispatcher-authority dry-run surface, metadata recording draft, metadata append checkpoint, and human-reviewed blocked execution-simulation readback for `req_20260518_1255_dispatcher_execution_simulation` / `corr_20260518_1255_dispatcher_execution_simulation`. It reports safe counts/latest refs/completed lanes only and keeps dry-run execution, adapter binding/dispatch, target mutation, NAS save, watcher/cron, Kanban mutation, public exposure, and VPS direct NAS authority disabled.
+
+Verification 2026-05-18 22:31 KST: RED backend helper/API tests failed first for the missing helper/route; RED frontend API/panel tests failed for the missing wrapper/export. GREEN focused backend completion+simulation tests passed (`4 passed`), controlled-mutation backend regression passed (`199 passed`), frontend API + Office RPG regression passed (`81 passed`), py_compile for changed backend modules passed, `npm run build` passed with the existing Vite large chunk warning only, and `git diff --check` passed.
+
+Deploy/smoke 2026-05-18 22:44 KST: committed and pushed `419f0be6` (`feat(office): surface dispatcher completion review`) to `origin/main`; restricted VPS dashboard worktree `/home/hermes/.hermes/ai-office-dashboard` was fast-forwarded to `419f0be6`. Copied the locally verified `hermes_cli/web_dist` fallback to the VPS and verified per-file hashes match. Restarted both `hermes-agent-dashboard.service` and the explicitly requested `hermes-gateway.service`; both are active/running afterward. Private `/office?completion-review=419f0be6` returned HTTP 200 and browser smoke rendered the completion-review panel with complete=true, readback=true, execution/dispatch/target/NAS false, controls 0, four completed-lane hooks, scoped raw leak false, and console JS errors 0. Protected API returned 200 with the session header, counts dry-run=1/audit=1, execution/dispatch/NAS false, and raw leak false. Public probes to 8765/8766 returned `http=000`, and listeners remain bound to Tailscale/private addresses.
+
+Boundary: this is status/readback/UI only over already-written safe metadata checkpoints. It did not append another checkpoint, execute a real dry-run command, bind or dispatch an authority adapter, mutate a target, write NAS, start watcher/cron, mutate Kanban, expose public routes, or grant VPS direct NAS mount/credential/write authority. The gateway restart was limited to the user's explicit service-restart request.
 
 ## Human-reviewed dispatcher execution simulation status readback lane
 
