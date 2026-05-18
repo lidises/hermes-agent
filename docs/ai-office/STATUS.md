@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 17:18 KST
+Last updated: 2026-05-18 17:21 KST
 
 ## NAS Keeper Mac relay fail-closed filesystem hardening
 
@@ -8,7 +8,9 @@ After the user chose the hardening path before dispatcher/automation work, added
 
 Verification 2026-05-18 17:18 KST: RED focused tests first failed with raw `OSError`/`FileExistsError` paths; GREEN focused tests passed (`5 passed`). Broader regression `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_runtime_write.py tests/hermes_cli/test_office_controlled_mutation_nas_mac_relay_write_execute.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_from_preview.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_state_record.py tests/hermes_cli/test_office_api.py -q -o 'addopts='` -> `34 passed`; `py_compile` for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py` passed; `git diff --check` passed.
 
-Boundary: local code/test/docs hardening only. No NAS write smoke was performed in this slice, no durable queue item was executed, no watcher/cron/dispatch daemon or authority adapter was started, no VPS direct NAS mount/credential/write authority was added, no public exposure was added, and no dashboard/gateway service was restarted.
+Boundary: local code/test/docs hardening plus dashboard-worktree sync/restart only. No NAS write smoke was performed in this slice, no durable queue item was executed, no watcher/cron/dispatch daemon or authority adapter was started, no VPS direct NAS mount/credential/write authority was added, no public exposure was added, and gateway was not restarted.
+
+Deploy/smoke 2026-05-18 17:21 KST: committed and pushed `93983e52` (`fix(office): fail closed on NAS filesystem errors`) to `origin/main`; restricted VPS dashboard worktree `/home/hermes/.hermes/ai-office-dashboard` was reset to `93983e52` with an explicit main refspec. VPS focused backend regression for the two changed NAS runtime suites passed (`15 passed`), `py_compile` passed, and `git diff --check` passed. Restarted only `hermes-agent-dashboard.service`; `hermes-gateway.service` stayed active/untouched. Private `/office?failclosed=93983e52` returned HTTP 200, listener remained private on `100.122.57.85:8765`, browser DOM showed AI Office plus NAS Keeper operator/queue panels, forms count was 0, scoped raw Mac/VPS path, Traceback, token, and `markdown_body` leak probe was false, and browser console JS errors were 0.
 
 ## VPS dashboard sync after inline browser smoke
 
