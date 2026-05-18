@@ -75,6 +75,7 @@ export interface Translations {
       keys: string;
       logs: string;
       models: string;
+      lifeCompass: string;
       office: string;
       profiles: string;
       plugins: string;

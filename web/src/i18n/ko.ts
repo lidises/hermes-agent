@@ -73,6 +73,7 @@ export const ko: Translations = {
       keys: "키",
       logs: "로그",
       models: "모델",
+      lifeCompass: "라이프 컴퍼스",
       office: "오피스",
       profiles: "프로필 · 멀티 에이전트",
       plugins: "플러그인",

@@ -16,7 +16,7 @@ export interface SidebarNavGroup {
 }
 
 const SIDEBAR_NAV_GROUP_PATHS: Record<SidebarNavGroupId, string[]> = {
-  primary: ["/chat", "/sessions", "/office"],
+  primary: ["/chat", "/sessions", "/office", "/life-compass"],
   operations: ["/analytics", "/models", "/logs", "/cron"],
   library: ["/skills", "/plugins", "/profiles"],
   settings: ["/config", "/env", "/docs"],
@@ -24,7 +24,7 @@ const SIDEBAR_NAV_GROUP_PATHS: Record<SidebarNavGroupId, string[]> = {
 };
 
 export function shouldShowSidebarSystemActions(pathname: string): boolean {
-  return pathname.split(/[?#]/, 1)[0] !== "/office";
+  return !["/office", "/life-compass"].includes(pathname.split(/[?#]/, 1)[0]);
 }
 
 export function buildSidebarNavGroups(items: NavItem[]): SidebarNavGroup[] {

@@ -21,6 +21,7 @@ import {
   Clock,
   ChevronDown,
   Code,
+  Compass,
   Cpu,
   Database,
   Download,
@@ -66,6 +67,7 @@ import AnalyticsPage from "@/pages/AnalyticsPage";
 import ModelsPage from "@/pages/ModelsPage";
 import CronPage from "@/pages/CronPage";
 import OfficePage from "@/pages/OfficePage";
+import LifeCompassPage from "@/pages/LifeCompassPage";
 import ProfilesPage from "@/pages/ProfilesPage";
 import SkillsPage from "@/pages/SkillsPage";
 import PluginsPage from "@/pages/PluginsPage";
@@ -112,6 +114,7 @@ const BUILTIN_ROUTES_CORE: Record<string, ComponentType> = {
   "/": RootRedirect,
   "/sessions": SessionsPage,
   "/office": OfficePage,
+  "/life-compass": LifeCompassPage,
   "/analytics": AnalyticsPage,
   "/models": ModelsPage,
   "/logs": LogsPage,
@@ -144,6 +147,12 @@ const BUILTIN_NAV_REST: NavItem[] = [
     labelKey: "office",
     label: "Office",
     icon: Home,
+  },
+  {
+    path: "/life-compass",
+    labelKey: "lifeCompass",
+    label: "Life Compass",
+    icon: Compass,
   },
   {
     path: "/analytics",
@@ -194,6 +203,7 @@ const ICON_MAP: Record<string, ComponentType<{ className?: string }>> = {
   Heart,
   Star,
   Code,
+  Compass,
   Eye,
 };
 

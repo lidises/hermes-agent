@@ -97,6 +97,13 @@ except ImportError:
     )
 
 WEB_DIST = Path(os.environ["HERMES_WEB_DIST"]) if "HERMES_WEB_DIST" in os.environ else Path(__file__).parent / "web_dist"
+LIFE_COMPASS_SITE = Path(
+    os.environ.get(
+        "HERMES_LIFE_COMPASS_SITE",
+        str(get_hermes_home() / "vps-core-dashboard" / "sites" / "life-compass" / "current"),
+    )
+)
+LIFE_COMPASS_ENTRYPOINT = "Life Compass.html"
 _log = logging.getLogger(__name__)
 
 app = FastAPI(title="Hermes Agent", version=__version__)
@@ -136,6 +143,7 @@ app.add_middleware(
 # ---------------------------------------------------------------------------
 _PUBLIC_API_PATHS: frozenset = frozenset({
     "/api/status",
+    "/api/life-compass/status",
     "/api/config/defaults",
     "/api/config/schema",
     "/api/model/info",
@@ -659,6 +667,75 @@ async def execute_office_controlled_mutation_nas_single_file_write_route(payload
         payload,
         root_path=os.environ.get("HERMES_AI_OFFICE_NAS_WRITE_ROOT"),
     )
+
+
+def _safe_life_compass_manifest(site_root: Path) -> Dict[str, Any]:
+    """Return bounded, non-content metadata for the Life Compass snapshot."""
+    manifest_path = site_root / "snapshot-manifest.json"
+    if not manifest_path.is_file():
+        return {"available": False, "missing": ["snapshot-manifest.json"]}
+    try:
+        raw = json.loads(manifest_path.read_text())
+    except Exception:
+        return {"available": False, "missing": [], "error": "manifest_unreadable"}
+    if not isinstance(raw, dict):
+        return {"available": False, "missing": [], "error": "manifest_invalid"}
+
+    allowed_keys = {
+        "schema_version",
+        "snapshot_id",
+        "generated_at",
+        "generated_by",
+        "source_kind",
+        "source_label",
+        "entrypoint",
+        "file_count",
+        "total_bytes",
+        "redaction_summary",
+    }
+    safe: Dict[str, Any] = {}
+    for key in allowed_keys:
+        value = raw.get(key)
+        if isinstance(value, (str, int, float, bool)) or value is None:
+            safe[key] = value
+        elif isinstance(value, dict):
+            safe[key] = {
+                str(k): v
+                for k, v in value.items()
+                if isinstance(v, (str, int, float, bool)) or v is None
+            }
+    return {"available": True, "missing": [], "manifest": safe}
+
+
+@app.get("/api/life-compass/status")
+async def life_compass_status():
+    site_root = LIFE_COMPASS_SITE.expanduser().resolve()
+    entry_path = site_root / LIFE_COMPASS_ENTRYPOINT
+    missing = []
+    if not site_root.is_dir():
+        missing.append("site_root")
+    if not entry_path.is_file():
+        missing.append(LIFE_COMPASS_ENTRYPOINT)
+    manifest = (
+        _safe_life_compass_manifest(site_root)
+        if site_root.is_dir()
+        else {"available": False, "missing": ["snapshot-manifest.json"]}
+    )
+    available = not missing
+    return {
+        "available": available,
+        "entrypoint": f"/life-compass-site/{urllib.parse.quote(LIFE_COMPASS_ENTRYPOINT)}" if available else None,
+        "site_root": str(site_root),
+        "entry_mtime": entry_path.stat().st_mtime if entry_path.is_file() else None,
+        "entry_size_bytes": entry_path.stat().st_size if entry_path.is_file() else None,
+        "missing": missing,
+        "snapshot": manifest,
+        "safety": {
+            "mode": "vps-local-read-only-snapshot",
+            "raw_html_in_api": False,
+            "nas_mounted_on_vps": False,
+        },
+    }
 
 
 @app.post("/api/office/controlled-mutation/nas-path-resolution/validate")
@@ -3725,6 +3802,9 @@ def mount_spa(application: FastAPI):
                 css = css.replace(f"url(\"{asset_dir}", f"url(\"{prefix}{asset_dir}")
                 css = css.replace(f"url('{asset_dir}", f"url('{prefix}{asset_dir}")
         return Response(content=css, media_type="text/css")
+
+    if LIFE_COMPASS_SITE.is_dir():
+        application.mount("/life-compass-site", StaticFiles(directory=LIFE_COMPASS_SITE), name="life-compass-site")
 
     application.mount("/assets", StaticFiles(directory=WEB_DIST / "assets"), name="assets")
 

@@ -12,6 +12,7 @@ describe("buildSidebarNavGroups", () => {
     const groups = buildSidebarNavGroups([
       item("/sessions", "Sessions"),
       item("/office", "Office"),
+      item("/life-compass", "Life Compass"),
       item("/analytics", "Analytics"),
       item("/models", "Models"),
       item("/logs", "Logs"),
@@ -34,6 +35,7 @@ describe("buildSidebarNavGroups", () => {
     expect(groups[0].items.map((navItem) => navItem.path)).toEqual([
       "/sessions",
       "/office",
+      "/life-compass",
     ]);
     expect(groups.slice(1).every((group) => group.collapsible)).toBe(true);
     expect(groups.find((group) => group.id === "operations")?.items.map((navItem) => navItem.path)).toEqual([
@@ -67,5 +69,7 @@ describe("buildSidebarNavGroups", () => {
     expect(shouldShowSidebarSystemActions("/sessions")).toBe(true);
     expect(shouldShowSidebarSystemActions("/office")).toBe(false);
     expect(shouldShowSidebarSystemActions("/office?density=detail")).toBe(false);
+    expect(shouldShowSidebarSystemActions("/life-compass")).toBe(false);
+    expect(shouldShowSidebarSystemActions("/life-compass?fresh=1#study")).toBe(false);
   });
 });
