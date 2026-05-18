@@ -2215,6 +2215,30 @@ export type OfficeNasKeeperQueueManualEvidenceReviewSurface = {
   rawExcluded: true;
 };
 
+
+export type OfficeNasKeeperExecutionOperatorAction = {
+  stageLabel: "NAS Keeper Execution Operator Action 1";
+  title: string;
+  detailKind: "nas_keeper_execution_operator_action";
+  sourceDetailKind: OfficeNasKeeperQueueManualEvidenceReviewSurface["detailKind"];
+  executionEndpoint: "/api/office/controlled-mutation/nas-runtime/nas-keeper-execution-from-preview";
+  executionStateEndpoint: "/api/office/controlled-mutation/nas-runtime/nas-keeper-execution-state";
+  approvalRequired: true;
+  enabledControls: 2;
+  safeFields: ["handoff_ref", "relay_execution_ref", "nas_keeper_ref", "relay_node_ref", "relay_authorized_by", "relay_authorized_at", "execution_record_ref", "recorded_by", "recorded_at", "execution_status", "safe_summary", "evidence_refs"];
+  markdownBodyProjected: false;
+  rawPathInputEnabled: false;
+  credentialInputEnabled: false;
+  vpsNasAuthorityEnabled: false;
+  watcherCronDaemonEnabled: false;
+  relayDispatchEnabled: false;
+  authorityAdapterBindingEnabled: false;
+  dashboardRestartEnabled: false;
+  gatewayRestartEnabled: false;
+  rawExcluded: true;
+  safeSummary: string;
+};
+
 export type OfficeDeskRpgReadOnlyChainCompletionReviewCard = {
   id: "request_to_orchestrator" | "evidence_to_review" | "approval_to_nas_keeper" | "next_projection_gap";
   label: string;
@@ -5451,6 +5475,31 @@ export function buildOfficeNasKeeperQueueManualEvidenceReviewSurface(action: Off
     gatewayRestartEnabled: false,
     markdownBodyProjected: false,
     rawExcluded: true,
+  };
+}
+
+export function buildOfficeNasKeeperExecutionOperatorAction(surface: OfficeNasKeeperQueueManualEvidenceReviewSurface): OfficeNasKeeperExecutionOperatorAction {
+  return {
+    stageLabel: "NAS Keeper Execution Operator Action 1",
+    title: "NAS Keeper execution-from-preview operator action",
+    detailKind: "nas_keeper_execution_operator_action",
+    sourceDetailKind: surface.detailKind,
+    executionEndpoint: "/api/office/controlled-mutation/nas-runtime/nas-keeper-execution-from-preview",
+    executionStateEndpoint: "/api/office/controlled-mutation/nas-runtime/nas-keeper-execution-state",
+    approvalRequired: true,
+    enabledControls: 2,
+    safeFields: ["handoff_ref", "relay_execution_ref", "nas_keeper_ref", "relay_node_ref", "relay_authorized_by", "relay_authorized_at", "execution_record_ref", "recorded_by", "recorded_at", "execution_status", "safe_summary", "evidence_refs"],
+    markdownBodyProjected: false,
+    rawPathInputEnabled: false,
+    credentialInputEnabled: false,
+    vpsNasAuthorityEnabled: false,
+    watcherCronDaemonEnabled: false,
+    relayDispatchEnabled: false,
+    authorityAdapterBindingEnabled: false,
+    dashboardRestartEnabled: false,
+    gatewayRestartEnabled: false,
+    rawExcluded: true,
+    safeSummary: "Authorized queue item을 다시 preview 검증한 뒤 Mac relay execution-from-preview route로 실행하고, 별도 버튼으로 safe execution-state만 기록합니다. Markdown body/raw path/credential은 브라우저에 투영하지 않습니다.",
   };
 }
 

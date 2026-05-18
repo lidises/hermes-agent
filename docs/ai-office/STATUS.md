@@ -1,6 +1,15 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 13:45 KST
+Last updated: 2026-05-18 14:05 KST
+
+
+## Guarded NAS Keeper execution operator UI implemented locally
+
+Implemented the next shortest product slice after the real write smoke: `/office` now has an explicit guarded operator panel for the already-existing NAS Keeper `execution-from-preview` and `execution-state` routes. The panel projects only safe refs/metadata (`handoff_ref`, `relay_execution_ref`, NAS Keeper/relay refs, authorization timestamps, execution record/status/summary/evidence refs), requires a one-shot checkbox before calling execution-from-preview, and records safe execution state through a separate button. It deliberately projects no `markdown_body`, raw paths, credential inputs, provider/log fields, watcher/cron controls, authority-adapter binding controls, gateway/dashboard restart controls, or VPS direct NAS authority. The action-model DTO also carries false capability flags for VPS NAS authority, watcher cron daemon, relay dispatch, and authority adapter binding.
+
+Verification 2026-05-18 14:05 KST: RED first failed on missing `buildOfficeNasKeeperExecutionOperatorAction`; GREEN focused panel test passed. Combined frontend regression `npm test -- --run src/pages/OfficePage.rpg.test.tsx src/pages/OfficePage.test.ts src/lib/api.test.ts` -> `217 passed`; frontend `npm run build` passed with the existing Vite large chunk warning only; backend focused execution/API regression `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_from_preview.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_state_record.py tests/hermes_cli/test_office_api.py -q -o 'addopts='` -> `18 passed`; `git diff --check` passed. Local dev-server browser smoke could not reach `/office` data because the standalone Vite server returned the expected backend-proxy `ERROR: 500: INTERNAL SERVER ERROR`, so UI verification for this slice is currently test/build-level only until deployed behind the Hermes dashboard backend.
+
+Boundary: local code only so far. No production queue item was executed, no NAS write was performed by the new UI, no execution state was recorded, no watcher/cron/dispatch/authority adapter was started, no VPS NAS mount/credential/direct-write authority was granted, and dashboard/gateway services were not restarted in this slice.
 
 ## NAS Keeper execution-from-preview real Mac NAS write smoke rerun
 

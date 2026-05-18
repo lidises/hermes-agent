@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeDataSource, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeDataSource, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -149,6 +149,7 @@ import {
   buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface,
   buildOfficeNasRuntimeSingleFileWriteApprovalAction,
   buildOfficeNasKeeperQueueManualEvidenceReviewSurface,
+  buildOfficeNasKeeperExecutionOperatorAction,
   buildOfficeDeskRpgReadOnlyChainCompletionReview,
   buildOfficeEventDrivenCharacterStateProjection,
   buildOfficeCharacterStateRoomOverlay,
@@ -201,6 +202,7 @@ import {
   type OfficeNasRuntimeN3ApprovalBoundaryStatusSurface,
   type OfficeNasRuntimeSingleFileWriteApprovalAction,
   type OfficeNasKeeperQueueManualEvidenceReviewSurface,
+  type OfficeNasKeeperExecutionOperatorAction,
   type OfficeDeskRpgReadOnlyChainCompletionReview,
   type OfficeControlledMutationContractPostureProjection,
   type OfficeControlledMutationContractPosturePolish,
@@ -258,6 +260,26 @@ const DEFAULT_NAS_SINGLE_WRITE_DRAFT: OfficeNasMacRelayWritePayload = {
   relay_node_ref: "mac_relay_primary",
   relay_authorized_by: "agent_nas_keeper",
   relay_authorized_at: "2026-05-17T13:31:00Z",
+};
+
+type NasKeeperExecutionStateDraft = Pick<OfficeNasKeeperExecutionStatePayload, "execution_record_ref" | "recorded_by" | "recorded_at" | "execution_status" | "safe_summary"> & { evidence_refs: string };
+
+const DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT: OfficeNasKeeperExecutionFromPreviewPayload = {
+  handoff_ref: "handoff_office_ui_smoke",
+  relay_execution_ref: "relay_exec_office_ui_smoke",
+  nas_keeper_ref: "agent_nas_keeper",
+  relay_node_ref: "mac_relay_primary",
+  relay_authorized_by: "agent_nas_keeper",
+  relay_authorized_at: "2026-05-18T05:00:00Z",
+};
+
+const DEFAULT_NAS_KEEPER_EXECUTION_STATE_DRAFT: NasKeeperExecutionStateDraft = {
+  execution_record_ref: "exec_record_office_ui_smoke",
+  recorded_by: "agent_nas_keeper",
+  recorded_at: "2026-05-18T05:01:00Z",
+  execution_status: "succeeded",
+  safe_summary: "safe execution result recorded",
+  evidence_refs: "evidence_office_ui_smoke",
 };
 
 const FOCUS_LABEL: Record<FocusOption, string> = {
@@ -3664,6 +3686,112 @@ export function NasRuntimeSingleFileWriteApprovalActionPanel({
   );
 }
 
+
+export function NasKeeperExecutionOperatorActionPanel({
+  action,
+  draft,
+  stateDraft,
+  approved,
+  busy,
+  result,
+  stateBusy,
+  stateResult,
+  error,
+  onDraftChange,
+  onStateDraftChange,
+  onApprovalChange,
+  onExecute,
+  onRecordState,
+}: {
+  action: OfficeNasKeeperExecutionOperatorAction;
+  draft: OfficeNasKeeperExecutionFromPreviewPayload;
+  stateDraft: NasKeeperExecutionStateDraft;
+  approved: boolean;
+  busy: boolean;
+  result: OfficeNasKeeperExecutionFromPreviewResult | null;
+  stateBusy: boolean;
+  stateResult: OfficeNasKeeperExecutionStateResult | null;
+  error: string | null;
+  onDraftChange: (field: keyof OfficeNasKeeperExecutionFromPreviewPayload, value: string) => void;
+  onStateDraftChange: (field: keyof NasKeeperExecutionStateDraft, value: string) => void;
+  onApprovalChange: (approved: boolean) => void;
+  onExecute: () => void;
+  onRecordState: () => void;
+}) {
+  const executionFields: Array<keyof OfficeNasKeeperExecutionFromPreviewPayload> = ["handoff_ref", "relay_execution_ref", "nas_keeper_ref", "relay_node_ref", "relay_authorized_by", "relay_authorized_at"];
+  const stateFields: Array<keyof NasKeeperExecutionStateDraft> = ["execution_record_ref", "recorded_by", "recorded_at", "execution_status", "safe_summary", "evidence_refs"];
+  return (
+    <Card
+      data-office-nas-keeper-execution-operator-action="true"
+      data-office-nas-keeper-execution-operator-enabled-controls={action.enabledControls}
+      data-office-nas-keeper-execution-operator-execution-endpoint={action.executionEndpoint}
+      data-office-nas-keeper-execution-operator-state-endpoint={action.executionStateEndpoint}
+      data-office-nas-keeper-execution-operator-markdown-body-projected={String(action.markdownBodyProjected)}
+      data-office-nas-keeper-execution-operator-vps-nas-authority-enabled={String(action.vpsNasAuthorityEnabled)}
+      data-office-nas-keeper-execution-operator-watcher-cron-daemon-enabled={String(action.watcherCronDaemonEnabled)}
+      data-office-nas-keeper-execution-operator-relay-dispatch-enabled={String(action.relayDispatchEnabled)}
+      data-office-nas-keeper-execution-operator-authority-adapter-binding-enabled={String(action.authorityAdapterBindingEnabled)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4 text-amber-300" /> {action.title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-amber-300/20 bg-amber-950/10 p-3">
+            <div className="font-semibold text-amber-100">execution-from-preview · safe queue item only</div>
+            <div className="mt-1 leading-5">{action.safeSummary}</div>
+            <div className="mt-1 grid gap-1 font-mono text-[10px] text-amber-100/70">
+              <span>{action.executionEndpoint}</span>
+              <span>{action.executionStateEndpoint}</span>
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-2">
+            {executionFields.map((field) => (
+              <label key={field} className="grid gap-1 border border-current/15 bg-black/15 p-2">
+                <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-midground/55">{field}</span>
+                <input name={field} value={draft[field]} onChange={(event) => onDraftChange(field, event.target.value)} className="border border-current/15 bg-black/30 px-2 py-1 text-xs text-foreground" />
+              </label>
+            ))}
+          </div>
+          <label className="flex items-center gap-2 border border-amber-300/20 bg-amber-950/10 p-3 text-amber-100/80">
+            <input type="checkbox" name="execution_from_preview_approved" checked={approved} onChange={(event) => onApprovalChange(event.target.checked)} />
+            승인: authorized queue item을 preview 재검증 후 1회 실행
+          </label>
+          <button type="button" disabled={!approved || busy} onClick={onExecute} className="border border-amber-300/30 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-amber-100 disabled:opacity-40">
+            {busy ? "실행 중" : "NAS Keeper → Mac relay preview 실행"}
+          </button>
+          <div className="grid gap-2 md:grid-cols-2">
+            {stateFields.map((field) => (
+              <label key={field} className="grid gap-1 border border-current/15 bg-black/15 p-2">
+                <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-midground/55">{field}</span>
+                <input name={field} value={stateDraft[field]} onChange={(event) => onStateDraftChange(field, event.target.value)} className="border border-current/15 bg-black/30 px-2 py-1 text-xs text-foreground" />
+              </label>
+            ))}
+          </div>
+          <button type="button" disabled={stateBusy} onClick={onRecordState} className="border border-sky-300/30 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-sky-100 disabled:opacity-40">
+            {stateBusy ? "기록 중" : "실행 상태 기록"}
+          </button>
+          {error ? <div className="border border-red-300/25 bg-red-950/10 p-3 text-red-100" data-office-nas-keeper-execution-operator-error="true">{error}</div> : null}
+          {result ? (
+            <div className="border border-amber-300/20 bg-amber-950/10 p-3" data-office-nas-keeper-execution-operator-result="true">
+              <div>executed {String(result.executed)} · written {String(result.written)}</div>
+              {result.dto ? <div className="mt-1">handoff {result.dto.handoff_ref} · readback {String(result.dto.readback_verified)} · audit {String(result.dto.audit_written)}</div> : null}
+              {result.errors.length > 0 ? <div className="mt-1">errors {result.errors.map((item) => `${item.field}:${item.code}`).join(" · ")}</div> : null}
+            </div>
+          ) : null}
+          {stateResult ? (
+            <div className="border border-sky-300/20 bg-sky-950/10 p-3" data-office-nas-keeper-execution-operator-state-result="true">
+              recorded {String(stateResult.recorded)} · {stateResult.dto?.queue_status_after ?? "state_not_recorded"}
+            </div>
+          ) : null}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function NasKeeperQueueManualEvidenceReviewSurfacePanel({
   surface,
   readback,
@@ -4853,6 +4981,14 @@ export default function OfficePage() {
   const [nasKeeperQueueReadback, setNasKeeperQueueReadback] = useState<OfficeNasKeeperHandoffQueueReadback | null>(null);
   const [nasKeeperQueueReadbackLoading, setNasKeeperQueueReadbackLoading] = useState(false);
   const [nasKeeperQueueReadbackError, setNasKeeperQueueReadbackError] = useState<string | null>(null);
+  const [nasKeeperExecutionDraft, setNasKeeperExecutionDraft] = useState<OfficeNasKeeperExecutionFromPreviewPayload>(DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT);
+  const [nasKeeperExecutionStateDraft, setNasKeeperExecutionStateDraft] = useState<NasKeeperExecutionStateDraft>(DEFAULT_NAS_KEEPER_EXECUTION_STATE_DRAFT);
+  const [nasKeeperExecutionApproved, setNasKeeperExecutionApproved] = useState(false);
+  const [nasKeeperExecutionBusy, setNasKeeperExecutionBusy] = useState(false);
+  const [nasKeeperExecutionResult, setNasKeeperExecutionResult] = useState<OfficeNasKeeperExecutionFromPreviewResult | null>(null);
+  const [nasKeeperExecutionStateBusy, setNasKeeperExecutionStateBusy] = useState(false);
+  const [nasKeeperExecutionStateResult, setNasKeeperExecutionStateResult] = useState<OfficeNasKeeperExecutionStateResult | null>(null);
+  const [nasKeeperExecutionError, setNasKeeperExecutionError] = useState<string | null>(null);
   const previousStateRef = useRef<OfficeState | null>(null);
   const liveFailureCountRef = useRef(0);
 
@@ -4952,6 +5088,59 @@ export default function OfficePage() {
       setNasSingleWriteBusy(false);
     }
   }, [loadNasKeeperQueueReadback, nasSingleWriteApproved, nasSingleWriteDraft]);
+
+
+  const updateNasKeeperExecutionDraft = useCallback((field: keyof OfficeNasKeeperExecutionFromPreviewPayload, value: string) => {
+    setNasKeeperExecutionDraft((current) => ({ ...current, [field]: value }));
+  }, []);
+
+  const updateNasKeeperExecutionStateDraft = useCallback((field: keyof NasKeeperExecutionStateDraft, value: string) => {
+    setNasKeeperExecutionStateDraft((current) => ({ ...current, [field]: value }));
+  }, []);
+
+  const executeNasKeeperExecutionFromPreview = useCallback(async () => {
+    if (!nasKeeperExecutionApproved) {
+      setNasKeeperExecutionError("approval_required");
+      return;
+    }
+    setNasKeeperExecutionBusy(true);
+    setNasKeeperExecutionError(null);
+    try {
+      const result = await api.executeOfficeControlledMutationNasKeeperExecutionFromPreview(nasKeeperExecutionDraft);
+      setNasKeeperExecutionResult(result);
+      setNasKeeperExecutionApproved(false);
+      void loadNasKeeperQueueReadback();
+    } catch {
+      setNasKeeperExecutionError("request failed");
+    } finally {
+      setNasKeeperExecutionBusy(false);
+    }
+  }, [loadNasKeeperQueueReadback, nasKeeperExecutionApproved, nasKeeperExecutionDraft]);
+
+  const recordNasKeeperExecutionState = useCallback(async () => {
+    setNasKeeperExecutionStateBusy(true);
+    setNasKeeperExecutionError(null);
+    try {
+      const result = await api.recordOfficeControlledMutationNasKeeperExecutionState({
+        handoff_ref: nasKeeperExecutionDraft.handoff_ref,
+        execution_record_ref: nasKeeperExecutionStateDraft.execution_record_ref,
+        relay_execution_ref: nasKeeperExecutionDraft.relay_execution_ref,
+        nas_keeper_ref: nasKeeperExecutionDraft.nas_keeper_ref,
+        relay_node_ref: nasKeeperExecutionDraft.relay_node_ref,
+        recorded_by: nasKeeperExecutionStateDraft.recorded_by,
+        recorded_at: nasKeeperExecutionStateDraft.recorded_at,
+        execution_status: nasKeeperExecutionStateDraft.execution_status,
+        safe_summary: nasKeeperExecutionStateDraft.safe_summary,
+        evidence_refs: nasKeeperExecutionStateDraft.evidence_refs.split(",").map((item) => item.trim()).filter(Boolean),
+      });
+      setNasKeeperExecutionStateResult(result);
+      void loadNasKeeperQueueReadback();
+    } catch {
+      setNasKeeperExecutionError("request failed");
+    } finally {
+      setNasKeeperExecutionStateBusy(false);
+    }
+  }, [loadNasKeeperQueueReadback, nasKeeperExecutionDraft, nasKeeperExecutionStateDraft]);
 
   useEffect(() => {
     let cancelled = false;
@@ -5212,6 +5401,10 @@ export default function OfficePage() {
   const nasKeeperQueueManualEvidenceReviewSurface = useMemo(
     () => buildOfficeNasKeeperQueueManualEvidenceReviewSurface(nasRuntimeSingleFileWriteApprovalAction),
     [nasRuntimeSingleFileWriteApprovalAction],
+  );
+  const nasKeeperExecutionOperatorAction = useMemo(
+    () => buildOfficeNasKeeperExecutionOperatorAction(nasKeeperQueueManualEvidenceReviewSurface),
+    [nasKeeperQueueManualEvidenceReviewSurface],
   );
   const deskRpgReadOnlyChainCompletionReview = useMemo(
     () => buildOfficeDeskRpgReadOnlyChainCompletionReview(nasKeeperRollbackEvidencePreview),
@@ -5549,6 +5742,23 @@ export default function OfficePage() {
         readback={nasKeeperQueueReadback}
         loading={nasKeeperQueueReadbackLoading}
         error={nasKeeperQueueReadbackError}
+      />
+
+      <NasKeeperExecutionOperatorActionPanel
+        action={nasKeeperExecutionOperatorAction}
+        draft={nasKeeperExecutionDraft}
+        stateDraft={nasKeeperExecutionStateDraft}
+        approved={nasKeeperExecutionApproved}
+        busy={nasKeeperExecutionBusy}
+        result={nasKeeperExecutionResult}
+        stateBusy={nasKeeperExecutionStateBusy}
+        stateResult={nasKeeperExecutionStateResult}
+        error={nasKeeperExecutionError}
+        onDraftChange={updateNasKeeperExecutionDraft}
+        onStateDraftChange={updateNasKeeperExecutionStateDraft}
+        onApprovalChange={setNasKeeperExecutionApproved}
+        onExecute={executeNasKeeperExecutionFromPreview}
+        onRecordState={recordNasKeeperExecutionState}
       />
 
       <DeskRpgReadOnlyChainCompletionReviewPanel review={deskRpgReadOnlyChainCompletionReview} />
