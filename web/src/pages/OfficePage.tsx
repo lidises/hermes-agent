@@ -243,6 +243,8 @@ const FOCUS_OPTIONS = ["overview", "work", "automation", "routing"] as const;
 const LIST_LIMIT = 6;
 const EVENT_LIMIT = 12;
 const CHANGE_LIMIT = 6;
+const SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES = false;
+const SHOW_OFFICE_SECONDARY_DETAILS = false;
 type FocusOption = (typeof FOCUS_OPTIONS)[number];
 
 const DEFAULT_NAS_SINGLE_WRITE_DRAFT: OfficeNasMacRelayWritePayload = {
@@ -6425,6 +6427,8 @@ export default function OfficePage() {
         </div>
       </section>
 
+      {SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES ? (
+        <>
       <OfficeDeskRpgRoomShell projection={deskRpgProjection} />
 
       <OfficeDeskRpgBossCommandConsolePanel projection={deskRpgProjection} />
@@ -7376,6 +7380,8 @@ export default function OfficePage() {
           }}
         />
       ) : null}
+        </>
+      ) : null}
 
       <div className="border border-current/20 bg-gradient-to-br from-black/35 to-black/10 p-5">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
@@ -7916,7 +7922,7 @@ export default function OfficePage() {
         </div>
       </OfficeSectionDrawer>
 
-      {showOverview ? (
+      {SHOW_OFFICE_SECONDARY_DETAILS && showOverview ? (
         <OfficeSectionDrawer plan={sectionById.paperclip}>
         <Card data-office-paperclip-workbench="true">
           <CardHeader>
