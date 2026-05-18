@@ -169,6 +169,25 @@ export interface OfficeNasKeeperHandoffQueueReadbackParams {
   limit?: number;
 }
 
+export interface OfficeAuthorityMetadataHandoffStatus {
+  schema_version: number;
+  mode: "authority_metadata_handoff_status";
+  request_id?: string;
+  correlation_id?: string;
+  checkpoint_complete: boolean;
+  chain_counts: Record<string, number>;
+  latest_refs: Record<string, string>;
+  next_manual_lane: string;
+  capabilities: Record<string, boolean>;
+  errors: Array<{ field: string; code: string }>;
+}
+
+export interface OfficeAuthorityMetadataHandoffParams {
+  request_id?: string;
+  correlation_id?: string;
+  limit?: number;
+}
+
 export interface OfficeNasKeeperExecutionFromPreviewPayload {
   handoff_ref: string;
   relay_execution_ref: string;
@@ -282,6 +301,14 @@ export const api = {
     if (params.limit !== undefined) qs.set("limit", String(params.limit));
     const suffix = qs.toString() ? `?${qs.toString()}` : "";
     return fetchJSON<OfficeNasKeeperHandoffQueueReadback>(`/api/office/controlled-mutation/nas-runtime/nas-keeper-handoff-queue${suffix}`);
+  },
+  getOfficeControlledMutationAuthorityMetadataHandoff: (params: OfficeAuthorityMetadataHandoffParams = {}) => {
+    const qs = new URLSearchParams();
+    if (params.request_id) qs.set("request_id", params.request_id);
+    if (params.correlation_id) qs.set("correlation_id", params.correlation_id);
+    if (params.limit !== undefined) qs.set("limit", String(params.limit));
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+    return fetchJSON<OfficeAuthorityMetadataHandoffStatus>(`/api/office/controlled-mutation/authority-metadata-handoff${suffix}`);
   },
   executeOfficeControlledMutationNasSingleFileWrite: (body: OfficeNasSingleFileWritePayload) =>
     fetchJSON<OfficeNasSingleFileWriteResult>("/api/office/controlled-mutation/nas-runtime/single-file-write", {

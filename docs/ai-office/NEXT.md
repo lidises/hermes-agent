@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-18 17:32 KST
+Last updated: 2026-05-18 17:56 KST
 
 ## Start here after `/new`
 
@@ -73,6 +73,8 @@ When not to rely on `/goal` alone:
 The user approved A-G approval buckets for future AI Office work while excluding H public exposure changes and permanently excluding VPS NAS mounts/direct NAS credentials/VPS direct NAS raw reads. Use the prepared prompt and guardrails in `docs/ai-office/plans/2026-05-13-goal-a-g-approval-handoff.md` for the next `/goal` session. A-G are permission buckets, not standalone tasks: the next session must first identify the exact concrete task list from current NEXT/STATUS/evidence before implementing.
 
 ## Current next stage
+
+Immediate state 2026-05-18 17:56 KST: Implemented the local guarded status-note/authority metadata handoff readback lane. Added a safe helper and protected API endpoint `/api/office/controlled-mutation/authority-metadata-handoff` that summarize request/decision/dry-run/audit/authority-registry JSONL counts and latest opaque refs without echoing raw filter values. Added typed frontend API wrapper and a read-only `/office` status panel with stable `data-office-authority-metadata-handoff-*` hooks. Focused backend regression passed (`11 passed` across authority metadata handoff + authority registry store); focused frontend API + Office RPG panel regression passed (`71 passed`); `npm run lint` passed with existing warnings only; `npm run build` passed with existing Vite large chunk warning; `git diff --check` passed. Current next shortest step: commit/push this local slice, then optionally sync dashboard-only to the restricted VPS and browser-smoke the protected readback panel. Still excluded unless separately approved: watcher/cron/dispatch daemon, authority-adapter binding, public exposure, gateway restart, and VPS direct NAS mounts/credentials/write authority.
 
 Immediate state 2026-05-18 17:32 KST: User approved continuing by shortest path and said actual writes are acceptable. Performed one live safe metadata-only write checkpoint on the restricted VPS Hermes profile: request/decision/dry-run-result/audit/authority-registry chain for `req_20260518_1727_authority_metadata` / `corr_20260518_1727_authority_metadata`. Readback counts were 1 across all five stores; capabilities remained blocked for dispatch, credential access, target mutation, dry-run execution, and NAS save. VPS focused regression `54 passed`; `py_compile` and `git diff --check` passed; private `/office?authority-metadata=3d5673bf` HTTP 200/browser smoke passed with console JS errors 0 and scoped raw path/Traceback/token/provider/prompt/task leak probes false. Current next shortest step: implement or surface the next guarded operator lane that can use these safe metadata checkpoints for a manual status-note/authority handoff, still without watcher/cron/dispatch daemon, authority-adapter binding, public exposure, gateway restart, or VPS direct NAS mounts/credentials/write authority.
 

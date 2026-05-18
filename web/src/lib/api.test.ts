@@ -137,6 +137,43 @@ describe("fetchJSON", () => {
     expect(JSON.stringify(fetchMock.mock.calls[0]?.[1])).not.toMatch(/method|body|\/Users\/|\/home\/|token=|sk-|raw markdown body/i);
   });
 
+  it("reads safe authority metadata handoff status through the protected readback route", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        __HERMES_SESSION_TOKEN__: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        schema_version: 1,
+        mode: "authority_metadata_handoff_status",
+        request_id: "req_20260518_1801_handoff",
+        correlation_id: "corr_20260518_1801_handoff",
+        checkpoint_complete: true,
+        chain_counts: { requests: 1, decisions: 1, dry_run_results: 1, audit_events: 1, authority_registry: 1 },
+        latest_refs: { authority_registry: "adapter_20260518_handoff" },
+        next_manual_lane: "manual_status_note_authority_handoff",
+        capabilities: { status_note_lane_enabled: true, adapter_dispatch_enabled: false },
+        errors: [],
+      }),
+    } as Response);
+
+    const result = await api.getOfficeControlledMutationAuthorityMetadataHandoff({ request_id: "req_20260518_1801_handoff", limit: 2 });
+
+    expect(result.checkpoint_complete).toBe(true);
+    expect(result.chain_counts.requests).toBe(1);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/office/controlled-mutation/authority-metadata-handoff?request_id=req_20260518_1801_handoff&limit=2",
+      expect.objectContaining({ headers: expect.any(Headers) }),
+    );
+    const headers = fetchMock.mock.calls[0]?.[1]?.headers as Headers;
+    expect(headers.get("X-Hermes-Session-Token")).toBe("session-token-for-header-only");
+    expect(JSON.stringify(fetchMock.mock.calls[0]?.[1])).not.toMatch(/method|body|\/Users\/|\/home\/|token=|sk-|raw markdown body/i);
+  });
+
   it("posts safe NAS Keeper Mac relay write payload through the protected execution route", async () => {
     Object.defineProperty(globalThis, "window", {
       configurable: true,

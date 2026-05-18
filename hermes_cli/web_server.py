@@ -56,6 +56,7 @@ from hermes_cli.office_controlled_mutation import (
     append_office_controlled_mutation_nas_evidence_package_event,
     append_office_controlled_mutation_nas_path_resolution_preview_event,
     append_office_controlled_mutation_request_event,
+    build_office_controlled_mutation_authority_metadata_handoff_status,
     build_office_controlled_mutation_contract_schema,
     execute_office_controlled_mutation_nas_single_file_write,
     execute_office_controlled_mutation_nas_mac_relay_write,
@@ -911,6 +912,20 @@ async def list_office_controlled_mutation_authority_adapter_registry(
     return list_office_controlled_mutation_authority_adapter_registry_events(
         limit=limit,
         adapter_kind=adapter_kind,
+    )
+
+
+@app.get("/api/office/controlled-mutation/authority-metadata-handoff")
+async def get_office_controlled_mutation_authority_metadata_handoff(
+    request_id: str | None = None,
+    correlation_id: str | None = None,
+    limit: int = 25,
+):
+    """Summarize safe metadata checkpoints for manual authority handoff status."""
+    return build_office_controlled_mutation_authority_metadata_handoff_status(
+        request_id=request_id,
+        correlation_id=correlation_id,
+        limit=limit,
     )
 
 

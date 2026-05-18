@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeDataSource, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -3847,11 +3847,66 @@ export function NasKeeperExecutionOperatorActionPanel({
   );
 }
 
+export function AuthorityMetadataHandoffStatusPanel({
+  status,
+  error,
+}: {
+  status: OfficeAuthorityMetadataHandoffStatus | null;
+  error?: string | null;
+}) {
+  const counts = status?.chain_counts ?? {};
+  const refs = status?.latest_refs ?? {};
+  return (
+    <section
+      className="border border-amber-300/20 bg-amber-950/10 p-4"
+      data-office-authority-metadata-handoff="true"
+      data-office-authority-metadata-handoff-complete={String(Boolean(status?.checkpoint_complete))}
+      data-office-authority-metadata-handoff-status-note-lane={String(Boolean(status?.capabilities?.status_note_lane_enabled))}
+      data-office-authority-metadata-handoff-dispatch-enabled={String(Boolean(status?.capabilities?.adapter_dispatch_enabled))}
+      data-office-authority-metadata-handoff-binding-enabled={String(Boolean(status?.capabilities?.adapter_binding_enabled))}
+      data-office-authority-metadata-handoff-target-mutation-enabled={String(Boolean(status?.capabilities?.target_mutation_enabled))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-200/70">Authority metadata handoff</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">수동 status-note / authority handoff lane</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            VPS restricted-profile safe JSONL checkpoints only. Dispatch, binding, credentials, target mutation, NAS save, watcher, cron stay disabled.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? `readback ${error}` : `complete ${status?.checkpoint_complete ? "true" : "false"}`}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-5" data-office-authority-metadata-handoff-counts="true">
+        {[
+          ["requests", "request"],
+          ["decisions", "decision"],
+          ["dry_run_results", "dry-run"],
+          ["audit_events", "audit"],
+          ["authority_registry", "authority"],
+        ].map(([key, label]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3" data-office-authority-metadata-handoff-count={key}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{label}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{counts[key] ?? 0}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 text-xs text-midground/70 md:grid-cols-3" data-office-authority-metadata-handoff-refs="true">
+        <div className="border border-current/15 bg-black/20 p-2">lane: {status?.next_manual_lane ?? "manual_status_note_authority_handoff"}</div>
+        <div className="border border-current/15 bg-black/20 p-2">request: {status?.request_id ?? refs.request ?? "safe-ref unavailable"}</div>
+        <div className="border border-current/15 bg-black/20 p-2">authority: {refs.authority_registry ?? "safe-ref unavailable"}</div>
+      </div>
+    </section>
+  );
+}
+
+
 export function NasKeeperQueueManualEvidenceReviewSurfacePanel({
   surface,
   readback,
-  loading = false,
-  error = null,
+  loading,
+  error,
   onPrefillExecutionFromQueue,
 }: {
   surface: OfficeNasKeeperQueueManualEvidenceReviewSurface;
@@ -5048,6 +5103,8 @@ export default function OfficePage() {
   const [nasSingleWriteResult, setNasSingleWriteResult] = useState<OfficeNasMacRelayWriteResult | null>(null);
   const [nasSingleWriteError, setNasSingleWriteError] = useState<string | null>(null);
   const [nasKeeperQueueReadback, setNasKeeperQueueReadback] = useState<OfficeNasKeeperHandoffQueueReadback | null>(null);
+  const [authorityMetadataHandoff, setAuthorityMetadataHandoff] = useState<OfficeAuthorityMetadataHandoffStatus | null>(null);
+  const [authorityMetadataHandoffError, setAuthorityMetadataHandoffError] = useState<string | null>(null);
   const [nasKeeperQueueReadbackLoading, setNasKeeperQueueReadbackLoading] = useState(false);
   const [nasKeeperQueueReadbackError, setNasKeeperQueueReadbackError] = useState<string | null>(null);
   const [nasKeeperExecutionDraft, setNasKeeperExecutionDraft] = useState<OfficeNasKeeperExecutionFromPreviewPayload>(DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT);
@@ -5263,6 +5320,20 @@ export default function OfficePage() {
         if (!cancelled) {
           setNasKeeperQueueReadback(null);
           setNasKeeperQueueReadbackError("request failed");
+        }
+      });
+    api
+      .getOfficeControlledMutationAuthorityMetadataHandoff({ limit: 25 })
+      .then((next) => {
+        if (!cancelled) {
+          setAuthorityMetadataHandoff(next);
+          setAuthorityMetadataHandoffError(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setAuthorityMetadataHandoff(null);
+          setAuthorityMetadataHandoffError("request failed");
         }
       });
     api
@@ -5834,6 +5905,8 @@ export default function OfficePage() {
         error={nasKeeperQueueReadbackError}
         onPrefillExecutionFromQueue={prefillNasKeeperExecutionFromQueue}
       />
+
+      <AuthorityMetadataHandoffStatusPanel status={authorityMetadataHandoff} error={authorityMetadataHandoffError} />
 
       <NasKeeperExecutionOperatorActionPanel
         action={nasKeeperExecutionOperatorAction}

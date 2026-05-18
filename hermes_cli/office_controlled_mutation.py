@@ -1340,6 +1340,130 @@ def list_office_controlled_mutation_authority_adapter_registry_events(
     return response
 
 
+def build_office_controlled_mutation_authority_metadata_handoff_status(
+    *,
+    request_id: str | None = None,
+    correlation_id: str | None = None,
+    store_paths: Mapping[str, Path] | None = None,
+    limit: int = 25,
+) -> dict[str, object]:
+    """Summarize safe metadata checkpoints for a manual authority handoff lane."""
+
+    errors: list[dict[str, str]] = []
+    safe_request_id: str | None = None
+    safe_correlation_id: str | None = None
+    if request_id is not None:
+        if _is_opaque_id(request_id):
+            safe_request_id = request_id
+        else:
+            errors.append(_error("request_id", "invalid_opaque_id"))
+    if correlation_id is not None:
+        if _is_opaque_id(correlation_id):
+            safe_correlation_id = correlation_id
+        else:
+            errors.append(_error("correlation_id", "invalid_opaque_id"))
+    errors = sorted(errors, key=lambda item: (item["field"], item["code"]))
+    if errors:
+        return {
+            "schema_version": 1,
+            "mode": "authority_metadata_handoff_status",
+            "checkpoint_complete": False,
+            "chain_counts": {
+                "requests": 0,
+                "decisions": 0,
+                "dry_run_results": 0,
+                "audit_events": 0,
+                "authority_registry": 0,
+            },
+            "latest_refs": {},
+            "next_manual_lane": "manual_status_note_authority_handoff",
+            "capabilities": _authority_metadata_handoff_capabilities(),
+            "redaction": dict(_REDACTION_POSTURE),
+            "errors": errors,
+        }
+
+    paths = store_paths or {}
+    max_items = max(0, min(limit, 200))
+    requests = list_office_controlled_mutation_request_events(
+        store_path=paths.get("requests"), limit=max_items, correlation_id=safe_correlation_id
+    )
+    decisions = list_office_controlled_mutation_decision_events(
+        store_path=paths.get("decisions"), limit=max_items, request_id=safe_request_id, correlation_id=safe_correlation_id
+    )
+    dry_runs = list_office_controlled_mutation_dry_run_result_events(
+        store_path=paths.get("dry_run_results"), limit=max_items, request_id=safe_request_id, correlation_id=safe_correlation_id
+    )
+    audits = list_office_controlled_mutation_audit_events(
+        store_path=paths.get("audit_events"), limit=max_items, request_id=safe_request_id, correlation_id=safe_correlation_id
+    )
+    registry = list_office_controlled_mutation_authority_adapter_registry_events(
+        store_path=paths.get("authority_registry"), limit=max_items, adapter_kind="status_note"
+    )
+
+    counts = {
+        "requests": _safe_count(requests.get("count")),
+        "decisions": _safe_count(decisions.get("count")),
+        "dry_run_results": _safe_count(dry_runs.get("count")),
+        "audit_events": _safe_count(audits.get("count")),
+        "authority_registry": _safe_count(registry.get("count")),
+    }
+    latest_refs: dict[str, str] = {}
+    for key, response, ref_field in (
+        ("request", requests, "request_id"),
+        ("decision", decisions, "decision_id"),
+        ("dry_run_result", dry_runs, "result_id"),
+        ("audit", audits, "audit_id"),
+        ("authority_registry", registry, "adapter_ref"),
+    ):
+        events = response.get("events")
+        if isinstance(events, list) and events and isinstance(events[-1], Mapping):
+            ref = events[-1].get(ref_field)
+            if isinstance(ref, str) and _is_opaque_id(ref):
+                latest_refs[key] = ref
+
+    response: dict[str, object] = {
+        "schema_version": 1,
+        "mode": "authority_metadata_handoff_status",
+        "checkpoint_complete": all(value > 0 for value in counts.values()),
+        "chain_counts": counts,
+        "latest_refs": latest_refs,
+        "next_manual_lane": "manual_status_note_authority_handoff",
+        "capabilities": _authority_metadata_handoff_capabilities(),
+        "redaction": dict(_REDACTION_POSTURE),
+        "errors": [],
+    }
+    if safe_request_id is not None:
+        response["request_id"] = safe_request_id
+    if safe_correlation_id is not None:
+        response["correlation_id"] = safe_correlation_id
+    return response
+
+
+def _authority_metadata_handoff_capabilities() -> dict[str, bool]:
+    return {
+        "metadata_readback_enabled": True,
+        "status_note_lane_enabled": True,
+        "request_store_readback_enabled": True,
+        "decision_store_readback_enabled": True,
+        "dry_run_result_readback_enabled": True,
+        "audit_readback_enabled": True,
+        "authority_registry_readback_enabled": True,
+        "adapter_implementation_enabled": False,
+        "adapter_binding_enabled": False,
+        "adapter_dispatch_enabled": False,
+        "credential_access_enabled": False,
+        "target_mutation_enabled": False,
+        "dry_run_execution_enabled": False,
+        "nas_save_enabled": False,
+        "watcher_daemon_enabled": False,
+        "cron_enabled": False,
+    }
+
+
+def _safe_count(value: object) -> int:
+    return value if isinstance(value, int) else 0
+
+
 def build_office_controlled_mutation_event_persistence_contract(
     *, unsafe_examples: Mapping[str, Any] | None = None
 ) -> dict[str, object]:

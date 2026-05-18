@@ -19,7 +19,7 @@ vi.mock("@/lib/api", () => ({
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
 import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerAssignmentCandidateGate, buildOfficeWorkerRequestDraftPreview, buildOfficeWorkerHumanConfirmationEnvelope, buildOfficeWorkerAuthorityHandoffEnvelope, buildOfficeWorkerDispatchDryRunEnvelope, buildOfficeWorkerAuditPreviewEnvelope, buildOfficeWorkerRollbackPreviewEnvelope, buildOfficeWorkerFinalGateChecklist, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeNasKeeperSaveRequestGate, buildOfficeNasKeeperRollbackEvidencePreview, buildOfficeNasEvidencePackageStoreReadbackStatus, buildOfficeNasPathValidationStatusSurface, buildOfficeNasPathPreviewStatusSurface, buildOfficeNasPathPreviewStoreReadbackStatusSurface, buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface, buildOfficeNasRuntimeSingleFileWriteApprovalAction, buildOfficeNasKeeperQueueManualEvidenceReviewSurface, buildOfficeNasKeeperExecutionOperatorAction, buildOfficeDeskRpgReadOnlyChainCompletionReview, buildOfficeEventDrivenCharacterStateProjection, buildOfficeCharacterStateRoomOverlay, buildOfficeCharacterRoomInteractionPosture, buildOfficeCharacterInspectorDetailPosture, buildOfficeCharacterDetailSafeDialogueCopy, buildOfficeCharacterBubbleInspectorAlignment, buildOfficeCharacterPanelBoundarySummary, buildOfficeCharacterFacilityRoleLegend, buildOfficeCharacterFacilityBoundaryStrip, buildOfficeCharacterFacilitySourceLedgerStrip, buildOfficeCharacterFacilityCompletionReview, buildOfficeControlledMutationProposalContract, buildOfficeControlledMutationDryRunPlan, buildOfficeControlledMutationAuditSinkPlan, buildOfficeControlledMutationRollbackVerificationPlan, buildOfficeControlledMutationHumanApprovalPlan, buildOfficeControlledMutationAuthoritySummary, buildOfficeControlledMutationExecutionReadinessSummary, buildOfficeControlledMutationContractPostureProjection, buildOfficeControlledMutationContractPosturePolish, buildOfficeControlledMutationReadinessHandoffRibbon, buildOfficeControlledMutationReadinessSummaryPolish, buildOfficeControlledMutationRequestStorePosture, buildOfficeControlledMutationRequestStoreHardeningPlan, buildOfficeControlledMutationNextApprovalBoundary, buildOfficeControlledMutationPostDecisionApprovalBoundary, buildOfficeControlledMutationPostRegistryApprovalBoundary, buildOfficeControlledMutationTargetDispatchForbiddenBoundary, buildOfficeControlledMutationSafeContinuationCompletionReview, buildOfficeRpgScene } from "./officeView";
-import type { OfficeNasKeeperExecutionFromPreviewResult, OfficeNasKeeperHandoffQueueReadback, OfficeState } from "@/lib/api";
+import type { OfficeAuthorityMetadataHandoffStatus, OfficeNasKeeperExecutionFromPreviewResult, OfficeNasKeeperHandoffQueueReadback, OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
   return {
@@ -1596,6 +1596,54 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(markup).not.toContain("<select");
     expect(markup).not.toContain("<textarea");
     expect(markup).not.toMatch(/raw queue panel prompt|raw markdown body|Traceback|\/Users\/lidises|token-shaped-queue-panel|private-queue-panel-provider/i);
+  });
+});
+
+
+describe("AuthorityMetadataHandoffStatusPanel", () => {
+  it("renders safe status-note authority metadata readback without executable controls", () => {
+    const AuthorityMetadataHandoffStatusPanel = (OfficePageModule as unknown as {
+      AuthorityMetadataHandoffStatusPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.AuthorityMetadataHandoffStatusPanel>>;
+    }).AuthorityMetadataHandoffStatusPanel;
+    const status: OfficeAuthorityMetadataHandoffStatus = {
+      schema_version: 1,
+      mode: "authority_metadata_handoff_status",
+      request_id: "req_20260518_1801_handoff",
+      correlation_id: "corr_20260518_1801_handoff",
+      checkpoint_complete: true,
+      chain_counts: { requests: 1, decisions: 1, dry_run_results: 1, audit_events: 1, authority_registry: 1 },
+      latest_refs: { request: "req_20260518_1801_handoff", authority_registry: "adapter_20260518_handoff" },
+      next_manual_lane: "manual_status_note_authority_handoff",
+      capabilities: {
+        metadata_readback_enabled: true,
+        status_note_lane_enabled: true,
+        adapter_dispatch_enabled: false,
+        adapter_binding_enabled: false,
+        target_mutation_enabled: false,
+        credential_access_enabled: false,
+        watcher_daemon_enabled: false,
+        cron_enabled: false,
+      },
+      errors: [],
+    };
+
+    const markup = renderToStaticMarkup(<AuthorityMetadataHandoffStatusPanel status={status} error={null} />);
+
+    expect(markup).toContain('data-office-authority-metadata-handoff="true"');
+    expect(markup).toContain('data-office-authority-metadata-handoff-complete="true"');
+    expect(markup).toContain('data-office-authority-metadata-handoff-status-note-lane="true"');
+    expect(markup).toContain('data-office-authority-metadata-handoff-dispatch-enabled="false"');
+    expect(markup).toContain('data-office-authority-metadata-handoff-binding-enabled="false"');
+    expect(markup).toContain('data-office-authority-metadata-handoff-target-mutation-enabled="false"');
+    expect(markup).toContain('data-office-authority-metadata-handoff-count="requests"');
+    expect(markup).toContain('manual_status_note_authority_handoff');
+    expect(markup).toContain('adapter_20260518_handoff');
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw markdown body|Traceback|\/Users\/lidises|token-shaped-authority|private-authority-provider/i);
   });
 });
 
