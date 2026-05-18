@@ -148,6 +148,7 @@ import {
   buildOfficeNasPathPreviewStoreReadbackStatusSurface,
   buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface,
   buildOfficeNasRuntimeSingleFileWriteApprovalAction,
+  buildOfficeNasKeeperQueueManualEvidenceReviewSurface,
   buildOfficeDeskRpgReadOnlyChainCompletionReview,
   buildOfficeEventDrivenCharacterStateProjection,
   buildOfficeCharacterStateRoomOverlay,
@@ -199,6 +200,7 @@ import {
   type OfficeNasPathPreviewStoreReadbackStatusSurface,
   type OfficeNasRuntimeN3ApprovalBoundaryStatusSurface,
   type OfficeNasRuntimeSingleFileWriteApprovalAction,
+  type OfficeNasKeeperQueueManualEvidenceReviewSurface,
   type OfficeDeskRpgReadOnlyChainCompletionReview,
   type OfficeControlledMutationContractPostureProjection,
   type OfficeControlledMutationContractPosturePolish,
@@ -3662,6 +3664,62 @@ export function NasRuntimeSingleFileWriteApprovalActionPanel({
   );
 }
 
+export function NasKeeperQueueManualEvidenceReviewSurfacePanel({ surface }: { surface: OfficeNasKeeperQueueManualEvidenceReviewSurface }) {
+  return (
+    <Card
+      data-office-nas-keeper-queue-manual-review="true"
+      data-office-nas-keeper-queue-manual-review-enabled-controls={surface.enabledControls}
+      data-office-nas-keeper-queue-manual-review-endpoint={surface.endpoint}
+      data-office-nas-keeper-queue-manual-review-queue-readback-enabled={String(surface.queueReadbackEnabled)}
+      data-office-nas-keeper-queue-manual-review-manual-evidence-enabled={String(surface.manualEvidenceReviewEnabled)}
+      data-office-nas-keeper-queue-manual-review-browser-fetch-enabled={String(surface.browserFetchEnabled)}
+      data-office-nas-keeper-queue-manual-review-queue-mutation-enabled={String(surface.queueMutationEnabled)}
+      data-office-nas-keeper-queue-manual-review-execution-state-recording-enabled={String(surface.executionStateRecordingEnabled)}
+      data-office-nas-keeper-queue-manual-review-mac-relay-execution-enabled={String(surface.macRelayExecutionEnabled)}
+      data-office-nas-keeper-queue-manual-review-relay-dispatch-enabled={String(surface.relayDispatchEnabled)}
+      data-office-nas-keeper-queue-manual-review-watcher-cron-daemon-enabled={String(surface.watcherCronDaemonEnabled)}
+      data-office-nas-keeper-queue-manual-review-authority-adapter-binding-enabled={String(surface.authorityAdapterBindingEnabled)}
+      data-office-nas-keeper-queue-manual-review-vps-nas-authority-enabled={String(surface.vpsNasAuthorityEnabled)}
+      data-office-nas-keeper-queue-manual-review-nas-write-enabled={String(surface.nasWriteEnabled)}
+      data-office-nas-keeper-queue-manual-review-markdown-body-projected={String(surface.markdownBodyProjected)}
+      data-office-nas-keeper-queue-manual-review-raw-excluded={String(surface.rawExcluded)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Eye className="h-4 w-4 text-sky-300" /> {surface.title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div className="border border-sky-300/20 bg-sky-950/10 p-3">
+            <div className="font-semibold text-sky-100">manual evidence review · queue-state readback only</div>
+            <div className="mt-1 leading-5">Protected queue list API의 safe summary를 사람이 검토하는 표면입니다. 브라우저 fetch, queue rewrite, 실행 상태 기록, relay dispatch, NAS write, markdown body projection은 모두 비활성입니다.</div>
+            <div className="mt-1 font-mono text-[10px] text-sky-100/70">{surface.endpoint}</div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {surface.reviewCards.map((card) => (
+              <div
+                key={card.id}
+                className="border border-current/15 bg-black/15 p-3"
+                data-office-nas-keeper-queue-manual-review-card={card.id}
+                data-office-nas-keeper-queue-manual-review-card-status={card.status}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{card.id}</div>
+                <div className="mt-1 font-semibold text-foreground">{card.label}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-sky-100/80">{card.status}</div>
+                <div className="mt-2 leading-5">{card.summary}</div>
+              </div>
+            ))}
+          </div>
+          <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-nas-keeper-queue-manual-review-boundary="true">
+            source {surface.sourceDetailKind} · cards {surface.reviewCardCount} · controls {surface.enabledControls} · browser fetch {String(surface.browserFetchEnabled)} · queue mutation {String(surface.queueMutationEnabled)} · relay execution {String(surface.macRelayExecutionEnabled)} · NAS write {String(surface.nasWriteEnabled)} · markdown body projected {String(surface.markdownBodyProjected)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function DeskRpgReadOnlyChainCompletionReviewPanel({ review }: { review: OfficeDeskRpgReadOnlyChainCompletionReview }) {
   return (
     <Card
@@ -5032,6 +5090,10 @@ export default function OfficePage() {
     () => buildOfficeNasRuntimeSingleFileWriteApprovalAction(nasRuntimeN3ApprovalBoundaryStatusSurface),
     [nasRuntimeN3ApprovalBoundaryStatusSurface],
   );
+  const nasKeeperQueueManualEvidenceReviewSurface = useMemo(
+    () => buildOfficeNasKeeperQueueManualEvidenceReviewSurface(nasRuntimeSingleFileWriteApprovalAction),
+    [nasRuntimeSingleFileWriteApprovalAction],
+  );
   const deskRpgReadOnlyChainCompletionReview = useMemo(
     () => buildOfficeDeskRpgReadOnlyChainCompletionReview(nasKeeperRollbackEvidencePreview),
     [nasKeeperRollbackEvidencePreview],
@@ -5362,6 +5424,8 @@ export default function OfficePage() {
         onApprovalChange={setNasSingleWriteApproved}
         onExecute={executeNasSingleFileWrite}
       />
+
+      <NasKeeperQueueManualEvidenceReviewSurfacePanel surface={nasKeeperQueueManualEvidenceReviewSurface} />
 
       <DeskRpgReadOnlyChainCompletionReviewPanel review={deskRpgReadOnlyChainCompletionReview} />
 

@@ -137,6 +137,7 @@ import {
   buildOfficeNasPathPreviewStoreReadbackStatusSurface,
   buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface,
   buildOfficeNasRuntimeSingleFileWriteApprovalAction,
+  buildOfficeNasKeeperQueueManualEvidenceReviewSurface,
   buildOfficeDeskRpgReadOnlyChainCompletionReview,
   buildOfficeEventDrivenCharacterStateProjection,
   buildOfficeCharacterStateRoomOverlay,
@@ -212,6 +213,29 @@ describe("NAS Keeper Mac Relay Write Execution Action 1", () => {
     expect(action.mountPathInputEnabled).toBe(false);
     expect(action.rawExcluded).toBe(true);
     expect(JSON.stringify(action)).not.toMatch(/raw write action prompt|raw write action task|Traceback|\/Users\/lidises|token-shaped-write-action|private-write-action-provider/i);
+  });
+});
+
+
+describe("NAS Keeper Queue Manual Evidence Review Surface 1", () => {
+  it("builds a read-only manual review model for the protected queue-state readback route", () => {
+    const action = { detailKind: "nas_runtime_single_file_write_approval_action" } as ReturnType<typeof buildOfficeNasRuntimeSingleFileWriteApprovalAction>;
+
+    const surface = buildOfficeNasKeeperQueueManualEvidenceReviewSurface(action);
+
+    expect(surface.stageLabel).toBe("NAS Keeper Queue Manual Evidence Review Surface 1");
+    expect(surface.detailKind).toBe("nas_keeper_queue_manual_evidence_review_surface");
+    expect(surface.endpoint).toBe("/api/office/controlled-mutation/nas-runtime/nas-keeper-handoff-queue");
+    expect(surface.enabledControls).toBe(0);
+    expect(surface.queueReadbackEnabled).toBe(true);
+    expect(surface.manualEvidenceReviewEnabled).toBe(true);
+    expect(surface.browserFetchEnabled).toBe(false);
+    expect(surface.queueMutationEnabled).toBe(false);
+    expect(surface.macRelayExecutionEnabled).toBe(false);
+    expect(surface.nasWriteEnabled).toBe(false);
+    expect(surface.markdownBodyProjected).toBe(false);
+    expect(surface.reviewCards.map((card) => card.id)).toEqual(["queue_summary", "manual_evidence", "terminal_state", "next_boundary"]);
+    expect(JSON.stringify(surface)).not.toMatch(/raw queue prompt|raw markdown body|Traceback|\/Users\/lidises|token-shaped-queue-review|private-queue-provider/i);
   });
 });
 

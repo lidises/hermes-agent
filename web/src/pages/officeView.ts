@@ -2180,6 +2180,41 @@ export type OfficeNasRuntimeSingleFileWriteApprovalAction = {
   safeSummary: string;
 };
 
+export type OfficeNasKeeperQueueManualEvidenceReviewCard = {
+  id: "queue_summary" | "manual_evidence" | "terminal_state" | "next_boundary";
+  label: string;
+  status: "available" | "guarded" | "terminal" | "approval_required";
+  summary: string;
+  rawExcluded: true;
+};
+
+export type OfficeNasKeeperQueueManualEvidenceReviewSurface = {
+  stageLabel: "NAS Keeper Queue Manual Evidence Review Surface 1";
+  title: string;
+  detailKind: "nas_keeper_queue_manual_evidence_review_surface";
+  sourceDetailKind: OfficeNasRuntimeSingleFileWriteApprovalAction["detailKind"];
+  endpoint: "/api/office/controlled-mutation/nas-runtime/nas-keeper-handoff-queue";
+  reviewCards: OfficeNasKeeperQueueManualEvidenceReviewCard[];
+  reviewCardCount: number;
+  enabledControls: 0;
+  frontendOnly: true;
+  queueReadbackEnabled: true;
+  manualEvidenceReviewEnabled: true;
+  browserFetchEnabled: false;
+  queueMutationEnabled: false;
+  executionStateRecordingEnabled: false;
+  macRelayExecutionEnabled: false;
+  relayDispatchEnabled: false;
+  watcherCronDaemonEnabled: false;
+  authorityAdapterBindingEnabled: false;
+  vpsNasAuthorityEnabled: false;
+  nasWriteEnabled: false;
+  dashboardRestartEnabled: false;
+  gatewayRestartEnabled: false;
+  markdownBodyProjected: false;
+  rawExcluded: true;
+};
+
 export type OfficeDeskRpgReadOnlyChainCompletionReviewCard = {
   id: "request_to_orchestrator" | "evidence_to_review" | "approval_to_nas_keeper" | "next_projection_gap";
   label: string;
@@ -5357,6 +5392,65 @@ export function buildOfficeNasRuntimeSingleFileWriteApprovalAction(boundary: Off
     auditWriteEnabled: false,
     rawExcluded: true,
     safeSummary: "NAS Keeper 승인 envelope를 Mac relay 실행 route로 1회 전달합니다. VPS는 direct NAS mount/credential/write를 갖지 않으며 Mac relay root가 없으면 안전하게 not-configured로 닫힙니다.",
+  };
+}
+
+export function buildOfficeNasKeeperQueueManualEvidenceReviewSurface(action: OfficeNasRuntimeSingleFileWriteApprovalAction): OfficeNasKeeperQueueManualEvidenceReviewSurface {
+  const reviewCards: OfficeNasKeeperQueueManualEvidenceReviewCard[] = [
+    {
+      id: "queue_summary",
+      label: "Queue-state readback",
+      status: "available",
+      summary: "Protected GET route lists safe queue summaries with status/filter metadata only; queued markdown bodies stay excluded from browser projection.",
+      rawExcluded: true,
+    },
+    {
+      id: "manual_evidence",
+      label: "Manual evidence review",
+      status: "guarded",
+      summary: "Manual-review evidence refs can be inspected as safe refs/counts for NAS Keeper follow-up without opening raw logs, provider IDs, paths, or note bodies.",
+      rawExcluded: true,
+    },
+    {
+      id: "terminal_state",
+      label: "Terminal execution state",
+      status: "terminal",
+      summary: "Succeeded/failed/manual-review queue outcomes are reviewable as state summaries only; this surface does not record or rewrite queue state.",
+      rawExcluded: true,
+    },
+    {
+      id: "next_boundary",
+      label: "Next automation boundary",
+      status: "approval_required",
+      summary: "Watcher, cron, daemon relay dispatch, authority adapter binding, VPS NAS authority, service restarts, and public exposure remain separate approval gates.",
+      rawExcluded: true,
+    },
+  ];
+  return {
+    stageLabel: "NAS Keeper Queue Manual Evidence Review Surface 1",
+    title: "NAS Keeper queue manual evidence review surface",
+    detailKind: "nas_keeper_queue_manual_evidence_review_surface",
+    sourceDetailKind: action.detailKind,
+    endpoint: "/api/office/controlled-mutation/nas-runtime/nas-keeper-handoff-queue",
+    reviewCards,
+    reviewCardCount: reviewCards.length,
+    enabledControls: 0,
+    frontendOnly: true,
+    queueReadbackEnabled: true,
+    manualEvidenceReviewEnabled: true,
+    browserFetchEnabled: false,
+    queueMutationEnabled: false,
+    executionStateRecordingEnabled: false,
+    macRelayExecutionEnabled: false,
+    relayDispatchEnabled: false,
+    watcherCronDaemonEnabled: false,
+    authorityAdapterBindingEnabled: false,
+    vpsNasAuthorityEnabled: false,
+    nasWriteEnabled: false,
+    dashboardRestartEnabled: false,
+    gatewayRestartEnabled: false,
+    markdownBodyProjected: false,
+    rawExcluded: true,
   };
 }
 
