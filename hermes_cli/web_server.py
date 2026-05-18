@@ -62,6 +62,7 @@ from hermes_cli.office_controlled_mutation import (
     build_office_controlled_mutation_dispatcher_authority_metadata_recording_draft,
     build_office_controlled_mutation_dispatcher_completion_review_status,
     build_office_controlled_mutation_dispatcher_execution_simulation_status,
+    build_office_controlled_mutation_target_dispatch_contract_status,
     build_office_controlled_mutation_contract_schema,
     execute_office_controlled_mutation_nas_single_file_write,
     execute_office_controlled_mutation_nas_mac_relay_write,
@@ -992,6 +993,12 @@ async def get_office_controlled_mutation_dispatcher_execution_simulation_status(
 async def get_office_controlled_mutation_dispatcher_completion_review_status(limit: int = 25):
     """Summarize the dispatcher authority handoff chain without enabling execution."""
     return build_office_controlled_mutation_dispatcher_completion_review_status(limit=limit)
+
+
+@app.get("/api/office/controlled-mutation/target-dispatch-contract-status")
+async def get_office_controlled_mutation_target_dispatch_contract_status():
+    """Project target dispatch contract status without enabling dispatch or mutation."""
+    return build_office_controlled_mutation_target_dispatch_contract_status()
 
 
 @app.get("/api/office/events")

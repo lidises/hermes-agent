@@ -1879,6 +1879,67 @@ def build_office_controlled_mutation_dispatcher_completion_review_status(
     }
 
 
+def build_office_controlled_mutation_target_dispatch_contract_status(
+    *, unsafe_examples: Mapping[str, Any] | None = None
+) -> dict[str, object]:
+    """Project the next target-dispatch contract lane without dispatch or mutation."""
+
+    _ = unsafe_examples
+    return {
+        "schema_version": 1,
+        "mode": "target_dispatch_contract_status",
+        "target_dispatch_contract_complete": True,
+        "source_completion_review_lane": "dispatcher_completion_review_status",
+        "next_manual_lane": "target_dispatch_runtime_approval_required",
+        "dispatch_options": ["kanban_comment", "status_note", "read_only_projection"],
+        "required_dispatch_fields": [
+            "dispatch_ref",
+            "binding_candidate_ref",
+            "authority_candidate_ref",
+            "request_ref",
+            "decision_ref",
+            "target_ref",
+            "operation_kind",
+            "dry_run_ref",
+            "safe_summary",
+            "evidence_refs",
+            "expires_at",
+        ],
+        "allowed_operation_kinds": ["comment", "status_note", "read_only_projection"],
+        "forbidden_boundaries": [
+            "adapter_dispatch",
+            "target_mutation",
+            "kanban_mutation",
+            "nas_save",
+            "vps_file_change",
+            "service_restart",
+            "git_push",
+            "public_exposure",
+        ],
+        "capabilities": {
+            "target_dispatch_contract_readback_enabled": True,
+            "adapter_dispatch_enabled": False,
+            "target_mutation_enabled": False,
+            "kanban_mutation_enabled": False,
+            "nas_save_enabled": False,
+            "vps_file_change_enabled": False,
+            "service_restart_enabled": False,
+            "git_push_enabled": False,
+            "public_exposure_enabled": False,
+            "credential_access_enabled": False,
+        },
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "opaque_refs_only": True,
+            "safe_summaries_only": True,
+            "unsupported_values_echoed": False,
+            "credentials_echoed": False,
+        },
+        "errors": [],
+    }
+
+
 def _dispatcher_authority_metadata_append_status_capabilities() -> dict[str, bool]:
     return {
         "metadata_append_readback_enabled": True,

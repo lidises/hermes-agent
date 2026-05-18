@@ -1715,6 +1715,58 @@ describe("DispatcherAuthorityMetadataRecordingDraftPanel", () => {
     expect(markup).not.toContain("<textarea");
     expect(markup).not.toMatch(/raw markdown body|Traceback|\/Users\/lidises|\/home\/hermes|token-shaped-completion|private-authority-provider/i);
   });
+
+  it("renders target dispatch contract status without executable controls", () => {
+    const TargetDispatchContractStatusPanel = (OfficePageModule as unknown as {
+      TargetDispatchContractStatusPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.TargetDispatchContractStatusPanel>>;
+    }).TargetDispatchContractStatusPanel;
+    const status = {
+      schema_version: 1,
+      mode: "target_dispatch_contract_status" as const,
+      target_dispatch_contract_complete: true,
+      source_completion_review_lane: "dispatcher_completion_review_status",
+      next_manual_lane: "target_dispatch_runtime_approval_required",
+      dispatch_options: ["kanban_comment", "status_note", "read_only_projection"],
+      required_dispatch_fields: ["dispatch_ref", "target_ref"],
+      allowed_operation_kinds: ["comment", "status_note", "read_only_projection"],
+      forbidden_boundaries: ["adapter_dispatch", "target_mutation", "kanban_mutation", "nas_save"],
+      capabilities: {
+        target_dispatch_contract_readback_enabled: true,
+        adapter_dispatch_enabled: false,
+        target_mutation_enabled: false,
+        kanban_mutation_enabled: false,
+        nas_save_enabled: false,
+        vps_file_change_enabled: false,
+        service_restart_enabled: false,
+        git_push_enabled: false,
+      },
+      redaction: { raw_excluded: true },
+      errors: [],
+    };
+
+    const markup = renderToStaticMarkup(<TargetDispatchContractStatusPanel status={status} error={null} />);
+
+    expect(markup).toContain('data-office-target-dispatch-contract-status="true"');
+    expect(markup).toContain('data-office-target-dispatch-contract-status-complete="true"');
+    expect(markup).toContain('data-office-target-dispatch-contract-status-readback-enabled="true"');
+    expect(markup).toContain('data-office-target-dispatch-contract-status-dispatch-enabled="false"');
+    expect(markup).toContain('data-office-target-dispatch-contract-status-target-mutation-enabled="false"');
+    expect(markup).toContain('data-office-target-dispatch-contract-status-kanban-mutation-enabled="false"');
+    expect(markup).toContain('data-office-target-dispatch-contract-status-nas-save-enabled="false"');
+    expect(markup).toContain('data-office-target-dispatch-contract-status-vps-file-change-enabled="false"');
+    expect(markup).toContain('data-office-target-dispatch-contract-status-service-restart-enabled="false"');
+    expect(markup).toContain('data-office-target-dispatch-contract-status-git-push-enabled="false"');
+    expect(markup).toContain('data-office-target-dispatch-contract-status-raw-excluded="true"');
+    expect(markup).toContain('data-office-target-dispatch-contract-status-option="kanban_comment"');
+    expect(markup).toContain('data-office-target-dispatch-contract-status-forbidden-boundary="adapter_dispatch"');
+    expect(markup).toContain('data-office-target-dispatch-contract-status-field="dispatch_ref"');
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw target dispatch|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-target-dispatch|provider/i);
+  });
 });
 
 

@@ -290,6 +290,21 @@ export interface OfficeDispatcherCompletionReviewStatus {
   errors: Array<{ field: string; code: string }>;
 }
 
+export interface OfficeTargetDispatchContractStatus {
+  schema_version: number;
+  mode: "target_dispatch_contract_status";
+  target_dispatch_contract_complete: boolean;
+  source_completion_review_lane: string;
+  next_manual_lane: string;
+  dispatch_options: string[];
+  required_dispatch_fields: string[];
+  allowed_operation_kinds: string[];
+  forbidden_boundaries: string[];
+  capabilities: Record<string, boolean>;
+  redaction: Record<string, boolean>;
+  errors: Array<{ field: string; code: string }>;
+}
+
 export interface OfficeDispatcherCompletionReviewStatusParams {
   limit?: number;
 }
@@ -455,6 +470,8 @@ export const api = {
     const suffix = qs.toString() ? `?${qs.toString()}` : "";
     return fetchJSON<OfficeDispatcherCompletionReviewStatus>(`/api/office/controlled-mutation/dispatcher-completion-review-status${suffix}`);
   },
+  getOfficeControlledMutationTargetDispatchContractStatus: () =>
+    fetchJSON<OfficeTargetDispatchContractStatus>("/api/office/controlled-mutation/target-dispatch-contract-status"),
   executeOfficeControlledMutationNasSingleFileWrite: (body: OfficeNasSingleFileWritePayload) =>
     fetchJSON<OfficeNasSingleFileWriteResult>("/api/office/controlled-mutation/nas-runtime/single-file-write", {
       method: "POST",
