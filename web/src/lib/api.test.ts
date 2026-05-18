@@ -381,7 +381,7 @@ describe("fetchJSON", () => {
     expect(JSON.stringify(fetchMock.mock.calls[0]?.[1])).not.toMatch(/method|body|\/Users\/|\/home\/|token=|sk-|raw markdown body|provider/i);
   });
 
-  it("gets the target dispatch contract status without request body", async () => {
+  it("gets target dispatch contract status through the protected readback route", async () => {
     Object.defineProperty(globalThis, "window", {
       configurable: true,
       value: {
@@ -414,6 +414,46 @@ describe("fetchJSON", () => {
     expect(result.capabilities.adapter_dispatch_enabled).toBe(false);
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/office/controlled-mutation/target-dispatch-contract-status",
+      expect.objectContaining({ headers: expect.any(Headers) }),
+    );
+    const headers = fetchMock.mock.calls[0]?.[1]?.headers as Headers;
+    expect(headers.get("X-Hermes-Session-Token")).toBe("session-token-for-header-only");
+    expect(JSON.stringify(fetchMock.mock.calls[0]?.[1])).not.toMatch(/method|body|\/Users\/|\/home\/|token=|sk-|provider/i);
+  });
+
+  it("gets watcher cron contract status through the protected readback route", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        __HERMES_SESSION_TOKEN__: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        schema_version: 1,
+        mode: "watcher_cron_contract_status",
+        watcher_cron_contract_complete: true,
+        source_target_dispatch_lane: "target_dispatch_contract_status",
+        next_manual_lane: "watcher_cron_runtime_approval_required",
+        scheduler_options: ["manual_poll", "operator_trigger", "disabled_cron_draft"],
+        required_scheduler_fields: ["schedule_ref", "dispatch_contract_ref"],
+        forbidden_boundaries: ["watcher_daemon", "cron_job_activation"],
+        capabilities: { watcher_cron_contract_readback_enabled: true, watcher_daemon_enabled: false, cron_enabled: false },
+        redaction: { raw_excluded: true },
+        errors: [],
+      }),
+    } as Response);
+
+    const result = await api.getOfficeControlledMutationWatcherCronContractStatus();
+
+    expect(result.mode).toBe("watcher_cron_contract_status");
+    expect(result.watcher_cron_contract_complete).toBe(true);
+    expect(result.capabilities.watcher_daemon_enabled).toBe(false);
+    expect(result.capabilities.cron_enabled).toBe(false);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/office/controlled-mutation/watcher-cron-contract-status",
       expect.objectContaining({ headers: expect.any(Headers) }),
     );
     const headers = fetchMock.mock.calls[0]?.[1]?.headers as Headers;

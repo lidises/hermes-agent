@@ -1940,6 +1940,68 @@ def build_office_controlled_mutation_target_dispatch_contract_status(
     }
 
 
+def build_office_controlled_mutation_watcher_cron_contract_status(
+    *, unsafe_examples: Mapping[str, Any] | None = None
+) -> dict[str, object]:
+    """Project the watcher/cron scheduler contract without enabling a daemon."""
+
+    _ = unsafe_examples
+    return {
+        "schema_version": 1,
+        "mode": "watcher_cron_contract_status",
+        "watcher_cron_contract_complete": True,
+        "source_target_dispatch_lane": "target_dispatch_contract_status",
+        "next_manual_lane": "watcher_cron_runtime_approval_required",
+        "scheduler_options": ["manual_poll", "operator_trigger", "disabled_cron_draft"],
+        "required_scheduler_fields": [
+            "schedule_ref",
+            "dispatch_contract_ref",
+            "target_ref",
+            "poll_interval_seconds",
+            "max_items_per_tick",
+            "dry_run_ref",
+            "safe_summary",
+            "evidence_refs",
+            "expires_at",
+        ],
+        "forbidden_boundaries": [
+            "watcher_daemon",
+            "cron_job_activation",
+            "adapter_dispatch",
+            "target_mutation",
+            "kanban_mutation",
+            "nas_save",
+            "vps_file_change",
+            "service_restart",
+            "git_push",
+            "public_exposure",
+        ],
+        "capabilities": {
+            "watcher_cron_contract_readback_enabled": True,
+            "watcher_daemon_enabled": False,
+            "cron_enabled": False,
+            "adapter_dispatch_enabled": False,
+            "target_mutation_enabled": False,
+            "kanban_mutation_enabled": False,
+            "nas_save_enabled": False,
+            "vps_file_change_enabled": False,
+            "service_restart_enabled": False,
+            "git_push_enabled": False,
+            "public_exposure_enabled": False,
+            "credential_access_enabled": False,
+        },
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "opaque_refs_only": True,
+            "safe_summaries_only": True,
+            "unsupported_values_echoed": False,
+            "credentials_echoed": False,
+        },
+        "errors": [],
+    }
+
+
 def _dispatcher_authority_metadata_append_status_capabilities() -> dict[str, bool]:
     return {
         "metadata_append_readback_enabled": True,

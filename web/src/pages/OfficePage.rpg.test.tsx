@@ -1767,6 +1767,59 @@ describe("DispatcherAuthorityMetadataRecordingDraftPanel", () => {
     expect(markup).not.toContain("<textarea");
     expect(markup).not.toMatch(/raw target dispatch|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-target-dispatch|provider/i);
   });
+
+  it("renders watcher cron contract status without daemon, cron, or executable controls", () => {
+    const WatcherCronContractStatusPanel = (OfficePageModule as unknown as {
+      WatcherCronContractStatusPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.WatcherCronContractStatusPanel>>;
+    }).WatcherCronContractStatusPanel;
+    const status = {
+      schema_version: 1,
+      mode: "watcher_cron_contract_status" as const,
+      watcher_cron_contract_complete: true,
+      source_target_dispatch_lane: "target_dispatch_contract_status",
+      next_manual_lane: "watcher_cron_runtime_approval_required",
+      scheduler_options: ["manual_poll", "operator_trigger", "disabled_cron_draft"],
+      required_scheduler_fields: ["schedule_ref", "dispatch_contract_ref"],
+      forbidden_boundaries: ["watcher_daemon", "cron_job_activation", "adapter_dispatch", "target_mutation"],
+      capabilities: {
+        watcher_cron_contract_readback_enabled: true,
+        watcher_daemon_enabled: false,
+        cron_enabled: false,
+        adapter_dispatch_enabled: false,
+        target_mutation_enabled: false,
+        kanban_mutation_enabled: false,
+        nas_save_enabled: false,
+        service_restart_enabled: false,
+        git_push_enabled: false,
+      },
+      redaction: { raw_excluded: true },
+      errors: [],
+    };
+
+    const markup = renderToStaticMarkup(<WatcherCronContractStatusPanel status={status} error={null} />);
+
+    expect(markup).toContain('data-office-watcher-cron-contract-status="true"');
+    expect(markup).toContain('data-office-watcher-cron-contract-status-complete="true"');
+    expect(markup).toContain('data-office-watcher-cron-contract-status-readback-enabled="true"');
+    expect(markup).toContain('data-office-watcher-cron-contract-status-watcher-enabled="false"');
+    expect(markup).toContain('data-office-watcher-cron-contract-status-cron-enabled="false"');
+    expect(markup).toContain('data-office-watcher-cron-contract-status-dispatch-enabled="false"');
+    expect(markup).toContain('data-office-watcher-cron-contract-status-target-mutation-enabled="false"');
+    expect(markup).toContain('data-office-watcher-cron-contract-status-kanban-mutation-enabled="false"');
+    expect(markup).toContain('data-office-watcher-cron-contract-status-nas-save-enabled="false"');
+    expect(markup).toContain('data-office-watcher-cron-contract-status-service-restart-enabled="false"');
+    expect(markup).toContain('data-office-watcher-cron-contract-status-git-push-enabled="false"');
+    expect(markup).toContain('data-office-watcher-cron-contract-status-raw-excluded="true"');
+    expect(markup).toContain('data-office-watcher-cron-contract-status-option="manual_poll"');
+    expect(markup).toContain('data-office-watcher-cron-contract-status-forbidden-boundary="watcher_daemon"');
+    expect(markup).toContain('data-office-watcher-cron-contract-status-field="schedule_ref"');
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw watcher cron|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-watcher|provider/i);
+  });
 });
 
 

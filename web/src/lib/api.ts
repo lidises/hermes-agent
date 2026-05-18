@@ -305,6 +305,20 @@ export interface OfficeTargetDispatchContractStatus {
   errors: Array<{ field: string; code: string }>;
 }
 
+export interface OfficeWatcherCronContractStatus {
+  schema_version: number;
+  mode: "watcher_cron_contract_status";
+  watcher_cron_contract_complete: boolean;
+  source_target_dispatch_lane: string;
+  next_manual_lane: string;
+  scheduler_options: string[];
+  required_scheduler_fields: string[];
+  forbidden_boundaries: string[];
+  capabilities: Record<string, boolean>;
+  redaction: Record<string, boolean>;
+  errors: Array<{ field: string; code: string }>;
+}
+
 export interface OfficeDispatcherCompletionReviewStatusParams {
   limit?: number;
 }
@@ -472,6 +486,8 @@ export const api = {
   },
   getOfficeControlledMutationTargetDispatchContractStatus: () =>
     fetchJSON<OfficeTargetDispatchContractStatus>("/api/office/controlled-mutation/target-dispatch-contract-status"),
+  getOfficeControlledMutationWatcherCronContractStatus: () =>
+    fetchJSON<OfficeWatcherCronContractStatus>("/api/office/controlled-mutation/watcher-cron-contract-status"),
   executeOfficeControlledMutationNasSingleFileWrite: (body: OfficeNasSingleFileWritePayload) =>
     fetchJSON<OfficeNasSingleFileWriteResult>("/api/office/controlled-mutation/nas-runtime/single-file-write", {
       method: "POST",

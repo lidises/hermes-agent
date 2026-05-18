@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -4237,6 +4237,65 @@ export function TargetDispatchContractStatusPanel({
 }
 
 
+export function WatcherCronContractStatusPanel({
+  status,
+  error,
+}: {
+  status: OfficeWatcherCronContractStatus | null;
+  error?: string | null;
+}) {
+  const caps = status?.capabilities ?? {};
+  return (
+    <section
+      className="border border-sky-300/20 bg-sky-950/10 p-4"
+      data-office-watcher-cron-contract-status="true"
+      data-office-watcher-cron-contract-status-complete={String(Boolean(status?.watcher_cron_contract_complete))}
+      data-office-watcher-cron-contract-status-readback-enabled={String(Boolean(caps.watcher_cron_contract_readback_enabled))}
+      data-office-watcher-cron-contract-status-watcher-enabled={String(Boolean(caps.watcher_daemon_enabled))}
+      data-office-watcher-cron-contract-status-cron-enabled={String(Boolean(caps.cron_enabled))}
+      data-office-watcher-cron-contract-status-dispatch-enabled={String(Boolean(caps.adapter_dispatch_enabled))}
+      data-office-watcher-cron-contract-status-target-mutation-enabled={String(Boolean(caps.target_mutation_enabled))}
+      data-office-watcher-cron-contract-status-kanban-mutation-enabled={String(Boolean(caps.kanban_mutation_enabled))}
+      data-office-watcher-cron-contract-status-nas-save-enabled={String(Boolean(caps.nas_save_enabled))}
+      data-office-watcher-cron-contract-status-service-restart-enabled={String(Boolean(caps.service_restart_enabled))}
+      data-office-watcher-cron-contract-status-git-push-enabled={String(Boolean(caps.git_push_enabled))}
+      data-office-watcher-cron-contract-status-raw-excluded={String(Boolean(status?.redaction?.raw_excluded))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-200/70">Watcher / cron contract status</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">scheduler contract readback · daemon still off</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Projects the scheduler contract after target dispatch contract readback. This panel is protected and display-only: no watcher daemon, cron activation, adapter dispatch, target mutation, Kanban mutation, NAS write, service restart, git push, credential access, or public exposure.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "readback request failed" : `next ${status?.next_manual_lane ?? "watcher_cron_runtime_approval_required"}`}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-3" data-office-watcher-cron-contract-status-options="true">
+        {(status?.scheduler_options ?? []).map((option) => (
+          <div key={option} className="border border-current/15 bg-black/20 p-3" data-office-watcher-cron-contract-status-option={option}>{option}</div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-2" data-office-watcher-cron-contract-status-forbidden-boundaries="true">
+        {(status?.forbidden_boundaries ?? []).map((boundary) => (
+          <div key={boundary} className="border border-red-300/20 bg-red-950/10 p-2 text-xs text-red-100/80" data-office-watcher-cron-contract-status-forbidden-boundary={boundary}>{boundary}</div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 text-xs text-midground/70 md:grid-cols-2" data-office-watcher-cron-contract-status-fields="true">
+        {(status?.required_scheduler_fields ?? []).map((field) => (
+          <div key={field} className="border border-current/15 bg-black/20 p-2" data-office-watcher-cron-contract-status-field={field}>{field}</div>
+        ))}
+      </div>
+      <div className="mt-3 border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+        source: {status?.source_target_dispatch_lane ?? "target_dispatch_contract_status"}
+      </div>
+    </section>
+  );
+}
+
+
 export function NasKeeperQueueManualEvidenceReviewSurfacePanel({
   surface,
   readback,
@@ -5452,6 +5511,8 @@ export default function OfficePage() {
   const [dispatcherCompletionReviewStatusError, setDispatcherCompletionReviewStatusError] = useState<string | null>(null);
   const [targetDispatchContractStatus, setTargetDispatchContractStatus] = useState<OfficeTargetDispatchContractStatus | null>(null);
   const [targetDispatchContractStatusError, setTargetDispatchContractStatusError] = useState<string | null>(null);
+  const [watcherCronContractStatus, setWatcherCronContractStatus] = useState<OfficeWatcherCronContractStatus | null>(null);
+  const [watcherCronContractStatusError, setWatcherCronContractStatusError] = useState<string | null>(null);
   const [nasKeeperQueueReadbackLoading, setNasKeeperQueueReadbackLoading] = useState(false);
   const [nasKeeperQueueReadbackError, setNasKeeperQueueReadbackError] = useState<string | null>(null);
   const [nasKeeperExecutionDraft, setNasKeeperExecutionDraft] = useState<OfficeNasKeeperExecutionFromPreviewPayload>(DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT);
@@ -5780,6 +5841,20 @@ export default function OfficePage() {
         if (!cancelled) {
           setTargetDispatchContractStatus(null);
           setTargetDispatchContractStatusError("request failed");
+        }
+      });
+    api
+      .getOfficeControlledMutationWatcherCronContractStatus()
+      .then((next) => {
+        if (!cancelled) {
+          setWatcherCronContractStatus(next);
+          setWatcherCronContractStatusError(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setWatcherCronContractStatus(null);
+          setWatcherCronContractStatusError("request failed");
         }
       });
     api
@@ -6364,6 +6439,7 @@ export default function OfficePage() {
 
       <DispatcherCompletionReviewStatusPanel status={dispatcherCompletionReviewStatus} error={dispatcherCompletionReviewStatusError} />
       <TargetDispatchContractStatusPanel status={targetDispatchContractStatus} error={targetDispatchContractStatusError} />
+      <WatcherCronContractStatusPanel status={watcherCronContractStatus} error={watcherCronContractStatusError} />
 
       <NasKeeperExecutionOperatorActionPanel
         action={nasKeeperExecutionOperatorAction}

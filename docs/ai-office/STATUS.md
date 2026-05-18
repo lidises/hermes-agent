@@ -1,6 +1,18 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 22:45 KST
+Last updated: 2026-05-18 23:44 KST
+
+## Watcher / cron contract status lane
+
+Implemented the shortest follow-up after `target_dispatch_contract_status`: a protected scheduler-contract readback lane that documents the required watcher/cron envelope while keeping runtime automation disabled. Backend adds `build_office_controlled_mutation_watcher_cron_contract_status(...)` plus protected GET `/api/office/controlled-mutation/watcher-cron-contract-status`; frontend adds a typed API wrapper and display-only `/office` panel with stable `data-office-watcher-cron-contract-status-*` hooks. It reports scheduler options (`manual_poll`, `operator_trigger`, `disabled_cron_draft`), required safe fields, and forbidden boundaries while keeping watcher daemon, cron activation, adapter dispatch, target mutation, Kanban mutation, NAS save, VPS file changes, service restart, git push, credential access, and public exposure disabled.
+
+Verification 2026-05-18 23:44 KST: RED backend tests first failed for missing helper/route. GREEN backend watcher+target tests passed (`4 passed`), focused backend watcher+target+completion tests passed (`6 passed`), py_compile for changed backend modules passed, `git diff --check` passed, frontend API + Office RPG regression passed (`85 passed`), and `npm run build` passed with the existing Vite large chunk warning only.
+
+Boundary: this is contract/readback/UI only. It does not create, enable, or schedule a watcher/cron job; does not dispatch an adapter; does not mutate targets/Kanban/NAS/VPS files; does not restart services by itself; and does not add public exposure or VPS direct NAS mount/credential/write authority.
+
+## Target dispatch contract status lane
+
+Implemented the shortest follow-up after dispatcher completion review: a protected target-dispatch contract readback lane. Backend adds `build_office_controlled_mutation_target_dispatch_contract_status(...)` plus protected GET `/api/office/controlled-mutation/target-dispatch-contract-status`; frontend adds a typed API wrapper and display-only `/office` panel with stable `data-office-target-dispatch-contract-status-*` hooks. It records safe dispatch options and required fields while keeping adapter dispatch, target mutation, Kanban mutation, NAS save, VPS file changes, service restart, git push, credential access, and public exposure disabled. Committed/pushed/deployed at `a2576799` with dashboard service active and protected API smoke returning adapter dispatch false and target mutation false.
 
 ## Dispatcher authority completion review status lane
 
