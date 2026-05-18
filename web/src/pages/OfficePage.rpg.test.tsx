@@ -1820,6 +1820,69 @@ describe("DispatcherAuthorityMetadataRecordingDraftPanel", () => {
     expect(markup).not.toContain("<textarea");
     expect(markup).not.toMatch(/raw watcher cron|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-watcher|provider/i);
   });
+
+  it("renders runtime activation review status with all runtime paths still disabled", () => {
+    const RuntimeActivationReviewStatusPanel = (OfficePageModule as unknown as {
+      RuntimeActivationReviewStatusPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.RuntimeActivationReviewStatusPanel>>;
+    }).RuntimeActivationReviewStatusPanel;
+    const status = {
+      schema_version: 1,
+      mode: "runtime_activation_review_status" as const,
+      runtime_activation_review_complete: true,
+      source_watcher_cron_lane: "watcher_cron_contract_status",
+      next_manual_lane: "runtime_activation_still_disabled",
+      reviewed_activation_targets: ["watcher_daemon", "cron_job_activation", "adapter_dispatch", "target_mutation"],
+      activation_decisions: {
+        watcher_daemon: "disabled_requires_explicit_runtime_approval",
+        cron_job_activation: "disabled_requires_explicit_runtime_approval",
+        adapter_dispatch: "disabled_requires_explicit_runtime_approval",
+        target_mutation: "disabled_requires_explicit_runtime_approval",
+      },
+      forbidden_boundaries: ["runtime_activation", "vps_file_change", "service_restart", "git_push"],
+      capabilities: {
+        runtime_activation_review_readback_enabled: true,
+        watcher_daemon_enabled: false,
+        cron_enabled: false,
+        adapter_dispatch_enabled: false,
+        target_mutation_enabled: false,
+        kanban_mutation_enabled: false,
+        nas_save_enabled: false,
+        vps_file_change_enabled: false,
+        service_restart_enabled: false,
+        git_push_enabled: false,
+        credential_access_enabled: false,
+        public_exposure_enabled: false,
+      },
+      redaction: { raw_excluded: true },
+      errors: [],
+    };
+
+    const markup = renderToStaticMarkup(<RuntimeActivationReviewStatusPanel status={status} error={null} />);
+
+    expect(markup).toContain('data-office-runtime-activation-review-status="true"');
+    expect(markup).toContain('data-office-runtime-activation-review-status-complete="true"');
+    expect(markup).toContain('data-office-runtime-activation-review-status-readback-enabled="true"');
+    expect(markup).toContain('data-office-runtime-activation-review-status-watcher-enabled="false"');
+    expect(markup).toContain('data-office-runtime-activation-review-status-cron-enabled="false"');
+    expect(markup).toContain('data-office-runtime-activation-review-status-dispatch-enabled="false"');
+    expect(markup).toContain('data-office-runtime-activation-review-status-target-mutation-enabled="false"');
+    expect(markup).toContain('data-office-runtime-activation-review-status-kanban-mutation-enabled="false"');
+    expect(markup).toContain('data-office-runtime-activation-review-status-nas-save-enabled="false"');
+    expect(markup).toContain('data-office-runtime-activation-review-status-vps-file-change-enabled="false"');
+    expect(markup).toContain('data-office-runtime-activation-review-status-service-restart-enabled="false"');
+    expect(markup).toContain('data-office-runtime-activation-review-status-git-push-enabled="false"');
+    expect(markup).toContain('data-office-runtime-activation-review-status-credential-access-enabled="false"');
+    expect(markup).toContain('data-office-runtime-activation-review-status-public-exposure-enabled="false"');
+    expect(markup).toContain('data-office-runtime-activation-review-status-raw-excluded="true"');
+    expect(markup).toContain('data-office-runtime-activation-review-status-target="watcher_daemon"');
+    expect(markup).toContain('data-office-runtime-activation-review-status-forbidden-boundary="runtime_activation"');
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw runtime activation|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
+  });
 });
 
 

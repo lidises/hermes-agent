@@ -2002,6 +2002,70 @@ def build_office_controlled_mutation_watcher_cron_contract_status(
     }
 
 
+def build_office_controlled_mutation_runtime_activation_review_status(
+    *, unsafe_examples: Mapping[str, Any] | None = None
+) -> dict[str, object]:
+    """Review runtime activation posture while keeping every runtime path disabled."""
+
+    _ = unsafe_examples
+    return {
+        "schema_version": 1,
+        "mode": "runtime_activation_review_status",
+        "runtime_activation_review_complete": True,
+        "source_watcher_cron_lane": "watcher_cron_contract_status",
+        "next_manual_lane": "runtime_activation_still_disabled",
+        "reviewed_activation_targets": [
+            "watcher_daemon",
+            "cron_job_activation",
+            "adapter_dispatch",
+            "target_mutation",
+        ],
+        "activation_decisions": {
+            "watcher_daemon": "disabled_requires_explicit_runtime_approval",
+            "cron_job_activation": "disabled_requires_explicit_runtime_approval",
+            "adapter_dispatch": "disabled_requires_explicit_runtime_approval",
+            "target_mutation": "disabled_requires_explicit_runtime_approval",
+        },
+        "forbidden_boundaries": [
+            "runtime_activation",
+            "watcher_daemon",
+            "cron_job_activation",
+            "adapter_dispatch",
+            "target_mutation",
+            "kanban_mutation",
+            "nas_save",
+            "vps_file_change",
+            "service_restart",
+            "git_push",
+            "credential_access",
+            "public_exposure",
+        ],
+        "capabilities": {
+            "runtime_activation_review_readback_enabled": True,
+            "watcher_daemon_enabled": False,
+            "cron_enabled": False,
+            "adapter_dispatch_enabled": False,
+            "target_mutation_enabled": False,
+            "kanban_mutation_enabled": False,
+            "nas_save_enabled": False,
+            "vps_file_change_enabled": False,
+            "service_restart_enabled": False,
+            "git_push_enabled": False,
+            "credential_access_enabled": False,
+            "public_exposure_enabled": False,
+        },
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "opaque_refs_only": True,
+            "safe_summaries_only": True,
+            "unsupported_values_echoed": False,
+            "credentials_echoed": False,
+        },
+        "errors": [],
+    }
+
+
 def _dispatcher_authority_metadata_append_status_capabilities() -> dict[str, bool]:
     return {
         "metadata_append_readback_enabled": True,

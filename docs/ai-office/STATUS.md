@@ -1,6 +1,14 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 23:49 KST
+Last updated: 2026-05-19 00:21 KST
+
+## Runtime activation review status lane
+
+Implemented the shortest follow-up after `watcher_cron_contract_status`: a protected runtime activation review/readback lane that records the watcher/cron activation decision while keeping every runtime path disabled. Backend adds `build_office_controlled_mutation_runtime_activation_review_status(...)` plus protected GET `/api/office/controlled-mutation/runtime-activation-review-status`; frontend adds a typed API wrapper and display-only `/office` panel with stable `data-office-runtime-activation-review-status-*` hooks. It reviews watcher daemon, cron job activation, adapter dispatch, and target mutation as `disabled_requires_explicit_runtime_approval` and keeps Kanban mutation, NAS save, VPS file change, service restart, git push, credential access, and public exposure disabled.
+
+Verification 2026-05-19 00:21 KST: RED backend tests first failed for missing helper/route; RED frontend tests first failed for missing API wrapper/panel. GREEN focused backend runtime+watcher tests passed (`4 passed`), and focused frontend runtime API/panel tests passed (`2 passed`). Broader verification/deploy evidence should be appended after the final local regression/build and VPS smoke.
+
+Boundary: this is review/readback/UI only. It does not create, enable, schedule, or start watcher/cron automation; does not dispatch an adapter; does not mutate targets/Kanban/NAS/VPS files; does not restart services by itself; and does not add public exposure or VPS direct NAS mount/credential/write authority.
 
 ## Watcher / cron contract status lane
 

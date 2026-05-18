@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -4296,6 +4296,66 @@ export function WatcherCronContractStatusPanel({
 }
 
 
+export function RuntimeActivationReviewStatusPanel({
+  status,
+  error,
+}: {
+  status: OfficeRuntimeActivationReviewStatus | null;
+  error?: string | null;
+}) {
+  const caps = status?.capabilities ?? {};
+  return (
+    <section
+      className="border border-violet-300/20 bg-violet-950/10 p-4"
+      data-office-runtime-activation-review-status="true"
+      data-office-runtime-activation-review-status-complete={String(Boolean(status?.runtime_activation_review_complete))}
+      data-office-runtime-activation-review-status-readback-enabled={String(Boolean(caps.runtime_activation_review_readback_enabled))}
+      data-office-runtime-activation-review-status-watcher-enabled={String(Boolean(caps.watcher_daemon_enabled))}
+      data-office-runtime-activation-review-status-cron-enabled={String(Boolean(caps.cron_enabled))}
+      data-office-runtime-activation-review-status-dispatch-enabled={String(Boolean(caps.adapter_dispatch_enabled))}
+      data-office-runtime-activation-review-status-target-mutation-enabled={String(Boolean(caps.target_mutation_enabled))}
+      data-office-runtime-activation-review-status-kanban-mutation-enabled={String(Boolean(caps.kanban_mutation_enabled))}
+      data-office-runtime-activation-review-status-nas-save-enabled={String(Boolean(caps.nas_save_enabled))}
+      data-office-runtime-activation-review-status-vps-file-change-enabled={String(Boolean(caps.vps_file_change_enabled))}
+      data-office-runtime-activation-review-status-service-restart-enabled={String(Boolean(caps.service_restart_enabled))}
+      data-office-runtime-activation-review-status-git-push-enabled={String(Boolean(caps.git_push_enabled))}
+      data-office-runtime-activation-review-status-credential-access-enabled={String(Boolean(caps.credential_access_enabled))}
+      data-office-runtime-activation-review-status-public-exposure-enabled={String(Boolean(caps.public_exposure_enabled))}
+      data-office-runtime-activation-review-status-raw-excluded={String(Boolean(status?.redaction?.raw_excluded))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-violet-200/70">Runtime activation review status</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">activation reviewed · runtime still disabled</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Reviews the watcher/cron contract activation posture while keeping every runtime path off: no daemon, cron job, adapter dispatch, target mutation, Kanban mutation, NAS save, VPS file change, service restart, git push, credentials, or public exposure.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "readback request failed" : `next ${status?.next_manual_lane ?? "runtime_activation_still_disabled"}`}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-runtime-activation-review-status-targets="true">
+        {(status?.reviewed_activation_targets ?? []).map((target) => (
+          <div key={target} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-runtime-activation-review-status-target={target}>
+            <div className="font-semibold text-violet-100/80">{target}</div>
+            <div className="mt-1 text-midground/60">{status?.activation_decisions?.[target] ?? "disabled_requires_explicit_runtime_approval"}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-2" data-office-runtime-activation-review-status-forbidden-boundaries="true">
+        {(status?.forbidden_boundaries ?? []).map((boundary) => (
+          <div key={boundary} className="border border-red-300/20 bg-red-950/10 p-2 text-xs text-red-100/80" data-office-runtime-activation-review-status-forbidden-boundary={boundary}>{boundary}</div>
+        ))}
+      </div>
+      <div className="mt-3 border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+        source: {status?.source_watcher_cron_lane ?? "watcher_cron_contract_status"}
+      </div>
+    </section>
+  );
+}
+
+
 export function NasKeeperQueueManualEvidenceReviewSurfacePanel({
   surface,
   readback,
@@ -5513,6 +5573,8 @@ export default function OfficePage() {
   const [targetDispatchContractStatusError, setTargetDispatchContractStatusError] = useState<string | null>(null);
   const [watcherCronContractStatus, setWatcherCronContractStatus] = useState<OfficeWatcherCronContractStatus | null>(null);
   const [watcherCronContractStatusError, setWatcherCronContractStatusError] = useState<string | null>(null);
+  const [runtimeActivationReviewStatus, setRuntimeActivationReviewStatus] = useState<OfficeRuntimeActivationReviewStatus | null>(null);
+  const [runtimeActivationReviewStatusError, setRuntimeActivationReviewStatusError] = useState<string | null>(null);
   const [nasKeeperQueueReadbackLoading, setNasKeeperQueueReadbackLoading] = useState(false);
   const [nasKeeperQueueReadbackError, setNasKeeperQueueReadbackError] = useState<string | null>(null);
   const [nasKeeperExecutionDraft, setNasKeeperExecutionDraft] = useState<OfficeNasKeeperExecutionFromPreviewPayload>(DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT);
@@ -5855,6 +5917,20 @@ export default function OfficePage() {
         if (!cancelled) {
           setWatcherCronContractStatus(null);
           setWatcherCronContractStatusError("request failed");
+        }
+      });
+    api
+      .getOfficeControlledMutationRuntimeActivationReviewStatus()
+      .then((next) => {
+        if (!cancelled) {
+          setRuntimeActivationReviewStatus(next);
+          setRuntimeActivationReviewStatusError(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setRuntimeActivationReviewStatus(null);
+          setRuntimeActivationReviewStatusError("request failed");
         }
       });
     api
@@ -6440,6 +6516,7 @@ export default function OfficePage() {
       <DispatcherCompletionReviewStatusPanel status={dispatcherCompletionReviewStatus} error={dispatcherCompletionReviewStatusError} />
       <TargetDispatchContractStatusPanel status={targetDispatchContractStatus} error={targetDispatchContractStatusError} />
       <WatcherCronContractStatusPanel status={watcherCronContractStatus} error={watcherCronContractStatusError} />
+      <RuntimeActivationReviewStatusPanel status={runtimeActivationReviewStatus} error={runtimeActivationReviewStatusError} />
 
       <NasKeeperExecutionOperatorActionPanel
         action={nasKeeperExecutionOperatorAction}

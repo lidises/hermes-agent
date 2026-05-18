@@ -461,6 +461,46 @@ describe("fetchJSON", () => {
     expect(JSON.stringify(fetchMock.mock.calls[0]?.[1])).not.toMatch(/method|body|\/Users\/|\/home\/|token=|sk-|provider/i);
   });
 
+  it("gets runtime activation review status through the protected readback route", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        __HERMES_SESSION_TOKEN__: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        schema_version: 1,
+        mode: "runtime_activation_review_status",
+        runtime_activation_review_complete: true,
+        source_watcher_cron_lane: "watcher_cron_contract_status",
+        next_manual_lane: "runtime_activation_still_disabled",
+        reviewed_activation_targets: ["watcher_daemon", "cron_job_activation"],
+        activation_decisions: { watcher_daemon: "disabled_requires_explicit_runtime_approval" },
+        forbidden_boundaries: ["runtime_activation", "adapter_dispatch", "target_mutation"],
+        capabilities: { runtime_activation_review_readback_enabled: true, watcher_daemon_enabled: false, cron_enabled: false, adapter_dispatch_enabled: false, target_mutation_enabled: false },
+        redaction: { raw_excluded: true },
+        errors: [],
+      }),
+    } as Response);
+
+    const result = await api.getOfficeControlledMutationRuntimeActivationReviewStatus();
+
+    expect(result.mode).toBe("runtime_activation_review_status");
+    expect(result.runtime_activation_review_complete).toBe(true);
+    expect(result.capabilities.watcher_daemon_enabled).toBe(false);
+    expect(result.capabilities.cron_enabled).toBe(false);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/office/controlled-mutation/runtime-activation-review-status",
+      expect.objectContaining({ headers: expect.any(Headers) }),
+    );
+    const headers = fetchMock.mock.calls[0]?.[1]?.headers as Headers;
+    expect(headers.get("X-Hermes-Session-Token")).toBe("session-token-for-header-only");
+    expect(JSON.stringify(fetchMock.mock.calls[0]?.[1])).not.toMatch(/method|body|\/Users\/|\/home\/|token=|sk-|provider/i);
+  });
+
   it("posts safe NAS Keeper Mac relay write payload through the protected execution route", async () => {
     Object.defineProperty(globalThis, "window", {
       configurable: true,

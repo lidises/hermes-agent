@@ -319,6 +319,20 @@ export interface OfficeWatcherCronContractStatus {
   errors: Array<{ field: string; code: string }>;
 }
 
+export interface OfficeRuntimeActivationReviewStatus {
+  schema_version: number;
+  mode: "runtime_activation_review_status";
+  runtime_activation_review_complete: boolean;
+  source_watcher_cron_lane: string;
+  next_manual_lane: string;
+  reviewed_activation_targets: string[];
+  activation_decisions: Record<string, string>;
+  forbidden_boundaries: string[];
+  capabilities: Record<string, boolean>;
+  redaction: Record<string, boolean>;
+  errors: Array<{ field: string; code: string }>;
+}
+
 export interface OfficeDispatcherCompletionReviewStatusParams {
   limit?: number;
 }
@@ -488,6 +502,8 @@ export const api = {
     fetchJSON<OfficeTargetDispatchContractStatus>("/api/office/controlled-mutation/target-dispatch-contract-status"),
   getOfficeControlledMutationWatcherCronContractStatus: () =>
     fetchJSON<OfficeWatcherCronContractStatus>("/api/office/controlled-mutation/watcher-cron-contract-status"),
+  getOfficeControlledMutationRuntimeActivationReviewStatus: () =>
+    fetchJSON<OfficeRuntimeActivationReviewStatus>("/api/office/controlled-mutation/runtime-activation-review-status"),
   executeOfficeControlledMutationNasSingleFileWrite: (body: OfficeNasSingleFileWritePayload) =>
     fetchJSON<OfficeNasSingleFileWriteResult>("/api/office/controlled-mutation/nas-runtime/single-file-write", {
       method: "POST",
