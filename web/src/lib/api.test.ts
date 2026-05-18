@@ -201,4 +201,105 @@ describe("fetchJSON", () => {
     expect(headers.get("Content-Type")).toBe("application/json");
     expect(JSON.stringify(fetchMock.mock.calls[0]?.[1]?.body)).not.toMatch(/\/Users\/|\/home\/|token=|sk-/i);
   });
+
+  it("posts safe NAS Keeper execution-from-preview payload through the protected Mac relay bridge", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        __HERMES_SESSION_TOKEN__: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        executed: false,
+        written: false,
+        errors: [{ field: "mac_relay_root", code: "mac_relay_root_not_configured" }],
+        dto: null,
+      }),
+    } as Response);
+
+    const payload = {
+      handoff_ref: "handoff_ui_demo",
+      relay_execution_ref: "relay_exec_ui_demo",
+      nas_keeper_ref: "agent_nas_keeper",
+      relay_node_ref: "mac_relay_primary",
+      relay_authorized_by: "agent_nas_keeper",
+      relay_authorized_at: "2026-05-18T04:10:00Z",
+    };
+
+    const result = await api.executeOfficeControlledMutationNasKeeperExecutionFromPreview(payload);
+
+    expect(result.executed).toBe(false);
+    expect(result.errors[0]?.code).toBe("mac_relay_root_not_configured");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/office/controlled-mutation/nas-runtime/nas-keeper-execution-from-preview",
+      expect.objectContaining({ method: "POST", headers: expect.any(Headers), body: JSON.stringify(payload) }),
+    );
+    const headers = fetchMock.mock.calls[0]?.[1]?.headers as Headers;
+    expect(headers.get("X-Hermes-Session-Token")).toBe("session-token-for-header-only");
+    expect(headers.get("Content-Type")).toBe("application/json");
+    expect(JSON.stringify(fetchMock.mock.calls[0]?.[1]?.body)).not.toMatch(/markdown_body|\/Users\/|\/home\/|token=|sk-|provider/i);
+  });
+
+  it("posts safe NAS Keeper execution-state record payload through the protected queue mutation route", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        __HERMES_SESSION_TOKEN__: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        recorded: true,
+        errors: [],
+        dto: {
+          schema_version: 1,
+          mode: "nas_keeper_mac_relay_execution_state_recorded",
+          recorded: true,
+          handoff_ref: "handoff_ui_demo",
+          execution_record_ref: "exec_record_ui_demo",
+          relay_execution_ref: "relay_exec_ui_demo",
+          queue_ref: "queue_handoff_ui_demo",
+          queue_status_before: "authorized_for_mac_relay_execution",
+          queue_status_after: "mac_relay_execution_succeeded",
+          execution_status: "succeeded",
+          execution_safe_summary: "safe execution result recorded",
+          execution_evidence_refs: ["evidence_ui_demo"],
+          markdown_body_included: false,
+          capabilities: { queue_mutation_enabled: true, direct_vps_nas_write_enabled: false },
+          next_required_boundary: "none_terminal_execution_state_recorded",
+        },
+      }),
+    } as Response);
+
+    const payload = {
+      handoff_ref: "handoff_ui_demo",
+      execution_record_ref: "exec_record_ui_demo",
+      relay_execution_ref: "relay_exec_ui_demo",
+      nas_keeper_ref: "agent_nas_keeper",
+      relay_node_ref: "mac_relay_primary",
+      recorded_by: "agent_nas_keeper",
+      recorded_at: "2026-05-18T04:12:00Z",
+      execution_status: "succeeded" as const,
+      safe_summary: "safe execution result recorded",
+      evidence_refs: ["evidence_ui_demo"],
+    };
+
+    const result = await api.recordOfficeControlledMutationNasKeeperExecutionState(payload);
+
+    expect(result.recorded).toBe(true);
+    expect(result.dto?.markdown_body_included).toBe(false);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/office/controlled-mutation/nas-runtime/nas-keeper-execution-state",
+      expect.objectContaining({ method: "POST", headers: expect.any(Headers), body: JSON.stringify(payload) }),
+    );
+    const headers = fetchMock.mock.calls[0]?.[1]?.headers as Headers;
+    expect(headers.get("X-Hermes-Session-Token")).toBe("session-token-for-header-only");
+    expect(headers.get("Content-Type")).toBe("application/json");
+    expect(JSON.stringify(fetchMock.mock.calls[0]?.[1]?.body)).not.toMatch(/markdown_body|\/Users\/|\/home\/|token=|sk-|provider|Traceback/i);
+  });
 });

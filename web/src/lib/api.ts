@@ -169,6 +169,69 @@ export interface OfficeNasKeeperHandoffQueueReadbackParams {
   limit?: number;
 }
 
+export interface OfficeNasKeeperExecutionFromPreviewPayload {
+  handoff_ref: string;
+  relay_execution_ref: string;
+  nas_keeper_ref: string;
+  relay_node_ref: string;
+  relay_authorized_by: string;
+  relay_authorized_at: string;
+}
+
+export interface OfficeNasKeeperExecutionFromPreviewResult {
+  executed: boolean;
+  written: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: null | (OfficeNasMacRelayWriteResult["dto"] & {
+    mode: "nas_keeper_mac_relay_execution_from_preview_completed";
+    handoff_ref: string;
+    queue_ref: string;
+    queue_status: string;
+    authorization_ref: string;
+    previewed_payload_verified: true;
+    markdown_body_ref: string;
+    markdown_body_bytes: number;
+    markdown_body_sha256: string;
+    markdown_body_included: false;
+    execution_bridge_path: string[];
+  });
+}
+
+export interface OfficeNasKeeperExecutionStatePayload {
+  handoff_ref: string;
+  execution_record_ref: string;
+  relay_execution_ref: string;
+  nas_keeper_ref: string;
+  relay_node_ref: string;
+  recorded_by: string;
+  recorded_at: string;
+  execution_status: "succeeded" | "failed" | "manual_review_required";
+  safe_summary: string;
+  evidence_refs: string[];
+}
+
+export interface OfficeNasKeeperExecutionStateResult {
+  recorded: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: null | {
+    schema_version: number;
+    mode: "nas_keeper_mac_relay_execution_state_recorded";
+    recorded: true;
+    handoff_ref: string;
+    execution_record_ref: string;
+    relay_execution_ref: string;
+    queue_ref: string;
+    queue_status_before: string;
+    queue_status_after: string;
+    execution_status: string;
+    execution_safe_summary: string;
+    execution_evidence_refs: string[];
+    markdown_body_included: false;
+    capabilities: Record<string, boolean>;
+    next_required_boundary: string;
+  };
+}
+
 export async function fetchJSON<T>(url: string, init?: RequestInit): Promise<T> {
   // Inject the session token into all /api/ requests.
   const headers = new Headers(init?.headers);
@@ -221,6 +284,18 @@ export const api = {
     }),
   executeOfficeControlledMutationNasMacRelayWrite: (body: OfficeNasMacRelayWritePayload) =>
     fetchJSON<OfficeNasMacRelayWriteResult>("/api/office/controlled-mutation/nas-runtime/mac-relay-write-execute", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
+  executeOfficeControlledMutationNasKeeperExecutionFromPreview: (body: OfficeNasKeeperExecutionFromPreviewPayload) =>
+    fetchJSON<OfficeNasKeeperExecutionFromPreviewResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-execution-from-preview", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
+  recordOfficeControlledMutationNasKeeperExecutionState: (body: OfficeNasKeeperExecutionStatePayload) =>
+    fetchJSON<OfficeNasKeeperExecutionStateResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-execution-state", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),

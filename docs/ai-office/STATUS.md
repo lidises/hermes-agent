@@ -1,6 +1,12 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 13:01 KST
+Last updated: 2026-05-18 13:23 KST
+
+## NAS Keeper write-capable frontend API bridge typed locally
+
+Added the shortest next write-capable frontend bridge over the already-implemented protected NAS Keeper routes: typed API payload/result contracts and client methods for `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-execution-from-preview` and `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-execution-state`. This is API-client wiring only: it adds no browser panel/button/form/input, does not call either route during normal page load, does not execute a Mac relay write, does not record queue state by itself, does not mutate the queue during tests, does not start watcher/cron/daemon automation, does not bind dispatch/authority adapters, does not grant VPS NAS mount/credential/direct write authority, does not restart dashboard/gateway, and does not expose queued markdown bodies/raw paths/logs/provider IDs/tokens.
+
+Verification 2026-05-18 13:23 KST: focused frontend API regression `npm test -- --run src/lib/api.test.ts` -> `7 passed`; `npm run build` passed with the existing Vite large chunk warning only; backend focused route/helper regression `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_from_preview.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_state_record.py tests/hermes_cli/test_office_api.py -q -o 'addopts='` -> `18 passed`; `git diff --check` passed. Payload tests assert session token stays in the header, request bodies contain only safe refs/metadata, and no `markdown_body`, raw path, token-like, provider, or traceback fields are sent by the new wrappers.
 
 ## NAS Keeper queue manual-review UX polish implemented locally
 
