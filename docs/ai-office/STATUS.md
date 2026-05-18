@@ -1,12 +1,14 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 23:44 KST
+Last updated: 2026-05-18 23:49 KST
 
 ## Watcher / cron contract status lane
 
 Implemented the shortest follow-up after `target_dispatch_contract_status`: a protected scheduler-contract readback lane that documents the required watcher/cron envelope while keeping runtime automation disabled. Backend adds `build_office_controlled_mutation_watcher_cron_contract_status(...)` plus protected GET `/api/office/controlled-mutation/watcher-cron-contract-status`; frontend adds a typed API wrapper and display-only `/office` panel with stable `data-office-watcher-cron-contract-status-*` hooks. It reports scheduler options (`manual_poll`, `operator_trigger`, `disabled_cron_draft`), required safe fields, and forbidden boundaries while keeping watcher daemon, cron activation, adapter dispatch, target mutation, Kanban mutation, NAS save, VPS file changes, service restart, git push, credential access, and public exposure disabled.
 
 Verification 2026-05-18 23:44 KST: RED backend tests first failed for missing helper/route. GREEN backend watcher+target tests passed (`4 passed`), focused backend watcher+target+completion tests passed (`6 passed`), py_compile for changed backend modules passed, `git diff --check` passed, frontend API + Office RPG regression passed (`85 passed`), and `npm run build` passed with the existing Vite large chunk warning only.
+
+Deploy/smoke 2026-05-18 23:49 KST: committed and pushed `3e4dbbef` (`Add watcher cron contract status lane`) to `origin/main`; restricted VPS source worktree `/home/hermes/.hermes/hermes-agent` and dashboard worktree `/home/hermes/.hermes/ai-office-dashboard` were reset to `3e4dbbef`. Copied the locally built `hermes_cli/web_dist` fallback to both worktrees. Restarted only `hermes-agent-dashboard.service`; `hermes-gateway.service` remained active. VPS focused watcher+target backend tests passed (`4 passed`). Private `/office?watcher-cron-contract=3e4dbbef` returned HTTP 200, protected watcher/cron API returned `watcher_cron_contract_status True False False False False` for complete, watcher daemon, cron, adapter dispatch, and target mutation respectively.
 
 Boundary: this is contract/readback/UI only. It does not create, enable, or schedule a watcher/cron job; does not dispatch an adapter; does not mutate targets/Kanban/NAS/VPS files; does not restart services by itself; and does not add public exposure or VPS direct NAS mount/credential/write authority.
 
