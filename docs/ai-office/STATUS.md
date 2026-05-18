@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 14:05 KST
+Last updated: 2026-05-18 14:08 KST
 
 
 ## Guarded NAS Keeper execution operator UI implemented locally
@@ -9,7 +9,9 @@ Implemented the next shortest product slice after the real write smoke: `/office
 
 Verification 2026-05-18 14:05 KST: RED first failed on missing `buildOfficeNasKeeperExecutionOperatorAction`; GREEN focused panel test passed. Combined frontend regression `npm test -- --run src/pages/OfficePage.rpg.test.tsx src/pages/OfficePage.test.ts src/lib/api.test.ts` -> `217 passed`; frontend `npm run build` passed with the existing Vite large chunk warning only; backend focused execution/API regression `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_from_preview.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_state_record.py tests/hermes_cli/test_office_api.py -q -o 'addopts='` -> `18 passed`; `git diff --check` passed. Local dev-server browser smoke could not reach `/office` data because the standalone Vite server returned the expected backend-proxy `ERROR: 500: INTERNAL SERVER ERROR`, so UI verification for this slice is currently test/build-level only until deployed behind the Hermes dashboard backend.
 
-Boundary: local code only so far. No production queue item was executed, no NAS write was performed by the new UI, no execution state was recorded, no watcher/cron/dispatch/authority adapter was started, no VPS NAS mount/credential/direct-write authority was granted, and dashboard/gateway services were not restarted in this slice.
+Deploy/smoke 2026-05-18 14:08 KST: committed and pushed `0121defb feat(office): add guarded NAS Keeper execution UI` to `origin/main`; restricted VPS dashboard worktree `/home/hermes/.hermes/ai-office-dashboard` was reset to `0121defb`, locally verified built `hermes_cli/web_dist` was copied to the VPS, VPS focused backend execution/API regression passed (`18 passed`), and `hermes-agent-dashboard.service` only was restarted. Private `/office?operator-ui=0121defb` browser smoke found the execution operator panel hook, execution endpoint `/api/office/controlled-mutation/nas-runtime/nas-keeper-execution-from-preview`, state endpoint `/api/office/controlled-mutation/nas-runtime/nas-keeper-execution-state`, markdown-body projected `false`, VPS NAS authority `false`, watcher cron daemon `false`, queue panel present, scoped forms count 0, scoped console JS errors 0, and scoped raw leak false for `/home/hermes`, `/Users/lidises`, `markdown_body`, `provider_id`, token, Traceback, and `sk-`. Public IPv4 probe to port 8765 timed out with `http=000`; listener remains bound to Tailscale IP `100.122.57.85:8765`. Gateway service stayed active/untouched.
+
+Boundary: no production queue item was executed, no NAS write was performed by the new UI during deploy smoke, no execution state was recorded, no watcher/cron/dispatch/authority adapter was started, no VPS NAS mount/credential/direct-write authority was granted, and gateway was not restarted.
 
 ## NAS Keeper execution-from-preview real Mac NAS write smoke rerun
 
