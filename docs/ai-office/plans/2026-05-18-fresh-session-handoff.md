@@ -8,12 +8,12 @@ This handoff lets a later `/new` session restart from durable files and live rea
 
 - Local repo: `/Users/lidises/dev/hermes-agent`
 - Branch: `main`
-- Local HEAD: `e9825f29` (`docs(ai-office): record authority handoff deploy`)
-- `origin/main`: `e9825f29`
+- Local HEAD: `7ddc8ba9` (`docs(office): record dispatcher completion review deploy`)
+- `origin/main`: `7ddc8ba9`
 - Local git status before writing this handoff: clean (`## main...origin/main`)
 - Hermes CLI: `Hermes Agent v0.14.0 (2026.5.16)`, reported `Up to date`
 - Canonical VPS dashboard worktree: `/home/hermes/.hermes/ai-office-dashboard`
-- VPS dashboard HEAD: `e9825f29`
+- VPS dashboard HEAD: `7ddc8ba9`
 - VPS dashboard worktree status: clean
 - VPS services: `hermes-agent-dashboard.service=active`, `hermes-gateway.service=active`
 - VPS listeners: dashboard `100.122.57.85:8765`, gateway `100.122.57.85:8766`; both private/Tailscale-bound in the read-only listener check
@@ -48,10 +48,10 @@ AI Office has moved from a read-only RPG/control-room prototype into a guarded c
    - Multiple harmless Mac-local NAS smoke writes verified write/readback/audit/rollback behavior.
 
 5. Latest completed slice
-   - Commit `74342ce7` added the authority metadata handoff readback helper/API/UI panel.
-   - Commit `e9825f29` documented the deploy evidence.
-   - VPS dashboard worktree is synced to `e9825f29`; code slice `74342ce7` was browser-smoked with the verified `web_dist` fallback.
-   - Private `/office` authority handoff smoke passed in the previous completion report: HTTP 200, panel rendered, complete=true, counts 1/1/1/1/1, no forms/buttons/inputs, dispatch/binding/target mutation false, raw leak false, console JS errors 0.
+   - Commit `419f0be6` added the dispatcher authority completion-review helper/API/UI panel.
+   - Commit `7ddc8ba9` documented the completion-review deploy evidence in `STATUS.md` and `NEXT.md`.
+   - VPS dashboard worktree is synced to `7ddc8ba9`; code slice `419f0be6` was browser-smoked with the verified `web_dist` fallback.
+   - Private `/office?completion-review=419f0be6` smoke passed: HTTP 200, completion-review panel rendered, complete=true, readback=true, four completed-lane hooks, controls 0, execution/dispatch/target/NAS false, raw leak false, console JS errors 0.
 
 ## What is not done / still intentionally excluded
 
@@ -60,7 +60,7 @@ AI Office has moved from a read-only RPG/control-room prototype into a guarded c
 - No public dashboard exposure has been added.
 - No VPS direct NAS mount, NAS credentials, raw NAS read, or direct VPS NAS write authority has been added.
 - No durable production NAS Keeper queue item should be assumed executed; the real writes so far were bounded harmless Mac-local smoke notes or safe metadata checkpoints.
-- The latest authority metadata handoff panel is a manual status/readback lane only; it is not automation.
+- The latest dispatcher completion-review panel is a manual status/readback lane only; it is not automation.
 - The canonical `ai-office` Kanban board currently has no live ready/running work; if further work should persist across sessions, create new explicit cards rather than relying on old completed cards.
 
 ## Current best interpretation of progress percentage
@@ -71,7 +71,7 @@ AI Office has moved from a read-only RPG/control-room prototype into a guarded c
 - Automated AI Office operations/dispatcher authority: low, roughly 15–25%; the safety contracts and metadata lanes exist, but actual watcher/cron/dispatcher/authority binding remain excluded.
 - Public/multi-user production hardening: low; public exposure and broader operational authority have not been pursued.
 
-Practical summary: the project is past prototype for private/manual guarded operation, but not yet an autonomous dispatcher. The safest next framing is “manual status-note/authority handoff lane is complete; choose whether to harden observability or design a dry-run-only dispatcher surface.”
+Practical summary: the project is past prototype for private/manual guarded operation, but not yet an autonomous dispatcher. The dry-run-only dispatcher surface, metadata draft, append checkpoint, execution-simulation checkpoint, and completion-review readback are now complete; the safest next framing is “choose a new concrete product track before real adapter binding/dispatch, target mutation, watcher/cron automation, or production NAS writes.”
 
 ## Important docs to read next
 
@@ -87,7 +87,8 @@ For the latest lane, inspect code and tests around:
 
 - `hermes_cli/office_controlled_mutation.py`
 - `hermes_cli/web_server.py`
-- `tests/hermes_cli/test_office_controlled_mutation_authority_metadata_handoff.py`
+- `tests/hermes_cli/test_office_controlled_mutation_dispatcher_completion_review_status.py`
+- `tests/hermes_cli/test_office_controlled_mutation_dispatcher_execution_simulation_status.py`
 - `tests/hermes_cli/test_office_controlled_mutation_authority_registry_store.py`
 - `web/src/lib/api.ts`
 - `web/src/lib/api.test.ts`
@@ -125,15 +126,14 @@ Require explicit approval before:
    - Optionally commit/push this handoff and status update.
    - No code/service changes.
 
-2. Manual status-note/authority handoff polish
-   - Keep the latest authority metadata handoff lane manual/read-only.
-   - Improve operator wording, empty/error states, and observability copy.
-   - No dispatcher, no authority binding, no queue/NAS mutation.
+2. Completion-review polish only
+   - Keep the latest dispatcher completion-review lane manual/read-only.
+   - Improve operator wording, empty/error states, or observability copy.
+   - No real dispatcher execution, authority binding, target/NAS mutation, or daemon.
 
-3. Dry-run-only dispatcher/authority design surface
-   - Add a contract/helper/UI that describes what a dispatcher would do in dry-run form only.
-   - It must not dispatch, bind adapters, mutate targets, start daemons, or write NAS.
-   - This is the next logical step if moving toward automation while preserving boundaries.
+3. New concrete product track
+   - Pick the next explicit track before implementation: real authority-adapter binding design, target-dispatch contract, watcher/cron design, production NAS queue execution path, or further readback hardening.
+   - Keep real adapter binding/dispatch, target mutation, watcher/cron automation, public exposure, and VPS direct NAS mounts/credentials/write authority separately gated.
 
 ## Exact starter prompt for a new session
 
@@ -142,8 +142,8 @@ AI Office/Hermes 이어서 해줘. 먼저 스킬 `hermes-agent`와 `ai-office-vp
 
 - Handoff: /Users/lidises/dev/hermes-agent/docs/ai-office/plans/2026-05-18-fresh-session-handoff.md
 - Repo: /Users/lidises/dev/hermes-agent
-- Expected local/origin HEAD: e9825f29
-- Expected VPS dashboard worktree: /home/hermes/.hermes/ai-office-dashboard at e9825f29
+- Expected local/origin HEAD: 7ddc8ba9
+- Expected VPS dashboard worktree: /home/hermes/.hermes/ai-office-dashboard at 7ddc8ba9
 - Canonical VPS Kanban board: ai-office; last observed 74 done, 0 active/blocked
 
 먼저 Mac/VPS/WSL Hermes 상태를 read-only로 확인하고, 실제로 진행되지 않은 구상/카드/문서를 요약해줘. 구현/서비스 재시작/게이트웨이 재시작/VPS 파일 변경/WSL 변경/commit/push/Kanban mutation/NAS write는 내가 승인하기 전에는 하지 마.
@@ -157,4 +157,4 @@ AI Office/Hermes 이어서 해줘. 먼저 스킬 `hermes-agent`와 `ai-office-vp
 
 ## Note on this handoff file
 
-This file itself is newly created and not committed at creation time. A later session should decide whether to keep/commit it, update `NEXT.md`/`STATUS.md` to point here, or discard it.
+This handoff file is now tracked and should be treated as a durable fresh-session pointer. Its current expected HEAD values may still need a live read-only recheck after each follow-up commit.
