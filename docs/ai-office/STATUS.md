@@ -1,6 +1,14 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 21:46 KST
+Last updated: 2026-05-18 21:57 KST
+
+## Human-reviewed dispatcher execution simulation checkpoint
+
+After the user explicitly said actual writes are acceptable and to continue by the shortest path, wrote one bounded safe metadata-only dispatcher execution simulation checkpoint into the restricted VPS Hermes profile stores. Appended dry-run result `dryrun_20260518_1255_dispatcher_execution_simulation` and audit event `audit_20260518_1255_dispatcher_execution_simulation` for request `req_20260518_1255_dispatcher_execution_simulation` / correlation `corr_20260518_1255_dispatcher_execution_simulation`. Both returned `stored=true`; readback counts were dry-run=1 and audit=1 for that request, and the append-status protected API reports `append_checkpoint_complete=true` for the pair. Store files now have three lines each; SHA-256: `dry_run_results.jsonl` = `55464fccf858ea950026fc9682bcbc869ba448d76362f89f5312b9f91293ed02`, `audit_events.jsonl` = `93dc786cc984a328df28f3960e5fffc69cb10506868a2e72e1670da2e5725b07`.
+
+Verification 2026-05-18 21:57 KST: first append attempt failed closed with no write because evidence refs were malformed; corrected refs to safe opaque `kind:value` form and reran. VPS focused regression passed (`31 passed`). Protected API readback returned 401 unauthenticated and 200 authenticated for append-status, dry-run results, and audit filters; counts were 1/1, `dry_run_execution_enabled=false`, `target_mutation_enabled=false`, `nas_save_enabled=false`, and raw leak probes were false. Dashboard and gateway services stayed active; no service restart was performed. Listeners remain bound to Tailscale `100.122.57.85:8765/8766`; public IPv4 probes to 8765/8766 timed out with `http=000`.
+
+Boundary: this was a safe metadata checkpoint that records a human-reviewed dispatcher execution simulation as blocked. It did not bind an authority adapter, dispatch to an adapter, mutate a target, execute a real dry-run command, write NAS, start watcher/cron, mutate Kanban, expose public routes, restart dashboard/gateway, or grant VPS direct NAS mount/credential/write authority.
 
 ## Controlled-mutation dispatcher/authority metadata append status readback
 
