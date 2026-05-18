@@ -1,6 +1,12 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 17:02 KST
+Last updated: 2026-05-18 17:08 KST
+
+## VPS dashboard sync after inline browser smoke
+
+Commit `824459fc` (`fix(office): fail closed for unavailable NAS write targets`) was pushed to `origin/main`, then the restricted VPS dashboard worktree `/home/hermes/.hermes/ai-office-dashboard` was fast-forwarded to `origin/main` with an explicit main refspec and reset to `824459fc`. Restarted only `hermes-agent-dashboard.service`; `hermes-gateway.service` remained active and was not restarted. Private smoke on `http://100.122.57.85:8765/office?inline-smoke=824459fc` returned HTTP 200, listener bind stayed on `100.122.57.85:8765`, browser DOM showed AI Office content plus NAS Keeper operator/queue panels, forms count was 0, scoped raw Mac/VPS path, Traceback, token, and `markdown_body` leak probes were false, and browser console JS errors were 0.
+
+Boundary: this was a dashboard-worktree sync/restart only. No gateway restart, no public exposure, no watcher/cron/dispatch daemon, no direct VPS NAS mount/credential/write authority, and no production NAS queue execution were added.
 
 ## NAS Keeper inline execute-and-record browser operator smoke
 

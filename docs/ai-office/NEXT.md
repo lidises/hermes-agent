@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-18 17:02 KST
+Last updated: 2026-05-18 17:08 KST
 
 ## Start here after `/new`
 
@@ -73,6 +73,8 @@ When not to rely on `/goal` alone:
 The user approved A-G approval buckets for future AI Office work while excluding H public exposure changes and permanently excluding VPS NAS mounts/direct NAS credentials/VPS direct NAS raw reads. Use the prepared prompt and guardrails in `docs/ai-office/plans/2026-05-13-goal-a-g-approval-handoff.md` for the next `/goal` session. A-G are permission buckets, not standalone tasks: the next session must first identify the exact concrete task list from current NEXT/STATUS/evidence before implementing.
 
 ## Current next stage
+
+Immediate state 2026-05-18 17:08 KST: Commit `824459fc` has been pushed to `origin/main` and synced to the restricted VPS dashboard worktree `/home/hermes/.hermes/ai-office-dashboard`. Only `hermes-agent-dashboard.service` was restarted; `hermes-gateway.service` stayed active/untouched. Private `/office?inline-smoke=824459fc` smoke returned HTTP 200 on `100.122.57.85:8765`, browser DOM rendered AI Office plus NAS Keeper operator/queue panels, forms count was 0, scoped raw path/Traceback/token/markdown_body leak probes were false, and console JS errors were 0. Current next shortest step: either move to a dry-run-only dispatcher/authority design surface, or add more fail-closed DTO coverage around later write/readback/audit filesystem failures before any dispatcher/watch/automation work. Keep watcher/cron/dispatch daemon, authority-adapter binding, public exposure, gateway restart, and VPS direct NAS mounts/credentials/write authority excluded.
 
 Immediate state 2026-05-18 17:02 KST: The current one-call NAS Keeper execute+record path has now been verified through the real guarded `/office` browser operator flow in a Mac relay context. Using an isolated temporary `HERMES_HOME` queue and `HERMES_AI_OFFICE_MAC_RELAY_NAS_ROOT=/Users/lidises/nas`, the UI loaded an authorized handoff, prefilled safe refs, kept inline recording checked, required explicit execution approval, then executed+recorded one safe write to `Hermes::ai-office-inline-ui-browser-smoke-20260518.md`. Browser result: executed/written/readback/audit true and state recorded true with queue status `mac_relay_execution_succeeded`; final file SHA-256 `4b58839dc5e62c27861556346da86a71225d29ae09609be1050f89e0115d5b33`; operator/queue scoped raw-body/path/provider/token/Traceback leak false; console JS errors 0. During smoke, an intentionally mis-targeted unwritable vault surfaced a server-side `PermissionError`; code is now hardened to fail closed with safe `write_target_unavailable`, and focused regression passed (`25 passed`). Current next shortest step: move to a dry-run-only dispatcher/authority design surface or, if the user wants more runtime hardening first, add safe catch/DTO coverage for later write/readback/audit filesystem errors. Keep watcher/cron/dispatch daemon, authority-adapter binding, public exposure, and VPS direct NAS mounts/credentials/write authority excluded.
 
