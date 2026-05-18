@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-18 13:23 KST
+Last updated: 2026-05-18 13:27 KST
 
 ## Start here after `/new`
 
@@ -74,7 +74,7 @@ The user approved A-G approval buckets for future AI Office work while excluding
 
 ## Current next stage
 
-Immediate state 2026-05-18 13:23 KST: shortest next write-capable frontend API bridge is implemented locally on top of the already-existing protected NAS Keeper routes. `web/src/lib/api.ts` now has typed payload/result contracts and client methods for execution-from-preview and execution-state recording. This adds no `/office` button/panel/form/input and does not call either route during normal page load; it only makes the protected routes available to a later explicitly approved UI/operator slice. Verification passed: frontend API test `7 passed`, production build passed with the existing Vite large chunk warning only, focused backend execution-from-preview/execution-state/API regression `18 passed`, and `git diff --check` passed. The previous read-only queue-state readback and manual-review UX polish remain deployed/smoked at code commit `7a93c852`; this new local slice has not been VPS-deployed yet. Recommended next boundary: a separately approved guarded operator UI for execution-from-preview and/or execution-state recording, or stop here after commit/push. Do not start watcher/cron/dispatch automation, unprompted route calls, Mac relay execution, queue mutation from the browser, VPS NAS authority, public exposure, or gateway restart without separate approval.
+Immediate state 2026-05-18 13:27 KST: shortest next write-capable frontend API bridge is implemented, pushed, and dashboard-deployed on top of the already-existing protected NAS Keeper routes. `web/src/lib/api.ts` now has typed payload/result contracts and client methods for execution-from-preview and execution-state recording. This adds no `/office` button/panel/form/input and does not call either route during normal page load; it only makes the protected routes available to a later explicitly approved UI/operator slice. Verification passed: frontend API test `7 passed`, production build passed with the existing Vite large chunk warning only, focused backend execution-from-preview/execution-state/API regression `18 passed`, and `git diff --check` passed. Local commit `3cb39118` was pushed to `origin/main`; VPS dashboard worktree was reset to `3cb39118`, verified local `web_dist` fallback copied, VPS focused backend regression `18 passed`, `hermes-agent-dashboard.service` only restarted, private `/office?api-bridge=3cb39118` browser smoke passed with manual-review panel present, scoped controls 0, raw leak false, console errors 0, dashboard/gateway active, listener Tailscale-private, and public IPv4 port 8765 unreachable. Recommended next boundary: a separately approved guarded operator UI for execution-from-preview and/or execution-state recording, or stop here with clean state. Do not start watcher/cron/dispatch automation, unprompted route calls, Mac relay execution, queue mutation from the browser, VPS NAS authority, public exposure, or gateway restart without separate approval.
 
 Current umbrella project: `AI Office Unified Operating Workbench` / `AI Office 통합 운영실`.
 
