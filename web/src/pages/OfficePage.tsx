@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -3901,6 +3901,55 @@ export function AuthorityMetadataHandoffStatusPanel({
   );
 }
 
+export function DispatcherAuthorityDryRunSurfacePanel({
+  surface,
+  error,
+}: {
+  surface: OfficeDispatcherAuthorityDryRunSurface | null;
+  error?: string | null;
+}) {
+  const plan = surface?.dry_run_plan;
+  const caps = surface?.capabilities ?? {};
+  return (
+    <section
+      className="border border-sky-300/20 bg-sky-950/10 p-4"
+      data-office-dispatcher-authority-dry-run="true"
+      data-office-dispatcher-authority-dry-run-ready={String(Boolean(plan?.ready))}
+      data-office-dispatcher-authority-dry-run-dispatch-enabled={String(Boolean(caps.adapter_dispatch_enabled))}
+      data-office-dispatcher-authority-dry-run-binding-enabled={String(Boolean(caps.adapter_binding_enabled))}
+      data-office-dispatcher-authority-dry-run-target-mutation-enabled={String(Boolean(caps.target_mutation_enabled))}
+      data-office-dispatcher-authority-dry-run-nas-save-enabled={String(Boolean(caps.nas_save_enabled))}
+      data-office-dispatcher-authority-dry-run-daemon-enabled={String(Boolean(caps.watcher_daemon_enabled))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-200/70">Dispatcher authority dry-run</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">dispatcher / authority design surface</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Display-only plan for what the dispatcher would prepare. It never dispatches, binds adapters, mutates targets, starts daemons, or writes NAS from this panel.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? `readback ${error}` : `ready ${plan?.ready ? "true" : "false"}`}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 text-xs text-midground/70 md:grid-cols-3" data-office-dispatcher-authority-dry-run-plan="true">
+        <div className="border border-current/15 bg-black/20 p-2">plan: {plan?.plan_ref ?? "safe-plan unavailable"}</div>
+        <div className="border border-current/15 bg-black/20 p-2">request: {surface?.request_id ?? "safe-ref unavailable"}</div>
+        <div className="border border-current/15 bg-black/20 p-2">next: {plan?.next_boundary ?? "explicit_dispatcher_authority_execution_approval_required"}</div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-5" data-office-dispatcher-authority-dry-run-steps="true">
+        {(plan?.steps ?? []).map((step) => (
+          <div key={step.step_ref} className="border border-current/15 bg-black/20 p-3" data-office-dispatcher-authority-dry-run-step={step.step_ref}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">{step.step_ref}</div>
+            <div className="mt-1 text-xs text-midground/70">enabled {String(step.enabled)}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 
 export function NasKeeperQueueManualEvidenceReviewSurfacePanel({
   surface,
@@ -5105,6 +5154,8 @@ export default function OfficePage() {
   const [nasKeeperQueueReadback, setNasKeeperQueueReadback] = useState<OfficeNasKeeperHandoffQueueReadback | null>(null);
   const [authorityMetadataHandoff, setAuthorityMetadataHandoff] = useState<OfficeAuthorityMetadataHandoffStatus | null>(null);
   const [authorityMetadataHandoffError, setAuthorityMetadataHandoffError] = useState<string | null>(null);
+  const [dispatcherAuthorityDryRun, setDispatcherAuthorityDryRun] = useState<OfficeDispatcherAuthorityDryRunSurface | null>(null);
+  const [dispatcherAuthorityDryRunError, setDispatcherAuthorityDryRunError] = useState<string | null>(null);
   const [nasKeeperQueueReadbackLoading, setNasKeeperQueueReadbackLoading] = useState(false);
   const [nasKeeperQueueReadbackError, setNasKeeperQueueReadbackError] = useState<string | null>(null);
   const [nasKeeperExecutionDraft, setNasKeeperExecutionDraft] = useState<OfficeNasKeeperExecutionFromPreviewPayload>(DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT);
@@ -5334,6 +5385,24 @@ export default function OfficePage() {
         if (!cancelled) {
           setAuthorityMetadataHandoff(null);
           setAuthorityMetadataHandoffError("request failed");
+        }
+      });
+    api
+      .getOfficeControlledMutationDispatcherAuthorityDryRun({
+        request_id: "req_20260518_dispatcher_dryrun",
+        correlation_id: "corr_20260518_dispatcher_dryrun",
+        authority_ref: "authority_20260518_status_note",
+      })
+      .then((next) => {
+        if (!cancelled) {
+          setDispatcherAuthorityDryRun(next);
+          setDispatcherAuthorityDryRunError(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setDispatcherAuthorityDryRun(null);
+          setDispatcherAuthorityDryRunError("request failed");
         }
       });
     api
@@ -5907,6 +5976,8 @@ export default function OfficePage() {
       />
 
       <AuthorityMetadataHandoffStatusPanel status={authorityMetadataHandoff} error={authorityMetadataHandoffError} />
+
+      <DispatcherAuthorityDryRunSurfacePanel surface={dispatcherAuthorityDryRun} error={dispatcherAuthorityDryRunError} />
 
       <NasKeeperExecutionOperatorActionPanel
         action={nasKeeperExecutionOperatorAction}

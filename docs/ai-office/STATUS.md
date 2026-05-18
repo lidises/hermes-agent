@@ -1,6 +1,14 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 18:03 KST
+Last updated: 2026-05-18 19:11 KST
+
+## Controlled-mutation dispatcher/authority dry-run design surface
+
+Implementation in progress after explicit approval to continue with C. The slice adds a safe backend projection helper and protected GET `/api/office/controlled-mutation/dispatcher-authority-dry-run`, plus a typed frontend API wrapper and `/office` display-only panel. The panel shows a dry-run plan, safe request/authority refs, and step refs for the would-be dispatcher path, but all execution capabilities remain false: no adapter dispatch, no adapter binding, no target mutation, no NAS save, no watcher/cron daemon, no credential access, no public exposure, and no VPS direct NAS authority.
+
+Verification status 2026-05-18 19:11 KST: RED backend test first failed because the helper/route were missing; GREEN focused backend test now passes (`3 passed`). Focused backend regression for dispatcher dry-run plus authority metadata handoff passed (`6 passed`). Focused frontend API + Office RPG panel regression passed (`73 passed`). `py_compile` for the changed backend modules passed, `git diff --check` passed, `npm run lint` passed with 23 existing warnings and 0 errors, and `npm run build` passed with the existing Vite large chunk warning only. Safety scan showed production hits only for existing sanitizer literals (`sk-`, `Traceback`); intentional unsafe sentinel strings are confined to tests.
+
+Boundary: this is a design/display dry-run surface. It does not start an actual dispatcher, execute dry-run actions, append dry-run result/audit metadata, bind an authority adapter, mutate a target, write NAS, restart services, mutate Kanban, or change VPS files by itself.
 
 ## Controlled-mutation authority metadata handoff readback lane
 

@@ -57,6 +57,7 @@ from hermes_cli.office_controlled_mutation import (
     append_office_controlled_mutation_nas_path_resolution_preview_event,
     append_office_controlled_mutation_request_event,
     build_office_controlled_mutation_authority_metadata_handoff_status,
+    build_office_controlled_mutation_dispatcher_authority_dry_run_surface,
     build_office_controlled_mutation_contract_schema,
     execute_office_controlled_mutation_nas_single_file_write,
     execute_office_controlled_mutation_nas_mac_relay_write,
@@ -926,6 +927,20 @@ async def get_office_controlled_mutation_authority_metadata_handoff(
         request_id=request_id,
         correlation_id=correlation_id,
         limit=limit,
+    )
+
+
+@app.get("/api/office/controlled-mutation/dispatcher-authority-dry-run")
+async def get_office_controlled_mutation_dispatcher_authority_dry_run(
+    request_id: str | None = None,
+    correlation_id: str | None = None,
+    authority_ref: str | None = None,
+):
+    """Project a non-executing dispatcher/authority dry-run design surface."""
+    return build_office_controlled_mutation_dispatcher_authority_dry_run_surface(
+        request_id=request_id,
+        correlation_id=correlation_id,
+        authority_ref=authority_ref,
     )
 
 

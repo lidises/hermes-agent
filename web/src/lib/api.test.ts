@@ -174,6 +174,39 @@ describe("fetchJSON", () => {
     expect(JSON.stringify(fetchMock.mock.calls[0]?.[1])).not.toMatch(/method|body|\/Users\/|\/home\/|token=|sk-|raw markdown body/i);
   });
 
+  it("reads the dispatcher authority dry-run surface through the protected display route", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        __HERMES_SESSION_TOKEN__: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        schema_version: 1,
+        mode: "dispatcher_authority_dry_run_surface",
+        request_id: "req_20260518_dispatcher_dryrun",
+        dry_run_plan: { ready: true, would_dispatch: false, would_bind_authority_adapter: false, would_mutate_target: false, steps: [] },
+        capabilities: { dry_run_design_surface_enabled: true, adapter_dispatch_enabled: false },
+        errors: [],
+      }),
+    } as Response);
+
+    const result = await api.getOfficeControlledMutationDispatcherAuthorityDryRun({ request_id: "req_20260518_dispatcher_dryrun", authority_ref: "authority_20260518_status_note" });
+
+    expect(result.mode).toBe("dispatcher_authority_dry_run_surface");
+    expect(result.dry_run_plan.would_dispatch).toBe(false);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/office/controlled-mutation/dispatcher-authority-dry-run?request_id=req_20260518_dispatcher_dryrun&authority_ref=authority_20260518_status_note",
+      expect.objectContaining({ headers: expect.any(Headers) }),
+    );
+    const headers = fetchMock.mock.calls[0]?.[1]?.headers as Headers;
+    expect(headers.get("X-Hermes-Session-Token")).toBe("session-token-for-header-only");
+    expect(JSON.stringify(fetchMock.mock.calls[0]?.[1])).not.toMatch(/method|body|\/Users\/|\/home\/|token=|sk-|raw markdown body|provider/i);
+  });
+
   it("posts safe NAS Keeper Mac relay write payload through the protected execution route", async () => {
     Object.defineProperty(globalThis, "window", {
       configurable: true,

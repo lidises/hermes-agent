@@ -1460,6 +1460,113 @@ def _authority_metadata_handoff_capabilities() -> dict[str, bool]:
     }
 
 
+def build_office_controlled_mutation_dispatcher_authority_dry_run_surface(
+    *,
+    request_id: str | None = None,
+    correlation_id: str | None = None,
+    authority_ref: str | None = None,
+    unsafe_examples: Mapping[str, Any] | None = None,
+) -> dict[str, object]:
+    """Describe a future dispatcher/authority path as a non-executing dry-run surface."""
+
+    _ = unsafe_examples
+    errors: list[dict[str, str]] = []
+    safe_request_id: str | None = None
+    safe_correlation_id: str | None = None
+    safe_authority_ref: str | None = None
+    if request_id is not None:
+        if _is_opaque_id(request_id):
+            safe_request_id = request_id
+        else:
+            errors.append(_error("request_id", "invalid_opaque_id"))
+    if correlation_id is not None:
+        if _is_opaque_id(correlation_id):
+            safe_correlation_id = correlation_id
+        else:
+            errors.append(_error("correlation_id", "invalid_opaque_id"))
+    if authority_ref is not None:
+        if _is_opaque_id(authority_ref):
+            safe_authority_ref = authority_ref
+        else:
+            errors.append(_error("authority_ref", "invalid_opaque_id"))
+    errors = sorted(errors, key=lambda item: (item["field"], item["code"]))
+    plan_ref = f"plan_{safe_request_id}" if safe_request_id else "plan_dispatcher_authority_dry_run"
+    response: dict[str, object] = {
+        "schema_version": 1,
+        "mode": "dispatcher_authority_dry_run_surface",
+        "dry_run_plan": {
+            "plan_ref": plan_ref,
+            "ready": not errors,
+            "would_dispatch": False,
+            "would_bind_authority_adapter": False,
+            "would_mutate_target": False,
+            "would_write_nas": False,
+            "would_start_daemon": False,
+            "would_record_audit": False,
+            "next_boundary": "explicit_dispatcher_authority_execution_approval_required",
+            "steps": [
+                {
+                    "step_ref": "read_authority_metadata_checkpoint",
+                    "label": "Read the existing safe metadata checkpoint.",
+                    "enabled": True,
+                },
+                {
+                    "step_ref": "select_safe_authority_candidate",
+                    "label": "Select a metadata-only authority candidate.",
+                    "enabled": True,
+                },
+                {
+                    "step_ref": "prepare_simulated_dispatch_envelope",
+                    "label": "Prepare a simulated dispatch envelope without sending it.",
+                    "enabled": True,
+                },
+                {
+                    "step_ref": "record_manual_dry_run_result_only_after_separate_approval",
+                    "label": "Record dry-run metadata only if a separate store-write approval is given.",
+                    "enabled": False,
+                },
+                {
+                    "step_ref": "stop_before_execution_boundary",
+                    "label": "Stop before dispatcher execution, adapter binding, or target mutation.",
+                    "enabled": True,
+                },
+            ],
+        },
+        "capabilities": _dispatcher_authority_dry_run_capabilities(),
+        "redaction": dict(_REDACTION_POSTURE),
+        "errors": errors,
+    }
+    if safe_request_id is not None:
+        response["request_id"] = safe_request_id
+    if safe_correlation_id is not None:
+        response["correlation_id"] = safe_correlation_id
+    if safe_authority_ref is not None:
+        response["authority_ref"] = safe_authority_ref
+    return response
+
+
+def _dispatcher_authority_dry_run_capabilities() -> dict[str, bool]:
+    return {
+        "dry_run_design_surface_enabled": True,
+        "metadata_readback_enabled": True,
+        "simulated_dispatch_envelope_enabled": True,
+        "manual_approval_boundary_visible": True,
+        "adapter_implementation_enabled": False,
+        "adapter_binding_enabled": False,
+        "adapter_dispatch_enabled": False,
+        "credential_access_enabled": False,
+        "target_mutation_enabled": False,
+        "dry_run_execution_enabled": False,
+        "dry_run_result_storage_enabled": False,
+        "audit_write_enabled": False,
+        "nas_save_enabled": False,
+        "watcher_daemon_enabled": False,
+        "cron_enabled": False,
+        "vps_direct_nas_authority_enabled": False,
+        "public_exposure_enabled": False,
+    }
+
+
 def _safe_count(value: object) -> int:
     return value if isinstance(value, int) else 0
 

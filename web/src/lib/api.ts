@@ -188,6 +188,34 @@ export interface OfficeAuthorityMetadataHandoffParams {
   limit?: number;
 }
 
+export interface OfficeDispatcherAuthorityDryRunSurface {
+  schema_version: number;
+  mode: "dispatcher_authority_dry_run_surface";
+  request_id?: string;
+  correlation_id?: string;
+  authority_ref?: string;
+  dry_run_plan: {
+    plan_ref: string;
+    ready: boolean;
+    would_dispatch: false;
+    would_bind_authority_adapter: false;
+    would_mutate_target: false;
+    would_write_nas: false;
+    would_start_daemon: false;
+    would_record_audit: false;
+    next_boundary: string;
+    steps: Array<{ step_ref: string; label: string; enabled: boolean }>;
+  };
+  capabilities: Record<string, boolean>;
+  errors: Array<{ field: string; code: string }>;
+}
+
+export interface OfficeDispatcherAuthorityDryRunParams {
+  request_id?: string;
+  correlation_id?: string;
+  authority_ref?: string;
+}
+
 export interface OfficeNasKeeperExecutionFromPreviewPayload {
   handoff_ref: string;
   relay_execution_ref: string;
@@ -309,6 +337,14 @@ export const api = {
     if (params.limit !== undefined) qs.set("limit", String(params.limit));
     const suffix = qs.toString() ? `?${qs.toString()}` : "";
     return fetchJSON<OfficeAuthorityMetadataHandoffStatus>(`/api/office/controlled-mutation/authority-metadata-handoff${suffix}`);
+  },
+  getOfficeControlledMutationDispatcherAuthorityDryRun: (params: OfficeDispatcherAuthorityDryRunParams = {}) => {
+    const qs = new URLSearchParams();
+    if (params.request_id) qs.set("request_id", params.request_id);
+    if (params.correlation_id) qs.set("correlation_id", params.correlation_id);
+    if (params.authority_ref) qs.set("authority_ref", params.authority_ref);
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+    return fetchJSON<OfficeDispatcherAuthorityDryRunSurface>(`/api/office/controlled-mutation/dispatcher-authority-dry-run${suffix}`);
   },
   executeOfficeControlledMutationNasSingleFileWrite: (body: OfficeNasSingleFileWritePayload) =>
     fetchJSON<OfficeNasSingleFileWriteResult>("/api/office/controlled-mutation/nas-runtime/single-file-write", {
