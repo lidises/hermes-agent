@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 12:35 KST
+Last updated: 2026-05-18 12:49 KST
 
 ## AI Office 통합 운영실 umbrella summary
 
@@ -26,7 +26,7 @@ Phase 0 consolidation docs:
 
 Added the `/office` manual review surface for the already-safe NAS Keeper Mac relay handoff queue readback. Frontend API wrapper `listOfficeNasKeeperHandoffQueue(...)` calls the protected read-only queue route, and the new Office panel lists only safe handoff refs/statuses, relay/NAS Keeper refs, manual-review evidence refs, byte counts, and safe capability flags. The panel is display-only: no forms, no execute/retry/approve/dispatch controls, no queue mutation, no Mac relay execution, no NAS read/write, no watcher/cron/daemon automation, no authority-adapter binding, no VPS NAS mount/credential/direct write authority, no dashboard/gateway restart, and no queued markdown body/raw path/log/provider/token echo.
 
-Verification 2026-05-18 12:35 KST: focused frontend tests passed for `api.test.ts`, `OfficePage.rpg.test.tsx`, and targeted `OfficePage.test.ts` queue readback coverage; `npm run build` passed with the existing Vite large chunk warning only. Backend readback verification from the prior slice remains `46 passed`, with `py_compile`, `git diff --check`, added-line safety scan, and independent review passing. Local commit: `9a4d30d9 feat(office): show NAS Keeper queue readback`; branch `main` is ahead of `origin/main` by one commit before push.
+Verification 2026-05-18 12:35 KST: focused frontend tests passed for `api.test.ts`, `OfficePage.rpg.test.tsx`, and targeted `OfficePage.test.ts` queue readback coverage; `npm run build` passed with the existing Vite large chunk warning only. Backend readback verification from the prior slice remains `46 passed`, with `py_compile`, `git diff --check`, added-line safety scan, and independent review passing. Local commits: `9a4d30d9 feat(office): show NAS Keeper queue readback` and `bb41bbb4 docs(office): update queue readback handoff`; branch `main` was pushed to `origin/main`. VPS deploy/smoke 2026-05-18 12:49 KST: after Mac and VPS Hermes updates, the Mac gateway was stopped again to avoid Telegram polling conflicts; the VPS dashboard worktree was fast-forwarded to `bb41bbb4`, rebuilt with the existing Vite large chunk warning only, and `hermes-agent-dashboard.service` was restarted. VPS focused backend queue/API tests passed (`15 passed`), targeted frontend API test passed, private `/office?queue-readback=bb41bbb4` browser smoke found `data-office-nas-keeper-queue-manual-review="true"`, endpoint `/api/office/controlled-mutation/nas-runtime/nas-keeper-handoff-queue`, enabled controls/forms count 0, console JS errors 0, and no `/home/hermes`, `/Users/lidises`, token, `markdown_body`, or `provider_id` body leak. Public IPv4 probe to port 8765 returned `http=000` timeout; listener stayed bound to Tailscale IP `100.122.57.85:8765`. VPS gateway stayed active; dashboard restart only.
 
 ## NAS Keeper Mac relay queue readback implemented locally
 
