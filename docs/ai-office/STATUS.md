@@ -1,7 +1,14 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 14:54 KST
+Last updated: 2026-05-18 15:16 KST
 
+## 2026-05-18 VPS deploy/update continuation
+
+After the user approved continuing by the shortest path and confirmed real writes are acceptable, verified the Telegram-origin AI Office Kanban request graph on the canonical VPS `ai-office` board is already complete (`74 done`, `0 ready/running/blocked`) and that the real Mac NAS execution-from-preview smoke artifact exists with final SHA-256 `64eb59e85140b6708b5c5cc507c892d3db6cef53d2c34a1667918ee4d1537d63`. Updated Hermes on both Mac install checkout and the restricted VPS checkout to current upstream `9b91377be`; backup branches/snapshots were created before update. The VPS update restarted `hermes-gateway.service` through the updater and the gateway is active afterward.
+
+Deployed the current AI Office dashboard handoff commit `00f63496` to the restricted VPS dashboard worktree `/home/hermes/.hermes/ai-office-dashboard`, copied the locally verified `hermes_cli/web_dist` fallback because the restricted VPS lacks frontend toolchain access, and restarted only `hermes-agent-dashboard.service`. Verification: local focused prefill test passed, local `npm run build` passed with existing Vite large chunk warning only, copied `web_dist` tree SHA-256 `2ad4969ae0eea3ebed94cc47f266687bcd4957e24084a8b608de9a601d197a0f`, VPS dashboard and gateway services are active, `/office?prefill-deploy=00f63496` renders HTTP 200, browser smoke loaded fresh asset `index-DA2arxx2.js`, found authorized queue prefill buttons, clicked a safe prefill item, verified execution-panel safe refs were populated while execution approval checkboxes stayed unchecked, console JS errors were 0, and raw/body/path/token/Traceback leak sentinel was false. Listener remains private on the Tailscale address for dashboard port 8765; public IPv4 probes to 8765/8766 returned `http=000` timeouts.
+
+Boundary: no new durable production queue item was executed during this deploy smoke, no new NAS write was performed beyond verifying the already-completed smoke artifact, no direct VPS NAS mount/credential/write authority was added, no watcher/cron/dispatch daemon or authority adapter was started, and no public exposure was added.
 
 ## Guarded NAS Keeper queue-to-execution safe prefill affordance
 
