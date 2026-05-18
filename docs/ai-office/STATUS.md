@@ -1,6 +1,14 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 17:21 KST
+Last updated: 2026-05-18 17:32 KST
+
+## VPS controlled-mutation safe metadata write checkpoint
+
+After the user approved continuing by the shortest path and said actual writes are acceptable, wrote one safe metadata-only controlled-mutation checkpoint into the restricted VPS Hermes profile store. The write recorded a coherent request/decision/dry-run-result/audit/authority-registry chain for `req_20260518_1727_authority_metadata` / `corr_20260518_1727_authority_metadata` under `/home/hermes/.hermes/office/controlled-mutation/`. All five append helpers returned `stored=true`; readback counts were request=1, decision=1, dry_run_result=1, audit=1, registry=1. Capability readback stayed blocked for dispatch, credential access, target mutation, dry-run execution, and NAS save.
+
+Verification 2026-05-18 17:32 KST: VPS focused regression for request/decision/dry-run-result/audit/authority registry stores passed (`54 passed`); `py_compile` and `git diff --check` passed. Store-file readback showed one line in each JSONL file with raw-leak probes false for Mac/VPS paths, Traceback, raw prompt/task markers, `markdown_body`, private provider strings, and token-like sentinel content; file SHA-256 values were recorded locally in command output. Dashboard and gateway services were active; gateway was not restarted. Private `/office?authority-metadata=3d5673bf` returned HTTP 200 on `100.122.57.85:8765`; browser DOM rendered AI Office plus NAS Keeper operator/queue panels, forms count was 0, raw path/Traceback/token/provider/prompt/task leak probes were false, and browser console JS errors were 0. The visible `MARKDOWN_BODY` text is the existing operator field label, not leaked stored metadata.
+
+Boundary: actual writes were limited to safe metadata JSONL append files in the restricted VPS Hermes profile. No NAS write was performed, no durable production NAS queue item was executed, no watcher/cron/dispatch daemon or authority adapter binding was started, no VPS direct NAS mount/credential/write authority was added, no public exposure was added, and neither dashboard nor gateway was restarted for this checkpoint.
 
 ## NAS Keeper Mac relay fail-closed filesystem hardening
 
