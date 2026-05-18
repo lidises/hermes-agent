@@ -105,6 +105,70 @@ export interface OfficeNasMacRelayWriteResult {
   };
 }
 
+export interface OfficeNasKeeperHandoffQueueItemSummary {
+  schema_version: number;
+  mode: string;
+  handoff_ref: string;
+  queue_ref: string;
+  queue_status: string;
+  relay_request_ref: string;
+  write_ref: string;
+  package_ref: string;
+  target_vault_ref: string;
+  safe_slug: string;
+  safe_title: string;
+  requested_by: string;
+  requested_at: string;
+  nas_keeper_ref: string;
+  relay_node_ref: string;
+  safe_logical_path: string;
+  safe_display_path: string;
+  payload_bytes: number;
+  markdown_body_included: false;
+  next_required_boundary: string;
+  queued_by?: string;
+  queued_at?: string;
+  authorization_ref?: string;
+  authorization_decision?: string;
+  authorized_by?: string;
+  authorized_at?: string;
+  relay_execution_ref?: string;
+  execution_record_ref?: string;
+  execution_status?: string;
+  execution_recorded_by?: string;
+  execution_recorded_at?: string;
+  execution_safe_summary?: string;
+  execution_evidence_refs?: string[];
+}
+
+export interface OfficeNasKeeperHandoffQueueReadback {
+  listed: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: null | {
+    schema_version: number;
+    mode: string;
+    listed: true;
+    queue_storage_ref: string;
+    filters: Record<string, string | number>;
+    effective_limit: number;
+    available_count: number;
+    count: number;
+    skipped_count: number;
+    items: OfficeNasKeeperHandoffQueueItemSummary[];
+    markdown_body_included: false;
+    capabilities: Record<string, boolean>;
+    next_required_boundary: string;
+  };
+}
+
+export interface OfficeNasKeeperHandoffQueueReadbackParams {
+  handoff_ref?: string;
+  queue_status?: string;
+  relay_node_ref?: string;
+  nas_keeper_ref?: string;
+  limit?: number;
+}
+
 export async function fetchJSON<T>(url: string, init?: RequestInit): Promise<T> {
   // Inject the session token into all /api/ requests.
   const headers = new Headers(init?.headers);
@@ -139,6 +203,16 @@ export const api = {
   getStatus: () => fetchJSON<StatusResponse>("/api/status"),
   getOfficeState: () => fetchJSON<OfficeState>("/api/office/state"),
   getOfficeEvents: () => fetchJSON<OfficeSafeEventsResponse>("/api/office/events"),
+  getOfficeControlledMutationNasKeeperHandoffQueue: (params: OfficeNasKeeperHandoffQueueReadbackParams = {}) => {
+    const qs = new URLSearchParams();
+    if (params.handoff_ref) qs.set("handoff_ref", params.handoff_ref);
+    if (params.queue_status) qs.set("queue_status", params.queue_status);
+    if (params.relay_node_ref) qs.set("relay_node_ref", params.relay_node_ref);
+    if (params.nas_keeper_ref) qs.set("nas_keeper_ref", params.nas_keeper_ref);
+    if (params.limit !== undefined) qs.set("limit", String(params.limit));
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+    return fetchJSON<OfficeNasKeeperHandoffQueueReadback>(`/api/office/controlled-mutation/nas-runtime/nas-keeper-handoff-queue${suffix}`);
+  },
   executeOfficeControlledMutationNasSingleFileWrite: (body: OfficeNasSingleFileWritePayload) =>
     fetchJSON<OfficeNasSingleFileWriteResult>("/api/office/controlled-mutation/nas-runtime/single-file-write", {
       method: "POST",

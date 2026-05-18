@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeDataSource, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeDataSource, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -3664,7 +3664,18 @@ export function NasRuntimeSingleFileWriteApprovalActionPanel({
   );
 }
 
-export function NasKeeperQueueManualEvidenceReviewSurfacePanel({ surface }: { surface: OfficeNasKeeperQueueManualEvidenceReviewSurface }) {
+export function NasKeeperQueueManualEvidenceReviewSurfacePanel({
+  surface,
+  readback,
+  loading = false,
+  error = null,
+}: {
+  surface: OfficeNasKeeperQueueManualEvidenceReviewSurface;
+  readback?: OfficeNasKeeperHandoffQueueReadback | null;
+  loading?: boolean;
+  error?: string | null;
+}) {
+  const dto = readback?.dto ?? null;
   return (
     <Card
       data-office-nas-keeper-queue-manual-review="true"
@@ -3682,6 +3693,10 @@ export function NasKeeperQueueManualEvidenceReviewSurfacePanel({ surface }: { su
       data-office-nas-keeper-queue-manual-review-vps-nas-authority-enabled={String(surface.vpsNasAuthorityEnabled)}
       data-office-nas-keeper-queue-manual-review-nas-write-enabled={String(surface.nasWriteEnabled)}
       data-office-nas-keeper-queue-manual-review-markdown-body-projected={String(surface.markdownBodyProjected)}
+      data-office-nas-keeper-queue-manual-review-readback-loading={String(loading)}
+      data-office-nas-keeper-queue-manual-review-readback-listed={String(readback?.listed ?? false)}
+      data-office-nas-keeper-queue-manual-review-readback-count={dto?.count ?? 0}
+      data-office-nas-keeper-queue-manual-review-readback-skipped-count={dto?.skipped_count ?? 0}
       data-office-nas-keeper-queue-manual-review-raw-excluded={String(surface.rawExcluded)}
     >
       <CardHeader>
@@ -3710,6 +3725,36 @@ export function NasKeeperQueueManualEvidenceReviewSurfacePanel({ surface }: { su
                 <div className="mt-2 leading-5">{card.summary}</div>
               </div>
             ))}
+          </div>
+          <div className="border border-cyan-300/20 bg-cyan-950/10 p-3" data-office-nas-keeper-queue-manual-review-readback="true">
+            <div className="font-semibold text-cyan-100">queue readback result</div>
+            <div className="mt-1 leading-5">
+              {loading ? "loading safe queue summaries" : error ? "queue readback unavailable" : dto ? `items ${dto.count}/${dto.available_count} · skipped unsafe ${dto.skipped_count} · limit ${dto.effective_limit}` : "no queue readback loaded yet"}
+            </div>
+            {error ? <div className="mt-1 text-amber-100" data-office-nas-keeper-queue-manual-review-readback-error="true">request failed</div> : null}
+            {dto ? (
+              <>
+                <div className="mt-1 font-mono text-[10px] text-cyan-100/70">{dto.queue_storage_ref} · next {dto.next_required_boundary}</div>
+                <div className="mt-2 grid gap-2 md:grid-cols-2">
+                  {dto.items.slice(0, 6).map((item) => (
+                    <div
+                      key={item.handoff_ref}
+                      className="border border-current/15 bg-black/15 p-2"
+                      data-office-nas-keeper-queue-manual-review-readback-item={item.handoff_ref}
+                      data-office-nas-keeper-queue-manual-review-readback-item-status={item.queue_status}
+                      data-office-nas-keeper-queue-manual-review-readback-item-markdown-body-included={String(item.markdown_body_included)}
+                    >
+                      <div className="font-semibold text-foreground">{item.safe_title}</div>
+                      <div className="mt-1 font-mono text-[10px] text-midground/60">{item.handoff_ref} · {item.queue_status}</div>
+                      <div className="mt-1 text-midground/70">{item.safe_display_path}</div>
+                      <div className="mt-1 text-midground/60">payload {item.payload_bytes} bytes · relay {item.relay_node_ref}</div>
+                      {item.execution_status ? <div className="mt-1 text-cyan-100/80">execution {item.execution_status}</div> : null}
+                      {item.execution_evidence_refs?.length ? <div className="mt-1 text-cyan-100/80">evidence refs {item.execution_evidence_refs.length}</div> : null}
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : null}
           </div>
           <div className="border border-dashed border-current/15 p-3 text-midground/60" data-office-nas-keeper-queue-manual-review-boundary="true">
             source {surface.sourceDetailKind} · cards {surface.reviewCardCount} · controls {surface.enabledControls} · browser fetch {String(surface.browserFetchEnabled)} · queue mutation {String(surface.queueMutationEnabled)} · relay execution {String(surface.macRelayExecutionEnabled)} · NAS write {String(surface.nasWriteEnabled)} · markdown body projected {String(surface.markdownBodyProjected)}
@@ -4765,6 +4810,9 @@ export default function OfficePage() {
   const [nasSingleWriteBusy, setNasSingleWriteBusy] = useState(false);
   const [nasSingleWriteResult, setNasSingleWriteResult] = useState<OfficeNasMacRelayWriteResult | null>(null);
   const [nasSingleWriteError, setNasSingleWriteError] = useState<string | null>(null);
+  const [nasKeeperQueueReadback, setNasKeeperQueueReadback] = useState<OfficeNasKeeperHandoffQueueReadback | null>(null);
+  const [nasKeeperQueueReadbackLoading, setNasKeeperQueueReadbackLoading] = useState(false);
+  const [nasKeeperQueueReadbackError, setNasKeeperQueueReadbackError] = useState<string | null>(null);
   const previousStateRef = useRef<OfficeState | null>(null);
   const liveFailureCountRef = useRef(0);
 
@@ -4815,6 +4863,22 @@ export default function OfficePage() {
     setNasSingleWriteDraft((current) => ({ ...current, [field]: value }));
   }, []);
 
+  const loadNasKeeperQueueReadback = useCallback(async () => {
+    setNasKeeperQueueReadbackLoading(true);
+    setNasKeeperQueueReadbackError(null);
+    try {
+      const result = await api.getOfficeControlledMutationNasKeeperHandoffQueue({ limit: 25 });
+      setNasKeeperQueueReadback(result);
+      return true;
+    } catch {
+      setNasKeeperQueueReadback(null);
+      setNasKeeperQueueReadbackError("request failed");
+      return false;
+    } finally {
+      setNasKeeperQueueReadbackLoading(false);
+    }
+  }, []);
+
   const executeNasSingleFileWrite = useCallback(async () => {
     if (!nasSingleWriteApproved) {
       setNasSingleWriteError("approval_required");
@@ -4841,12 +4905,13 @@ export default function OfficePage() {
       });
       setNasSingleWriteResult(result);
       setNasSingleWriteApproved(false);
+      void loadNasKeeperQueueReadback();
     } catch (err) {
       setNasSingleWriteError(String(err).replace(/Traceback|\/Users\/[^\s]+|\/home\/[^\s]+|token=[^\s]+|sk-[A-Za-z0-9_-]+/gi, "request failed"));
     } finally {
       setNasSingleWriteBusy(false);
     }
-  }, [nasSingleWriteApproved, nasSingleWriteDraft]);
+  }, [loadNasKeeperQueueReadback, nasSingleWriteApproved, nasSingleWriteDraft]);
 
   useEffect(() => {
     let cancelled = false;
@@ -4865,6 +4930,20 @@ export default function OfficePage() {
           setSafeEvents(null);
           setSafeEventsStatus("unavailable");
           setSafeMotionFailures((current) => current + 1);
+        }
+      });
+    api
+      .getOfficeControlledMutationNasKeeperHandoffQueue({ limit: 25 })
+      .then((next) => {
+        if (!cancelled) {
+          setNasKeeperQueueReadback(next);
+          setNasKeeperQueueReadbackError(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setNasKeeperQueueReadback(null);
+          setNasKeeperQueueReadbackError("request failed");
         }
       });
     api
@@ -5425,7 +5504,12 @@ export default function OfficePage() {
         onExecute={executeNasSingleFileWrite}
       />
 
-      <NasKeeperQueueManualEvidenceReviewSurfacePanel surface={nasKeeperQueueManualEvidenceReviewSurface} />
+      <NasKeeperQueueManualEvidenceReviewSurfacePanel
+        surface={nasKeeperQueueManualEvidenceReviewSurface}
+        readback={nasKeeperQueueReadback}
+        loading={nasKeeperQueueReadbackLoading}
+        error={nasKeeperQueueReadbackError}
+      />
 
       <DeskRpgReadOnlyChainCompletionReviewPanel review={deskRpgReadOnlyChainCompletionReview} />
 

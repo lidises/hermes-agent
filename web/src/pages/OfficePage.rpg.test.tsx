@@ -1517,14 +1517,57 @@ describe("NasRuntimeSingleFileWriteApprovalActionPanel", () => {
 
 describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
   it("renders the queue-state manual review surface without executable controls or raw markdown", () => {
-    const NasKeeperQueueManualEvidenceReviewSurfacePanel = (OfficePageModule as unknown as {
-      NasKeeperQueueManualEvidenceReviewSurfacePanel: React.ComponentType<{ surface: ReturnType<typeof buildOfficeNasKeeperQueueManualEvidenceReviewSurface> }>;
-    }).NasKeeperQueueManualEvidenceReviewSurfacePanel;
+    const NasKeeperQueueManualEvidenceReviewSurfacePanel = (OfficePageModule as any).NasKeeperQueueManualEvidenceReviewSurfacePanel;
     const boundary = { detailKind: "nas_runtime_n3_approval_boundary_status_surface" } as ReturnType<typeof buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface>;
     const action = buildOfficeNasRuntimeSingleFileWriteApprovalAction(boundary);
     const surface = buildOfficeNasKeeperQueueManualEvidenceReviewSurface(action);
 
-    const markup = renderToStaticMarkup(<NasKeeperQueueManualEvidenceReviewSurfacePanel surface={surface} />);
+    const markup = renderToStaticMarkup(
+      NasKeeperQueueManualEvidenceReviewSurfacePanel({
+        surface,
+        readback: {
+          listed: true,
+          errors: [],
+          dto: {
+            schema_version: 1,
+            mode: "nas_keeper_mac_relay_handoff_queue_readback",
+            listed: true,
+            queue_storage_ref: "ai_office_local_profile::nas_keeper_mac_relay_handoff_queue",
+            filters: { queue_status: "manual_review_required" },
+            effective_limit: 2,
+            available_count: 3,
+            count: 1,
+            skipped_count: 2,
+            items: [{
+              handoff_ref: "handoff_queue_panel_demo",
+              queue_ref: "nas_keeper_mac_relay_handoff_queue::handoff_queue_panel_demo",
+              queue_status: "manual_review_required",
+              relay_request_ref: "relay_req_queue_panel_demo",
+              write_ref: "write_queue_panel_demo",
+              package_ref: "pkg_queue_panel_demo",
+              target_vault_ref: "vault_personal_wiki_demo",
+              safe_slug: "queue-panel-demo",
+              safe_title: "Queue panel demo",
+              requested_by: "agent_nas_keeper",
+              requested_at: "2026-05-18T03:20:00Z",
+              nas_keeper_ref: "agent_nas_keeper",
+              relay_node_ref: "mac_relay_primary",
+              safe_logical_path: "vault_personal_wiki_demo::queue-panel-demo.md",
+              safe_display_path: "vault_personal_wiki_demo / queue-panel-demo.md",
+              payload_bytes: 88,
+              markdown_body_included: false,
+              next_required_boundary: "manual_nas_keeper_execution_evidence_review_if_needed",
+              execution_evidence_refs: ["evidence_queue_panel_demo"],
+            }],
+            markdown_body_included: false,
+            capabilities: { queue_read_enabled: true, queue_mutation_enabled: false, execution_state_recording_enabled: false, mac_relay_write_enabled: false, actual_nas_write_enabled: false, watcher_enabled: false, cron_enabled: false, dispatch_enabled: false },
+            next_required_boundary: "manual_nas_keeper_execution_evidence_review_if_needed",
+          },
+        },
+        loading: false,
+        error: null,
+      }) as React.ReactNode
+    );
 
     expect(markup).toContain('data-office-nas-keeper-queue-manual-review="true"');
     expect(markup).toContain('data-office-nas-keeper-queue-manual-review-enabled-controls="0"');
@@ -1534,6 +1577,11 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(markup).toContain('data-office-nas-keeper-queue-manual-review-queue-mutation-enabled="false"');
     expect(markup).toContain('data-office-nas-keeper-queue-manual-review-mac-relay-execution-enabled="false"');
     expect(markup).toContain('data-office-nas-keeper-queue-manual-review-markdown-body-projected="false"');
+    expect(markup).toContain('data-office-nas-keeper-queue-manual-review-readback-count="1"');
+    expect(markup).toContain('data-office-nas-keeper-queue-manual-review-readback-skipped-count="2"');
+    expect(markup).toContain('data-office-nas-keeper-queue-manual-review-readback-item="handoff_queue_panel_demo"');
+    expect(markup).toContain("Queue panel demo");
+    expect(markup).toContain("manual_nas_keeper_execution_evidence_review_if_needed");
     expect(markup.match(/data-office-nas-keeper-queue-manual-review-card=/g)?.length).toBe(4);
     expect(markup).toContain("manual evidence review");
     expect(markup).not.toContain("<form");

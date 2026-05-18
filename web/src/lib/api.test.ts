@@ -92,6 +92,51 @@ describe("fetchJSON", () => {
     expect(JSON.stringify(fetchMock.mock.calls[0]?.[1]?.body)).not.toMatch(/\/Users\/|\/home\/|token=|sk-/i);
   });
 
+  it("reads safe NAS Keeper handoff queue summaries through the protected readback route", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        __HERMES_SESSION_TOKEN__: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        listed: true,
+        errors: [],
+        dto: {
+          schema_version: 1,
+          mode: "nas_keeper_mac_relay_handoff_queue_readback",
+          listed: true,
+          queue_storage_ref: "ai_office_local_profile::nas_keeper_mac_relay_handoff_queue",
+          filters: { queue_status: "manual_review_required" },
+          effective_limit: 2,
+          available_count: 1,
+          count: 1,
+          skipped_count: 3,
+          items: [{ handoff_ref: "handoff_ui_demo", queue_status: "manual_review_required", safe_title: "Safe title", markdown_body_included: false }],
+          markdown_body_included: false,
+          capabilities: { queue_read_enabled: true, queue_mutation_enabled: false, mac_relay_write_enabled: false },
+          next_required_boundary: "manual_nas_keeper_execution_evidence_review_if_needed",
+        },
+      }),
+    } as Response);
+
+    const result = await api.getOfficeControlledMutationNasKeeperHandoffQueue({ queue_status: "manual_review_required", limit: 2 });
+
+    expect(result.listed).toBe(true);
+    expect(result.dto?.count).toBe(1);
+    expect(result.dto?.markdown_body_included).toBe(false);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/office/controlled-mutation/nas-runtime/nas-keeper-handoff-queue?queue_status=manual_review_required&limit=2",
+      expect.objectContaining({ headers: expect.any(Headers) }),
+    );
+    const headers = fetchMock.mock.calls[0]?.[1]?.headers as Headers;
+    expect(headers.get("X-Hermes-Session-Token")).toBe("session-token-for-header-only");
+    expect(JSON.stringify(fetchMock.mock.calls[0]?.[1])).not.toMatch(/method|body|\/Users\/|\/home\/|token=|sk-|raw markdown body/i);
+  });
+
   it("posts safe NAS Keeper Mac relay write payload through the protected execution route", async () => {
     Object.defineProperty(globalThis, "window", {
       configurable: true,
