@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-17 23:57 KST
+Last updated: 2026-05-18 11:38 KST
 
 ## Start here after `/new`
 
@@ -74,7 +74,7 @@ The user approved A-G approval buckets for future AI Office work while excluding
 
 ## Current next stage
 
-Immediate state 2026-05-17 23:57 KST: PR #13 is merged into `main` and the approved harmless real Mac NAS smoke for `Mac relay execution-from-preview bridge` passed. The smoke used a temporary local handoff queue, enqueued/authorized/previewed two safe handoffs, then executed them via `execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_preview(...)` against the Mac-local relay root. It wrote and replaced exactly one safe smoke note at logical path `Hermes::ai-office-exec-from-preview-smoke-20260517145703.md`, verified readback on both writes, verified audit sidecars, verified the second write produced rollback metadata, and verified no raw Mac/VPS path, token-looking string, or markdown-body echo in result DTOs. Focused/combined backend verification passed (`38 passed`), `py_compile` and `git diff --check` passed. Recommended next boundary: queue execution-state recording for success/failure/manual evidence, still without watcher/cron/daemon, dispatch, authority-adapter binding, VPS NAS mounts/credentials/direct writes, dashboard/gateway restart, or public exposure.
+Immediate state 2026-05-18 11:38 KST: queue execution-state recording is implemented locally after the execution-from-preview bridge. New helper `record_office_controlled_mutation_nas_keeper_mac_relay_execution_state(...)` and protected route `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-execution-state` atomically rewrite exactly one authorized queue item to `mac_relay_execution_succeeded`, `mac_relay_execution_failed`, or `mac_relay_execution_manual_review_required`, storing only safe execution metadata/evidence refs and no markdown body in response DTOs. Focused verification passed (`4 passed`), combined NAS Keeper/Mac relay/backend verification passed (`42 passed`), `py_compile` and `git diff --check` passed. Recommended next boundary: publish/update PR if needed, then optionally a read-only queue state list/readback surface or Mac relay/NAS Keeper evidence review UX; still no watcher/cron/daemon, dispatch, authority-adapter binding, VPS NAS mounts/credentials/direct writes, dashboard/gateway restart, or public exposure unless separately approved.
 
 Current umbrella project: `AI Office Unified Operating Workbench` / `AI Office 통합 운영실`.
 

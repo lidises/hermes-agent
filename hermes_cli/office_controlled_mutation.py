@@ -199,6 +199,23 @@ _NAS_KEEPER_HANDOFF_EXECUTION_PAYLOAD_PREVIEW_FIELDS = {
     "relay_authorized_by",
     "relay_authorized_at",
 }
+_NAS_KEEPER_HANDOFF_EXECUTION_STATE_FIELDS = {
+    "handoff_ref",
+    "execution_record_ref",
+    "relay_execution_ref",
+    "nas_keeper_ref",
+    "relay_node_ref",
+    "recorded_by",
+    "recorded_at",
+    "execution_status",
+    "safe_summary",
+    "evidence_refs",
+}
+_NAS_KEEPER_HANDOFF_EXECUTION_STATUSES = {
+    "succeeded": "mac_relay_execution_succeeded",
+    "failed": "mac_relay_execution_failed",
+    "manual_review_required": "mac_relay_execution_manual_review_required",
+}
 _OPAQUE_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{2,119}$")
 _OPAQUE_REF_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_-]{1,40}:[A-Za-z0-9][A-Za-z0-9_.:-]{1,160}$")
 _SAFE_TEXT_RE = re.compile(r"^[^<>\\]{1,240}$")
@@ -2662,6 +2679,176 @@ def execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_previ
         }
     )
     return {"executed": True, "written": True, "errors": [], "dto": dto}
+
+
+
+def record_office_controlled_mutation_nas_keeper_mac_relay_execution_state(
+    payload: object, *, queue_dir: Path | str | None = None
+) -> dict[str, object]:
+    """Record final/manual execution state for one authorized NAS Keeper handoff.
+
+    This is a queue-state recording boundary only. It mutates one local queue
+    item from authorized to a terminal/manual execution status and stores safe
+    evidence refs. It does not execute a write, read NAS files, start automation,
+    dispatch to a relay daemon, bind authority adapters, or grant VPS NAS
+    authority.
+    """
+
+    if not isinstance(payload, Mapping):
+        return {"recorded": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+
+    errors: list[dict[str, str]] = []
+    if set(payload) - _NAS_KEEPER_HANDOFF_EXECUTION_STATE_FIELDS:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+    for field in sorted(_NAS_KEEPER_HANDOFF_EXECUTION_STATE_FIELDS):
+        if field not in payload:
+            errors.append(_error(field, "missing_field"))
+    for field in ("handoff_ref", "execution_record_ref", "relay_execution_ref", "nas_keeper_ref", "relay_node_ref", "recorded_by"):
+        if field in payload and not _is_opaque_id(payload.get(field)):
+            errors.append(_error(field, "invalid_opaque_id"))
+    if "recorded_at" in payload and not (
+        isinstance(payload.get("recorded_at"), str) and _ISO_UTC_RE.fullmatch(payload["recorded_at"])
+    ):
+        errors.append(_error("recorded_at", "invalid_timestamp"))
+    if payload.get("execution_status") not in _NAS_KEEPER_HANDOFF_EXECUTION_STATUSES:
+        errors.append(_error("execution_status", "unsupported_execution_status"))
+    if "safe_summary" in payload and not _is_safe_text(payload.get("safe_summary")):
+        errors.append(_error("safe_summary", "invalid_safe_text"))
+    if "evidence_refs" in payload:
+        evidence_refs = payload.get("evidence_refs")
+        if not isinstance(evidence_refs, Sequence) or isinstance(evidence_refs, (str, bytes)):
+            errors.append(_error("evidence_refs", "invalid_list"))
+        elif len(evidence_refs) > 12 or not all(_is_opaque_ref(item) for item in evidence_refs):
+            errors.append(_error("evidence_refs", "invalid_opaque_ref"))
+    if errors:
+        return {"recorded": False, "errors": sorted(errors, key=lambda item: (item["field"], item["code"])), "dto": None}
+
+    queue_file = _nas_keeper_handoff_queue_file(queue_dir)
+    if not queue_file.exists():
+        return {"recorded": False, "errors": [_error("queue", "queue_not_found")], "dto": None}
+
+    wanted = str(payload["handoff_ref"])
+    items: list[dict[str, object]] = []
+    matched_index: int | None = None
+    for line in queue_file.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            item = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(item, Mapping):
+            continue
+        item_dict = dict(item)
+        if item_dict.get("handoff_ref") == wanted and matched_index is None:
+            matched_index = len(items)
+        items.append(item_dict)
+
+    if matched_index is None:
+        return {"recorded": False, "errors": [_error("handoff_ref", "handoff_not_found")], "dto": None}
+
+    matched = items[matched_index]
+    if matched.get("queue_status") != "authorized_for_mac_relay_execution":
+        return {
+            "recorded": False,
+            "errors": [_error("queue_status", "handoff_not_open_for_execution_state_recording")],
+            "dto": None,
+        }
+    if matched.get("nas_keeper_ref") != payload["nas_keeper_ref"]:
+        return {"recorded": False, "errors": [_error("nas_keeper_ref", "nas_keeper_mismatch")], "dto": None}
+    if matched.get("relay_node_ref") != payload["relay_node_ref"]:
+        return {"recorded": False, "errors": [_error("relay_node_ref", "relay_node_mismatch")], "dto": None}
+
+    preview_payload = {
+        "handoff_ref": payload["handoff_ref"],
+        "relay_execution_ref": payload["relay_execution_ref"],
+        "nas_keeper_ref": payload["nas_keeper_ref"],
+        "relay_node_ref": payload["relay_node_ref"],
+        "relay_authorized_by": matched.get("authorized_by"),
+        "relay_authorized_at": matched.get("authorized_at"),
+    }
+    previewed = preview_office_controlled_mutation_nas_keeper_mac_relay_execution_payload(preview_payload, queue_dir=queue_dir)
+    if not previewed.get("previewed"):
+        return {"recorded": False, "errors": cast(list[dict[str, str]], previewed.get("errors") or []), "dto": None}
+    preview_dto = cast(dict[str, object], previewed["dto"])
+
+    queue_status_after = _NAS_KEEPER_HANDOFF_EXECUTION_STATUSES[str(payload["execution_status"])]
+    next_required_boundary = (
+        "manual_nas_keeper_execution_evidence_review"
+        if payload["execution_status"] == "manual_review_required"
+        else "none_terminal_execution_state_recorded"
+    )
+    capabilities = {
+        "queue_read_enabled": True,
+        "queue_mutation_enabled": True,
+        "execution_state_recording_enabled": True,
+        "execution_payload_preview_enabled": True,
+        "vps_nas_mount_enabled": False,
+        "vps_credential_access_enabled": False,
+        "direct_vps_nas_write_enabled": False,
+        "mac_relay_write_enabled": False,
+        "actual_nas_write_enabled": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+    }
+    updated = dict(matched)
+    updated.update(
+        {
+            "queue_status": queue_status_after,
+            "execution_record_ref": payload["execution_record_ref"],
+            "relay_execution_ref": payload["relay_execution_ref"],
+            "execution_status": payload["execution_status"],
+            "execution_recorded_by": payload["recorded_by"],
+            "execution_recorded_at": payload["recorded_at"],
+            "execution_safe_summary": payload["safe_summary"],
+            "execution_evidence_refs": list(cast(Sequence[object], payload["evidence_refs"])),
+            "execution_state_path": [
+                "authorized_queue_item_read",
+                "execution_state_recorded",
+                "manual_evidence_refs_attached",
+                "queue_closed_without_automation",
+            ],
+            "capabilities": capabilities,
+            "next_required_boundary": next_required_boundary,
+        }
+    )
+    items[matched_index] = updated
+    tmp_file = queue_file.with_suffix(queue_file.suffix + ".tmp")
+    with tmp_file.open("w", encoding="utf-8") as handle:
+        for item in items:
+            handle.write(json.dumps(item, sort_keys=True, ensure_ascii=False) + "\n")
+    tmp_file.replace(queue_file)
+
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_mac_relay_execution_state_recorded",
+        "recorded": True,
+        "handoff_ref": payload["handoff_ref"],
+        "execution_record_ref": payload["execution_record_ref"],
+        "relay_execution_ref": payload["relay_execution_ref"],
+        "queue_ref": matched.get("queue_ref"),
+        "queue_status_before": "authorized_for_mac_relay_execution",
+        "queue_status_after": queue_status_after,
+        "execution_status": payload["execution_status"],
+        "recorded_by": payload["recorded_by"],
+        "recorded_at": payload["recorded_at"],
+        "nas_keeper_ref": payload["nas_keeper_ref"],
+        "relay_node_ref": payload["relay_node_ref"],
+        "safe_summary": payload["safe_summary"],
+        "evidence_refs": list(cast(Sequence[object], payload["evidence_refs"])),
+        "safe_logical_path": matched.get("safe_logical_path"),
+        "safe_display_path": matched.get("safe_display_path"),
+        "markdown_body_ref": preview_dto.get("markdown_body_ref"),
+        "markdown_body_bytes": preview_dto.get("markdown_body_bytes"),
+        "markdown_body_sha256": preview_dto.get("markdown_body_sha256"),
+        "markdown_body_included": False,
+        "execution_state_path": updated["execution_state_path"],
+        "capabilities": capabilities,
+        "next_required_boundary": next_required_boundary,
+    }
+    return {"recorded": True, "errors": [], "dto": dto}
 
 
 

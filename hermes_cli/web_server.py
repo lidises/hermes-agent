@@ -60,6 +60,7 @@ from hermes_cli.office_controlled_mutation import (
     execute_office_controlled_mutation_nas_single_file_write,
     execute_office_controlled_mutation_nas_mac_relay_write,
     execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_preview,
+    record_office_controlled_mutation_nas_keeper_mac_relay_execution_state,
     dry_run_office_controlled_mutation_nas_keeper_mac_relay_claim,
     authorize_office_controlled_mutation_nas_keeper_mac_relay_handoff,
     preview_office_controlled_mutation_nas_keeper_mac_relay_execution_payload,
@@ -651,6 +652,12 @@ async def execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from
         payload,
         root_path=os.environ.get("HERMES_AI_OFFICE_MAC_RELAY_NAS_ROOT"),
     )
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-execution-state")
+async def record_office_controlled_mutation_nas_keeper_mac_relay_execution_state_route(payload: Any = Body(None)):
+    """Record safe queue execution state without dispatching or writing NAS files."""
+    return record_office_controlled_mutation_nas_keeper_mac_relay_execution_state(payload)
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/mac-relay-write-execute")

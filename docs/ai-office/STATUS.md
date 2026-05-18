@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-17 23:57 KST
+Last updated: 2026-05-18 11:38 KST
 
 ## AI Office 통합 운영실 umbrella summary
 
@@ -21,6 +21,14 @@ Phase 0 consolidation docs:
 - `docs/ai-office/architecture/unified-operating-workbench.md`
 - `docs/ai-office/plans/2026-05-14-desk-rpg-master-spec-review.md`
 - `docs/ai-office/architecture/approval-model-contract.md`
+
+## NAS Keeper Mac relay queue execution-state recording implemented locally
+
+Added the next queue mutation boundary after execution-from-preview: `record_office_controlled_mutation_nas_keeper_mac_relay_execution_state(...)` and protected route `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-execution-state`. The route records one authorized handoff as `mac_relay_execution_succeeded`, `mac_relay_execution_failed`, or `mac_relay_execution_manual_review_required`, stores only safe execution metadata/evidence refs, and atomically rewrites exactly one local queue item.
+
+Boundary: queue execution-state recording only. It does not execute a Mac relay write, write/read NAS files, start watcher/cron/daemon automation, dispatch to a relay service, bind authority adapters, grant VPS NAS mounts/credentials/direct write authority, restart dashboard/gateway, or expose raw markdown bodies. Manual status leaves `next_required_boundary=manual_nas_keeper_execution_evidence_review`; terminal success/failure has `next_required_boundary=none_terminal_execution_state_recorded`.
+
+Verification 2026-05-18 11:38 KST: RED first failed on missing helper/import and missing protected route (`4 failed`). GREEN focused `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_state_record.py -q -o 'addopts='` -> `4 passed`; combined backend `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_state_record.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_from_preview.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_payload_preview.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_authorize_handoff.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_claim_dry_run.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_handoff_queue.py tests/hermes_cli/test_office_controlled_mutation_nas_mac_relay_write_execute.py tests/hermes_cli/test_office_controlled_mutation_nas_mac_relay_write_request.py tests/hermes_cli/test_office_controlled_mutation_nas_runtime_write.py tests/hermes_cli/test_office_api.py -q -o 'addopts='` -> `42 passed`; `py_compile` and `git diff --check` passed. Added-line raw/secret scan produced one expected false-positive on the literal false capability key `vps_credential_access_enabled: False`; no raw values were exposed in DTO tests.
 
 
 ## Real Mac NAS smoke for execution-from-preview bridge completed
