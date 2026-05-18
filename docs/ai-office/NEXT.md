@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-18 11:52 KST
+Last updated: 2026-05-18 12:35 KST
 
 ## Start here after `/new`
 
@@ -74,7 +74,7 @@ The user approved A-G approval buckets for future AI Office work while excluding
 
 ## Current next stage
 
-Immediate state 2026-05-18 11:52 KST: read-only NAS Keeper Mac relay queue-state readback is implemented locally after queue execution-state recording. New helper `list_office_controlled_mutation_nas_keeper_mac_relay_handoff_queue(...)` and protected route `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-handoff-queue` list only safe queue summaries with optional filters for `handoff_ref`, `queue_status`, `relay_node_ref`, `nas_keeper_ref`, and clamped `limit`. The DTO omits queued markdown bodies, skips malformed/unsafe stored lines without raw echo, keeps queue mutation/execution/write/automation/dispatch/authority/NAS capability flags false, and supports manual-review evidence refs. RED first failed on missing helper/route (`4 failed`); focused GREEN passed (`4 passed`); combined NAS Keeper/Mac relay/backend verification passed (`46 passed`); `py_compile`, `git diff --check`, added-line safety scan, and independent review passed. Recommended next boundary: commit/push this slice; then optionally add a frontend-only/manual evidence review surface over this read-only API, still with no watcher/cron/daemon, relay dispatch, authority-adapter binding, VPS NAS mounts/credentials/direct writes, dashboard/gateway restart, or public exposure unless separately approved.
+Immediate state 2026-05-18 12:35 KST: read-only NAS Keeper Mac relay queue-state readback is now also surfaced in `/office`. The backend helper/route `list_office_controlled_mutation_nas_keeper_mac_relay_handoff_queue(...)` and `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-handoff-queue` remain safe queue-summary readback only. Frontend API wrapper `listOfficeNasKeeperHandoffQueue(...)` plus the `/office` manual review panel expose only safe queue refs/status/evidence counts and explicit disabled capability flags. The UI omits queued markdown bodies and raw paths/logs/provider IDs/tokens, has no forms/actions/executable controls, and keeps queue mutation/execution/write/automation/dispatch/authority/NAS capability flags false. Verification before commit: frontend focused tests passed (`api.test.ts`, `OfficePage.rpg.test.tsx`, `OfficePage.test.ts` targeted queue readback), `npm run build` passed with existing Vite large chunk warning only, backend focused/combined NAS Keeper verification remained green, `py_compile`, `git diff --check`, added-line safety scan, and independent review passed. Current local state: `main` is ahead of `origin/main` by this UI slice commit. Recommended next boundary: push this verified slice; then optionally deploy/smoke it to the private VPS dashboard under dashboard-only scope, still with no watcher/cron/daemon, relay dispatch, authority-adapter binding, VPS NAS mounts/credentials/direct writes, gateway restart, public exposure, or PR/merge side effects unless separately approved.
 
 Current umbrella project: `AI Office Unified Operating Workbench` / `AI Office 통합 운영실`.
 

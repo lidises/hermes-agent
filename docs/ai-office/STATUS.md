@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 11:52 KST
+Last updated: 2026-05-18 12:35 KST
 
 ## AI Office 통합 운영실 umbrella summary
 
@@ -21,6 +21,12 @@ Phase 0 consolidation docs:
 - `docs/ai-office/architecture/unified-operating-workbench.md`
 - `docs/ai-office/plans/2026-05-14-desk-rpg-master-spec-review.md`
 - `docs/ai-office/architecture/approval-model-contract.md`
+
+## NAS Keeper Mac relay queue readback UI surfaced locally
+
+Added the `/office` manual review surface for the already-safe NAS Keeper Mac relay handoff queue readback. Frontend API wrapper `listOfficeNasKeeperHandoffQueue(...)` calls the protected read-only queue route, and the new Office panel lists only safe handoff refs/statuses, relay/NAS Keeper refs, manual-review evidence refs, byte counts, and safe capability flags. The panel is display-only: no forms, no execute/retry/approve/dispatch controls, no queue mutation, no Mac relay execution, no NAS read/write, no watcher/cron/daemon automation, no authority-adapter binding, no VPS NAS mount/credential/direct write authority, no dashboard/gateway restart, and no queued markdown body/raw path/log/provider/token echo.
+
+Verification 2026-05-18 12:35 KST: focused frontend tests passed for `api.test.ts`, `OfficePage.rpg.test.tsx`, and targeted `OfficePage.test.ts` queue readback coverage; `npm run build` passed with the existing Vite large chunk warning only. Backend readback verification from the prior slice remains `46 passed`, with `py_compile`, `git diff --check`, added-line safety scan, and independent review passing. Local commit: `9a4d30d9 feat(office): show NAS Keeper queue readback`; branch `main` is ahead of `origin/main` by one commit before push.
 
 ## NAS Keeper Mac relay queue readback implemented locally
 
