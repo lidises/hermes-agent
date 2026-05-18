@@ -1567,6 +1567,158 @@ def _dispatcher_authority_dry_run_capabilities() -> dict[str, bool]:
     }
 
 
+def build_office_controlled_mutation_dispatcher_authority_metadata_recording_draft(
+    *,
+    request_id: str | None = None,
+    correlation_id: str | None = None,
+    authority_ref: str | None = None,
+    result_id: str | None = None,
+    audit_id: str | None = None,
+    recorded_at: str | None = None,
+    unsafe_examples: Mapping[str, Any] | None = None,
+) -> dict[str, object]:
+    """Prepare safe dry-run result/audit payloads without appending them."""
+
+    _ = unsafe_examples
+    errors: list[dict[str, str]] = []
+    safe_request_id: str | None = None
+    safe_correlation_id: str | None = None
+    safe_authority_ref: str | None = None
+    safe_result_id: str | None = None
+    safe_audit_id: str | None = None
+    safe_recorded_at: str | None = None
+
+    if request_id is not None:
+        if _is_opaque_id(request_id):
+            safe_request_id = request_id
+        else:
+            errors.append(_error("request_id", "invalid_opaque_id"))
+    else:
+        errors.append(_error("request_id", "missing_field"))
+    if correlation_id is not None:
+        if _is_opaque_id(correlation_id):
+            safe_correlation_id = correlation_id
+        else:
+            errors.append(_error("correlation_id", "invalid_opaque_id"))
+    else:
+        errors.append(_error("correlation_id", "missing_field"))
+    if authority_ref is not None:
+        if _is_opaque_id(authority_ref):
+            safe_authority_ref = authority_ref
+        else:
+            errors.append(_error("authority_ref", "invalid_opaque_id"))
+    if result_id is not None:
+        if _is_opaque_id(result_id):
+            safe_result_id = result_id
+        else:
+            errors.append(_error("result_id", "invalid_opaque_id"))
+    else:
+        errors.append(_error("result_id", "missing_field"))
+    if audit_id is not None:
+        if _is_opaque_id(audit_id):
+            safe_audit_id = audit_id
+        else:
+            errors.append(_error("audit_id", "invalid_opaque_id"))
+    else:
+        errors.append(_error("audit_id", "missing_field"))
+    if recorded_at is not None:
+        if _ISO_UTC_RE.fullmatch(recorded_at):
+            safe_recorded_at = recorded_at
+        else:
+            errors.append(_error("recorded_at", "invalid_timestamp"))
+    else:
+        errors.append(_error("recorded_at", "missing_field"))
+
+    errors = sorted(errors, key=lambda item: (item["field"], item["code"]))
+    capabilities = _dispatcher_authority_metadata_recording_draft_capabilities()
+    response: dict[str, object] = {
+        "schema_version": 1,
+        "mode": "dispatcher_authority_metadata_recording_draft",
+        "ready": not errors,
+        "dry_run_result_payload": None,
+        "audit_payload": None,
+        "capabilities": capabilities,
+        "redaction": dict(_REDACTION_POSTURE),
+        "errors": errors,
+    }
+    if safe_request_id is not None:
+        response["request_id"] = safe_request_id
+    if safe_correlation_id is not None:
+        response["correlation_id"] = safe_correlation_id
+    if safe_authority_ref is not None:
+        response["authority_ref"] = safe_authority_ref
+    if errors:
+        return response
+
+    assert safe_request_id is not None
+    assert safe_correlation_id is not None
+    assert safe_result_id is not None
+    assert safe_audit_id is not None
+    assert safe_recorded_at is not None
+    evidence_refs = [f"plan:{safe_request_id}"]
+    audit_evidence_refs = [f"dryrun:{safe_result_id}"]
+    if safe_authority_ref is not None:
+        evidence_refs.append(f"authority:{safe_authority_ref}")
+        audit_evidence_refs.append(f"authority:{safe_authority_ref}")
+
+    dry_run_result_payload = {
+        "result_id": safe_result_id,
+        "request_id": safe_request_id,
+        "correlation_id": safe_correlation_id,
+        "simulated_by": "actor:dispatcher_authority_dry_run_surface",
+        "simulation_status": "passed",
+        "safe_summary": "Dispatcher authority dry-run metadata recorded; execution boundary remains closed.",
+        "evidence_refs": evidence_refs,
+        "completed_at": safe_recorded_at,
+    }
+    audit_payload = {
+        "audit_id": safe_audit_id,
+        "request_id": safe_request_id,
+        "correlation_id": safe_correlation_id,
+        "event_kind": "dry_run_result_recorded",
+        "actor_ref": "actor:dispatcher_authority_dry_run_surface",
+        "safe_summary": "Dry-run result metadata prepared for manual append only; no dispatch, binding, target mutation, NAS save, daemon, auth access, or public exposure.",
+        "evidence_refs": audit_evidence_refs,
+        "recorded_at": safe_recorded_at,
+    }
+    dry_validation = validate_office_controlled_mutation_dry_run_result_event(dry_run_result_payload)
+    audit_validation = validate_office_controlled_mutation_audit_event(audit_payload)
+    validation_errors: list[dict[str, str]] = []
+    if not dry_validation["valid"]:
+        validation_errors.append(_error("dry_run_result_payload", "invalid_payload"))
+    if not audit_validation["valid"]:
+        validation_errors.append(_error("audit_payload", "invalid_payload"))
+    if validation_errors:
+        response["ready"] = False
+        response["errors"] = validation_errors
+        return response
+
+    response["dry_run_result_payload"] = dry_run_result_payload
+    response["audit_payload"] = audit_payload
+    return response
+
+
+def _dispatcher_authority_metadata_recording_draft_capabilities() -> dict[str, bool]:
+    return {
+        "metadata_recording_draft_enabled": True,
+        "dry_run_result_payload_projection_enabled": True,
+        "audit_payload_projection_enabled": True,
+        "dry_run_result_storage_enabled": False,
+        "audit_write_enabled": False,
+        "adapter_implementation_enabled": False,
+        "adapter_binding_enabled": False,
+        "adapter_dispatch_enabled": False,
+        "credential_access_enabled": False,
+        "target_mutation_enabled": False,
+        "dry_run_execution_enabled": False,
+        "nas_save_enabled": False,
+        "watcher_daemon_enabled": False,
+        "cron_enabled": False,
+        "vps_direct_nas_authority_enabled": False,
+        "public_exposure_enabled": False,
+    }
+
+
 def _safe_count(value: object) -> int:
     return value if isinstance(value, int) else 0
 

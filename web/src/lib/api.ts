@@ -216,6 +216,28 @@ export interface OfficeDispatcherAuthorityDryRunParams {
   authority_ref?: string;
 }
 
+export interface OfficeDispatcherAuthorityMetadataRecordingDraft {
+  schema_version: number;
+  mode: "dispatcher_authority_metadata_recording_draft";
+  ready: boolean;
+  request_id?: string;
+  correlation_id?: string;
+  authority_ref?: string;
+  dry_run_result_payload: null | Record<string, unknown>;
+  audit_payload: null | Record<string, unknown>;
+  capabilities: Record<string, boolean>;
+  errors: Array<{ field: string; code: string }>;
+}
+
+export interface OfficeDispatcherAuthorityMetadataRecordingDraftParams {
+  request_id?: string;
+  correlation_id?: string;
+  authority_ref?: string;
+  result_id?: string;
+  audit_id?: string;
+  recorded_at?: string;
+}
+
 export interface OfficeNasKeeperExecutionFromPreviewPayload {
   handoff_ref: string;
   relay_execution_ref: string;
@@ -345,6 +367,17 @@ export const api = {
     if (params.authority_ref) qs.set("authority_ref", params.authority_ref);
     const suffix = qs.toString() ? `?${qs.toString()}` : "";
     return fetchJSON<OfficeDispatcherAuthorityDryRunSurface>(`/api/office/controlled-mutation/dispatcher-authority-dry-run${suffix}`);
+  },
+  getOfficeControlledMutationDispatcherAuthorityMetadataRecordingDraft: (params: OfficeDispatcherAuthorityMetadataRecordingDraftParams = {}) => {
+    const qs = new URLSearchParams();
+    if (params.request_id) qs.set("request_id", params.request_id);
+    if (params.correlation_id) qs.set("correlation_id", params.correlation_id);
+    if (params.authority_ref) qs.set("authority_ref", params.authority_ref);
+    if (params.result_id) qs.set("result_id", params.result_id);
+    if (params.audit_id) qs.set("audit_id", params.audit_id);
+    if (params.recorded_at) qs.set("recorded_at", params.recorded_at);
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+    return fetchJSON<OfficeDispatcherAuthorityMetadataRecordingDraft>(`/api/office/controlled-mutation/dispatcher-authority-metadata-recording-draft${suffix}`);
   },
   executeOfficeControlledMutationNasSingleFileWrite: (body: OfficeNasSingleFileWritePayload) =>
     fetchJSON<OfficeNasSingleFileWriteResult>("/api/office/controlled-mutation/nas-runtime/single-file-write", {

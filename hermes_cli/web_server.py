@@ -58,6 +58,7 @@ from hermes_cli.office_controlled_mutation import (
     append_office_controlled_mutation_request_event,
     build_office_controlled_mutation_authority_metadata_handoff_status,
     build_office_controlled_mutation_dispatcher_authority_dry_run_surface,
+    build_office_controlled_mutation_dispatcher_authority_metadata_recording_draft,
     build_office_controlled_mutation_contract_schema,
     execute_office_controlled_mutation_nas_single_file_write,
     execute_office_controlled_mutation_nas_mac_relay_write,
@@ -941,6 +942,26 @@ async def get_office_controlled_mutation_dispatcher_authority_dry_run(
         request_id=request_id,
         correlation_id=correlation_id,
         authority_ref=authority_ref,
+    )
+
+
+@app.get("/api/office/controlled-mutation/dispatcher-authority-metadata-recording-draft")
+async def get_office_controlled_mutation_dispatcher_authority_metadata_recording_draft(
+    request_id: str | None = None,
+    correlation_id: str | None = None,
+    authority_ref: str | None = None,
+    result_id: str | None = None,
+    audit_id: str | None = None,
+    recorded_at: str | None = None,
+):
+    """Project safe dry-run result/audit metadata payloads without appending them."""
+    return build_office_controlled_mutation_dispatcher_authority_metadata_recording_draft(
+        request_id=request_id,
+        correlation_id=correlation_id,
+        authority_ref=authority_ref,
+        result_id=result_id,
+        audit_id=audit_id,
+        recorded_at=recorded_at,
     )
 
 

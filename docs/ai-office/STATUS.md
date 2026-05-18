@@ -1,10 +1,18 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 19:11 KST
+Last updated: 2026-05-18 21:01 KST
+
+## Controlled-mutation dispatcher/authority dry-run metadata recording draft
+
+Local implementation in progress after explicit approval to continue with B. This slice adds a safe backend projection helper and protected GET `/api/office/controlled-mutation/dispatcher-authority-metadata-recording-draft`, plus a typed frontend API wrapper and `/office` display-only panel. It prepares allowlisted dry-run result and audit metadata payloads for manual append review only; it does not append to the dry-run result store, write audit JSONL, execute a dry-run, dispatch, bind an adapter, mutate a target, write NAS, start watcher/cron, change credentials, expose public routes, mutate Kanban, change VPS files, restart services, commit, or push.
+
+Verification status 2026-05-18 21:01 KST: RED backend test first failed because the helper/route were missing; RED frontend API test failed because the wrapper was missing; RED Office RPG panel test failed because the panel export was missing. GREEN focused verification now passes: backend metadata draft test `3 passed`; frontend API `11 passed`; Office RPG full file `64 passed`; focused metadata/dry-run RPG regression `2 passed`. Current local worktree is intentionally uncommitted and not deployed because commit/push/VPS sync/restart were not approved for this B slice.
+
+Boundary: this is a draft/projection rung only. Dry-run result storage and audit write capabilities remain false in the DTO and UI hooks. Any actual metadata append, service restart, VPS worktree change, Kanban mutation, NAS write, public exposure, real dispatcher execution, authority-adapter binding, watcher/cron daemon, or commit/push still requires a separate explicit approval.
 
 ## Controlled-mutation dispatcher/authority dry-run design surface
 
-Implementation in progress after explicit approval to continue with C. The slice adds a safe backend projection helper and protected GET `/api/office/controlled-mutation/dispatcher-authority-dry-run`, plus a typed frontend API wrapper and `/office` display-only panel. The panel shows a dry-run plan, safe request/authority refs, and step refs for the would-be dispatcher path, but all execution capabilities remain false: no adapter dispatch, no adapter binding, no target mutation, no NAS save, no watcher/cron daemon, no credential access, no public exposure, and no VPS direct NAS authority.
+Implemented and deployed after explicit approval to continue with C. The slice adds a safe backend projection helper and protected GET `/api/office/controlled-mutation/dispatcher-authority-dry-run`, plus a typed frontend API wrapper and `/office` display-only panel. The panel shows a dry-run plan, safe request/authority refs, and step refs for the would-be dispatcher path, but all execution capabilities remain false: no adapter dispatch, no adapter binding, no target mutation, no NAS save, no watcher/cron daemon, no credential access, no public exposure, and no VPS direct NAS authority.
 
 Verification status 2026-05-18 19:11 KST: RED backend test first failed because the helper/route were missing; GREEN focused backend test now passes (`3 passed`). Focused backend regression for dispatcher dry-run plus authority metadata handoff passed (`6 passed`). Focused frontend API + Office RPG panel regression passed (`73 passed`). `py_compile` for the changed backend modules passed, `git diff --check` passed, `npm run lint` passed with 23 existing warnings and 0 errors, and `npm run build` passed with the existing Vite large chunk warning only. Safety scan showed production hits only for existing sanitizer literals (`sk-`, `Traceback`); intentional unsafe sentinel strings are confined to tests.
 

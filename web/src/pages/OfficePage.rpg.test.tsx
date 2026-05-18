@@ -19,7 +19,7 @@ vi.mock("@/lib/api", () => ({
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
 import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerAssignmentCandidateGate, buildOfficeWorkerRequestDraftPreview, buildOfficeWorkerHumanConfirmationEnvelope, buildOfficeWorkerAuthorityHandoffEnvelope, buildOfficeWorkerDispatchDryRunEnvelope, buildOfficeWorkerAuditPreviewEnvelope, buildOfficeWorkerRollbackPreviewEnvelope, buildOfficeWorkerFinalGateChecklist, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeNasKeeperSaveRequestGate, buildOfficeNasKeeperRollbackEvidencePreview, buildOfficeNasEvidencePackageStoreReadbackStatus, buildOfficeNasPathValidationStatusSurface, buildOfficeNasPathPreviewStatusSurface, buildOfficeNasPathPreviewStoreReadbackStatusSurface, buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface, buildOfficeNasRuntimeSingleFileWriteApprovalAction, buildOfficeNasKeeperQueueManualEvidenceReviewSurface, buildOfficeNasKeeperExecutionOperatorAction, buildOfficeDeskRpgReadOnlyChainCompletionReview, buildOfficeEventDrivenCharacterStateProjection, buildOfficeCharacterStateRoomOverlay, buildOfficeCharacterRoomInteractionPosture, buildOfficeCharacterInspectorDetailPosture, buildOfficeCharacterDetailSafeDialogueCopy, buildOfficeCharacterBubbleInspectorAlignment, buildOfficeCharacterPanelBoundarySummary, buildOfficeCharacterFacilityRoleLegend, buildOfficeCharacterFacilityBoundaryStrip, buildOfficeCharacterFacilitySourceLedgerStrip, buildOfficeCharacterFacilityCompletionReview, buildOfficeControlledMutationProposalContract, buildOfficeControlledMutationDryRunPlan, buildOfficeControlledMutationAuditSinkPlan, buildOfficeControlledMutationRollbackVerificationPlan, buildOfficeControlledMutationHumanApprovalPlan, buildOfficeControlledMutationAuthoritySummary, buildOfficeControlledMutationExecutionReadinessSummary, buildOfficeControlledMutationContractPostureProjection, buildOfficeControlledMutationContractPosturePolish, buildOfficeControlledMutationReadinessHandoffRibbon, buildOfficeControlledMutationReadinessSummaryPolish, buildOfficeControlledMutationRequestStorePosture, buildOfficeControlledMutationRequestStoreHardeningPlan, buildOfficeControlledMutationNextApprovalBoundary, buildOfficeControlledMutationPostDecisionApprovalBoundary, buildOfficeControlledMutationPostRegistryApprovalBoundary, buildOfficeControlledMutationTargetDispatchForbiddenBoundary, buildOfficeControlledMutationSafeContinuationCompletionReview, buildOfficeRpgScene } from "./officeView";
-import type { OfficeAuthorityMetadataHandoffStatus, OfficeDispatcherAuthorityDryRunSurface, OfficeNasKeeperExecutionFromPreviewResult, OfficeNasKeeperHandoffQueueReadback, OfficeState } from "@/lib/api";
+import type { OfficeAuthorityMetadataHandoffStatus, OfficeDispatcherAuthorityDryRunSurface, OfficeDispatcherAuthorityMetadataRecordingDraft, OfficeNasKeeperExecutionFromPreviewResult, OfficeNasKeeperHandoffQueueReadback, OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
   return {
@@ -1511,6 +1511,55 @@ describe("NasRuntimeSingleFileWriteApprovalActionPanel", () => {
     expect(markup).not.toContain('name="secret"');
     expect(markup).not.toContain('name="token"');
     expect(markup).not.toMatch(/\/Users\/|\/home\/|sk-|token=|private-provider/i);
+  });
+});
+
+
+describe("DispatcherAuthorityMetadataRecordingDraftPanel", () => {
+  it("renders safe dry-run result/audit metadata draft without write controls", () => {
+    const DispatcherAuthorityMetadataRecordingDraftPanel = (OfficePageModule as unknown as {
+      DispatcherAuthorityMetadataRecordingDraftPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.DispatcherAuthorityMetadataRecordingDraftPanel>>;
+    }).DispatcherAuthorityMetadataRecordingDraftPanel;
+    const draft: OfficeDispatcherAuthorityMetadataRecordingDraft = {
+      schema_version: 1,
+      mode: "dispatcher_authority_metadata_recording_draft",
+      ready: true,
+      request_id: "req_20260518_dispatcher_dryrun",
+      correlation_id: "corr_20260518_dispatcher_dryrun",
+      authority_ref: "authority_20260518_status_note",
+      dry_run_result_payload: {
+        result_id: "dryrun_20260518_dispatcher_metadata",
+        safe_summary: "Dispatcher authority dry-run metadata recorded; execution boundary remains closed.",
+      },
+      audit_payload: {
+        audit_id: "audit_20260518_dispatcher_metadata",
+        event_kind: "dry_run_result_recorded",
+      },
+      capabilities: {
+        metadata_recording_draft_enabled: true,
+        dry_run_result_storage_enabled: false,
+        audit_write_enabled: false,
+        dry_run_execution_enabled: false,
+        adapter_binding_enabled: false,
+        target_mutation_enabled: false,
+        nas_save_enabled: false,
+      },
+      errors: [],
+    };
+
+    const markup = renderToStaticMarkup(<DispatcherAuthorityMetadataRecordingDraftPanel draft={draft} error={null} />);
+
+    expect(markup).toContain('data-office-dispatcher-authority-metadata-recording-draft="true"');
+    expect(markup).toContain('data-office-dispatcher-authority-metadata-recording-draft-ready="true"');
+    expect(markup).toContain('data-office-dispatcher-authority-metadata-recording-draft-storage-enabled="false"');
+    expect(markup).toContain('data-office-dispatcher-authority-metadata-recording-draft-audit-write-enabled="false"');
+    expect(markup).toContain('data-office-dispatcher-authority-metadata-recording-draft-target-mutation-enabled="false"');
+    expect(markup).toContain("dryrun_20260518_dispatcher_metadata");
+    expect(markup).toContain("audit_20260518_dispatcher_metadata");
+    expect(markup).toContain("manual append only");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("button");
+    expect(markup).not.toMatch(/\/Users\/|\/home\/|sk-|token=|provider/i);
   });
 });
 

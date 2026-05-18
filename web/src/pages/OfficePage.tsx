@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -3951,6 +3951,57 @@ export function DispatcherAuthorityDryRunSurfacePanel({
 }
 
 
+function safeDraftValue(payload: Record<string, unknown> | null, field: string): string {
+  const value = payload?.[field];
+  return typeof value === "string" ? value : "safe-ref unavailable";
+}
+
+export function DispatcherAuthorityMetadataRecordingDraftPanel({
+  draft,
+  error,
+}: {
+  draft: OfficeDispatcherAuthorityMetadataRecordingDraft | null;
+  error?: string | null;
+}) {
+  const caps = draft?.capabilities ?? {};
+  return (
+    <section
+      className="border border-cyan-300/20 bg-cyan-950/10 p-4"
+      data-office-dispatcher-authority-metadata-recording-draft="true"
+      data-office-dispatcher-authority-metadata-recording-draft-ready={String(Boolean(draft?.ready))}
+      data-office-dispatcher-authority-metadata-recording-draft-storage-enabled={String(Boolean(caps.dry_run_result_storage_enabled))}
+      data-office-dispatcher-authority-metadata-recording-draft-audit-write-enabled={String(Boolean(caps.audit_write_enabled))}
+      data-office-dispatcher-authority-metadata-recording-draft-target-mutation-enabled={String(Boolean(caps.target_mutation_enabled))}
+      data-office-dispatcher-authority-metadata-recording-draft-nas-save-enabled={String(Boolean(caps.nas_save_enabled))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-200/70">Dispatcher metadata recording draft</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">dry-run result / audit payload projection</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Projects allowlisted dry-run result and audit metadata for manual append only. Storage, audit write, execution, target mutation, adapter binding, and NAS save remain disabled here.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? `readback ${error}` : `ready ${draft?.ready ? "true" : "false"}`}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 text-xs text-midground/70 md:grid-cols-3" data-office-dispatcher-authority-metadata-recording-draft-refs="true">
+        <div className="border border-current/15 bg-black/20 p-2">request: {draft?.request_id ?? "safe-ref unavailable"}</div>
+        <div className="border border-current/15 bg-black/20 p-2">result: {safeDraftValue(draft?.dry_run_result_payload ?? null, "result_id")}</div>
+        <div className="border border-current/15 bg-black/20 p-2">audit: {safeDraftValue(draft?.audit_payload ?? null, "audit_id")}</div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-dispatcher-authority-metadata-recording-draft-boundaries="true">
+        <div className="border border-current/15 bg-black/20 p-3 text-xs text-midground/70">storage enabled {String(Boolean(caps.dry_run_result_storage_enabled))}</div>
+        <div className="border border-current/15 bg-black/20 p-3 text-xs text-midground/70">audit write enabled {String(Boolean(caps.audit_write_enabled))}</div>
+        <div className="border border-current/15 bg-black/20 p-3 text-xs text-midground/70">execution enabled {String(Boolean(caps.dry_run_execution_enabled))}</div>
+        <div className="border border-current/15 bg-black/20 p-3 text-xs text-midground/70">manual append only</div>
+      </div>
+    </section>
+  );
+}
+
+
 export function NasKeeperQueueManualEvidenceReviewSurfacePanel({
   surface,
   readback,
@@ -5156,6 +5207,8 @@ export default function OfficePage() {
   const [authorityMetadataHandoffError, setAuthorityMetadataHandoffError] = useState<string | null>(null);
   const [dispatcherAuthorityDryRun, setDispatcherAuthorityDryRun] = useState<OfficeDispatcherAuthorityDryRunSurface | null>(null);
   const [dispatcherAuthorityDryRunError, setDispatcherAuthorityDryRunError] = useState<string | null>(null);
+  const [dispatcherAuthorityMetadataRecordingDraft, setDispatcherAuthorityMetadataRecordingDraft] = useState<OfficeDispatcherAuthorityMetadataRecordingDraft | null>(null);
+  const [dispatcherAuthorityMetadataRecordingDraftError, setDispatcherAuthorityMetadataRecordingDraftError] = useState<string | null>(null);
   const [nasKeeperQueueReadbackLoading, setNasKeeperQueueReadbackLoading] = useState(false);
   const [nasKeeperQueueReadbackError, setNasKeeperQueueReadbackError] = useState<string | null>(null);
   const [nasKeeperExecutionDraft, setNasKeeperExecutionDraft] = useState<OfficeNasKeeperExecutionFromPreviewPayload>(DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT);
@@ -5403,6 +5456,27 @@ export default function OfficePage() {
         if (!cancelled) {
           setDispatcherAuthorityDryRun(null);
           setDispatcherAuthorityDryRunError("request failed");
+        }
+      });
+    api
+      .getOfficeControlledMutationDispatcherAuthorityMetadataRecordingDraft({
+        request_id: "req_20260518_dispatcher_dryrun",
+        correlation_id: "corr_20260518_dispatcher_dryrun",
+        authority_ref: "authority_20260518_status_note",
+        result_id: "dryrun_20260518_dispatcher_metadata",
+        audit_id: "audit_20260518_dispatcher_metadata",
+        recorded_at: "2026-05-18T11:45:00Z",
+      })
+      .then((next) => {
+        if (!cancelled) {
+          setDispatcherAuthorityMetadataRecordingDraft(next);
+          setDispatcherAuthorityMetadataRecordingDraftError(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setDispatcherAuthorityMetadataRecordingDraft(null);
+          setDispatcherAuthorityMetadataRecordingDraftError("request failed");
         }
       });
     api
@@ -5978,6 +6052,8 @@ export default function OfficePage() {
       <AuthorityMetadataHandoffStatusPanel status={authorityMetadataHandoff} error={authorityMetadataHandoffError} />
 
       <DispatcherAuthorityDryRunSurfacePanel surface={dispatcherAuthorityDryRun} error={dispatcherAuthorityDryRunError} />
+
+      <DispatcherAuthorityMetadataRecordingDraftPanel draft={dispatcherAuthorityMetadataRecordingDraft} error={dispatcherAuthorityMetadataRecordingDraftError} />
 
       <NasKeeperExecutionOperatorActionPanel
         action={nasKeeperExecutionOperatorAction}
