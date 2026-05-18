@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 17:56 KST
+Last updated: 2026-05-18 18:03 KST
 
 ## Controlled-mutation authority metadata handoff readback lane
 
@@ -9,6 +9,8 @@ Implemented the next local guarded lane after the VPS safe metadata checkpoint. 
 Verification 2026-05-18 17:56 KST: RED backend tests first failed because the helper/route were missing, then GREEN regression passed: `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_authority_metadata_handoff.py tests/hermes_cli/test_office_controlled_mutation_authority_registry_store.py -q -o 'addopts='` -> `11 passed`. Focused frontend API + panel regression `npm test -- --run src/lib/api.test.ts src/pages/OfficePage.rpg.test.tsx` -> `71 passed`. `npm run lint` passed with 23 existing warnings and 0 errors; `npm run build` passed with the existing Vite large chunk warning only; `git diff --check` passed.
 
 Boundary: this slice added local safe readback/API/UI status only. It did not append new VPS metadata, execute a NAS write, mutate queue state, start watcher/cron/dispatch, bind an authority adapter, add public exposure, restart dashboard/gateway, or grant VPS direct NAS mount/credential/write authority.
+
+Deploy/smoke 2026-05-18 18:03 KST: committed and pushed `74342ce7` (`feat(office): surface authority metadata handoff`) to `origin/main`; restricted VPS dashboard worktree `/home/hermes/.hermes/ai-office-dashboard` was reset to `74342ce7` with an explicit main refspec. Copied the locally verified `hermes_cli/web_dist` fallback to the VPS; normalized local/remote tree hash matched (`92473f580b48f28bf100927d3fb34cc1a88829ff021a81f7b84f06b8ebc34420`). Restarted only `hermes-agent-dashboard.service`; `hermes-gateway.service` remained active and untouched. Private `/office?authority-handoff=74342ce7` returned HTTP 200 after listener readiness retry, authority metadata handoff panel rendered with complete=true and counts 1/1/1/1/1, dispatch/binding/target mutation flags false, panel forms/buttons/inputs 0, protected API returned 401 without the session header and 200 with the session header, scoped raw path/Traceback/token/provider/markdown-body leak probe false, and browser console JS errors 0.
 
 ## VPS controlled-mutation safe metadata write checkpoint
 

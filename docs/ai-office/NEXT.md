@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-18 17:56 KST
+Last updated: 2026-05-18 18:03 KST
 
 ## Start here after `/new`
 
@@ -73,6 +73,8 @@ When not to rely on `/goal` alone:
 The user approved A-G approval buckets for future AI Office work while excluding H public exposure changes and permanently excluding VPS NAS mounts/direct NAS credentials/VPS direct NAS raw reads. Use the prepared prompt and guardrails in `docs/ai-office/plans/2026-05-13-goal-a-g-approval-handoff.md` for the next `/goal` session. A-G are permission buckets, not standalone tasks: the next session must first identify the exact concrete task list from current NEXT/STATUS/evidence before implementing.
 
 ## Current next stage
+
+Immediate state 2026-05-18 18:03 KST: Code commit `74342ce7` (`feat(office): surface authority metadata handoff`) is pushed to `origin/main` and synced to the restricted VPS dashboard worktree. Locally verified `web_dist` fallback was copied to the VPS with matching normalized tree hash `92473f580b48f28bf100927d3fb34cc1a88829ff021a81f7b84f06b8ebc34420`; restarted only `hermes-agent-dashboard.service`; `hermes-gateway.service` stayed active/untouched. Private `/office?authority-handoff=74342ce7` HTTP 200/browser smoke passed: authority metadata handoff hook rendered, counts were 1 across request/decision/dry-run/audit/authority-registry, dispatch/binding/target mutation flags false, panel forms/buttons/inputs 0, scoped raw path/Traceback/token/provider/markdown-body leak probe false, console JS errors 0. Current next shortest step: decide whether to keep this as manual status-note lane only or design the next dry-run-only dispatcher/authority surface. Still excluded unless separately approved: watcher/cron/dispatch daemon, authority-adapter binding, public exposure, gateway restart, and VPS direct NAS mounts/credentials/write authority.
 
 Immediate state 2026-05-18 17:56 KST: Implemented the local guarded status-note/authority metadata handoff readback lane. Added a safe helper and protected API endpoint `/api/office/controlled-mutation/authority-metadata-handoff` that summarize request/decision/dry-run/audit/authority-registry JSONL counts and latest opaque refs without echoing raw filter values. Added typed frontend API wrapper and a read-only `/office` status panel with stable `data-office-authority-metadata-handoff-*` hooks. Focused backend regression passed (`11 passed` across authority metadata handoff + authority registry store); focused frontend API + Office RPG panel regression passed (`71 passed`); `npm run lint` passed with existing warnings only; `npm run build` passed with existing Vite large chunk warning; `git diff --check` passed. Current next shortest step: commit/push this local slice, then optionally sync dashboard-only to the restricted VPS and browser-smoke the protected readback panel. Still excluded unless separately approved: watcher/cron/dispatch daemon, authority-adapter binding, public exposure, gateway restart, and VPS direct NAS mounts/credentials/write authority.
 
