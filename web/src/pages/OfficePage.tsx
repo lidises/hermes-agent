@@ -262,7 +262,7 @@ const DEFAULT_NAS_SINGLE_WRITE_DRAFT: OfficeNasMacRelayWritePayload = {
   relay_authorized_at: "2026-05-17T13:31:00Z",
 };
 
-type NasKeeperExecutionStateDraft = Pick<OfficeNasKeeperExecutionStatePayload, "execution_record_ref" | "recorded_by" | "recorded_at" | "execution_status" | "safe_summary"> & { evidence_refs: string };
+export type NasKeeperExecutionStateDraft = Pick<OfficeNasKeeperExecutionStatePayload, "execution_record_ref" | "recorded_by" | "recorded_at" | "execution_status" | "safe_summary"> & { evidence_refs: string };
 
 const DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT: OfficeNasKeeperExecutionFromPreviewPayload = {
   handoff_ref: "handoff_office_ui_smoke",
@@ -281,6 +281,35 @@ const DEFAULT_NAS_KEEPER_EXECUTION_STATE_DRAFT: NasKeeperExecutionStateDraft = {
   safe_summary: "safe execution result recorded",
   evidence_refs: "evidence_office_ui_smoke",
 };
+
+function safeRefPart(value: string): string {
+  return value.replace(/[^A-Za-z0-9_]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 80) || "execution";
+}
+
+export function buildNasKeeperExecutionStateDraftFromResult(
+  current: NasKeeperExecutionStateDraft,
+  executionDraft: OfficeNasKeeperExecutionFromPreviewPayload,
+  result: OfficeNasKeeperExecutionFromPreviewResult,
+  recordedAt: string = new Date().toISOString(),
+): NasKeeperExecutionStateDraft {
+  const dto = result.dto;
+  if (!result.executed || !result.written || !dto) return current;
+  const evidenceRefs = [
+    dto.audit_ref ? `audit:${dto.audit_ref}` : null,
+    dto.readback_sha256 ? `readback_sha256:${dto.readback_sha256.slice(0, 16)}` : null,
+    dto.rollback_ref ? `rollback:${dto.rollback_ref}` : null,
+    dto.markdown_body_sha256 ? `markdown_sha256:${dto.markdown_body_sha256.slice(0, 16)}` : null,
+  ].filter((item): item is string => Boolean(item));
+
+  return {
+    execution_record_ref: `exec_record_${safeRefPart(executionDraft.relay_execution_ref || dto.handoff_ref)}`,
+    recorded_by: executionDraft.nas_keeper_ref,
+    recorded_at: recordedAt,
+    execution_status: "succeeded",
+    safe_summary: "Mac relay write completed; readback and audit evidence were verified.",
+    evidence_refs: evidenceRefs.join(", "),
+  };
+}
 
 const FOCUS_LABEL: Record<FocusOption, string> = {
   overview: "전체",
@@ -5137,6 +5166,7 @@ export default function OfficePage() {
     try {
       const result = await api.executeOfficeControlledMutationNasKeeperExecutionFromPreview(nasKeeperExecutionDraft);
       setNasKeeperExecutionResult(result);
+      setNasKeeperExecutionStateDraft((current) => buildNasKeeperExecutionStateDraftFromResult(current, nasKeeperExecutionDraft, result));
       setNasKeeperExecutionApproved(false);
       void loadNasKeeperQueueReadback();
     } catch {

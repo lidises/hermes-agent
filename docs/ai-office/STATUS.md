@@ -1,6 +1,14 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 15:16 KST
+Last updated: 2026-05-18 15:33 KST
+
+## NAS Keeper execution-state evidence prefill after real write
+
+Implemented the shortest write-capable operator polish after guarded prefill/deploy: when `/office` `execution-from-preview` succeeds, the guarded execution-state draft is automatically populated from safe result metadata. It derives a safe `execution_record_ref`, records the NAS Keeper as `recorded_by`, stamps `recorded_at`, sets `execution_status=succeeded`, and fills safe evidence refs from audit/readback/rollback/markdown hashes. Failed or non-written execution results leave the previous state draft unchanged. The UI still requires the separate execution-state record button; this slice does not auto-record state, auto-dispatch, start watchers/cron, bind authority adapters, grant VPS NAS access, or expose queued markdown bodies/raw paths.
+
+Verification 2026-05-18 15:33 KST: RED focused test covered missing evidence-prefill behavior; GREEN focused `npm test -- --run src/pages/OfficePage.rpg.test.tsx -t "prefills safe execution-state evidence"` passed. Combined frontend regression `npm test -- --run src/pages/OfficePage.rpg.test.tsx src/pages/OfficePage.test.ts src/lib/api.test.ts` -> `219 passed`; backend focused execution/API regression `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_from_preview.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_state_record.py tests/hermes_cli/test_office_api.py -q -o 'addopts='` -> `18 passed`; `npm run build` passed with the existing Vite large chunk warning only; `git diff --check` passed. Under the user-approved actual-write scope, a Mac-local temporary queue smoke wrote `Hermes::ai-office-live-evidence-prefill-smoke.md` through execution-from-preview against `/Users/lidises/nas`, verified readback SHA-256 `b16f7d8115c550b39b6839068206fd6570459264bfd3b3c202ffe3431a178d76`, audit write true, response leak probe false, then recorded terminal queue state using safe evidence refs (`mac_relay_execution_succeeded`).
+
+Boundary: local code/docs and Mac-local actual NAS smoke only. No durable production queue item was executed, no VPS direct NAS mount/credential/write authority was added, no watcher/cron/dispatch daemon or authority adapter was started, no public exposure was added, and no dashboard/gateway service was restarted for this slice.
 
 ## 2026-05-18 VPS deploy/update continuation
 
