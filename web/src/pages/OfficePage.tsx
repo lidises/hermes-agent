@@ -311,6 +311,21 @@ export function buildNasKeeperExecutionStateDraftFromResult(
   };
 }
 
+export function buildNasKeeperExecutionFromPreviewRequest(
+  draft: OfficeNasKeeperExecutionFromPreviewPayload,
+  stateDraft: NasKeeperExecutionStateDraft,
+  recordStateAfterWrite: boolean,
+): OfficeNasKeeperExecutionFromPreviewPayload {
+  if (!recordStateAfterWrite) return draft;
+  return {
+    ...draft,
+    record_execution_state_after_write: true,
+    execution_record_ref: stateDraft.execution_record_ref,
+    recorded_by: stateDraft.recorded_by,
+    recorded_at: stateDraft.recorded_at,
+  };
+}
+
 const FOCUS_LABEL: Record<FocusOption, string> = {
   overview: "전체",
   work: "작업",
@@ -3723,6 +3738,7 @@ export function NasKeeperExecutionOperatorActionPanel({
   draft,
   stateDraft,
   approved,
+  recordStateAfterWrite,
   busy,
   result,
   stateBusy,
@@ -3731,6 +3747,7 @@ export function NasKeeperExecutionOperatorActionPanel({
   onDraftChange,
   onStateDraftChange,
   onApprovalChange,
+  onRecordStateAfterWriteChange,
   onExecute,
   onRecordState,
 }: {
@@ -3738,6 +3755,7 @@ export function NasKeeperExecutionOperatorActionPanel({
   draft: OfficeNasKeeperExecutionFromPreviewPayload;
   stateDraft: NasKeeperExecutionStateDraft;
   approved: boolean;
+  recordStateAfterWrite: boolean;
   busy: boolean;
   result: OfficeNasKeeperExecutionFromPreviewResult | null;
   stateBusy: boolean;
@@ -3746,6 +3764,7 @@ export function NasKeeperExecutionOperatorActionPanel({
   onDraftChange: (field: NasKeeperExecutionFromPreviewDraftField, value: string) => void;
   onStateDraftChange: (field: keyof NasKeeperExecutionStateDraft, value: string) => void;
   onApprovalChange: (approved: boolean) => void;
+  onRecordStateAfterWriteChange: (enabled: boolean) => void;
   onExecute: () => void;
   onRecordState: () => void;
 }) {
@@ -3791,8 +3810,12 @@ export function NasKeeperExecutionOperatorActionPanel({
             <input type="checkbox" name="execution_from_preview_approved" checked={approved} onChange={(event) => onApprovalChange(event.target.checked)} />
             승인: authorized queue item을 preview 재검증 후 1회 실행
           </label>
+          <label className="flex items-center gap-2 border border-sky-300/20 bg-sky-950/10 p-3 text-sky-100/80">
+            <input type="checkbox" name="record_execution_state_after_write" checked={recordStateAfterWrite} onChange={(event) => onRecordStateAfterWriteChange(event.target.checked)} />
+            성공한 write는 같은 요청에서 실행 상태까지 기록
+          </label>
           <button type="button" disabled={!approved || busy} onClick={onExecute} className="border border-amber-300/30 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-amber-100 disabled:opacity-40">
-            {busy ? "실행 중" : "NAS Keeper → Mac relay preview 실행"}
+            {busy ? "실행 중" : recordStateAfterWrite ? "NAS Keeper → Mac relay 실행+기록" : "NAS Keeper → Mac relay preview 실행"}
           </button>
           <div className="grid gap-2 md:grid-cols-2">
             {stateFields.map((field) => (
@@ -5030,6 +5053,7 @@ export default function OfficePage() {
   const [nasKeeperExecutionDraft, setNasKeeperExecutionDraft] = useState<OfficeNasKeeperExecutionFromPreviewPayload>(DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT);
   const [nasKeeperExecutionStateDraft, setNasKeeperExecutionStateDraft] = useState<NasKeeperExecutionStateDraft>(DEFAULT_NAS_KEEPER_EXECUTION_STATE_DRAFT);
   const [nasKeeperExecutionApproved, setNasKeeperExecutionApproved] = useState(false);
+  const [nasKeeperExecutionRecordStateAfterWrite, setNasKeeperExecutionRecordStateAfterWrite] = useState(true);
   const [nasKeeperExecutionBusy, setNasKeeperExecutionBusy] = useState(false);
   const [nasKeeperExecutionResult, setNasKeeperExecutionResult] = useState<OfficeNasKeeperExecutionFromPreviewResult | null>(null);
   const [nasKeeperExecutionStateBusy, setNasKeeperExecutionStateBusy] = useState(false);
@@ -5167,9 +5191,13 @@ export default function OfficePage() {
     setNasKeeperExecutionBusy(true);
     setNasKeeperExecutionError(null);
     try {
-      const result = await api.executeOfficeControlledMutationNasKeeperExecutionFromPreview(nasKeeperExecutionDraft);
+      const request = buildNasKeeperExecutionFromPreviewRequest(nasKeeperExecutionDraft, nasKeeperExecutionStateDraft, nasKeeperExecutionRecordStateAfterWrite);
+      const result = await api.executeOfficeControlledMutationNasKeeperExecutionFromPreview(request);
       setNasKeeperExecutionResult(result);
       setNasKeeperExecutionStateDraft((current) => buildNasKeeperExecutionStateDraftFromResult(current, nasKeeperExecutionDraft, result));
+      if (result.dto?.execution_state) {
+        setNasKeeperExecutionStateResult({ recorded: Boolean(result.recorded), errors: result.errors, dto: result.dto.execution_state });
+      }
       setNasKeeperExecutionApproved(false);
       void loadNasKeeperQueueReadback();
     } catch {
@@ -5177,7 +5205,7 @@ export default function OfficePage() {
     } finally {
       setNasKeeperExecutionBusy(false);
     }
-  }, [loadNasKeeperQueueReadback, nasKeeperExecutionApproved, nasKeeperExecutionDraft]);
+  }, [loadNasKeeperQueueReadback, nasKeeperExecutionApproved, nasKeeperExecutionDraft, nasKeeperExecutionRecordStateAfterWrite, nasKeeperExecutionStateDraft]);
 
   const recordNasKeeperExecutionState = useCallback(async () => {
     setNasKeeperExecutionStateBusy(true);
@@ -5812,6 +5840,7 @@ export default function OfficePage() {
         draft={nasKeeperExecutionDraft}
         stateDraft={nasKeeperExecutionStateDraft}
         approved={nasKeeperExecutionApproved}
+        recordStateAfterWrite={nasKeeperExecutionRecordStateAfterWrite}
         busy={nasKeeperExecutionBusy}
         result={nasKeeperExecutionResult}
         stateBusy={nasKeeperExecutionStateBusy}
@@ -5820,6 +5849,7 @@ export default function OfficePage() {
         onDraftChange={updateNasKeeperExecutionDraft}
         onStateDraftChange={updateNasKeeperExecutionStateDraft}
         onApprovalChange={setNasKeeperExecutionApproved}
+        onRecordStateAfterWriteChange={setNasKeeperExecutionRecordStateAfterWrite}
         onExecute={executeNasKeeperExecutionFromPreview}
         onRecordState={recordNasKeeperExecutionState}
       />

@@ -1601,6 +1601,38 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
 
 
 describe("NasKeeperExecutionOperatorActionPanel", () => {
+  it("builds one-call execute-and-record payloads from safe refs only", () => {
+    const buildRequest = (OfficePageModule as unknown as {
+      buildNasKeeperExecutionFromPreviewRequest: typeof OfficePageModule.buildNasKeeperExecutionFromPreviewRequest;
+    }).buildNasKeeperExecutionFromPreviewRequest;
+    const executionDraft = {
+      handoff_ref: "handoff_inline_ui_demo",
+      relay_execution_ref: "relay_exec_inline_ui_demo",
+      nas_keeper_ref: "agent_nas_keeper",
+      relay_node_ref: "mac_relay_primary",
+      relay_authorized_by: "agent_nas_keeper",
+      relay_authorized_at: "2026-05-18T07:01:00Z",
+    };
+    const stateDraft = {
+      execution_record_ref: "exec_record_inline_ui_demo",
+      recorded_by: "agent_nas_keeper",
+      recorded_at: "2026-05-18T07:02:00Z",
+      execution_status: "succeeded" as const,
+      safe_summary: "safe summary not sent inline",
+      evidence_refs: "evidence:not_sent_inline",
+    };
+
+    expect(buildRequest(executionDraft, stateDraft, false)).toBe(executionDraft);
+    expect(buildRequest(executionDraft, stateDraft, true)).toEqual({
+      ...executionDraft,
+      record_execution_state_after_write: true,
+      execution_record_ref: "exec_record_inline_ui_demo",
+      recorded_by: "agent_nas_keeper",
+      recorded_at: "2026-05-18T07:02:00Z",
+    });
+    expect(JSON.stringify(buildRequest(executionDraft, stateDraft, true))).not.toMatch(/safe summary not sent inline|evidence:not_sent_inline|markdown_body|\/Users\/lidises|\/home\/hermes|Traceback|sk-/i);
+  });
+
   it("prefills safe execution-state evidence from a successful execution result", () => {
     const buildDraft = (OfficePageModule as unknown as {
       buildNasKeeperExecutionStateDraftFromResult: typeof OfficePageModule.buildNasKeeperExecutionStateDraftFromResult;
@@ -1760,6 +1792,7 @@ describe("NasKeeperExecutionOperatorActionPanel", () => {
           evidence_refs: "evidence_operator_demo",
         }}
         approved={false}
+        recordStateAfterWrite={true}
         busy={false}
         result={null}
         stateBusy={false}
@@ -1768,6 +1801,7 @@ describe("NasKeeperExecutionOperatorActionPanel", () => {
         onDraftChange={() => undefined}
         onStateDraftChange={() => undefined}
         onApprovalChange={() => undefined}
+        onRecordStateAfterWriteChange={() => undefined}
         onExecute={() => undefined}
         onRecordState={() => undefined}
       />
@@ -1781,7 +1815,8 @@ describe("NasKeeperExecutionOperatorActionPanel", () => {
     expect(markup).toContain('data-office-nas-keeper-execution-operator-watcher-cron-daemon-enabled="false"');
     expect(markup).toContain('name="handoff_ref"');
     expect(markup).toContain('name="execution_record_ref"');
-    expect(markup).toContain("NAS Keeper → Mac relay preview 실행");
+    expect(markup).toContain('name="record_execution_state_after_write"');
+    expect(markup).toContain("NAS Keeper → Mac relay 실행+기록");
     expect(markup).toContain("실행 상태 기록");
     expect(markup).not.toContain('name="markdown_body"');
     expect(markup).not.toContain('name="raw_path"');

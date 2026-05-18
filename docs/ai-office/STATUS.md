@@ -1,6 +1,14 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 15:56 KST
+Last updated: 2026-05-18 16:18 KST
+
+## NAS Keeper inline execute-and-record UI path
+
+Implemented the shortest UI continuation after the backend one-call write+record bridge: `/office` NAS Keeper execution operator now has an explicit `record_execution_state_after_write` checkbox, checked by default, and builds a one-call execution-from-preview request with only safe inline state refs (`execution_record_ref`, `recorded_by`, `recorded_at`). When the backend returns inline `execution_state`, the UI surfaces the recorded state result immediately and refreshes queue readback. The separate state-record button remains available for manual fallback. The request builder deliberately does not send the safe summary, evidence refs, markdown body, raw paths, provider/log fields, credentials, watcher/cron controls, authority-adapter binding controls, gateway/dashboard restart controls, or VPS direct NAS authority.
+
+Verification 2026-05-18 16:18 KST: RED focused UI/helper test first covered the missing one-call execute-and-record payload option; GREEN focused `npm test -- --run src/pages/OfficePage.rpg.test.tsx -t "NasKeeperExecutionOperatorActionPanel"` -> `4 passed`. Combined frontend regression `npm test -- --run src/pages/OfficePage.rpg.test.tsx src/pages/OfficePage.test.ts src/lib/api.test.ts` -> `221 passed`; backend focused/API regression `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_from_preview.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_state_record.py tests/hermes_cli/test_office_api.py -q -o 'addopts='` -> `19 passed`; `py_compile`, `npm run build`, and `git diff --check` passed. Vite large chunk warning remains the existing known warning only.
+
+Boundary: actual write path is enabled only through the already-guarded operator flow and still requires the execution approval checkbox before the request is sent. No durable production queue item was executed in this UI slice, no watcher/cron/dispatch daemon or authority adapter was started, no VPS direct NAS mount/credential/write authority was added, no public exposure was added, and no gateway restart was performed. Dashboard-only publish/smoke pending for this commit.
 
 ## NAS Keeper inline execute-and-record write path
 
