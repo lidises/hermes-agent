@@ -1,7 +1,13 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 14:08 KST
+Last updated: 2026-05-18 14:41 KST
 
+
+## Guarded NAS Keeper operator UI end-to-end local/Mac relay smoke
+
+After the user chose the deliberately-approved local end-to-end UI smoke path, ran `/office?ui-e2e=local` behind the real Hermes dashboard backend with an isolated temporary local profile and a temporary Mac relay NAS root. From the browser session, seeded one safe authorized NAS Keeper queue item, used the guarded operator panel to execute `execution-from-preview`, then used the same panel to record execution state. Safe logical target: `vault_personal_wiki_demo::ai-office-ui-e2e-smoke-20260518-1434.md`. UI result showed `executed true`, `written true`, `readback true`, `audit true`, then `recorded true` with queue status `mac_relay_execution_succeeded`. Final readback SHA-256: `e906a9a5ab92fb7869cb757dd35cd9c0ef39209e5f65e9b80f7a50555a9e04a3`. Browser console JS errors: 0. Scoped public DTO/panel leak check was false for raw Mac/VPS paths, token-looking strings, raw JSON `markdown_body`, and Traceback. Focused backend execution/API regression passed: `18 passed`.
+
+Boundary: this was an isolated local/Mac relay UI smoke only. It did not mutate the durable production NAS Keeper queue, did not start watcher/cron/dispatch automation, did not bind an authority adapter, did not grant VPS NAS mount/credential/direct-write authority, did not deploy or restart dashboard/gateway, and did not expose raw paths or markdown bodies in public result DTOs. The Mac `.venv` dashboard web extra was installed to run this local backend smoke (`pip install -e '.[web]'`).
 
 ## Guarded NAS Keeper execution operator UI implemented locally
 
