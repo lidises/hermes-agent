@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-18 17:08 KST
+Last updated: 2026-05-18 17:18 KST
 
 ## Start here after `/new`
 
@@ -73,6 +73,8 @@ When not to rely on `/goal` alone:
 The user approved A-G approval buckets for future AI Office work while excluding H public exposure changes and permanently excluding VPS NAS mounts/direct NAS credentials/VPS direct NAS raw reads. Use the prepared prompt and guardrails in `docs/ai-office/plans/2026-05-13-goal-a-g-approval-handoff.md` for the next `/goal` session. A-G are permission buckets, not standalone tasks: the next session must first identify the exact concrete task list from current NEXT/STATUS/evidence before implementing.
 
 ## Current next stage
+
+Immediate state 2026-05-18 17:18 KST: The fail-closed filesystem hardening path is implemented locally and ready to commit/push. Additional RED tests covered later actual-NAS failure points: atomic temp write, atomic replace, rollback copy, Mac relay readback, and audit write/directory OS errors. Implementation now returns constant safe DTO errors (`write_target_unavailable`, `rollback_unavailable`, `readback_unavailable`) or safe audit metadata (`audit_written=false`) without raw paths/tracebacks. Verification passed: focused GREEN `5 passed`; broader backend regression `34 passed`; `py_compile` and `git diff --check` passed. Current next shortest step after commit/push is to move to a dry-run-only dispatcher/authority design surface; keep watcher/cron/dispatch daemon, authority-adapter binding, public exposure, gateway restart, and VPS direct NAS mounts/credentials/write authority excluded.
 
 Immediate state 2026-05-18 17:08 KST: Commit `824459fc` has been pushed to `origin/main` and synced to the restricted VPS dashboard worktree `/home/hermes/.hermes/ai-office-dashboard`. Only `hermes-agent-dashboard.service` was restarted; `hermes-gateway.service` stayed active/untouched. Private `/office?inline-smoke=824459fc` smoke returned HTTP 200 on `100.122.57.85:8765`, browser DOM rendered AI Office plus NAS Keeper operator/queue panels, forms count was 0, scoped raw path/Traceback/token/markdown_body leak probes were false, and console JS errors were 0. Current next shortest step: either move to a dry-run-only dispatcher/authority design surface, or add more fail-closed DTO coverage around later write/readback/audit filesystem failures before any dispatcher/watch/automation work. Keep watcher/cron/dispatch daemon, authority-adapter binding, public exposure, gateway restart, and VPS direct NAS mounts/credentials/write authority excluded.
 

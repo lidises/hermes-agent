@@ -132,6 +132,89 @@ def test_nas_runtime_single_file_write_fails_closed_when_target_parent_unavailab
     assert "traceback" not in serialized
 
 
+def test_nas_runtime_single_file_write_fails_closed_when_atomic_temp_write_fails(tmp_path, monkeypatch):
+    from pathlib import Path
+
+    from hermes_cli.office_controlled_mutation import execute_office_controlled_mutation_nas_single_file_write
+
+    real_write_text = Path.write_text
+
+    def fail_temp_write(self, data, *args, **kwargs):
+        if self.name.startswith(".usable-ai-office-demo.md.") and self.name.endswith(".tmp"):
+            raise OSError("/Users/lidises/nas/private write failed")
+        return real_write_text(self, data, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "write_text", fail_temp_write)
+    result = execute_office_controlled_mutation_nas_single_file_write(safe_write_payload(), root_path=tmp_path / "nas-root")
+
+    assert result == {
+        "written": False,
+        "errors": [{"field": "write_target", "code": "write_target_unavailable"}],
+        "dto": None,
+    }
+    serialized = json.dumps(result, sort_keys=True).lower()
+    assert "/users/lidises" not in serialized
+    assert "write failed" not in serialized
+    assert "traceback" not in serialized
+
+
+def test_nas_runtime_single_file_write_fails_closed_when_atomic_replace_fails(tmp_path, monkeypatch):
+    from pathlib import Path
+
+    from hermes_cli.office_controlled_mutation import execute_office_controlled_mutation_nas_single_file_write
+
+    real_replace = Path.replace
+
+    def fail_temp_replace(self, target):
+        if self.name.startswith(".usable-ai-office-demo.md.") and self.name.endswith(".tmp"):
+            raise OSError("/Users/lidises/nas/private replace failed")
+        return real_replace(self, target)
+
+    monkeypatch.setattr(Path, "replace", fail_temp_replace)
+    result = execute_office_controlled_mutation_nas_single_file_write(safe_write_payload(), root_path=tmp_path / "nas-root")
+
+    assert result == {
+        "written": False,
+        "errors": [{"field": "write_target", "code": "write_target_unavailable"}],
+        "dto": None,
+    }
+    serialized = json.dumps(result, sort_keys=True).lower()
+    assert "/users/lidises" not in serialized
+    assert "replace failed" not in serialized
+    assert "traceback" not in serialized
+
+
+def test_nas_runtime_single_file_write_fails_closed_when_rollback_copy_fails(tmp_path, monkeypatch):
+    from pathlib import Path
+
+    from hermes_cli.office_controlled_mutation import execute_office_controlled_mutation_nas_single_file_write
+
+    root_path = tmp_path / "nas-root"
+    target = root_path / "vault_personal_wiki_demo" / "usable-ai-office-demo.md"
+    target.parent.mkdir(parents=True)
+    target.write_text("# Previous safe note\n", encoding="utf-8")
+    real_write_bytes = Path.write_bytes
+
+    def fail_rollback_write(self, data):
+        if ".ai-office-rollbacks" in self.parts:
+            raise OSError("/Users/lidises/nas/private rollback failed")
+        return real_write_bytes(self, data)
+
+    monkeypatch.setattr(Path, "write_bytes", fail_rollback_write)
+    result = execute_office_controlled_mutation_nas_single_file_write(safe_write_payload(), root_path=root_path)
+
+    assert result == {
+        "written": False,
+        "errors": [{"field": "rollback", "code": "rollback_unavailable"}],
+        "dto": None,
+    }
+    assert target.read_text(encoding="utf-8") == "# Previous safe note\n"
+    serialized = json.dumps(result, sort_keys=True).lower()
+    assert "/users/lidises" not in serialized
+    assert "rollback failed" not in serialized
+    assert "traceback" not in serialized
+
+
 def test_nas_runtime_single_file_write_api_requires_root_and_session_token(monkeypatch, tmp_path):
     from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
 

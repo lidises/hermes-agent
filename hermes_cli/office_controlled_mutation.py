@@ -3206,7 +3206,10 @@ def execute_office_controlled_mutation_nas_mac_relay_write(
         target.relative_to(root)
     except ValueError:
         return {"executed": False, "written": False, "errors": [_error("safe_slug", "path_escape_blocked")], "dto": None}
-    readback = target.read_text(encoding="utf-8")
+    try:
+        readback = target.read_text(encoding="utf-8")
+    except OSError:
+        return {"executed": False, "written": True, "errors": [_error("readback", "readback_unavailable")], "dto": None}
     readback_sha256 = hashlib.sha256(readback.encode("utf-8")).hexdigest()
     readback_first_line = readback.splitlines()[0] if readback.splitlines() else ""
     if not _is_safe_text(readback_first_line):
@@ -3243,7 +3246,7 @@ def execute_office_controlled_mutation_nas_mac_relay_write(
         audit_dir.mkdir(parents=True, exist_ok=True)
         audit_path.write_text(json.dumps(audit_body, sort_keys=True, ensure_ascii=False) + "\n", encoding="utf-8")
         audit_written = True
-    except PermissionError:
+    except OSError:
         audit_written = False
 
     dto = {
@@ -3351,19 +3354,29 @@ def execute_office_controlled_mutation_nas_single_file_write(
         rollback_path = (root / ".ai-office-rollbacks" / str(payload["write_ref"]) / target.name).resolve()
         try:
             rollback_path.parent.mkdir(parents=True, exist_ok=True)
-        except PermissionError:
+        except OSError:
             rollback_path = (target.parent / ".ai-office-rollbacks" / str(payload["write_ref"]) / target.name).resolve()
             try:
                 rollback_path.parent.mkdir(parents=True, exist_ok=True)
-            except PermissionError:
+            except OSError:
                 return {"written": False, "errors": [_error("rollback", "rollback_unavailable")], "dto": None}
-        rollback_path.write_bytes(target.read_bytes())
+        try:
+            rollback_path.write_bytes(target.read_bytes())
+        except OSError:
+            return {"written": False, "errors": [_error("rollback", "rollback_unavailable")], "dto": None}
         rollback_created = True
 
     markdown_body = str(payload["markdown_body"])
     temp_path = target.with_name(f".{target.name}.{payload['write_ref']}.tmp")
-    temp_path.write_text(markdown_body, encoding="utf-8")
-    temp_path.replace(target)
+    try:
+        temp_path.write_text(markdown_body, encoding="utf-8")
+        temp_path.replace(target)
+    except OSError:
+        try:
+            temp_path.unlink(missing_ok=True)
+        except OSError:
+            pass
+        return {"written": False, "errors": [_error("write_target", "write_target_unavailable")], "dto": None}
 
     dto = {
         "schema_version": 1,

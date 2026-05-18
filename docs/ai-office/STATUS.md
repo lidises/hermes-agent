@@ -1,6 +1,14 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 17:08 KST
+Last updated: 2026-05-18 17:18 KST
+
+## NAS Keeper Mac relay fail-closed filesystem hardening
+
+After the user chose the hardening path before dispatcher/automation work, added focused RED tests for later filesystem failure points in the actual NAS write path: atomic temp write failure, atomic replace failure, rollback copy failure, Mac relay readback failure, and audit directory/write OS errors. Implemented minimal fail-closed behavior: temp write/replace errors now return safe `write_target_unavailable` and clean up the temp file best-effort; rollback read/copy errors now return safe `rollback_unavailable`; Mac relay post-write readback errors now return safe `readback_unavailable` with `written=true` and no DTO; audit OS errors remain nonfatal but produce `audit_written=false`/`audit_ref=None` without raw path/traceback echo.
+
+Verification 2026-05-18 17:18 KST: RED focused tests first failed with raw `OSError`/`FileExistsError` paths; GREEN focused tests passed (`5 passed`). Broader regression `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_runtime_write.py tests/hermes_cli/test_office_controlled_mutation_nas_mac_relay_write_execute.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_from_preview.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_state_record.py tests/hermes_cli/test_office_api.py -q -o 'addopts='` -> `34 passed`; `py_compile` for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py` passed; `git diff --check` passed.
+
+Boundary: local code/test/docs hardening only. No NAS write smoke was performed in this slice, no durable queue item was executed, no watcher/cron/dispatch daemon or authority adapter was started, no VPS direct NAS mount/credential/write authority was added, no public exposure was added, and no dashboard/gateway service was restarted.
 
 ## VPS dashboard sync after inline browser smoke
 

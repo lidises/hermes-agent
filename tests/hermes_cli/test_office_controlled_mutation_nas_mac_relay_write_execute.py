@@ -88,6 +88,55 @@ def test_mac_relay_write_execute_creates_rollback_on_replace(tmp_path):
     assert rollback.read_text(encoding="utf-8") == "# First\n"
 
 
+def test_mac_relay_write_execute_fails_closed_when_readback_unavailable(tmp_path, monkeypatch):
+    from pathlib import Path
+
+    from hermes_cli.office_controlled_mutation import execute_office_controlled_mutation_nas_mac_relay_write
+
+    real_read_text = Path.read_text
+
+    def fail_target_readback(self, *args, **kwargs):
+        if self.name == "usable-ai-office-mac-relay-exec.md":
+            raise OSError("/Users/lidises/nas/private readback failed")
+        return real_read_text(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", fail_target_readback)
+    result = execute_office_controlled_mutation_nas_mac_relay_write(safe_mac_relay_execute_payload(), root_path=tmp_path)
+
+    assert result == {
+        "executed": False,
+        "written": True,
+        "errors": [{"field": "readback", "code": "readback_unavailable"}],
+        "dto": None,
+    }
+    serialized = json.dumps(result, sort_keys=True).lower()
+    assert "/users/lidises" not in serialized
+    assert "readback failed" not in serialized
+    assert "traceback" not in serialized
+
+
+def test_mac_relay_write_execute_treats_audit_os_errors_as_nonfatal_safe_metadata(tmp_path):
+    from hermes_cli.office_controlled_mutation import execute_office_controlled_mutation_nas_mac_relay_write
+
+    audit_path_parent = tmp_path / "vault_personal_wiki_demo" / ".ai-office-audit"
+    audit_path_parent.parent.mkdir(parents=True)
+    audit_path_parent.write_text("not a directory", encoding="utf-8")
+
+    result = execute_office_controlled_mutation_nas_mac_relay_write(safe_mac_relay_execute_payload(), root_path=tmp_path)
+
+    assert result["executed"] is True
+    assert result["written"] is True
+    assert result["errors"] == []
+    dto = result["dto"]
+    assert isinstance(dto, dict)
+    assert dto["audit_written"] is False
+    assert dto["audit_ref"] is None
+    assert dto["capabilities"]["audit_write_enabled"] is False
+    serialized = json.dumps(result, sort_keys=True).lower()
+    assert "/users/lidises" not in serialized
+    assert "traceback" not in serialized
+
+
 def test_mac_relay_write_execute_requires_local_root_and_auth_fields():
     from hermes_cli.office_controlled_mutation import execute_office_controlled_mutation_nas_mac_relay_write
 
