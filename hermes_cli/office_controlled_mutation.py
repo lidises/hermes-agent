@@ -216,6 +216,14 @@ _NAS_KEEPER_HANDOFF_EXECUTION_STATUSES = {
     "failed": "mac_relay_execution_failed",
     "manual_review_required": "mac_relay_execution_manual_review_required",
 }
+_NAS_KEEPER_HANDOFF_QUEUE_STATUSES = {
+    "pending_nas_keeper_authorization",
+    "authorized_for_mac_relay_execution",
+    "mac_relay_execution_succeeded",
+    "mac_relay_execution_failed",
+    "mac_relay_execution_manual_review_required",
+}
+_NAS_KEEPER_HANDOFF_QUEUE_READBACK_FIELDS = {"handoff_ref", "queue_status", "relay_node_ref", "nas_keeper_ref", "limit"}
 _OPAQUE_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{2,119}$")
 _OPAQUE_REF_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_-]{1,40}:[A-Za-z0-9][A-Za-z0-9_.:-]{1,160}$")
 _SAFE_TEXT_RE = re.compile(r"^[^<>\\]{1,240}$")
@@ -2193,6 +2201,215 @@ def _nas_keeper_handoff_queue_file(queue_dir: Path | str | None = None) -> Path:
     if queue_dir is None:
         return get_hermes_home() / "ai-office" / "nas-keeper-handoff" / "mac-relay-write-queue.jsonl"
     return Path(queue_dir).expanduser() / "mac-relay-write-queue.jsonl"
+
+
+def _safe_nas_keeper_queue_summary(item: Mapping[str, object]) -> dict[str, object] | None:
+    """Return a safe readback DTO for one queue item, or ``None`` if unsafe."""
+
+    required = (
+        "handoff_ref",
+        "queue_ref",
+        "queue_status",
+        "relay_request_ref",
+        "write_ref",
+        "package_ref",
+        "target_vault_ref",
+        "safe_slug",
+        "safe_title",
+        "requested_by",
+        "requested_at",
+        "nas_keeper_ref",
+        "relay_node_ref",
+        "safe_logical_path",
+        "safe_display_path",
+        "payload_bytes",
+        "next_required_boundary",
+    )
+    if any(field not in item for field in required):
+        return None
+    if item.get("queue_status") not in _NAS_KEEPER_HANDOFF_QUEUE_STATUSES:
+        return None
+    if not _is_safe_text(item.get("queue_ref")):
+        return None
+    for field in (
+        "handoff_ref",
+        "relay_request_ref",
+        "write_ref",
+        "package_ref",
+        "target_vault_ref",
+        "requested_by",
+        "nas_keeper_ref",
+        "relay_node_ref",
+    ):
+        if not _is_opaque_id(item.get(field)):
+            return None
+    if not _is_safe_text(item.get("safe_title")) or not _is_safe_text(item.get("safe_logical_path")):
+        return None
+    if not _is_safe_text(item.get("safe_display_path")) or not _is_safe_text(item.get("next_required_boundary")):
+        return None
+    safe_slug = item.get("safe_slug")
+    if not isinstance(safe_slug, str) or not _SAFE_SLUG_RE.fullmatch(safe_slug):
+        return None
+    for field in ("requested_at", "queued_at", "authorized_at", "execution_recorded_at"):
+        if field in item and not (isinstance(item.get(field), str) and _ISO_UTC_RE.fullmatch(str(item[field]))):
+            return None
+    if not isinstance(item.get("payload_bytes"), int) or int(cast(int, item["payload_bytes"])) < 0:
+        return None
+
+    summary: dict[str, object] = {
+        "schema_version": 1,
+        "mode": "nas_keeper_mac_relay_handoff_queue_item_summary",
+        "handoff_ref": item["handoff_ref"],
+        "queue_ref": item["queue_ref"],
+        "queue_status": item["queue_status"],
+        "relay_request_ref": item["relay_request_ref"],
+        "write_ref": item["write_ref"],
+        "package_ref": item["package_ref"],
+        "target_vault_ref": item["target_vault_ref"],
+        "safe_slug": item["safe_slug"],
+        "safe_title": item["safe_title"],
+        "requested_by": item["requested_by"],
+        "requested_at": item["requested_at"],
+        "nas_keeper_ref": item["nas_keeper_ref"],
+        "relay_node_ref": item["relay_node_ref"],
+        "safe_logical_path": item["safe_logical_path"],
+        "safe_display_path": item["safe_display_path"],
+        "payload_bytes": item["payload_bytes"],
+        "markdown_body_included": False,
+        "next_required_boundary": item["next_required_boundary"],
+    }
+    for field in (
+        "queued_by",
+        "queued_at",
+        "authorization_ref",
+        "authorization_decision",
+        "authorized_by",
+        "authorized_at",
+        "relay_execution_ref",
+        "execution_record_ref",
+        "execution_status",
+        "execution_recorded_by",
+        "execution_recorded_at",
+        "execution_safe_summary",
+    ):
+        if field in item:
+            value = item[field]
+            if field.endswith("_at") and not (isinstance(value, str) and _ISO_UTC_RE.fullmatch(value)):
+                return None
+            if field.endswith("_ref") or field in {"queued_by", "authorized_by", "execution_recorded_by"}:
+                if not _is_opaque_id(value):
+                    return None
+            if field == "authorization_decision" and value != "authorize_mac_relay_execution":
+                return None
+            if field == "execution_status" and value not in _NAS_KEEPER_HANDOFF_EXECUTION_STATUSES:
+                return None
+            if field == "execution_safe_summary" and not _is_safe_text(value):
+                return None
+            summary[field] = value
+    if "execution_evidence_refs" in item:
+        refs = item["execution_evidence_refs"]
+        if not _validate_evidence_refs(refs):
+            return None
+        summary["execution_evidence_refs"] = list(cast(Sequence[object], refs))
+    return summary
+
+
+def list_office_controlled_mutation_nas_keeper_mac_relay_handoff_queue(
+    filters: object | None = None, *, queue_dir: Path | str | None = None
+) -> dict[str, object]:
+    """Read the local NAS Keeper handoff queue as safe summary DTOs only."""
+
+    filter_map: Mapping[str, object]
+    if filters is None:
+        filter_map = {}
+    elif isinstance(filters, Mapping):
+        filter_map = filters
+    else:
+        return {"listed": False, "errors": [_error("filters", "invalid_filters_type")], "dto": None}
+
+    errors: list[dict[str, str]] = []
+    if set(filter_map) - _NAS_KEEPER_HANDOFF_QUEUE_READBACK_FIELDS:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+    safe_filters: dict[str, object] = {}
+    for field in ("handoff_ref", "relay_node_ref", "nas_keeper_ref"):
+        if field in filter_map:
+            if not _is_opaque_id(filter_map.get(field)):
+                errors.append(_error(field, "invalid_opaque_id"))
+            else:
+                safe_filters[field] = filter_map[field]
+    if "queue_status" in filter_map:
+        if filter_map.get("queue_status") not in _NAS_KEEPER_HANDOFF_QUEUE_STATUSES:
+            errors.append(_error("queue_status", "unsupported_queue_status"))
+        else:
+            safe_filters["queue_status"] = filter_map["queue_status"]
+    limit = 200
+    if "limit" in filter_map:
+        try:
+            limit = int(cast(Any, filter_map.get("limit")))
+        except (TypeError, ValueError):
+            errors.append(_error("limit", "invalid_limit"))
+        else:
+            limit = max(1, min(limit, 200))
+    if errors:
+        return {"listed": False, "errors": sorted(errors, key=lambda item: (item["field"], item["code"])), "dto": None}
+
+    queue_file = _nas_keeper_handoff_queue_file(queue_dir)
+    if not queue_file.exists():
+        items: list[dict[str, object]] = []
+        skipped_count = 0
+    else:
+        items = []
+        skipped_count = 0
+        for line in queue_file.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            try:
+                raw_item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped_count += 1
+                continue
+            if not isinstance(raw_item, Mapping):
+                skipped_count += 1
+                continue
+            summary = _safe_nas_keeper_queue_summary(raw_item)
+            if summary is None:
+                skipped_count += 1
+                continue
+            if any(summary.get(key) != value for key, value in safe_filters.items()):
+                continue
+            items.append(summary)
+    available_count = len(items)
+    returned_items = items[:limit]
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_mac_relay_handoff_queue_readback",
+        "listed": True,
+        "queue_storage_ref": "ai_office_local_profile::nas_keeper_mac_relay_handoff_queue",
+        "filters": safe_filters,
+        "effective_limit": limit,
+        "available_count": available_count,
+        "count": len(returned_items),
+        "skipped_count": skipped_count,
+        "items": returned_items,
+        "markdown_body_included": False,
+        "capabilities": {
+            "queue_read_enabled": True,
+            "queue_mutation_enabled": False,
+            "execution_state_recording_enabled": False,
+            "execution_payload_preview_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_credential_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+            "mac_relay_write_enabled": False,
+            "actual_nas_write_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+        },
+        "next_required_boundary": "manual_nas_keeper_execution_evidence_review_if_needed",
+    }
+    return {"listed": True, "errors": [], "dto": dto}
 
 
 def dry_run_office_controlled_mutation_nas_keeper_mac_relay_claim(

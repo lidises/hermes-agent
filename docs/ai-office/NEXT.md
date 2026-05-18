@@ -1,6 +1,6 @@
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-18 11:38 KST
+Last updated: 2026-05-18 11:52 KST
 
 ## Start here after `/new`
 
@@ -74,7 +74,7 @@ The user approved A-G approval buckets for future AI Office work while excluding
 
 ## Current next stage
 
-Immediate state 2026-05-18 11:38 KST: queue execution-state recording is implemented locally after the execution-from-preview bridge. New helper `record_office_controlled_mutation_nas_keeper_mac_relay_execution_state(...)` and protected route `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-execution-state` atomically rewrite exactly one authorized queue item to `mac_relay_execution_succeeded`, `mac_relay_execution_failed`, or `mac_relay_execution_manual_review_required`, storing only safe execution metadata/evidence refs and no markdown body in response DTOs. Focused verification passed (`4 passed`), combined NAS Keeper/Mac relay/backend verification passed (`42 passed`), `py_compile` and `git diff --check` passed. Recommended next boundary: publish/update PR if needed, then optionally a read-only queue state list/readback surface or Mac relay/NAS Keeper evidence review UX; still no watcher/cron/daemon, dispatch, authority-adapter binding, VPS NAS mounts/credentials/direct writes, dashboard/gateway restart, or public exposure unless separately approved.
+Immediate state 2026-05-18 11:52 KST: read-only NAS Keeper Mac relay queue-state readback is implemented locally after queue execution-state recording. New helper `list_office_controlled_mutation_nas_keeper_mac_relay_handoff_queue(...)` and protected route `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-handoff-queue` list only safe queue summaries with optional filters for `handoff_ref`, `queue_status`, `relay_node_ref`, `nas_keeper_ref`, and clamped `limit`. The DTO omits queued markdown bodies, skips malformed/unsafe stored lines without raw echo, keeps queue mutation/execution/write/automation/dispatch/authority/NAS capability flags false, and supports manual-review evidence refs. RED first failed on missing helper/route (`4 failed`); focused GREEN passed (`4 passed`); combined NAS Keeper/Mac relay/backend verification passed (`46 passed`); `py_compile`, `git diff --check`, added-line safety scan, and independent review passed. Recommended next boundary: commit/push this slice; then optionally add a frontend-only/manual evidence review surface over this read-only API, still with no watcher/cron/daemon, relay dispatch, authority-adapter binding, VPS NAS mounts/credentials/direct writes, dashboard/gateway restart, or public exposure unless separately approved.
 
 Current umbrella project: `AI Office Unified Operating Workbench` / `AI Office 통합 운영실`.
 

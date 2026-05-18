@@ -61,6 +61,7 @@ from hermes_cli.office_controlled_mutation import (
     execute_office_controlled_mutation_nas_mac_relay_write,
     execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_preview,
     record_office_controlled_mutation_nas_keeper_mac_relay_execution_state,
+    list_office_controlled_mutation_nas_keeper_mac_relay_handoff_queue,
     dry_run_office_controlled_mutation_nas_keeper_mac_relay_claim,
     authorize_office_controlled_mutation_nas_keeper_mac_relay_handoff,
     preview_office_controlled_mutation_nas_keeper_mac_relay_execution_payload,
@@ -658,6 +659,29 @@ async def execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from
 async def record_office_controlled_mutation_nas_keeper_mac_relay_execution_state_route(payload: Any = Body(None)):
     """Record safe queue execution state without dispatching or writing NAS files."""
     return record_office_controlled_mutation_nas_keeper_mac_relay_execution_state(payload)
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-handoff-queue")
+async def list_office_controlled_mutation_nas_keeper_mac_relay_handoff_queue_route(
+    handoff_ref: Optional[str] = None,
+    queue_status: Optional[str] = None,
+    relay_node_ref: Optional[str] = None,
+    nas_keeper_ref: Optional[str] = None,
+    limit: Optional[int] = None,
+):
+    """Read NAS Keeper handoff queue state as safe DTO summaries only."""
+    filters = {
+        key: value
+        for key, value in {
+            "handoff_ref": handoff_ref,
+            "queue_status": queue_status,
+            "relay_node_ref": relay_node_ref,
+            "nas_keeper_ref": nas_keeper_ref,
+            "limit": limit,
+        }.items()
+        if value is not None
+    }
+    return list_office_controlled_mutation_nas_keeper_mac_relay_handoff_queue(filters)
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/mac-relay-write-execute")

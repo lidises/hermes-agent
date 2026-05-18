@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 11:38 KST
+Last updated: 2026-05-18 11:52 KST
 
 ## AI Office 통합 운영실 umbrella summary
 
@@ -21,6 +21,14 @@ Phase 0 consolidation docs:
 - `docs/ai-office/architecture/unified-operating-workbench.md`
 - `docs/ai-office/plans/2026-05-14-desk-rpg-master-spec-review.md`
 - `docs/ai-office/architecture/approval-model-contract.md`
+
+## NAS Keeper Mac relay queue readback implemented locally
+
+Added the read-only state-review boundary after queue execution-state recording: `list_office_controlled_mutation_nas_keeper_mac_relay_handoff_queue(...)` and protected route `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-handoff-queue`. The route returns only safe queue item summaries, supports safe filters for `handoff_ref`, `queue_status`, `relay_node_ref`, `nas_keeper_ref`, clamps `limit` to 200, skips malformed/unsafe stored lines without raw echo, and includes manual-review evidence refs when present.
+
+Boundary: queue readback only. It does not mutate queue state, execute Mac relay writes, read/write NAS files, start watcher/cron/daemon automation, dispatch to relay services, bind authority adapters, grant VPS NAS mounts/credentials/direct write authority, restart dashboard/gateway, or expose queued markdown bodies/raw paths/logs/provider IDs/tokens.
+
+Verification 2026-05-18 11:52 KST: RED first failed on missing helper/import and missing protected route (`4 failed`). GREEN focused `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_queue_readback.py -q -o 'addopts='` -> `4 passed`; combined backend `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_queue_readback.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_state_record.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_from_preview.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_payload_preview.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_authorize_handoff.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_claim_dry_run.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_handoff_queue.py tests/hermes_cli/test_office_controlled_mutation_nas_mac_relay_write_execute.py tests/hermes_cli/test_office_controlled_mutation_nas_mac_relay_write_request.py tests/hermes_cli/test_office_controlled_mutation_nas_runtime_write.py tests/hermes_cli/test_office_api.py -q -o 'addopts='` -> `46 passed`; `py_compile` and `git diff --check` passed; added-line safety scan passed; independent review PASS after hardening stored `queue_ref`, `authorization_decision`, and `execution_status` sanitization.
 
 ## NAS Keeper Mac relay queue execution-state recording implemented locally
 
