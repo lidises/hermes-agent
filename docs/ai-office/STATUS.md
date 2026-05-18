@@ -1,6 +1,6 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 16:18 KST
+Last updated: 2026-05-18 16:22 KST
 
 ## NAS Keeper inline execute-and-record UI path
 
@@ -8,7 +8,7 @@ Implemented the shortest UI continuation after the backend one-call write+record
 
 Verification 2026-05-18 16:18 KST: RED focused UI/helper test first covered the missing one-call execute-and-record payload option; GREEN focused `npm test -- --run src/pages/OfficePage.rpg.test.tsx -t "NasKeeperExecutionOperatorActionPanel"` -> `4 passed`. Combined frontend regression `npm test -- --run src/pages/OfficePage.rpg.test.tsx src/pages/OfficePage.test.ts src/lib/api.test.ts` -> `221 passed`; backend focused/API regression `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_from_preview.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_state_record.py tests/hermes_cli/test_office_api.py -q -o 'addopts='` -> `19 passed`; `py_compile`, `npm run build`, and `git diff --check` passed. Vite large chunk warning remains the existing known warning only.
 
-Boundary: actual write path is enabled only through the already-guarded operator flow and still requires the execution approval checkbox before the request is sent. No durable production queue item was executed in this UI slice, no watcher/cron/dispatch daemon or authority adapter was started, no VPS direct NAS mount/credential/write authority was added, no public exposure was added, and no gateway restart was performed. Dashboard-only publish/smoke pending for this commit.
+Boundary: actual write path is enabled only through the already-guarded operator flow and still requires the execution approval checkbox before the request is sent. No durable production queue item was executed in this UI slice, no watcher/cron/dispatch daemon or authority adapter was started, no VPS direct NAS mount/credential/write authority was added, no public exposure was added, and no gateway restart was performed. Committed/pushed `b789fdec feat(office): wire inline NAS keeper execution recording`; private VPS dashboard-only deploy reset the restricted dashboard worktree to `b789fdec`, copied the locally verified `web_dist` fallback with file hashes matching, restarted only `hermes-agent-dashboard.service`, and left `hermes-gateway.service` active/untouched. Private `/office?inline-ui=b789fdec` browser smoke passed: operator panel rendered, inline record checkbox present and checked, execution approval checkbox stayed unchecked, operator markdown-body projection flag false, scoped operator raw/path/provider/token/Traceback leak false, and console JS errors 0.
 
 ## NAS Keeper inline execute-and-record write path
 
