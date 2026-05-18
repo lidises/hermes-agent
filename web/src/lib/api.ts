@@ -257,6 +257,24 @@ export interface OfficeDispatcherAuthorityMetadataAppendStatusParams {
   limit?: number;
 }
 
+export interface OfficeDispatcherExecutionSimulationStatus {
+  schema_version: number;
+  mode: "dispatcher_execution_simulation_status";
+  request_id: string;
+  correlation_id: string;
+  simulation_checkpoint_complete: boolean;
+  simulation_counts: Record<string, number>;
+  latest_refs: Record<string, string>;
+  checkpoint_status: string;
+  next_manual_lane: string;
+  capabilities: Record<string, boolean>;
+  errors: Array<{ field: string; code: string }>;
+}
+
+export interface OfficeDispatcherExecutionSimulationStatusParams {
+  limit?: number;
+}
+
 export interface OfficeNasKeeperExecutionFromPreviewPayload {
   handoff_ref: string;
   relay_execution_ref: string;
@@ -405,6 +423,12 @@ export const api = {
     if (params.limit !== undefined) qs.set("limit", String(params.limit));
     const suffix = qs.toString() ? `?${qs.toString()}` : "";
     return fetchJSON<OfficeDispatcherAuthorityMetadataAppendStatus>(`/api/office/controlled-mutation/dispatcher-authority-metadata-append-status${suffix}`);
+  },
+  getOfficeControlledMutationDispatcherExecutionSimulationStatus: (params: OfficeDispatcherExecutionSimulationStatusParams = {}) => {
+    const qs = new URLSearchParams();
+    if (params.limit !== undefined) qs.set("limit", String(params.limit));
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+    return fetchJSON<OfficeDispatcherExecutionSimulationStatus>(`/api/office/controlled-mutation/dispatcher-execution-simulation-status${suffix}`);
   },
   executeOfficeControlledMutationNasSingleFileWrite: (body: OfficeNasSingleFileWritePayload) =>
     fetchJSON<OfficeNasSingleFileWriteResult>("/api/office/controlled-mutation/nas-runtime/single-file-write", {

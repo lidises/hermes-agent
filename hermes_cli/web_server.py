@@ -60,6 +60,7 @@ from hermes_cli.office_controlled_mutation import (
     build_office_controlled_mutation_dispatcher_authority_dry_run_surface,
     build_office_controlled_mutation_dispatcher_authority_metadata_append_status,
     build_office_controlled_mutation_dispatcher_authority_metadata_recording_draft,
+    build_office_controlled_mutation_dispatcher_execution_simulation_status,
     build_office_controlled_mutation_contract_schema,
     execute_office_controlled_mutation_nas_single_file_write,
     execute_office_controlled_mutation_nas_mac_relay_write,
@@ -978,6 +979,12 @@ async def get_office_controlled_mutation_dispatcher_authority_metadata_append_st
         correlation_id=correlation_id,
         limit=limit,
     )
+
+
+@app.get("/api/office/controlled-mutation/dispatcher-execution-simulation-status")
+async def get_office_controlled_mutation_dispatcher_execution_simulation_status(limit: int = 25):
+    """Read back the human-reviewed dispatcher execution simulation checkpoint."""
+    return build_office_controlled_mutation_dispatcher_execution_simulation_status(limit=limit)
 
 
 @app.get("/api/office/events")

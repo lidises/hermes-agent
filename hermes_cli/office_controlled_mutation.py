@@ -1789,6 +1789,42 @@ def build_office_controlled_mutation_dispatcher_authority_metadata_append_status
     return base_response
 
 
+_DISPATCHER_EXECUTION_SIMULATION_REQUEST_ID = "req_20260518_1255_dispatcher_execution_simulation"
+_DISPATCHER_EXECUTION_SIMULATION_CORRELATION_ID = "corr_20260518_1255_dispatcher_execution_simulation"
+
+
+def build_office_controlled_mutation_dispatcher_execution_simulation_status(
+    *,
+    store_paths: Mapping[str, Path] | None = None,
+    limit: int = 25,
+) -> dict[str, object]:
+    """Read back the human-reviewed dispatcher execution simulation checkpoint safely."""
+
+    status = build_office_controlled_mutation_dispatcher_authority_metadata_append_status(
+        request_id=_DISPATCHER_EXECUTION_SIMULATION_REQUEST_ID,
+        correlation_id=_DISPATCHER_EXECUTION_SIMULATION_CORRELATION_ID,
+        store_paths=store_paths,
+        limit=limit,
+    )
+    capabilities_value = status.get("capabilities", {})
+    capabilities: dict[str, bool] = dict(capabilities_value) if isinstance(capabilities_value, dict) else {}
+    capabilities["simulation_status_readback_enabled"] = True
+    return {
+        "schema_version": 1,
+        "mode": "dispatcher_execution_simulation_status",
+        "request_id": _DISPATCHER_EXECUTION_SIMULATION_REQUEST_ID,
+        "correlation_id": _DISPATCHER_EXECUTION_SIMULATION_CORRELATION_ID,
+        "simulation_checkpoint_complete": bool(status.get("append_checkpoint_complete")),
+        "simulation_counts": status.get("append_counts", {"dry_run_results": 0, "audit_events": 0}),
+        "latest_refs": status.get("latest_refs", {}),
+        "checkpoint_status": "blocked",
+        "next_manual_lane": "dispatcher_execution_readback_review_only",
+        "capabilities": capabilities,
+        "redaction": dict(_REDACTION_POSTURE),
+        "errors": status.get("errors", []),
+    }
+
+
 def _dispatcher_authority_metadata_append_status_capabilities() -> dict[str, bool]:
     return {
         "metadata_append_readback_enabled": True,

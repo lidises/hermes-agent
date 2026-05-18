@@ -1,6 +1,14 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-18 21:57 KST
+Last updated: 2026-05-18 22:10 KST
+
+## Human-reviewed dispatcher execution simulation status readback lane
+
+Implemented the shortest follow-up after the safe metadata checkpoint: a dedicated protected readback lane for the human-reviewed dispatcher execution simulation checkpoint. Backend adds `build_office_controlled_mutation_dispatcher_execution_simulation_status(...)` plus protected GET `/api/office/controlled-mutation/dispatcher-execution-simulation-status`; frontend adds a typed API wrapper and display-only `/office` panel with stable `data-office-dispatcher-execution-simulation-status-*` hooks. The lane reads back the existing checkpoint for `req_20260518_1255_dispatcher_execution_simulation` / `corr_20260518_1255_dispatcher_execution_simulation`, reports counts/latest refs/checkpoint status only, and keeps dry-run execution, adapter dispatch/binding, target mutation, NAS save, watcher/cron, Kanban mutation, public exposure, and VPS direct NAS authority disabled.
+
+Verification 2026-05-18 22:10 KST: RED backend test first failed for the missing helper/route, then GREEN focused simulation status tests passed (`2 passed`). Focused backend regression for simulation/append/draft/dry-run/API passed (`22 passed`), py_compile for changed backend modules passed, focused frontend API + Office RPG tests passed (`79 passed`), `npm run build` passed with the existing Vite large chunk warning only, and `git diff --check` passed.
+
+Boundary: this is status/readback/UI only over an already-written safe metadata checkpoint. It did not append another checkpoint, execute a dry-run command, bind or dispatch an authority adapter, mutate a target, write NAS, start watcher/cron, mutate Kanban, expose public routes, restart dashboard/gateway, or grant VPS direct NAS mount/credential/write authority.
 
 ## Human-reviewed dispatcher execution simulation checkpoint
 

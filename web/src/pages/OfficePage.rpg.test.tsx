@@ -19,7 +19,7 @@ vi.mock("@/lib/api", () => ({
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
 import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerAssignmentCandidateGate, buildOfficeWorkerRequestDraftPreview, buildOfficeWorkerHumanConfirmationEnvelope, buildOfficeWorkerAuthorityHandoffEnvelope, buildOfficeWorkerDispatchDryRunEnvelope, buildOfficeWorkerAuditPreviewEnvelope, buildOfficeWorkerRollbackPreviewEnvelope, buildOfficeWorkerFinalGateChecklist, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeNasKeeperSaveRequestGate, buildOfficeNasKeeperRollbackEvidencePreview, buildOfficeNasEvidencePackageStoreReadbackStatus, buildOfficeNasPathValidationStatusSurface, buildOfficeNasPathPreviewStatusSurface, buildOfficeNasPathPreviewStoreReadbackStatusSurface, buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface, buildOfficeNasRuntimeSingleFileWriteApprovalAction, buildOfficeNasKeeperQueueManualEvidenceReviewSurface, buildOfficeNasKeeperExecutionOperatorAction, buildOfficeDeskRpgReadOnlyChainCompletionReview, buildOfficeEventDrivenCharacterStateProjection, buildOfficeCharacterStateRoomOverlay, buildOfficeCharacterRoomInteractionPosture, buildOfficeCharacterInspectorDetailPosture, buildOfficeCharacterDetailSafeDialogueCopy, buildOfficeCharacterBubbleInspectorAlignment, buildOfficeCharacterPanelBoundarySummary, buildOfficeCharacterFacilityRoleLegend, buildOfficeCharacterFacilityBoundaryStrip, buildOfficeCharacterFacilitySourceLedgerStrip, buildOfficeCharacterFacilityCompletionReview, buildOfficeControlledMutationProposalContract, buildOfficeControlledMutationDryRunPlan, buildOfficeControlledMutationAuditSinkPlan, buildOfficeControlledMutationRollbackVerificationPlan, buildOfficeControlledMutationHumanApprovalPlan, buildOfficeControlledMutationAuthoritySummary, buildOfficeControlledMutationExecutionReadinessSummary, buildOfficeControlledMutationContractPostureProjection, buildOfficeControlledMutationContractPosturePolish, buildOfficeControlledMutationReadinessHandoffRibbon, buildOfficeControlledMutationReadinessSummaryPolish, buildOfficeControlledMutationRequestStorePosture, buildOfficeControlledMutationRequestStoreHardeningPlan, buildOfficeControlledMutationNextApprovalBoundary, buildOfficeControlledMutationPostDecisionApprovalBoundary, buildOfficeControlledMutationPostRegistryApprovalBoundary, buildOfficeControlledMutationTargetDispatchForbiddenBoundary, buildOfficeControlledMutationSafeContinuationCompletionReview, buildOfficeRpgScene } from "./officeView";
-import type { OfficeAuthorityMetadataHandoffStatus, OfficeDispatcherAuthorityDryRunSurface, OfficeDispatcherAuthorityMetadataAppendStatus, OfficeDispatcherAuthorityMetadataRecordingDraft, OfficeNasKeeperExecutionFromPreviewResult, OfficeNasKeeperHandoffQueueReadback, OfficeState } from "@/lib/api";
+import type { OfficeAuthorityMetadataHandoffStatus, OfficeDispatcherAuthorityDryRunSurface, OfficeDispatcherAuthorityMetadataAppendStatus, OfficeDispatcherAuthorityMetadataRecordingDraft, OfficeDispatcherExecutionSimulationStatus, OfficeNasKeeperExecutionFromPreviewResult, OfficeNasKeeperHandoffQueueReadback, OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
   return {
@@ -1609,6 +1609,53 @@ describe("DispatcherAuthorityMetadataRecordingDraftPanel", () => {
     expect(markup).not.toContain("<select");
     expect(markup).not.toContain("<textarea");
     expect(markup).not.toMatch(/raw markdown body|Traceback|\/Users\/lidises|\/home\/hermes|token-shaped-append|private-authority-provider/i);
+  });
+
+  it("renders the human-reviewed dispatcher execution simulation checkpoint without execution controls", () => {
+    const DispatcherExecutionSimulationStatusPanel = (OfficePageModule as unknown as {
+      DispatcherExecutionSimulationStatusPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.DispatcherExecutionSimulationStatusPanel>>;
+    }).DispatcherExecutionSimulationStatusPanel;
+    const status: OfficeDispatcherExecutionSimulationStatus = {
+      schema_version: 1,
+      mode: "dispatcher_execution_simulation_status",
+      request_id: "req_20260518_1255_dispatcher_execution_simulation",
+      correlation_id: "corr_20260518_1255_dispatcher_execution_simulation",
+      simulation_checkpoint_complete: true,
+      simulation_counts: { dry_run_results: 1, audit_events: 1 },
+      latest_refs: {
+        dry_run_result: "dryrun_20260518_1255_dispatcher_execution_simulation",
+        audit: "audit_20260518_1255_dispatcher_execution_simulation",
+      },
+      checkpoint_status: "blocked",
+      next_manual_lane: "dispatcher_execution_readback_review_only",
+      capabilities: {
+        simulation_status_readback_enabled: true,
+        dry_run_execution_enabled: false,
+        adapter_dispatch_enabled: false,
+        target_mutation_enabled: false,
+        nas_save_enabled: false,
+      },
+      errors: [],
+    };
+
+    const markup = renderToStaticMarkup(<DispatcherExecutionSimulationStatusPanel status={status} error={null} />);
+
+    expect(markup).toContain('data-office-dispatcher-execution-simulation-status="true"');
+    expect(markup).toContain('data-office-dispatcher-execution-simulation-status-complete="true"');
+    expect(markup).toContain('data-office-dispatcher-execution-simulation-status-readback-enabled="true"');
+    expect(markup).toContain('data-office-dispatcher-execution-simulation-status-execution-enabled="false"');
+    expect(markup).toContain('data-office-dispatcher-execution-simulation-status-dispatch-enabled="false"');
+    expect(markup).toContain('data-office-dispatcher-execution-simulation-status-target-mutation-enabled="false"');
+    expect(markup).toContain('data-office-dispatcher-execution-simulation-status-count="dry_run_results"');
+    expect(markup).toContain("dryrun_20260518_1255_dispatcher_execution_simulation");
+    expect(markup).toContain("audit_20260518_1255_dispatcher_execution_simulation");
+    expect(markup).toContain("dispatcher_execution_readback_review_only");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw markdown body|Traceback|\/Users\/lidises|\/home\/hermes|token-shaped-simulation|private-authority-provider/i);
   });
 });
 
