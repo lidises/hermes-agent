@@ -125,3 +125,61 @@ def test_manual_approval_recording_draft_api_is_protected_and_writes_draft_only(
     assert payload["draft_count"] == 1
     assert payload["latest_refs"]["approval_record_ref"] == "approval-office-dispatch-1"
     assert payload["capabilities"]["real_dispatch_execution_enabled"] is False
+
+
+def test_manual_approval_recording_draft_review_status_projects_promotion_readiness_without_real_approval(tmp_path):
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_manual_approval_recording_draft,
+        build_office_controlled_mutation_manual_approval_recording_draft_review_status,
+    )
+
+    store_path = tmp_path / "approval_record_drafts.jsonl"
+    append_office_controlled_mutation_manual_approval_recording_draft(_valid_payload(), store_path=store_path)
+
+    status = build_office_controlled_mutation_manual_approval_recording_draft_review_status(
+        store_path=store_path,
+        approval_record_ref="approval-office-dispatch-1",
+        unsafe_examples={"raw_command": "python /Users/lidises/private.py", "unsafe_ref": "secret-like-value"},
+    )
+
+    assert status["mode"] == "manual_approval_recording_draft_review_status"
+    assert status["manual_approval_recording_draft_review_complete"] is True
+    assert status["review"]["draft_present"] is True
+    assert status["review"]["draft_status"] == "draft_only"
+    assert status["review"]["ready_for_manual_operator_review"] is True
+    assert status["review"]["ready_for_real_approval_record_write"] is False
+    assert status["execution_boundary"]["approval_record_written"] is False
+    assert status["execution_boundary"]["dispatch_gate_open"] is False
+    assert status["execution_boundary"]["runtime_command_executed"] is False
+    assert status["execution_boundary"]["target_mutation_created"] is False
+    assert status["capabilities"]["approval_record_draft_readback_enabled"] is True
+    assert status["capabilities"]["approval_recording_enabled"] is False
+    assert status["capabilities"]["real_dispatch_execution_enabled"] is False
+    assert status["capabilities"]["kanban_mutation_enabled"] is False
+    rendered = repr(status)
+    assert "/Users/lidises" not in rendered
+    assert "secret-like-value" not in rendered
+    assert "raw_command" not in rendered
+
+
+def test_manual_approval_recording_draft_review_api_is_protected_and_safe(monkeypatch, tmp_path):
+    from fastapi.testclient import TestClient
+    import hermes_cli.web_server as web_server
+    from hermes_cli.office_controlled_mutation import append_office_controlled_mutation_manual_approval_recording_draft
+
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+    append_office_controlled_mutation_manual_approval_recording_draft(_valid_payload())
+    client = TestClient(web_server.app)
+    path = "/api/office/controlled-mutation/manual-approval-recording-draft-review-status?approval_record_ref=approval-office-dispatch-1"
+
+    assert client.get(path).status_code == 401
+    response = client.get(path, headers={web_server._SESSION_HEADER_NAME: web_server._SESSION_TOKEN})
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["manual_approval_recording_draft_review_complete"] is True
+    assert payload["review"]["draft_present"] is True
+    assert payload["review"]["ready_for_real_approval_record_write"] is False
+    assert payload["capabilities"]["approval_recording_enabled"] is False
+    assert payload["capabilities"]["dispatch_gate_open"] is False
+    assert payload["errors"] == []

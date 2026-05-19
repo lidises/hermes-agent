@@ -3025,6 +3025,76 @@ def list_office_controlled_mutation_manual_approval_recording_drafts(
     }
 
 
+def build_office_controlled_mutation_manual_approval_recording_draft_review_status(
+    *,
+    store_path: Path | None = None,
+    approval_record_ref: str | None = None,
+    unsafe_examples: Mapping[str, Any] | None = None,
+) -> dict[str, object]:
+    """Project safe draft-review readiness without writing a real approval record."""
+
+    _ = unsafe_examples
+    readback = list_office_controlled_mutation_manual_approval_recording_drafts(
+        store_path=store_path,
+        approval_record_ref=approval_record_ref,
+        limit=1,
+    )
+    drafts = cast(list[dict[str, object]], readback.get("drafts", []))
+    latest = drafts[-1] if drafts else None
+    errors = list(cast(list[dict[str, str]], readback.get("errors", [])))
+    draft_present = latest is not None
+    review = {
+        "draft_present": draft_present,
+        "draft_status": latest.get("draft_status") if latest else None,
+        "approval_record_ref": latest.get("approval_record_ref") if latest else None,
+        "idempotency_key": latest.get("idempotency_key") if latest else None,
+        "safe_evidence_ref_count": len(latest.get("evidence_refs", [])) if latest and isinstance(latest.get("evidence_refs"), list) else 0,
+        "safe_summary_present": bool(latest.get("safe_summary")) if latest else False,
+        "ready_for_manual_operator_review": draft_present and not errors,
+        "ready_for_real_approval_record_write": False,
+        "next_required_gate": "separate_real_approval_record_write_gate",
+    }
+    return {
+        "schema_version": 1,
+        "mode": "manual_approval_recording_draft_review_status",
+        "manual_approval_recording_draft_review_complete": True,
+        "source_design_lane": "manual_approval_recording_draft_persistence",
+        "next_manual_lane": "separate_real_approval_record_write_gate",
+        "review": review,
+        "readback": {
+            "draft_count": readback.get("draft_count", 0),
+            "skipped_count": readback.get("skipped_count", 0),
+            "latest_refs": readback.get("latest_refs", {}),
+        },
+        "execution_boundary": {
+            "review_status_only": True,
+            "approval_record_written": False,
+            "dispatch_gate_open": False,
+            "runtime_command_included": False,
+            "runtime_command_executed": False,
+            "adapter_binding_created": False,
+            "adapter_dispatch_created": False,
+            "idempotency_replay_store_written": False,
+            "rollback_executed": False,
+            "target_mutation_created": False,
+            "watcher_or_cron_created": False,
+            "kanban_mutation_created": False,
+            "nas_save_created": False,
+            "vps_file_change_created": False,
+        },
+        "capabilities": _approval_recording_draft_capabilities(),
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "opaque_refs_only": True,
+            "safe_summaries_only": True,
+            "unsupported_values_echoed": False,
+            "credentials_echoed": False,
+        },
+        "errors": errors,
+    }
+
+
 def build_office_controlled_mutation_manual_approval_recording_preflight_status(
     *, unsafe_examples: Mapping[str, Any] | None = None
 ) -> dict[str, object]:

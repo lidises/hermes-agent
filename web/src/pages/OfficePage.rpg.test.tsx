@@ -2486,6 +2486,60 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(markup).not.toMatch(/raw command|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
   });
 
+  it("renders manual approval-recording draft review status without real write controls", () => {
+    const ManualApprovalRecordingDraftReviewStatusPanel = (OfficePageModule as unknown as {
+      ManualApprovalRecordingDraftReviewStatusPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.ManualApprovalRecordingDraftReviewStatusPanel>>;
+    }).ManualApprovalRecordingDraftReviewStatusPanel;
+    const status = {
+      schema_version: 1,
+      mode: "manual_approval_recording_draft_review_status" as const,
+      manual_approval_recording_draft_review_complete: true,
+      source_design_lane: "manual_approval_recording_draft_persistence",
+      next_manual_lane: "separate_real_approval_record_write_gate",
+      review: {
+        draft_present: true,
+        draft_status: "draft_only",
+        approval_record_ref: "approval-office-dispatch-1",
+        ready_for_manual_operator_review: true,
+        ready_for_real_approval_record_write: false,
+      },
+      readback: { draft_count: 1 },
+      execution_boundary: {
+        review_status_only: true,
+        approval_record_written: false,
+        dispatch_gate_open: false,
+        runtime_command_executed: false,
+        target_mutation_created: false,
+      },
+      capabilities: {
+        approval_record_draft_readback_enabled: true,
+        approval_recording_enabled: false,
+        dispatch_gate_open: false,
+        real_dispatch_execution_enabled: false,
+        target_mutation_enabled: false,
+      },
+      redaction: { raw_excluded: true },
+      errors: [],
+    };
+
+    const markup = renderToStaticMarkup(<ManualApprovalRecordingDraftReviewStatusPanel status={status} error={null} />);
+
+    expect(markup).toContain('data-office-manual-approval-recording-draft-review-status="true"');
+    expect(markup).toContain('data-office-manual-approval-recording-draft-review-complete="true"');
+    expect(markup).toContain('data-office-manual-approval-recording-draft-review-draft-present="true"');
+    expect(markup).toContain('data-office-manual-approval-recording-draft-review-manual-review-ready="true"');
+    expect(markup).toContain('data-office-manual-approval-recording-draft-review-real-write-ready="false"');
+    expect(markup).toContain('data-office-manual-approval-recording-draft-review-approval-recording-enabled="false"');
+    expect(markup).toContain('data-office-manual-approval-recording-draft-review-dispatch-gate-open="false"');
+    expect(markup).toContain('data-office-manual-approval-recording-draft-review-boundary="approval_record_written"');
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw command|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
+  });
+
   it("renders approved real one-shot dispatch gate design without executable controls", () => {
     const ApprovedRealOneShotDispatchGateDesignPanel = (OfficePageModule as unknown as {
       ApprovedRealOneShotDispatchGateDesignPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.ApprovedRealOneShotDispatchGateDesignPanel>>;

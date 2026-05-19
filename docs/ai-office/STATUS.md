@@ -1,4 +1,12 @@
-Last updated: 2026-05-19 13:02 KST
+Last updated: 2026-05-19 13:29 KST
+
+## Manual approval-recording draft review readiness implemented locally (review-only)
+- Added protected review/readiness projection after draft persistence.
+- Backend GET: `/api/office/controlled-mutation/manual-approval-recording-draft-review-status`.
+- The review lane reads latest draft-only approval record metadata and projects `ready_for_manual_operator_review=true` when a safe draft exists, while keeping `ready_for_real_approval_record_write=false`.
+- Frontend API wrapper and display-only `/office` panel added; no form/button/input/select/textarea controls.
+- Boundary remains closed: no real approval record write, dispatch gate open, runtime command inclusion/execution, adapter binding/dispatch, replay-store write, rollback, target/Kanban/NAS/VPS mutation, watcher/cron, service restart by lane, public exposure, or credential authority.
+- RED confirmed missing frontend API wrapper first (`1 failed`); backend review helper/API + existing draft tests `6 passed`; frontend API/RPG `112 passed`; broader controlled-mutation chain `15 passed`; `py_compile`, `git diff --check`, added-line secret scan, and `npm run build` passed with existing Vite chunk warning only.
 
 ## Manual approval-recording draft persistence deployed (draft-only)
 - Added protected draft-only approval-record persistence after the refusal-only preflight rung.

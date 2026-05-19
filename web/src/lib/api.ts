@@ -536,6 +536,20 @@ export interface OfficeManualApprovalRecordingDraftStatus {
   errors: Array<{ field: string; code: string }>;
 }
 
+export interface OfficeManualApprovalRecordingDraftReviewStatus {
+  schema_version: number;
+  mode: "manual_approval_recording_draft_review_status";
+  manual_approval_recording_draft_review_complete: boolean;
+  source_design_lane?: string;
+  next_manual_lane?: string;
+  review: Record<string, string | boolean | number | null>;
+  readback: Record<string, unknown>;
+  execution_boundary: Record<string, boolean>;
+  capabilities: Record<string, boolean>;
+  redaction: Record<string, boolean>;
+  errors: Array<{ field: string; code: string }>;
+}
+
 export interface OfficeDisabledOneShotRuntimeDispatchPayload {
   exact_target_allowlist_ref: string;
   idempotency_key: string;
@@ -767,6 +781,12 @@ export const api = {
     if (params.limit !== undefined) qs.set("limit", String(params.limit));
     const suffix = qs.toString() ? `?${qs.toString()}` : "";
     return fetchJSON<OfficeManualApprovalRecordingDraftStatus>(`/api/office/controlled-mutation/manual-approval-recording-draft-status${suffix}`);
+  },
+  getOfficeControlledMutationManualApprovalRecordingDraftReviewStatus: (params: { approval_record_ref?: string } = {}) => {
+    const qs = new URLSearchParams();
+    if (params.approval_record_ref) qs.set("approval_record_ref", params.approval_record_ref);
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+    return fetchJSON<OfficeManualApprovalRecordingDraftReviewStatus>(`/api/office/controlled-mutation/manual-approval-recording-draft-review-status${suffix}`);
   },
   executeOfficeControlledMutationDisabledOneShotRuntimeDispatch: (body: OfficeDisabledOneShotRuntimeDispatchPayload) =>
     fetchJSON<OfficeDisabledOneShotRuntimeDispatchRefusal>("/api/office/controlled-mutation/disabled-one-shot-runtime-dispatch-executor-skeleton/execute", {

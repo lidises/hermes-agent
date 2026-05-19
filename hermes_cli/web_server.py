@@ -74,6 +74,7 @@ from hermes_cli.office_controlled_mutation import (
     build_office_controlled_mutation_concrete_runtime_single_dispatch_slice_design,
     build_office_controlled_mutation_disabled_one_shot_runtime_dispatch_executor_skeleton,
     build_office_controlled_mutation_approved_real_one_shot_dispatch_gate_design,
+    build_office_controlled_mutation_manual_approval_recording_draft_review_status,
     build_office_controlled_mutation_manual_approval_recording_preflight_status,
     refuse_office_controlled_mutation_manual_approval_recording_preflight,
     refuse_office_controlled_mutation_disabled_one_shot_runtime_dispatch,
@@ -1103,6 +1104,16 @@ async def get_office_controlled_mutation_manual_approval_recording_draft_status(
     return list_office_controlled_mutation_manual_approval_recording_drafts(
         approval_record_ref=approval_record_ref,
         limit=limit,
+    )
+
+
+@app.get("/api/office/controlled-mutation/manual-approval-recording-draft-review-status")
+async def get_office_controlled_mutation_manual_approval_recording_draft_review_status(
+    approval_record_ref: str | None = None,
+):
+    """Read back draft review readiness without writing real approval records."""
+    return build_office_controlled_mutation_manual_approval_recording_draft_review_status(
+        approval_record_ref=approval_record_ref,
     )
 
 
