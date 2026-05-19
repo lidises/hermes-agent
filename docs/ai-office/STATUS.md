@@ -1,4 +1,14 @@
-Last updated: 2026-05-19 15:49 KST
+Last updated: 2026-05-19 16:16 KST
+
+## Manual runtime command execution record implemented locally (noop execution, replay metadata, no target mutation)
+- Added inclusion-backed noop runtime-command execution write/readback after bounded runtime-command inclusion metadata.
+- Backend POST: `/api/office/controlled-mutation/manual-runtime-command-execution-record`.
+- Backend GET: `/api/office/controlled-mutation/manual-runtime-command-execution-record-status`.
+- The write requires an existing runtime command inclusion record, exact safe `cmd-*` ref, safe `exec-*` runtime execution ref, safe `idem-*` idempotency key, confirmation `confirmed-runtime-command-execute-noop-probe-only`, safe executor/timestamp/evidence refs, included command kind `office_controlled_mutation_single_dispatch_noop_probe`, and duplicate execution/idempotency refs are blocked.
+- Stored execution records set `runtime_command_executed=true` and `idempotency_replay_store_written=true` for the noop probe lane only, but keep adapter binding/dispatch false, rollback false, target/Kanban/NAS/VPS mutation false, service restart false, git push false, credential/public authority false, and real dispatch execution false.
+- Frontend typed API wrappers and display-only `/office` runtime-command execution panel added; no form/button/input/select/textarea controls.
+- RED confirmed missing backend helper/API and frontend wrapper/panel first. GREEN local: focused backend execution tests `2 passed`, broader controlled-mutation chain `28 passed`, frontend API/RPG `124 passed`, `py_compile`, `git diff --check`, added-line secret scan, and `npm run build` passed with existing Vite chunk warning only.
+- Not yet deployed in this paragraph until commit/VPS sync completes; next verification step is commit, push, copy `web_dist`, restart dashboard only, and smoke without touching gateway.
 
 ## Manual runtime command inclusion record deployed (safe body, no execution)
 - Added bounded runtime-command inclusion metadata write/readback after runtime-command preview metadata.

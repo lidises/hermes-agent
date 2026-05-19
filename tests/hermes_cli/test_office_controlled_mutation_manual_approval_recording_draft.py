@@ -773,6 +773,136 @@ def test_manual_runtime_command_inclusion_record_api_is_protected_and_safe(monke
     assert readback_body["capabilities"]["runtime_command_execution_enabled"] is False
 
 
+def _seed_runtime_command_inclusion_chain(tmp_path):
+    from hermes_cli.office_controlled_mutation import append_office_controlled_mutation_manual_runtime_command_inclusion_record
+
+    preview_store = _seed_runtime_command_preview_chain(tmp_path)
+    inclusion_store = tmp_path / "office" / "controlled-mutation" / "runtime_command_inclusion_records.jsonl"
+    append_office_controlled_mutation_manual_runtime_command_inclusion_record(
+        {
+            "runtime_command_preview_ref": "cmdpreview-office-dispatch-1",
+            "runtime_command_ref": "cmd-office-dispatch-1",
+            "operator_confirmation": "confirmed-runtime-command-inclusion-no-execute",
+            "included_by": "actor:ai_office_operator",
+            "included_at": "2026-05-19T06:00:00Z",
+            "command_kind": "office_controlled_mutation_single_dispatch_noop_probe",
+            "command_body": {
+                "target_ref": "target-office-dispatch-1",
+                "dry_run_evidence_ref": "dryrun-office-dispatch-1",
+                "rollback_disable_ref": "rollback-office-dispatch-1",
+            },
+            "inclusion_evidence_refs": ["cmdpreview:cmdpreview-office-dispatch-1"],
+        },
+        preview_store_path=preview_store,
+        store_path=inclusion_store,
+    )
+    return inclusion_store
+
+
+def test_manual_runtime_command_execution_record_executes_noop_and_writes_replay_without_target_mutation(tmp_path):
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_manual_runtime_command_execution_record,
+        list_office_controlled_mutation_manual_runtime_command_execution_records,
+    )
+
+    inclusion_store = _seed_runtime_command_inclusion_chain(tmp_path)
+    execution_store = tmp_path / "runtime_command_execution_records.jsonl"
+    result = append_office_controlled_mutation_manual_runtime_command_execution_record(
+        {
+            "runtime_command_ref": "cmd-office-dispatch-1",
+            "runtime_execution_ref": "exec-office-dispatch-1",
+            "idempotency_key": "idem-office-dispatch-1",
+            "operator_confirmation": "confirmed-runtime-command-execute-noop-probe-only",
+            "executed_by": "actor:ai_office_operator",
+            "executed_at": "2026-05-19T06:20:00Z",
+            "execution_evidence_refs": ["cmd:cmd-office-dispatch-1"],
+            "shell_command": "python private-runtime.py",
+        },
+        inclusion_store_path=inclusion_store,
+        store_path=execution_store,
+    )
+
+    assert result["stored"] is True
+    dto = result["dto"]
+    assert dto["mode"] == "stored_manual_runtime_command_execution_record"
+    assert dto["runtime_command_executed"] is True
+    assert dto["runtime_execution_result"] == "noop_probe_succeeded"
+    assert dto["idempotency_replay_store_written"] is True
+    assert dto["target_mutation_created"] is False
+    assert dto["kanban_mutation_created"] is False
+    assert dto["nas_save_created"] is False
+    assert dto["adapter_dispatch_created"] is False
+    assert dto["real_dispatch_execution_enabled"] is False
+    assert "shell_command" not in dto
+    assert "private-runtime" not in repr(dto)
+
+    duplicate = append_office_controlled_mutation_manual_runtime_command_execution_record(
+        {
+            "runtime_command_ref": "cmd-office-dispatch-1",
+            "runtime_execution_ref": "exec-office-dispatch-2",
+            "idempotency_key": "idem-office-dispatch-1",
+            "operator_confirmation": "confirmed-runtime-command-execute-noop-probe-only",
+            "executed_by": "actor:ai_office_operator",
+            "executed_at": "2026-05-19T06:21:00Z",
+            "execution_evidence_refs": ["cmd:cmd-office-dispatch-1"],
+        },
+        inclusion_store_path=inclusion_store,
+        store_path=execution_store,
+    )
+    assert duplicate["stored"] is False
+    assert duplicate["errors"] == [{"field": "idempotency_key", "code": "duplicate_idempotency_key"}]
+
+    readback = list_office_controlled_mutation_manual_runtime_command_execution_records(store_path=execution_store)
+    assert readback["mode"] == "stored_manual_runtime_command_execution_records_readback"
+    assert readback["runtime_command_execution_record_count"] == 1
+    assert readback["records"][0]["runtime_command_executed"] is True
+    assert readback["capabilities"]["runtime_command_execution_enabled"] is True
+    assert readback["capabilities"]["target_mutation_enabled"] is False
+
+
+def test_manual_runtime_command_execution_record_api_is_protected_and_safe(monkeypatch, tmp_path):
+    from fastapi.testclient import TestClient
+    import hermes_cli.web_server as web_server
+
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+    _seed_runtime_command_inclusion_chain(tmp_path)
+    client = TestClient(web_server.app)
+    post_path = "/api/office/controlled-mutation/manual-runtime-command-execution-record"
+    get_path = "/api/office/controlled-mutation/manual-runtime-command-execution-record-status?runtime_execution_ref=exec-office-dispatch-1"
+    body = {
+        "runtime_command_ref": "cmd-office-dispatch-1",
+        "runtime_execution_ref": "exec-office-dispatch-1",
+        "idempotency_key": "idem-office-dispatch-1",
+        "operator_confirmation": "confirmed-runtime-command-execute-noop-probe-only",
+        "executed_by": "actor:ai_office_operator",
+        "executed_at": "2026-05-19T06:20:00Z",
+        "execution_evidence_refs": ["cmd:cmd-office-dispatch-1"],
+        "shell_command": "python private-runtime.py",
+    }
+
+    assert client.post(post_path, json=body).status_code == 401
+    assert client.get(get_path).status_code == 401
+
+    stored = client.post(post_path, headers={web_server._SESSION_HEADER_NAME: web_server._SESSION_TOKEN}, json=body)
+    assert stored.status_code == 200
+    payload = stored.json()
+    assert payload["stored"] is True
+    assert payload["dto"]["runtime_command_executed"] is True
+    assert payload["dto"]["idempotency_replay_store_written"] is True
+    assert payload["dto"]["target_mutation_created"] is False
+    assert payload["dto"]["real_dispatch_execution_enabled"] is False
+    assert "private-runtime" not in repr(payload)
+    assert "shell_command" not in payload["dto"]
+
+    readback = client.get(get_path, headers={web_server._SESSION_HEADER_NAME: web_server._SESSION_TOKEN})
+    assert readback.status_code == 200
+    readback_body = readback.json()
+    assert readback_body["runtime_command_execution_record_count"] == 1
+    assert readback_body["records"][0]["runtime_execution_ref"] == "exec-office-dispatch-1"
+    assert readback_body["capabilities"]["runtime_command_execution_enabled"] is True
+    assert readback_body["capabilities"]["target_mutation_enabled"] is False
+
+
 def test_manual_runtime_command_preview_record_api_is_protected_and_safe(monkeypatch, tmp_path):
     from fastapi.testclient import TestClient
     import hermes_cli.web_server as web_server

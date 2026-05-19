@@ -2756,6 +2756,51 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(markup).not.toMatch(/shell command|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
   });
 
+  it("renders manual runtime command execution record as executed noop without target mutation controls", () => {
+    const ManualRuntimeCommandExecutionRecordStatusPanel = (OfficePageModule as unknown as {
+      ManualRuntimeCommandExecutionRecordStatusPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.ManualRuntimeCommandExecutionRecordStatusPanel>>;
+    }).ManualRuntimeCommandExecutionRecordStatusPanel;
+    const status = {
+      schema_version: 1,
+      mode: "stored_manual_runtime_command_execution_records_readback" as const,
+      runtime_command_execution_record_count: 1,
+      limit: 10,
+      records: [
+        {
+          schema_version: 1,
+          mode: "stored_manual_runtime_command_execution_record" as const,
+          runtime_command_ref: "cmd-office-dispatch-1",
+          runtime_execution_ref: "exec-office-dispatch-1",
+          idempotency_key: "idem-office-dispatch-1",
+          runtime_execution_result: "noop_probe_succeeded" as const,
+          runtime_command_executed: true,
+          idempotency_replay_store_written: true,
+          target_mutation_created: false,
+          kanban_mutation_created: false,
+          nas_save_created: false,
+          real_dispatch_execution_enabled: false,
+        },
+      ],
+      capabilities: { runtime_command_execution_enabled: true, idempotency_replay_store_write_enabled: true, target_mutation_enabled: false, kanban_mutation_enabled: false, nas_save_enabled: false, real_dispatch_execution_enabled: false },
+      redaction: { shell_command_excluded: true, credentials_echoed: false },
+      errors: [],
+    };
+
+    const markup = renderToStaticMarkup(<ManualRuntimeCommandExecutionRecordStatusPanel status={status} error={null} />);
+
+    expect(markup).toContain('data-office-manual-runtime-command-execution-record-status="true"');
+    expect(markup).toContain('data-office-manual-runtime-command-execution-record-count="1"');
+    expect(markup).toContain('data-office-manual-runtime-command-executed="true"');
+    expect(markup).toContain('data-office-manual-runtime-command-execution-target-mutated="false"');
+    expect(markup).toContain('data-office-manual-runtime-command-execution-real-dispatch-enabled="false"');
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/shell command|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
+  });
+
   it("renders approved real one-shot dispatch gate design without executable controls", () => {
     const ApprovedRealOneShotDispatchGateDesignPanel = (OfficePageModule as unknown as {
       ApprovedRealOneShotDispatchGateDesignPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.ApprovedRealOneShotDispatchGateDesignPanel>>;

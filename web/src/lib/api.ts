@@ -763,6 +763,56 @@ export interface OfficeManualRuntimeCommandInclusionRecordStatus {
   errors?: Array<{ field: string; code: string }>;
 }
 
+export interface OfficeManualRuntimeCommandExecutionRecordPayload {
+  runtime_command_ref: string;
+  runtime_execution_ref: string;
+  idempotency_key: string;
+  operator_confirmation: "confirmed-runtime-command-execute-noop-probe-only";
+  executed_by: string;
+  executed_at: string;
+  execution_evidence_refs: string[];
+}
+
+export interface OfficeManualRuntimeCommandExecutionRecord {
+  schema_version: number;
+  mode: "stored_manual_runtime_command_execution_record";
+  execution_status?: "noop_probe_executed_no_target_mutation";
+  runtime_command_preview_ref?: string;
+  runtime_command_ref: string;
+  runtime_execution_ref: string;
+  idempotency_key: string;
+  runtime_execution_result: "noop_probe_succeeded";
+  runtime_command_included?: boolean;
+  runtime_command_executed: boolean;
+  idempotency_replay_store_written: boolean;
+  adapter_dispatch_created?: boolean;
+  target_mutation_created: boolean;
+  kanban_mutation_created?: boolean;
+  nas_save_created?: boolean;
+  real_dispatch_execution_enabled: boolean;
+  capabilities?: Record<string, boolean>;
+  redaction?: Record<string, boolean>;
+}
+
+export interface OfficeManualRuntimeCommandExecutionRecordAppendResult {
+  stored: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: OfficeManualRuntimeCommandExecutionRecord | null;
+}
+
+export interface OfficeManualRuntimeCommandExecutionRecordStatus {
+  schema_version: number;
+  mode: "stored_manual_runtime_command_execution_records_readback";
+  runtime_command_execution_record_count: number;
+  limit?: number;
+  skipped_count?: number;
+  records: OfficeManualRuntimeCommandExecutionRecord[];
+  latest_refs?: Record<string, string>;
+  capabilities: Record<string, boolean>;
+  redaction?: Record<string, boolean>;
+  errors?: Array<{ field: string; code: string }>;
+}
+
 export interface OfficeDisabledOneShotRuntimeDispatchPayload {
   exact_target_allowlist_ref: string;
   idempotency_key: string;
@@ -1061,6 +1111,20 @@ export const api = {
     if (typeof params.limit === "number") qs.set("limit", String(params.limit));
     const suffix = qs.toString() ? `?${qs.toString()}` : "";
     return fetchJSON<OfficeManualRuntimeCommandInclusionRecordStatus>(`/api/office/controlled-mutation/manual-runtime-command-inclusion-record-status${suffix}`);
+  },
+  writeOfficeControlledMutationManualRuntimeCommandExecutionRecord: (body: OfficeManualRuntimeCommandExecutionRecordPayload) =>
+    fetchJSON<OfficeManualRuntimeCommandExecutionRecordAppendResult>("/api/office/controlled-mutation/manual-runtime-command-execution-record", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
+  getOfficeControlledMutationManualRuntimeCommandExecutionRecordStatus: (params: { runtime_command_ref?: string; runtime_execution_ref?: string; limit?: number } = {}) => {
+    const qs = new URLSearchParams();
+    if (params.runtime_command_ref) qs.set("runtime_command_ref", params.runtime_command_ref);
+    if (params.runtime_execution_ref) qs.set("runtime_execution_ref", params.runtime_execution_ref);
+    if (typeof params.limit === "number") qs.set("limit", String(params.limit));
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+    return fetchJSON<OfficeManualRuntimeCommandExecutionRecordStatus>(`/api/office/controlled-mutation/manual-runtime-command-execution-record-status${suffix}`);
   },
   executeOfficeControlledMutationDisabledOneShotRuntimeDispatch: (body: OfficeDisabledOneShotRuntimeDispatchPayload) =>
     fetchJSON<OfficeDisabledOneShotRuntimeDispatchRefusal>("/api/office/controlled-mutation/disabled-one-shot-runtime-dispatch-executor-skeleton/execute", {
