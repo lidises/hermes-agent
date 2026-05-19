@@ -1,4 +1,15 @@
-Last updated: 2026-05-19 17:06 KST
+Last updated: 2026-05-19 17:30 KST
+
+## Manual target mutation record deployed (exact target mutated, Kanban/NAS still closed)
+- Added readiness-backed exact-target mutation write/readback after execution-backed target readiness metadata.
+- Backend POST: `/api/office/controlled-mutation/manual-target-mutation-record`.
+- Backend GET: `/api/office/controlled-mutation/manual-target-mutation-record-status`.
+- The write requires an existing target-readiness record, exact safe `targetready-*` ref, safe `targetmut-*` mutation ref, confirmation `confirmed-target-mutation-write-only`, safe mutator/timestamp/evidence refs, verified readiness, verified allowlist, executed noop runtime command, replay store written, and prior readiness `target_mutation_created=false`; duplicate readiness/mutation refs are blocked.
+- Stored mutation records set `target_mutation_created=true` and `target_mutation_result=safe_target_marker_written`, but keep adapter dispatch false, rollback execution false, Kanban mutation false, NAS save false, VPS file change false, service restart false, git push false, credential/public authority false, and real dispatch execution false.
+- Frontend typed API wrappers and display-only `/office` target mutation panel added; no form/button/input/select/textarea controls.
+- RED confirmed missing backend helper/API and frontend wrapper/panel first. GREEN local: focused backend target-mutation tests `2 passed`, broader controlled-mutation chain `32 passed`, frontend API/RPG `128 passed`, `py_compile`, `git diff --check`, added-line secret scan, and `npm run build` passed with existing Vite chunk warning only.
+- Commit `6d0369c2` pushed and deployed to VPS source/dashboard worktrees; `web_dist` copied to both; restarted only `hermes-agent-dashboard.service`; `hermes-gateway.service` stayed active without restart.
+- VPS focused backend preflight+draft/approval/gate-open/preview/inclusion/execution/readiness/target-mutation tests passed (`27 passed`). Live private `/office?target-mutation=6d0369c2` returned HTTP 200. Protected API smoke stored draft+bounded approval+gate-open+preview+inclusion+noop execution+target-readiness+target-mutation record and read back `target_mutation_created=true`, `target_mutation_readiness_verified=true`, `exact_target_allowlist_verified=true`, `runtime_command_executed=true`, `idempotency_replay_store_written=true`, `kanban_mutation_created=false`, `nas_save_created=false`, count 1, real dispatch false, and raw target value leak false.
 
 ## Manual target mutation readiness record deployed (exact target verified, no target mutation)
 - Added execution-backed target mutation readiness write/readback after bounded noop runtime-command execution metadata.
