@@ -1,6 +1,6 @@
-Last updated: 2026-05-19 16:16 KST
+Last updated: 2026-05-19 16:21 KST
 
-## Manual runtime command execution record implemented locally (noop execution, replay metadata, no target mutation)
+## Manual runtime command execution record deployed (noop execution, replay metadata, no target mutation)
 - Added inclusion-backed noop runtime-command execution write/readback after bounded runtime-command inclusion metadata.
 - Backend POST: `/api/office/controlled-mutation/manual-runtime-command-execution-record`.
 - Backend GET: `/api/office/controlled-mutation/manual-runtime-command-execution-record-status`.
@@ -8,7 +8,8 @@ Last updated: 2026-05-19 16:16 KST
 - Stored execution records set `runtime_command_executed=true` and `idempotency_replay_store_written=true` for the noop probe lane only, but keep adapter binding/dispatch false, rollback false, target/Kanban/NAS/VPS mutation false, service restart false, git push false, credential/public authority false, and real dispatch execution false.
 - Frontend typed API wrappers and display-only `/office` runtime-command execution panel added; no form/button/input/select/textarea controls.
 - RED confirmed missing backend helper/API and frontend wrapper/panel first. GREEN local: focused backend execution tests `2 passed`, broader controlled-mutation chain `28 passed`, frontend API/RPG `124 passed`, `py_compile`, `git diff --check`, added-line secret scan, and `npm run build` passed with existing Vite chunk warning only.
-- Not yet deployed in this paragraph until commit/VPS sync completes; next verification step is commit, push, copy `web_dist`, restart dashboard only, and smoke without touching gateway.
+- Commit `8ff95555` pushed and deployed to VPS source/dashboard worktrees; `web_dist` copied to both; restarted only `hermes-agent-dashboard.service`; `hermes-gateway.service` stayed active without restart.
+- VPS focused backend preflight+draft/approval/gate-open/preview/inclusion/execution tests passed (`23 passed`). Live private `/office?runtime-execution=8ff95555` returned HTTP 200. Protected API smoke stored draft+bounded approval+gate-open+preview+inclusion+noop execution record and read back `runtime_command_executed=true`, `idempotency_replay_store_written=true`, `target_mutation_created=false`, `kanban_mutation_created=false`, `nas_save_created=false`, count 1, real dispatch false, and raw executable value leak false.
 
 ## Manual runtime command inclusion record deployed (safe body, no execution)
 - Added bounded runtime-command inclusion metadata write/readback after runtime-command preview metadata.
