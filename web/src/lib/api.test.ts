@@ -1072,6 +1072,74 @@ describe("fetchJSON", () => {
     );
   });
 
+  it("writes and reads manual approval records through protected routes without opening dispatch", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: { __HERMES_SESSION_TOKEN__: "session-token-for-header-only", __HERMES_BASE_PATH__: "" },
+    });
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        headers: new Headers({ "content-type": "application/json" }),
+        json: async () => ({
+          stored: true,
+          errors: [],
+          dto: {
+            mode: "stored_manual_approval_record",
+            approval_status: "recorded_manual_approval",
+            approval_record_written: true,
+            dispatch_gate_open: false,
+            runtime_command_executed: false,
+            target_mutation_created: false,
+            capabilities: { approval_recording_enabled: true, dispatch_gate_open: false, real_dispatch_execution_enabled: false },
+            redaction: { raw_excluded: true },
+          },
+        }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        headers: new Headers({ "content-type": "application/json" }),
+        json: async () => ({
+          mode: "stored_manual_approval_records_readback",
+          approval_record_count: 1,
+          records: [],
+          latest_refs: { approval_record_ref: "approval-office-dispatch-1" },
+          capabilities: { approval_recording_enabled: true, dispatch_gate_open: false, real_dispatch_execution_enabled: false },
+          errors: [],
+        }),
+      } as Response);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const writeResult = await api.appendOfficeControlledMutationManualApprovalRecord({
+      approval_record_ref: "approval-office-dispatch-1",
+      operator_confirmation: "confirmed-real-approval-record-write-only",
+      approved_by: "actor:ai_office_operator",
+      approved_at: "2026-05-19T04:30:00Z",
+      approval_evidence_refs: ["approval:approval-office-dispatch-1"],
+    });
+    const readback = await api.getOfficeControlledMutationManualApprovalRecordStatus({ approval_record_ref: "approval-office-dispatch-1", limit: 10 });
+
+    expect(writeResult.stored).toBe(true);
+    expect(writeResult.dto?.approval_record_written).toBe(true);
+    expect(writeResult.dto?.dispatch_gate_open).toBe(false);
+    expect(readback.mode).toBe("stored_manual_approval_records_readback");
+    expect(readback.approval_record_count).toBe(1);
+    expect(readback.capabilities.real_dispatch_execution_enabled).toBe(false);
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      "/api/office/controlled-mutation/manual-approval-record",
+      expect.objectContaining({ method: "POST", body: expect.not.stringContaining("raw_command") }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      "/api/office/controlled-mutation/manual-approval-record-status?approval_record_ref=approval-office-dispatch-1&limit=10",
+      expect.objectContaining({ headers: expect.any(Headers) }),
+    );
+  });
+
   it("gets approved real one-shot dispatch gate design through the protected readback route", async () => {
     Object.defineProperty(globalThis, "window", {
       configurable: true,

@@ -2540,6 +2540,49 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(markup).not.toMatch(/raw command|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
   });
 
+  it("renders manual approval record status with write recorded but dispatch still closed", () => {
+    const ManualApprovalRecordStatusPanel = (OfficePageModule as unknown as {
+      ManualApprovalRecordStatusPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.ManualApprovalRecordStatusPanel>>;
+    }).ManualApprovalRecordStatusPanel;
+    const status = {
+      schema_version: 1,
+      mode: "stored_manual_approval_records_readback" as const,
+      approval_record_count: 1,
+      records: [
+        {
+          schema_version: 1,
+          mode: "stored_manual_approval_record" as const,
+          approval_status: "recorded_manual_approval" as const,
+          approval_record_ref: "approval-office-dispatch-1",
+          approval_record_written: true as const,
+          dispatch_gate_open: false as const,
+          runtime_command_executed: false as const,
+          target_mutation_created: false as const,
+          capabilities: { approval_recording_enabled: true, dispatch_gate_open: false, real_dispatch_execution_enabled: false },
+          redaction: { raw_excluded: true },
+        },
+      ],
+      latest_refs: { approval_record_ref: "approval-office-dispatch-1" },
+      capabilities: { approval_recording_enabled: true, dispatch_gate_open: false, real_dispatch_execution_enabled: false, target_mutation_enabled: false },
+      redaction: { raw_excluded: true },
+      errors: [],
+    };
+
+    const markup = renderToStaticMarkup(<ManualApprovalRecordStatusPanel status={status} error={null} />);
+
+    expect(markup).toContain('data-office-manual-approval-record-status="true"');
+    expect(markup).toContain('data-office-manual-approval-record-count="1"');
+    expect(markup).toContain('data-office-manual-approval-record-written="true"');
+    expect(markup).toContain('data-office-manual-approval-record-dispatch-gate-open="false"');
+    expect(markup).toContain('data-office-manual-approval-record-real-dispatch-enabled="false"');
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw command|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
+  });
+
   it("renders approved real one-shot dispatch gate design without executable controls", () => {
     const ApprovedRealOneShotDispatchGateDesignPanel = (OfficePageModule as unknown as {
       ApprovedRealOneShotDispatchGateDesignPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.ApprovedRealOneShotDispatchGateDesignPanel>>;

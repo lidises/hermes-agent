@@ -1,4 +1,14 @@
-Last updated: 2026-05-19 13:32 KST
+Last updated: 2026-05-19 13:51 KST
+
+## Manual approval record write gate implemented locally (approval-record-only)
+- Added bounded manual approval-record write gate after draft-review readiness.
+- Backend POST: `/api/office/controlled-mutation/manual-approval-record`.
+- Backend readback GET: `/api/office/controlled-mutation/manual-approval-record-status`.
+- The write requires an existing draft, exact `approval_record_ref`, safe operator confirmation `confirmed-real-approval-record-write-only`, safe approver/timestamp/evidence refs, and duplicate approval refs are blocked.
+- Stored approval records set `approval_record_written=true`, but keep `dispatch_gate_open=false`, `runtime_command_included=false`, `runtime_command_executed=false`, `target_mutation_created=false`, `idempotency_replay_store_written=false`, `kanban_mutation_created=false`, and `nas_save_created=false`.
+- Frontend API wrapper and display-only `/office` readback panel added; no form/button/input/select/textarea controls.
+- RED confirmed missing backend helper/API and frontend wrapper/panel first (`3 failed` backend, `2 failed` frontend). GREEN focused backend `9 passed`, broader controlled-mutation chain `18 passed`, frontend API/RPG `114 passed`, `py_compile`, `git diff --check`, added-line secret scan, and `npm run build` passed with existing Vite chunk warning only.
+- Pending deploy verification in this session: commit/push, VPS sync, dashboard restart, VPS tests, live smoke.
 
 ## Manual approval-recording draft review readiness deployed (review-only)
 - Added protected review/readiness projection after draft persistence.
