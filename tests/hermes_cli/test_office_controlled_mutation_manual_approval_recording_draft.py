@@ -311,7 +311,8 @@ def test_manual_approval_record_write_gate_api_is_protected_and_readback_safe(mo
     assert payload["dto"]["dispatch_gate_open"] is False
     assert payload["dto"]["runtime_command_executed"] is False
     assert "/Users/lidises" not in repr(payload)
-    assert "raw_command" not in repr(payload)
+    assert "unsafe-runtime-command-redacted" not in repr(payload)
+    assert "raw_command" not in payload["dto"]
 
     readback = client.get(get_path, headers={web_server._SESSION_HEADER_NAME: web_server._SESSION_TOKEN})
     assert readback.status_code == 200
@@ -463,7 +464,8 @@ def test_manual_dispatch_gate_open_record_writes_gate_metadata_without_runtime(t
     assert dto["kanban_mutation_created"] is False
     assert dto["nas_save_created"] is False
     assert dto["real_dispatch_execution_enabled"] is False
-    assert "raw_command" not in repr(dto)
+    assert "unsafe-runtime-command-redacted" not in repr(dto)
+    assert "raw_command" not in dto
 
     readback = list_office_controlled_mutation_manual_dispatch_gate_open_records(store_path=gate_store)
     assert readback["mode"] == "stored_manual_dispatch_gate_open_records_readback"
@@ -518,7 +520,8 @@ def test_manual_dispatch_gate_open_record_api_is_protected_and_safe(monkeypatch,
     assert payload["dto"]["runtime_command_executed"] is False
     assert payload["dto"]["target_mutation_created"] is False
     assert payload["dto"]["real_dispatch_execution_enabled"] is False
-    assert "raw_command" not in repr(payload)
+    assert "unsafe-runtime-command-redacted" not in repr(payload)
+    assert "raw_command" not in payload["dto"]
 
     readback = client.get(get_path, headers={web_server._SESSION_HEADER_NAME: web_server._SESSION_TOKEN})
     assert readback.status_code == 200
@@ -527,5 +530,156 @@ def test_manual_dispatch_gate_open_record_api_is_protected_and_safe(monkeypatch,
     assert readback_body["dispatch_gate_open_record_count"] == 1
     assert readback_body["records"][0]["dispatch_gate_open"] is True
     assert readback_body["capabilities"]["dispatch_gate_open"] is True
+    assert readback_body["capabilities"]["runtime_command_execution_enabled"] is False
+    assert readback_body["capabilities"]["real_dispatch_execution_enabled"] is False
+
+
+def test_manual_runtime_command_preview_record_writes_checksum_only_without_execution(tmp_path):
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_manual_approval_record,
+        append_office_controlled_mutation_manual_approval_recording_draft,
+        append_office_controlled_mutation_manual_dispatch_gate_open_record,
+        append_office_controlled_mutation_manual_runtime_command_preview_record,
+        list_office_controlled_mutation_manual_runtime_command_preview_records,
+    )
+
+    draft_store = tmp_path / "approval_record_drafts.jsonl"
+    approval_store = tmp_path / "approval_records.jsonl"
+    gate_store = tmp_path / "dispatch_gate_open_records.jsonl"
+    preview_store = tmp_path / "runtime_command_preview_records.jsonl"
+    append_office_controlled_mutation_manual_approval_recording_draft(_valid_payload(), store_path=draft_store)
+    append_office_controlled_mutation_manual_approval_record(
+        {
+            "approval_record_ref": "approval-office-dispatch-1",
+            "operator_confirmation": "confirmed-real-approval-record-write-only",
+            "approved_by": "actor:ai_office_operator",
+            "approved_at": "2026-05-19T04:30:00Z",
+            "approval_evidence_refs": ["approval:approval-office-dispatch-1"],
+        },
+        draft_store_path=draft_store,
+        store_path=approval_store,
+    )
+    append_office_controlled_mutation_manual_dispatch_gate_open_record(
+        {
+            "approval_record_ref": "approval-office-dispatch-1",
+            "dispatch_gate_ref": "gate-office-dispatch-1",
+            "operator_confirmation": "confirmed-dispatch-gate-open-metadata-only",
+            "opened_by": "actor:ai_office_operator",
+            "opened_at": "2026-05-19T05:20:00Z",
+            "gate_evidence_refs": ["approval:approval-office-dispatch-1"],
+        },
+        approval_store_path=approval_store,
+        store_path=gate_store,
+    )
+
+    result = append_office_controlled_mutation_manual_runtime_command_preview_record(
+        {
+            "dispatch_gate_ref": "gate-office-dispatch-1",
+            "runtime_command_preview_ref": "cmdpreview-office-dispatch-1",
+            "command_envelope_ref": "envelope-office-dispatch-1",
+            "command_intent_ref": "intent-office-dispatch-1",
+            "operator_confirmation": "confirmed-runtime-command-preview-only",
+            "materialized_by": "actor:ai_office_operator",
+            "materialized_at": "2026-05-19T05:40:00Z",
+            "preview_evidence_refs": ["gate:gate-office-dispatch-1"],
+            "raw_command": "unsafe-runtime-command-redacted",
+        },
+        gate_store_path=gate_store,
+        store_path=preview_store,
+    )
+
+    assert result["stored"] is True
+    dto = result["dto"]
+    assert dto["mode"] == "stored_manual_runtime_command_preview_record"
+    assert dto["dispatch_gate_ref"] == "gate-office-dispatch-1"
+    assert dto["runtime_command_preview_ref"] == "cmdpreview-office-dispatch-1"
+    assert dto["runtime_command_preview_created"] is True
+    assert dto["runtime_command_included"] is False
+    assert dto["runtime_command_executed"] is False
+    assert dto["target_mutation_created"] is False
+    assert dto["kanban_mutation_created"] is False
+    assert dto["nas_save_created"] is False
+    assert dto["real_dispatch_execution_enabled"] is False
+    assert len(dto["runtime_command_preview_checksum_sha256"]) == 64
+    assert "unsafe-runtime-command-redacted" not in repr(dto)
+    assert "raw_command" not in dto
+    assert "unsafe-runtime-command" not in repr(dto)
+
+    readback = list_office_controlled_mutation_manual_runtime_command_preview_records(store_path=preview_store)
+    assert readback["mode"] == "stored_manual_runtime_command_preview_records_readback"
+    assert readback["runtime_command_preview_record_count"] == 1
+    assert readback["records"][0]["runtime_command_preview_created"] is True
+    assert readback["capabilities"]["runtime_command_preview_enabled"] is True
+    assert readback["capabilities"]["runtime_command_execution_enabled"] is False
+    assert readback["capabilities"]["target_mutation_enabled"] is False
+
+
+def test_manual_runtime_command_preview_record_api_is_protected_and_safe(monkeypatch, tmp_path):
+    from fastapi.testclient import TestClient
+    import hermes_cli.web_server as web_server
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_manual_approval_record,
+        append_office_controlled_mutation_manual_approval_recording_draft,
+        append_office_controlled_mutation_manual_dispatch_gate_open_record,
+    )
+
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+    append_office_controlled_mutation_manual_approval_recording_draft(_valid_payload())
+    append_office_controlled_mutation_manual_approval_record(
+        {
+            "approval_record_ref": "approval-office-dispatch-1",
+            "operator_confirmation": "confirmed-real-approval-record-write-only",
+            "approved_by": "actor:ai_office_operator",
+            "approved_at": "2026-05-19T04:30:00Z",
+            "approval_evidence_refs": ["approval:approval-office-dispatch-1"],
+        }
+    )
+    append_office_controlled_mutation_manual_dispatch_gate_open_record(
+        {
+            "approval_record_ref": "approval-office-dispatch-1",
+            "dispatch_gate_ref": "gate-office-dispatch-1",
+            "operator_confirmation": "confirmed-dispatch-gate-open-metadata-only",
+            "opened_by": "actor:ai_office_operator",
+            "opened_at": "2026-05-19T05:20:00Z",
+            "gate_evidence_refs": ["approval:approval-office-dispatch-1"],
+        }
+    )
+    client = TestClient(web_server.app)
+    post_path = "/api/office/controlled-mutation/manual-runtime-command-preview-record"
+    get_path = "/api/office/controlled-mutation/manual-runtime-command-preview-record-status?runtime_command_preview_ref=cmdpreview-office-dispatch-1"
+    body = {
+        "dispatch_gate_ref": "gate-office-dispatch-1",
+        "runtime_command_preview_ref": "cmdpreview-office-dispatch-1",
+        "command_envelope_ref": "envelope-office-dispatch-1",
+        "command_intent_ref": "intent-office-dispatch-1",
+        "operator_confirmation": "confirmed-runtime-command-preview-only",
+        "materialized_by": "actor:ai_office_operator",
+        "materialized_at": "2026-05-19T05:40:00Z",
+        "preview_evidence_refs": ["gate:gate-office-dispatch-1"],
+        "raw_command": "unsafe-runtime-command-redacted",
+    }
+
+    assert client.post(post_path, json=body).status_code == 401
+    assert client.get(get_path).status_code == 401
+
+    stored = client.post(post_path, headers={web_server._SESSION_HEADER_NAME: web_server._SESSION_TOKEN}, json=body)
+    assert stored.status_code == 200
+    payload = stored.json()
+    assert payload["stored"] is True
+    assert payload["dto"]["runtime_command_preview_created"] is True
+    assert payload["dto"]["runtime_command_included"] is False
+    assert payload["dto"]["runtime_command_executed"] is False
+    assert payload["dto"]["target_mutation_created"] is False
+    assert payload["dto"]["real_dispatch_execution_enabled"] is False
+    assert "unsafe-runtime-command-redacted" not in repr(payload)
+    assert "raw_command" not in payload["dto"]
+    assert "unsafe-runtime-command" not in repr(payload)
+
+    readback = client.get(get_path, headers={web_server._SESSION_HEADER_NAME: web_server._SESSION_TOKEN})
+    assert readback.status_code == 200
+    readback_body = readback.json()
+    assert readback_body["mode"] == "stored_manual_runtime_command_preview_records_readback"
+    assert readback_body["runtime_command_preview_record_count"] == 1
+    assert readback_body["records"][0]["runtime_command_preview_created"] is True
     assert readback_body["capabilities"]["runtime_command_execution_enabled"] is False
     assert readback_body["capabilities"]["real_dispatch_execution_enabled"] is False

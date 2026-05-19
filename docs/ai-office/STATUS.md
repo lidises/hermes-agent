@@ -1,4 +1,15 @@
-Last updated: 2026-05-19 14:41 KST
+Last updated: 2026-05-19 15:11 KST
+
+## Manual runtime command preview record implemented locally (checksum-only, no execution)
+- Added bounded runtime-command preview metadata write/readback after dispatch-gate-open metadata.
+- Backend POST: `/api/office/controlled-mutation/manual-runtime-command-preview-record`.
+- Backend GET: `/api/office/controlled-mutation/manual-runtime-command-preview-record-status`.
+- The write requires an existing dispatch gate open record, exact safe `dispatch_gate_ref`, safe `cmdpreview-*` preview ref, safe `envelope-*` and `intent-*` refs, confirmation `confirmed-runtime-command-preview-only`, safe operator/timestamp/evidence refs, and duplicate preview refs are blocked.
+- Stored preview records include only safe refs and `runtime_command_preview_checksum_sha256`; raw command bodies/args/providers/paths/tokens are neither accepted into DTOs nor returned.
+- Stored preview records set `runtime_command_preview_created=true`, but keep `runtime_command_included=false`, `runtime_command_executed=false`, adapter binding/dispatch false, replay-store write false, rollback false, target/Kanban/NAS/VPS mutation false, service restart false, credential/public authority false, and real dispatch execution false.
+- Frontend typed API wrappers and display-only `/office` runtime-command preview panel added; no form/button/input/select/textarea controls.
+- RED confirmed missing backend helper/API and frontend wrapper/panel first. GREEN local: focused backend `15 passed`, broader controlled-mutation chain `24 passed`, frontend API/RPG `120 passed`, `py_compile`, `git diff --check`, added-line secret scan, and `npm run build` passed with existing Vite chunk warning only.
+- Not yet deployed in this paragraph until commit/VPS sync completes; next verification step is commit, push, copy `web_dist`, restart dashboard only, and smoke without touching gateway.
 
 ## Manual dispatch gate open record deployed (metadata-only)
 - Added bounded dispatch-gate-open metadata write/readback after approval-backed readiness.

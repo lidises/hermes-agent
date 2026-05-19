@@ -2664,6 +2664,52 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(markup).not.toMatch(/raw command|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
   });
 
+  it("renders manual runtime command preview record without command execution", () => {
+    const ManualRuntimeCommandPreviewRecordStatusPanel = (OfficePageModule as unknown as {
+      ManualRuntimeCommandPreviewRecordStatusPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.ManualRuntimeCommandPreviewRecordStatusPanel>>;
+    }).ManualRuntimeCommandPreviewRecordStatusPanel;
+    const status = {
+      schema_version: 1,
+      mode: "stored_manual_runtime_command_preview_records_readback" as const,
+      runtime_command_preview_record_count: 1,
+      records: [
+        {
+          schema_version: 1,
+          mode: "stored_manual_runtime_command_preview_record" as const,
+          dispatch_gate_ref: "gate-office-dispatch-1",
+          runtime_command_preview_ref: "cmdpreview-office-dispatch-1",
+          command_envelope_ref: "envelope-office-dispatch-1",
+          command_intent_ref: "intent-office-dispatch-1",
+          runtime_command_preview_created: true,
+          runtime_command_preview_checksum_sha256: "a".repeat(64),
+          runtime_command_included: false,
+          runtime_command_executed: false,
+          target_mutation_created: false,
+          kanban_mutation_created: false,
+          nas_save_created: false,
+          real_dispatch_execution_enabled: false,
+        },
+      ],
+      capabilities: { runtime_command_preview_enabled: true, runtime_command_execution_enabled: false, real_dispatch_execution_enabled: false, target_mutation_enabled: false, kanban_mutation_enabled: false, nas_save_enabled: false },
+      redaction: { raw_command_excluded: true, command_args_excluded: true },
+      errors: [],
+    };
+
+    const markup = renderToStaticMarkup(<ManualRuntimeCommandPreviewRecordStatusPanel status={status} error={null} />);
+
+    expect(markup).toContain('data-office-manual-runtime-command-preview-record-status="true"');
+    expect(markup).toContain('data-office-manual-runtime-command-preview-record-count="1"');
+    expect(markup).toContain('data-office-manual-runtime-command-preview-created="true"');
+    expect(markup).toContain('data-office-manual-runtime-command-preview-executed="false"');
+    expect(markup).toContain('data-office-manual-runtime-command-preview-real-dispatch-enabled="false"');
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw command|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
+  });
+
   it("renders approved real one-shot dispatch gate design without executable controls", () => {
     const ApprovedRealOneShotDispatchGateDesignPanel = (OfficePageModule as unknown as {
       ApprovedRealOneShotDispatchGateDesignPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.ApprovedRealOneShotDispatchGateDesignPanel>>;

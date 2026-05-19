@@ -1260,6 +1260,83 @@ describe("fetchJSON", () => {
     expect(body.provider).toBeUndefined();
   });
 
+  it("writes and reads manual runtime command preview records through protected routes without execution", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        __HERMES_SESSION_TOKEN__: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        headers: new Headers({ "content-type": "application/json" }),
+        json: async () => ({
+          stored: true,
+          dto: {
+            mode: "stored_manual_runtime_command_preview_record",
+            dispatch_gate_ref: "gate-office-dispatch-1",
+            runtime_command_preview_ref: "cmdpreview-office-dispatch-1",
+            runtime_command_preview_created: true,
+            runtime_command_preview_checksum_sha256: "a".repeat(64),
+            runtime_command_included: false,
+            runtime_command_executed: false,
+            target_mutation_created: false,
+            real_dispatch_execution_enabled: false,
+          },
+          errors: [],
+        }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        headers: new Headers({ "content-type": "application/json" }),
+        json: async () => ({
+          mode: "stored_manual_runtime_command_preview_records_readback",
+          runtime_command_preview_record_count: 1,
+          records: [{ runtime_command_preview_ref: "cmdpreview-office-dispatch-1", runtime_command_preview_created: true, runtime_command_executed: false }],
+          capabilities: { runtime_command_preview_enabled: true, runtime_command_execution_enabled: false, real_dispatch_execution_enabled: false },
+        }),
+      } as Response);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const write = await api.writeOfficeControlledMutationManualRuntimeCommandPreviewRecord({
+      dispatch_gate_ref: "gate-office-dispatch-1",
+      runtime_command_preview_ref: "cmdpreview-office-dispatch-1",
+      command_envelope_ref: "envelope-office-dispatch-1",
+      command_intent_ref: "intent-office-dispatch-1",
+      operator_confirmation: "confirmed-runtime-command-preview-only",
+      materialized_by: "actor:ai_office_operator",
+      materialized_at: "2026-05-19T05:40:00Z",
+      preview_evidence_refs: ["gate:gate-office-dispatch-1"],
+    });
+    const read = await api.getOfficeControlledMutationManualRuntimeCommandPreviewRecordStatus({ runtime_command_preview_ref: "cmdpreview-office-dispatch-1" });
+
+    expect(write.stored).toBe(true);
+    expect(write.dto?.runtime_command_preview_created).toBe(true);
+    expect(write.dto?.runtime_command_executed).toBe(false);
+    expect(read.mode).toBe("stored_manual_runtime_command_preview_records_readback");
+    expect(read.records[0]?.runtime_command_preview_created).toBe(true);
+    expect(read.capabilities.runtime_command_execution_enabled).toBe(false);
+    expect(read.capabilities.real_dispatch_execution_enabled).toBe(false);
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      "/api/office/controlled-mutation/manual-runtime-command-preview-record",
+      expect.objectContaining({ method: "POST", body: expect.any(String), headers: expect.any(Headers) }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      "/api/office/controlled-mutation/manual-runtime-command-preview-record-status?runtime_command_preview_ref=cmdpreview-office-dispatch-1",
+      expect.objectContaining({ headers: expect.any(Headers) }),
+    );
+    const body = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body));
+    expect(body.raw_command).toBeUndefined();
+    expect(body.provider).toBeUndefined();
+  });
+
   it("gets approved real one-shot dispatch gate design through the protected readback route", async () => {
     Object.defineProperty(globalThis, "window", {
       configurable: true,

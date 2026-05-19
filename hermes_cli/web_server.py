@@ -53,6 +53,7 @@ from hermes_cli.office_controlled_mutation import (
     append_office_controlled_mutation_manual_approval_record,
     append_office_controlled_mutation_manual_approval_recording_draft,
     append_office_controlled_mutation_manual_dispatch_gate_open_record,
+    append_office_controlled_mutation_manual_runtime_command_preview_record,
     append_office_controlled_mutation_authority_adapter_registry_event,
     append_office_controlled_mutation_decision_event,
     append_office_controlled_mutation_dry_run_result_event,
@@ -103,6 +104,7 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_audit_events,
     list_office_controlled_mutation_manual_approval_records,
     list_office_controlled_mutation_manual_dispatch_gate_open_records,
+    list_office_controlled_mutation_manual_runtime_command_preview_records,
     list_office_controlled_mutation_manual_approval_recording_drafts,
     list_office_controlled_mutation_authority_adapter_registry_events,
     list_office_controlled_mutation_request_events,
@@ -1156,6 +1158,26 @@ async def get_office_controlled_mutation_manual_dispatch_gate_open_record_status
     return list_office_controlled_mutation_manual_dispatch_gate_open_records(
         dispatch_gate_ref=dispatch_gate_ref,
         approval_record_ref=approval_record_ref,
+        limit=limit,
+    )
+
+
+@app.post("/api/office/controlled-mutation/manual-runtime-command-preview-record")
+async def append_office_controlled_mutation_manual_runtime_command_preview_record_endpoint(payload: Mapping[str, Any]):
+    """Store bounded runtime-command preview metadata without command execution."""
+    return append_office_controlled_mutation_manual_runtime_command_preview_record(payload)
+
+
+@app.get("/api/office/controlled-mutation/manual-runtime-command-preview-record-status")
+async def get_office_controlled_mutation_manual_runtime_command_preview_record_status(
+    runtime_command_preview_ref: str | None = None,
+    dispatch_gate_ref: str | None = None,
+    limit: int = 50,
+):
+    """Read back runtime-command preview metadata without returning raw commands."""
+    return list_office_controlled_mutation_manual_runtime_command_preview_records(
+        runtime_command_preview_ref=runtime_command_preview_ref,
+        dispatch_gate_ref=dispatch_gate_ref,
         limit=limit,
     )
 
