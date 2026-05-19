@@ -1,12 +1,12 @@
 # Hermes AI Office — STATUS
 
-Last updated: 2026-05-19 09:35 KST
+Last updated: 2026-05-19 09:39 KST
 
 ## Manual one-shot runtime dry-run status lane
 
 Implemented the recommended shortest follow-up after `runtime_preflight_status`: a protected manual one-shot runtime dry-run status lane. Backend adds `build_office_controlled_mutation_manual_one_shot_runtime_dry_run_status(...)` plus protected GET `/api/office/controlled-mutation/manual-one-shot-runtime-dry-run-status`; frontend adds a typed API wrapper and display-only `/office` panel with stable `data-office-manual-one-shot-runtime-dry-run-status-*` hooks. It models an operator-triggered single dry-run envelope, allowing only metadata-result and audit-event recording while keeping runtime command execution, watcher daemon, cron, adapter dispatch, target/Kanban/NAS mutation, VPS file changes, service restart, git push, credential access, and public exposure disabled.
 
-Verification 2026-05-19 09:35 KST: RED backend tests first failed for the missing helper/route; RED frontend tests first failed for the missing API wrapper/panel. GREEN focused backend manual-one-shot+runtime-preflight tests passed (`4 passed`), focused frontend API/RPG tests passed (`2 passed | 89 skipped`). Broader verification/build/deploy pending in this same slice.
+Verification/deploy 2026-05-19 09:39 KST: RED backend tests first failed for the missing helper/route; RED frontend tests first failed for the missing API wrapper/panel. GREEN focused backend manual-one-shot+runtime-preflight tests passed (`4 passed`); broader backend manual-one-shot+runtime-preflight+runtime-review+watcher+target tests passed (`10 passed`); frontend API/RPG regression passed (`91 passed`); `py_compile` + `git diff --check` passed; added-line secret scan passed; `npm run build` passed with only the existing Vite large chunk warning. Commit `60e83787` was pushed and deployed to VPS source/dashboard worktrees; copied `web_dist`; restarted only `hermes-agent-dashboard.service`; kept `hermes-gateway.service` active without restart. VPS focused backend tests passed (`4 passed`); private `/office?manual-runtime-dry-run=60e83787` returned HTTP 200; protected API readback returned `manual_one_shot_runtime_dry_run_status True True True False False False False False False False False False False False False` (complete true, metadata write true, audit write true, runtime execution/watcher/cron/dispatch/target/Kanban/NAS/VPS-file/service/git/credential/public false).
 
 Boundary: this is status/readback/UI only. It does not execute a runtime command, start watcher/cron automation, dispatch or bind an adapter, mutate targets/Kanban/NAS/VPS files, restart services by itself, push from the lane, expose public routes, or grant VPS direct NAS mount/credential/write authority.
 
