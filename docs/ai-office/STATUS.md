@@ -1,4 +1,15 @@
-Last updated: 2026-05-19 17:30 KST
+Last updated: 2026-05-19 17:55 KST
+
+## Manual adapter dispatch record deployed (adapter dispatched, Kanban/NAS still closed)
+- Added target-mutation-backed adapter dispatch write/readback after exact-target mutation metadata.
+- Backend POST: `/api/office/controlled-mutation/manual-adapter-dispatch-record`.
+- Backend GET: `/api/office/controlled-mutation/manual-adapter-dispatch-record-status`.
+- The write requires an existing target mutation record, exact safe `targetmut-*` ref, safe `adapterdispatch-*` dispatch ref, safe `adapter-*` ref, confirmation `confirmed-adapter-dispatch-record-only`, safe dispatcher/timestamp/evidence refs, prior target mutation created, and prior Kanban/NAS/adapter dispatch still false; duplicate target mutation/adapter dispatch refs are blocked.
+- Stored adapter dispatch records set `adapter_dispatch_created=true` and `adapter_dispatch_result=safe_adapter_dispatch_marker_written`, but keep Kanban mutation false, NAS save/write false, VPS file change false, service restart false, git push false, credential/public authority false, and real dispatch execution false.
+- Frontend typed API wrappers and display-only `/office` adapter dispatch panel added; no form/button/input/select/textarea controls.
+- RED confirmed missing backend helper/API and frontend wrapper/panel first. GREEN local: focused backend adapter-dispatch tests `2 passed`, broader controlled-mutation chain `34 passed`, frontend API/RPG `130 passed`, `py_compile`, `git diff --check`, added-line secret scan, and `npm run build` passed with existing Vite chunk warning only.
+- Commit `36293093` pushed and deployed to VPS source/dashboard worktrees; `web_dist` copied to both; restarted only `hermes-agent-dashboard.service`; `hermes-gateway.service` stayed active without restart.
+- VPS focused backend preflight+draft/approval/gate-open/preview/inclusion/execution/readiness/target-mutation/adapter-dispatch tests passed (`29 passed`). Live private `/office?adapter-dispatch=36293093` returned HTTP 200. Protected API smoke stored draft+bounded approval+gate-open+preview+inclusion+noop execution+target-readiness+target-mutation+adapter-dispatch record and read back `adapter_dispatch_created=true`, `target_mutation_created=true`, `kanban_mutation_created=false`, `nas_save_created=false`, count 1, real dispatch false, raw provider leak false, and unauth POST 401.
 
 ## Manual target mutation record deployed (exact target mutated, Kanban/NAS still closed)
 - Added readiness-backed exact-target mutation write/readback after execution-backed target readiness metadata.
