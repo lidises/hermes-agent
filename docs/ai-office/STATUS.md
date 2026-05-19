@@ -1,6 +1,6 @@
-Last updated: 2026-05-19 18:18 KST
+Last updated: 2026-05-19 18:21 KST
 
-## Manual Kanban mutation record implemented locally (Kanban marker opened, NAS still closed)
+## Manual Kanban mutation record deployed (Kanban marker opened, NAS still closed)
 - Added adapter-dispatch-backed Kanban mutation write/readback after adapter dispatch metadata.
 - Backend POST: `/api/office/controlled-mutation/manual-kanban-mutation-record`.
 - Backend GET: `/api/office/controlled-mutation/manual-kanban-mutation-record-status`.
@@ -8,7 +8,8 @@ Last updated: 2026-05-19 18:18 KST
 - Stored Kanban mutation records set `kanban_mutation_created=true` and `kanban_mutation_result=safe_kanban_marker_written`, but keep NAS save/write false, VPS file change false, service restart false, git push false, credential/public authority false, and real dispatch execution false.
 - Frontend typed API wrappers and display-only `/office` Kanban mutation panel added; no form/button/input/select/textarea controls.
 - RED confirmed missing backend helper/API and frontend wrapper/panel first. GREEN local: focused backend Kanban-mutation tests `2 passed`, broader controlled-mutation chain `36 passed`, frontend API/RPG `132 passed`, `py_compile`, `git diff --check`, added-line secret scan, and `npm run build` passed with existing Vite chunk warning only.
-- Not yet committed/pushed/deployed in this section until final verification/deploy finishes.
+- Commit `4a52a11f` pushed and deployed to VPS source/dashboard worktrees; `web_dist` copied to both; restarted only `hermes-agent-dashboard.service`; `hermes-gateway.service` stayed active without restart.
+- VPS focused backend preflight+draft/approval/gate-open/preview/inclusion/execution/readiness/target-mutation/adapter-dispatch/Kanban-mutation tests passed (`31 passed`). Live private `/office?kanban-mutation=4a52a11f` returned HTTP 200. Protected API smoke stored prerequisite adapter-dispatch chain plus Kanban mutation record and read back `kanban_mutation_created=true`, `adapter_dispatch_created=true`, `nas_save_created=false`, count 1, real dispatch false, raw card/provider leak false, and unauth POST 401.
 
 ## Manual adapter dispatch record deployed (adapter dispatched, Kanban/NAS still closed)
 - Added target-mutation-backed adapter dispatch write/readback after exact-target mutation metadata.
