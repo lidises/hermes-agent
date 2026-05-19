@@ -1,6 +1,6 @@
-Last updated: 2026-05-19 14:36 KST
+Last updated: 2026-05-19 14:41 KST
 
-## Manual dispatch gate open record implemented locally (metadata-only)
+## Manual dispatch gate open record deployed (metadata-only)
 - Added bounded dispatch-gate-open metadata write/readback after approval-backed readiness.
 - Backend POST: `/api/office/controlled-mutation/manual-dispatch-gate-open-record`.
 - Backend GET: `/api/office/controlled-mutation/manual-dispatch-gate-open-record-status`.
@@ -8,7 +8,8 @@ Last updated: 2026-05-19 14:36 KST
 - Stored gate records set `dispatch_gate_open=true`, but keep `runtime_command_included=false`, `runtime_command_executed=false`, adapter binding/dispatch false, replay-store write false, rollback false, target/Kanban/NAS/VPS mutation false, service restart false, credential/public authority false, and real dispatch execution false.
 - Frontend typed API wrappers and display-only `/office` gate-open record panel added; no form/button/input/select/textarea controls.
 - RED confirmed missing backend helper/API and frontend wrapper/panel first. GREEN local: focused backend `13 passed`, broader controlled-mutation chain `22 passed`, frontend API/RPG `118 passed`, `py_compile`, `git diff --check`, added-line secret scan, and `npm run build` passed with existing Vite chunk warning only.
-- Deployment/smoke still pending for this local implementation.
+- Commit `31bba860` pushed and deployed to VPS source/dashboard worktrees; `web_dist` copied to both; restarted only `hermes-agent-dashboard.service`; `hermes-gateway.service` stayed active without restart.
+- VPS focused backend preflight+draft/approval/gate-open tests passed (`17 passed`). Live private `/office?dispatch-gate-open=31bba860` returned HTTP 200. Protected API smoke stored draft+bounded approval+bounded gate-open record and read back `dispatch_gate_open=true`, with runtime command inclusion/execution, target mutation, Kanban mutation, NAS save, and real dispatch execution false; raw leak false.
 
 ## Manual approval dispatch gate readiness deployed (readiness-only)
 - Added approval-backed dispatch gate readiness projection after bounded approval-record write.
