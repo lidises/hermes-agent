@@ -1,6 +1,6 @@
-Last updated: 2026-05-20 00:10 KST
+Last updated: 2026-05-20 00:14 KST
 
-## Manual NAS Keeper handoff record implemented locally (Mac relay queue marker opened, real NAS execution still closed)
+## Manual NAS Keeper handoff record deployed (Mac relay queue marker opened, real NAS execution still closed)
 - Added NAS-save-backed NAS Keeper/Mac relay handoff write/readback after NAS save metadata.
 - Backend POST: `/api/office/controlled-mutation/manual-nas-keeper-handoff-record`.
 - Backend GET: `/api/office/controlled-mutation/manual-nas-keeper-handoff-record-status`.
@@ -8,7 +8,8 @@ Last updated: 2026-05-20 00:10 KST
 - Stored handoff records set `nas_keeper_handoff_queued=true` and `queue_status=pending_nas_keeper_authorization`, but keep direct VPS NAS write false, direct VPS NAS authority false, Mac relay write false, actual NAS write false, real NAS execution false, watcher/cron false, real dispatch false, and credential/raw-path exposure false.
 - Frontend typed API wrappers and display-only `/office` NAS Keeper handoff panel added; no form/button/input/select/textarea controls.
 - RED confirmed missing backend helper/API and frontend wrapper/panel first. GREEN local: focused backend NAS-Keeper-handoff tests `2 passed`, broader controlled-mutation chain `38 passed`, frontend API/RPG `136 passed`, `py_compile`, `git diff --check`, added-line secret scan, and `npm run build` passed with existing Vite chunk warning only.
-- Not yet committed/pushed/deployed in this section until final verification/deploy finishes.
+- Commit `9a1d0106` pushed and deployed to VPS source/dashboard worktrees; `web_dist` copied to both; restarted only `hermes-agent-dashboard.service`; `hermes-gateway.service` stayed active without restart.
+- VPS focused backend controlled-mutation chain passed (`38 passed`). Live private `/office?nas-keeper-handoff=9a1d0106` returned HTTP 200. Protected API smoke stored prerequisite adapter/Kanban/NAS-save chain plus NAS Keeper handoff record and read back `nas_keeper_handoff_queued=true`, actual NAS write false, Mac relay write false, real NAS execution false, count 1, raw path leak false, and unauth POST 401.
 
 ## Manual NAS save record deployed (NAS save marker opened, direct VPS NAS authority still closed)
 - Added Kanban-mutation-backed NAS save write/readback after Kanban mutation metadata.
