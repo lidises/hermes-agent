@@ -456,6 +456,45 @@ export interface OfficeApprovedRealOneShotDispatchGateDesign {
   errors: Array<{ field: string; code: string }>;
 }
 
+export interface OfficeManualApprovalRecordingPreflightStatus {
+  schema_version: number;
+  mode: "manual_approval_recording_preflight_status";
+  manual_approval_recording_preflight_complete: boolean;
+  source_design_lane: string;
+  next_manual_lane: string;
+  preflight_contract: Record<string, boolean>;
+  execution_boundary: Record<string, boolean>;
+  capabilities: Record<string, boolean>;
+  redaction: Record<string, boolean>;
+  errors: Array<{ field: string; code: string }>;
+}
+
+export interface OfficeManualApprovalRecordingPreflightPayload {
+  approval_record_ref: string;
+  exact_target_allowlist_ref: string;
+  idempotency_key: string;
+  replay_lookup_ref: string;
+  rollback_disable_ref: string;
+  dry_run_evidence_ref: string;
+  operator_confirmation: string;
+}
+
+export interface OfficeManualApprovalRecordingPreflightRefusal {
+  schema_version: number;
+  mode: "manual_approval_recording_preflight_refusal";
+  accepted: false;
+  approval_record_written: false;
+  dispatch_gate_open: false;
+  runtime_command_executed: false;
+  target_mutation_created: false;
+  refusal_code: string;
+  safe_validation: Record<string, boolean>;
+  validation_errors: Array<{ field: string; code: string }>;
+  missing_requirements: string[];
+  capabilities: Record<string, boolean>;
+  redaction: Record<string, boolean>;
+}
+
 export interface OfficeDisabledOneShotRuntimeDispatchPayload {
   exact_target_allowlist_ref: string;
   idempotency_key: string;
@@ -667,6 +706,14 @@ export const api = {
     fetchJSON<OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton>("/api/office/controlled-mutation/disabled-one-shot-runtime-dispatch-executor-skeleton"),
   getOfficeControlledMutationApprovedRealOneShotDispatchGateDesign: () =>
     fetchJSON<OfficeApprovedRealOneShotDispatchGateDesign>("/api/office/controlled-mutation/approved-real-one-shot-dispatch-gate-design"),
+  getOfficeControlledMutationManualApprovalRecordingPreflightStatus: () =>
+    fetchJSON<OfficeManualApprovalRecordingPreflightStatus>("/api/office/controlled-mutation/manual-approval-recording-preflight"),
+  executeOfficeControlledMutationManualApprovalRecordingPreflight: (body: OfficeManualApprovalRecordingPreflightPayload) =>
+    fetchJSON<OfficeManualApprovalRecordingPreflightRefusal>("/api/office/controlled-mutation/manual-approval-recording-preflight/preflight", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
   executeOfficeControlledMutationDisabledOneShotRuntimeDispatch: (body: OfficeDisabledOneShotRuntimeDispatchPayload) =>
     fetchJSON<OfficeDisabledOneShotRuntimeDispatchRefusal>("/api/office/controlled-mutation/disabled-one-shot-runtime-dispatch-executor-skeleton/execute", {
       method: "POST",

@@ -2384,6 +2384,62 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(markup).not.toMatch(/raw command|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
   });
 
+  it("renders manual approval-recording preflight status without executable controls", () => {
+    const ManualApprovalRecordingPreflightStatusPanel = (OfficePageModule as unknown as {
+      ManualApprovalRecordingPreflightStatusPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.ManualApprovalRecordingPreflightStatusPanel>>;
+    }).ManualApprovalRecordingPreflightStatusPanel;
+    const status = {
+      schema_version: 1,
+      mode: "manual_approval_recording_preflight_status" as const,
+      manual_approval_recording_preflight_complete: true,
+      source_design_lane: "approved_real_one_shot_dispatch_gate_design",
+      next_manual_lane: "manual_real_approval_recording",
+      preflight_contract: {
+        approval_record_shape_required: true,
+        exact_target_allowlist_ref_required: true,
+        idempotency_key_required: true,
+        replay_lookup_required: true,
+        rollback_disable_ref_required: true,
+        rollback_readiness_required: true,
+        dry_run_evidence_ref_required: true,
+        operator_final_confirmation_required: true,
+        refusal_only_default: true,
+      },
+      execution_boundary: {
+        preflight_only: true,
+        approval_record_written: false,
+        dispatch_gate_open: false,
+        runtime_command_executed: false,
+        target_mutation_created: false,
+      },
+      capabilities: {
+        manual_approval_recording_preflight_readback_enabled: true,
+        approval_recording_enabled: false,
+        real_dispatch_execution_enabled: false,
+        idempotency_replay_store_write_enabled: false,
+        target_mutation_enabled: false,
+      },
+      redaction: { raw_excluded: true },
+      errors: [],
+    };
+
+    const markup = renderToStaticMarkup(<ManualApprovalRecordingPreflightStatusPanel status={status} error={null} />);
+
+    expect(markup).toContain('data-office-manual-approval-recording-preflight="true"');
+    expect(markup).toContain('data-office-manual-approval-recording-preflight-complete="true"');
+    expect(markup).toContain('data-office-manual-approval-recording-preflight-readback-enabled="true"');
+    expect(markup).toContain('data-office-manual-approval-recording-preflight-approval-recording-enabled="false"');
+    expect(markup).toContain('data-office-manual-approval-recording-preflight-target-mutation-enabled="false"');
+    expect(markup).toContain('data-office-manual-approval-recording-preflight-contract="approval_record_shape_required"');
+    expect(markup).toContain('data-office-manual-approval-recording-preflight-boundary="approval_record_written"');
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw command|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
+  });
+
   it("renders approved real one-shot dispatch gate design without executable controls", () => {
     const ApprovedRealOneShotDispatchGateDesignPanel = (OfficePageModule as unknown as {
       ApprovedRealOneShotDispatchGateDesignPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.ApprovedRealOneShotDispatchGateDesignPanel>>;

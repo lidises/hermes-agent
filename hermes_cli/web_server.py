@@ -73,6 +73,8 @@ from hermes_cli.office_controlled_mutation import (
     build_office_controlled_mutation_concrete_runtime_single_dispatch_slice_design,
     build_office_controlled_mutation_disabled_one_shot_runtime_dispatch_executor_skeleton,
     build_office_controlled_mutation_approved_real_one_shot_dispatch_gate_design,
+    build_office_controlled_mutation_manual_approval_recording_preflight_status,
+    refuse_office_controlled_mutation_manual_approval_recording_preflight,
     refuse_office_controlled_mutation_disabled_one_shot_runtime_dispatch,
     build_office_controlled_mutation_contract_schema,
     execute_office_controlled_mutation_nas_single_file_write,
@@ -1070,6 +1072,18 @@ async def get_office_controlled_mutation_disabled_one_shot_runtime_dispatch_exec
 async def get_office_controlled_mutation_approved_real_one_shot_dispatch_gate_design():
     """Project real-dispatch gate design without approval recording or execution."""
     return build_office_controlled_mutation_approved_real_one_shot_dispatch_gate_design()
+
+
+@app.get("/api/office/controlled-mutation/manual-approval-recording-preflight")
+async def get_office_controlled_mutation_manual_approval_recording_preflight_status():
+    """Project manual approval-recording preflight without writing an approval record."""
+    return build_office_controlled_mutation_manual_approval_recording_preflight_status()
+
+
+@app.post("/api/office/controlled-mutation/manual-approval-recording-preflight/preflight")
+async def execute_office_controlled_mutation_manual_approval_recording_preflight(payload: Mapping[str, Any]):
+    """Refuse manual approval recording while returning safe validation metadata."""
+    return refuse_office_controlled_mutation_manual_approval_recording_preflight(payload)
 
 
 @app.post("/api/office/controlled-mutation/disabled-one-shot-runtime-dispatch-executor-skeleton/execute")

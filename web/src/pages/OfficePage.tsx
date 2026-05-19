@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -4804,6 +4804,57 @@ export function ConcreteRuntimeSingleDispatchSliceDesignPanel({
 }
 
 
+export function ManualApprovalRecordingPreflightStatusPanel({
+  status,
+  error,
+}: {
+  status: OfficeManualApprovalRecordingPreflightStatus | null;
+  error?: string | null;
+}) {
+  const caps = status?.capabilities ?? {};
+  const contract = status?.preflight_contract ?? {};
+  const boundary = status?.execution_boundary ?? {};
+  return (
+    <section
+      className="border border-amber-300/20 bg-amber-950/10 p-4"
+      data-office-manual-approval-recording-preflight="true"
+      data-office-manual-approval-recording-preflight-complete={String(Boolean(status?.manual_approval_recording_preflight_complete))}
+      data-office-manual-approval-recording-preflight-readback-enabled={String(Boolean(caps.manual_approval_recording_preflight_readback_enabled))}
+      data-office-manual-approval-recording-preflight-approval-recording-enabled={String(Boolean(caps.approval_recording_enabled))}
+      data-office-manual-approval-recording-preflight-real-dispatch-enabled={String(Boolean(caps.real_dispatch_execution_enabled))}
+      data-office-manual-approval-recording-preflight-replay-store-write-enabled={String(Boolean(caps.idempotency_replay_store_write_enabled))}
+      data-office-manual-approval-recording-preflight-target-mutation-enabled={String(Boolean(caps.target_mutation_enabled))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-200/70">Manual approval-recording preflight</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">refusal-only approval preflight · no record write</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Validates the approval-record shape, target allowlist ref, replay lookup contract, rollback readiness, and operator confirmation while keeping approval recording disabled.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "readback request failed" : `next ${status?.next_manual_lane ?? "manual_real_approval_recording"}`}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-manual-approval-recording-preflight-contracts="true">
+        {Object.entries(contract).map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-manual-approval-recording-preflight-contract={key}>{key}: {String(Boolean(value))}</div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-manual-approval-recording-preflight-boundaries="true">
+        {Object.entries(boundary).map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-manual-approval-recording-preflight-boundary={key}>{key}: {String(Boolean(value))}</div>
+        ))}
+      </div>
+      <div className="mt-3 border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+        source: {status?.source_design_lane ?? "approved_real_one_shot_dispatch_gate_design"}
+      </div>
+    </section>
+  );
+}
+
+
 export function ApprovedRealOneShotDispatchGateDesignPanel({
   status,
   error,
@@ -6202,6 +6253,8 @@ export default function OfficePage() {
   const [disabledOneShotRuntimeDispatchExecutorSkeletonError, setDisabledOneShotRuntimeDispatchExecutorSkeletonError] = useState<string | null>(null);
   const [approvedRealOneShotDispatchGateDesign, setApprovedRealOneShotDispatchGateDesign] = useState<OfficeApprovedRealOneShotDispatchGateDesign | null>(null);
   const [approvedRealOneShotDispatchGateDesignError, setApprovedRealOneShotDispatchGateDesignError] = useState<string | null>(null);
+  const [manualApprovalRecordingPreflightStatus, setManualApprovalRecordingPreflightStatus] = useState<OfficeManualApprovalRecordingPreflightStatus | null>(null);
+  const [manualApprovalRecordingPreflightStatusError, setManualApprovalRecordingPreflightStatusError] = useState<string | null>(null);
   const [nasKeeperQueueReadbackLoading, setNasKeeperQueueReadbackLoading] = useState(false);
   const [nasKeeperQueueReadbackError, setNasKeeperQueueReadbackError] = useState<string | null>(null);
   const [nasKeeperExecutionDraft, setNasKeeperExecutionDraft] = useState<OfficeNasKeeperExecutionFromPreviewPayload>(DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT);
@@ -6670,6 +6723,20 @@ export default function OfficePage() {
         if (!cancelled) {
           setApprovedRealOneShotDispatchGateDesign(null);
           setApprovedRealOneShotDispatchGateDesignError("request failed");
+        }
+      });
+    api
+      .getOfficeControlledMutationManualApprovalRecordingPreflightStatus()
+      .then((next) => {
+        if (!cancelled) {
+          setManualApprovalRecordingPreflightStatus(next);
+          setManualApprovalRecordingPreflightStatusError(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setManualApprovalRecordingPreflightStatus(null);
+          setManualApprovalRecordingPreflightStatusError("request failed");
         }
       });
     api
@@ -7266,6 +7333,7 @@ export default function OfficePage() {
       <ConcreteRuntimeSingleDispatchSliceDesignPanel status={concreteRuntimeSingleDispatchSliceDesign} error={concreteRuntimeSingleDispatchSliceDesignError} />
       <DisabledOneShotRuntimeDispatchExecutorSkeletonPanel status={disabledOneShotRuntimeDispatchExecutorSkeleton} error={disabledOneShotRuntimeDispatchExecutorSkeletonError} />
       <ApprovedRealOneShotDispatchGateDesignPanel status={approvedRealOneShotDispatchGateDesign} error={approvedRealOneShotDispatchGateDesignError} />
+      <ManualApprovalRecordingPreflightStatusPanel status={manualApprovalRecordingPreflightStatus} error={manualApprovalRecordingPreflightStatusError} />
 
       <NasKeeperExecutionOperatorActionPanel
         action={nasKeeperExecutionOperatorAction}

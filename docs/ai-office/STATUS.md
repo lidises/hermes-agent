@@ -1,4 +1,14 @@
-Last updated: 2026-05-19 12:06 KST
+Last updated: 2026-05-19 12:20 KST
+
+## Manual approval-recording preflight implemented locally (refusal-only)
+- Added refusal-only manual approval-recording preflight surface after approved real dispatch gate design.
+- Backend readback endpoint: `/api/office/controlled-mutation/manual-approval-recording-preflight`.
+- Backend refusal endpoint: `/api/office/controlled-mutation/manual-approval-recording-preflight/preflight`.
+- Frontend API + display-only DeskRPG panel added.
+- Safe validation covers approval record ref, exact target allowlist ref, idempotency key, replay lookup ref, rollback disable ref, dry-run evidence ref, and operator confirmation.
+- Refusal remains explicit: approval recording disabled by default; no record write, dispatch gate open, runtime command execution, target mutation, replay-store write, rollback execution, watcher/cron, NAS/Kanban/VPS mutation, or credential access.
+- RED confirmed missing helper/routes/API/panel first; focused GREEN: backend 4 passed, frontend 3 passed.
+- Not yet committed/deployed in this checkpoint.
 
 ## Approved real one-shot dispatch gate design
 

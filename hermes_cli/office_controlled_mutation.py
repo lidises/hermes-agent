@@ -2814,6 +2814,165 @@ def build_office_controlled_mutation_approved_real_one_shot_dispatch_gate_design
 
 
 
+def build_office_controlled_mutation_manual_approval_recording_preflight_status(
+    *, unsafe_examples: Mapping[str, Any] | None = None
+) -> dict[str, object]:
+    """Project refusal-only manual approval-recording preflight without writing approval records."""
+
+    _ = unsafe_examples
+    return {
+        "schema_version": 1,
+        "mode": "manual_approval_recording_preflight_status",
+        "manual_approval_recording_preflight_complete": True,
+        "source_design_lane": "approved_real_one_shot_dispatch_gate_design",
+        "next_manual_lane": "manual_real_approval_recording",
+        "preflight_contract": {
+            "approval_record_shape_required": True,
+            "exact_target_allowlist_ref_required": True,
+            "idempotency_key_required": True,
+            "replay_lookup_required": True,
+            "rollback_disable_ref_required": True,
+            "rollback_readiness_required": True,
+            "dry_run_evidence_ref_required": True,
+            "operator_final_confirmation_required": True,
+            "refusal_only_default": True,
+        },
+        "execution_boundary": {
+            "preflight_only": True,
+            "approval_record_written": False,
+            "dispatch_gate_open": False,
+            "runtime_command_included": False,
+            "runtime_command_executed": False,
+            "adapter_binding_created": False,
+            "adapter_dispatch_created": False,
+            "idempotency_replay_store_written": False,
+            "rollback_executed": False,
+            "target_mutation_created": False,
+            "watcher_or_cron_created": False,
+        },
+        "capabilities": {
+            "manual_approval_recording_preflight_readback_enabled": True,
+            "approval_recording_enabled": False,
+            "real_dispatch_execution_enabled": False,
+            "runtime_command_materialization_enabled": False,
+            "runtime_command_execution_enabled": False,
+            "adapter_binding_enabled": False,
+            "adapter_dispatch_enabled": False,
+            "idempotency_replay_store_write_enabled": False,
+            "rollback_execution_enabled": False,
+            "target_mutation_enabled": False,
+            "kanban_mutation_enabled": False,
+            "nas_save_enabled": False,
+            "vps_file_change_enabled": False,
+            "service_restart_enabled": False,
+            "git_push_enabled": False,
+            "credential_access_enabled": False,
+            "public_exposure_enabled": False,
+        },
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "opaque_refs_only": True,
+            "safe_summaries_only": True,
+            "unsupported_values_echoed": False,
+            "credentials_echoed": False,
+        },
+        "errors": [],
+    }
+
+
+def refuse_office_controlled_mutation_manual_approval_recording_preflight(
+    payload: Mapping[str, Any] | None = None,
+) -> dict[str, object]:
+    """Refuse manual approval recording while returning only safe preflight validation metadata."""
+
+    body = payload if isinstance(payload, Mapping) else {}
+    approval_record_ref = body.get("approval_record_ref")
+    exact_target_allowlist_ref = body.get("exact_target_allowlist_ref")
+    idempotency_key = body.get("idempotency_key")
+    replay_lookup_ref = body.get("replay_lookup_ref")
+    rollback_disable_ref = body.get("rollback_disable_ref")
+    dry_run_evidence_ref = body.get("dry_run_evidence_ref")
+    operator_confirmation = body.get("operator_confirmation")
+    safe_validation = {
+        "approval_record_ref_present": bool(approval_record_ref),
+        "approval_record_ref_valid": _office_disabled_runtime_dispatch_valid_prefixed_ref(approval_record_ref, "approval-"),
+        "exact_target_allowlist_ref_present": bool(exact_target_allowlist_ref),
+        "exact_target_allowlist_ref_valid": _office_disabled_runtime_dispatch_valid_prefixed_ref(exact_target_allowlist_ref, "allowlist-"),
+        "idempotency_key_present": bool(idempotency_key),
+        "idempotency_key_valid": _office_disabled_runtime_dispatch_valid_prefixed_ref(idempotency_key, "idem-"),
+        "replay_lookup_ref_present": bool(replay_lookup_ref),
+        "replay_lookup_ref_valid": _office_disabled_runtime_dispatch_valid_prefixed_ref(replay_lookup_ref, "replay-"),
+        "replay_lookup_seen": False,
+        "rollback_disable_ref_present": bool(rollback_disable_ref),
+        "rollback_disable_ref_valid": _office_disabled_runtime_dispatch_valid_prefixed_ref(rollback_disable_ref, "rollback-"),
+        "rollback_ready": False,
+        "dry_run_evidence_ref_present": bool(dry_run_evidence_ref),
+        "dry_run_evidence_ref_valid": _office_disabled_runtime_dispatch_valid_prefixed_ref(dry_run_evidence_ref, "dryrun-"),
+        "operator_confirmation_present": operator_confirmation is not None,
+        "operator_confirmation_valid": operator_confirmation == "confirmed-manual-preflight-only",
+    }
+    validation_errors: list[dict[str, str]] = []
+    missing: list[str] = []
+    validation_specs = [
+        ("approval_record_ref", "approval_record_ref", safe_validation["approval_record_ref_present"], safe_validation["approval_record_ref_valid"]),
+        ("exact_target_allowlist_ref", "exact_target_allowlist_ref", safe_validation["exact_target_allowlist_ref_present"], safe_validation["exact_target_allowlist_ref_valid"]),
+        ("idempotency_key", "idempotency_key", safe_validation["idempotency_key_present"], safe_validation["idempotency_key_valid"]),
+        ("replay_lookup_ref", "replay_lookup_ref", safe_validation["replay_lookup_ref_present"], safe_validation["replay_lookup_ref_valid"]),
+        ("rollback_disable_ref", "rollback_disable_ref", safe_validation["rollback_disable_ref_present"], safe_validation["rollback_disable_ref_valid"]),
+        ("dry_run_evidence_ref", "dry_run_evidence_ref", safe_validation["dry_run_evidence_ref_present"], safe_validation["dry_run_evidence_ref_valid"]),
+    ]
+    for field, requirement, present, valid in validation_specs:
+        if not present:
+            missing.append(requirement)
+            validation_errors.append({"field": field, "code": "required"})
+        elif not valid:
+            validation_errors.append({"field": field, "code": "unsupported_ref_shape"})
+    if not safe_validation["operator_confirmation_present"]:
+        missing.append("operator_confirmation")
+        validation_errors.append({"field": "operator_confirmation", "code": "required"})
+    elif not safe_validation["operator_confirmation_valid"]:
+        validation_errors.append({"field": "operator_confirmation", "code": "unsupported_confirmation"})
+    return {
+        "schema_version": 1,
+        "mode": "manual_approval_recording_preflight_refusal",
+        "accepted": False,
+        "approval_record_written": False,
+        "dispatch_gate_open": False,
+        "runtime_command_executed": False,
+        "target_mutation_created": False,
+        "adapter_binding_created": False,
+        "adapter_dispatch_created": False,
+        "idempotency_replay_store_written": False,
+        "rollback_executed": False,
+        "watcher_or_cron_created": False,
+        "refusal_code": "approval_recording_disabled_by_default",
+        "safe_validation": safe_validation,
+        "validation_errors": validation_errors,
+        "missing_requirements": missing,
+        "capabilities": {
+            "preflight_validation_enabled": True,
+            "approval_recording_enabled": False,
+            "runtime_command_execution_enabled": False,
+            "target_mutation_enabled": False,
+            "adapter_dispatch_enabled": False,
+            "idempotency_replay_store_write_enabled": False,
+            "rollback_execution_enabled": False,
+            "kanban_mutation_enabled": False,
+            "nas_save_enabled": False,
+            "credential_access_enabled": False,
+            "public_exposure_enabled": False,
+        },
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "unsupported_values_echoed": False,
+            "credentials_echoed": False,
+        },
+    }
+
+
+
 def _dispatcher_authority_metadata_append_status_capabilities() -> dict[str, bool]:
     return {
         "metadata_append_readback_enabled": True,
