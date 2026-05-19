@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -4804,6 +4804,81 @@ export function ConcreteRuntimeSingleDispatchSliceDesignPanel({
 }
 
 
+export function DisabledOneShotRuntimeDispatchExecutorSkeletonPanel({
+  status,
+  error,
+}: {
+  status: OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton | null;
+  error?: string | null;
+}) {
+  const caps = status?.capabilities ?? {};
+  const gate = status?.executor_gate ?? {};
+  const required = status?.required_inputs ?? {};
+  const boundary = status?.execution_boundary ?? {};
+  return (
+    <section
+      className="border border-red-300/20 bg-red-950/10 p-4"
+      data-office-disabled-one-shot-runtime-dispatch-executor-skeleton="true"
+      data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-complete={String(Boolean(status?.disabled_one_shot_runtime_dispatch_executor_skeleton_complete))}
+      data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-readback-enabled={String(Boolean(caps.disabled_executor_skeleton_readback_enabled))}
+      data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-refusal-validation-enabled={String(Boolean(caps.refusal_validation_enabled))}
+      data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-endpoint-present={String(Boolean(caps.execution_endpoint_present))}
+      data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-runtime-gate-open={String(Boolean(gate.runtime_gate_open))}
+      data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-dispatch-approved={String(Boolean(gate.actual_dispatch_approved))}
+      data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-binding-enabled={String(Boolean(caps.adapter_binding_enabled))}
+      data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-dispatch-enabled={String(Boolean(caps.adapter_dispatch_enabled))}
+      data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-runtime-execution-enabled={String(Boolean(caps.runtime_command_execution_enabled))}
+      data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-watcher-enabled={String(Boolean(caps.watcher_daemon_enabled))}
+      data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-cron-enabled={String(Boolean(caps.cron_enabled))}
+      data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-target-mutation-enabled={String(Boolean(caps.target_mutation_enabled))}
+      data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-kanban-mutation-enabled={String(Boolean(caps.kanban_mutation_enabled))}
+      data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-nas-save-enabled={String(Boolean(caps.nas_save_enabled))}
+      data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-vps-file-change-enabled={String(Boolean(caps.vps_file_change_enabled))}
+      data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-service-restart-enabled={String(Boolean(caps.service_restart_enabled))}
+      data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-git-push-enabled={String(Boolean(caps.git_push_enabled))}
+      data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-credential-access-enabled={String(Boolean(caps.credential_access_enabled))}
+      data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-public-exposure-enabled={String(Boolean(caps.public_exposure_enabled))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-red-200/70">Disabled one-shot runtime dispatch executor skeleton</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">endpoint present · refuses by default</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Projects the first executable-route skeleton while keeping the runtime gate closed. Requests can only receive safe refusal validation metadata.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "readback request failed" : `next ${status?.next_manual_lane ?? "approved_one_shot_runtime_dispatch_execution"}`}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-5" data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-gate-list="true">
+        {Object.entries(gate).map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-gate={key}>{key}: {String(Boolean(value))}</div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-5" data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-required-inputs="true">
+        {Object.entries(required).map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-required-input={key}>{key}: {String(Boolean(value))}</div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-execution-boundaries="true">
+        {Object.entries(boundary).map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-execution-boundary={key}>{key}: {String(Boolean(value))}</div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-2" data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-forbidden-boundaries="true">
+        {(status?.forbidden_boundaries ?? []).map((item) => (
+          <div key={item} className="border border-red-300/20 bg-red-950/10 p-2 text-xs text-red-100/80" data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-forbidden-boundary={item}>{item}</div>
+        ))}
+      </div>
+      <div className="mt-3 border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+        source: {status?.source_design_lane ?? "concrete_runtime_single_dispatch_slice_design"}
+      </div>
+    </section>
+  );
+}
+
+
 export function NasKeeperQueueManualEvidenceReviewSurfacePanel({
   surface,
   readback,
@@ -6035,6 +6110,8 @@ export default function OfficePage() {
   const [explicitRuntimeDispatchApprovalStatusError, setExplicitRuntimeDispatchApprovalStatusError] = useState<string | null>(null);
   const [concreteRuntimeSingleDispatchSliceDesign, setConcreteRuntimeSingleDispatchSliceDesign] = useState<OfficeConcreteRuntimeSingleDispatchSliceDesign | null>(null);
   const [concreteRuntimeSingleDispatchSliceDesignError, setConcreteRuntimeSingleDispatchSliceDesignError] = useState<string | null>(null);
+  const [disabledOneShotRuntimeDispatchExecutorSkeleton, setDisabledOneShotRuntimeDispatchExecutorSkeleton] = useState<OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton | null>(null);
+  const [disabledOneShotRuntimeDispatchExecutorSkeletonError, setDisabledOneShotRuntimeDispatchExecutorSkeletonError] = useState<string | null>(null);
   const [nasKeeperQueueReadbackLoading, setNasKeeperQueueReadbackLoading] = useState(false);
   const [nasKeeperQueueReadbackError, setNasKeeperQueueReadbackError] = useState<string | null>(null);
   const [nasKeeperExecutionDraft, setNasKeeperExecutionDraft] = useState<OfficeNasKeeperExecutionFromPreviewPayload>(DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT);
@@ -6475,6 +6552,20 @@ export default function OfficePage() {
         if (!cancelled) {
           setConcreteRuntimeSingleDispatchSliceDesign(null);
           setConcreteRuntimeSingleDispatchSliceDesignError("request failed");
+        }
+      });
+    api
+      .getOfficeControlledMutationDisabledOneShotRuntimeDispatchExecutorSkeleton()
+      .then((next) => {
+        if (!cancelled) {
+          setDisabledOneShotRuntimeDispatchExecutorSkeleton(next);
+          setDisabledOneShotRuntimeDispatchExecutorSkeletonError(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setDisabledOneShotRuntimeDispatchExecutorSkeleton(null);
+          setDisabledOneShotRuntimeDispatchExecutorSkeletonError("request failed");
         }
       });
     api
@@ -7069,6 +7160,7 @@ export default function OfficePage() {
       <HumanReviewedSingleDispatchStatusPanel status={humanReviewedSingleDispatchStatus} error={humanReviewedSingleDispatchStatusError} />
       <ExplicitRuntimeDispatchApprovalStatusPanel status={explicitRuntimeDispatchApprovalStatus} error={explicitRuntimeDispatchApprovalStatusError} />
       <ConcreteRuntimeSingleDispatchSliceDesignPanel status={concreteRuntimeSingleDispatchSliceDesign} error={concreteRuntimeSingleDispatchSliceDesignError} />
+      <DisabledOneShotRuntimeDispatchExecutorSkeletonPanel status={disabledOneShotRuntimeDispatchExecutorSkeleton} error={disabledOneShotRuntimeDispatchExecutorSkeletonError} />
 
       <NasKeeperExecutionOperatorActionPanel
         action={nasKeeperExecutionOperatorAction}

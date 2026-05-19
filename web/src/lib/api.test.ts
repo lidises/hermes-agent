@@ -765,6 +765,102 @@ describe("fetchJSON", () => {
     expect(JSON.stringify(fetchMock.mock.calls[0]?.[1])).not.toMatch(/method|body|\/Users\/|\/home\/|token=|sk-|provider/i);
   });
 
+  it("gets disabled one-shot runtime dispatch executor skeleton through the protected readback route", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        __HERMES_SESSION_TOKEN__: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers({ "content-type": "application/json" }),
+      json: async () => ({
+        mode: "disabled_one_shot_runtime_dispatch_executor_skeleton",
+        disabled_one_shot_runtime_dispatch_executor_skeleton_complete: true,
+        capabilities: {
+          disabled_executor_skeleton_readback_enabled: true,
+          refusal_validation_enabled: true,
+          execution_endpoint_present: true,
+          runtime_command_execution_enabled: false,
+          target_mutation_enabled: false,
+        },
+      }),
+    } as Response);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await api.getOfficeControlledMutationDisabledOneShotRuntimeDispatchExecutorSkeleton();
+
+    expect(result.mode).toBe("disabled_one_shot_runtime_dispatch_executor_skeleton");
+    expect(result.disabled_one_shot_runtime_dispatch_executor_skeleton_complete).toBe(true);
+    expect(result.capabilities.disabled_executor_skeleton_readback_enabled).toBe(true);
+    expect(result.capabilities.refusal_validation_enabled).toBe(true);
+    expect(result.capabilities.execution_endpoint_present).toBe(true);
+    expect(result.capabilities.runtime_command_execution_enabled).toBe(false);
+    expect(result.capabilities.target_mutation_enabled).toBe(false);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/office/controlled-mutation/disabled-one-shot-runtime-dispatch-executor-skeleton",
+      expect.objectContaining({ headers: expect.any(Headers) }),
+    );
+    const headers = fetchMock.mock.calls[0]?.[1]?.headers as Headers;
+    expect(headers.get("X-Hermes-Session-Token")).toBe("session-token-for-header-only");
+    expect(JSON.stringify(fetchMock.mock.calls[0]?.[1])).not.toMatch(/method|body|\/Users\/|\/home\/|token=|sk-|provider/i);
+  });
+
+  it("refuses disabled one-shot runtime dispatch execute requests through the protected route without raw values", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        __HERMES_SESSION_TOKEN__: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers({ "content-type": "application/json" }),
+      json: async () => ({
+        mode: "disabled_one_shot_runtime_dispatch_executor_refusal",
+        accepted: false,
+        dispatch_created: false,
+        runtime_command_executed: false,
+        target_mutation_created: false,
+        refusal_code: "runtime_dispatch_disabled_by_default",
+      }),
+    } as Response);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await api.executeOfficeControlledMutationDisabledOneShotRuntimeDispatch({
+      target_ref: "office-target-1",
+      idempotency_key: "idem-1",
+      rollback_plan_ref: "rollback-1",
+      dry_run_evidence_ref: "dryrun-1",
+      operator_confirmation: true,
+    });
+
+    expect(result.accepted).toBe(false);
+    expect(result.runtime_command_executed).toBe(false);
+    expect(result.target_mutation_created).toBe(false);
+    expect(result.refusal_code).toBe("runtime_dispatch_disabled_by_default");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/office/controlled-mutation/disabled-one-shot-runtime-dispatch-executor-skeleton/execute",
+      expect.objectContaining({ method: "POST", headers: expect.any(Headers), body: expect.any(String) }),
+    );
+    const [, init] = fetchMock.mock.calls[0] ?? [];
+    const headers = init?.headers as Headers;
+    expect(headers.get("X-Hermes-Session-Token")).toBe("session-token-for-header-only");
+    expect(init?.body).toBe(JSON.stringify({
+      target_ref: "office-target-1",
+      idempotency_key: "idem-1",
+      rollback_plan_ref: "rollback-1",
+      dry_run_evidence_ref: "dryrun-1",
+      operator_confirmation: true,
+    }));
+    expect(JSON.stringify(fetchMock.mock.calls[0])).not.toMatch(/\/Users\/|\/home\/|sk-|provider|raw_command/i);
+  });
+
   it("posts safe NAS Keeper Mac relay write payload through the protected execution route", async () => {
     Object.defineProperty(globalThis, "window", {
       configurable: true,

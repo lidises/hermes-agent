@@ -2521,6 +2521,145 @@ def build_office_controlled_mutation_concrete_runtime_single_dispatch_slice_desi
     }
 
 
+def build_office_controlled_mutation_disabled_one_shot_runtime_dispatch_executor_skeleton(
+    *, unsafe_examples: Mapping[str, Any] | None = None
+) -> dict[str, object]:
+    """Project a disabled one-shot executor skeleton without executing."""
+
+    _ = unsafe_examples
+    return {
+        "schema_version": 1,
+        "mode": "disabled_one_shot_runtime_dispatch_executor_skeleton",
+        "disabled_one_shot_runtime_dispatch_executor_skeleton_complete": True,
+        "source_design_lane": "concrete_runtime_single_dispatch_slice_design",
+        "next_manual_lane": "approved_one_shot_runtime_dispatch_execution",
+        "executor_gate": {
+            "disabled_by_default": True,
+            "runtime_gate_open": False,
+            "execution_endpoint_present": True,
+            "execution_refuses_by_default": True,
+            "actual_dispatch_approved": False,
+        },
+        "required_inputs": {
+            "exact_target_allowlist_required": True,
+            "idempotency_key_required": True,
+            "rollback_disable_plan_required": True,
+            "dry_run_evidence_required": True,
+            "operator_final_confirmation_required": True,
+        },
+        "execution_boundary": {
+            "runtime_command_included": False,
+            "runtime_command_executed": False,
+            "adapter_binding_created": False,
+            "adapter_dispatch_created": False,
+            "target_mutation_created": False,
+            "watcher_or_cron_created": False,
+            "refusal_validation_only": True,
+        },
+        "forbidden_boundaries": [
+            "runtime_command_execution",
+            "adapter_binding",
+            "adapter_dispatch",
+            "target_mutation",
+            "watcher_daemon_activation",
+            "cron_job_installation",
+            "kanban_mutation",
+            "nas_save",
+            "vps_file_change",
+            "service_restart",
+            "git_push",
+            "credential_access",
+            "public_exposure",
+        ],
+        "capabilities": {
+            "disabled_executor_skeleton_readback_enabled": True,
+            "refusal_validation_enabled": True,
+            "execution_endpoint_present": True,
+            "adapter_binding_enabled": False,
+            "adapter_dispatch_enabled": False,
+            "runtime_command_execution_enabled": False,
+            "watcher_daemon_enabled": False,
+            "cron_enabled": False,
+            "target_mutation_enabled": False,
+            "kanban_mutation_enabled": False,
+            "nas_save_enabled": False,
+            "vps_file_change_enabled": False,
+            "service_restart_enabled": False,
+            "git_push_enabled": False,
+            "credential_access_enabled": False,
+            "public_exposure_enabled": False,
+        },
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "opaque_refs_only": True,
+            "safe_summaries_only": True,
+            "unsupported_values_echoed": False,
+            "credentials_echoed": False,
+        },
+        "errors": [],
+    }
+
+
+def refuse_office_controlled_mutation_disabled_one_shot_runtime_dispatch(
+    payload: Mapping[str, Any] | None = None,
+) -> dict[str, object]:
+    """Refuse a would-be one-shot dispatch while returning only safe validation metadata."""
+
+    body = payload if isinstance(payload, Mapping) else {}
+    safe_validation = {
+        "exact_target_allowlist_present": bool(body.get("exact_target_allowlist_ref")),
+        "idempotency_key_present": bool(body.get("idempotency_key")),
+        "rollback_disable_plan_present": bool(body.get("rollback_plan_ref")),
+        "dry_run_evidence_present": bool(body.get("dry_run_evidence_ref")),
+        "operator_confirmation_present": bool(body.get("operator_confirmation")),
+    }
+    missing = []
+    if not safe_validation["exact_target_allowlist_present"]:
+        missing.append("exact_target_allowlist")
+    if not safe_validation["idempotency_key_present"]:
+        missing.append("idempotency_key")
+    if not safe_validation["rollback_disable_plan_present"]:
+        missing.append("rollback_disable_plan")
+    if not safe_validation["dry_run_evidence_present"]:
+        missing.append("dry_run_evidence")
+    if not safe_validation["operator_confirmation_present"]:
+        missing.append("operator_confirmation")
+    return {
+        "schema_version": 1,
+        "mode": "disabled_one_shot_runtime_dispatch_executor_refusal",
+        "accepted": False,
+        "dispatch_created": False,
+        "runtime_command_executed": False,
+        "target_mutation_created": False,
+        "adapter_binding_created": False,
+        "adapter_dispatch_created": False,
+        "watcher_or_cron_created": False,
+        "refusal_code": "runtime_dispatch_disabled_by_default",
+        "safe_validation": safe_validation,
+        "missing_requirements": missing,
+        "capabilities": {
+            "refusal_validation_enabled": True,
+            "runtime_command_execution_enabled": False,
+            "target_mutation_enabled": False,
+            "adapter_dispatch_enabled": False,
+            "watcher_daemon_enabled": False,
+            "cron_enabled": False,
+            "kanban_mutation_enabled": False,
+            "nas_save_enabled": False,
+            "credential_access_enabled": False,
+            "public_exposure_enabled": False,
+        },
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "unsupported_values_echoed": False,
+            "credentials_echoed": False,
+        },
+        "errors": [],
+    }
+
+
 def _dispatcher_authority_metadata_append_status_capabilities() -> dict[str, bool]:
     return {
         "metadata_append_readback_enabled": True,

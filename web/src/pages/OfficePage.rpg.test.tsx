@@ -2384,6 +2384,85 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(markup).not.toMatch(/raw command|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
   });
 
+  it("renders disabled one-shot runtime dispatch executor skeleton without executable controls", () => {
+    const DisabledOneShotRuntimeDispatchExecutorSkeletonPanel = (OfficePageModule as unknown as {
+      DisabledOneShotRuntimeDispatchExecutorSkeletonPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.DisabledOneShotRuntimeDispatchExecutorSkeletonPanel>>;
+    }).DisabledOneShotRuntimeDispatchExecutorSkeletonPanel;
+    const status = {
+      schema_version: 1,
+      mode: "disabled_one_shot_runtime_dispatch_executor_skeleton" as const,
+      disabled_one_shot_runtime_dispatch_executor_skeleton_complete: true,
+      source_design_lane: "concrete_runtime_single_dispatch_slice_design",
+      next_manual_lane: "approved_one_shot_runtime_dispatch_execution",
+      executor_gate: {
+        disabled_by_default: true,
+        runtime_gate_open: false,
+        execution_endpoint_present: true,
+        execution_refuses_by_default: true,
+        actual_dispatch_approved: false,
+      },
+      required_inputs: {
+        exact_target_allowlist_required: true,
+        idempotency_key_required: true,
+        rollback_disable_plan_required: true,
+        dry_run_evidence_required: true,
+        operator_final_confirmation_required: true,
+      },
+      execution_boundary: {
+        runtime_command_included: false,
+        runtime_command_executed: false,
+        adapter_binding_created: false,
+        adapter_dispatch_created: false,
+        target_mutation_created: false,
+        watcher_or_cron_created: false,
+        refusal_validation_only: true,
+      },
+      forbidden_boundaries: ["runtime_command_execution", "adapter_dispatch", "target_mutation"],
+      capabilities: {
+        disabled_executor_skeleton_readback_enabled: true,
+        refusal_validation_enabled: true,
+        execution_endpoint_present: true,
+        adapter_binding_enabled: false,
+        adapter_dispatch_enabled: false,
+        runtime_command_execution_enabled: false,
+        watcher_daemon_enabled: false,
+        cron_enabled: false,
+        target_mutation_enabled: false,
+        kanban_mutation_enabled: false,
+        nas_save_enabled: false,
+        vps_file_change_enabled: false,
+        service_restart_enabled: false,
+        git_push_enabled: false,
+        credential_access_enabled: false,
+        public_exposure_enabled: false,
+      },
+      redaction: { raw_excluded: true },
+      errors: [],
+    };
+
+    const markup = renderToStaticMarkup(<DisabledOneShotRuntimeDispatchExecutorSkeletonPanel status={status} error={null} />);
+
+    expect(markup).toContain('data-office-disabled-one-shot-runtime-dispatch-executor-skeleton="true"');
+    expect(markup).toContain('data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-complete="true"');
+    expect(markup).toContain('data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-readback-enabled="true"');
+    expect(markup).toContain('data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-refusal-validation-enabled="true"');
+    expect(markup).toContain('data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-endpoint-present="true"');
+    expect(markup).toContain('data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-runtime-gate-open="false"');
+    expect(markup).toContain('data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-dispatch-approved="false"');
+    expect(markup).toContain('data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-runtime-execution-enabled="false"');
+    expect(markup).toContain('data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-target-mutation-enabled="false"');
+    expect(markup).toContain('data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-gate="disabled_by_default"');
+    expect(markup).toContain('data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-required-input="exact_target_allowlist_required"');
+    expect(markup).toContain('data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-execution-boundary="runtime_command_executed"');
+    expect(markup).toContain('data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-forbidden-boundary="target_mutation"');
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw command|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
+  });
+
   it("renders the queue-state manual review surface without executable controls or raw markdown", () => {
     const NasKeeperQueueManualEvidenceReviewSurfacePanel = (OfficePageModule as unknown as { NasKeeperQueueManualEvidenceReviewSurfacePanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.NasKeeperQueueManualEvidenceReviewSurfacePanel>> }).NasKeeperQueueManualEvidenceReviewSurfacePanel;
     const boundary = { detailKind: "nas_runtime_n3_approval_boundary_status_surface" } as ReturnType<typeof buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface>;

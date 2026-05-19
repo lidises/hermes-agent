@@ -1,4 +1,12 @@
-Last updated: 2026-05-19 11:01 KST
+Last updated: 2026-05-19 11:20 KST
+
+## Disabled one-shot runtime dispatch executor skeleton
+
+Implemented the recommended shortest follow-up after `concrete_runtime_single_dispatch_slice_design`: a disabled-by-default one-shot runtime dispatch executor skeleton. Backend adds `build_office_controlled_mutation_disabled_one_shot_runtime_dispatch_executor_skeleton(...)`, `refuse_office_controlled_mutation_disabled_one_shot_runtime_dispatch(...)`, protected GET `/api/office/controlled-mutation/disabled-one-shot-runtime-dispatch-executor-skeleton`, and protected POST `/api/office/controlled-mutation/disabled-one-shot-runtime-dispatch-executor-skeleton/execute`; frontend adds typed API wrappers and a display-only `/office` panel with stable `data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-*` hooks. The POST route exists only to return safe refusal/validation metadata while disabled-by-default; it does not execute runtime commands, create adapter binding/dispatch, or mutate targets.
+
+Verification 2026-05-19 11:20 KST: RED backend tests first failed for missing helper/refusal helper/route and POST method; RED frontend tests first failed for missing API wrappers/panel. GREEN focused backend disabled-executor-skeleton+concrete-runtime-single-dispatch-slice-design tests passed (`5 passed`); focused frontend API/RPG tests passed (`3 passed`). Broader verification/deploy pending in this working tree.
+
+Boundary: this is an executor skeleton/refusal-validation/UI slice only. It does not approve or record a real runtime dispatch, include or execute runtime commands, create adapter binding, dispatch an adapter, mutate targets/Kanban/NAS/VPS files, start watcher/cron automation, restart services by itself, push from the lane, expose public routes, or grant VPS direct NAS mount/credential/write authority.
 
 ## Concrete runtime single-dispatch slice design lane
 

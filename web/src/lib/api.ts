@@ -422,6 +422,44 @@ export interface OfficeConcreteRuntimeSingleDispatchSliceDesign {
   errors: Array<{ field: string; code: string }>;
 }
 
+export interface OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton {
+  schema_version: number;
+  mode: "disabled_one_shot_runtime_dispatch_executor_skeleton";
+  disabled_one_shot_runtime_dispatch_executor_skeleton_complete: boolean;
+  source_design_lane: string;
+  next_manual_lane: string;
+  executor_gate: Record<string, boolean>;
+  required_inputs: Record<string, boolean>;
+  execution_boundary: Record<string, boolean>;
+  forbidden_boundaries: string[];
+  capabilities: Record<string, boolean>;
+  redaction: Record<string, boolean>;
+  errors: Array<{ field: string; code: string }>;
+}
+
+export interface OfficeDisabledOneShotRuntimeDispatchPayload {
+  target_ref: string;
+  idempotency_key: string;
+  rollback_plan_ref: string;
+  dry_run_evidence_ref: string;
+  operator_confirmation: boolean;
+}
+
+export interface OfficeDisabledOneShotRuntimeDispatchRefusal {
+  schema_version: number;
+  mode: "disabled_one_shot_runtime_dispatch_executor_refusal";
+  accepted: false;
+  dispatch_created: false;
+  runtime_command_executed: false;
+  target_mutation_created: false;
+  refusal_code: string;
+  safe_validation: Record<string, boolean>;
+  missing_requirements: string[];
+  capabilities: Record<string, boolean>;
+  redaction: Record<string, boolean>;
+  errors: Array<{ field: string; code: string }>;
+}
+
 export interface OfficeDispatcherCompletionReviewStatusParams {
   limit?: number;
 }
@@ -605,6 +643,14 @@ export const api = {
     fetchJSON<OfficeExplicitRuntimeDispatchApprovalStatus>("/api/office/controlled-mutation/explicit-runtime-dispatch-approval-status"),
   getOfficeControlledMutationConcreteRuntimeSingleDispatchSliceDesign: () =>
     fetchJSON<OfficeConcreteRuntimeSingleDispatchSliceDesign>("/api/office/controlled-mutation/concrete-runtime-single-dispatch-slice-design"),
+  getOfficeControlledMutationDisabledOneShotRuntimeDispatchExecutorSkeleton: () =>
+    fetchJSON<OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton>("/api/office/controlled-mutation/disabled-one-shot-runtime-dispatch-executor-skeleton"),
+  executeOfficeControlledMutationDisabledOneShotRuntimeDispatch: (body: OfficeDisabledOneShotRuntimeDispatchPayload) =>
+    fetchJSON<OfficeDisabledOneShotRuntimeDispatchRefusal>("/api/office/controlled-mutation/disabled-one-shot-runtime-dispatch-executor-skeleton/execute", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
   executeOfficeControlledMutationNasSingleFileWrite: (body: OfficeNasSingleFileWritePayload) =>
     fetchJSON<OfficeNasSingleFileWriteResult>("/api/office/controlled-mutation/nas-runtime/single-file-write", {
       method: "POST",

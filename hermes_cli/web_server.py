@@ -23,7 +23,7 @@ import time
 import urllib.parse
 import urllib.request
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 import yaml
 
@@ -71,6 +71,8 @@ from hermes_cli.office_controlled_mutation import (
     build_office_controlled_mutation_human_reviewed_single_dispatch_status,
     build_office_controlled_mutation_explicit_runtime_dispatch_approval_status,
     build_office_controlled_mutation_concrete_runtime_single_dispatch_slice_design,
+    build_office_controlled_mutation_disabled_one_shot_runtime_dispatch_executor_skeleton,
+    refuse_office_controlled_mutation_disabled_one_shot_runtime_dispatch,
     build_office_controlled_mutation_contract_schema,
     execute_office_controlled_mutation_nas_single_file_write,
     execute_office_controlled_mutation_nas_mac_relay_write,
@@ -1055,6 +1057,18 @@ async def get_office_controlled_mutation_explicit_runtime_dispatch_approval_stat
 async def get_office_controlled_mutation_concrete_runtime_single_dispatch_slice_design():
     """Project a concrete single-dispatch slice design without dispatching."""
     return build_office_controlled_mutation_concrete_runtime_single_dispatch_slice_design()
+
+
+@app.get("/api/office/controlled-mutation/disabled-one-shot-runtime-dispatch-executor-skeleton")
+async def get_office_controlled_mutation_disabled_one_shot_runtime_dispatch_executor_skeleton():
+    """Project a disabled one-shot executor skeleton without executing."""
+    return build_office_controlled_mutation_disabled_one_shot_runtime_dispatch_executor_skeleton()
+
+
+@app.post("/api/office/controlled-mutation/disabled-one-shot-runtime-dispatch-executor-skeleton/execute")
+async def execute_office_controlled_mutation_disabled_one_shot_runtime_dispatch_executor_skeleton(payload: Mapping[str, Any]):
+    """Refuse one-shot runtime dispatch while returning safe validation metadata."""
+    return refuse_office_controlled_mutation_disabled_one_shot_runtime_dispatch(payload)
 
 
 @app.get("/api/office/events")
