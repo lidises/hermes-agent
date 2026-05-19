@@ -2940,6 +2940,54 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(markup).not.toMatch(/raw adapter|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-provider|provider/i);
   });
 
+  it("renders manual Kanban mutation record as Kanban-mutated without NAS controls", () => {
+    const ManualKanbanMutationRecordStatusPanel = (OfficePageModule as unknown as {
+      ManualKanbanMutationRecordStatusPanel: React.ComponentType<{ status: unknown; error?: string | null }>;
+    }).ManualKanbanMutationRecordStatusPanel;
+    expect(ManualKanbanMutationRecordStatusPanel).toBeTypeOf("function");
+
+    const html = renderToStaticMarkup(
+      <ManualKanbanMutationRecordStatusPanel
+        error={null}
+        status={{
+          schema_version: 1,
+          mode: "stored_manual_kanban_mutation_records_readback",
+          kanban_mutation_record_count: 1,
+          records: [
+            {
+              schema_version: 1,
+              mode: "stored_manual_kanban_mutation_record",
+              adapter_dispatch_ref: "adapterdispatch-office-dispatch-1",
+              kanban_mutation_ref: "kanbanmut-office-dispatch-1",
+              kanban_card_ref: "card-office-dispatch-1",
+              kanban_mutation_created: true,
+              kanban_mutation_result: "safe_kanban_marker_written" as const,
+              adapter_dispatch_created: true,
+              nas_save_created: false,
+              real_dispatch_execution_enabled: false,
+            },
+          ],
+          capabilities: {
+            kanban_mutation_enabled: true,
+            nas_write_enabled: false,
+            real_dispatch_execution_enabled: false,
+          },
+          redaction: { raw_kanban_payload_excluded: true, credentials_echoed: false },
+        }}
+      />,
+    );
+
+    expect(html).toContain('data-office-manual-kanban-mutation-record-status="true"');
+    expect(html).toContain('data-office-manual-kanban-mutation-created="true"');
+    expect(html).toContain('data-office-manual-kanban-mutation-nas-created="false"');
+    expect(html).toContain("Kanban mutated · NAS still closed");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("<form");
+    expect(html).not.toContain("<input");
+    expect(html).not.toContain("<select");
+    expect(html).not.toContain("<textarea");
+  });
+
   it("renders approved real one-shot dispatch gate design without executable controls", () => {
     const ApprovedRealOneShotDispatchGateDesignPanel = (OfficePageModule as unknown as {
       ApprovedRealOneShotDispatchGateDesignPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.ApprovedRealOneShotDispatchGateDesignPanel>>;

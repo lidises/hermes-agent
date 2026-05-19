@@ -1,4 +1,14 @@
-Last updated: 2026-05-19 17:55 KST
+Last updated: 2026-05-19 18:18 KST
+
+## Manual Kanban mutation record implemented locally (Kanban marker opened, NAS still closed)
+- Added adapter-dispatch-backed Kanban mutation write/readback after adapter dispatch metadata.
+- Backend POST: `/api/office/controlled-mutation/manual-kanban-mutation-record`.
+- Backend GET: `/api/office/controlled-mutation/manual-kanban-mutation-record-status`.
+- The write requires an existing adapter dispatch record, exact safe `adapterdispatch-*` ref, safe `kanbanmut-*` mutation ref, safe `card-*` card ref, confirmation `confirmed-kanban-mutation-record-only`, safe mutator/timestamp/evidence refs, prior adapter dispatch created, and prior Kanban/NAS still false; duplicate adapter dispatch/Kanban mutation refs are blocked.
+- Stored Kanban mutation records set `kanban_mutation_created=true` and `kanban_mutation_result=safe_kanban_marker_written`, but keep NAS save/write false, VPS file change false, service restart false, git push false, credential/public authority false, and real dispatch execution false.
+- Frontend typed API wrappers and display-only `/office` Kanban mutation panel added; no form/button/input/select/textarea controls.
+- RED confirmed missing backend helper/API and frontend wrapper/panel first. GREEN local: focused backend Kanban-mutation tests `2 passed`, broader controlled-mutation chain `36 passed`, frontend API/RPG `132 passed`, `py_compile`, `git diff --check`, added-line secret scan, and `npm run build` passed with existing Vite chunk warning only.
+- Not yet committed/pushed/deployed in this section until final verification/deploy finishes.
 
 ## Manual adapter dispatch record deployed (adapter dispatched, Kanban/NAS still closed)
 - Added target-mutation-backed adapter dispatch write/readback after exact-target mutation metadata.

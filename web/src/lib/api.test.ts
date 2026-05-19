@@ -1725,6 +1725,102 @@ describe("fetchJSON", () => {
     expect(body.raw_adapter_payload).toBeUndefined();
   });
 
+  it("writes and reads manual Kanban mutation records through protected routes without NAS or real dispatch", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        location: { origin: "https://office.example" },
+        __HERMES_SESSION_TOKEN__: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.endsWith("/api/office/controlled-mutation/manual-kanban-mutation-record")) {
+        expect(init?.method).toBe("POST");
+        const body = JSON.parse(String(init?.body));
+        expect(body.kanban_mutation_ref).toBe("kanbanmut-office-dispatch-1");
+        return {
+          ok: true,
+          status: 200,
+          headers: new Headers({ "content-type": "application/json" }),
+          json: async () => ({
+            stored: true,
+            errors: [],
+            dto: {
+              schema_version: 1,
+              mode: "stored_manual_kanban_mutation_record",
+              adapter_dispatch_ref: "adapterdispatch-office-dispatch-1",
+              kanban_mutation_ref: "kanbanmut-office-dispatch-1",
+              kanban_card_ref: "card-office-dispatch-1",
+              kanban_mutation_created: true,
+              kanban_mutation_result: "safe_kanban_marker_written",
+              adapter_dispatch_created: true,
+              nas_save_created: false,
+              real_dispatch_execution_enabled: false,
+            },
+          }),
+        } as Response;
+      }
+      if (url.endsWith("/api/office/controlled-mutation/manual-kanban-mutation-record-status?kanban_mutation_ref=kanbanmut-office-dispatch-1")) {
+        return {
+          ok: true,
+          status: 200,
+          headers: new Headers({ "content-type": "application/json" }),
+          json: async () => ({
+            schema_version: 1,
+            mode: "stored_manual_kanban_mutation_records_readback",
+            kanban_mutation_record_count: 1,
+            records: [
+              {
+                schema_version: 1,
+                mode: "stored_manual_kanban_mutation_record",
+                adapter_dispatch_ref: "adapterdispatch-office-dispatch-1",
+                kanban_mutation_ref: "kanbanmut-office-dispatch-1",
+                kanban_card_ref: "card-office-dispatch-1",
+                kanban_mutation_created: true,
+                kanban_mutation_result: "safe_kanban_marker_written",
+                adapter_dispatch_created: true,
+                nas_save_created: false,
+                real_dispatch_execution_enabled: false,
+              },
+            ],
+            capabilities: {
+              kanban_mutation_enabled: true,
+              nas_write_enabled: false,
+              real_dispatch_execution_enabled: false,
+            },
+            redaction: {
+              raw_kanban_payload_excluded: true,
+              credentials_echoed: false,
+            },
+          }),
+        } as Response;
+      }
+      throw new Error(`unexpected url ${url}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const stored = await api.writeOfficeControlledMutationManualKanbanMutationRecord({
+      adapter_dispatch_ref: "adapterdispatch-office-dispatch-1",
+      kanban_mutation_ref: "kanbanmut-office-dispatch-1",
+      kanban_card_ref: "card-office-dispatch-1",
+      operator_confirmation: "confirmed-kanban-mutation-record-only",
+      mutated_by: "actor:ai_office_operator",
+      mutated_at: "2026-05-19T07:40:00Z",
+      mutation_evidence_refs: ["adapterdispatch:adapterdispatch-office-dispatch-1"],
+    });
+    expect(stored.stored).toBe(true);
+    expect(stored.dto?.kanban_mutation_created).toBe(true);
+    expect(stored.dto?.nas_save_created).toBe(false);
+
+    const status = await api.getOfficeControlledMutationManualKanbanMutationRecordStatus({ kanban_mutation_ref: "kanbanmut-office-dispatch-1" });
+    expect(status.kanban_mutation_record_count).toBe(1);
+    expect(status.capabilities.kanban_mutation_enabled).toBe(true);
+    expect(status.capabilities.nas_write_enabled).toBe(false);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it("gets approved real one-shot dispatch gate design through the protected readback route", async () => {
     Object.defineProperty(globalThis, "window", {
       configurable: true,

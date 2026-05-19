@@ -59,6 +59,7 @@ from hermes_cli.office_controlled_mutation import (
     append_office_controlled_mutation_manual_target_mutation_readiness_record,
     append_office_controlled_mutation_manual_target_mutation_record,
     append_office_controlled_mutation_manual_adapter_dispatch_record,
+    append_office_controlled_mutation_manual_kanban_mutation_record,
     append_office_controlled_mutation_authority_adapter_registry_event,
     append_office_controlled_mutation_decision_event,
     append_office_controlled_mutation_dry_run_result_event,
@@ -115,6 +116,7 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_manual_target_mutation_readiness_records,
     list_office_controlled_mutation_manual_target_mutation_records,
     list_office_controlled_mutation_manual_adapter_dispatch_records,
+    list_office_controlled_mutation_manual_kanban_mutation_records,
     list_office_controlled_mutation_manual_approval_recording_drafts,
     list_office_controlled_mutation_authority_adapter_registry_events,
     list_office_controlled_mutation_request_events,
@@ -1288,6 +1290,26 @@ async def get_office_controlled_mutation_manual_adapter_dispatch_record_status(
     return list_office_controlled_mutation_manual_adapter_dispatch_records(
         target_mutation_ref=target_mutation_ref,
         adapter_dispatch_ref=adapter_dispatch_ref,
+        limit=limit,
+    )
+
+
+@app.post("/api/office/controlled-mutation/manual-kanban-mutation-record")
+async def append_office_controlled_mutation_manual_kanban_mutation_record_endpoint(payload: Mapping[str, Any]):
+    """Store Kanban mutation metadata while keeping NAS and real dispatch closed."""
+    return append_office_controlled_mutation_manual_kanban_mutation_record(payload)
+
+
+@app.get("/api/office/controlled-mutation/manual-kanban-mutation-record-status")
+async def get_office_controlled_mutation_manual_kanban_mutation_record_status(
+    adapter_dispatch_ref: str | None = None,
+    kanban_mutation_ref: str | None = None,
+    limit: int = 50,
+):
+    """Read back Kanban mutation metadata without exposing card bodies or credentials."""
+    return list_office_controlled_mutation_manual_kanban_mutation_records(
+        adapter_dispatch_ref=adapter_dispatch_ref,
+        kanban_mutation_ref=kanban_mutation_ref,
         limit=limit,
     )
 

@@ -982,6 +982,55 @@ export interface OfficeManualAdapterDispatchRecordStatus {
   errors?: Array<{ field: string; code: string }>;
 }
 
+export interface OfficeManualKanbanMutationRecordPayload {
+  adapter_dispatch_ref: string;
+  kanban_mutation_ref: string;
+  kanban_card_ref: string;
+  operator_confirmation: "confirmed-kanban-mutation-record-only";
+  mutated_by: string;
+  mutated_at: string;
+  mutation_evidence_refs: string[];
+}
+
+export interface OfficeManualKanbanMutationRecord {
+  schema_version: number;
+  mode: "stored_manual_kanban_mutation_record";
+  kanban_status?: "kanban_mutated_no_nas_or_real_dispatch";
+  kanban_mutation_result?: "safe_kanban_marker_written";
+  adapter_dispatch_ref: string;
+  kanban_mutation_ref: string;
+  kanban_card_ref: string;
+  adapter_ref?: string;
+  target_mutation_ref?: string;
+  target_ref?: string;
+  target_mutation_created: boolean;
+  adapter_dispatch_created: boolean;
+  kanban_mutation_created: boolean;
+  nas_save_created: boolean;
+  real_dispatch_execution_enabled: boolean;
+  capabilities?: Record<string, boolean>;
+  redaction?: Record<string, boolean>;
+}
+
+export interface OfficeManualKanbanMutationRecordAppendResult {
+  stored: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: OfficeManualKanbanMutationRecord | null;
+}
+
+export interface OfficeManualKanbanMutationRecordStatus {
+  schema_version: number;
+  mode: "stored_manual_kanban_mutation_records_readback";
+  kanban_mutation_record_count: number;
+  limit?: number;
+  skipped_count?: number;
+  records: OfficeManualKanbanMutationRecord[];
+  latest_refs?: Record<string, string>;
+  capabilities: Record<string, boolean>;
+  redaction?: Record<string, boolean>;
+  errors?: Array<{ field: string; code: string }>;
+}
+
 export interface OfficeDisabledOneShotRuntimeDispatchPayload {
   exact_target_allowlist_ref: string;
   idempotency_key: string;
@@ -1336,6 +1385,20 @@ export const api = {
     if (typeof params.limit === "number") qs.set("limit", String(params.limit));
     const suffix = qs.toString() ? `?${qs.toString()}` : "";
     return fetchJSON<OfficeManualAdapterDispatchRecordStatus>(`/api/office/controlled-mutation/manual-adapter-dispatch-record-status${suffix}`);
+  },
+  writeOfficeControlledMutationManualKanbanMutationRecord: (body: OfficeManualKanbanMutationRecordPayload) =>
+    fetchJSON<OfficeManualKanbanMutationRecordAppendResult>("/api/office/controlled-mutation/manual-kanban-mutation-record", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
+  getOfficeControlledMutationManualKanbanMutationRecordStatus: (params: { adapter_dispatch_ref?: string; kanban_mutation_ref?: string; limit?: number } = {}) => {
+    const qs = new URLSearchParams();
+    if (params.adapter_dispatch_ref) qs.set("adapter_dispatch_ref", params.adapter_dispatch_ref);
+    if (params.kanban_mutation_ref) qs.set("kanban_mutation_ref", params.kanban_mutation_ref);
+    if (typeof params.limit === "number") qs.set("limit", String(params.limit));
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+    return fetchJSON<OfficeManualKanbanMutationRecordStatus>(`/api/office/controlled-mutation/manual-kanban-mutation-record-status${suffix}`);
   },
   executeOfficeControlledMutationDisabledOneShotRuntimeDispatch: (body: OfficeDisabledOneShotRuntimeDispatchPayload) =>
     fetchJSON<OfficeDisabledOneShotRuntimeDispatchRefusal>("/api/office/controlled-mutation/disabled-one-shot-runtime-dispatch-executor-skeleton/execute", {

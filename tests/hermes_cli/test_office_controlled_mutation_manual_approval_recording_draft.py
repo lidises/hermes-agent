@@ -1289,6 +1289,128 @@ def test_manual_adapter_dispatch_record_api_is_protected_and_safe(monkeypatch, t
     assert readback_body["capabilities"]["nas_write_enabled"] is False
 
 
+def _seed_adapter_dispatch_chain(tmp_path):
+    from hermes_cli.office_controlled_mutation import append_office_controlled_mutation_manual_adapter_dispatch_record
+
+    target_mutation_store = _seed_target_mutation_chain(tmp_path)
+    adapter_store = tmp_path / "office" / "controlled-mutation" / "adapter_dispatch_records.jsonl"
+    append_office_controlled_mutation_manual_adapter_dispatch_record(
+        {
+            "target_mutation_ref": "targetmut-office-dispatch-1",
+            "adapter_dispatch_ref": "adapterdispatch-office-dispatch-1",
+            "adapter_ref": "adapter-office-dispatch-1",
+            "operator_confirmation": "confirmed-adapter-dispatch-record-only",
+            "dispatched_by": "actor:ai_office_operator",
+            "dispatched_at": "2026-05-19T07:20:00Z",
+            "dispatch_evidence_refs": ["targetmut:targetmut-office-dispatch-1"],
+        },
+        target_mutation_store_path=target_mutation_store,
+        store_path=adapter_store,
+    )
+    return adapter_store
+
+
+def test_manual_kanban_mutation_record_mutates_kanban_without_nas_or_real_dispatch(tmp_path):
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_manual_kanban_mutation_record,
+        list_office_controlled_mutation_manual_kanban_mutation_records,
+    )
+
+    adapter_store = _seed_adapter_dispatch_chain(tmp_path)
+    kanban_store = tmp_path / "kanban_mutation_records.jsonl"
+    result = append_office_controlled_mutation_manual_kanban_mutation_record(
+        {
+            "adapter_dispatch_ref": "adapterdispatch-office-dispatch-1",
+            "kanban_mutation_ref": "kanbanmut-office-dispatch-1",
+            "kanban_card_ref": "card-office-dispatch-1",
+            "operator_confirmation": "confirmed-kanban-mutation-record-only",
+            "mutated_by": "actor:ai_office_operator",
+            "mutated_at": "2026-05-19T07:40:00Z",
+            "mutation_evidence_refs": ["adapterdispatch:adapterdispatch-office-dispatch-1"],
+            "raw_card_body": "secret provider sk-test-redacted",
+        },
+        adapter_dispatch_store_path=adapter_store,
+        store_path=kanban_store,
+    )
+
+    assert result["stored"] is True
+    dto = result["dto"]
+    assert dto["mode"] == "stored_manual_kanban_mutation_record"
+    assert dto["adapter_dispatch_created"] is True
+    assert dto["kanban_mutation_created"] is True
+    assert dto["kanban_mutation_result"] == "safe_kanban_marker_written"
+    assert dto["nas_save_created"] is False
+    assert dto["real_dispatch_execution_enabled"] is False
+    assert "raw_card_body" not in dto
+    assert "sk-test" not in repr(dto)
+
+    duplicate = append_office_controlled_mutation_manual_kanban_mutation_record(
+        {
+            "adapter_dispatch_ref": "adapterdispatch-office-dispatch-1",
+            "kanban_mutation_ref": "kanbanmut-office-dispatch-2",
+            "kanban_card_ref": "card-office-dispatch-1",
+            "operator_confirmation": "confirmed-kanban-mutation-record-only",
+            "mutated_by": "actor:ai_office_operator",
+            "mutated_at": "2026-05-19T07:41:00Z",
+            "mutation_evidence_refs": ["adapterdispatch:adapterdispatch-office-dispatch-1"],
+        },
+        adapter_dispatch_store_path=adapter_store,
+        store_path=kanban_store,
+    )
+    assert duplicate["stored"] is False
+    assert duplicate["errors"] == [{"field": "adapter_dispatch_ref", "code": "duplicate_adapter_dispatch_ref"}]
+
+    readback = list_office_controlled_mutation_manual_kanban_mutation_records(store_path=kanban_store)
+    assert readback["mode"] == "stored_manual_kanban_mutation_records_readback"
+    assert readback["kanban_mutation_record_count"] == 1
+    assert readback["records"][0]["kanban_mutation_created"] is True
+    assert readback["capabilities"]["kanban_mutation_enabled"] is True
+    assert readback["capabilities"]["nas_write_enabled"] is False
+    assert readback["capabilities"]["real_dispatch_execution_enabled"] is False
+
+
+def test_manual_kanban_mutation_record_api_is_protected_and_safe(monkeypatch, tmp_path):
+    from fastapi.testclient import TestClient
+    import hermes_cli.web_server as web_server
+
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+    _seed_adapter_dispatch_chain(tmp_path)
+    client = TestClient(web_server.app)
+    post_path = "/api/office/controlled-mutation/manual-kanban-mutation-record"
+    get_path = "/api/office/controlled-mutation/manual-kanban-mutation-record-status?kanban_mutation_ref=kanbanmut-office-dispatch-1"
+    body = {
+        "adapter_dispatch_ref": "adapterdispatch-office-dispatch-1",
+        "kanban_mutation_ref": "kanbanmut-office-dispatch-1",
+        "kanban_card_ref": "card-office-dispatch-1",
+        "operator_confirmation": "confirmed-kanban-mutation-record-only",
+        "mutated_by": "actor:ai_office_operator",
+        "mutated_at": "2026-05-19T07:40:00Z",
+        "mutation_evidence_refs": ["adapterdispatch:adapterdispatch-office-dispatch-1"],
+        "raw_card_body": "secret provider sk-test-redacted",
+    }
+
+    assert client.post(post_path, json=body).status_code == 401
+    assert client.get(get_path).status_code == 401
+
+    stored = client.post(post_path, headers={web_server._SESSION_HEADER_NAME: web_server._SESSION_TOKEN}, json=body)
+    assert stored.status_code == 200
+    payload = stored.json()
+    assert payload["stored"] is True
+    assert payload["dto"]["kanban_mutation_created"] is True
+    assert payload["dto"]["nas_save_created"] is False
+    assert payload["dto"]["real_dispatch_execution_enabled"] is False
+    assert "sk-test" not in repr(payload)
+    assert "raw_card_body" not in payload["dto"]
+
+    readback = client.get(get_path, headers={web_server._SESSION_HEADER_NAME: web_server._SESSION_TOKEN})
+    assert readback.status_code == 200
+    readback_body = readback.json()
+    assert readback_body["kanban_mutation_record_count"] == 1
+    assert readback_body["records"][0]["kanban_mutation_ref"] == "kanbanmut-office-dispatch-1"
+    assert readback_body["capabilities"]["kanban_mutation_enabled"] is True
+    assert readback_body["capabilities"]["nas_write_enabled"] is False
+
+
 def test_manual_runtime_command_preview_record_api_is_protected_and_safe(monkeypatch, tmp_path):
     from fastapi.testclient import TestClient
     import hermes_cli.web_server as web_server
