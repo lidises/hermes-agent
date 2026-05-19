@@ -1,6 +1,6 @@
-Last updated: 2026-05-19 15:11 KST
+Last updated: 2026-05-19 15:17 KST
 
-## Manual runtime command preview record implemented locally (checksum-only, no execution)
+## Manual runtime command preview record deployed (checksum-only, no execution)
 - Added bounded runtime-command preview metadata write/readback after dispatch-gate-open metadata.
 - Backend POST: `/api/office/controlled-mutation/manual-runtime-command-preview-record`.
 - Backend GET: `/api/office/controlled-mutation/manual-runtime-command-preview-record-status`.
@@ -9,7 +9,8 @@ Last updated: 2026-05-19 15:11 KST
 - Stored preview records set `runtime_command_preview_created=true`, but keep `runtime_command_included=false`, `runtime_command_executed=false`, adapter binding/dispatch false, replay-store write false, rollback false, target/Kanban/NAS/VPS mutation false, service restart false, credential/public authority false, and real dispatch execution false.
 - Frontend typed API wrappers and display-only `/office` runtime-command preview panel added; no form/button/input/select/textarea controls.
 - RED confirmed missing backend helper/API and frontend wrapper/panel first. GREEN local: focused backend `15 passed`, broader controlled-mutation chain `24 passed`, frontend API/RPG `120 passed`, `py_compile`, `git diff --check`, added-line secret scan, and `npm run build` passed with existing Vite chunk warning only.
-- Not yet deployed in this paragraph until commit/VPS sync completes; next verification step is commit, push, copy `web_dist`, restart dashboard only, and smoke without touching gateway.
+- Commit `5005aba6` pushed and deployed to VPS source/dashboard worktrees; `web_dist` copied to both; restarted only `hermes-agent-dashboard.service`; `hermes-gateway.service` stayed active without restart.
+- VPS focused backend preflight+draft/approval/gate-open/preview tests passed (`19 passed`). Live private `/office?runtime-preview=5005aba6` returned HTTP 200. Protected API smoke stored draft+bounded approval+gate-open+runtime-preview record and read back `runtime_command_preview_created=true`, checksum length 64, with runtime command inclusion/execution, target mutation, Kanban mutation, NAS save, and real dispatch execution false; raw command field/value leak false.
 
 ## Manual dispatch gate open record deployed (metadata-only)
 - Added bounded dispatch-gate-open metadata write/readback after approval-backed readiness.
