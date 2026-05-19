@@ -1,5 +1,5 @@
 ## Next safest lane
-- Continue from manual approval-recording preflight: run broader local verification, build, safe added-line scan, then commit/push/VPS deploy/dashboard smoke if still clean.
+- Continue from deployed manual approval-recording preflight. Next implementation candidate: approval-record write draft surface that still refuses persistence unless a separate explicit approval gate is added.
 - After deploy, next implementation candidate: approval-record write draft surface that still refuses persistence unless a separate explicit approval gate is added.
 - Keep forbidden until separate approval: actual approval record write, dispatch gate open, runtime command execution, target mutation, replay-store write, rollback execution, watcher/cron, NAS/Kanban/VPS mutation, credential access.
 

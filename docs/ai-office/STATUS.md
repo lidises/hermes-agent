@@ -1,4 +1,4 @@
-Last updated: 2026-05-19 12:20 KST
+Last updated: 2026-05-19 12:26 KST
 
 ## Manual approval-recording preflight implemented locally (refusal-only)
 - Added refusal-only manual approval-recording preflight surface after approved real dispatch gate design.
@@ -8,7 +8,8 @@ Last updated: 2026-05-19 12:20 KST
 - Safe validation covers approval record ref, exact target allowlist ref, idempotency key, replay lookup ref, rollback disable ref, dry-run evidence ref, and operator confirmation.
 - Refusal remains explicit: approval recording disabled by default; no record write, dispatch gate open, runtime command execution, target mutation, replay-store write, rollback execution, watcher/cron, NAS/Kanban/VPS mutation, or credential access.
 - RED confirmed missing helper/routes/API/panel first; focused GREEN: backend 4 passed, frontend 3 passed.
-- Not yet committed/deployed in this checkpoint.
+- Committed/pushed/deployed to VPS. Dashboard service active; gateway still active.
+- VPS focused tests: 11 passed. Live protected API smoke: readback 200, refusal POST 200, approval write false, gate open false, runtime executed false, target mutation false, replay write false, invalid refs return safe field/code errors only, raw unsafe values not echoed, browser JS errors 0.
 
 ## Approved real one-shot dispatch gate design
 
