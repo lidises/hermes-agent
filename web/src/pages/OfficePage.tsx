@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -4709,6 +4709,101 @@ export function ExplicitRuntimeDispatchApprovalStatusPanel({
 }
 
 
+export function ConcreteRuntimeSingleDispatchSliceDesignPanel({
+  status,
+  error,
+}: {
+  status: OfficeConcreteRuntimeSingleDispatchSliceDesign | null;
+  error?: string | null;
+}) {
+  const caps = status?.capabilities ?? {};
+  const envelope = status?.one_shot_envelope ?? {};
+  const allowlist = status?.target_allowlist ?? {};
+  const rollback = status?.rollback_plan ?? {};
+  const evidence = status?.dry_run_evidence_requirements ?? {};
+  const idempotency = status?.idempotency ?? {};
+  const gate = status?.disabled_runtime_gate ?? {};
+  return (
+    <section
+      className="border border-rose-300/20 bg-rose-950/10 p-4"
+      data-office-concrete-runtime-single-dispatch-slice-design="true"
+      data-office-concrete-runtime-single-dispatch-slice-design-complete={String(Boolean(status?.concrete_runtime_single_dispatch_slice_design_complete))}
+      data-office-concrete-runtime-single-dispatch-slice-design-readback-enabled={String(Boolean(caps.single_dispatch_slice_design_readback_enabled))}
+      data-office-concrete-runtime-single-dispatch-slice-design-envelope-enabled={String(Boolean(caps.one_shot_envelope_metadata_enabled))}
+      data-office-concrete-runtime-single-dispatch-slice-design-target-allowlist-enabled={String(Boolean(caps.target_allowlist_readback_enabled))}
+      data-office-concrete-runtime-single-dispatch-slice-design-rollback-enabled={String(Boolean(caps.rollback_plan_readback_enabled))}
+      data-office-concrete-runtime-single-dispatch-slice-design-evidence-enabled={String(Boolean(caps.dry_run_evidence_requirements_readback_enabled))}
+      data-office-concrete-runtime-single-dispatch-slice-design-idempotency-enabled={String(Boolean(caps.idempotency_key_readback_enabled))}
+      data-office-concrete-runtime-single-dispatch-slice-design-runtime-gate-enabled={String(Boolean(caps.disabled_runtime_gate_readback_enabled))}
+      data-office-concrete-runtime-single-dispatch-slice-design-binding-enabled={String(Boolean(caps.adapter_binding_enabled))}
+      data-office-concrete-runtime-single-dispatch-slice-design-dispatch-enabled={String(Boolean(caps.adapter_dispatch_enabled))}
+      data-office-concrete-runtime-single-dispatch-slice-design-runtime-execution-enabled={String(Boolean(caps.runtime_command_execution_enabled))}
+      data-office-concrete-runtime-single-dispatch-slice-design-watcher-enabled={String(Boolean(caps.watcher_daemon_enabled))}
+      data-office-concrete-runtime-single-dispatch-slice-design-cron-enabled={String(Boolean(caps.cron_enabled))}
+      data-office-concrete-runtime-single-dispatch-slice-design-target-mutation-enabled={String(Boolean(caps.target_mutation_enabled))}
+      data-office-concrete-runtime-single-dispatch-slice-design-kanban-mutation-enabled={String(Boolean(caps.kanban_mutation_enabled))}
+      data-office-concrete-runtime-single-dispatch-slice-design-nas-save-enabled={String(Boolean(caps.nas_save_enabled))}
+      data-office-concrete-runtime-single-dispatch-slice-design-vps-file-change-enabled={String(Boolean(caps.vps_file_change_enabled))}
+      data-office-concrete-runtime-single-dispatch-slice-design-service-restart-enabled={String(Boolean(caps.service_restart_enabled))}
+      data-office-concrete-runtime-single-dispatch-slice-design-git-push-enabled={String(Boolean(caps.git_push_enabled))}
+      data-office-concrete-runtime-single-dispatch-slice-design-credential-access-enabled={String(Boolean(caps.credential_access_enabled))}
+      data-office-concrete-runtime-single-dispatch-slice-design-public-exposure-enabled={String(Boolean(caps.public_exposure_enabled))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-rose-200/70">Concrete runtime single-dispatch slice design</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">one-shot envelope · execution blocked</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Projects a future one-shot dispatch envelope, allowlist, rollback, evidence, idempotency, and disabled runtime gate without creating any runtime dispatch or target mutation.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "readback request failed" : `next ${status?.next_manual_lane ?? "approved_one_shot_runtime_dispatch"}`}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-3" data-office-concrete-runtime-single-dispatch-slice-design-envelope-list="true">
+        {Object.entries(envelope).map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-concrete-runtime-single-dispatch-slice-design-envelope={key}>{key}: {String(Boolean(value))}</div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-concrete-runtime-single-dispatch-slice-design-target-allowlist-list="true">
+        {Object.entries(allowlist).map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-concrete-runtime-single-dispatch-slice-design-target-allowlist={key}>{key}: {String(Boolean(value))}</div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-concrete-runtime-single-dispatch-slice-design-rollback-list="true">
+        {Object.entries(rollback).map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-concrete-runtime-single-dispatch-slice-design-rollback={key}>{key}: {String(Boolean(value))}</div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-concrete-runtime-single-dispatch-slice-design-evidence-list="true">
+        {Object.entries(evidence).map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-concrete-runtime-single-dispatch-slice-design-evidence={key}>{key}: {String(Boolean(value))}</div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-3" data-office-concrete-runtime-single-dispatch-slice-design-idempotency-list="true">
+        {Object.entries(idempotency).map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-concrete-runtime-single-dispatch-slice-design-idempotency={key}>{key}: {String(Boolean(value))}</div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-concrete-runtime-single-dispatch-slice-design-runtime-gate-list="true">
+        {Object.entries(gate).map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-concrete-runtime-single-dispatch-slice-design-runtime-gate={key}>{key}: {String(Boolean(value))}</div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-2" data-office-concrete-runtime-single-dispatch-slice-design-forbidden-boundaries="true">
+        {(status?.forbidden_boundaries ?? []).map((item) => (
+          <div key={item} className="border border-red-300/20 bg-red-950/10 p-2 text-xs text-red-100/80" data-office-concrete-runtime-single-dispatch-slice-design-forbidden-boundary={item}>{item}</div>
+        ))}
+      </div>
+      <div className="mt-3 border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+        source: {status?.source_approval_lane ?? "explicit_runtime_dispatch_approval_status"}
+      </div>
+    </section>
+  );
+}
+
+
 export function NasKeeperQueueManualEvidenceReviewSurfacePanel({
   surface,
   readback,
@@ -5938,6 +6033,8 @@ export default function OfficePage() {
   const [humanReviewedSingleDispatchStatusError, setHumanReviewedSingleDispatchStatusError] = useState<string | null>(null);
   const [explicitRuntimeDispatchApprovalStatus, setExplicitRuntimeDispatchApprovalStatus] = useState<OfficeExplicitRuntimeDispatchApprovalStatus | null>(null);
   const [explicitRuntimeDispatchApprovalStatusError, setExplicitRuntimeDispatchApprovalStatusError] = useState<string | null>(null);
+  const [concreteRuntimeSingleDispatchSliceDesign, setConcreteRuntimeSingleDispatchSliceDesign] = useState<OfficeConcreteRuntimeSingleDispatchSliceDesign | null>(null);
+  const [concreteRuntimeSingleDispatchSliceDesignError, setConcreteRuntimeSingleDispatchSliceDesignError] = useState<string | null>(null);
   const [nasKeeperQueueReadbackLoading, setNasKeeperQueueReadbackLoading] = useState(false);
   const [nasKeeperQueueReadbackError, setNasKeeperQueueReadbackError] = useState<string | null>(null);
   const [nasKeeperExecutionDraft, setNasKeeperExecutionDraft] = useState<OfficeNasKeeperExecutionFromPreviewPayload>(DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT);
@@ -6364,6 +6461,20 @@ export default function OfficePage() {
         if (!cancelled) {
           setExplicitRuntimeDispatchApprovalStatus(null);
           setExplicitRuntimeDispatchApprovalStatusError("request failed");
+        }
+      });
+    api
+      .getOfficeControlledMutationConcreteRuntimeSingleDispatchSliceDesign()
+      .then((next) => {
+        if (!cancelled) {
+          setConcreteRuntimeSingleDispatchSliceDesign(next);
+          setConcreteRuntimeSingleDispatchSliceDesignError(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setConcreteRuntimeSingleDispatchSliceDesign(null);
+          setConcreteRuntimeSingleDispatchSliceDesignError("request failed");
         }
       });
     api
@@ -6957,6 +7068,7 @@ export default function OfficePage() {
       <AdapterBindingDryRunStatusPanel status={adapterBindingDryRunStatus} error={adapterBindingDryRunStatusError} />
       <HumanReviewedSingleDispatchStatusPanel status={humanReviewedSingleDispatchStatus} error={humanReviewedSingleDispatchStatusError} />
       <ExplicitRuntimeDispatchApprovalStatusPanel status={explicitRuntimeDispatchApprovalStatus} error={explicitRuntimeDispatchApprovalStatusError} />
+      <ConcreteRuntimeSingleDispatchSliceDesignPanel status={concreteRuntimeSingleDispatchSliceDesign} error={concreteRuntimeSingleDispatchSliceDesignError} />
 
       <NasKeeperExecutionOperatorActionPanel
         action={nasKeeperExecutionOperatorAction}

@@ -404,6 +404,24 @@ export interface OfficeExplicitRuntimeDispatchApprovalStatus {
   errors: Array<{ field: string; code: string }>;
 }
 
+export interface OfficeConcreteRuntimeSingleDispatchSliceDesign {
+  schema_version: number;
+  mode: "concrete_runtime_single_dispatch_slice_design";
+  concrete_runtime_single_dispatch_slice_design_complete: boolean;
+  source_approval_lane: string;
+  next_manual_lane: string;
+  one_shot_envelope: Record<string, boolean>;
+  target_allowlist: Record<string, boolean>;
+  rollback_plan: Record<string, boolean>;
+  dry_run_evidence_requirements: Record<string, boolean>;
+  idempotency: Record<string, boolean>;
+  disabled_runtime_gate: Record<string, boolean>;
+  forbidden_boundaries: string[];
+  capabilities: Record<string, boolean>;
+  redaction: Record<string, boolean>;
+  errors: Array<{ field: string; code: string }>;
+}
+
 export interface OfficeDispatcherCompletionReviewStatusParams {
   limit?: number;
 }
@@ -585,6 +603,8 @@ export const api = {
     fetchJSON<OfficeHumanReviewedSingleDispatchStatus>("/api/office/controlled-mutation/human-reviewed-single-dispatch-status"),
   getOfficeControlledMutationExplicitRuntimeDispatchApprovalStatus: () =>
     fetchJSON<OfficeExplicitRuntimeDispatchApprovalStatus>("/api/office/controlled-mutation/explicit-runtime-dispatch-approval-status"),
+  getOfficeControlledMutationConcreteRuntimeSingleDispatchSliceDesign: () =>
+    fetchJSON<OfficeConcreteRuntimeSingleDispatchSliceDesign>("/api/office/controlled-mutation/concrete-runtime-single-dispatch-slice-design"),
   executeOfficeControlledMutationNasSingleFileWrite: (body: OfficeNasSingleFileWritePayload) =>
     fetchJSON<OfficeNasSingleFileWriteResult>("/api/office/controlled-mutation/nas-runtime/single-file-write", {
       method: "POST",

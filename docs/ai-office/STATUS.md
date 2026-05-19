@@ -1,4 +1,12 @@
-Last updated: 2026-05-19 10:39 KST
+Last updated: 2026-05-19 10:55 KST
+
+## Concrete runtime single-dispatch slice design lane
+
+Implemented the recommended shortest follow-up after `explicit_runtime_dispatch_approval_status`: a protected concrete runtime single-dispatch slice design lane. Backend adds `build_office_controlled_mutation_concrete_runtime_single_dispatch_slice_design(...)` plus protected GET `/api/office/controlled-mutation/concrete-runtime-single-dispatch-slice-design`; frontend adds a typed API wrapper and display-only `/office` panel with stable `data-office-concrete-runtime-single-dispatch-slice-design-*` hooks. It models one-shot envelope, target allowlist, rollback/disable plan, dry-run evidence requirements, idempotency, and disabled-by-default runtime gate only, while keeping adapter binding, adapter dispatch, runtime command execution, watcher daemon, cron, target/Kanban/NAS mutation, VPS file changes, service restart, git push, credential access, and public exposure disabled.
+
+Verification 2026-05-19 10:55 KST: RED backend tests first failed for missing helper/route; RED frontend tests first failed for missing API wrapper/panel. GREEN focused backend concrete-runtime-single-dispatch-slice-design+explicit-runtime-dispatch-approval tests passed (`4 passed`); focused frontend API/RPG tests passed (`2 passed`). Broader verification/deploy pending in this working tree.
+
+Boundary: this is design/readback/UI only. It does not approve or record a real runtime dispatch, dispatch an adapter, create an adapter binding, include or execute runtime commands, start watcher/cron automation, mutate targets/Kanban/NAS/VPS files, restart services by itself, push from the lane, expose public routes, or grant VPS direct NAS mount/credential/write authority.
 
 ## Explicit runtime dispatch approval status lane
 

@@ -2424,6 +2424,103 @@ def build_office_controlled_mutation_explicit_runtime_dispatch_approval_status(
     }
 
 
+def build_office_controlled_mutation_concrete_runtime_single_dispatch_slice_design(
+    *, unsafe_examples: Mapping[str, Any] | None = None
+) -> dict[str, object]:
+    """Project a concrete single-dispatch slice design without dispatching."""
+
+    _ = unsafe_examples
+    return {
+        "schema_version": 1,
+        "mode": "concrete_runtime_single_dispatch_slice_design",
+        "concrete_runtime_single_dispatch_slice_design_complete": True,
+        "source_approval_lane": "explicit_runtime_dispatch_approval_status",
+        "next_manual_lane": "approved_one_shot_runtime_dispatch",
+        "one_shot_envelope": {
+            "single_dispatch_only": True,
+            "operator_confirmation_required": True,
+            "runtime_dispatch_created": False,
+            "runtime_command_included": False,
+            "adapter_dispatch_created": False,
+            "target_mutation_created": False,
+        },
+        "target_allowlist": {
+            "allowlist_required": True,
+            "allowlist_locked": False,
+            "opaque_target_refs_only": True,
+            "raw_paths_excluded": True,
+        },
+        "rollback_plan": {
+            "rollback_required": True,
+            "disable_command_required": True,
+            "rollback_verified": False,
+            "service_restart_required": False,
+        },
+        "dry_run_evidence_requirements": {
+            "dry_run_result_required": True,
+            "audit_event_required": True,
+            "human_review_required": True,
+            "evidence_locked": False,
+        },
+        "idempotency": {
+            "idempotency_key_required": True,
+            "idempotency_key_issued": False,
+            "repeat_dispatch_blocked": True,
+        },
+        "disabled_runtime_gate": {
+            "disabled_by_default": True,
+            "runtime_gate_open": False,
+            "automation_activation_requested": False,
+            "watcher_or_cron_allowed": False,
+        },
+        "forbidden_boundaries": [
+            "adapter_dispatch",
+            "target_mutation",
+            "runtime_command_execution",
+            "watcher_daemon_activation",
+            "cron_job_installation",
+            "kanban_mutation",
+            "nas_save",
+            "vps_file_change",
+            "service_restart",
+            "git_push",
+            "credential_access",
+            "public_exposure",
+        ],
+        "capabilities": {
+            "single_dispatch_slice_design_readback_enabled": True,
+            "one_shot_envelope_metadata_enabled": True,
+            "target_allowlist_readback_enabled": True,
+            "rollback_plan_readback_enabled": True,
+            "dry_run_evidence_requirements_readback_enabled": True,
+            "idempotency_key_readback_enabled": True,
+            "disabled_runtime_gate_readback_enabled": True,
+            "adapter_binding_enabled": False,
+            "adapter_dispatch_enabled": False,
+            "runtime_command_execution_enabled": False,
+            "watcher_daemon_enabled": False,
+            "cron_enabled": False,
+            "target_mutation_enabled": False,
+            "kanban_mutation_enabled": False,
+            "nas_save_enabled": False,
+            "vps_file_change_enabled": False,
+            "service_restart_enabled": False,
+            "git_push_enabled": False,
+            "credential_access_enabled": False,
+            "public_exposure_enabled": False,
+        },
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "opaque_refs_only": True,
+            "safe_summaries_only": True,
+            "unsupported_values_echoed": False,
+            "credentials_echoed": False,
+        },
+        "errors": [],
+    }
+
+
 def _dispatcher_authority_metadata_append_status_capabilities() -> dict[str, bool]:
     return {
         "metadata_append_readback_enabled": True,

@@ -2282,6 +2282,108 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(markup).not.toMatch(/raw runtime|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
   });
 
+  it("renders concrete runtime single-dispatch slice design without dispatch or target mutation", () => {
+    const ConcreteRuntimeSingleDispatchSliceDesignPanel = (OfficePageModule as unknown as {
+      ConcreteRuntimeSingleDispatchSliceDesignPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.ConcreteRuntimeSingleDispatchSliceDesignPanel>>;
+    }).ConcreteRuntimeSingleDispatchSliceDesignPanel;
+    const status = {
+      schema_version: 1,
+      mode: "concrete_runtime_single_dispatch_slice_design" as const,
+      concrete_runtime_single_dispatch_slice_design_complete: true,
+      source_approval_lane: "explicit_runtime_dispatch_approval_status",
+      next_manual_lane: "approved_one_shot_runtime_dispatch",
+      one_shot_envelope: {
+        single_dispatch_only: true,
+        operator_confirmation_required: true,
+        runtime_dispatch_created: false,
+        runtime_command_included: false,
+        adapter_dispatch_created: false,
+        target_mutation_created: false,
+      },
+      target_allowlist: {
+        allowlist_required: true,
+        allowlist_locked: false,
+        opaque_target_refs_only: true,
+        raw_paths_excluded: true,
+      },
+      rollback_plan: {
+        rollback_required: true,
+        disable_command_required: true,
+        rollback_verified: false,
+        service_restart_required: false,
+      },
+      dry_run_evidence_requirements: {
+        dry_run_result_required: true,
+        audit_event_required: true,
+        human_review_required: true,
+        evidence_locked: false,
+      },
+      idempotency: {
+        idempotency_key_required: true,
+        idempotency_key_issued: false,
+        repeat_dispatch_blocked: true,
+      },
+      disabled_runtime_gate: {
+        disabled_by_default: true,
+        runtime_gate_open: false,
+        automation_activation_requested: false,
+        watcher_or_cron_allowed: false,
+      },
+      forbidden_boundaries: ["adapter_dispatch", "target_mutation", "runtime_command_execution"],
+      capabilities: {
+        single_dispatch_slice_design_readback_enabled: true,
+        one_shot_envelope_metadata_enabled: true,
+        target_allowlist_readback_enabled: true,
+        rollback_plan_readback_enabled: true,
+        dry_run_evidence_requirements_readback_enabled: true,
+        idempotency_key_readback_enabled: true,
+        disabled_runtime_gate_readback_enabled: true,
+        adapter_binding_enabled: false,
+        adapter_dispatch_enabled: false,
+        runtime_command_execution_enabled: false,
+        watcher_daemon_enabled: false,
+        cron_enabled: false,
+        target_mutation_enabled: false,
+        kanban_mutation_enabled: false,
+        nas_save_enabled: false,
+        vps_file_change_enabled: false,
+        service_restart_enabled: false,
+        git_push_enabled: false,
+        credential_access_enabled: false,
+        public_exposure_enabled: false,
+      },
+      redaction: { raw_excluded: true },
+      errors: [],
+    };
+
+    const markup = renderToStaticMarkup(<ConcreteRuntimeSingleDispatchSliceDesignPanel status={status} error={null} />);
+
+    expect(markup).toContain('data-office-concrete-runtime-single-dispatch-slice-design="true"');
+    expect(markup).toContain('data-office-concrete-runtime-single-dispatch-slice-design-complete="true"');
+    expect(markup).toContain('data-office-concrete-runtime-single-dispatch-slice-design-readback-enabled="true"');
+    expect(markup).toContain('data-office-concrete-runtime-single-dispatch-slice-design-envelope-enabled="true"');
+    expect(markup).toContain('data-office-concrete-runtime-single-dispatch-slice-design-target-allowlist-enabled="true"');
+    expect(markup).toContain('data-office-concrete-runtime-single-dispatch-slice-design-rollback-enabled="true"');
+    expect(markup).toContain('data-office-concrete-runtime-single-dispatch-slice-design-dispatch-enabled="false"');
+    expect(markup).toContain('data-office-concrete-runtime-single-dispatch-slice-design-target-mutation-enabled="false"');
+    expect(markup).toContain('data-office-concrete-runtime-single-dispatch-slice-design-runtime-execution-enabled="false"');
+    expect(markup).toContain('data-office-concrete-runtime-single-dispatch-slice-design-watcher-enabled="false"');
+    expect(markup).toContain('data-office-concrete-runtime-single-dispatch-slice-design-cron-enabled="false"');
+    expect(markup).toContain('data-office-concrete-runtime-single-dispatch-slice-design-envelope="single_dispatch_only"');
+    expect(markup).toContain('data-office-concrete-runtime-single-dispatch-slice-design-target-allowlist="allowlist_required"');
+    expect(markup).toContain('data-office-concrete-runtime-single-dispatch-slice-design-rollback="rollback_required"');
+    expect(markup).toContain('data-office-concrete-runtime-single-dispatch-slice-design-evidence="dry_run_result_required"');
+    expect(markup).toContain('data-office-concrete-runtime-single-dispatch-slice-design-idempotency="idempotency_key_required"');
+    expect(markup).toContain('data-office-concrete-runtime-single-dispatch-slice-design-runtime-gate="disabled_by_default"');
+    expect(markup).toContain('data-office-concrete-runtime-single-dispatch-slice-design-forbidden-boundary="adapter_dispatch"');
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw command|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
+  });
+
   it("renders the queue-state manual review surface without executable controls or raw markdown", () => {
     const NasKeeperQueueManualEvidenceReviewSurfacePanel = (OfficePageModule as unknown as { NasKeeperQueueManualEvidenceReviewSurfacePanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.NasKeeperQueueManualEvidenceReviewSurfacePanel>> }).NasKeeperQueueManualEvidenceReviewSurfacePanel;
     const boundary = { detailKind: "nas_runtime_n3_approval_boundary_status_surface" } as ReturnType<typeof buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface>;
