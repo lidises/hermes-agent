@@ -2801,6 +2801,52 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(markup).not.toMatch(/shell command|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
   });
 
+  it("renders manual target mutation readiness record as verified without target mutation controls", () => {
+    const ManualTargetMutationReadinessRecordStatusPanel = (OfficePageModule as unknown as {
+      ManualTargetMutationReadinessRecordStatusPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.ManualTargetMutationReadinessRecordStatusPanel>>;
+    }).ManualTargetMutationReadinessRecordStatusPanel;
+    const status = {
+      schema_version: 1,
+      mode: "stored_manual_target_mutation_readiness_records_readback" as const,
+      target_mutation_readiness_record_count: 1,
+      limit: 10,
+      records: [
+        {
+          schema_version: 1,
+          mode: "stored_manual_target_mutation_readiness_record" as const,
+          runtime_execution_ref: "exec-office-dispatch-1",
+          target_mutation_readiness_ref: "targetready-office-dispatch-1",
+          exact_target_allowlist_ref: "allowlist-office-target-1",
+          target_ref: "target-office-dispatch-1",
+          target_mutation_readiness_verified: true,
+          exact_target_allowlist_verified: true,
+          runtime_command_executed: true,
+          target_mutation_created: false,
+          kanban_mutation_created: false,
+          nas_save_created: false,
+          real_dispatch_execution_enabled: false,
+        },
+      ],
+      capabilities: { target_mutation_readiness_enabled: true, target_mutation_enabled: false, kanban_mutation_enabled: false, nas_save_enabled: false, real_dispatch_execution_enabled: false },
+      redaction: { raw_target_excluded: true, credentials_echoed: false },
+      errors: [],
+    };
+
+    const markup = renderToStaticMarkup(<ManualTargetMutationReadinessRecordStatusPanel status={status} error={null} />);
+
+    expect(markup).toContain('data-office-manual-target-mutation-readiness-record-status="true"');
+    expect(markup).toContain('data-office-manual-target-mutation-readiness-record-count="1"');
+    expect(markup).toContain('data-office-manual-target-mutation-readiness-verified="true"');
+    expect(markup).toContain('data-office-manual-target-mutation-readiness-target-mutated="false"');
+    expect(markup).toContain('data-office-manual-target-mutation-readiness-real-dispatch-enabled="false"');
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw target|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-target|provider/i);
+  });
+
   it("renders approved real one-shot dispatch gate design without executable controls", () => {
     const ApprovedRealOneShotDispatchGateDesignPanel = (OfficePageModule as unknown as {
       ApprovedRealOneShotDispatchGateDesignPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.ApprovedRealOneShotDispatchGateDesignPanel>>;

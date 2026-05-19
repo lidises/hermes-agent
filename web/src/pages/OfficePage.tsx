@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeManualApprovalRecordingDraftReviewStatus, type OfficeManualApprovalRecordStatus, type OfficeManualApprovalDispatchGateReadinessStatus, type OfficeManualDispatchGateOpenRecordStatus, type OfficeManualRuntimeCommandPreviewRecordStatus, type OfficeManualRuntimeCommandInclusionRecordStatus, type OfficeManualRuntimeCommandExecutionRecordStatus, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeManualApprovalRecordingDraftReviewStatus, type OfficeManualApprovalRecordStatus, type OfficeManualApprovalDispatchGateReadinessStatus, type OfficeManualDispatchGateOpenRecordStatus, type OfficeManualRuntimeCommandPreviewRecordStatus, type OfficeManualRuntimeCommandInclusionRecordStatus, type OfficeManualRuntimeCommandExecutionRecordStatus, type OfficeManualTargetMutationReadinessRecordStatus, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -5283,6 +5283,62 @@ export function ManualRuntimeCommandExecutionRecordStatusPanel({
 }
 
 
+export function ManualTargetMutationReadinessRecordStatusPanel({
+  status,
+  error,
+}: {
+  status: OfficeManualTargetMutationReadinessRecordStatus | null;
+  error?: string | null;
+}) {
+  const caps = status?.capabilities ?? {};
+  const latest = status?.records?.[status.records.length - 1] ?? null;
+  return (
+    <section
+      className="border border-red-300/20 bg-red-950/10 p-4"
+      data-office-manual-target-mutation-readiness-record-status="true"
+      data-office-manual-target-mutation-readiness-record-count={String(status?.target_mutation_readiness_record_count ?? 0)}
+      data-office-manual-target-mutation-readiness-verified={String(Boolean(latest?.target_mutation_readiness_verified))}
+      data-office-manual-target-mutation-readiness-target-mutated={String(Boolean(latest?.target_mutation_created))}
+      data-office-manual-target-mutation-readiness-real-dispatch-enabled={String(Boolean(caps.real_dispatch_execution_enabled))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-red-200/70">Target mutation readiness record</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">exact target verified · mutation still blocked</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Verifies the exact target allowlist, dry-run evidence, and rollback disable ref after noop runtime execution. It writes readiness metadata only; target mutation, adapter dispatch, Kanban, NAS, VPS writes, service restarts, git push, credentials, and real dispatch remain disabled.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "target readiness request failed" : String(latest?.target_mutation_readiness_ref ?? "target readiness pending")}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-manual-target-mutation-readiness-record-boundaries="true">
+        {[
+          ["target_mutation_readiness_verified", Boolean(latest?.target_mutation_readiness_verified)],
+          ["exact_target_allowlist_verified", Boolean(latest?.exact_target_allowlist_verified)],
+          ["runtime_command_executed", Boolean(latest?.runtime_command_executed)],
+          ["idempotency_replay_store_written", Boolean(latest?.idempotency_replay_store_written)],
+          ["adapter_dispatch_created", Boolean(latest?.adapter_dispatch_created)],
+          ["target_mutation_created", Boolean(latest?.target_mutation_created)],
+          ["kanban_mutation_created", Boolean(latest?.kanban_mutation_created)],
+          ["nas_save_created", Boolean(latest?.nas_save_created)],
+          ["real_dispatch_execution_enabled", Boolean(caps.real_dispatch_execution_enabled)],
+          ["target_mutation_enabled", Boolean(caps.target_mutation_enabled)],
+          ["raw_target_excluded", Boolean(status?.redaction?.raw_target_excluded)],
+          ["credentials_echoed", Boolean(status?.redaction?.credentials_echoed)],
+        ].map(([key, value]) => (
+          <div key={String(key)} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-manual-target-mutation-readiness-record-boundary={String(key)}>{String(key)}: {String(Boolean(value))}</div>
+        ))}
+      </div>
+      <div className="mt-3 border border-current/15 bg-black/20 p-3 text-xs text-midground/70">
+        target {latest?.target_ref ?? "not-verified"} · allowlist {latest?.exact_target_allowlist_ref ?? "not-verified"}
+      </div>
+    </section>
+  );
+}
+
+
 export function ApprovedRealOneShotDispatchGateDesignPanel({
   status,
   error,
@@ -6699,6 +6755,8 @@ export default function OfficePage() {
   const [manualRuntimeCommandInclusionRecordStatusError, setManualRuntimeCommandInclusionRecordStatusError] = useState<string | null>(null);
   const [manualRuntimeCommandExecutionRecordStatus, setManualRuntimeCommandExecutionRecordStatus] = useState<OfficeManualRuntimeCommandExecutionRecordStatus | null>(null);
   const [manualRuntimeCommandExecutionRecordStatusError, setManualRuntimeCommandExecutionRecordStatusError] = useState<string | null>(null);
+  const [manualTargetMutationReadinessRecordStatus, setManualTargetMutationReadinessRecordStatus] = useState<OfficeManualTargetMutationReadinessRecordStatus | null>(null);
+  const [manualTargetMutationReadinessRecordStatusError, setManualTargetMutationReadinessRecordStatusError] = useState<string | null>(null);
   const [nasKeeperQueueReadbackLoading, setNasKeeperQueueReadbackLoading] = useState(false);
   const [nasKeeperQueueReadbackError, setNasKeeperQueueReadbackError] = useState<string | null>(null);
   const [nasKeeperExecutionDraft, setNasKeeperExecutionDraft] = useState<OfficeNasKeeperExecutionFromPreviewPayload>(DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT);
@@ -7293,6 +7351,20 @@ export default function OfficePage() {
         if (!cancelled) {
           setManualRuntimeCommandExecutionRecordStatus(null);
           setManualRuntimeCommandExecutionRecordStatusError("request failed");
+        }
+      });
+    api
+      .getOfficeControlledMutationManualTargetMutationReadinessRecordStatus({ limit: 10 })
+      .then((next) => {
+        if (!cancelled) {
+          setManualTargetMutationReadinessRecordStatus(next);
+          setManualTargetMutationReadinessRecordStatusError(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setManualTargetMutationReadinessRecordStatus(null);
+          setManualTargetMutationReadinessRecordStatusError("request failed");
         }
       });
     api
@@ -7898,6 +7970,7 @@ export default function OfficePage() {
       <ManualRuntimeCommandPreviewRecordStatusPanel status={manualRuntimeCommandPreviewRecordStatus} error={manualRuntimeCommandPreviewRecordStatusError} />
       <ManualRuntimeCommandInclusionRecordStatusPanel status={manualRuntimeCommandInclusionRecordStatus} error={manualRuntimeCommandInclusionRecordStatusError} />
       <ManualRuntimeCommandExecutionRecordStatusPanel status={manualRuntimeCommandExecutionRecordStatus} error={manualRuntimeCommandExecutionRecordStatusError} />
+      <ManualTargetMutationReadinessRecordStatusPanel status={manualTargetMutationReadinessRecordStatus} error={manualTargetMutationReadinessRecordStatusError} />
 
       <NasKeeperExecutionOperatorActionPanel
         action={nasKeeperExecutionOperatorAction}

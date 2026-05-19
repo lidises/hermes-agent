@@ -173,6 +173,18 @@ _RUNTIME_COMMAND_EXECUTION_RECORD_FIELDS = {
     "executed_at",
     "execution_evidence_refs",
 }
+_TARGET_MUTATION_READINESS_RECORD_FIELDS = {
+    "runtime_execution_ref",
+    "target_mutation_readiness_ref",
+    "exact_target_allowlist_ref",
+    "target_ref",
+    "dry_run_evidence_ref",
+    "rollback_disable_ref",
+    "operator_confirmation",
+    "verified_by",
+    "verified_at",
+    "readiness_evidence_refs",
+}
 _AUTHORITY_REGISTRY_FIELDS = {
     "adapter_ref",
     "adapter_kind",
@@ -3094,6 +3106,35 @@ def _default_runtime_command_execution_record_store_path() -> Path:
     return get_hermes_home() / "office" / "controlled-mutation" / "runtime_command_execution_records.jsonl"
 
 
+def _default_target_mutation_readiness_record_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "target_mutation_readiness_records.jsonl"
+
+
+def _target_mutation_readiness_record_capabilities() -> dict[str, bool]:
+    capabilities = _runtime_command_execution_record_capabilities()
+    capabilities.update(
+        {
+            "target_mutation_readiness_record_storage_enabled": True,
+            "target_mutation_readiness_record_readback_enabled": True,
+            "target_mutation_readiness_enabled": True,
+            "exact_target_allowlist_verification_enabled": True,
+            "target_mutation_enabled": False,
+            "adapter_binding_enabled": False,
+            "adapter_dispatch_enabled": False,
+            "rollback_execution_enabled": False,
+            "kanban_mutation_enabled": False,
+            "nas_save_enabled": False,
+            "vps_file_change_enabled": False,
+            "service_restart_enabled": False,
+            "git_push_enabled": False,
+            "credential_access_enabled": False,
+            "public_exposure_enabled": False,
+            "real_dispatch_execution_enabled": False,
+        }
+    )
+    return capabilities
+
+
 def _runtime_command_execution_record_capabilities() -> dict[str, bool]:
     capabilities = _runtime_command_inclusion_record_capabilities()
     capabilities.update(
@@ -4310,6 +4351,209 @@ def list_office_controlled_mutation_manual_runtime_command_execution_records(
             "credentials_echoed": False,
             "unsupported_values_echoed": False,
             "safe_noop_probe_only": True,
+        },
+        "errors": errors,
+    }
+
+
+def validate_office_controlled_mutation_manual_target_mutation_readiness_record(payload: object, *, source_execution: Mapping[str, object]) -> dict[str, object]:
+    errors: list[dict[str, str]] = []
+    if not isinstance(payload, Mapping):
+        return {"valid": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    for field in sorted(_TARGET_MUTATION_READINESS_RECORD_FIELDS):
+        if field not in payload:
+            errors.append(_error(field, "required"))
+    if "runtime_execution_ref" in payload and not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("runtime_execution_ref"), "exec-"):
+        errors.append(_error("runtime_execution_ref", "unsupported_ref_shape"))
+    if "runtime_execution_ref" in payload and payload.get("runtime_execution_ref") != source_execution.get("runtime_execution_ref"):
+        errors.append(_error("runtime_execution_ref", "runtime_execution_mismatch"))
+    if "target_mutation_readiness_ref" in payload and not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("target_mutation_readiness_ref"), "targetready-"):
+        errors.append(_error("target_mutation_readiness_ref", "unsupported_ref_shape"))
+    if "exact_target_allowlist_ref" in payload and not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("exact_target_allowlist_ref"), "allowlist-"):
+        errors.append(_error("exact_target_allowlist_ref", "unsupported_ref_shape"))
+    if "target_ref" in payload and not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("target_ref"), "target-"):
+        errors.append(_error("target_ref", "unsupported_ref_shape"))
+    if "dry_run_evidence_ref" in payload and not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("dry_run_evidence_ref"), "dryrun-"):
+        errors.append(_error("dry_run_evidence_ref", "unsupported_ref_shape"))
+    if "rollback_disable_ref" in payload and not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("rollback_disable_ref"), "rollback-"):
+        errors.append(_error("rollback_disable_ref", "unsupported_ref_shape"))
+    if "operator_confirmation" in payload and payload.get("operator_confirmation") != "confirmed-target-mutation-readiness-no-mutate":
+        errors.append(_error("operator_confirmation", "unsupported_confirmation"))
+    if "verified_by" in payload and not _is_opaque_ref(payload.get("verified_by")):
+        errors.append(_error("verified_by", "invalid_opaque_ref"))
+    if "verified_at" in payload and not (isinstance(payload.get("verified_at"), str) and _ISO_UTC_RE.fullmatch(payload["verified_at"])):
+        errors.append(_error("verified_at", "invalid_timestamp"))
+    if "readiness_evidence_refs" in payload and not _validate_evidence_refs(payload.get("readiness_evidence_refs")):
+        errors.append(_error("readiness_evidence_refs", "invalid_opaque_ref"))
+    if not bool(source_execution.get("runtime_command_executed")):
+        errors.append(_error("runtime_execution_ref", "runtime_command_not_executed"))
+    if source_execution.get("runtime_execution_result") != "noop_probe_succeeded":
+        errors.append(_error("runtime_execution_result", "unsupported_runtime_execution_result"))
+    if bool(source_execution.get("target_mutation_created")):
+        errors.append(_error("runtime_execution_ref", "target_already_mutated"))
+    if errors:
+        return {"valid": False, "errors": errors, "dto": None}
+    dto = {
+        "schema_version": 1,
+        "mode": "stored_manual_target_mutation_readiness_record",
+        "readiness_status": "exact_target_verified_no_mutation",
+        "runtime_command_preview_ref": source_execution.get("runtime_command_preview_ref"),
+        "runtime_command_ref": source_execution.get("runtime_command_ref"),
+        "runtime_execution_ref": payload["runtime_execution_ref"],
+        "target_mutation_readiness_ref": payload["target_mutation_readiness_ref"],
+        "idempotency_key": source_execution.get("idempotency_key"),
+        "dispatch_gate_ref": source_execution.get("dispatch_gate_ref"),
+        "approval_record_ref": source_execution.get("approval_record_ref"),
+        "exact_target_allowlist_ref": payload["exact_target_allowlist_ref"],
+        "target_ref": payload["target_ref"],
+        "dry_run_evidence_ref": payload["dry_run_evidence_ref"],
+        "rollback_disable_ref": payload["rollback_disable_ref"],
+        "verified_by": payload["verified_by"],
+        "verified_at": payload["verified_at"],
+        "readiness_evidence_refs": list(payload["readiness_evidence_refs"]),
+        "target_mutation_readiness_verified": True,
+        "exact_target_allowlist_verified": True,
+        "rollback_disable_verified": True,
+        "dry_run_evidence_verified": True,
+        "approval_record_written": True,
+        "dispatch_gate_open": True,
+        "runtime_command_preview_created": True,
+        "runtime_command_included": True,
+        "runtime_command_executed": True,
+        "adapter_binding_created": False,
+        "adapter_dispatch_created": False,
+        "idempotency_replay_store_written": True,
+        "rollback_executed": False,
+        "target_mutation_created": False,
+        "watcher_or_cron_created": False,
+        "kanban_mutation_created": False,
+        "nas_save_created": False,
+        "vps_file_change_created": False,
+        "real_dispatch_execution_enabled": False,
+        "capabilities": _target_mutation_readiness_record_capabilities(),
+        "redaction": {
+            "raw_target_excluded": True,
+            "provider_excluded": True,
+            "credentials_echoed": False,
+            "unsupported_values_echoed": False,
+            "safe_refs_only": True,
+        },
+    }
+    return {"valid": True, "errors": [], "dto": dto}
+
+
+def _normalize_stored_target_mutation_readiness_record(item: object) -> dict[str, object] | None:
+    if not isinstance(item, Mapping):
+        return None
+    if item.get("mode") != "stored_manual_target_mutation_readiness_record":
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(item.get("runtime_execution_ref"), "exec-"):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(item.get("target_mutation_readiness_ref"), "targetready-"):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(item.get("target_ref"), "target-"):
+        return None
+    if item.get("target_mutation_readiness_verified") is not True:
+        return None
+    if item.get("target_mutation_created") is not False:
+        return None
+    return dict(item)
+
+
+def _read_target_mutation_readiness_record_store(path: Path) -> tuple[list[dict[str, object]], int]:
+    records: list[dict[str, object]] = []
+    skipped_count = 0
+    if not path.exists():
+        return records, skipped_count
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped_count += 1
+                continue
+            normalized = _normalize_stored_target_mutation_readiness_record(item)
+            if normalized is None:
+                skipped_count += 1
+                continue
+            records.append(normalized)
+    return records, skipped_count
+
+
+def append_office_controlled_mutation_manual_target_mutation_readiness_record(
+    payload: object, *, execution_store_path: Path | None = None, store_path: Path | None = None
+) -> dict[str, object]:
+    if not isinstance(payload, Mapping):
+        return {"stored": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    runtime_execution_ref = payload.get("runtime_execution_ref")
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(runtime_execution_ref, "exec-"):
+        return {"stored": False, "errors": [_error("runtime_execution_ref", "unsupported_ref_shape")], "dto": None}
+    execution_readback = list_office_controlled_mutation_manual_runtime_command_execution_records(
+        store_path=execution_store_path,
+        runtime_execution_ref=cast(str, runtime_execution_ref),
+        limit=1,
+    )
+    executions = cast(list[dict[str, object]], execution_readback.get("records", []))
+    if not executions:
+        return {"stored": False, "errors": [_error("runtime_execution_ref", "runtime_execution_not_found")], "dto": None}
+    validation = validate_office_controlled_mutation_manual_target_mutation_readiness_record(payload, source_execution=executions[-1])
+    if not validation["valid"]:
+        return {"stored": False, "errors": validation["errors"], "dto": None}
+    dto = cast(dict[str, object], validation["dto"])
+    path = store_path or _default_target_mutation_readiness_record_store_path()
+    existing, _ = _read_target_mutation_readiness_record_store(path)
+    if any(item.get("runtime_execution_ref") == dto["runtime_execution_ref"] for item in existing):
+        return {"stored": False, "errors": [_error("runtime_execution_ref", "duplicate_runtime_execution_ref")], "dto": None}
+    if any(item.get("target_mutation_readiness_ref") == dto["target_mutation_readiness_ref"] for item in existing):
+        return {"stored": False, "errors": [_error("target_mutation_readiness_ref", "duplicate_target_mutation_readiness_ref")], "dto": None}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(dto, sort_keys=True, separators=(",", ":")) + "\n")
+    return {"stored": True, "errors": [], "dto": dto}
+
+
+def list_office_controlled_mutation_manual_target_mutation_readiness_records(
+    *, store_path: Path | None = None, limit: int = 50, runtime_execution_ref: str | None = None, target_mutation_readiness_ref: str | None = None
+) -> dict[str, object]:
+    path = store_path or _default_target_mutation_readiness_record_store_path()
+    errors: list[dict[str, str]] = []
+    records, skipped_count = _read_target_mutation_readiness_record_store(path)
+    if runtime_execution_ref is not None:
+        if _office_disabled_runtime_dispatch_valid_prefixed_ref(runtime_execution_ref, "exec-"):
+            records = [item for item in records if item.get("runtime_execution_ref") == runtime_execution_ref]
+        else:
+            errors.append(_error("runtime_execution_ref", "unsupported_ref_shape"))
+            records = []
+    if target_mutation_readiness_ref is not None:
+        if _office_disabled_runtime_dispatch_valid_prefixed_ref(target_mutation_readiness_ref, "targetready-"):
+            records = [item for item in records if item.get("target_mutation_readiness_ref") == target_mutation_readiness_ref]
+        else:
+            errors.append(_error("target_mutation_readiness_ref", "unsupported_ref_shape"))
+            records = []
+    max_items = max(0, min(limit, 200))
+    records = records[-max_items:] if max_items else []
+    latest_refs: dict[str, str] = {}
+    if records:
+        latest = records[-1]
+        for key in ("runtime_execution_ref", "target_mutation_readiness_ref", "target_ref", "exact_target_allowlist_ref"):
+            value = latest.get(key)
+            if isinstance(value, str):
+                latest_refs[key] = value
+    return {
+        "schema_version": 1,
+        "mode": "stored_manual_target_mutation_readiness_records_readback",
+        "target_mutation_readiness_record_count": len(records),
+        "limit": max_items,
+        "skipped_count": skipped_count,
+        "records": records,
+        "latest_refs": latest_refs,
+        "capabilities": _target_mutation_readiness_record_capabilities(),
+        "redaction": {
+            "raw_target_excluded": True,
+            "provider_excluded": True,
+            "credentials_echoed": False,
+            "unsupported_values_echoed": False,
+            "safe_refs_only": True,
         },
         "errors": errors,
     }

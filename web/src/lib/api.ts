@@ -813,6 +813,62 @@ export interface OfficeManualRuntimeCommandExecutionRecordStatus {
   errors?: Array<{ field: string; code: string }>;
 }
 
+export interface OfficeManualTargetMutationReadinessRecordPayload {
+  runtime_execution_ref: string;
+  target_mutation_readiness_ref: string;
+  exact_target_allowlist_ref: string;
+  target_ref: string;
+  dry_run_evidence_ref: string;
+  rollback_disable_ref: string;
+  operator_confirmation: "confirmed-target-mutation-readiness-no-mutate";
+  verified_by: string;
+  verified_at: string;
+  readiness_evidence_refs: string[];
+}
+
+export interface OfficeManualTargetMutationReadinessRecord {
+  schema_version: number;
+  mode: "stored_manual_target_mutation_readiness_record";
+  readiness_status?: "exact_target_verified_no_mutation";
+  runtime_command_ref?: string;
+  runtime_execution_ref: string;
+  target_mutation_readiness_ref: string;
+  exact_target_allowlist_ref: string;
+  target_ref: string;
+  dry_run_evidence_ref?: string;
+  rollback_disable_ref?: string;
+  target_mutation_readiness_verified: boolean;
+  exact_target_allowlist_verified: boolean;
+  runtime_command_executed: boolean;
+  idempotency_replay_store_written?: boolean;
+  adapter_dispatch_created?: boolean;
+  target_mutation_created: boolean;
+  kanban_mutation_created?: boolean;
+  nas_save_created?: boolean;
+  real_dispatch_execution_enabled: boolean;
+  capabilities?: Record<string, boolean>;
+  redaction?: Record<string, boolean>;
+}
+
+export interface OfficeManualTargetMutationReadinessRecordAppendResult {
+  stored: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: OfficeManualTargetMutationReadinessRecord | null;
+}
+
+export interface OfficeManualTargetMutationReadinessRecordStatus {
+  schema_version: number;
+  mode: "stored_manual_target_mutation_readiness_records_readback";
+  target_mutation_readiness_record_count: number;
+  limit?: number;
+  skipped_count?: number;
+  records: OfficeManualTargetMutationReadinessRecord[];
+  latest_refs?: Record<string, string>;
+  capabilities: Record<string, boolean>;
+  redaction?: Record<string, boolean>;
+  errors?: Array<{ field: string; code: string }>;
+}
+
 export interface OfficeDisabledOneShotRuntimeDispatchPayload {
   exact_target_allowlist_ref: string;
   idempotency_key: string;
@@ -1125,6 +1181,20 @@ export const api = {
     if (typeof params.limit === "number") qs.set("limit", String(params.limit));
     const suffix = qs.toString() ? `?${qs.toString()}` : "";
     return fetchJSON<OfficeManualRuntimeCommandExecutionRecordStatus>(`/api/office/controlled-mutation/manual-runtime-command-execution-record-status${suffix}`);
+  },
+  writeOfficeControlledMutationManualTargetMutationReadinessRecord: (body: OfficeManualTargetMutationReadinessRecordPayload) =>
+    fetchJSON<OfficeManualTargetMutationReadinessRecordAppendResult>("/api/office/controlled-mutation/manual-target-mutation-readiness-record", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
+  getOfficeControlledMutationManualTargetMutationReadinessRecordStatus: (params: { runtime_execution_ref?: string; target_mutation_readiness_ref?: string; limit?: number } = {}) => {
+    const qs = new URLSearchParams();
+    if (params.runtime_execution_ref) qs.set("runtime_execution_ref", params.runtime_execution_ref);
+    if (params.target_mutation_readiness_ref) qs.set("target_mutation_readiness_ref", params.target_mutation_readiness_ref);
+    if (typeof params.limit === "number") qs.set("limit", String(params.limit));
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+    return fetchJSON<OfficeManualTargetMutationReadinessRecordStatus>(`/api/office/controlled-mutation/manual-target-mutation-readiness-record-status${suffix}`);
   },
   executeOfficeControlledMutationDisabledOneShotRuntimeDispatch: (body: OfficeDisabledOneShotRuntimeDispatchPayload) =>
     fetchJSON<OfficeDisabledOneShotRuntimeDispatchRefusal>("/api/office/controlled-mutation/disabled-one-shot-runtime-dispatch-executor-skeleton/execute", {
