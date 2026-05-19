@@ -4815,6 +4815,8 @@ export function DisabledOneShotRuntimeDispatchExecutorSkeletonPanel({
   const gate = status?.executor_gate ?? {};
   const required = status?.required_inputs ?? {};
   const boundary = status?.execution_boundary ?? {};
+  const hardening = status?.contract_hardening ?? {};
+  const refPatterns = status?.ref_patterns ?? {};
   return (
     <section
       className="border border-red-300/20 bg-red-950/10 p-4"
@@ -4823,6 +4825,8 @@ export function DisabledOneShotRuntimeDispatchExecutorSkeletonPanel({
       data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-readback-enabled={String(Boolean(caps.disabled_executor_skeleton_readback_enabled))}
       data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-refusal-validation-enabled={String(Boolean(caps.refusal_validation_enabled))}
       data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-endpoint-present={String(Boolean(caps.execution_endpoint_present))}
+      data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-contract-hardening-readback-enabled={String(Boolean(caps.contract_hardening_readback_enabled))}
+      data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-idempotency-replay-block-metadata-enabled={String(Boolean(caps.idempotency_replay_block_metadata_enabled))}
       data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-runtime-gate-open={String(Boolean(gate.runtime_gate_open))}
       data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-dispatch-approved={String(Boolean(gate.actual_dispatch_approved))}
       data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-binding-enabled={String(Boolean(caps.adapter_binding_enabled))}
@@ -4864,6 +4868,16 @@ export function DisabledOneShotRuntimeDispatchExecutorSkeletonPanel({
       <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-execution-boundaries="true">
         {Object.entries(boundary).map(([key, value]) => (
           <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-execution-boundary={key}>{key}: {String(Boolean(value))}</div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-contract-hardening="true">
+        {Object.entries(hardening).map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-contract-hardening-field={key}>{key}: {String(Boolean(value))}</div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-ref-patterns="true">
+        {Object.entries(refPatterns).map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-ref-pattern={key}>{key}: {value}</div>
         ))}
       </div>
       <div className="mt-3 grid gap-2 md:grid-cols-2" data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-forbidden-boundaries="true">

@@ -1,4 +1,12 @@
-Last updated: 2026-05-19 11:20 KST
+Last updated: 2026-05-19 11:38 KST
+
+## Disabled executor contract hardening
+
+Implemented the recommended shortest follow-up after `disabled_one_shot_runtime_dispatch_executor_skeleton`: refusal-only contract hardening for exact target allowlist refs, idempotency key format/replay metadata, rollback/disable plan refs, dry-run evidence refs, and operator final confirmation metadata. The existing protected GET `/api/office/controlled-mutation/disabled-one-shot-runtime-dispatch-executor-skeleton` now readbacks `contract_hardening` and `ref_patterns`; the existing protected POST `/api/office/controlled-mutation/disabled-one-shot-runtime-dispatch-executor-skeleton/execute` still refuses by default but now returns safe `validation_errors` plus expanded `safe_validation` booleans without echoing raw request values.
+
+Verification 2026-05-19 11:38 KST: RED backend tests failed first for missing contract_hardening/ref_patterns/validation_errors and ref-shape booleans; RED frontend panel test failed first for missing contract-hardening hooks. GREEN focused backend disabled-executor-skeleton+concrete-runtime-single-dispatch-slice-design tests passed (`7 passed`); focused frontend API/RPG tests passed (`3 passed`). Broader verification/deploy pending in this working tree.
+
+Boundary: this is contract hardening on the refusal-only executor skeleton. It does not approve or record a real runtime dispatch, include or execute runtime commands, create adapter binding, dispatch an adapter, mutate targets/Kanban/NAS/VPS files, start watcher/cron automation, restart services by itself, push from the lane, expose public routes, or grant VPS direct NAS mount/credential/write authority.
 
 ## Disabled one-shot runtime dispatch executor skeleton
 

@@ -431,6 +431,8 @@ export interface OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton {
   executor_gate: Record<string, boolean>;
   required_inputs: Record<string, boolean>;
   execution_boundary: Record<string, boolean>;
+  contract_hardening: Record<string, boolean>;
+  ref_patterns: Record<string, string>;
   forbidden_boundaries: string[];
   capabilities: Record<string, boolean>;
   redaction: Record<string, boolean>;
@@ -438,7 +440,7 @@ export interface OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton {
 }
 
 export interface OfficeDisabledOneShotRuntimeDispatchPayload {
-  target_ref: string;
+  exact_target_allowlist_ref: string;
   idempotency_key: string;
   rollback_plan_ref: string;
   dry_run_evidence_ref: string;
@@ -454,6 +456,7 @@ export interface OfficeDisabledOneShotRuntimeDispatchRefusal {
   target_mutation_created: false;
   refusal_code: string;
   safe_validation: Record<string, boolean>;
+  validation_errors: Array<{ field: string; code: string }>;
   missing_requirements: string[];
   capabilities: Record<string, boolean>;
   redaction: Record<string, boolean>;

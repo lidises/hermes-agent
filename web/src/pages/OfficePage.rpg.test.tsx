@@ -2418,10 +2418,27 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
         refusal_validation_only: true,
       },
       forbidden_boundaries: ["runtime_command_execution", "adapter_dispatch", "target_mutation"],
+      contract_hardening: {
+        exact_target_allowlist_schema_enabled: true,
+        idempotency_key_format_check_enabled: true,
+        idempotency_replay_metadata_enabled: true,
+        rollback_disable_plan_ref_check_enabled: true,
+        dry_run_evidence_ref_check_enabled: true,
+        operator_final_confirmation_metadata_enabled: true,
+        refusal_only_default: true,
+      },
+      ref_patterns: {
+        exact_target_allowlist_ref_prefix: "allowlist-",
+        rollback_plan_ref_prefix: "rollback-",
+        dry_run_evidence_ref_prefix: "dryrun-",
+        idempotency_key_prefix: "idem-",
+      },
       capabilities: {
         disabled_executor_skeleton_readback_enabled: true,
         refusal_validation_enabled: true,
         execution_endpoint_present: true,
+        contract_hardening_readback_enabled: true,
+        idempotency_replay_block_metadata_enabled: true,
         adapter_binding_enabled: false,
         adapter_dispatch_enabled: false,
         runtime_command_execution_enabled: false,
@@ -2447,6 +2464,11 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(markup).toContain('data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-readback-enabled="true"');
     expect(markup).toContain('data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-refusal-validation-enabled="true"');
     expect(markup).toContain('data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-endpoint-present="true"');
+    expect(markup).toContain('data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-contract-hardening-readback-enabled="true"');
+    expect(markup).toContain('data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-idempotency-replay-block-metadata-enabled="true"');
+    expect(markup).toContain('data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-contract-hardening="true"');
+    expect(markup).toContain('data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-contract-hardening-field="exact_target_allowlist_schema_enabled"');
+    expect(markup).toContain('data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-ref-pattern="idempotency_key_prefix"');
     expect(markup).toContain('data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-runtime-gate-open="false"');
     expect(markup).toContain('data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-dispatch-approved="false"');
     expect(markup).toContain('data-office-disabled-one-shot-runtime-dispatch-executor-skeleton-runtime-execution-enabled="false"');

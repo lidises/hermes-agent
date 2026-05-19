@@ -784,8 +784,25 @@ describe("fetchJSON", () => {
           disabled_executor_skeleton_readback_enabled: true,
           refusal_validation_enabled: true,
           execution_endpoint_present: true,
+          contract_hardening_readback_enabled: true,
+          idempotency_replay_block_metadata_enabled: true,
           runtime_command_execution_enabled: false,
           target_mutation_enabled: false,
+        },
+        contract_hardening: {
+          exact_target_allowlist_schema_enabled: true,
+          idempotency_key_format_check_enabled: true,
+          idempotency_replay_metadata_enabled: true,
+          rollback_disable_plan_ref_check_enabled: true,
+          dry_run_evidence_ref_check_enabled: true,
+          operator_final_confirmation_metadata_enabled: true,
+          refusal_only_default: true,
+        },
+        ref_patterns: {
+          exact_target_allowlist_ref_prefix: "allowlist-",
+          rollback_plan_ref_prefix: "rollback-",
+          dry_run_evidence_ref_prefix: "dryrun-",
+          idempotency_key_prefix: "idem-",
         },
       }),
     } as Response);
@@ -798,6 +815,11 @@ describe("fetchJSON", () => {
     expect(result.capabilities.disabled_executor_skeleton_readback_enabled).toBe(true);
     expect(result.capabilities.refusal_validation_enabled).toBe(true);
     expect(result.capabilities.execution_endpoint_present).toBe(true);
+    expect(result.capabilities.contract_hardening_readback_enabled).toBe(true);
+    expect(result.capabilities.idempotency_replay_block_metadata_enabled).toBe(true);
+    expect(result.contract_hardening.exact_target_allowlist_schema_enabled).toBe(true);
+    expect(result.contract_hardening.refusal_only_default).toBe(true);
+    expect(result.ref_patterns.idempotency_key_prefix).toBe("idem-");
     expect(result.capabilities.runtime_command_execution_enabled).toBe(false);
     expect(result.capabilities.target_mutation_enabled).toBe(false);
     expect(fetchMock).toHaveBeenCalledWith(
@@ -833,7 +855,7 @@ describe("fetchJSON", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const result = await api.executeOfficeControlledMutationDisabledOneShotRuntimeDispatch({
-      target_ref: "office-target-1",
+      exact_target_allowlist_ref: "allowlist-office-target-1",
       idempotency_key: "idem-1",
       rollback_plan_ref: "rollback-1",
       dry_run_evidence_ref: "dryrun-1",
@@ -852,7 +874,7 @@ describe("fetchJSON", () => {
     const headers = init?.headers as Headers;
     expect(headers.get("X-Hermes-Session-Token")).toBe("session-token-for-header-only");
     expect(init?.body).toBe(JSON.stringify({
-      target_ref: "office-target-1",
+      exact_target_allowlist_ref: "allowlist-office-target-1",
       idempotency_key: "idem-1",
       rollback_plan_ref: "rollback-1",
       dry_run_evidence_ref: "dryrun-1",

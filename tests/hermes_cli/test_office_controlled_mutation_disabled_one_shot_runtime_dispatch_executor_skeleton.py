@@ -66,6 +66,32 @@ def test_disabled_one_shot_runtime_dispatch_executor_skeleton_projects_refusal_g
     assert "run-target" not in serialized
 
 
+def test_disabled_one_shot_runtime_dispatch_executor_skeleton_contract_hardening_documents_ref_requirements():
+    from hermes_cli.office_controlled_mutation import build_office_controlled_mutation_disabled_one_shot_runtime_dispatch_executor_skeleton
+
+    status = build_office_controlled_mutation_disabled_one_shot_runtime_dispatch_executor_skeleton()
+
+    assert status["contract_hardening"] == {
+        "exact_target_allowlist_schema_enabled": True,
+        "idempotency_key_format_check_enabled": True,
+        "idempotency_replay_metadata_enabled": True,
+        "rollback_disable_plan_ref_check_enabled": True,
+        "dry_run_evidence_ref_check_enabled": True,
+        "operator_final_confirmation_metadata_enabled": True,
+        "refusal_only_default": True,
+    }
+    assert status["ref_patterns"] == {
+        "exact_target_allowlist_ref_prefix": "allowlist-",
+        "rollback_plan_ref_prefix": "rollback-",
+        "dry_run_evidence_ref_prefix": "dryrun-",
+        "idempotency_key_prefix": "idem-",
+    }
+    assert status["capabilities"]["contract_hardening_readback_enabled"] is True
+    assert status["capabilities"]["idempotency_replay_block_metadata_enabled"] is True
+    assert status["capabilities"]["runtime_command_execution_enabled"] is False
+    assert status["capabilities"]["target_mutation_enabled"] is False
+
+
 def test_disabled_one_shot_runtime_dispatch_executor_skeleton_refuses_execute_requests_without_echoing_raw_values():
     from hermes_cli.office_controlled_mutation import refuse_office_controlled_mutation_disabled_one_shot_runtime_dispatch
 
@@ -91,16 +117,71 @@ def test_disabled_one_shot_runtime_dispatch_executor_skeleton_refuses_execute_re
     assert result["refusal_code"] == "runtime_dispatch_disabled_by_default"
     assert result["safe_validation"] == {
         "exact_target_allowlist_present": False,
+        "exact_target_allowlist_valid": False,
         "idempotency_key_present": True,
+        "idempotency_key_valid": True,
+        "idempotency_replay_seen": False,
         "rollback_disable_plan_present": True,
+        "rollback_disable_plan_valid": True,
         "dry_run_evidence_present": True,
+        "dry_run_evidence_valid": True,
         "operator_confirmation_present": True,
+        "operator_confirmation_valid": True,
     }
+    assert result["validation_errors"] == [
+        {"field": "exact_target_allowlist_ref", "code": "required"},
+    ]
     assert result["missing_requirements"] == ["exact_target_allowlist"]
     serialized = repr(result)
     assert "sk-private" not in serialized
     assert "/home/hermes" not in serialized
     assert "run-target" not in serialized
+
+
+def test_disabled_one_shot_runtime_dispatch_executor_skeleton_hardens_invalid_ref_shapes_without_echoing_values():
+    from hermes_cli.office_controlled_mutation import refuse_office_controlled_mutation_disabled_one_shot_runtime_dispatch
+
+    result = refuse_office_controlled_mutation_disabled_one_shot_runtime_dispatch(
+        {
+            "exact_target_allowlist_ref": "bad/private/path",
+            "idempotency_key": "repeat key with spaces",
+            "rollback_plan_ref": "bad-rollback",
+            "dry_run_evidence_ref": "bad-evidence",
+            "operator_confirmation": "yes",
+            "target_path": "/Users/lidises/private-target.json",
+            "token": "sk-pri...oken",
+        }
+    )
+
+    assert result["accepted"] is False
+    assert result["runtime_command_executed"] is False
+    assert result["target_mutation_created"] is False
+    assert result["safe_validation"] == {
+        "exact_target_allowlist_present": True,
+        "exact_target_allowlist_valid": False,
+        "idempotency_key_present": True,
+        "idempotency_key_valid": False,
+        "idempotency_replay_seen": False,
+        "rollback_disable_plan_present": True,
+        "rollback_disable_plan_valid": False,
+        "dry_run_evidence_present": True,
+        "dry_run_evidence_valid": False,
+        "operator_confirmation_present": True,
+        "operator_confirmation_valid": False,
+    }
+    assert result["validation_errors"] == [
+        {"field": "exact_target_allowlist_ref", "code": "unsupported_ref_shape"},
+        {"field": "idempotency_key", "code": "unsupported_ref_shape"},
+        {"field": "rollback_plan_ref", "code": "unsupported_ref_shape"},
+        {"field": "dry_run_evidence_ref", "code": "unsupported_ref_shape"},
+        {"field": "operator_confirmation", "code": "unsupported_confirmation"},
+    ]
+    assert result["missing_requirements"] == []
+    serialized = repr(result)
+    assert "bad/private/path" not in serialized
+    assert "repeat key with spaces" not in serialized
+    assert "/Users/lidises" not in serialized
+    assert "sk-private" not in serialized
 
 
 def test_disabled_one_shot_runtime_dispatch_executor_skeleton_api_is_protected_and_refuses_execution():

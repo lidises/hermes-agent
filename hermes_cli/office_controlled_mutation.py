@@ -2556,6 +2556,21 @@ def build_office_controlled_mutation_disabled_one_shot_runtime_dispatch_executor
             "watcher_or_cron_created": False,
             "refusal_validation_only": True,
         },
+        "contract_hardening": {
+            "exact_target_allowlist_schema_enabled": True,
+            "idempotency_key_format_check_enabled": True,
+            "idempotency_replay_metadata_enabled": True,
+            "rollback_disable_plan_ref_check_enabled": True,
+            "dry_run_evidence_ref_check_enabled": True,
+            "operator_final_confirmation_metadata_enabled": True,
+            "refusal_only_default": True,
+        },
+        "ref_patterns": {
+            "exact_target_allowlist_ref_prefix": "allowlist-",
+            "rollback_plan_ref_prefix": "rollback-",
+            "dry_run_evidence_ref_prefix": "dryrun-",
+            "idempotency_key_prefix": "idem-",
+        },
         "forbidden_boundaries": [
             "runtime_command_execution",
             "adapter_binding",
@@ -2575,6 +2590,8 @@ def build_office_controlled_mutation_disabled_one_shot_runtime_dispatch_executor
             "disabled_executor_skeleton_readback_enabled": True,
             "refusal_validation_enabled": True,
             "execution_endpoint_present": True,
+            "contract_hardening_readback_enabled": True,
+            "idempotency_replay_block_metadata_enabled": True,
             "adapter_binding_enabled": False,
             "adapter_dispatch_enabled": False,
             "runtime_command_execution_enabled": False,
@@ -2601,30 +2618,60 @@ def build_office_controlled_mutation_disabled_one_shot_runtime_dispatch_executor
     }
 
 
+def _office_disabled_runtime_dispatch_valid_prefixed_ref(value: object, prefix: str) -> bool:
+    if not isinstance(value, str):
+        return False
+    if not value.startswith(prefix):
+        return False
+    if not 6 <= len(value) <= 80:
+        return False
+    suffix = value[len(prefix):]
+    return bool(suffix) and all(char.isalnum() or char in {"-", "_"} for char in suffix)
+
+
 def refuse_office_controlled_mutation_disabled_one_shot_runtime_dispatch(
     payload: Mapping[str, Any] | None = None,
 ) -> dict[str, object]:
     """Refuse a would-be one-shot dispatch while returning only safe validation metadata."""
 
     body = payload if isinstance(payload, Mapping) else {}
+    exact_target_allowlist_ref = body.get("exact_target_allowlist_ref")
+    idempotency_key = body.get("idempotency_key")
+    rollback_plan_ref = body.get("rollback_plan_ref")
+    dry_run_evidence_ref = body.get("dry_run_evidence_ref")
+    operator_confirmation = body.get("operator_confirmation")
     safe_validation = {
-        "exact_target_allowlist_present": bool(body.get("exact_target_allowlist_ref")),
-        "idempotency_key_present": bool(body.get("idempotency_key")),
-        "rollback_disable_plan_present": bool(body.get("rollback_plan_ref")),
-        "dry_run_evidence_present": bool(body.get("dry_run_evidence_ref")),
-        "operator_confirmation_present": bool(body.get("operator_confirmation")),
+        "exact_target_allowlist_present": bool(exact_target_allowlist_ref),
+        "exact_target_allowlist_valid": _office_disabled_runtime_dispatch_valid_prefixed_ref(exact_target_allowlist_ref, "allowlist-"),
+        "idempotency_key_present": bool(idempotency_key),
+        "idempotency_key_valid": _office_disabled_runtime_dispatch_valid_prefixed_ref(idempotency_key, "idem-"),
+        "idempotency_replay_seen": False,
+        "rollback_disable_plan_present": bool(rollback_plan_ref),
+        "rollback_disable_plan_valid": _office_disabled_runtime_dispatch_valid_prefixed_ref(rollback_plan_ref, "rollback-"),
+        "dry_run_evidence_present": bool(dry_run_evidence_ref),
+        "dry_run_evidence_valid": _office_disabled_runtime_dispatch_valid_prefixed_ref(dry_run_evidence_ref, "dryrun-"),
+        "operator_confirmation_present": operator_confirmation is not None,
+        "operator_confirmation_valid": operator_confirmation is True,
     }
     missing = []
-    if not safe_validation["exact_target_allowlist_present"]:
-        missing.append("exact_target_allowlist")
-    if not safe_validation["idempotency_key_present"]:
-        missing.append("idempotency_key")
-    if not safe_validation["rollback_disable_plan_present"]:
-        missing.append("rollback_disable_plan")
-    if not safe_validation["dry_run_evidence_present"]:
-        missing.append("dry_run_evidence")
+    validation_errors: list[dict[str, str]] = []
+    validation_specs = [
+        ("exact_target_allowlist_ref", "exact_target_allowlist", safe_validation["exact_target_allowlist_present"], safe_validation["exact_target_allowlist_valid"]),
+        ("idempotency_key", "idempotency_key", safe_validation["idempotency_key_present"], safe_validation["idempotency_key_valid"]),
+        ("rollback_plan_ref", "rollback_disable_plan", safe_validation["rollback_disable_plan_present"], safe_validation["rollback_disable_plan_valid"]),
+        ("dry_run_evidence_ref", "dry_run_evidence", safe_validation["dry_run_evidence_present"], safe_validation["dry_run_evidence_valid"]),
+    ]
+    for field, requirement, present, valid in validation_specs:
+        if not present:
+            missing.append(requirement)
+            validation_errors.append({"field": field, "code": "required"})
+        elif not valid:
+            validation_errors.append({"field": field, "code": "unsupported_ref_shape"})
     if not safe_validation["operator_confirmation_present"]:
         missing.append("operator_confirmation")
+        validation_errors.append({"field": "operator_confirmation", "code": "required"})
+    elif not safe_validation["operator_confirmation_valid"]:
+        validation_errors.append({"field": "operator_confirmation", "code": "unsupported_confirmation"})
     return {
         "schema_version": 1,
         "mode": "disabled_one_shot_runtime_dispatch_executor_refusal",
@@ -2637,6 +2684,7 @@ def refuse_office_controlled_mutation_disabled_one_shot_runtime_dispatch(
         "watcher_or_cron_created": False,
         "refusal_code": "runtime_dispatch_disabled_by_default",
         "safe_validation": safe_validation,
+        "validation_errors": validation_errors,
         "missing_requirements": missing,
         "capabilities": {
             "refusal_validation_enabled": True,
