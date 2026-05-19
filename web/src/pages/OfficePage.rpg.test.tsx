@@ -2202,6 +2202,86 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(markup).not.toMatch(/raw dispatch|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-dispatch|provider/i);
   });
 
+  it("renders explicit runtime dispatch approval status without dispatch or target mutation", () => {
+    const ExplicitRuntimeDispatchApprovalStatusPanel = (OfficePageModule as unknown as {
+      ExplicitRuntimeDispatchApprovalStatusPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.ExplicitRuntimeDispatchApprovalStatusPanel>>;
+    }).ExplicitRuntimeDispatchApprovalStatusPanel;
+    const status = {
+      schema_version: 1,
+      mode: "explicit_runtime_dispatch_approval_status" as const,
+      explicit_runtime_dispatch_approval_complete: true,
+      source_human_review_lane: "human_reviewed_single_dispatch_status",
+      next_manual_lane: "concrete_runtime_single_dispatch_slice",
+      approval_status: {
+        explicit_runtime_dispatch_approval_recorded: false,
+        operator_final_approval_required: true,
+        single_dispatch_scope_locked: true,
+        target_allowlist_locked: false,
+        rollback_plan_locked: false,
+        dry_run_evidence_locked: false,
+        automation_activation_requested: false,
+      },
+      runtime_boundary: {
+        runtime_dispatch_ready: false,
+        adapter_dispatch_created: false,
+        target_mutation_created: false,
+        watcher_or_cron_created: false,
+        approval_status_only: true,
+      },
+      forbidden_boundaries: ["adapter_dispatch", "target_mutation", "watcher_daemon_activation"],
+      capabilities: {
+        explicit_runtime_dispatch_approval_readback_enabled: true,
+        approval_criteria_readback_enabled: true,
+        runtime_boundary_readback_enabled: true,
+        adapter_binding_enabled: false,
+        adapter_dispatch_enabled: false,
+        runtime_command_execution_enabled: false,
+        watcher_daemon_enabled: false,
+        cron_enabled: false,
+        target_mutation_enabled: false,
+        kanban_mutation_enabled: false,
+        nas_save_enabled: false,
+        vps_file_change_enabled: false,
+        service_restart_enabled: false,
+        git_push_enabled: false,
+        credential_access_enabled: false,
+        public_exposure_enabled: false,
+      },
+      redaction: { raw_excluded: true },
+      errors: [],
+    };
+
+    const markup = renderToStaticMarkup(<ExplicitRuntimeDispatchApprovalStatusPanel status={status} error={null} />);
+
+    expect(markup).toContain('data-office-explicit-runtime-dispatch-approval-status="true"');
+    expect(markup).toContain('data-office-explicit-runtime-dispatch-approval-status-complete="true"');
+    expect(markup).toContain('data-office-explicit-runtime-dispatch-approval-status-readback-enabled="true"');
+    expect(markup).toContain('data-office-explicit-runtime-dispatch-approval-status-criteria-readback-enabled="true"');
+    expect(markup).toContain('data-office-explicit-runtime-dispatch-approval-status-runtime-boundary-readback-enabled="true"');
+    expect(markup).toContain('data-office-explicit-runtime-dispatch-approval-status-binding-enabled="false"');
+    expect(markup).toContain('data-office-explicit-runtime-dispatch-approval-status-dispatch-enabled="false"');
+    expect(markup).toContain('data-office-explicit-runtime-dispatch-approval-status-target-mutation-enabled="false"');
+    expect(markup).toContain('data-office-explicit-runtime-dispatch-approval-status-runtime-execution-enabled="false"');
+    expect(markup).toContain('data-office-explicit-runtime-dispatch-approval-status-watcher-enabled="false"');
+    expect(markup).toContain('data-office-explicit-runtime-dispatch-approval-status-cron-enabled="false"');
+    expect(markup).toContain('data-office-explicit-runtime-dispatch-approval-status-kanban-mutation-enabled="false"');
+    expect(markup).toContain('data-office-explicit-runtime-dispatch-approval-status-nas-save-enabled="false"');
+    expect(markup).toContain('data-office-explicit-runtime-dispatch-approval-status-vps-file-change-enabled="false"');
+    expect(markup).toContain('data-office-explicit-runtime-dispatch-approval-status-service-restart-enabled="false"');
+    expect(markup).toContain('data-office-explicit-runtime-dispatch-approval-status-git-push-enabled="false"');
+    expect(markup).toContain('data-office-explicit-runtime-dispatch-approval-status-credential-access-enabled="false"');
+    expect(markup).toContain('data-office-explicit-runtime-dispatch-approval-status-public-exposure-enabled="false"');
+    expect(markup).toContain('data-office-explicit-runtime-dispatch-approval-status-approval="explicit_runtime_dispatch_approval_recorded"');
+    expect(markup).toContain('data-office-explicit-runtime-dispatch-approval-status-runtime-boundary="runtime_dispatch_ready"');
+    expect(markup).toContain('data-office-explicit-runtime-dispatch-approval-status-forbidden-boundary="adapter_dispatch"');
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw runtime|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
+  });
+
   it("renders the queue-state manual review surface without executable controls or raw markdown", () => {
     const NasKeeperQueueManualEvidenceReviewSurfacePanel = (OfficePageModule as unknown as { NasKeeperQueueManualEvidenceReviewSurfacePanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.NasKeeperQueueManualEvidenceReviewSurfacePanel>> }).NasKeeperQueueManualEvidenceReviewSurfacePanel;
     const boundary = { detailKind: "nas_runtime_n3_approval_boundary_status_surface" } as ReturnType<typeof buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface>;

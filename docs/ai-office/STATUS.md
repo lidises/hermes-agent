@@ -1,4 +1,12 @@
-Last updated: 2026-05-19 10:21 KST
+Last updated: 2026-05-19 10:36 KST
+
+## Explicit runtime dispatch approval status lane
+
+Implemented the recommended shortest follow-up after `human_reviewed_single_dispatch_status`: a protected explicit runtime dispatch approval status lane. Backend adds `build_office_controlled_mutation_explicit_runtime_dispatch_approval_status(...)` plus protected GET `/api/office/controlled-mutation/explicit-runtime-dispatch-approval-status`; frontend adds a typed API wrapper and display-only `/office` panel with stable `data-office-explicit-runtime-dispatch-approval-status-*` hooks. It models final approval criteria and runtime-boundary readback only, while keeping adapter binding, adapter dispatch, runtime command execution, watcher daemon, cron, target/Kanban/NAS mutation, VPS file changes, service restart, git push, credential access, and public exposure disabled.
+
+Verification 2026-05-19 10:36 KST: RED backend tests first failed for missing helper/route; RED frontend tests first failed for missing API wrapper/panel. GREEN focused backend explicit-runtime-dispatch-approval+human-reviewed-single-dispatch tests passed (`4 passed`); focused frontend API/RPG tests passed (`2 passed`). Broader verification/deploy pending in this working tree.
+
+Boundary: this is approval-status/readback/UI only. It does not record a real runtime dispatch approval, dispatch an adapter, create an adapter binding, execute runtime commands, start watcher/cron automation, mutate targets/Kanban/NAS/VPS files, restart services by itself, push from the lane, expose public routes, or grant VPS direct NAS mount/credential/write authority.
 
 ## Human-reviewed single-dispatch status lane
 

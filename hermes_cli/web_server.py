@@ -69,6 +69,7 @@ from hermes_cli.office_controlled_mutation import (
     build_office_controlled_mutation_manual_one_shot_runtime_dry_run_status,
     build_office_controlled_mutation_adapter_binding_dry_run_status,
     build_office_controlled_mutation_human_reviewed_single_dispatch_status,
+    build_office_controlled_mutation_explicit_runtime_dispatch_approval_status,
     build_office_controlled_mutation_contract_schema,
     execute_office_controlled_mutation_nas_single_file_write,
     execute_office_controlled_mutation_nas_mac_relay_write,
@@ -1041,6 +1042,12 @@ async def get_office_controlled_mutation_adapter_binding_dry_run_status():
 async def get_office_controlled_mutation_human_reviewed_single_dispatch_status():
     """Project a human-reviewed single-dispatch candidate without dispatching."""
     return build_office_controlled_mutation_human_reviewed_single_dispatch_status()
+
+
+@app.get("/api/office/controlled-mutation/explicit-runtime-dispatch-approval-status")
+async def get_office_controlled_mutation_explicit_runtime_dispatch_approval_status():
+    """Project explicit runtime dispatch approval status without dispatching."""
+    return build_office_controlled_mutation_explicit_runtime_dispatch_approval_status()
 
 
 @app.get("/api/office/events")
