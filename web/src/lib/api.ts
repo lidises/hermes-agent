@@ -1031,6 +1031,56 @@ export interface OfficeManualKanbanMutationRecordStatus {
   errors?: Array<{ field: string; code: string }>;
 }
 
+export interface OfficeManualNasSaveRecordPayload {
+  kanban_mutation_ref: string;
+  nas_save_ref: string;
+  nas_note_ref: string;
+  operator_confirmation: "confirmed-nas-save-record-only";
+  saved_by: string;
+  saved_at: string;
+  save_evidence_refs: string[];
+}
+
+export interface OfficeManualNasSaveRecord {
+  schema_version: number;
+  mode: "stored_manual_nas_save_record";
+  nas_save_status?: "nas_save_marker_written_no_direct_vps_authority";
+  nas_save_result?: "safe_nas_save_marker_written";
+  kanban_mutation_ref: string;
+  nas_save_ref: string;
+  nas_note_ref: string;
+  kanban_card_ref?: string;
+  adapter_dispatch_ref?: string;
+  target_mutation_ref?: string;
+  target_ref?: string;
+  kanban_mutation_created: boolean;
+  nas_save_created: boolean;
+  vps_direct_nas_authority_enabled: boolean;
+  real_nas_execution_enabled: boolean;
+  real_dispatch_execution_enabled: boolean;
+  capabilities?: Record<string, boolean>;
+  redaction?: Record<string, boolean>;
+}
+
+export interface OfficeManualNasSaveRecordAppendResult {
+  stored: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: OfficeManualNasSaveRecord | null;
+}
+
+export interface OfficeManualNasSaveRecordStatus {
+  schema_version: number;
+  mode: "stored_manual_nas_save_records_readback";
+  nas_save_record_count: number;
+  limit?: number;
+  skipped_count?: number;
+  records: OfficeManualNasSaveRecord[];
+  latest_refs?: Record<string, string>;
+  capabilities: Record<string, boolean>;
+  redaction?: Record<string, boolean>;
+  errors?: Array<{ field: string; code: string }>;
+}
+
 export interface OfficeDisabledOneShotRuntimeDispatchPayload {
   exact_target_allowlist_ref: string;
   idempotency_key: string;
@@ -1399,6 +1449,20 @@ export const api = {
     if (typeof params.limit === "number") qs.set("limit", String(params.limit));
     const suffix = qs.toString() ? `?${qs.toString()}` : "";
     return fetchJSON<OfficeManualKanbanMutationRecordStatus>(`/api/office/controlled-mutation/manual-kanban-mutation-record-status${suffix}`);
+  },
+  writeOfficeControlledMutationManualNasSaveRecord: (body: OfficeManualNasSaveRecordPayload) =>
+    fetchJSON<OfficeManualNasSaveRecordAppendResult>("/api/office/controlled-mutation/manual-nas-save-record", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
+  getOfficeControlledMutationManualNasSaveRecordStatus: (params: { kanban_mutation_ref?: string; nas_save_ref?: string; limit?: number } = {}) => {
+    const qs = new URLSearchParams();
+    if (params.kanban_mutation_ref) qs.set("kanban_mutation_ref", params.kanban_mutation_ref);
+    if (params.nas_save_ref) qs.set("nas_save_ref", params.nas_save_ref);
+    if (typeof params.limit === "number") qs.set("limit", String(params.limit));
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+    return fetchJSON<OfficeManualNasSaveRecordStatus>(`/api/office/controlled-mutation/manual-nas-save-record-status${suffix}`);
   },
   executeOfficeControlledMutationDisabledOneShotRuntimeDispatch: (body: OfficeDisabledOneShotRuntimeDispatchPayload) =>
     fetchJSON<OfficeDisabledOneShotRuntimeDispatchRefusal>("/api/office/controlled-mutation/disabled-one-shot-runtime-dispatch-executor-skeleton/execute", {

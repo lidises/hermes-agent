@@ -1821,6 +1821,108 @@ describe("fetchJSON", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  it("writes and reads manual NAS save records through protected routes without direct VPS NAS authority or real execution", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        location: { origin: "https://office.example" },
+        __HERMES_SESSION_TOKEN__: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.endsWith("/api/office/controlled-mutation/manual-nas-save-record")) {
+        expect(init?.method).toBe("POST");
+        const body = JSON.parse(String(init?.body));
+        expect(body.nas_save_ref).toBe("nassave-office-dispatch-1");
+        expect(JSON.stringify(body)).not.toMatch(/raw_markdown_body|raw_nas_path|\/Users\/lidises|sk-test/i);
+        return {
+          ok: true,
+          status: 200,
+          headers: new Headers({ "content-type": "application/json" }),
+          json: async () => ({
+            stored: true,
+            errors: [],
+            dto: {
+              schema_version: 1,
+              mode: "stored_manual_nas_save_record",
+              kanban_mutation_ref: "kanbanmut-office-dispatch-1",
+              nas_save_ref: "nassave-office-dispatch-1",
+              nas_note_ref: "nasnote-office-dispatch-1",
+              kanban_mutation_created: true,
+              nas_save_created: true,
+              nas_save_result: "safe_nas_save_marker_written",
+              vps_direct_nas_authority_enabled: false,
+              real_nas_execution_enabled: false,
+              real_dispatch_execution_enabled: false,
+            },
+          }),
+        } as Response;
+      }
+      if (url.endsWith("/api/office/controlled-mutation/manual-nas-save-record-status?nas_save_ref=nassave-office-dispatch-1")) {
+        return {
+          ok: true,
+          status: 200,
+          headers: new Headers({ "content-type": "application/json" }),
+          json: async () => ({
+            schema_version: 1,
+            mode: "stored_manual_nas_save_records_readback",
+            nas_save_record_count: 1,
+            records: [
+              {
+                schema_version: 1,
+                mode: "stored_manual_nas_save_record",
+                kanban_mutation_ref: "kanbanmut-office-dispatch-1",
+                nas_save_ref: "nassave-office-dispatch-1",
+                nas_note_ref: "nasnote-office-dispatch-1",
+                kanban_mutation_created: true,
+                nas_save_created: true,
+                nas_save_result: "safe_nas_save_marker_written",
+                vps_direct_nas_authority_enabled: false,
+                real_nas_execution_enabled: false,
+                real_dispatch_execution_enabled: false,
+              },
+            ],
+            capabilities: {
+              nas_write_enabled: true,
+              vps_direct_nas_authority_enabled: false,
+              real_nas_execution_enabled: false,
+              real_dispatch_execution_enabled: false,
+            },
+            redaction: {
+              raw_markdown_body_excluded: true,
+              raw_nas_path_excluded: true,
+              credentials_echoed: false,
+            },
+          }),
+        } as Response;
+      }
+      throw new Error(`unexpected url ${url}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const stored = await api.writeOfficeControlledMutationManualNasSaveRecord({
+      kanban_mutation_ref: "kanbanmut-office-dispatch-1",
+      nas_save_ref: "nassave-office-dispatch-1",
+      nas_note_ref: "nasnote-office-dispatch-1",
+      operator_confirmation: "confirmed-nas-save-record-only",
+      saved_by: "actor:ai_office_operator",
+      saved_at: "2026-05-19T08:00:00Z",
+      save_evidence_refs: ["kanbanmut:kanbanmut-office-dispatch-1"],
+    });
+    expect(stored.stored).toBe(true);
+    expect(stored.dto?.nas_save_created).toBe(true);
+    expect(stored.dto?.vps_direct_nas_authority_enabled).toBe(false);
+
+    const status = await api.getOfficeControlledMutationManualNasSaveRecordStatus({ nas_save_ref: "nassave-office-dispatch-1" });
+    expect(status.nas_save_record_count).toBe(1);
+    expect(status.capabilities.nas_write_enabled).toBe(true);
+    expect(status.capabilities.vps_direct_nas_authority_enabled).toBe(false);
+    expect(status.capabilities.real_nas_execution_enabled).toBe(false);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it("gets approved real one-shot dispatch gate design through the protected readback route", async () => {
     Object.defineProperty(globalThis, "window", {
       configurable: true,

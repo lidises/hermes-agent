@@ -2988,6 +2988,58 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).not.toContain("<textarea");
   });
 
+  it("renders manual NAS save record as saved while direct VPS NAS authority stays closed", () => {
+    const ManualNasSaveRecordStatusPanel = (OfficePageModule as unknown as {
+      ManualNasSaveRecordStatusPanel: React.ComponentType<{ status: unknown; error?: string | null }>;
+    }).ManualNasSaveRecordStatusPanel;
+    expect(ManualNasSaveRecordStatusPanel).toBeTypeOf("function");
+
+    const html = renderToStaticMarkup(
+      <ManualNasSaveRecordStatusPanel
+        error={null}
+        status={{
+          schema_version: 1,
+          mode: "stored_manual_nas_save_records_readback",
+          nas_save_record_count: 1,
+          records: [
+            {
+              schema_version: 1,
+              mode: "stored_manual_nas_save_record",
+              kanban_mutation_ref: "kanbanmut-office-dispatch-1",
+              nas_save_ref: "nassave-office-dispatch-1",
+              nas_note_ref: "nasnote-office-dispatch-1",
+              kanban_mutation_created: true,
+              nas_save_created: true,
+              nas_save_result: "safe_nas_save_marker_written" as const,
+              vps_direct_nas_authority_enabled: false,
+              real_nas_execution_enabled: false,
+              real_dispatch_execution_enabled: false,
+            },
+          ],
+          capabilities: {
+            nas_write_enabled: true,
+            vps_direct_nas_authority_enabled: false,
+            real_nas_execution_enabled: false,
+            real_dispatch_execution_enabled: false,
+          },
+          redaction: { raw_markdown_body_excluded: true, raw_nas_path_excluded: true, credentials_echoed: false },
+        }}
+      />,
+    );
+
+    expect(html).toContain('data-office-manual-nas-save-record-status="true"');
+    expect(html).toContain('data-office-manual-nas-save-created="true"');
+    expect(html).toContain('data-office-manual-nas-save-vps-authority="false"');
+    expect(html).toContain("NAS save marker written · direct VPS NAS authority closed");
+    expect(html).not.toContain("/Users/lidises");
+    expect(html).not.toContain("sk-test");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("<form");
+    expect(html).not.toContain("<input");
+    expect(html).not.toContain("<select");
+    expect(html).not.toContain("<textarea");
+  });
+
   it("renders approved real one-shot dispatch gate design without executable controls", () => {
     const ApprovedRealOneShotDispatchGateDesignPanel = (OfficePageModule as unknown as {
       ApprovedRealOneShotDispatchGateDesignPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.ApprovedRealOneShotDispatchGateDesignPanel>>;

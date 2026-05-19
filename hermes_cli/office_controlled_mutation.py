@@ -211,6 +211,15 @@ _KANBAN_MUTATION_RECORD_FIELDS = {
     "mutated_at",
     "mutation_evidence_refs",
 }
+_NAS_SAVE_RECORD_FIELDS = {
+    "kanban_mutation_ref",
+    "nas_save_ref",
+    "nas_note_ref",
+    "operator_confirmation",
+    "saved_by",
+    "saved_at",
+    "save_evidence_refs",
+}
 _AUTHORITY_REGISTRY_FIELDS = {
     "adapter_ref",
     "adapter_kind",
@@ -3148,6 +3157,10 @@ def _default_kanban_mutation_record_store_path() -> Path:
     return get_hermes_home() / "office" / "controlled-mutation" / "kanban_mutation_records.jsonl"
 
 
+def _default_nas_save_record_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "nas_save_records.jsonl"
+
+
 def _target_mutation_readiness_record_capabilities() -> dict[str, bool]:
     capabilities = _runtime_command_execution_record_capabilities()
     capabilities.update(
@@ -3215,6 +3228,29 @@ def _kanban_mutation_record_capabilities() -> dict[str, bool]:
             "kanban_mutation_enabled": True,
             "nas_write_enabled": False,
             "nas_save_enabled": False,
+            "vps_direct_nas_authority_enabled": False,
+            "real_nas_execution_enabled": False,
+            "vps_file_change_enabled": False,
+            "service_restart_enabled": False,
+            "git_push_enabled": False,
+            "credential_access_enabled": False,
+            "public_exposure_enabled": False,
+            "real_dispatch_execution_enabled": False,
+        }
+    )
+    return capabilities
+
+
+def _nas_save_record_capabilities() -> dict[str, bool]:
+    capabilities = _kanban_mutation_record_capabilities()
+    capabilities.update(
+        {
+            "nas_save_record_storage_enabled": True,
+            "nas_save_record_readback_enabled": True,
+            "nas_write_enabled": True,
+            "nas_save_enabled": True,
+            "vps_direct_nas_authority_enabled": False,
+            "real_nas_execution_enabled": False,
             "vps_file_change_enabled": False,
             "service_restart_enabled": False,
             "git_push_enabled": False,
@@ -5245,6 +5281,212 @@ def list_office_controlled_mutation_manual_kanban_mutation_records(
         "redaction": {
             "raw_kanban_payload_excluded": True,
             "raw_card_body_excluded": True,
+            "credentials_echoed": False,
+            "unsupported_values_echoed": False,
+            "safe_refs_only": True,
+        },
+        "errors": errors,
+    }
+
+
+def validate_office_controlled_mutation_manual_nas_save_record(payload: object, *, source_kanban_mutation: Mapping[str, object]) -> dict[str, object]:
+    errors: list[dict[str, str]] = []
+    if not isinstance(payload, Mapping):
+        return {"valid": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    for field in sorted(_NAS_SAVE_RECORD_FIELDS):
+        if field not in payload:
+            errors.append(_error(field, "required"))
+    if "kanban_mutation_ref" in payload and not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("kanban_mutation_ref"), "kanbanmut-"):
+        errors.append(_error("kanban_mutation_ref", "unsupported_ref_shape"))
+    if "kanban_mutation_ref" in payload and payload.get("kanban_mutation_ref") != source_kanban_mutation.get("kanban_mutation_ref"):
+        errors.append(_error("kanban_mutation_ref", "kanban_mutation_mismatch"))
+    if "nas_save_ref" in payload and not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("nas_save_ref"), "nassave-"):
+        errors.append(_error("nas_save_ref", "unsupported_ref_shape"))
+    if "nas_note_ref" in payload and not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("nas_note_ref"), "nasnote-"):
+        errors.append(_error("nas_note_ref", "unsupported_ref_shape"))
+    if "operator_confirmation" in payload and payload.get("operator_confirmation") != "confirmed-nas-save-record-only":
+        errors.append(_error("operator_confirmation", "unsupported_confirmation"))
+    if "saved_by" in payload and not _is_opaque_ref(payload.get("saved_by")):
+        errors.append(_error("saved_by", "invalid_opaque_ref"))
+    if "saved_at" in payload and not (isinstance(payload.get("saved_at"), str) and _ISO_UTC_RE.fullmatch(payload["saved_at"])):
+        errors.append(_error("saved_at", "invalid_timestamp"))
+    if "save_evidence_refs" in payload and not _validate_evidence_refs(payload.get("save_evidence_refs")):
+        errors.append(_error("save_evidence_refs", "invalid_opaque_ref"))
+    if source_kanban_mutation.get("kanban_mutation_created") is not True:
+        errors.append(_error("kanban_mutation_ref", "kanban_mutation_not_created"))
+    if source_kanban_mutation.get("nas_save_created") is not False:
+        errors.append(_error("kanban_mutation_ref", "nas_already_saved"))
+    if errors:
+        return {"valid": False, "errors": errors, "dto": None}
+    dto = {
+        "schema_version": 1,
+        "mode": "stored_manual_nas_save_record",
+        "nas_save_status": "nas_save_marker_written_no_direct_vps_authority",
+        "nas_save_result": "safe_nas_save_marker_written",
+        "kanban_mutation_ref": payload["kanban_mutation_ref"],
+        "nas_save_ref": payload["nas_save_ref"],
+        "nas_note_ref": payload["nas_note_ref"],
+        "kanban_card_ref": source_kanban_mutation.get("kanban_card_ref"),
+        "adapter_dispatch_ref": source_kanban_mutation.get("adapter_dispatch_ref"),
+        "adapter_ref": source_kanban_mutation.get("adapter_ref"),
+        "target_mutation_ref": source_kanban_mutation.get("target_mutation_ref"),
+        "target_mutation_readiness_ref": source_kanban_mutation.get("target_mutation_readiness_ref"),
+        "runtime_execution_ref": source_kanban_mutation.get("runtime_execution_ref"),
+        "runtime_command_ref": source_kanban_mutation.get("runtime_command_ref"),
+        "runtime_command_preview_ref": source_kanban_mutation.get("runtime_command_preview_ref"),
+        "idempotency_key": source_kanban_mutation.get("idempotency_key"),
+        "dispatch_gate_ref": source_kanban_mutation.get("dispatch_gate_ref"),
+        "approval_record_ref": source_kanban_mutation.get("approval_record_ref"),
+        "target_ref": source_kanban_mutation.get("target_ref"),
+        "saved_by": payload["saved_by"],
+        "saved_at": payload["saved_at"],
+        "save_evidence_refs": list(payload["save_evidence_refs"]),
+        "target_mutation_readiness_verified": True,
+        "exact_target_allowlist_verified": True,
+        "approval_record_written": True,
+        "dispatch_gate_open": True,
+        "runtime_command_preview_created": True,
+        "runtime_command_included": True,
+        "runtime_command_executed": True,
+        "idempotency_replay_store_written": True,
+        "target_mutation_created": True,
+        "adapter_binding_created": False,
+        "adapter_dispatch_created": True,
+        "rollback_executed": False,
+        "watcher_or_cron_created": False,
+        "kanban_mutation_created": True,
+        "nas_save_created": True,
+        "vps_direct_nas_authority_enabled": False,
+        "real_nas_execution_enabled": False,
+        "vps_file_change_created": False,
+        "service_restart_created": False,
+        "git_push_created": False,
+        "real_dispatch_execution_enabled": False,
+        "capabilities": _nas_save_record_capabilities(),
+        "redaction": {
+            "raw_markdown_body_excluded": True,
+            "raw_nas_path_excluded": True,
+            "raw_nas_payload_excluded": True,
+            "credentials_echoed": False,
+            "unsupported_values_echoed": False,
+            "safe_refs_only": True,
+        },
+    }
+    return {"valid": True, "errors": [], "dto": dto}
+
+
+def _normalize_stored_nas_save_record(item: object) -> dict[str, object] | None:
+    if not isinstance(item, Mapping):
+        return None
+    if item.get("mode") != "stored_manual_nas_save_record":
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(item.get("kanban_mutation_ref"), "kanbanmut-"):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(item.get("nas_save_ref"), "nassave-"):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(item.get("nas_note_ref"), "nasnote-"):
+        return None
+    if item.get("nas_save_created") is not True:
+        return None
+    if item.get("vps_direct_nas_authority_enabled") is not False:
+        return None
+    if item.get("real_nas_execution_enabled") is not False:
+        return None
+    return dict(item)
+
+
+def _read_nas_save_record_store(path: Path) -> tuple[list[dict[str, object]], int]:
+    records: list[dict[str, object]] = []
+    skipped_count = 0
+    if not path.exists():
+        return records, skipped_count
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped_count += 1
+                continue
+            normalized = _normalize_stored_nas_save_record(item)
+            if normalized is None:
+                skipped_count += 1
+                continue
+            records.append(normalized)
+    return records, skipped_count
+
+
+def append_office_controlled_mutation_manual_nas_save_record(
+    payload: object, *, kanban_mutation_store_path: Path | None = None, store_path: Path | None = None
+) -> dict[str, object]:
+    if not isinstance(payload, Mapping):
+        return {"stored": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    kanban_mutation_ref = payload.get("kanban_mutation_ref")
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(kanban_mutation_ref, "kanbanmut-"):
+        return {"stored": False, "errors": [_error("kanban_mutation_ref", "unsupported_ref_shape")], "dto": None}
+    kanban_readback = list_office_controlled_mutation_manual_kanban_mutation_records(
+        store_path=kanban_mutation_store_path,
+        kanban_mutation_ref=cast(str, kanban_mutation_ref),
+        limit=1,
+    )
+    kanban_records = cast(list[dict[str, object]], kanban_readback.get("records", []))
+    if not kanban_records:
+        return {"stored": False, "errors": [_error("kanban_mutation_ref", "kanban_mutation_not_found")], "dto": None}
+    validation = validate_office_controlled_mutation_manual_nas_save_record(payload, source_kanban_mutation=kanban_records[-1])
+    if not validation["valid"]:
+        return {"stored": False, "errors": validation["errors"], "dto": None}
+    dto = cast(dict[str, object], validation["dto"])
+    path = store_path or _default_nas_save_record_store_path()
+    existing, _ = _read_nas_save_record_store(path)
+    if any(item.get("kanban_mutation_ref") == dto["kanban_mutation_ref"] for item in existing):
+        return {"stored": False, "errors": [_error("kanban_mutation_ref", "duplicate_kanban_mutation_ref")], "dto": None}
+    if any(item.get("nas_save_ref") == dto["nas_save_ref"] for item in existing):
+        return {"stored": False, "errors": [_error("nas_save_ref", "duplicate_nas_save_ref")], "dto": None}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(dto, sort_keys=True, separators=(",", ":")) + "\n")
+    return {"stored": True, "errors": [], "dto": dto}
+
+
+def list_office_controlled_mutation_manual_nas_save_records(
+    *, store_path: Path | None = None, limit: int = 50, kanban_mutation_ref: str | None = None, nas_save_ref: str | None = None
+) -> dict[str, object]:
+    path = store_path or _default_nas_save_record_store_path()
+    errors: list[dict[str, str]] = []
+    records, skipped_count = _read_nas_save_record_store(path)
+    if kanban_mutation_ref is not None:
+        if _office_disabled_runtime_dispatch_valid_prefixed_ref(kanban_mutation_ref, "kanbanmut-"):
+            records = [item for item in records if item.get("kanban_mutation_ref") == kanban_mutation_ref]
+        else:
+            errors.append(_error("kanban_mutation_ref", "unsupported_ref_shape"))
+            records = []
+    if nas_save_ref is not None:
+        if _office_disabled_runtime_dispatch_valid_prefixed_ref(nas_save_ref, "nassave-"):
+            records = [item for item in records if item.get("nas_save_ref") == nas_save_ref]
+        else:
+            errors.append(_error("nas_save_ref", "unsupported_ref_shape"))
+            records = []
+    max_items = max(0, min(limit, 200))
+    records = records[-max_items:] if max_items else []
+    latest_refs: dict[str, str] = {}
+    if records:
+        latest = records[-1]
+        for key in ("kanban_mutation_ref", "nas_save_ref", "nas_note_ref", "kanban_card_ref", "target_ref"):
+            value = latest.get(key)
+            if isinstance(value, str):
+                latest_refs[key] = value
+    return {
+        "schema_version": 1,
+        "mode": "stored_manual_nas_save_records_readback",
+        "nas_save_record_count": len(records),
+        "limit": max_items,
+        "skipped_count": skipped_count,
+        "records": records,
+        "latest_refs": latest_refs,
+        "capabilities": _nas_save_record_capabilities(),
+        "redaction": {
+            "raw_markdown_body_excluded": True,
+            "raw_nas_path_excluded": True,
+            "raw_nas_payload_excluded": True,
             "credentials_echoed": False,
             "unsupported_values_echoed": False,
             "safe_refs_only": True,

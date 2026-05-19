@@ -1411,6 +1411,139 @@ def test_manual_kanban_mutation_record_api_is_protected_and_safe(monkeypatch, tm
     assert readback_body["capabilities"]["nas_write_enabled"] is False
 
 
+def _seed_kanban_mutation_chain(tmp_path):
+    from hermes_cli.office_controlled_mutation import append_office_controlled_mutation_manual_kanban_mutation_record
+
+    adapter_store = _seed_adapter_dispatch_chain(tmp_path)
+    kanban_store = tmp_path / "office" / "controlled-mutation" / "kanban_mutation_records.jsonl"
+    append_office_controlled_mutation_manual_kanban_mutation_record(
+        {
+            "adapter_dispatch_ref": "adapterdispatch-office-dispatch-1",
+            "kanban_mutation_ref": "kanbanmut-office-dispatch-1",
+            "kanban_card_ref": "card-office-dispatch-1",
+            "operator_confirmation": "confirmed-kanban-mutation-record-only",
+            "mutated_by": "actor:ai_office_operator",
+            "mutated_at": "2026-05-19T07:40:00Z",
+            "mutation_evidence_refs": ["adapterdispatch:adapterdispatch-office-dispatch-1"],
+        },
+        adapter_dispatch_store_path=adapter_store,
+        store_path=kanban_store,
+    )
+    return kanban_store
+
+
+def test_manual_nas_save_record_saves_nas_marker_without_real_dispatch_or_vps_authority(tmp_path):
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_manual_nas_save_record,
+        list_office_controlled_mutation_manual_nas_save_records,
+    )
+
+    kanban_store = _seed_kanban_mutation_chain(tmp_path)
+    nas_store = tmp_path / "nas_save_records.jsonl"
+    result = append_office_controlled_mutation_manual_nas_save_record(
+        {
+            "kanban_mutation_ref": "kanbanmut-office-dispatch-1",
+            "nas_save_ref": "nassave-office-dispatch-1",
+            "nas_note_ref": "nasnote-office-dispatch-1",
+            "operator_confirmation": "confirmed-nas-save-record-only",
+            "saved_by": "actor:ai_office_operator",
+            "saved_at": "2026-05-19T08:00:00Z",
+            "save_evidence_refs": ["kanbanmut:kanbanmut-office-dispatch-1"],
+            "raw_markdown_body": "secret provider sk-test should not leak",
+            "raw_nas_path": "/Users/lidises/private/nas/path.md",
+        },
+        kanban_mutation_store_path=kanban_store,
+        store_path=nas_store,
+    )
+
+    assert result["stored"] is True
+    dto = result["dto"]
+    assert dto["mode"] == "stored_manual_nas_save_record"
+    assert dto["kanban_mutation_created"] is True
+    assert dto["nas_save_created"] is True
+    assert dto["nas_save_result"] == "safe_nas_save_marker_written"
+    assert dto["vps_direct_nas_authority_enabled"] is False
+    assert dto["real_nas_execution_enabled"] is False
+    assert dto["real_dispatch_execution_enabled"] is False
+    assert "raw_markdown_body" not in dto
+    assert "raw_nas_path" not in dto
+    assert "sk-test" not in repr(dto)
+    assert "/Users/lidises" not in repr(dto)
+
+    duplicate = append_office_controlled_mutation_manual_nas_save_record(
+        {
+            "kanban_mutation_ref": "kanbanmut-office-dispatch-1",
+            "nas_save_ref": "nassave-office-dispatch-2",
+            "nas_note_ref": "nasnote-office-dispatch-1",
+            "operator_confirmation": "confirmed-nas-save-record-only",
+            "saved_by": "actor:ai_office_operator",
+            "saved_at": "2026-05-19T08:01:00Z",
+            "save_evidence_refs": ["kanbanmut:kanbanmut-office-dispatch-1"],
+        },
+        kanban_mutation_store_path=kanban_store,
+        store_path=nas_store,
+    )
+    assert duplicate["stored"] is False
+    assert duplicate["errors"] == [{"field": "kanban_mutation_ref", "code": "duplicate_kanban_mutation_ref"}]
+
+    readback = list_office_controlled_mutation_manual_nas_save_records(store_path=nas_store)
+    assert readback["mode"] == "stored_manual_nas_save_records_readback"
+    assert readback["nas_save_record_count"] == 1
+    assert readback["records"][0]["nas_save_created"] is True
+    assert readback["capabilities"]["nas_write_enabled"] is True
+    assert readback["capabilities"]["vps_direct_nas_authority_enabled"] is False
+    assert readback["capabilities"]["real_nas_execution_enabled"] is False
+    assert readback["capabilities"]["real_dispatch_execution_enabled"] is False
+
+
+def test_manual_nas_save_record_api_is_protected_and_safe(monkeypatch, tmp_path):
+    from fastapi.testclient import TestClient
+    import hermes_cli.web_server as web_server
+
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+    _seed_kanban_mutation_chain(tmp_path)
+    client = TestClient(web_server.app)
+    post_path = "/api/office/controlled-mutation/manual-nas-save-record"
+    get_path = "/api/office/controlled-mutation/manual-nas-save-record-status?nas_save_ref=nassave-office-dispatch-1"
+    body = {
+        "kanban_mutation_ref": "kanbanmut-office-dispatch-1",
+        "nas_save_ref": "nassave-office-dispatch-1",
+        "nas_note_ref": "nasnote-office-dispatch-1",
+        "operator_confirmation": "confirmed-nas-save-record-only",
+        "saved_by": "actor:ai_office_operator",
+        "saved_at": "2026-05-19T08:00:00Z",
+        "save_evidence_refs": ["kanbanmut:kanbanmut-office-dispatch-1"],
+        "raw_markdown_body": "secret provider sk-test should not leak",
+        "raw_nas_path": "/Users/lidises/private/nas/path.md",
+    }
+
+    assert client.post(post_path, json=body).status_code == 401
+    assert client.get(get_path).status_code == 401
+
+    stored = client.post(post_path, headers={web_server._SESSION_HEADER_NAME: web_server._SESSION_TOKEN}, json=body)
+    assert stored.status_code == 200
+    payload = stored.json()
+    assert payload["stored"] is True
+    assert payload["dto"]["nas_save_created"] is True
+    assert payload["dto"]["kanban_mutation_created"] is True
+    assert payload["dto"]["vps_direct_nas_authority_enabled"] is False
+    assert payload["dto"]["real_nas_execution_enabled"] is False
+    assert payload["dto"]["real_dispatch_execution_enabled"] is False
+    assert "sk-test" not in repr(payload)
+    assert "/Users/lidises" not in repr(payload)
+    assert "raw_markdown_body" not in payload["dto"]
+    assert "raw_nas_path" not in payload["dto"]
+
+    readback = client.get(get_path, headers={web_server._SESSION_HEADER_NAME: web_server._SESSION_TOKEN})
+    assert readback.status_code == 200
+    readback_body = readback.json()
+    assert readback_body["nas_save_record_count"] == 1
+    assert readback_body["records"][0]["nas_save_ref"] == "nassave-office-dispatch-1"
+    assert readback_body["capabilities"]["nas_write_enabled"] is True
+    assert readback_body["capabilities"]["vps_direct_nas_authority_enabled"] is False
+    assert readback_body["capabilities"]["real_nas_execution_enabled"] is False
+
+
 def test_manual_runtime_command_preview_record_api_is_protected_and_safe(monkeypatch, tmp_path):
     from fastapi.testclient import TestClient
     import hermes_cli.web_server as web_server
