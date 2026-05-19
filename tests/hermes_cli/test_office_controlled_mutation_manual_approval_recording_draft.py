@@ -543,10 +543,11 @@ def test_manual_runtime_command_preview_record_writes_checksum_only_without_exec
         list_office_controlled_mutation_manual_runtime_command_preview_records,
     )
 
-    draft_store = tmp_path / "approval_record_drafts.jsonl"
-    approval_store = tmp_path / "approval_records.jsonl"
-    gate_store = tmp_path / "dispatch_gate_open_records.jsonl"
-    preview_store = tmp_path / "runtime_command_preview_records.jsonl"
+    controlled_mutation_store = tmp_path / "office" / "controlled-mutation"
+    draft_store = controlled_mutation_store / "approval_record_drafts.jsonl"
+    approval_store = controlled_mutation_store / "approval_records.jsonl"
+    gate_store = controlled_mutation_store / "dispatch_gate_open_records.jsonl"
+    preview_store = controlled_mutation_store / "runtime_command_preview_records.jsonl"
     append_office_controlled_mutation_manual_approval_recording_draft(_valid_payload(), store_path=draft_store)
     append_office_controlled_mutation_manual_approval_record(
         {
@@ -612,6 +613,164 @@ def test_manual_runtime_command_preview_record_writes_checksum_only_without_exec
     assert readback["capabilities"]["runtime_command_preview_enabled"] is True
     assert readback["capabilities"]["runtime_command_execution_enabled"] is False
     assert readback["capabilities"]["target_mutation_enabled"] is False
+
+
+def _seed_runtime_command_preview_chain(tmp_path):
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_manual_approval_record,
+        append_office_controlled_mutation_manual_approval_recording_draft,
+        append_office_controlled_mutation_manual_dispatch_gate_open_record,
+        append_office_controlled_mutation_manual_runtime_command_preview_record,
+    )
+
+    controlled_mutation_store = tmp_path / "office" / "controlled-mutation"
+    draft_store = controlled_mutation_store / "approval_record_drafts.jsonl"
+    approval_store = controlled_mutation_store / "approval_records.jsonl"
+    gate_store = controlled_mutation_store / "dispatch_gate_open_records.jsonl"
+    preview_store = controlled_mutation_store / "runtime_command_preview_records.jsonl"
+    append_office_controlled_mutation_manual_approval_recording_draft(_valid_payload(), store_path=draft_store)
+    append_office_controlled_mutation_manual_approval_record(
+        {
+            "approval_record_ref": "approval-office-dispatch-1",
+            "operator_confirmation": "confirmed-real-approval-record-write-only",
+            "approved_by": "actor:ai_office_operator",
+            "approved_at": "2026-05-19T04:30:00Z",
+            "approval_evidence_refs": ["approval:approval-office-dispatch-1"],
+        },
+        draft_store_path=draft_store,
+        store_path=approval_store,
+    )
+    append_office_controlled_mutation_manual_dispatch_gate_open_record(
+        {
+            "approval_record_ref": "approval-office-dispatch-1",
+            "dispatch_gate_ref": "gate-office-dispatch-1",
+            "operator_confirmation": "confirmed-dispatch-gate-open-metadata-only",
+            "opened_by": "actor:ai_office_operator",
+            "opened_at": "2026-05-19T05:20:00Z",
+            "gate_evidence_refs": ["approval:approval-office-dispatch-1"],
+        },
+        approval_store_path=approval_store,
+        store_path=gate_store,
+    )
+    append_office_controlled_mutation_manual_runtime_command_preview_record(
+        {
+            "dispatch_gate_ref": "gate-office-dispatch-1",
+            "runtime_command_preview_ref": "cmdpreview-office-dispatch-1",
+            "command_envelope_ref": "envelope-office-dispatch-1",
+            "command_intent_ref": "intent-office-dispatch-1",
+            "operator_confirmation": "confirmed-runtime-command-preview-only",
+            "materialized_by": "actor:ai_office_operator",
+            "materialized_at": "2026-05-19T05:40:00Z",
+            "preview_evidence_refs": ["gate:gate-office-dispatch-1"],
+        },
+        gate_store_path=gate_store,
+        store_path=preview_store,
+    )
+    return preview_store
+
+
+def test_manual_runtime_command_inclusion_record_writes_safe_body_without_execution(tmp_path):
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_manual_runtime_command_inclusion_record,
+        list_office_controlled_mutation_manual_runtime_command_inclusion_records,
+    )
+
+    preview_store = _seed_runtime_command_preview_chain(tmp_path)
+    inclusion_store = tmp_path / "runtime_command_inclusion_records.jsonl"
+    result = append_office_controlled_mutation_manual_runtime_command_inclusion_record(
+        {
+            "runtime_command_preview_ref": "cmdpreview-office-dispatch-1",
+            "runtime_command_ref": "cmd-office-dispatch-1",
+            "operator_confirmation": "confirmed-runtime-command-inclusion-no-execute",
+            "included_by": "actor:ai_office_operator",
+            "included_at": "2026-05-19T06:00:00Z",
+            "command_kind": "office_controlled_mutation_single_dispatch_noop_probe",
+            "command_body": {
+                "target_ref": "target-office-dispatch-1",
+                "dry_run_evidence_ref": "dryrun-office-dispatch-1",
+                "rollback_disable_ref": "rollback-office-dispatch-1",
+            },
+            "inclusion_evidence_refs": ["cmdpreview:cmdpreview-office-dispatch-1"],
+            "shell_command": "python /home/hermes/private/run.py",
+            "credential_value": "redacted-placeholder",
+        },
+        preview_store_path=preview_store,
+        store_path=inclusion_store,
+    )
+
+    assert result["stored"] is True
+    dto = result["dto"]
+    assert dto["mode"] == "stored_manual_runtime_command_inclusion_record"
+    assert dto["runtime_command_included"] is True
+    assert dto["runtime_command_executed"] is False
+    assert dto["target_mutation_created"] is False
+    assert dto["kanban_mutation_created"] is False
+    assert dto["nas_save_created"] is False
+    assert dto["real_dispatch_execution_enabled"] is False
+    assert dto["command_body"]["target_ref"] == "target-office-dispatch-1"
+    assert len(dto["runtime_command_body_checksum_sha256"]) == 64
+    rendered = repr(dto)
+    assert "/home/hermes" not in rendered
+    assert "sk-test" not in rendered
+    assert "shell_command" not in dto
+    assert "credential_value" not in dto
+
+    readback = list_office_controlled_mutation_manual_runtime_command_inclusion_records(store_path=inclusion_store)
+    assert readback["mode"] == "stored_manual_runtime_command_inclusion_records_readback"
+    assert readback["runtime_command_inclusion_record_count"] == 1
+    assert readback["records"][0]["runtime_command_ref"] == "cmd-office-dispatch-1"
+    assert readback["records"][0]["runtime_command_included"] is True
+    assert readback["capabilities"]["runtime_command_inclusion_record_storage_enabled"] is True
+    assert readback["capabilities"]["runtime_command_execution_enabled"] is False
+
+
+def test_manual_runtime_command_inclusion_record_api_is_protected_and_safe(monkeypatch, tmp_path):
+    from fastapi.testclient import TestClient
+    import hermes_cli.web_server as web_server
+
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+    _seed_runtime_command_preview_chain(tmp_path)
+    client = TestClient(web_server.app)
+    post_path = "/api/office/controlled-mutation/manual-runtime-command-inclusion-record"
+    get_path = "/api/office/controlled-mutation/manual-runtime-command-inclusion-record-status?runtime_command_ref=cmd-office-dispatch-1"
+    body = {
+        "runtime_command_preview_ref": "cmdpreview-office-dispatch-1",
+        "runtime_command_ref": "cmd-office-dispatch-1",
+        "operator_confirmation": "confirmed-runtime-command-inclusion-no-execute",
+        "included_by": "actor:ai_office_operator",
+        "included_at": "2026-05-19T06:00:00Z",
+        "command_kind": "office_controlled_mutation_single_dispatch_noop_probe",
+        "command_body": {
+            "target_ref": "target-office-dispatch-1",
+            "dry_run_evidence_ref": "dryrun-office-dispatch-1",
+            "rollback_disable_ref": "rollback-office-dispatch-1",
+        },
+        "inclusion_evidence_refs": ["cmdpreview:cmdpreview-office-dispatch-1"],
+        "shell_command": "python /home/hermes/private/run.py",
+    }
+
+    assert client.post(post_path, json=body).status_code == 401
+    assert client.get(get_path).status_code == 401
+
+    stored = client.post(post_path, headers={web_server._SESSION_HEADER_NAME: web_server._SESSION_TOKEN}, json=body)
+    assert stored.status_code == 200
+    payload = stored.json()
+    assert payload["stored"] is True
+    assert payload["dto"]["runtime_command_included"] is True
+    assert payload["dto"]["runtime_command_executed"] is False
+    assert payload["dto"]["target_mutation_created"] is False
+    assert payload["dto"]["real_dispatch_execution_enabled"] is False
+    assert "/home/hermes" not in repr(payload)
+    assert "shell_command" not in payload["dto"]
+
+    readback = client.get(get_path, headers={web_server._SESSION_HEADER_NAME: web_server._SESSION_TOKEN})
+    assert readback.status_code == 200
+    readback_body = readback.json()
+    assert readback_body["runtime_command_inclusion_record_count"] == 1
+    assert readback_body["records"][0]["runtime_command_ref"] == "cmd-office-dispatch-1"
+    assert readback_body["records"][0]["runtime_command_executed"] is False
+    assert readback_body["capabilities"]["runtime_command_included"] is True
+    assert readback_body["capabilities"]["runtime_command_execution_enabled"] is False
 
 
 def test_manual_runtime_command_preview_record_api_is_protected_and_safe(monkeypatch, tmp_path):

@@ -54,6 +54,7 @@ from hermes_cli.office_controlled_mutation import (
     append_office_controlled_mutation_manual_approval_recording_draft,
     append_office_controlled_mutation_manual_dispatch_gate_open_record,
     append_office_controlled_mutation_manual_runtime_command_preview_record,
+    append_office_controlled_mutation_manual_runtime_command_inclusion_record,
     append_office_controlled_mutation_authority_adapter_registry_event,
     append_office_controlled_mutation_decision_event,
     append_office_controlled_mutation_dry_run_result_event,
@@ -105,6 +106,7 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_manual_approval_records,
     list_office_controlled_mutation_manual_dispatch_gate_open_records,
     list_office_controlled_mutation_manual_runtime_command_preview_records,
+    list_office_controlled_mutation_manual_runtime_command_inclusion_records,
     list_office_controlled_mutation_manual_approval_recording_drafts,
     list_office_controlled_mutation_authority_adapter_registry_events,
     list_office_controlled_mutation_request_events,
@@ -1178,6 +1180,26 @@ async def get_office_controlled_mutation_manual_runtime_command_preview_record_s
     return list_office_controlled_mutation_manual_runtime_command_preview_records(
         runtime_command_preview_ref=runtime_command_preview_ref,
         dispatch_gate_ref=dispatch_gate_ref,
+        limit=limit,
+    )
+
+
+@app.post("/api/office/controlled-mutation/manual-runtime-command-inclusion-record")
+async def append_office_controlled_mutation_manual_runtime_command_inclusion_record_endpoint(payload: Mapping[str, Any]):
+    """Store bounded safe runtime-command body metadata without execution."""
+    return append_office_controlled_mutation_manual_runtime_command_inclusion_record(payload)
+
+
+@app.get("/api/office/controlled-mutation/manual-runtime-command-inclusion-record-status")
+async def get_office_controlled_mutation_manual_runtime_command_inclusion_record_status(
+    runtime_command_ref: str | None = None,
+    runtime_command_preview_ref: str | None = None,
+    limit: int = 50,
+):
+    """Read back included runtime command bodies without executing them."""
+    return list_office_controlled_mutation_manual_runtime_command_inclusion_records(
+        runtime_command_ref=runtime_command_ref,
+        runtime_command_preview_ref=runtime_command_preview_ref,
         limit=limit,
     )
 

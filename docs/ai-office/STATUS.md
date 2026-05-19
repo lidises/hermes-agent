@@ -1,4 +1,15 @@
-Last updated: 2026-05-19 15:17 KST
+Last updated: 2026-05-19 15:43 KST
+
+## Manual runtime command inclusion record implemented locally (safe body, no execution)
+- Added bounded runtime-command inclusion metadata write/readback after runtime-command preview metadata.
+- Backend POST: `/api/office/controlled-mutation/manual-runtime-command-inclusion-record`.
+- Backend GET: `/api/office/controlled-mutation/manual-runtime-command-inclusion-record-status`.
+- The write requires an existing runtime command preview record, exact safe `cmdpreview-*` ref, safe `cmd-*` runtime command ref, confirmation `confirmed-runtime-command-inclusion-no-execute`, command kind `office_controlled_mutation_single_dispatch_noop_probe`, safe included-by/timestamp/evidence refs, and duplicate runtime command refs are blocked.
+- Stored inclusion records include only bounded safe command body refs (`target-*`, `dryrun-*`, `rollback-*`) plus `runtime_command_body_checksum_sha256`; executable bodies, providers, paths, credentials, and unsupported extras are not accepted into DTOs.
+- Stored inclusion records set `runtime_command_included=true`, but keep `runtime_command_executed=false`, adapter binding/dispatch false, replay-store write false, rollback false, target/Kanban/NAS/VPS mutation false, service restart false, credential/public authority false, and real dispatch execution false.
+- Frontend typed API wrappers and display-only `/office` runtime-command inclusion panel added; no form/button/input/select/textarea controls.
+- RED confirmed missing backend helper/API and frontend wrapper/panel first. GREEN local: focused backend `17 passed`, broader controlled-mutation chain `26 passed`, frontend API/RPG `122 passed`, `py_compile`, `git diff --check`, added-line secret scan, and `npm run build` passed with existing Vite chunk warning only.
+- Not yet deployed in this paragraph until commit/VPS sync completes; next verification step is commit, push, copy `web_dist`, restart dashboard only, and smoke without touching gateway.
 
 ## Manual runtime command preview record deployed (checksum-only, no execution)
 - Added bounded runtime-command preview metadata write/readback after dispatch-gate-open metadata.
