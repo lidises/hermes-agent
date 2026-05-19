@@ -193,6 +193,15 @@ _TARGET_MUTATION_RECORD_FIELDS = {
     "mutated_at",
     "mutation_evidence_refs",
 }
+_ADAPTER_DISPATCH_RECORD_FIELDS = {
+    "target_mutation_ref",
+    "adapter_dispatch_ref",
+    "adapter_ref",
+    "operator_confirmation",
+    "dispatched_by",
+    "dispatched_at",
+    "dispatch_evidence_refs",
+}
 _AUTHORITY_REGISTRY_FIELDS = {
     "adapter_ref",
     "adapter_kind",
@@ -3122,6 +3131,10 @@ def _default_target_mutation_record_store_path() -> Path:
     return get_hermes_home() / "office" / "controlled-mutation" / "target_mutation_records.jsonl"
 
 
+def _default_adapter_dispatch_record_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "adapter_dispatch_records.jsonl"
+
+
 def _target_mutation_readiness_record_capabilities() -> dict[str, bool]:
     capabilities = _runtime_command_execution_record_capabilities()
     capabilities.update(
@@ -3158,6 +3171,22 @@ def _target_mutation_record_capabilities() -> dict[str, bool]:
             "nas_write_enabled": False,
             "nas_save_enabled": False,
             "adapter_dispatch_enabled": False,
+            "real_dispatch_execution_enabled": False,
+        }
+    )
+    return capabilities
+
+
+def _adapter_dispatch_record_capabilities() -> dict[str, bool]:
+    capabilities = _target_mutation_record_capabilities()
+    capabilities.update(
+        {
+            "adapter_dispatch_record_storage_enabled": True,
+            "adapter_dispatch_record_readback_enabled": True,
+            "adapter_dispatch_enabled": True,
+            "kanban_mutation_enabled": False,
+            "nas_write_enabled": False,
+            "nas_save_enabled": False,
             "real_dispatch_execution_enabled": False,
         }
     )
@@ -4782,6 +4811,207 @@ def list_office_controlled_mutation_manual_target_mutation_records(
         "capabilities": _target_mutation_record_capabilities(),
         "redaction": {
             "raw_target_excluded": True,
+            "provider_excluded": True,
+            "credentials_echoed": False,
+            "unsupported_values_echoed": False,
+            "safe_refs_only": True,
+        },
+        "errors": errors,
+    }
+
+
+def validate_office_controlled_mutation_manual_adapter_dispatch_record(payload: object, *, source_target_mutation: Mapping[str, object]) -> dict[str, object]:
+    errors: list[dict[str, str]] = []
+    if not isinstance(payload, Mapping):
+        return {"valid": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    for field in sorted(_ADAPTER_DISPATCH_RECORD_FIELDS):
+        if field not in payload:
+            errors.append(_error(field, "required"))
+    if "target_mutation_ref" in payload and not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("target_mutation_ref"), "targetmut-"):
+        errors.append(_error("target_mutation_ref", "unsupported_ref_shape"))
+    if "target_mutation_ref" in payload and payload.get("target_mutation_ref") != source_target_mutation.get("target_mutation_ref"):
+        errors.append(_error("target_mutation_ref", "target_mutation_mismatch"))
+    if "adapter_dispatch_ref" in payload and not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("adapter_dispatch_ref"), "adapterdispatch-"):
+        errors.append(_error("adapter_dispatch_ref", "unsupported_ref_shape"))
+    if "adapter_ref" in payload and not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("adapter_ref"), "adapter-"):
+        errors.append(_error("adapter_ref", "unsupported_ref_shape"))
+    if "operator_confirmation" in payload and payload.get("operator_confirmation") != "confirmed-adapter-dispatch-record-only":
+        errors.append(_error("operator_confirmation", "unsupported_confirmation"))
+    if "dispatched_by" in payload and not _is_opaque_ref(payload.get("dispatched_by")):
+        errors.append(_error("dispatched_by", "invalid_opaque_ref"))
+    if "dispatched_at" in payload and not (isinstance(payload.get("dispatched_at"), str) and _ISO_UTC_RE.fullmatch(payload["dispatched_at"])):
+        errors.append(_error("dispatched_at", "invalid_timestamp"))
+    if "dispatch_evidence_refs" in payload and not _validate_evidence_refs(payload.get("dispatch_evidence_refs")):
+        errors.append(_error("dispatch_evidence_refs", "invalid_opaque_ref"))
+    if source_target_mutation.get("target_mutation_created") is not True:
+        errors.append(_error("target_mutation_ref", "target_mutation_not_created"))
+    if source_target_mutation.get("adapter_dispatch_created") is not False:
+        errors.append(_error("target_mutation_ref", "adapter_already_dispatched"))
+    if source_target_mutation.get("kanban_mutation_created") is not False:
+        errors.append(_error("target_mutation_ref", "kanban_already_mutated"))
+    if source_target_mutation.get("nas_save_created") is not False:
+        errors.append(_error("target_mutation_ref", "nas_already_saved"))
+    if errors:
+        return {"valid": False, "errors": errors, "dto": None}
+    dto = {
+        "schema_version": 1,
+        "mode": "stored_manual_adapter_dispatch_record",
+        "dispatch_status": "adapter_dispatched_no_kanban_or_nas",
+        "adapter_dispatch_result": "safe_adapter_dispatch_marker_written",
+        "target_mutation_ref": payload["target_mutation_ref"],
+        "adapter_dispatch_ref": payload["adapter_dispatch_ref"],
+        "adapter_ref": payload["adapter_ref"],
+        "target_mutation_readiness_ref": source_target_mutation.get("target_mutation_readiness_ref"),
+        "runtime_execution_ref": source_target_mutation.get("runtime_execution_ref"),
+        "runtime_command_ref": source_target_mutation.get("runtime_command_ref"),
+        "runtime_command_preview_ref": source_target_mutation.get("runtime_command_preview_ref"),
+        "idempotency_key": source_target_mutation.get("idempotency_key"),
+        "dispatch_gate_ref": source_target_mutation.get("dispatch_gate_ref"),
+        "approval_record_ref": source_target_mutation.get("approval_record_ref"),
+        "exact_target_allowlist_ref": source_target_mutation.get("exact_target_allowlist_ref"),
+        "target_ref": source_target_mutation.get("target_ref"),
+        "dispatched_by": payload["dispatched_by"],
+        "dispatched_at": payload["dispatched_at"],
+        "dispatch_evidence_refs": list(payload["dispatch_evidence_refs"]),
+        "target_mutation_readiness_verified": True,
+        "exact_target_allowlist_verified": True,
+        "approval_record_written": True,
+        "dispatch_gate_open": True,
+        "runtime_command_preview_created": True,
+        "runtime_command_included": True,
+        "runtime_command_executed": True,
+        "idempotency_replay_store_written": True,
+        "target_mutation_created": True,
+        "adapter_binding_created": False,
+        "adapter_dispatch_created": True,
+        "rollback_executed": False,
+        "watcher_or_cron_created": False,
+        "kanban_mutation_created": False,
+        "nas_save_created": False,
+        "vps_file_change_created": False,
+        "real_dispatch_execution_enabled": False,
+        "capabilities": _adapter_dispatch_record_capabilities(),
+        "redaction": {
+            "raw_adapter_payload_excluded": True,
+            "provider_excluded": True,
+            "credentials_echoed": False,
+            "unsupported_values_echoed": False,
+            "safe_refs_only": True,
+        },
+    }
+    return {"valid": True, "errors": [], "dto": dto}
+
+
+def _normalize_stored_adapter_dispatch_record(item: object) -> dict[str, object] | None:
+    if not isinstance(item, Mapping):
+        return None
+    if item.get("mode") != "stored_manual_adapter_dispatch_record":
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(item.get("target_mutation_ref"), "targetmut-"):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(item.get("adapter_dispatch_ref"), "adapterdispatch-"):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(item.get("adapter_ref"), "adapter-"):
+        return None
+    if item.get("adapter_dispatch_created") is not True:
+        return None
+    if item.get("kanban_mutation_created") is not False:
+        return None
+    if item.get("nas_save_created") is not False:
+        return None
+    return dict(item)
+
+
+def _read_adapter_dispatch_record_store(path: Path) -> tuple[list[dict[str, object]], int]:
+    records: list[dict[str, object]] = []
+    skipped_count = 0
+    if not path.exists():
+        return records, skipped_count
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped_count += 1
+                continue
+            normalized = _normalize_stored_adapter_dispatch_record(item)
+            if normalized is None:
+                skipped_count += 1
+                continue
+            records.append(normalized)
+    return records, skipped_count
+
+
+def append_office_controlled_mutation_manual_adapter_dispatch_record(
+    payload: object, *, target_mutation_store_path: Path | None = None, store_path: Path | None = None
+) -> dict[str, object]:
+    if not isinstance(payload, Mapping):
+        return {"stored": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    target_mutation_ref = payload.get("target_mutation_ref")
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(target_mutation_ref, "targetmut-"):
+        return {"stored": False, "errors": [_error("target_mutation_ref", "unsupported_ref_shape")], "dto": None}
+    target_readback = list_office_controlled_mutation_manual_target_mutation_records(
+        store_path=target_mutation_store_path,
+        target_mutation_ref=cast(str, target_mutation_ref),
+        limit=1,
+    )
+    target_records = cast(list[dict[str, object]], target_readback.get("records", []))
+    if not target_records:
+        return {"stored": False, "errors": [_error("target_mutation_ref", "target_mutation_not_found")], "dto": None}
+    validation = validate_office_controlled_mutation_manual_adapter_dispatch_record(payload, source_target_mutation=target_records[-1])
+    if not validation["valid"]:
+        return {"stored": False, "errors": validation["errors"], "dto": None}
+    dto = cast(dict[str, object], validation["dto"])
+    path = store_path or _default_adapter_dispatch_record_store_path()
+    existing, _ = _read_adapter_dispatch_record_store(path)
+    if any(item.get("target_mutation_ref") == dto["target_mutation_ref"] for item in existing):
+        return {"stored": False, "errors": [_error("target_mutation_ref", "duplicate_target_mutation_ref")], "dto": None}
+    if any(item.get("adapter_dispatch_ref") == dto["adapter_dispatch_ref"] for item in existing):
+        return {"stored": False, "errors": [_error("adapter_dispatch_ref", "duplicate_adapter_dispatch_ref")], "dto": None}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(dto, sort_keys=True, separators=(",", ":")) + "\n")
+    return {"stored": True, "errors": [], "dto": dto}
+
+
+def list_office_controlled_mutation_manual_adapter_dispatch_records(
+    *, store_path: Path | None = None, limit: int = 50, target_mutation_ref: str | None = None, adapter_dispatch_ref: str | None = None
+) -> dict[str, object]:
+    path = store_path or _default_adapter_dispatch_record_store_path()
+    errors: list[dict[str, str]] = []
+    records, skipped_count = _read_adapter_dispatch_record_store(path)
+    if target_mutation_ref is not None:
+        if _office_disabled_runtime_dispatch_valid_prefixed_ref(target_mutation_ref, "targetmut-"):
+            records = [item for item in records if item.get("target_mutation_ref") == target_mutation_ref]
+        else:
+            errors.append(_error("target_mutation_ref", "unsupported_ref_shape"))
+            records = []
+    if adapter_dispatch_ref is not None:
+        if _office_disabled_runtime_dispatch_valid_prefixed_ref(adapter_dispatch_ref, "adapterdispatch-"):
+            records = [item for item in records if item.get("adapter_dispatch_ref") == adapter_dispatch_ref]
+        else:
+            errors.append(_error("adapter_dispatch_ref", "unsupported_ref_shape"))
+            records = []
+    max_items = max(0, min(limit, 200))
+    records = records[-max_items:] if max_items else []
+    latest_refs: dict[str, str] = {}
+    if records:
+        latest = records[-1]
+        for key in ("target_mutation_ref", "adapter_dispatch_ref", "adapter_ref", "target_ref"):
+            value = latest.get(key)
+            if isinstance(value, str):
+                latest_refs[key] = value
+    return {
+        "schema_version": 1,
+        "mode": "stored_manual_adapter_dispatch_records_readback",
+        "adapter_dispatch_record_count": len(records),
+        "limit": max_items,
+        "skipped_count": skipped_count,
+        "records": records,
+        "latest_refs": latest_refs,
+        "capabilities": _adapter_dispatch_record_capabilities(),
+        "redaction": {
+            "raw_adapter_payload_excluded": True,
             "provider_excluded": True,
             "credentials_echoed": False,
             "unsupported_values_echoed": False,

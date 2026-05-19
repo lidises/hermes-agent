@@ -1165,6 +1165,130 @@ def test_manual_target_mutation_record_api_is_protected_and_safe(monkeypatch, tm
     assert readback_body["capabilities"]["nas_write_enabled"] is False
 
 
+def _seed_target_mutation_chain(tmp_path):
+    from hermes_cli.office_controlled_mutation import append_office_controlled_mutation_manual_target_mutation_record
+
+    readiness_store = _seed_target_mutation_readiness_chain(tmp_path)
+    mutation_store = tmp_path / "office" / "controlled-mutation" / "target_mutation_records.jsonl"
+    append_office_controlled_mutation_manual_target_mutation_record(
+        {
+            "target_mutation_readiness_ref": "targetready-office-dispatch-1",
+            "target_mutation_ref": "targetmut-office-dispatch-1",
+            "operator_confirmation": "confirmed-target-mutation-write-only",
+            "mutated_by": "actor:ai_office_operator",
+            "mutated_at": "2026-05-19T07:00:00Z",
+            "mutation_evidence_refs": ["targetready:targetready-office-dispatch-1"],
+        },
+        readiness_store_path=readiness_store,
+        store_path=mutation_store,
+    )
+    return mutation_store
+
+
+def test_manual_adapter_dispatch_record_dispatches_adapter_without_kanban_or_nas(tmp_path):
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_manual_adapter_dispatch_record,
+        list_office_controlled_mutation_manual_adapter_dispatch_records,
+    )
+
+    target_mutation_store = _seed_target_mutation_chain(tmp_path)
+    adapter_store = tmp_path / "adapter_dispatch_records.jsonl"
+    result = append_office_controlled_mutation_manual_adapter_dispatch_record(
+        {
+            "target_mutation_ref": "targetmut-office-dispatch-1",
+            "adapter_dispatch_ref": "adapterdispatch-office-dispatch-1",
+            "adapter_ref": "adapter-office-dispatch-1",
+            "operator_confirmation": "confirmed-adapter-dispatch-record-only",
+            "dispatched_by": "actor:ai_office_operator",
+            "dispatched_at": "2026-05-19T07:20:00Z",
+            "dispatch_evidence_refs": ["targetmut:targetmut-office-dispatch-1"],
+            "provider": "private-provider-redacted",
+        },
+        target_mutation_store_path=target_mutation_store,
+        store_path=adapter_store,
+    )
+
+    assert result["stored"] is True
+    dto = result["dto"]
+    assert dto["mode"] == "stored_manual_adapter_dispatch_record"
+    assert dto["target_mutation_created"] is True
+    assert dto["adapter_dispatch_created"] is True
+    assert dto["adapter_dispatch_result"] == "safe_adapter_dispatch_marker_written"
+    assert dto["kanban_mutation_created"] is False
+    assert dto["nas_save_created"] is False
+    assert dto["real_dispatch_execution_enabled"] is False
+    assert "provider" not in dto
+    assert "private-provider" not in repr(dto)
+
+    duplicate = append_office_controlled_mutation_manual_adapter_dispatch_record(
+        {
+            "target_mutation_ref": "targetmut-office-dispatch-1",
+            "adapter_dispatch_ref": "adapterdispatch-office-dispatch-2",
+            "adapter_ref": "adapter-office-dispatch-1",
+            "operator_confirmation": "confirmed-adapter-dispatch-record-only",
+            "dispatched_by": "actor:ai_office_operator",
+            "dispatched_at": "2026-05-19T07:21:00Z",
+            "dispatch_evidence_refs": ["targetmut:targetmut-office-dispatch-1"],
+        },
+        target_mutation_store_path=target_mutation_store,
+        store_path=adapter_store,
+    )
+    assert duplicate["stored"] is False
+    assert duplicate["errors"] == [{"field": "target_mutation_ref", "code": "duplicate_target_mutation_ref"}]
+
+    readback = list_office_controlled_mutation_manual_adapter_dispatch_records(store_path=adapter_store)
+    assert readback["mode"] == "stored_manual_adapter_dispatch_records_readback"
+    assert readback["adapter_dispatch_record_count"] == 1
+    assert readback["records"][0]["adapter_dispatch_created"] is True
+    assert readback["capabilities"]["adapter_dispatch_enabled"] is True
+    assert readback["capabilities"]["kanban_mutation_enabled"] is False
+    assert readback["capabilities"]["nas_write_enabled"] is False
+
+
+def test_manual_adapter_dispatch_record_api_is_protected_and_safe(monkeypatch, tmp_path):
+    from fastapi.testclient import TestClient
+    import hermes_cli.web_server as web_server
+
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+    _seed_target_mutation_chain(tmp_path)
+    client = TestClient(web_server.app)
+    post_path = "/api/office/controlled-mutation/manual-adapter-dispatch-record"
+    get_path = "/api/office/controlled-mutation/manual-adapter-dispatch-record-status?adapter_dispatch_ref=adapterdispatch-office-dispatch-1"
+    body = {
+        "target_mutation_ref": "targetmut-office-dispatch-1",
+        "adapter_dispatch_ref": "adapterdispatch-office-dispatch-1",
+        "adapter_ref": "adapter-office-dispatch-1",
+        "operator_confirmation": "confirmed-adapter-dispatch-record-only",
+        "dispatched_by": "actor:ai_office_operator",
+        "dispatched_at": "2026-05-19T07:20:00Z",
+        "dispatch_evidence_refs": ["targetmut:targetmut-office-dispatch-1"],
+        "provider": "private-provider-redacted",
+    }
+
+    assert client.post(post_path, json=body).status_code == 401
+    assert client.get(get_path).status_code == 401
+
+    stored = client.post(post_path, headers={web_server._SESSION_HEADER_NAME: web_server._SESSION_TOKEN}, json=body)
+    assert stored.status_code == 200
+    payload = stored.json()
+    assert payload["stored"] is True
+    assert payload["dto"]["adapter_dispatch_created"] is True
+    assert payload["dto"]["kanban_mutation_created"] is False
+    assert payload["dto"]["nas_save_created"] is False
+    assert payload["dto"]["real_dispatch_execution_enabled"] is False
+    assert "private-provider" not in repr(payload)
+    assert "provider" not in payload["dto"]
+
+    readback = client.get(get_path, headers={web_server._SESSION_HEADER_NAME: web_server._SESSION_TOKEN})
+    assert readback.status_code == 200
+    readback_body = readback.json()
+    assert readback_body["adapter_dispatch_record_count"] == 1
+    assert readback_body["records"][0]["adapter_dispatch_ref"] == "adapterdispatch-office-dispatch-1"
+    assert readback_body["capabilities"]["adapter_dispatch_enabled"] is True
+    assert readback_body["capabilities"]["kanban_mutation_enabled"] is False
+    assert readback_body["capabilities"]["nas_write_enabled"] is False
+
+
 def test_manual_runtime_command_preview_record_api_is_protected_and_safe(monkeypatch, tmp_path):
     from fastapi.testclient import TestClient
     import hermes_cli.web_server as web_server

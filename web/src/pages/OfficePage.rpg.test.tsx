@@ -2895,6 +2895,51 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(markup).not.toMatch(/raw target|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-target|provider/i);
   });
 
+  it("renders manual adapter dispatch record as adapter-dispatched without kanban or nas controls", () => {
+    const ManualAdapterDispatchRecordStatusPanel = (OfficePageModule as unknown as {
+      ManualAdapterDispatchRecordStatusPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.ManualAdapterDispatchRecordStatusPanel>>;
+    }).ManualAdapterDispatchRecordStatusPanel;
+    const status = {
+      schema_version: 1,
+      mode: "stored_manual_adapter_dispatch_records_readback" as const,
+      adapter_dispatch_record_count: 1,
+      limit: 10,
+      records: [
+        {
+          schema_version: 1,
+          mode: "stored_manual_adapter_dispatch_record" as const,
+          target_mutation_ref: "targetmut-office-dispatch-1",
+          adapter_dispatch_ref: "adapterdispatch-office-dispatch-1",
+          adapter_ref: "adapter-office-dispatch-1",
+          target_mutation_created: true,
+          adapter_dispatch_created: true,
+          adapter_dispatch_result: "safe_adapter_dispatch_marker_written" as const,
+          kanban_mutation_created: false,
+          nas_save_created: false,
+          real_dispatch_execution_enabled: false,
+        },
+      ],
+      capabilities: { adapter_dispatch_enabled: true, kanban_mutation_enabled: false, nas_write_enabled: false, real_dispatch_execution_enabled: false },
+      redaction: { provider_excluded: true, credentials_echoed: false },
+      errors: [],
+    };
+
+    const markup = renderToStaticMarkup(<ManualAdapterDispatchRecordStatusPanel status={status} error={null} />);
+
+    expect(markup).toContain('data-office-manual-adapter-dispatch-record-status="true"');
+    expect(markup).toContain('data-office-manual-adapter-dispatch-record-count="1"');
+    expect(markup).toContain('data-office-manual-adapter-dispatch-created="true"');
+    expect(markup).toContain('data-office-manual-adapter-dispatch-kanban-created="false"');
+    expect(markup).toContain('data-office-manual-adapter-dispatch-nas-created="false"');
+    expect(markup).toContain('data-office-manual-adapter-dispatch-real-dispatch-enabled="false"');
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw adapter|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-provider|provider/i);
+  });
+
   it("renders approved real one-shot dispatch gate design without executable controls", () => {
     const ApprovedRealOneShotDispatchGateDesignPanel = (OfficePageModule as unknown as {
       ApprovedRealOneShotDispatchGateDesignPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.ApprovedRealOneShotDispatchGateDesignPanel>>;

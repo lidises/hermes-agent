@@ -1647,6 +1647,84 @@ describe("fetchJSON", () => {
     expect(body.shell_command).toBeUndefined();
   });
 
+  it("writes and reads manual adapter dispatch records through protected routes without kanban or nas mutation", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        __HERMES_SESSION_TOKEN__: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        headers: new Headers({ "content-type": "application/json" }),
+        json: async () => ({
+          stored: true,
+          dto: {
+            mode: "stored_manual_adapter_dispatch_record",
+            target_mutation_ref: "targetmut-office-dispatch-1",
+            adapter_dispatch_ref: "adapterdispatch-office-dispatch-1",
+            adapter_ref: "adapter-office-dispatch-1",
+            target_mutation_created: true,
+            adapter_dispatch_created: true,
+            adapter_dispatch_result: "safe_adapter_dispatch_marker_written",
+            kanban_mutation_created: false,
+            nas_save_created: false,
+            real_dispatch_execution_enabled: false,
+          },
+          errors: [],
+        }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        headers: new Headers({ "content-type": "application/json" }),
+        json: async () => ({
+          mode: "stored_manual_adapter_dispatch_records_readback",
+          adapter_dispatch_record_count: 1,
+          records: [{ adapter_dispatch_ref: "adapterdispatch-office-dispatch-1", adapter_dispatch_created: true, kanban_mutation_created: false, nas_save_created: false }],
+          capabilities: { adapter_dispatch_enabled: true, kanban_mutation_enabled: false, nas_write_enabled: false },
+        }),
+      } as Response);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const write = await api.writeOfficeControlledMutationManualAdapterDispatchRecord({
+      target_mutation_ref: "targetmut-office-dispatch-1",
+      adapter_dispatch_ref: "adapterdispatch-office-dispatch-1",
+      adapter_ref: "adapter-office-dispatch-1",
+      operator_confirmation: "confirmed-adapter-dispatch-record-only",
+      dispatched_by: "actor:ai_office_operator",
+      dispatched_at: "2026-05-19T07:20:00Z",
+      dispatch_evidence_refs: ["targetmut:targetmut-office-dispatch-1"],
+    });
+    const read = await api.getOfficeControlledMutationManualAdapterDispatchRecordStatus({ adapter_dispatch_ref: "adapterdispatch-office-dispatch-1" });
+
+    expect(write.stored).toBe(true);
+    expect(write.dto?.adapter_dispatch_created).toBe(true);
+    expect(write.dto?.kanban_mutation_created).toBe(false);
+    expect(write.dto?.nas_save_created).toBe(false);
+    expect(read.mode).toBe("stored_manual_adapter_dispatch_records_readback");
+    expect(read.capabilities.adapter_dispatch_enabled).toBe(true);
+    expect(read.capabilities.kanban_mutation_enabled).toBe(false);
+    expect(read.capabilities.nas_write_enabled).toBe(false);
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      "/api/office/controlled-mutation/manual-adapter-dispatch-record",
+      expect.objectContaining({ method: "POST", body: expect.any(String), headers: expect.any(Headers) }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      "/api/office/controlled-mutation/manual-adapter-dispatch-record-status?adapter_dispatch_ref=adapterdispatch-office-dispatch-1",
+      expect.objectContaining({ headers: expect.any(Headers) }),
+    );
+    const body = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body));
+    expect(body.provider).toBeUndefined();
+    expect(body.raw_adapter_payload).toBeUndefined();
+  });
+
   it("gets approved real one-shot dispatch gate design through the protected readback route", async () => {
     Object.defineProperty(globalThis, "window", {
       configurable: true,
