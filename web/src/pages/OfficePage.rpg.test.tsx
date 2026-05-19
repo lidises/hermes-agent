@@ -1964,6 +1964,87 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(markup).not.toMatch(/raw runtime preflight|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
   });
 
+  it("renders manual one-shot runtime dry-run status as metadata-only without runtime execution", () => {
+    const ManualOneShotRuntimeDryRunStatusPanel = (OfficePageModule as unknown as {
+      ManualOneShotRuntimeDryRunStatusPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.ManualOneShotRuntimeDryRunStatusPanel>>;
+    }).ManualOneShotRuntimeDryRunStatusPanel;
+    const status = {
+      schema_version: 1,
+      mode: "manual_one_shot_runtime_dry_run_status" as const,
+      manual_one_shot_runtime_dry_run_complete: true,
+      source_runtime_preflight_lane: "runtime_preflight_status",
+      next_manual_lane: "adapter_binding_dry_run_status",
+      operator_trigger: {
+        trigger_mode: "operator_manual_once",
+        repeat_enabled: false,
+        watcher_daemon_required: false,
+        cron_required: false,
+      },
+      dry_run_scope: {
+        metadata_result_write_allowed: true,
+        audit_event_write_allowed: true,
+        runtime_command_execution_allowed: false,
+        adapter_dispatch_allowed: false,
+        target_mutation_allowed: false,
+      },
+      metadata_envelope: {
+        request_ref: "req_manual_runtime_dry_run",
+        correlation_ref: "corr_manual_runtime_dry_run",
+        dry_run_result_ref: "dryrun_manual_runtime_dry_run",
+        audit_event_ref: "audit_manual_runtime_dry_run",
+      },
+      forbidden_boundaries: ["watcher_daemon_activation", "cron_job_installation", "runtime_command_execution", "target_mutation"],
+      capabilities: {
+        manual_one_shot_runtime_dry_run_readback_enabled: true,
+        metadata_result_write_enabled: true,
+        audit_event_write_enabled: true,
+        runtime_command_execution_enabled: false,
+        watcher_daemon_enabled: false,
+        cron_enabled: false,
+        adapter_dispatch_enabled: false,
+        target_mutation_enabled: false,
+        kanban_mutation_enabled: false,
+        nas_save_enabled: false,
+        vps_file_change_enabled: false,
+        service_restart_enabled: false,
+        git_push_enabled: false,
+        credential_access_enabled: false,
+        public_exposure_enabled: false,
+      },
+      redaction: { raw_excluded: true },
+      errors: [],
+    };
+
+    const markup = renderToStaticMarkup(<ManualOneShotRuntimeDryRunStatusPanel status={status} error={null} />);
+
+    expect(markup).toContain('data-office-manual-one-shot-runtime-dry-run-status="true"');
+    expect(markup).toContain('data-office-manual-one-shot-runtime-dry-run-status-complete="true"');
+    expect(markup).toContain('data-office-manual-one-shot-runtime-dry-run-status-readback-enabled="true"');
+    expect(markup).toContain('data-office-manual-one-shot-runtime-dry-run-status-metadata-write-enabled="true"');
+    expect(markup).toContain('data-office-manual-one-shot-runtime-dry-run-status-audit-write-enabled="true"');
+    expect(markup).toContain('data-office-manual-one-shot-runtime-dry-run-status-runtime-execution-enabled="false"');
+    expect(markup).toContain('data-office-manual-one-shot-runtime-dry-run-status-watcher-enabled="false"');
+    expect(markup).toContain('data-office-manual-one-shot-runtime-dry-run-status-cron-enabled="false"');
+    expect(markup).toContain('data-office-manual-one-shot-runtime-dry-run-status-dispatch-enabled="false"');
+    expect(markup).toContain('data-office-manual-one-shot-runtime-dry-run-status-target-mutation-enabled="false"');
+    expect(markup).toContain('data-office-manual-one-shot-runtime-dry-run-status-kanban-mutation-enabled="false"');
+    expect(markup).toContain('data-office-manual-one-shot-runtime-dry-run-status-nas-save-enabled="false"');
+    expect(markup).toContain('data-office-manual-one-shot-runtime-dry-run-status-vps-file-change-enabled="false"');
+    expect(markup).toContain('data-office-manual-one-shot-runtime-dry-run-status-service-restart-enabled="false"');
+    expect(markup).toContain('data-office-manual-one-shot-runtime-dry-run-status-git-push-enabled="false"');
+    expect(markup).toContain('data-office-manual-one-shot-runtime-dry-run-status-credential-access-enabled="false"');
+    expect(markup).toContain('data-office-manual-one-shot-runtime-dry-run-status-public-exposure-enabled="false"');
+    expect(markup).toContain('data-office-manual-one-shot-runtime-dry-run-status-scope="metadata_result_write_allowed"');
+    expect(markup).toContain('data-office-manual-one-shot-runtime-dry-run-status-envelope="request_ref"');
+    expect(markup).toContain('data-office-manual-one-shot-runtime-dry-run-status-forbidden-boundary="runtime_command_execution"');
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw command|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
+  });
+
   it("renders the queue-state manual review surface without executable controls or raw markdown", () => {
     const NasKeeperQueueManualEvidenceReviewSurfacePanel = (OfficePageModule as unknown as { NasKeeperQueueManualEvidenceReviewSurfacePanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.NasKeeperQueueManualEvidenceReviewSurfacePanel>> }).NasKeeperQueueManualEvidenceReviewSurfacePanel;
     const boundary = { detailKind: "nas_runtime_n3_approval_boundary_status_surface" } as ReturnType<typeof buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface>;

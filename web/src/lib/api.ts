@@ -347,6 +347,21 @@ export interface OfficeRuntimePreflightStatus {
   errors: Array<{ field: string; code: string }>;
 }
 
+export interface OfficeManualOneShotRuntimeDryRunStatus {
+  schema_version: number;
+  mode: "manual_one_shot_runtime_dry_run_status";
+  manual_one_shot_runtime_dry_run_complete: boolean;
+  source_runtime_preflight_lane: string;
+  next_manual_lane: string;
+  operator_trigger: Record<string, boolean | string>;
+  dry_run_scope: Record<string, boolean>;
+  metadata_envelope: Record<string, string>;
+  forbidden_boundaries: string[];
+  capabilities: Record<string, boolean>;
+  redaction: Record<string, boolean>;
+  errors: Array<{ field: string; code: string }>;
+}
+
 export interface OfficeDispatcherCompletionReviewStatusParams {
   limit?: number;
 }
@@ -520,6 +535,8 @@ export const api = {
     fetchJSON<OfficeRuntimeActivationReviewStatus>("/api/office/controlled-mutation/runtime-activation-review-status"),
   getOfficeControlledMutationRuntimePreflightStatus: () =>
     fetchJSON<OfficeRuntimePreflightStatus>("/api/office/controlled-mutation/runtime-preflight-status"),
+  getOfficeControlledMutationManualOneShotRuntimeDryRunStatus: () =>
+    fetchJSON<OfficeManualOneShotRuntimeDryRunStatus>("/api/office/controlled-mutation/manual-one-shot-runtime-dry-run-status"),
   executeOfficeControlledMutationNasSingleFileWrite: (body: OfficeNasSingleFileWritePayload) =>
     fetchJSON<OfficeNasSingleFileWriteResult>("/api/office/controlled-mutation/nas-runtime/single-file-write", {
       method: "POST",

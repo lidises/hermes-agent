@@ -2136,6 +2136,80 @@ def build_office_controlled_mutation_runtime_preflight_status(
     }
 
 
+def build_office_controlled_mutation_manual_one_shot_runtime_dry_run_status(
+    *, unsafe_examples: Mapping[str, Any] | None = None
+) -> dict[str, object]:
+    """Project a manual one-shot runtime dry-run lane without executing runtime work."""
+
+    _ = unsafe_examples
+    return {
+        "schema_version": 1,
+        "mode": "manual_one_shot_runtime_dry_run_status",
+        "manual_one_shot_runtime_dry_run_complete": True,
+        "source_runtime_preflight_lane": "runtime_preflight_status",
+        "next_manual_lane": "adapter_binding_dry_run_status",
+        "operator_trigger": {
+            "trigger_mode": "operator_manual_once",
+            "repeat_enabled": False,
+            "watcher_daemon_required": False,
+            "cron_required": False,
+        },
+        "dry_run_scope": {
+            "metadata_result_write_allowed": True,
+            "audit_event_write_allowed": True,
+            "runtime_command_execution_allowed": False,
+            "adapter_dispatch_allowed": False,
+            "target_mutation_allowed": False,
+        },
+        "metadata_envelope": {
+            "request_ref": "req_manual_one_shot_runtime_dry_run",
+            "correlation_ref": "corr_manual_one_shot_runtime_dry_run",
+            "dry_run_result_ref": "dryrun_manual_one_shot_runtime_dry_run",
+            "audit_event_ref": "audit_manual_one_shot_runtime_dry_run",
+        },
+        "forbidden_boundaries": [
+            "watcher_daemon_activation",
+            "cron_job_installation",
+            "runtime_command_execution",
+            "adapter_dispatch",
+            "target_mutation",
+            "kanban_mutation",
+            "nas_save",
+            "vps_file_change",
+            "service_restart",
+            "git_push",
+            "credential_access",
+            "public_exposure",
+        ],
+        "capabilities": {
+            "manual_one_shot_runtime_dry_run_readback_enabled": True,
+            "metadata_result_write_enabled": True,
+            "audit_event_write_enabled": True,
+            "runtime_command_execution_enabled": False,
+            "watcher_daemon_enabled": False,
+            "cron_enabled": False,
+            "adapter_dispatch_enabled": False,
+            "target_mutation_enabled": False,
+            "kanban_mutation_enabled": False,
+            "nas_save_enabled": False,
+            "vps_file_change_enabled": False,
+            "service_restart_enabled": False,
+            "git_push_enabled": False,
+            "credential_access_enabled": False,
+            "public_exposure_enabled": False,
+        },
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "opaque_refs_only": True,
+            "safe_summaries_only": True,
+            "unsupported_values_echoed": False,
+            "credentials_echoed": False,
+        },
+        "errors": [],
+    }
+
+
 def _dispatcher_authority_metadata_append_status_capabilities() -> dict[str, bool]:
     return {
         "metadata_append_readback_enabled": True,

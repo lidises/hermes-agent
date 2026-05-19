@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -4428,6 +4428,74 @@ export function RuntimePreflightStatusPanel({
 }
 
 
+export function ManualOneShotRuntimeDryRunStatusPanel({
+  status,
+  error,
+}: {
+  status: OfficeManualOneShotRuntimeDryRunStatus | null;
+  error?: string | null;
+}) {
+  const caps = status?.capabilities ?? {};
+  const scope = status?.dry_run_scope ?? {};
+  const envelope = status?.metadata_envelope ?? {};
+  return (
+    <section
+      className="border border-cyan-300/20 bg-cyan-950/10 p-4"
+      data-office-manual-one-shot-runtime-dry-run-status="true"
+      data-office-manual-one-shot-runtime-dry-run-status-complete={String(Boolean(status?.manual_one_shot_runtime_dry_run_complete))}
+      data-office-manual-one-shot-runtime-dry-run-status-readback-enabled={String(Boolean(caps.manual_one_shot_runtime_dry_run_readback_enabled))}
+      data-office-manual-one-shot-runtime-dry-run-status-metadata-write-enabled={String(Boolean(caps.metadata_result_write_enabled))}
+      data-office-manual-one-shot-runtime-dry-run-status-audit-write-enabled={String(Boolean(caps.audit_event_write_enabled))}
+      data-office-manual-one-shot-runtime-dry-run-status-runtime-execution-enabled={String(Boolean(caps.runtime_command_execution_enabled))}
+      data-office-manual-one-shot-runtime-dry-run-status-watcher-enabled={String(Boolean(caps.watcher_daemon_enabled))}
+      data-office-manual-one-shot-runtime-dry-run-status-cron-enabled={String(Boolean(caps.cron_enabled))}
+      data-office-manual-one-shot-runtime-dry-run-status-dispatch-enabled={String(Boolean(caps.adapter_dispatch_enabled))}
+      data-office-manual-one-shot-runtime-dry-run-status-target-mutation-enabled={String(Boolean(caps.target_mutation_enabled))}
+      data-office-manual-one-shot-runtime-dry-run-status-kanban-mutation-enabled={String(Boolean(caps.kanban_mutation_enabled))}
+      data-office-manual-one-shot-runtime-dry-run-status-nas-save-enabled={String(Boolean(caps.nas_save_enabled))}
+      data-office-manual-one-shot-runtime-dry-run-status-vps-file-change-enabled={String(Boolean(caps.vps_file_change_enabled))}
+      data-office-manual-one-shot-runtime-dry-run-status-service-restart-enabled={String(Boolean(caps.service_restart_enabled))}
+      data-office-manual-one-shot-runtime-dry-run-status-git-push-enabled={String(Boolean(caps.git_push_enabled))}
+      data-office-manual-one-shot-runtime-dry-run-status-credential-access-enabled={String(Boolean(caps.credential_access_enabled))}
+      data-office-manual-one-shot-runtime-dry-run-status-public-exposure-enabled={String(Boolean(caps.public_exposure_enabled))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-200/70">Manual one-shot runtime dry-run</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">metadata-only · no runtime execution</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Defines the operator-triggered single dry-run envelope while allowing only metadata-result and audit-event recording; runtime command execution, watcher, cron, dispatch, and target mutation remain disabled.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "readback request failed" : `next ${status?.next_manual_lane ?? "adapter_binding_dry_run_status"}`}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-5" data-office-manual-one-shot-runtime-dry-run-status-scope-list="true">
+        {Object.entries(scope).map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-manual-one-shot-runtime-dry-run-status-scope={key} data-office-manual-one-shot-runtime-dry-run-status-scope-enabled={String(Boolean(value))}>
+            {key}: {String(Boolean(value))}
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-manual-one-shot-runtime-dry-run-status-envelope-list="true">
+        {Object.entries(envelope).map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-2 text-xs" data-office-manual-one-shot-runtime-dry-run-status-envelope={key}>{value}</div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-2" data-office-manual-one-shot-runtime-dry-run-status-forbidden-boundaries="true">
+        {(status?.forbidden_boundaries ?? []).map((boundary) => (
+          <div key={boundary} className="border border-red-300/20 bg-red-950/10 p-2 text-xs text-red-100/80" data-office-manual-one-shot-runtime-dry-run-status-forbidden-boundary={boundary}>{boundary}</div>
+        ))}
+      </div>
+      <div className="mt-3 border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+        source: {status?.source_runtime_preflight_lane ?? "runtime_preflight_status"}
+      </div>
+    </section>
+  );
+}
+
+
 export function NasKeeperQueueManualEvidenceReviewSurfacePanel({
   surface,
   readback,
@@ -5649,6 +5717,8 @@ export default function OfficePage() {
   const [runtimeActivationReviewStatusError, setRuntimeActivationReviewStatusError] = useState<string | null>(null);
   const [runtimePreflightStatus, setRuntimePreflightStatus] = useState<OfficeRuntimePreflightStatus | null>(null);
   const [runtimePreflightStatusError, setRuntimePreflightStatusError] = useState<string | null>(null);
+  const [manualOneShotRuntimeDryRunStatus, setManualOneShotRuntimeDryRunStatus] = useState<OfficeManualOneShotRuntimeDryRunStatus | null>(null);
+  const [manualOneShotRuntimeDryRunStatusError, setManualOneShotRuntimeDryRunStatusError] = useState<string | null>(null);
   const [nasKeeperQueueReadbackLoading, setNasKeeperQueueReadbackLoading] = useState(false);
   const [nasKeeperQueueReadbackError, setNasKeeperQueueReadbackError] = useState<string | null>(null);
   const [nasKeeperExecutionDraft, setNasKeeperExecutionDraft] = useState<OfficeNasKeeperExecutionFromPreviewPayload>(DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT);
@@ -6019,6 +6089,20 @@ export default function OfficePage() {
         if (!cancelled) {
           setRuntimePreflightStatus(null);
           setRuntimePreflightStatusError("request failed");
+        }
+      });
+    api
+      .getOfficeControlledMutationManualOneShotRuntimeDryRunStatus()
+      .then((next) => {
+        if (!cancelled) {
+          setManualOneShotRuntimeDryRunStatus(next);
+          setManualOneShotRuntimeDryRunStatusError(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setManualOneShotRuntimeDryRunStatus(null);
+          setManualOneShotRuntimeDryRunStatusError("request failed");
         }
       });
     api
@@ -6608,6 +6692,7 @@ export default function OfficePage() {
       <WatcherCronContractStatusPanel status={watcherCronContractStatus} error={watcherCronContractStatusError} />
       <RuntimeActivationReviewStatusPanel status={runtimeActivationReviewStatus} error={runtimeActivationReviewStatusError} />
       <RuntimePreflightStatusPanel status={runtimePreflightStatus} error={runtimePreflightStatusError} />
+      <ManualOneShotRuntimeDryRunStatusPanel status={manualOneShotRuntimeDryRunStatus} error={manualOneShotRuntimeDryRunStatusError} />
 
       <NasKeeperExecutionOperatorActionPanel
         action={nasKeeperExecutionOperatorAction}
