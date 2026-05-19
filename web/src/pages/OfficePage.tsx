@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -4804,6 +4804,80 @@ export function ConcreteRuntimeSingleDispatchSliceDesignPanel({
 }
 
 
+export function ApprovedRealOneShotDispatchGateDesignPanel({
+  status,
+  error,
+}: {
+  status: OfficeApprovedRealOneShotDispatchGateDesign | null;
+  error?: string | null;
+}) {
+  const caps = status?.capabilities ?? {};
+  const gate = status?.approval_gate ?? {};
+  const envelope = status?.runtime_command_envelope ?? {};
+  const replay = status?.replay_store ?? {};
+  const rollback = status?.rollback_disable ?? {};
+  const boundary = status?.execution_boundary ?? {};
+  return (
+    <section
+      className="border border-amber-300/20 bg-amber-950/10 p-4"
+      data-office-approved-real-one-shot-dispatch-gate-design="true"
+      data-office-approved-real-one-shot-dispatch-gate-design-complete={String(Boolean(status?.approved_real_one_shot_dispatch_gate_design_complete))}
+      data-office-approved-real-one-shot-dispatch-gate-design-readback-enabled={String(Boolean(caps.approved_gate_design_readback_enabled))}
+      data-office-approved-real-one-shot-dispatch-gate-design-real-dispatch-enabled={String(Boolean(caps.real_dispatch_execution_enabled))}
+      data-office-approved-real-one-shot-dispatch-gate-design-approval-recording-enabled={String(Boolean(caps.approval_recording_enabled))}
+      data-office-approved-real-one-shot-dispatch-gate-design-replay-store-write-enabled={String(Boolean(caps.idempotency_replay_store_write_enabled))}
+      data-office-approved-real-one-shot-dispatch-gate-design-target-mutation-enabled={String(Boolean(caps.target_mutation_enabled))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-200/70">Approved real one-shot dispatch gate design</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">real gate design · still no execution</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Defines the approval record, exact target allowlist, rollback/disable switch, replay store, and runtime-command envelope required before any real dispatch gate can open.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "readback request failed" : `next ${status?.next_manual_lane ?? "manual_real_one_shot_dispatch_gate_approval"}`}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-approved-real-one-shot-dispatch-gate-design-approval-gates="true">
+        {Object.entries(gate).map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-approved-real-one-shot-dispatch-gate-design-approval-gate={key}>{key}: {String(Boolean(value))}</div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-approved-real-one-shot-dispatch-gate-design-runtime-envelopes="true">
+        {Object.entries(envelope).map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-approved-real-one-shot-dispatch-gate-design-runtime-envelope={key}>{key}: {String(Boolean(value))}</div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-3" data-office-approved-real-one-shot-dispatch-gate-design-replay-stores="true">
+        {Object.entries(replay).map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-approved-real-one-shot-dispatch-gate-design-replay-store={key}>{key}: {String(Boolean(value))}</div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-3" data-office-approved-real-one-shot-dispatch-gate-design-rollback-disables="true">
+        {Object.entries(rollback).map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-approved-real-one-shot-dispatch-gate-design-rollback-disable={key}>{key}: {String(Boolean(value))}</div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-approved-real-one-shot-dispatch-gate-design-execution-boundaries="true">
+        {Object.entries(boundary).map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-approved-real-one-shot-dispatch-gate-design-execution-boundary={key}>{key}: {String(Boolean(value))}</div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-2" data-office-approved-real-one-shot-dispatch-gate-design-forbidden-boundaries="true">
+        {(status?.forbidden_boundaries ?? []).map((item) => (
+          <div key={item} className="border border-amber-300/20 bg-amber-950/10 p-2 text-xs text-amber-100/80" data-office-approved-real-one-shot-dispatch-gate-design-forbidden-boundary={item}>{item}</div>
+        ))}
+      </div>
+      <div className="mt-3 border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+        source: {status?.source_design_lane ?? "disabled_executor_contract_hardening"}
+      </div>
+    </section>
+  );
+}
+
+
 export function DisabledOneShotRuntimeDispatchExecutorSkeletonPanel({
   status,
   error,
@@ -6126,6 +6200,8 @@ export default function OfficePage() {
   const [concreteRuntimeSingleDispatchSliceDesignError, setConcreteRuntimeSingleDispatchSliceDesignError] = useState<string | null>(null);
   const [disabledOneShotRuntimeDispatchExecutorSkeleton, setDisabledOneShotRuntimeDispatchExecutorSkeleton] = useState<OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton | null>(null);
   const [disabledOneShotRuntimeDispatchExecutorSkeletonError, setDisabledOneShotRuntimeDispatchExecutorSkeletonError] = useState<string | null>(null);
+  const [approvedRealOneShotDispatchGateDesign, setApprovedRealOneShotDispatchGateDesign] = useState<OfficeApprovedRealOneShotDispatchGateDesign | null>(null);
+  const [approvedRealOneShotDispatchGateDesignError, setApprovedRealOneShotDispatchGateDesignError] = useState<string | null>(null);
   const [nasKeeperQueueReadbackLoading, setNasKeeperQueueReadbackLoading] = useState(false);
   const [nasKeeperQueueReadbackError, setNasKeeperQueueReadbackError] = useState<string | null>(null);
   const [nasKeeperExecutionDraft, setNasKeeperExecutionDraft] = useState<OfficeNasKeeperExecutionFromPreviewPayload>(DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT);
@@ -6580,6 +6656,20 @@ export default function OfficePage() {
         if (!cancelled) {
           setDisabledOneShotRuntimeDispatchExecutorSkeleton(null);
           setDisabledOneShotRuntimeDispatchExecutorSkeletonError("request failed");
+        }
+      });
+    api
+      .getOfficeControlledMutationApprovedRealOneShotDispatchGateDesign()
+      .then((next) => {
+        if (!cancelled) {
+          setApprovedRealOneShotDispatchGateDesign(next);
+          setApprovedRealOneShotDispatchGateDesignError(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setApprovedRealOneShotDispatchGateDesign(null);
+          setApprovedRealOneShotDispatchGateDesignError("request failed");
         }
       });
     api
@@ -7175,6 +7265,7 @@ export default function OfficePage() {
       <ExplicitRuntimeDispatchApprovalStatusPanel status={explicitRuntimeDispatchApprovalStatus} error={explicitRuntimeDispatchApprovalStatusError} />
       <ConcreteRuntimeSingleDispatchSliceDesignPanel status={concreteRuntimeSingleDispatchSliceDesign} error={concreteRuntimeSingleDispatchSliceDesignError} />
       <DisabledOneShotRuntimeDispatchExecutorSkeletonPanel status={disabledOneShotRuntimeDispatchExecutorSkeleton} error={disabledOneShotRuntimeDispatchExecutorSkeletonError} />
+      <ApprovedRealOneShotDispatchGateDesignPanel status={approvedRealOneShotDispatchGateDesign} error={approvedRealOneShotDispatchGateDesignError} />
 
       <NasKeeperExecutionOperatorActionPanel
         action={nasKeeperExecutionOperatorAction}

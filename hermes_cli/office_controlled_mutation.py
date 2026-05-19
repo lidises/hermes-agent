@@ -2708,6 +2708,112 @@ def refuse_office_controlled_mutation_disabled_one_shot_runtime_dispatch(
     }
 
 
+def build_office_controlled_mutation_approved_real_one_shot_dispatch_gate_design(
+    *, unsafe_examples: Mapping[str, Any] | None = None
+) -> dict[str, object]:
+    """Project the real-dispatch approval gate design without approving or executing."""
+
+    _ = unsafe_examples
+    return {
+        "schema_version": 1,
+        "mode": "approved_real_one_shot_dispatch_gate_design",
+        "approved_real_one_shot_dispatch_gate_design_complete": True,
+        "source_design_lane": "disabled_executor_contract_hardening",
+        "next_manual_lane": "manual_real_one_shot_dispatch_gate_approval",
+        "approval_gate": {
+            "approval_record_required": True,
+            "exact_target_allowlist_required": True,
+            "rollback_disable_switch_required": True,
+            "idempotency_replay_store_required": True,
+            "operator_final_confirmation_required": True,
+            "runtime_gate_still_disabled_by_default": True,
+            "approval_recorded": False,
+        },
+        "runtime_command_envelope": {
+            "runtime_command_shape_defined": True,
+            "runtime_command_materialized": False,
+            "runtime_command_included": False,
+            "runtime_command_executed": False,
+            "command_args_echoed": False,
+        },
+        "replay_store": {
+            "idempotency_key_format_required": True,
+            "replay_lookup_required": True,
+            "replay_write_required_after_success": True,
+            "replay_store_bound": False,
+            "replay_state_mutated": False,
+        },
+        "rollback_disable": {
+            "disable_switch_required": True,
+            "rollback_plan_ref_required": True,
+            "rollback_verified_before_dispatch_required": True,
+            "disable_switch_bound": False,
+            "rollback_executed": False,
+        },
+        "execution_boundary": {
+            "design_only": True,
+            "dispatch_gate_open": False,
+            "approval_record_written": False,
+            "runtime_command_included": False,
+            "runtime_command_executed": False,
+            "adapter_binding_created": False,
+            "adapter_dispatch_created": False,
+            "target_mutation_created": False,
+            "watcher_or_cron_created": False,
+        },
+        "forbidden_boundaries": [
+            "approval_recording",
+            "runtime_command_materialization",
+            "runtime_command_execution",
+            "adapter_binding",
+            "adapter_dispatch",
+            "idempotency_replay_store_write",
+            "rollback_execution",
+            "target_mutation",
+            "watcher_daemon_activation",
+            "cron_job_installation",
+            "kanban_mutation",
+            "nas_save",
+            "vps_file_change",
+            "service_restart",
+            "git_push",
+            "credential_access",
+            "public_exposure",
+        ],
+        "capabilities": {
+            "approved_gate_design_readback_enabled": True,
+            "real_dispatch_execution_enabled": False,
+            "approval_recording_enabled": False,
+            "runtime_command_materialization_enabled": False,
+            "runtime_command_execution_enabled": False,
+            "adapter_binding_enabled": False,
+            "adapter_dispatch_enabled": False,
+            "idempotency_replay_store_write_enabled": False,
+            "rollback_execution_enabled": False,
+            "target_mutation_enabled": False,
+            "watcher_daemon_enabled": False,
+            "cron_enabled": False,
+            "kanban_mutation_enabled": False,
+            "nas_save_enabled": False,
+            "vps_file_change_enabled": False,
+            "service_restart_enabled": False,
+            "git_push_enabled": False,
+            "credential_access_enabled": False,
+            "public_exposure_enabled": False,
+        },
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "opaque_refs_only": True,
+            "safe_summaries_only": True,
+            "unsupported_values_echoed": False,
+            "credentials_echoed": False,
+        },
+        "errors": [],
+    }
+
+
+
 def _dispatcher_authority_metadata_append_status_capabilities() -> dict[str, bool]:
     return {
         "metadata_append_readback_enabled": True,

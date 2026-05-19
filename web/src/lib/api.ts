@@ -439,6 +439,23 @@ export interface OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton {
   errors: Array<{ field: string; code: string }>;
 }
 
+export interface OfficeApprovedRealOneShotDispatchGateDesign {
+  schema_version: number;
+  mode: "approved_real_one_shot_dispatch_gate_design";
+  approved_real_one_shot_dispatch_gate_design_complete: boolean;
+  source_design_lane: string;
+  next_manual_lane: string;
+  approval_gate: Record<string, boolean>;
+  runtime_command_envelope: Record<string, boolean>;
+  replay_store: Record<string, boolean>;
+  rollback_disable: Record<string, boolean>;
+  execution_boundary: Record<string, boolean>;
+  forbidden_boundaries: string[];
+  capabilities: Record<string, boolean>;
+  redaction: Record<string, boolean>;
+  errors: Array<{ field: string; code: string }>;
+}
+
 export interface OfficeDisabledOneShotRuntimeDispatchPayload {
   exact_target_allowlist_ref: string;
   idempotency_key: string;
@@ -648,6 +665,8 @@ export const api = {
     fetchJSON<OfficeConcreteRuntimeSingleDispatchSliceDesign>("/api/office/controlled-mutation/concrete-runtime-single-dispatch-slice-design"),
   getOfficeControlledMutationDisabledOneShotRuntimeDispatchExecutorSkeleton: () =>
     fetchJSON<OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton>("/api/office/controlled-mutation/disabled-one-shot-runtime-dispatch-executor-skeleton"),
+  getOfficeControlledMutationApprovedRealOneShotDispatchGateDesign: () =>
+    fetchJSON<OfficeApprovedRealOneShotDispatchGateDesign>("/api/office/controlled-mutation/approved-real-one-shot-dispatch-gate-design"),
   executeOfficeControlledMutationDisabledOneShotRuntimeDispatch: (body: OfficeDisabledOneShotRuntimeDispatchPayload) =>
     fetchJSON<OfficeDisabledOneShotRuntimeDispatchRefusal>("/api/office/controlled-mutation/disabled-one-shot-runtime-dispatch-executor-skeleton/execute", {
       method: "POST",

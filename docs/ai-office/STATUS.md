@@ -1,4 +1,12 @@
-Last updated: 2026-05-19 11:42 KST
+Last updated: 2026-05-19 11:56 KST
+
+## Approved real one-shot dispatch gate design
+
+Implemented the recommended shortest follow-up after `disabled_executor_contract_hardening`: a display-only approved real one-shot dispatch gate design lane. Backend adds `build_office_controlled_mutation_approved_real_one_shot_dispatch_gate_design(...)` plus protected GET `/api/office/controlled-mutation/approved-real-one-shot-dispatch-gate-design`; frontend adds typed API wrapper and display-only `/office` panel `data-office-approved-real-one-shot-dispatch-gate-design-*`. The lane defines the required approval record, exact target allowlist, rollback/disable switch, idempotency replay store, operator final confirmation, and runtime-command envelope shape only.
+
+Verification 2026-05-19 11:56 KST: RED backend failed first for missing helper/route; RED frontend failed first for missing wrapper/panel. GREEN focused backend approved-gate-design+disabled-executor tests passed (`7 passed`); focused frontend API/RPG tests passed (`2 passed`). Broader verification/deploy pending in this working tree.
+
+Boundary: this is gate design/readback/UI only. It does not record a real approval, materialize or execute runtime commands, bind or dispatch adapters, write replay-store state, execute rollback, mutate targets/Kanban/NAS/VPS files, start watcher/cron automation, restart services by itself, push from the lane, expose public routes, or grant VPS direct NAS mount/credential/write authority.
 
 ## Disabled executor contract hardening
 

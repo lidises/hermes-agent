@@ -2384,6 +2384,104 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(markup).not.toMatch(/raw command|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
   });
 
+  it("renders approved real one-shot dispatch gate design without executable controls", () => {
+    const ApprovedRealOneShotDispatchGateDesignPanel = (OfficePageModule as unknown as {
+      ApprovedRealOneShotDispatchGateDesignPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.ApprovedRealOneShotDispatchGateDesignPanel>>;
+    }).ApprovedRealOneShotDispatchGateDesignPanel;
+    const status = {
+      schema_version: 1,
+      mode: "approved_real_one_shot_dispatch_gate_design" as const,
+      approved_real_one_shot_dispatch_gate_design_complete: true,
+      source_design_lane: "disabled_executor_contract_hardening",
+      next_manual_lane: "manual_real_one_shot_dispatch_gate_approval",
+      approval_gate: {
+        approval_record_required: true,
+        exact_target_allowlist_required: true,
+        rollback_disable_switch_required: true,
+        idempotency_replay_store_required: true,
+        operator_final_confirmation_required: true,
+        runtime_gate_still_disabled_by_default: true,
+        approval_recorded: false,
+      },
+      runtime_command_envelope: {
+        runtime_command_shape_defined: true,
+        runtime_command_materialized: false,
+        runtime_command_included: false,
+        runtime_command_executed: false,
+        command_args_echoed: false,
+      },
+      replay_store: {
+        idempotency_key_format_required: true,
+        replay_lookup_required: true,
+        replay_write_required_after_success: true,
+        replay_store_bound: false,
+        replay_state_mutated: false,
+      },
+      rollback_disable: {
+        disable_switch_required: true,
+        rollback_plan_ref_required: true,
+        rollback_verified_before_dispatch_required: true,
+        disable_switch_bound: false,
+        rollback_executed: false,
+      },
+      execution_boundary: {
+        design_only: true,
+        dispatch_gate_open: false,
+        approval_record_written: false,
+        runtime_command_included: false,
+        runtime_command_executed: false,
+        adapter_binding_created: false,
+        adapter_dispatch_created: false,
+        target_mutation_created: false,
+        watcher_or_cron_created: false,
+      },
+      forbidden_boundaries: ["approval_recording", "runtime_command_execution", "target_mutation"],
+      capabilities: {
+        approved_gate_design_readback_enabled: true,
+        real_dispatch_execution_enabled: false,
+        approval_recording_enabled: false,
+        runtime_command_materialization_enabled: false,
+        runtime_command_execution_enabled: false,
+        adapter_binding_enabled: false,
+        adapter_dispatch_enabled: false,
+        idempotency_replay_store_write_enabled: false,
+        rollback_execution_enabled: false,
+        target_mutation_enabled: false,
+        kanban_mutation_enabled: false,
+        nas_save_enabled: false,
+        vps_file_change_enabled: false,
+        service_restart_enabled: false,
+        git_push_enabled: false,
+        credential_access_enabled: false,
+        public_exposure_enabled: false,
+      },
+      redaction: { raw_excluded: true },
+      errors: [],
+    };
+
+    const markup = renderToStaticMarkup(<ApprovedRealOneShotDispatchGateDesignPanel status={status} error={null} />);
+
+    expect(markup).toContain('data-office-approved-real-one-shot-dispatch-gate-design="true"');
+    expect(markup).toContain('data-office-approved-real-one-shot-dispatch-gate-design-complete="true"');
+    expect(markup).toContain('data-office-approved-real-one-shot-dispatch-gate-design-readback-enabled="true"');
+    expect(markup).toContain('data-office-approved-real-one-shot-dispatch-gate-design-real-dispatch-enabled="false"');
+    expect(markup).toContain('data-office-approved-real-one-shot-dispatch-gate-design-approval-recording-enabled="false"');
+    expect(markup).toContain('data-office-approved-real-one-shot-dispatch-gate-design-replay-store-write-enabled="false"');
+    expect(markup).toContain('data-office-approved-real-one-shot-dispatch-gate-design-target-mutation-enabled="false"');
+    expect(markup).toContain('data-office-approved-real-one-shot-dispatch-gate-design-approval-gate="approval_record_required"');
+    expect(markup).toContain('data-office-approved-real-one-shot-dispatch-gate-design-runtime-envelope="runtime_command_shape_defined"');
+    expect(markup).toContain('data-office-approved-real-one-shot-dispatch-gate-design-replay-store="replay_lookup_required"');
+    expect(markup).toContain('data-office-approved-real-one-shot-dispatch-gate-design-rollback-disable="disable_switch_required"');
+    expect(markup).toContain('data-office-approved-real-one-shot-dispatch-gate-design-execution-boundary="runtime_command_executed"');
+    expect(markup).toContain('data-office-approved-real-one-shot-dispatch-gate-design-forbidden-boundary="target_mutation"');
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw command|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
+  });
+
   it("renders disabled one-shot runtime dispatch executor skeleton without executable controls", () => {
     const DisabledOneShotRuntimeDispatchExecutorSkeletonPanel = (OfficePageModule as unknown as {
       DisabledOneShotRuntimeDispatchExecutorSkeletonPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.DisabledOneShotRuntimeDispatchExecutorSkeletonPanel>>;

@@ -831,6 +831,56 @@ describe("fetchJSON", () => {
     expect(JSON.stringify(fetchMock.mock.calls[0]?.[1])).not.toMatch(/method|body|\/Users\/|\/home\/|token=|sk-|provider/i);
   });
 
+  it("gets approved real one-shot dispatch gate design through the protected readback route", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        __HERMES_SESSION_TOKEN__: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers({ "content-type": "application/json" }),
+      json: async () => ({
+        mode: "approved_real_one_shot_dispatch_gate_design",
+        approved_real_one_shot_dispatch_gate_design_complete: true,
+        approval_gate: { approval_record_required: true, approval_recorded: false },
+        runtime_command_envelope: { runtime_command_shape_defined: true, runtime_command_executed: false },
+        replay_store: { replay_lookup_required: true, replay_state_mutated: false },
+        rollback_disable: { disable_switch_required: true, rollback_executed: false },
+        execution_boundary: { design_only: true, dispatch_gate_open: false, runtime_command_executed: false, target_mutation_created: false },
+        capabilities: {
+          approved_gate_design_readback_enabled: true,
+          real_dispatch_execution_enabled: false,
+          approval_recording_enabled: false,
+          idempotency_replay_store_write_enabled: false,
+          target_mutation_enabled: false,
+        },
+      }),
+    } as Response);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await api.getOfficeControlledMutationApprovedRealOneShotDispatchGateDesign();
+
+    expect(result.mode).toBe("approved_real_one_shot_dispatch_gate_design");
+    expect(result.approved_real_one_shot_dispatch_gate_design_complete).toBe(true);
+    expect(result.capabilities.approved_gate_design_readback_enabled).toBe(true);
+    expect(result.capabilities.real_dispatch_execution_enabled).toBe(false);
+    expect(result.capabilities.approval_recording_enabled).toBe(false);
+    expect(result.capabilities.idempotency_replay_store_write_enabled).toBe(false);
+    expect(result.execution_boundary.design_only).toBe(true);
+    expect(result.execution_boundary.target_mutation_created).toBe(false);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/office/controlled-mutation/approved-real-one-shot-dispatch-gate-design",
+      expect.objectContaining({ headers: expect.any(Headers) }),
+    );
+    const headers = fetchMock.mock.calls[0]?.[1]?.headers as Headers;
+    expect(headers.get("X-Hermes-Session-Token")).toBe("session-token-for-header-only");
+    expect(JSON.stringify(fetchMock.mock.calls[0]?.[1])).not.toMatch(/method|body|\/Users\/|\/home\/|token=|sk-|provider/i);
+  });
+
   it("refuses disabled one-shot runtime dispatch execute requests through the protected route without raw values", async () => {
     Object.defineProperty(globalThis, "window", {
       configurable: true,

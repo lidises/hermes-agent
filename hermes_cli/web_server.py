@@ -72,6 +72,7 @@ from hermes_cli.office_controlled_mutation import (
     build_office_controlled_mutation_explicit_runtime_dispatch_approval_status,
     build_office_controlled_mutation_concrete_runtime_single_dispatch_slice_design,
     build_office_controlled_mutation_disabled_one_shot_runtime_dispatch_executor_skeleton,
+    build_office_controlled_mutation_approved_real_one_shot_dispatch_gate_design,
     refuse_office_controlled_mutation_disabled_one_shot_runtime_dispatch,
     build_office_controlled_mutation_contract_schema,
     execute_office_controlled_mutation_nas_single_file_write,
@@ -1063,6 +1064,12 @@ async def get_office_controlled_mutation_concrete_runtime_single_dispatch_slice_
 async def get_office_controlled_mutation_disabled_one_shot_runtime_dispatch_executor_skeleton():
     """Project a disabled one-shot executor skeleton without executing."""
     return build_office_controlled_mutation_disabled_one_shot_runtime_dispatch_executor_skeleton()
+
+
+@app.get("/api/office/controlled-mutation/approved-real-one-shot-dispatch-gate-design")
+async def get_office_controlled_mutation_approved_real_one_shot_dispatch_gate_design():
+    """Project real-dispatch gate design without approval recording or execution."""
+    return build_office_controlled_mutation_approved_real_one_shot_dispatch_gate_design()
 
 
 @app.post("/api/office/controlled-mutation/disabled-one-shot-runtime-dispatch-executor-skeleton/execute")
