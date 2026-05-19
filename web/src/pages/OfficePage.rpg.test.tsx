@@ -3040,6 +3040,69 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).not.toContain("<textarea");
   });
 
+  it("renders manual NAS Keeper handoff record as queued while real NAS execution stays closed", () => {
+    const ManualNasKeeperHandoffRecordStatusPanel = (OfficePageModule as unknown as {
+      ManualNasKeeperHandoffRecordStatusPanel: React.ComponentType<{ status: unknown; error?: string | null }>;
+    }).ManualNasKeeperHandoffRecordStatusPanel;
+    expect(ManualNasKeeperHandoffRecordStatusPanel).toBeTypeOf("function");
+
+    const html = renderToStaticMarkup(
+      <ManualNasKeeperHandoffRecordStatusPanel
+        error={null}
+        status={{
+          schema_version: 1,
+          mode: "manual_nas_keeper_handoff_records_readback",
+          nas_keeper_handoff_record_count: 1,
+          records: [
+            {
+              schema_version: 1,
+              mode: "manual_nas_keeper_handoff_queued",
+              nas_save_ref: "nassave-office-dispatch-1",
+              handoff_ref: "handoff_manual_nas_keeper_1",
+              queue_status: "pending_nas_keeper_authorization",
+              relay_request_ref: "relay_req_manual_nas_keeper_1",
+              write_ref: "write_manual_nas_keeper_1",
+              package_ref: "pkg_manual_nas_keeper_1",
+              target_vault_ref: "vault_personal_wiki_demo",
+              safe_slug: "manual-nas-save-handoff",
+              safe_title: "Manual NAS save handoff",
+              nas_save_created: true,
+              nas_keeper_handoff_queued: true,
+              direct_vps_nas_write_enabled: false,
+              vps_direct_nas_authority_enabled: false,
+              mac_relay_write_enabled: false,
+              actual_nas_write_enabled: false,
+              real_nas_execution_enabled: false,
+              real_dispatch_execution_enabled: false,
+            },
+          ],
+          capabilities: {
+            queue_append_enabled: true,
+            nas_keeper_handoff_enabled: true,
+            direct_vps_nas_write_enabled: false,
+            mac_relay_write_enabled: false,
+            actual_nas_write_enabled: false,
+            real_nas_execution_enabled: false,
+          },
+          redaction: { markdown_body_excluded: true, raw_nas_path_excluded: true, credentials_echoed: false },
+        }}
+      />,
+    );
+
+    expect(html).toContain('data-office-manual-nas-keeper-handoff-record-status="true"');
+    expect(html).toContain('data-office-manual-nas-keeper-handoff-queued="true"');
+    expect(html).toContain('data-office-manual-nas-keeper-handoff-actual-write="false"');
+    expect(html).toContain('data-office-manual-nas-keeper-handoff-mac-relay-write="false"');
+    expect(html).toContain("Mac relay handoff queued · real NAS execution closed");
+    expect(html).not.toContain("/Users/lidises");
+    expect(html).not.toContain("sk-test");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("<form");
+    expect(html).not.toContain("<input");
+    expect(html).not.toContain("<select");
+    expect(html).not.toContain("<textarea");
+  });
+
   it("renders approved real one-shot dispatch gate design without executable controls", () => {
     const ApprovedRealOneShotDispatchGateDesignPanel = (OfficePageModule as unknown as {
       ApprovedRealOneShotDispatchGateDesignPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.ApprovedRealOneShotDispatchGateDesignPanel>>;

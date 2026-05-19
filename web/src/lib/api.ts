@@ -1081,6 +1081,67 @@ export interface OfficeManualNasSaveRecordStatus {
   errors?: Array<{ field: string; code: string }>;
 }
 
+export interface OfficeManualNasKeeperHandoffRecordPayload {
+  nas_save_ref: string;
+  handoff_ref: string;
+  relay_request_ref: string;
+  write_ref: string;
+  package_ref: string;
+  target_vault_ref: string;
+  safe_slug: string;
+  safe_title: string;
+  markdown_body: string;
+  requested_by: string;
+  requested_at: string;
+  nas_keeper_ref: string;
+  relay_node_ref: string;
+  queued_by: string;
+  queued_at: string;
+  operator_confirmation: "confirmed-nas-keeper-handoff-queue-only";
+}
+
+export interface OfficeManualNasKeeperHandoffRecord {
+  schema_version: number;
+  mode: "manual_nas_keeper_handoff_queued";
+  nas_save_ref: string;
+  handoff_ref: string;
+  queue_status: string;
+  relay_request_ref: string;
+  write_ref: string;
+  package_ref: string;
+  target_vault_ref: string;
+  safe_slug: string;
+  safe_title: string;
+  nas_save_created: boolean;
+  nas_keeper_handoff_queued: boolean;
+  direct_vps_nas_write_enabled: boolean;
+  vps_direct_nas_authority_enabled: boolean;
+  mac_relay_write_enabled: boolean;
+  actual_nas_write_enabled: boolean;
+  real_nas_execution_enabled: boolean;
+  real_dispatch_execution_enabled: boolean;
+  capabilities?: Record<string, boolean>;
+  redaction?: Record<string, boolean>;
+}
+
+export interface OfficeManualNasKeeperHandoffRecordAppendResult {
+  queued: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: OfficeManualNasKeeperHandoffRecord | null;
+}
+
+export interface OfficeManualNasKeeperHandoffRecordStatus {
+  schema_version: number;
+  mode: "manual_nas_keeper_handoff_records_readback";
+  nas_keeper_handoff_record_count: number;
+  limit?: number;
+  skipped_count?: number;
+  records: OfficeManualNasKeeperHandoffRecord[];
+  capabilities: Record<string, boolean>;
+  redaction?: Record<string, boolean>;
+  errors?: Array<{ field: string; code: string }>;
+}
+
 export interface OfficeDisabledOneShotRuntimeDispatchPayload {
   exact_target_allowlist_ref: string;
   idempotency_key: string;
@@ -1463,6 +1524,20 @@ export const api = {
     if (typeof params.limit === "number") qs.set("limit", String(params.limit));
     const suffix = qs.toString() ? `?${qs.toString()}` : "";
     return fetchJSON<OfficeManualNasSaveRecordStatus>(`/api/office/controlled-mutation/manual-nas-save-record-status${suffix}`);
+  },
+  writeOfficeControlledMutationManualNasKeeperHandoffRecord: (body: OfficeManualNasKeeperHandoffRecordPayload) =>
+    fetchJSON<OfficeManualNasKeeperHandoffRecordAppendResult>("/api/office/controlled-mutation/manual-nas-keeper-handoff-record", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
+  getOfficeControlledMutationManualNasKeeperHandoffRecordStatus: (params: { nas_save_ref?: string; handoff_ref?: string; limit?: number } = {}) => {
+    const qs = new URLSearchParams();
+    if (params.nas_save_ref) qs.set("nas_save_ref", params.nas_save_ref);
+    if (params.handoff_ref) qs.set("handoff_ref", params.handoff_ref);
+    if (typeof params.limit === "number") qs.set("limit", String(params.limit));
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+    return fetchJSON<OfficeManualNasKeeperHandoffRecordStatus>(`/api/office/controlled-mutation/manual-nas-keeper-handoff-record-status${suffix}`);
   },
   executeOfficeControlledMutationDisabledOneShotRuntimeDispatch: (body: OfficeDisabledOneShotRuntimeDispatchPayload) =>
     fetchJSON<OfficeDisabledOneShotRuntimeDispatchRefusal>("/api/office/controlled-mutation/disabled-one-shot-runtime-dispatch-executor-skeleton/execute", {

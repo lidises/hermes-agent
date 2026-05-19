@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeManualApprovalRecordingDraftReviewStatus, type OfficeManualApprovalRecordStatus, type OfficeManualApprovalDispatchGateReadinessStatus, type OfficeManualDispatchGateOpenRecordStatus, type OfficeManualRuntimeCommandPreviewRecordStatus, type OfficeManualRuntimeCommandInclusionRecordStatus, type OfficeManualRuntimeCommandExecutionRecordStatus, type OfficeManualTargetMutationReadinessRecordStatus, type OfficeManualTargetMutationRecordStatus, type OfficeManualAdapterDispatchRecordStatus, type OfficeManualKanbanMutationRecordStatus, type OfficeManualNasSaveRecordStatus, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeManualApprovalRecordingDraftReviewStatus, type OfficeManualApprovalRecordStatus, type OfficeManualApprovalDispatchGateReadinessStatus, type OfficeManualDispatchGateOpenRecordStatus, type OfficeManualRuntimeCommandPreviewRecordStatus, type OfficeManualRuntimeCommandInclusionRecordStatus, type OfficeManualRuntimeCommandExecutionRecordStatus, type OfficeManualTargetMutationReadinessRecordStatus, type OfficeManualTargetMutationRecordStatus, type OfficeManualAdapterDispatchRecordStatus, type OfficeManualKanbanMutationRecordStatus, type OfficeManualNasSaveRecordStatus, type OfficeManualNasKeeperHandoffRecordStatus, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -5561,6 +5561,60 @@ export function ManualNasSaveRecordStatusPanel({
 }
 
 
+export function ManualNasKeeperHandoffRecordStatusPanel({
+  status,
+  error,
+}: {
+  status: OfficeManualNasKeeperHandoffRecordStatus | null;
+  error?: string | null;
+}) {
+  const caps = status?.capabilities ?? {};
+  const latest = status?.records?.[status.records.length - 1] ?? null;
+  return (
+    <section
+      className="border border-cyan-300/20 bg-cyan-950/10 p-4"
+      data-office-manual-nas-keeper-handoff-record-status="true"
+      data-office-manual-nas-keeper-handoff-record-count={String(status?.nas_keeper_handoff_record_count ?? 0)}
+      data-office-manual-nas-keeper-handoff-queued={String(Boolean(latest?.nas_keeper_handoff_queued))}
+      data-office-manual-nas-keeper-handoff-actual-write={String(Boolean(caps.actual_nas_write_enabled))}
+      data-office-manual-nas-keeper-handoff-mac-relay-write={String(Boolean(caps.mac_relay_write_enabled))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-200/70">NAS Keeper handoff record</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">Mac relay handoff queued · real NAS execution closed</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Queues the next NAS Keeper/Mac relay handoff after the NAS save marker. This opens queue metadata only; direct VPS NAS writes, Mac relay execution, actual NAS writes, credentials, raw paths, watcher/cron, and real dispatch remain disabled.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "NAS Keeper handoff request failed" : String(latest?.handoff_ref ?? "handoff pending")}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-manual-nas-keeper-handoff-record-boundaries="true">
+        {[
+          ["nas_save_created", Boolean(latest?.nas_save_created)],
+          ["nas_keeper_handoff_queued", Boolean(latest?.nas_keeper_handoff_queued)],
+          ["queue_append_enabled", Boolean(caps.queue_append_enabled)],
+          ["nas_keeper_handoff_enabled", Boolean(caps.nas_keeper_handoff_enabled)],
+          ["direct_vps_nas_write_enabled", Boolean(caps.direct_vps_nas_write_enabled)],
+          ["mac_relay_write_enabled", Boolean(caps.mac_relay_write_enabled)],
+          ["actual_nas_write_enabled", Boolean(caps.actual_nas_write_enabled)],
+          ["real_nas_execution_enabled", Boolean(caps.real_nas_execution_enabled)],
+          ["markdown_body_excluded", Boolean(status?.redaction?.markdown_body_excluded)],
+          ["credentials_echoed", Boolean(status?.redaction?.credentials_echoed)],
+        ].map(([key, value]) => (
+          <div key={String(key)} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-manual-nas-keeper-handoff-record-boundary={String(key)}>{String(key)}: {String(Boolean(value))}</div>
+        ))}
+      </div>
+      <div className="mt-3 border border-current/15 bg-black/20 p-3 text-xs text-midground/70">
+        queue {latest?.queue_status ?? "not-queued"} · save {latest?.nas_save_ref ?? "pending"}
+      </div>
+    </section>
+  );
+}
+
+
 export function ApprovedRealOneShotDispatchGateDesignPanel({
   status,
   error,
@@ -6987,6 +7041,8 @@ export default function OfficePage() {
   const [manualKanbanMutationRecordStatusError, setManualKanbanMutationRecordStatusError] = useState<string | null>(null);
   const [manualNasSaveRecordStatus, setManualNasSaveRecordStatus] = useState<OfficeManualNasSaveRecordStatus | null>(null);
   const [manualNasSaveRecordStatusError, setManualNasSaveRecordStatusError] = useState<string | null>(null);
+  const [manualNasKeeperHandoffRecordStatus, setManualNasKeeperHandoffRecordStatus] = useState<OfficeManualNasKeeperHandoffRecordStatus | null>(null);
+  const [manualNasKeeperHandoffRecordStatusError, setManualNasKeeperHandoffRecordStatusError] = useState<string | null>(null);
   const [nasKeeperQueueReadbackLoading, setNasKeeperQueueReadbackLoading] = useState(false);
   const [nasKeeperQueueReadbackError, setNasKeeperQueueReadbackError] = useState<string | null>(null);
   const [nasKeeperExecutionDraft, setNasKeeperExecutionDraft] = useState<OfficeNasKeeperExecutionFromPreviewPayload>(DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT);
@@ -7654,6 +7710,20 @@ export default function OfficePage() {
         }
       });
     api
+      .getOfficeControlledMutationManualNasKeeperHandoffRecordStatus({ limit: 10 })
+      .then((next) => {
+        if (!cancelled) {
+          setManualNasKeeperHandoffRecordStatus(next);
+          setManualNasKeeperHandoffRecordStatusError(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setManualNasKeeperHandoffRecordStatus(null);
+          setManualNasKeeperHandoffRecordStatusError("request failed");
+        }
+      });
+    api
       .getOfficeState()
       .then((next) => {
         if (!cancelled) applyNextState(next);
@@ -8261,6 +8331,7 @@ export default function OfficePage() {
       <ManualAdapterDispatchRecordStatusPanel status={manualAdapterDispatchRecordStatus} error={manualAdapterDispatchRecordStatusError} />
       <ManualKanbanMutationRecordStatusPanel status={manualKanbanMutationRecordStatus} error={manualKanbanMutationRecordStatusError} />
       <ManualNasSaveRecordStatusPanel status={manualNasSaveRecordStatus} error={manualNasSaveRecordStatusError} />
+      <ManualNasKeeperHandoffRecordStatusPanel status={manualNasKeeperHandoffRecordStatus} error={manualNasKeeperHandoffRecordStatusError} />
 
       <NasKeeperExecutionOperatorActionPanel
         action={nasKeeperExecutionOperatorAction}

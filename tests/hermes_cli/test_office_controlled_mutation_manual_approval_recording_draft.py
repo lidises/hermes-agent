@@ -1544,6 +1544,135 @@ def test_manual_nas_save_record_api_is_protected_and_safe(monkeypatch, tmp_path)
     assert readback_body["capabilities"]["real_nas_execution_enabled"] is False
 
 
+def _manual_nas_keeper_handoff_payload(**overrides):
+    payload = {
+        "nas_save_ref": "nassave-office-dispatch-1",
+        "handoff_ref": "handoff_manual_nas_keeper_1",
+        "relay_request_ref": "relay_req_manual_nas_keeper_1",
+        "write_ref": "write_manual_nas_keeper_1",
+        "package_ref": "pkg_manual_nas_keeper_1",
+        "target_vault_ref": "vault_personal_wiki_demo",
+        "safe_slug": "manual-nas-save-handoff",
+        "safe_title": "Manual NAS save handoff",
+        "markdown_body": "# Manual NAS save handoff\n\nSafe queue body for Mac relay execution.\n",
+        "requested_by": "actor_ai_office_operator",
+        "requested_at": "2026-05-19T08:20:00Z",
+        "nas_keeper_ref": "agent_nas_keeper",
+        "relay_node_ref": "mac_relay_primary",
+        "queued_by": "actor_ai_office_operator",
+        "queued_at": "2026-05-19T08:21:00Z",
+        "operator_confirmation": "confirmed-nas-keeper-handoff-queue-only",
+    }
+    payload.update(overrides)
+    return payload
+
+
+def _seed_nas_save_chain(tmp_path):
+    from hermes_cli.office_controlled_mutation import append_office_controlled_mutation_manual_nas_save_record
+
+    kanban_store = _seed_kanban_mutation_chain(tmp_path)
+    nas_store = tmp_path / "office" / "controlled-mutation" / "nas_save_records.jsonl"
+    append_office_controlled_mutation_manual_nas_save_record(
+        {
+            "kanban_mutation_ref": "kanbanmut-office-dispatch-1",
+            "nas_save_ref": "nassave-office-dispatch-1",
+            "nas_note_ref": "nasnote-office-dispatch-1",
+            "operator_confirmation": "confirmed-nas-save-record-only",
+            "saved_by": "actor:ai_office_operator",
+            "saved_at": "2026-05-19T08:00:00Z",
+            "save_evidence_refs": ["kanbanmut:kanbanmut-office-dispatch-1"],
+        },
+        kanban_mutation_store_path=kanban_store,
+        store_path=nas_store,
+    )
+    return nas_store
+
+
+def test_manual_nas_keeper_handoff_queues_safe_request_without_direct_nas_or_execution(tmp_path):
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_manual_nas_keeper_handoff_record,
+        list_office_controlled_mutation_manual_nas_keeper_handoff_records,
+    )
+
+    nas_store = _seed_nas_save_chain(tmp_path)
+    queue_dir = tmp_path / "handoff-queue"
+    result = append_office_controlled_mutation_manual_nas_keeper_handoff_record(
+        _manual_nas_keeper_handoff_payload(
+            raw_nas_path="/Users/lidises/private/nas/path.md",
+            **{"credential": "redacted-secret-like-value-should-not-leak"},
+        ),
+        nas_save_store_path=nas_store,
+        queue_dir=queue_dir,
+    )
+
+    assert result["queued"] is True
+    dto = result["dto"]
+    assert dto["mode"] == "manual_nas_keeper_handoff_queued"
+    assert dto["nas_save_created"] is True
+    assert dto["nas_keeper_handoff_queued"] is True
+    assert dto["queue_status"] == "pending_nas_keeper_authorization"
+    assert dto["direct_vps_nas_write_enabled"] is False
+    assert dto["mac_relay_write_enabled"] is False
+    assert dto["actual_nas_write_enabled"] is False
+    assert dto["real_dispatch_execution_enabled"] is False
+    assert "markdown_body" not in dto
+    assert "raw_nas_path" not in dto
+    assert "credential" not in dto
+    assert "sk-test" not in repr(dto)
+    assert "/Users/lidises" not in repr(dto)
+
+    duplicate = append_office_controlled_mutation_manual_nas_keeper_handoff_record(
+        _manual_nas_keeper_handoff_payload(write_ref="write_manual_nas_keeper_2"),
+        nas_save_store_path=nas_store,
+        queue_dir=queue_dir,
+    )
+    assert duplicate["queued"] is False
+    assert duplicate["errors"] == [{"field": "nas_save_ref", "code": "duplicate_nas_save_ref"}]
+
+    readback = list_office_controlled_mutation_manual_nas_keeper_handoff_records(queue_dir=queue_dir)
+    assert readback["mode"] == "manual_nas_keeper_handoff_records_readback"
+    assert readback["nas_keeper_handoff_record_count"] == 1
+    assert readback["records"][0]["handoff_ref"] == "handoff_manual_nas_keeper_1"
+    assert readback["capabilities"]["queue_append_enabled"] is True
+    assert readback["capabilities"]["actual_nas_write_enabled"] is False
+
+
+def test_manual_nas_keeper_handoff_record_api_is_protected_and_safe(monkeypatch, tmp_path):
+    from fastapi.testclient import TestClient
+    import hermes_cli.web_server as web_server
+
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+    _seed_nas_save_chain(tmp_path)
+    client = TestClient(web_server.app)
+    post_path = "/api/office/controlled-mutation/manual-nas-keeper-handoff-record"
+    get_path = "/api/office/controlled-mutation/manual-nas-keeper-handoff-record-status?handoff_ref=handoff_manual_nas_keeper_1"
+    body = _manual_nas_keeper_handoff_payload(
+        raw_nas_path="/Users/lidises/private/nas/path.md",
+        **{"credential": "redacted-secret-like-value-should-not-leak"},
+    )
+
+    assert client.post(post_path, json=body).status_code == 401
+    assert client.get(get_path).status_code == 401
+
+    stored = client.post(post_path, headers={web_server._SESSION_HEADER_NAME: web_server._SESSION_TOKEN}, json=body)
+    assert stored.status_code == 200
+    payload = stored.json()
+    assert payload["queued"] is True
+    assert payload["dto"]["nas_keeper_handoff_queued"] is True
+    assert payload["dto"]["actual_nas_write_enabled"] is False
+    assert payload["dto"]["mac_relay_write_enabled"] is False
+    assert "sk-test" not in repr(payload)
+    assert "/Users/lidises" not in repr(payload)
+    assert "markdown_body" not in payload["dto"]
+
+    readback = client.get(get_path, headers={web_server._SESSION_HEADER_NAME: web_server._SESSION_TOKEN})
+    assert readback.status_code == 200
+    readback_body = readback.json()
+    assert readback_body["nas_keeper_handoff_record_count"] == 1
+    assert readback_body["records"][0]["handoff_ref"] == "handoff_manual_nas_keeper_1"
+    assert readback_body["capabilities"]["actual_nas_write_enabled"] is False
+
+
 def test_manual_runtime_command_preview_record_api_is_protected_and_safe(monkeypatch, tmp_path):
     from fastapi.testclient import TestClient
     import hermes_cli.web_server as web_server

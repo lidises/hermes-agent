@@ -1923,6 +1923,134 @@ describe("fetchJSON", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  it("writes and reads manual NAS Keeper handoff records through protected routes without real NAS execution", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        location: { origin: "https://office.example" },
+        __HERMES_SESSION_TOKEN__: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.endsWith("/api/office/controlled-mutation/manual-nas-keeper-handoff-record")) {
+        expect(init?.method).toBe("POST");
+        const body = JSON.parse(String(init?.body));
+        expect(body.nas_save_ref).toBe("nassave-office-dispatch-1");
+        expect(JSON.stringify(body)).not.toMatch(/raw_nas_path|credential|\/Users\/lidises|sk-test/i);
+        return {
+          ok: true,
+          status: 200,
+          headers: new Headers({ "content-type": "application/json" }),
+          json: async () => ({
+            queued: true,
+            errors: [],
+            dto: {
+              schema_version: 1,
+              mode: "manual_nas_keeper_handoff_queued",
+              nas_save_ref: "nassave-office-dispatch-1",
+              handoff_ref: "handoff_manual_nas_keeper_1",
+              queue_status: "pending_nas_keeper_authorization",
+              relay_request_ref: "relay_req_manual_nas_keeper_1",
+              write_ref: "write_manual_nas_keeper_1",
+              package_ref: "pkg_manual_nas_keeper_1",
+              target_vault_ref: "vault_personal_wiki_demo",
+              safe_slug: "manual-nas-save-handoff",
+              safe_title: "Manual NAS save handoff",
+              nas_save_created: true,
+              nas_keeper_handoff_queued: true,
+              direct_vps_nas_write_enabled: false,
+              vps_direct_nas_authority_enabled: false,
+              mac_relay_write_enabled: false,
+              actual_nas_write_enabled: false,
+              real_nas_execution_enabled: false,
+              real_dispatch_execution_enabled: false,
+            },
+          }),
+        } as Response;
+      }
+      if (url.endsWith("/api/office/controlled-mutation/manual-nas-keeper-handoff-record-status?handoff_ref=handoff_manual_nas_keeper_1")) {
+        return {
+          ok: true,
+          status: 200,
+          headers: new Headers({ "content-type": "application/json" }),
+          json: async () => ({
+            schema_version: 1,
+            mode: "manual_nas_keeper_handoff_records_readback",
+            nas_keeper_handoff_record_count: 1,
+            records: [
+              {
+                schema_version: 1,
+                mode: "manual_nas_keeper_handoff_queued",
+                nas_save_ref: "nassave-office-dispatch-1",
+                handoff_ref: "handoff_manual_nas_keeper_1",
+                queue_status: "pending_nas_keeper_authorization",
+                relay_request_ref: "relay_req_manual_nas_keeper_1",
+                write_ref: "write_manual_nas_keeper_1",
+                package_ref: "pkg_manual_nas_keeper_1",
+                target_vault_ref: "vault_personal_wiki_demo",
+                safe_slug: "manual-nas-save-handoff",
+                safe_title: "Manual NAS save handoff",
+                nas_save_created: true,
+                nas_keeper_handoff_queued: true,
+                direct_vps_nas_write_enabled: false,
+                vps_direct_nas_authority_enabled: false,
+                mac_relay_write_enabled: false,
+                actual_nas_write_enabled: false,
+                real_nas_execution_enabled: false,
+                real_dispatch_execution_enabled: false,
+              },
+            ],
+            capabilities: {
+              queue_append_enabled: true,
+              nas_keeper_handoff_enabled: true,
+              actual_nas_write_enabled: false,
+              mac_relay_write_enabled: false,
+              real_nas_execution_enabled: false,
+            },
+            redaction: {
+              markdown_body_excluded: true,
+              raw_nas_path_excluded: true,
+              credentials_echoed: false,
+            },
+          }),
+        } as Response;
+      }
+      throw new Error(`unexpected url ${url}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const queued = await api.writeOfficeControlledMutationManualNasKeeperHandoffRecord({
+      nas_save_ref: "nassave-office-dispatch-1",
+      handoff_ref: "handoff_manual_nas_keeper_1",
+      relay_request_ref: "relay_req_manual_nas_keeper_1",
+      write_ref: "write_manual_nas_keeper_1",
+      package_ref: "pkg_manual_nas_keeper_1",
+      target_vault_ref: "vault_personal_wiki_demo",
+      safe_slug: "manual-nas-save-handoff",
+      safe_title: "Manual NAS save handoff",
+      markdown_body: "# Manual NAS save handoff\n\nSafe queue body for Mac relay execution.\n",
+      requested_by: "actor_ai_office_operator",
+      requested_at: "2026-05-19T08:20:00Z",
+      nas_keeper_ref: "agent_nas_keeper",
+      relay_node_ref: "mac_relay_primary",
+      queued_by: "actor_ai_office_operator",
+      queued_at: "2026-05-19T08:21:00Z",
+      operator_confirmation: "confirmed-nas-keeper-handoff-queue-only",
+    });
+    expect(queued.queued).toBe(true);
+    expect(queued.dto?.nas_keeper_handoff_queued).toBe(true);
+    expect(queued.dto?.actual_nas_write_enabled).toBe(false);
+
+    const status = await api.getOfficeControlledMutationManualNasKeeperHandoffRecordStatus({ handoff_ref: "handoff_manual_nas_keeper_1" });
+    expect(status.nas_keeper_handoff_record_count).toBe(1);
+    expect(status.capabilities.queue_append_enabled).toBe(true);
+    expect(status.capabilities.actual_nas_write_enabled).toBe(false);
+    expect(status.redaction?.markdown_body_excluded).toBe(true);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it("gets approved real one-shot dispatch gate design through the protected readback route", async () => {
     Object.defineProperty(globalThis, "window", {
       configurable: true,

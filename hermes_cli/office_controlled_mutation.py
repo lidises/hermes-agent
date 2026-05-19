@@ -290,6 +290,7 @@ _NAS_RUNTIME_WRITE_FIELDS = {
 }
 _NAS_MAC_RELAY_WRITE_REQUEST_FIELDS = _NAS_RUNTIME_WRITE_FIELDS | {"relay_request_ref", "nas_keeper_ref", "relay_node_ref"}
 _NAS_KEEPER_HANDOFF_QUEUE_FIELDS = _NAS_MAC_RELAY_WRITE_REQUEST_FIELDS | {"handoff_ref", "queued_by", "queued_at"}
+_MANUAL_NAS_KEEPER_HANDOFF_RECORD_FIELDS = _NAS_KEEPER_HANDOFF_QUEUE_FIELDS | {"nas_save_ref", "operator_confirmation"}
 _NAS_KEEPER_HANDOFF_CLAIM_DRY_RUN_FIELDS = {"handoff_ref", "claim_ref", "relay_node_ref", "claimed_by", "claimed_at"}
 _NAS_KEEPER_HANDOFF_AUTHORIZE_FIELDS = {
     "handoff_ref",
@@ -3161,6 +3162,10 @@ def _default_nas_save_record_store_path() -> Path:
     return get_hermes_home() / "office" / "controlled-mutation" / "nas_save_records.jsonl"
 
 
+def _default_manual_nas_keeper_handoff_record_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "manual_nas_keeper_handoff_records.jsonl"
+
+
 def _target_mutation_readiness_record_capabilities() -> dict[str, bool]:
     capabilities = _runtime_command_execution_record_capabilities()
     capabilities.update(
@@ -3256,6 +3261,29 @@ def _nas_save_record_capabilities() -> dict[str, bool]:
             "git_push_enabled": False,
             "credential_access_enabled": False,
             "public_exposure_enabled": False,
+            "real_dispatch_execution_enabled": False,
+        }
+    )
+    return capabilities
+
+
+def _manual_nas_keeper_handoff_record_capabilities() -> dict[str, bool]:
+    capabilities = _nas_save_record_capabilities()
+    capabilities.update(
+        {
+            "manual_nas_keeper_handoff_record_storage_enabled": True,
+            "manual_nas_keeper_handoff_record_readback_enabled": True,
+            "queue_append_enabled": True,
+            "nas_keeper_handoff_enabled": True,
+            "direct_vps_nas_write_enabled": False,
+            "vps_direct_nas_authority_enabled": False,
+            "mac_relay_write_enabled": False,
+            "actual_nas_write_enabled": False,
+            "real_nas_execution_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
             "real_dispatch_execution_enabled": False,
         }
     )
@@ -5489,6 +5517,161 @@ def list_office_controlled_mutation_manual_nas_save_records(
             "raw_nas_payload_excluded": True,
             "credentials_echoed": False,
             "unsupported_values_echoed": False,
+            "safe_refs_only": True,
+        },
+        "errors": errors,
+    }
+
+
+def _normalize_manual_nas_keeper_handoff_record(item: object) -> dict[str, object] | None:
+    if not isinstance(item, Mapping):
+        return None
+    if item.get("mode") != "manual_nas_keeper_handoff_queued":
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(item.get("nas_save_ref"), "nassave-"):
+        return None
+    if not _is_opaque_id(item.get("handoff_ref")):
+        return None
+    if item.get("nas_keeper_handoff_queued") is not True:
+        return None
+    if item.get("actual_nas_write_enabled") is not False:
+        return None
+    return dict(item)
+
+
+def _read_manual_nas_keeper_handoff_record_store(path: Path) -> tuple[list[dict[str, object]], int]:
+    records: list[dict[str, object]] = []
+    skipped_count = 0
+    if not path.exists():
+        return records, skipped_count
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped_count += 1
+                continue
+            normalized = _normalize_manual_nas_keeper_handoff_record(item)
+            if normalized is None:
+                skipped_count += 1
+                continue
+            records.append(normalized)
+    return records, skipped_count
+
+
+def append_office_controlled_mutation_manual_nas_keeper_handoff_record(
+    payload: object,
+    *,
+    nas_save_store_path: Path | None = None,
+    queue_dir: Path | str | None = None,
+    store_path: Path | None = None,
+) -> dict[str, object]:
+    if not isinstance(payload, Mapping):
+        return {"queued": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    errors: list[dict[str, str]] = []
+    for field in sorted(_MANUAL_NAS_KEEPER_HANDOFF_RECORD_FIELDS):
+        if field not in payload:
+            errors.append(_error(field, "required"))
+    if "nas_save_ref" in payload and not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("nas_save_ref"), "nassave-"):
+        errors.append(_error("nas_save_ref", "unsupported_ref_shape"))
+    if "operator_confirmation" in payload and payload.get("operator_confirmation") != "confirmed-nas-keeper-handoff-queue-only":
+        errors.append(_error("operator_confirmation", "unsupported_confirmation"))
+    if errors:
+        return {"queued": False, "errors": errors, "dto": None}
+
+    nas_save_ref = cast(str, payload["nas_save_ref"])
+    nas_readback = list_office_controlled_mutation_manual_nas_save_records(
+        store_path=nas_save_store_path,
+        nas_save_ref=nas_save_ref,
+        limit=1,
+    )
+    nas_records = cast(list[dict[str, object]], nas_readback.get("records", []))
+    if not nas_records:
+        return {"queued": False, "errors": [_error("nas_save_ref", "nas_save_not_found")], "dto": None}
+    source = nas_records[-1]
+    if source.get("nas_save_created") is not True:
+        return {"queued": False, "errors": [_error("nas_save_ref", "nas_save_not_created")], "dto": None}
+    if source.get("vps_direct_nas_authority_enabled") is not False or source.get("real_nas_execution_enabled") is not False:
+        return {"queued": False, "errors": [_error("nas_save_ref", "unsafe_nas_authority_state")], "dto": None}
+
+    record_path = store_path or _default_manual_nas_keeper_handoff_record_store_path()
+    existing, _ = _read_manual_nas_keeper_handoff_record_store(record_path)
+    if any(item.get("nas_save_ref") == nas_save_ref for item in existing):
+        return {"queued": False, "errors": [_error("nas_save_ref", "duplicate_nas_save_ref")], "dto": None}
+    if any(item.get("handoff_ref") == payload.get("handoff_ref") for item in existing):
+        return {"queued": False, "errors": [_error("handoff_ref", "duplicate_handoff_ref")], "dto": None}
+
+    queue_payload = {field: payload[field] for field in _NAS_KEEPER_HANDOFF_QUEUE_FIELDS if field in payload}
+    queued = enqueue_office_controlled_mutation_nas_keeper_mac_relay_handoff(queue_payload, queue_dir=queue_dir)
+    if not queued.get("queued"):
+        return {"queued": False, "errors": queued.get("errors", []), "dto": None}
+    queue_dto = cast(dict[str, object], queued["dto"])
+    dto = {
+        **queue_dto,
+        "mode": "manual_nas_keeper_handoff_queued",
+        "nas_save_ref": nas_save_ref,
+        "nas_note_ref": source.get("nas_note_ref"),
+        "kanban_mutation_ref": source.get("kanban_mutation_ref"),
+        "nas_save_created": True,
+        "nas_keeper_handoff_queued": True,
+        "direct_vps_nas_write_enabled": False,
+        "vps_direct_nas_authority_enabled": False,
+        "mac_relay_write_enabled": False,
+        "actual_nas_write_enabled": False,
+        "real_nas_execution_enabled": False,
+        "real_dispatch_execution_enabled": False,
+        "capabilities": _manual_nas_keeper_handoff_record_capabilities(),
+        "redaction": {
+            "markdown_body_excluded": True,
+            "raw_nas_path_excluded": True,
+            "credentials_echoed": False,
+            "safe_refs_only": True,
+        },
+    }
+    record_path.parent.mkdir(parents=True, exist_ok=True)
+    with record_path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(dto, sort_keys=True, ensure_ascii=False) + "\n")
+    return {"queued": True, "errors": [], "dto": dto}
+
+
+def list_office_controlled_mutation_manual_nas_keeper_handoff_records(
+    *,
+    store_path: Path | None = None,
+    queue_dir: Path | str | None = None,
+    limit: int = 50,
+    nas_save_ref: str | None = None,
+    handoff_ref: str | None = None,
+) -> dict[str, object]:
+    del queue_dir
+    path = store_path or _default_manual_nas_keeper_handoff_record_store_path()
+    errors: list[dict[str, str]] = []
+    records, skipped_count = _read_manual_nas_keeper_handoff_record_store(path)
+    if nas_save_ref is not None:
+        if _office_disabled_runtime_dispatch_valid_prefixed_ref(nas_save_ref, "nassave-"):
+            records = [item for item in records if item.get("nas_save_ref") == nas_save_ref]
+        else:
+            errors.append(_error("nas_save_ref", "unsupported_ref_shape"))
+            records = []
+    if handoff_ref is not None:
+        if _is_opaque_id(handoff_ref):
+            records = [item for item in records if item.get("handoff_ref") == handoff_ref]
+        else:
+            errors.append(_error("handoff_ref", "invalid_opaque_id"))
+            records = []
+    max_items = max(0, min(limit, 200))
+    records = records[-max_items:] if max_items else []
+    return {
+        "schema_version": 1,
+        "mode": "manual_nas_keeper_handoff_records_readback",
+        "nas_keeper_handoff_record_count": len(records),
+        "limit": max_items,
+        "skipped_count": skipped_count,
+        "records": records,
+        "capabilities": _manual_nas_keeper_handoff_record_capabilities(),
+        "redaction": {
+            "markdown_body_excluded": True,
+            "raw_nas_path_excluded": True,
+            "credentials_echoed": False,
             "safe_refs_only": True,
         },
         "errors": errors,

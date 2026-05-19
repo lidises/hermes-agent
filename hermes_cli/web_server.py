@@ -61,6 +61,7 @@ from hermes_cli.office_controlled_mutation import (
     append_office_controlled_mutation_manual_adapter_dispatch_record,
     append_office_controlled_mutation_manual_kanban_mutation_record,
     append_office_controlled_mutation_manual_nas_save_record,
+    append_office_controlled_mutation_manual_nas_keeper_handoff_record,
     append_office_controlled_mutation_authority_adapter_registry_event,
     append_office_controlled_mutation_decision_event,
     append_office_controlled_mutation_dry_run_result_event,
@@ -119,6 +120,7 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_manual_adapter_dispatch_records,
     list_office_controlled_mutation_manual_kanban_mutation_records,
     list_office_controlled_mutation_manual_nas_save_records,
+    list_office_controlled_mutation_manual_nas_keeper_handoff_records,
     list_office_controlled_mutation_manual_approval_recording_drafts,
     list_office_controlled_mutation_authority_adapter_registry_events,
     list_office_controlled_mutation_request_events,
@@ -1332,6 +1334,26 @@ async def get_office_controlled_mutation_manual_nas_save_record_status(
     return list_office_controlled_mutation_manual_nas_save_records(
         kanban_mutation_ref=kanban_mutation_ref,
         nas_save_ref=nas_save_ref,
+        limit=limit,
+    )
+
+
+@app.post("/api/office/controlled-mutation/manual-nas-keeper-handoff-record")
+async def append_office_controlled_mutation_manual_nas_keeper_handoff_record_endpoint(payload: Mapping[str, Any]):
+    """Queue NAS Keeper/Mac relay handoff metadata while keeping real NAS execution closed."""
+    return append_office_controlled_mutation_manual_nas_keeper_handoff_record(payload)
+
+
+@app.get("/api/office/controlled-mutation/manual-nas-keeper-handoff-record-status")
+async def get_office_controlled_mutation_manual_nas_keeper_handoff_record_status(
+    nas_save_ref: str | None = None,
+    handoff_ref: str | None = None,
+    limit: int = 50,
+):
+    """Read back NAS Keeper/Mac relay handoff metadata without exposing markdown bodies, paths, or credentials."""
+    return list_office_controlled_mutation_manual_nas_keeper_handoff_records(
+        nas_save_ref=nas_save_ref,
+        handoff_ref=handoff_ref,
         limit=limit,
     )
 
