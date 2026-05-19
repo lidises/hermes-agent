@@ -376,6 +376,20 @@ export interface OfficeAdapterBindingDryRunStatus {
   errors: Array<{ field: string; code: string }>;
 }
 
+export interface OfficeHumanReviewedSingleDispatchStatus {
+  schema_version: number;
+  mode: "human_reviewed_single_dispatch_status";
+  human_reviewed_single_dispatch_complete: boolean;
+  source_adapter_binding_lane: string;
+  next_manual_lane: string;
+  dispatch_candidate: Record<string, boolean | string>;
+  approval_requirements: Record<string, boolean>;
+  forbidden_boundaries: string[];
+  capabilities: Record<string, boolean>;
+  redaction: Record<string, boolean>;
+  errors: Array<{ field: string; code: string }>;
+}
+
 export interface OfficeDispatcherCompletionReviewStatusParams {
   limit?: number;
 }
@@ -553,6 +567,8 @@ export const api = {
     fetchJSON<OfficeManualOneShotRuntimeDryRunStatus>("/api/office/controlled-mutation/manual-one-shot-runtime-dry-run-status"),
   getOfficeControlledMutationAdapterBindingDryRunStatus: () =>
     fetchJSON<OfficeAdapterBindingDryRunStatus>("/api/office/controlled-mutation/adapter-binding-dry-run-status"),
+  getOfficeControlledMutationHumanReviewedSingleDispatchStatus: () =>
+    fetchJSON<OfficeHumanReviewedSingleDispatchStatus>("/api/office/controlled-mutation/human-reviewed-single-dispatch-status"),
   executeOfficeControlledMutationNasSingleFileWrite: (body: OfficeNasSingleFileWritePayload) =>
     fetchJSON<OfficeNasSingleFileWriteResult>("/api/office/controlled-mutation/nas-runtime/single-file-write", {
       method: "POST",

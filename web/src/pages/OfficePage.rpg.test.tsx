@@ -2123,6 +2123,85 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(markup).not.toMatch(/raw adapter|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
   });
 
+  it("renders human-reviewed single-dispatch status without dispatch or target mutation", () => {
+    const HumanReviewedSingleDispatchStatusPanel = (OfficePageModule as unknown as {
+      HumanReviewedSingleDispatchStatusPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.HumanReviewedSingleDispatchStatusPanel>>;
+    }).HumanReviewedSingleDispatchStatusPanel;
+    const status = {
+      schema_version: 1,
+      mode: "human_reviewed_single_dispatch_status" as const,
+      human_reviewed_single_dispatch_complete: true,
+      source_adapter_binding_lane: "adapter_binding_dry_run_status",
+      next_manual_lane: "explicit_runtime_dispatch_approval",
+      dispatch_candidate: {
+        candidate_ref: "dispatch_candidate_human_reviewed_single",
+        human_review_required: true,
+        human_review_recorded: true,
+        single_dispatch_only: true,
+        dispatch_created: false,
+        target_mutation_created: false,
+      },
+      approval_requirements: {
+        operator_review_required: true,
+        adapter_binding_review_required: true,
+        target_allowlist_review_required: true,
+        rollback_review_required: true,
+        runtime_dispatch_approval_granted: false,
+      },
+      forbidden_boundaries: ["adapter_dispatch", "target_mutation", "runtime_command_execution"],
+      capabilities: {
+        human_reviewed_single_dispatch_readback_enabled: true,
+        dispatch_candidate_metadata_enabled: true,
+        approval_requirements_readback_enabled: true,
+        adapter_binding_enabled: false,
+        adapter_dispatch_enabled: false,
+        runtime_command_execution_enabled: false,
+        watcher_daemon_enabled: false,
+        cron_enabled: false,
+        target_mutation_enabled: false,
+        kanban_mutation_enabled: false,
+        nas_save_enabled: false,
+        vps_file_change_enabled: false,
+        service_restart_enabled: false,
+        git_push_enabled: false,
+        credential_access_enabled: false,
+        public_exposure_enabled: false,
+      },
+      redaction: { raw_excluded: true },
+      errors: [],
+    };
+
+    const markup = renderToStaticMarkup(<HumanReviewedSingleDispatchStatusPanel status={status} error={null} />);
+
+    expect(markup).toContain('data-office-human-reviewed-single-dispatch-status="true"');
+    expect(markup).toContain('data-office-human-reviewed-single-dispatch-status-complete="true"');
+    expect(markup).toContain('data-office-human-reviewed-single-dispatch-status-readback-enabled="true"');
+    expect(markup).toContain('data-office-human-reviewed-single-dispatch-status-candidate-metadata-enabled="true"');
+    expect(markup).toContain('data-office-human-reviewed-single-dispatch-status-approval-readback-enabled="true"');
+    expect(markup).toContain('data-office-human-reviewed-single-dispatch-status-binding-enabled="false"');
+    expect(markup).toContain('data-office-human-reviewed-single-dispatch-status-dispatch-enabled="false"');
+    expect(markup).toContain('data-office-human-reviewed-single-dispatch-status-target-mutation-enabled="false"');
+    expect(markup).toContain('data-office-human-reviewed-single-dispatch-status-runtime-execution-enabled="false"');
+    expect(markup).toContain('data-office-human-reviewed-single-dispatch-status-watcher-enabled="false"');
+    expect(markup).toContain('data-office-human-reviewed-single-dispatch-status-cron-enabled="false"');
+    expect(markup).toContain('data-office-human-reviewed-single-dispatch-status-kanban-mutation-enabled="false"');
+    expect(markup).toContain('data-office-human-reviewed-single-dispatch-status-nas-save-enabled="false"');
+    expect(markup).toContain('data-office-human-reviewed-single-dispatch-status-vps-file-change-enabled="false"');
+    expect(markup).toContain('data-office-human-reviewed-single-dispatch-status-service-restart-enabled="false"');
+    expect(markup).toContain('data-office-human-reviewed-single-dispatch-status-git-push-enabled="false"');
+    expect(markup).toContain('data-office-human-reviewed-single-dispatch-status-credential-access-enabled="false"');
+    expect(markup).toContain('data-office-human-reviewed-single-dispatch-status-public-exposure-enabled="false"');
+    expect(markup).toContain('data-office-human-reviewed-single-dispatch-status-candidate="candidate_ref"');
+    expect(markup).toContain('data-office-human-reviewed-single-dispatch-status-approval="runtime_dispatch_approval_granted"');
+    expect(markup).toContain('data-office-human-reviewed-single-dispatch-status-forbidden-boundary="adapter_dispatch"');
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw dispatch|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-dispatch|provider/i);
+  });
+
   it("renders the queue-state manual review surface without executable controls or raw markdown", () => {
     const NasKeeperQueueManualEvidenceReviewSurfacePanel = (OfficePageModule as unknown as { NasKeeperQueueManualEvidenceReviewSurfacePanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.NasKeeperQueueManualEvidenceReviewSurfacePanel>> }).NasKeeperQueueManualEvidenceReviewSurfacePanel;
     const boundary = { detailKind: "nas_runtime_n3_approval_boundary_status_surface" } as ReturnType<typeof buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface>;

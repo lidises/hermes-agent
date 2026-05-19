@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAdapterBindingDryRunStatus, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -4567,6 +4567,77 @@ export function AdapterBindingDryRunStatusPanel({
 }
 
 
+export function HumanReviewedSingleDispatchStatusPanel({
+  status,
+  error,
+}: {
+  status: OfficeHumanReviewedSingleDispatchStatus | null;
+  error?: string | null;
+}) {
+  const caps = status?.capabilities ?? {};
+  const candidate = status?.dispatch_candidate ?? {};
+  const approvals = status?.approval_requirements ?? {};
+  return (
+    <section
+      className="border border-violet-300/20 bg-violet-950/10 p-4"
+      data-office-human-reviewed-single-dispatch-status="true"
+      data-office-human-reviewed-single-dispatch-status-complete={String(Boolean(status?.human_reviewed_single_dispatch_complete))}
+      data-office-human-reviewed-single-dispatch-status-readback-enabled={String(Boolean(caps.human_reviewed_single_dispatch_readback_enabled))}
+      data-office-human-reviewed-single-dispatch-status-candidate-metadata-enabled={String(Boolean(caps.dispatch_candidate_metadata_enabled))}
+      data-office-human-reviewed-single-dispatch-status-approval-readback-enabled={String(Boolean(caps.approval_requirements_readback_enabled))}
+      data-office-human-reviewed-single-dispatch-status-binding-enabled={String(Boolean(caps.adapter_binding_enabled))}
+      data-office-human-reviewed-single-dispatch-status-dispatch-enabled={String(Boolean(caps.adapter_dispatch_enabled))}
+      data-office-human-reviewed-single-dispatch-status-runtime-execution-enabled={String(Boolean(caps.runtime_command_execution_enabled))}
+      data-office-human-reviewed-single-dispatch-status-watcher-enabled={String(Boolean(caps.watcher_daemon_enabled))}
+      data-office-human-reviewed-single-dispatch-status-cron-enabled={String(Boolean(caps.cron_enabled))}
+      data-office-human-reviewed-single-dispatch-status-target-mutation-enabled={String(Boolean(caps.target_mutation_enabled))}
+      data-office-human-reviewed-single-dispatch-status-kanban-mutation-enabled={String(Boolean(caps.kanban_mutation_enabled))}
+      data-office-human-reviewed-single-dispatch-status-nas-save-enabled={String(Boolean(caps.nas_save_enabled))}
+      data-office-human-reviewed-single-dispatch-status-vps-file-change-enabled={String(Boolean(caps.vps_file_change_enabled))}
+      data-office-human-reviewed-single-dispatch-status-service-restart-enabled={String(Boolean(caps.service_restart_enabled))}
+      data-office-human-reviewed-single-dispatch-status-git-push-enabled={String(Boolean(caps.git_push_enabled))}
+      data-office-human-reviewed-single-dispatch-status-credential-access-enabled={String(Boolean(caps.credential_access_enabled))}
+      data-office-human-reviewed-single-dispatch-status-public-exposure-enabled={String(Boolean(caps.public_exposure_enabled))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-violet-200/70">Human-reviewed single dispatch</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">candidate only · dispatch blocked</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Projects one human-reviewed dispatch candidate and the approval checklist while keeping adapter dispatch, runtime execution, and target mutation disabled.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "readback request failed" : `next ${status?.next_manual_lane ?? "explicit_runtime_dispatch_approval"}`}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-6" data-office-human-reviewed-single-dispatch-status-candidate-list="true">
+        {Object.entries(candidate).map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-human-reviewed-single-dispatch-status-candidate={key}>
+            {key}: {String(value)}
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-5" data-office-human-reviewed-single-dispatch-status-approval-list="true">
+        {Object.entries(approvals).map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-human-reviewed-single-dispatch-status-approval={key} data-office-human-reviewed-single-dispatch-status-approval-enabled={String(Boolean(value))}>
+            {key}: {String(Boolean(value))}
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-2" data-office-human-reviewed-single-dispatch-status-forbidden-boundaries="true">
+        {(status?.forbidden_boundaries ?? []).map((boundary) => (
+          <div key={boundary} className="border border-red-300/20 bg-red-950/10 p-2 text-xs text-red-100/80" data-office-human-reviewed-single-dispatch-status-forbidden-boundary={boundary}>{boundary}</div>
+        ))}
+      </div>
+      <div className="mt-3 border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+        source: {status?.source_adapter_binding_lane ?? "adapter_binding_dry_run_status"}
+      </div>
+    </section>
+  );
+}
+
+
 export function NasKeeperQueueManualEvidenceReviewSurfacePanel({
   surface,
   readback,
@@ -5792,6 +5863,8 @@ export default function OfficePage() {
   const [manualOneShotRuntimeDryRunStatusError, setManualOneShotRuntimeDryRunStatusError] = useState<string | null>(null);
   const [adapterBindingDryRunStatus, setAdapterBindingDryRunStatus] = useState<OfficeAdapterBindingDryRunStatus | null>(null);
   const [adapterBindingDryRunStatusError, setAdapterBindingDryRunStatusError] = useState<string | null>(null);
+  const [humanReviewedSingleDispatchStatus, setHumanReviewedSingleDispatchStatus] = useState<OfficeHumanReviewedSingleDispatchStatus | null>(null);
+  const [humanReviewedSingleDispatchStatusError, setHumanReviewedSingleDispatchStatusError] = useState<string | null>(null);
   const [nasKeeperQueueReadbackLoading, setNasKeeperQueueReadbackLoading] = useState(false);
   const [nasKeeperQueueReadbackError, setNasKeeperQueueReadbackError] = useState<string | null>(null);
   const [nasKeeperExecutionDraft, setNasKeeperExecutionDraft] = useState<OfficeNasKeeperExecutionFromPreviewPayload>(DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT);
@@ -6190,6 +6263,20 @@ export default function OfficePage() {
         if (!cancelled) {
           setAdapterBindingDryRunStatus(null);
           setAdapterBindingDryRunStatusError("request failed");
+        }
+      });
+    api
+      .getOfficeControlledMutationHumanReviewedSingleDispatchStatus()
+      .then((next) => {
+        if (!cancelled) {
+          setHumanReviewedSingleDispatchStatus(next);
+          setHumanReviewedSingleDispatchStatusError(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setHumanReviewedSingleDispatchStatus(null);
+          setHumanReviewedSingleDispatchStatusError("request failed");
         }
       });
     api
@@ -6781,6 +6868,7 @@ export default function OfficePage() {
       <RuntimePreflightStatusPanel status={runtimePreflightStatus} error={runtimePreflightStatusError} />
       <ManualOneShotRuntimeDryRunStatusPanel status={manualOneShotRuntimeDryRunStatus} error={manualOneShotRuntimeDryRunStatusError} />
       <AdapterBindingDryRunStatusPanel status={adapterBindingDryRunStatus} error={adapterBindingDryRunStatusError} />
+      <HumanReviewedSingleDispatchStatusPanel status={humanReviewedSingleDispatchStatus} error={humanReviewedSingleDispatchStatusError} />
 
       <NasKeeperExecutionOperatorActionPanel
         action={nasKeeperExecutionOperatorAction}

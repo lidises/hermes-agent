@@ -1,4 +1,12 @@
-Last updated: 2026-05-19 09:59 KST
+Last updated: 2026-05-19 10:12 KST
+
+## Human-reviewed single-dispatch status lane
+
+Implemented the recommended shortest follow-up after `adapter_binding_dry_run_status`: a protected human-reviewed single-dispatch status lane. Backend adds `build_office_controlled_mutation_human_reviewed_single_dispatch_status(...)` plus protected GET `/api/office/controlled-mutation/human-reviewed-single-dispatch-status`; frontend adds a typed API wrapper and display-only `/office` panel with stable `data-office-human-reviewed-single-dispatch-status-*` hooks. It models one human-reviewed dispatch candidate plus approval checklist metadata only, while keeping adapter binding, adapter dispatch, runtime command execution, watcher daemon, cron, target/Kanban/NAS mutation, VPS file changes, service restart, git push, credential access, and public exposure disabled.
+
+Verification 2026-05-19 10:12 KST: RED backend tests first failed for missing helper/route; RED frontend tests first failed for missing API wrapper/panel. GREEN focused backend human-reviewed-single-dispatch+adapter-binding tests passed (`4 passed`); focused frontend human-reviewed-single-dispatch API/RPG tests passed (`2 passed`, `93 skipped`). Broader verification/build pending in this slice.
+
+Boundary: this is status/readback/UI only. It does not dispatch an adapter, create an adapter binding, execute runtime commands, start watcher/cron automation, mutate targets/Kanban/NAS/VPS files, restart services by itself, push from the lane, expose public routes, or grant VPS direct NAS mount/credential/write authority.
 
 ## Adapter binding dry-run status lane
 

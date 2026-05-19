@@ -632,6 +632,49 @@ describe("fetchJSON", () => {
     expect(JSON.stringify(fetchMock.mock.calls[0]?.[1])).not.toMatch(/method|body|\/Users\/|\/home\/|token=|sk-|provider/i);
   });
 
+  it("gets human-reviewed single-dispatch status through the protected readback route", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        __HERMES_SESSION_TOKEN__: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers({ "content-type": "application/json" }),
+      json: async () => ({
+        mode: "human_reviewed_single_dispatch_status",
+        human_reviewed_single_dispatch_complete: true,
+        capabilities: {
+          human_reviewed_single_dispatch_readback_enabled: true,
+          dispatch_candidate_metadata_enabled: true,
+          approval_requirements_readback_enabled: true,
+          adapter_dispatch_enabled: false,
+          target_mutation_enabled: false,
+        },
+      }),
+    } as Response);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await api.getOfficeControlledMutationHumanReviewedSingleDispatchStatus();
+
+    expect(result.mode).toBe("human_reviewed_single_dispatch_status");
+    expect(result.human_reviewed_single_dispatch_complete).toBe(true);
+    expect(result.capabilities.dispatch_candidate_metadata_enabled).toBe(true);
+    expect(result.capabilities.approval_requirements_readback_enabled).toBe(true);
+    expect(result.capabilities.adapter_dispatch_enabled).toBe(false);
+    expect(result.capabilities.target_mutation_enabled).toBe(false);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/office/controlled-mutation/human-reviewed-single-dispatch-status",
+      expect.objectContaining({ headers: expect.any(Headers) }),
+    );
+    const headers = fetchMock.mock.calls[0]?.[1]?.headers as Headers;
+    expect(headers.get("X-Hermes-Session-Token")).toBe("session-token-for-header-only");
+    expect(JSON.stringify(fetchMock.mock.calls[0]?.[1])).not.toMatch(/method|body|\/Users\/|\/home\/|token=|sk-|provider/i);
+  });
+
   it("posts safe NAS Keeper Mac relay write payload through the protected execution route", async () => {
     Object.defineProperty(globalThis, "window", {
       configurable: true,
