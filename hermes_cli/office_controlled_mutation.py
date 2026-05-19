@@ -131,6 +131,14 @@ _APPROVAL_RECORD_FIELDS = {
     "approved_at",
     "approval_evidence_refs",
 }
+_DISPATCH_GATE_OPEN_RECORD_FIELDS = {
+    "approval_record_ref",
+    "dispatch_gate_ref",
+    "operator_confirmation",
+    "opened_by",
+    "opened_at",
+    "gate_evidence_refs",
+}
 _AUTHORITY_REGISTRY_FIELDS = {
     "adapter_ref",
     "adapter_kind",
@@ -3036,6 +3044,37 @@ def _default_approval_record_store_path() -> Path:
     return get_hermes_home() / "office" / "controlled-mutation" / "approval_records.jsonl"
 
 
+def _default_dispatch_gate_open_record_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "dispatch_gate_open_records.jsonl"
+
+
+def _dispatch_gate_open_record_capabilities() -> dict[str, bool]:
+    capabilities = _approval_record_capabilities()
+    capabilities.update(
+        {
+            "dispatch_gate_open_record_storage_enabled": True,
+            "dispatch_gate_open_record_readback_enabled": True,
+            "dispatch_gate_open": True,
+            "runtime_command_materialization_enabled": False,
+            "runtime_command_execution_enabled": False,
+            "adapter_binding_enabled": False,
+            "adapter_dispatch_enabled": False,
+            "idempotency_replay_store_write_enabled": False,
+            "rollback_execution_enabled": False,
+            "target_mutation_enabled": False,
+            "kanban_mutation_enabled": False,
+            "nas_save_enabled": False,
+            "vps_file_change_enabled": False,
+            "service_restart_enabled": False,
+            "git_push_enabled": False,
+            "credential_access_enabled": False,
+            "public_exposure_enabled": False,
+            "real_dispatch_execution_enabled": False,
+        }
+    )
+    return capabilities
+
+
 def _approval_record_capabilities() -> dict[str, bool]:
     capabilities = _approval_recording_draft_capabilities()
     capabilities.update(
@@ -3313,6 +3352,202 @@ def build_office_controlled_mutation_manual_approval_dispatch_gate_readiness_sta
             "credentials_echoed": False,
         },
         "errors": readback.get("errors", []),
+    }
+
+
+def validate_office_controlled_mutation_manual_dispatch_gate_open_record(payload: object, *, source_approval: Mapping[str, object]) -> dict[str, object]:
+    errors: list[dict[str, str]] = []
+    if not isinstance(payload, Mapping):
+        return {"valid": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+
+    for field in sorted(_DISPATCH_GATE_OPEN_RECORD_FIELDS):
+        if field not in payload:
+            errors.append(_error(field, "required"))
+    for field in sorted(set(payload) - _DISPATCH_GATE_OPEN_RECORD_FIELDS):
+        _ = field
+
+    if "approval_record_ref" in payload and not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("approval_record_ref"), "approval-"):
+        errors.append(_error("approval_record_ref", "unsupported_ref_shape"))
+    if "approval_record_ref" in payload and payload.get("approval_record_ref") != source_approval.get("approval_record_ref"):
+        errors.append(_error("approval_record_ref", "approval_record_mismatch"))
+    if "dispatch_gate_ref" in payload and not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("dispatch_gate_ref"), "gate-"):
+        errors.append(_error("dispatch_gate_ref", "unsupported_ref_shape"))
+    if "operator_confirmation" in payload and payload.get("operator_confirmation") != "confirmed-dispatch-gate-open-metadata-only":
+        errors.append(_error("operator_confirmation", "unsupported_confirmation"))
+    if "opened_by" in payload and not _is_opaque_ref(payload.get("opened_by")):
+        errors.append(_error("opened_by", "invalid_opaque_ref"))
+    if "opened_at" in payload and not (
+        isinstance(payload.get("opened_at"), str) and _ISO_UTC_RE.fullmatch(payload["opened_at"])
+    ):
+        errors.append(_error("opened_at", "invalid_timestamp"))
+    if "gate_evidence_refs" in payload and not _validate_evidence_refs(payload.get("gate_evidence_refs")):
+        errors.append(_error("gate_evidence_refs", "invalid_opaque_ref"))
+    if errors:
+        return {"valid": False, "errors": errors, "dto": None}
+
+    dto = {
+        "schema_version": 1,
+        "mode": "stored_manual_dispatch_gate_open_record",
+        "gate_status": "dispatch_gate_open_metadata_only",
+        "approval_record_ref": payload["approval_record_ref"],
+        "dispatch_gate_ref": payload["dispatch_gate_ref"],
+        "idempotency_key": source_approval.get("idempotency_key"),
+        "exact_target_allowlist_ref": source_approval.get("exact_target_allowlist_ref"),
+        "replay_lookup_ref": source_approval.get("replay_lookup_ref"),
+        "rollback_disable_ref": source_approval.get("rollback_disable_ref"),
+        "dry_run_evidence_ref": source_approval.get("dry_run_evidence_ref"),
+        "opened_by": payload["opened_by"],
+        "opened_at": payload["opened_at"],
+        "gate_evidence_refs": list(payload["gate_evidence_refs"]),
+        "approval_record_written": True,
+        "dispatch_gate_open": True,
+        "runtime_command_included": False,
+        "runtime_command_executed": False,
+        "adapter_binding_created": False,
+        "adapter_dispatch_created": False,
+        "idempotency_replay_store_written": False,
+        "rollback_executed": False,
+        "target_mutation_created": False,
+        "watcher_or_cron_created": False,
+        "kanban_mutation_created": False,
+        "nas_save_created": False,
+        "vps_file_change_created": False,
+        "real_dispatch_execution_enabled": False,
+        "capabilities": _dispatch_gate_open_record_capabilities(),
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "opaque_refs_only": True,
+            "safe_summaries_only": True,
+            "unsupported_values_echoed": False,
+            "credentials_echoed": False,
+        },
+    }
+    return {"valid": True, "errors": [], "dto": dto}
+
+
+def _normalize_stored_dispatch_gate_open_record(item: object) -> dict[str, object] | None:
+    if not isinstance(item, Mapping):
+        return None
+    if item.get("mode") != "stored_manual_dispatch_gate_open_record":
+        return None
+    required = {
+        "schema_version",
+        "mode",
+        "gate_status",
+        "approval_record_ref",
+        "dispatch_gate_ref",
+        "approval_record_written",
+        "dispatch_gate_open",
+        "runtime_command_executed",
+        "target_mutation_created",
+        "capabilities",
+        "redaction",
+    }
+    if not required.issubset(set(item)):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(item.get("approval_record_ref"), "approval-"):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(item.get("dispatch_gate_ref"), "gate-"):
+        return None
+    return dict(item)
+
+
+def _read_dispatch_gate_open_record_store(path: Path) -> tuple[list[dict[str, object]], int]:
+    records: list[dict[str, object]] = []
+    skipped_count = 0
+    if not path.exists():
+        return records, skipped_count
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped_count += 1
+                continue
+            normalized = _normalize_stored_dispatch_gate_open_record(item)
+            if normalized is None:
+                skipped_count += 1
+                continue
+            records.append(normalized)
+    return records, skipped_count
+
+
+def append_office_controlled_mutation_manual_dispatch_gate_open_record(
+    payload: object, *, approval_store_path: Path | None = None, store_path: Path | None = None
+) -> dict[str, object]:
+    if not isinstance(payload, Mapping):
+        return {"stored": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    approval_ref = payload.get("approval_record_ref")
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(approval_ref, "approval-"):
+        return {"stored": False, "errors": [_error("approval_record_ref", "unsupported_ref_shape")], "dto": None}
+    approval_readback = list_office_controlled_mutation_manual_approval_records(
+        store_path=approval_store_path,
+        approval_record_ref=cast(str, approval_ref),
+        limit=1,
+    )
+    approvals = cast(list[dict[str, object]], approval_readback.get("records", []))
+    if not approvals:
+        return {"stored": False, "errors": [_error("approval_record_ref", "approval_record_not_found")], "dto": None}
+    validation = validate_office_controlled_mutation_manual_dispatch_gate_open_record(payload, source_approval=approvals[-1])
+    if not validation["valid"]:
+        return {"stored": False, "errors": validation["errors"], "dto": None}
+    dto = cast(dict[str, object], validation["dto"])
+    path = store_path or _default_dispatch_gate_open_record_store_path()
+    existing, _ = _read_dispatch_gate_open_record_store(path)
+    if any(item.get("dispatch_gate_ref") == dto["dispatch_gate_ref"] for item in existing):
+        return {"stored": False, "errors": [_error("dispatch_gate_ref", "duplicate_dispatch_gate_ref")], "dto": None}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(dto, sort_keys=True, separators=(",", ":")) + "\n")
+    return {"stored": True, "errors": [], "dto": dto}
+
+
+def list_office_controlled_mutation_manual_dispatch_gate_open_records(
+    *, store_path: Path | None = None, limit: int = 50, dispatch_gate_ref: str | None = None, approval_record_ref: str | None = None
+) -> dict[str, object]:
+    path = store_path or _default_dispatch_gate_open_record_store_path()
+    errors: list[dict[str, str]] = []
+    records, skipped_count = _read_dispatch_gate_open_record_store(path)
+    if dispatch_gate_ref is not None:
+        if _office_disabled_runtime_dispatch_valid_prefixed_ref(dispatch_gate_ref, "gate-"):
+            records = [item for item in records if item.get("dispatch_gate_ref") == dispatch_gate_ref]
+        else:
+            errors.append(_error("dispatch_gate_ref", "unsupported_ref_shape"))
+            records = []
+    if approval_record_ref is not None:
+        if _office_disabled_runtime_dispatch_valid_prefixed_ref(approval_record_ref, "approval-"):
+            records = [item for item in records if item.get("approval_record_ref") == approval_record_ref]
+        else:
+            errors.append(_error("approval_record_ref", "unsupported_ref_shape"))
+            records = []
+    max_items = max(0, min(limit, 200))
+    records = records[-max_items:] if max_items else []
+    latest_refs: dict[str, str] = {}
+    if records:
+        latest = records[-1]
+        for key in ("dispatch_gate_ref", "approval_record_ref", "idempotency_key"):
+            value = latest.get(key)
+            if isinstance(value, str):
+                latest_refs[key] = value
+    return {
+        "schema_version": 1,
+        "mode": "stored_manual_dispatch_gate_open_records_readback",
+        "dispatch_gate_open_record_count": len(records),
+        "limit": max_items,
+        "skipped_count": skipped_count,
+        "records": records,
+        "latest_refs": latest_refs,
+        "capabilities": _dispatch_gate_open_record_capabilities(),
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "opaque_refs_only": True,
+            "safe_summaries_only": True,
+            "unsupported_values_echoed": False,
+            "credentials_echoed": False,
+        },
+        "errors": errors,
     }
 
 

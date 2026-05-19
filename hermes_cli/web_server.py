@@ -52,6 +52,7 @@ from hermes_cli.office_controlled_mutation import (
     append_office_controlled_mutation_audit_event,
     append_office_controlled_mutation_manual_approval_record,
     append_office_controlled_mutation_manual_approval_recording_draft,
+    append_office_controlled_mutation_manual_dispatch_gate_open_record,
     append_office_controlled_mutation_authority_adapter_registry_event,
     append_office_controlled_mutation_decision_event,
     append_office_controlled_mutation_dry_run_result_event,
@@ -101,6 +102,7 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_nas_path_resolution_preview_events,
     list_office_controlled_mutation_audit_events,
     list_office_controlled_mutation_manual_approval_records,
+    list_office_controlled_mutation_manual_dispatch_gate_open_records,
     list_office_controlled_mutation_manual_approval_recording_drafts,
     list_office_controlled_mutation_authority_adapter_registry_events,
     list_office_controlled_mutation_request_events,
@@ -1135,6 +1137,26 @@ async def get_office_controlled_mutation_manual_approval_dispatch_gate_readiness
     """Read back approval-backed dispatch-gate readiness without opening dispatch."""
     return build_office_controlled_mutation_manual_approval_dispatch_gate_readiness_status(
         approval_record_ref=approval_record_ref,
+    )
+
+
+@app.post("/api/office/controlled-mutation/manual-dispatch-gate-open-record")
+async def append_office_controlled_mutation_manual_dispatch_gate_open_record_endpoint(payload: Mapping[str, Any]):
+    """Store bounded dispatch-gate-open metadata without runtime execution."""
+    return append_office_controlled_mutation_manual_dispatch_gate_open_record(payload)
+
+
+@app.get("/api/office/controlled-mutation/manual-dispatch-gate-open-record-status")
+async def get_office_controlled_mutation_manual_dispatch_gate_open_record_status(
+    dispatch_gate_ref: str | None = None,
+    approval_record_ref: str | None = None,
+    limit: int = 50,
+):
+    """Read back stored dispatch-gate-open metadata without returning raw inputs."""
+    return list_office_controlled_mutation_manual_dispatch_gate_open_records(
+        dispatch_gate_ref=dispatch_gate_ref,
+        approval_record_ref=approval_record_ref,
+        limit=limit,
     )
 
 

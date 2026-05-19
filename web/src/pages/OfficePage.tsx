@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeManualApprovalRecordingDraftReviewStatus, type OfficeManualApprovalRecordStatus, type OfficeManualApprovalDispatchGateReadinessStatus, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeManualApprovalRecordingDraftReviewStatus, type OfficeManualApprovalRecordStatus, type OfficeManualApprovalDispatchGateReadinessStatus, type OfficeManualDispatchGateOpenRecordStatus, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -5062,6 +5062,59 @@ export function ManualApprovalDispatchGateReadinessPanel({
 }
 
 
+export function ManualDispatchGateOpenRecordStatusPanel({
+  status,
+  error,
+}: {
+  status: OfficeManualDispatchGateOpenRecordStatus | null;
+  error?: string | null;
+}) {
+  const caps = status?.capabilities ?? {};
+  const latest = status?.records?.[status.records.length - 1] ?? null;
+  return (
+    <section
+      className="border border-emerald-300/20 bg-emerald-950/10 p-4"
+      data-office-manual-dispatch-gate-open-record-status="true"
+      data-office-manual-dispatch-gate-open-record-count={String(status?.dispatch_gate_open_record_count ?? 0)}
+      data-office-manual-dispatch-gate-open-record-gate-open={String(Boolean(latest?.dispatch_gate_open))}
+      data-office-manual-dispatch-gate-open-record-runtime-executed={String(Boolean(latest?.runtime_command_executed))}
+      data-office-manual-dispatch-gate-open-record-real-dispatch-enabled={String(Boolean(caps.real_dispatch_execution_enabled))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">Dispatch gate open record</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">gate-open metadata · runtime disabled</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Records that the dispatch gate metadata boundary was opened after approval. Runtime commands, adapters, target mutation, Kanban, NAS, watchers, VPS writes, and public exposure stay disabled.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "gate-open record request failed" : String(latest?.dispatch_gate_ref ?? "gate-open record pending")}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-manual-dispatch-gate-open-record-boundaries="true">
+        {[
+          ["dispatch_gate_open", Boolean(latest?.dispatch_gate_open)],
+          ["approval_record_written", Boolean(latest?.approval_record_written)],
+          ["runtime_command_included", Boolean(latest?.runtime_command_included)],
+          ["runtime_command_executed", Boolean(latest?.runtime_command_executed)],
+          ["target_mutation_created", Boolean(latest?.target_mutation_created)],
+          ["kanban_mutation_created", Boolean(latest?.kanban_mutation_created)],
+          ["nas_save_created", Boolean(latest?.nas_save_created)],
+          ["real_dispatch_execution_enabled", Boolean(caps.real_dispatch_execution_enabled)],
+          ["runtime_command_execution_enabled", Boolean(caps.runtime_command_execution_enabled)],
+          ["adapter_binding_enabled", Boolean(caps.adapter_binding_enabled)],
+          ["vps_file_change_enabled", Boolean(caps.vps_file_change_enabled)],
+          ["public_exposure_enabled", Boolean(caps.public_exposure_enabled)],
+        ].map(([key, value]) => (
+          <div key={String(key)} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-manual-dispatch-gate-open-record-boundary={String(key)}>{String(key)}: {String(Boolean(value))}</div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+
 export function ApprovedRealOneShotDispatchGateDesignPanel({
   status,
   error,
@@ -6470,6 +6523,8 @@ export default function OfficePage() {
   const [manualApprovalRecordStatusError, setManualApprovalRecordStatusError] = useState<string | null>(null);
   const [manualApprovalDispatchGateReadinessStatus, setManualApprovalDispatchGateReadinessStatus] = useState<OfficeManualApprovalDispatchGateReadinessStatus | null>(null);
   const [manualApprovalDispatchGateReadinessStatusError, setManualApprovalDispatchGateReadinessStatusError] = useState<string | null>(null);
+  const [manualDispatchGateOpenRecordStatus, setManualDispatchGateOpenRecordStatus] = useState<OfficeManualDispatchGateOpenRecordStatus | null>(null);
+  const [manualDispatchGateOpenRecordStatusError, setManualDispatchGateOpenRecordStatusError] = useState<string | null>(null);
   const [nasKeeperQueueReadbackLoading, setNasKeeperQueueReadbackLoading] = useState(false);
   const [nasKeeperQueueReadbackError, setNasKeeperQueueReadbackError] = useState<string | null>(null);
   const [nasKeeperExecutionDraft, setNasKeeperExecutionDraft] = useState<OfficeNasKeeperExecutionFromPreviewPayload>(DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT);
@@ -7008,6 +7063,20 @@ export default function OfficePage() {
         if (!cancelled) {
           setManualApprovalDispatchGateReadinessStatus(null);
           setManualApprovalDispatchGateReadinessStatusError("request failed");
+        }
+      });
+    api
+      .getOfficeControlledMutationManualDispatchGateOpenRecordStatus({ limit: 10 })
+      .then((next) => {
+        if (!cancelled) {
+          setManualDispatchGateOpenRecordStatus(next);
+          setManualDispatchGateOpenRecordStatusError(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setManualDispatchGateOpenRecordStatus(null);
+          setManualDispatchGateOpenRecordStatusError("request failed");
         }
       });
     api
@@ -7609,6 +7678,7 @@ export default function OfficePage() {
       <ManualApprovalRecordingDraftReviewStatusPanel status={manualApprovalRecordingDraftReviewStatus} error={manualApprovalRecordingDraftReviewStatusError} />
       <ManualApprovalRecordStatusPanel status={manualApprovalRecordStatus} error={manualApprovalRecordStatusError} />
       <ManualApprovalDispatchGateReadinessPanel status={manualApprovalDispatchGateReadinessStatus} error={manualApprovalDispatchGateReadinessStatusError} />
+      <ManualDispatchGateOpenRecordStatusPanel status={manualDispatchGateOpenRecordStatus} error={manualDispatchGateOpenRecordStatusError} />
 
       <NasKeeperExecutionOperatorActionPanel
         action={nasKeeperExecutionOperatorAction}

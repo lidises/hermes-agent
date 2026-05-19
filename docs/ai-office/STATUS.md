@@ -1,4 +1,14 @@
-Last updated: 2026-05-19 14:12 KST
+Last updated: 2026-05-19 14:36 KST
+
+## Manual dispatch gate open record implemented locally (metadata-only)
+- Added bounded dispatch-gate-open metadata write/readback after approval-backed readiness.
+- Backend POST: `/api/office/controlled-mutation/manual-dispatch-gate-open-record`.
+- Backend GET: `/api/office/controlled-mutation/manual-dispatch-gate-open-record-status`.
+- The write requires an existing bounded approval record, exact safe `approval_record_ref`, safe `dispatch_gate_ref`, confirmation `confirmed-dispatch-gate-open-metadata-only`, safe operator/timestamp/evidence refs, and duplicate dispatch gate refs are blocked.
+- Stored gate records set `dispatch_gate_open=true`, but keep `runtime_command_included=false`, `runtime_command_executed=false`, adapter binding/dispatch false, replay-store write false, rollback false, target/Kanban/NAS/VPS mutation false, service restart false, credential/public authority false, and real dispatch execution false.
+- Frontend typed API wrappers and display-only `/office` gate-open record panel added; no form/button/input/select/textarea controls.
+- RED confirmed missing backend helper/API and frontend wrapper/panel first. GREEN local: focused backend `13 passed`, broader controlled-mutation chain `22 passed`, frontend API/RPG `118 passed`, `py_compile`, `git diff --check`, added-line secret scan, and `npm run build` passed with existing Vite chunk warning only.
+- Deployment/smoke still pending for this local implementation.
 
 ## Manual approval dispatch gate readiness deployed (readiness-only)
 - Added approval-backed dispatch gate readiness projection after bounded approval-record write.

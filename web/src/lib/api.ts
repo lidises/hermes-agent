@@ -604,6 +604,52 @@ export interface OfficeManualApprovalDispatchGateReadinessStatus {
   errors: Array<{ field: string; code: string }>;
 }
 
+export interface OfficeManualDispatchGateOpenRecordPayload {
+  approval_record_ref: string;
+  dispatch_gate_ref: string;
+  operator_confirmation: "confirmed-dispatch-gate-open-metadata-only";
+  opened_by: string;
+  opened_at: string;
+  gate_evidence_refs: string[];
+}
+
+export interface OfficeManualDispatchGateOpenRecord {
+  schema_version: number;
+  mode: "stored_manual_dispatch_gate_open_record";
+  gate_status?: "dispatch_gate_open_metadata_only";
+  approval_record_ref: string;
+  dispatch_gate_ref: string;
+  approval_record_written?: boolean;
+  dispatch_gate_open: boolean;
+  runtime_command_included: boolean;
+  runtime_command_executed: boolean;
+  target_mutation_created: boolean;
+  kanban_mutation_created?: boolean;
+  nas_save_created?: boolean;
+  real_dispatch_execution_enabled: boolean;
+  capabilities?: Record<string, boolean>;
+  redaction?: Record<string, boolean>;
+}
+
+export interface OfficeManualDispatchGateOpenRecordAppendResult {
+  stored: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: OfficeManualDispatchGateOpenRecord | null;
+}
+
+export interface OfficeManualDispatchGateOpenRecordStatus {
+  schema_version: number;
+  mode: "stored_manual_dispatch_gate_open_records_readback";
+  dispatch_gate_open_record_count: number;
+  limit?: number;
+  skipped_count?: number;
+  records: OfficeManualDispatchGateOpenRecord[];
+  latest_refs?: Record<string, string>;
+  capabilities: Record<string, boolean>;
+  redaction?: Record<string, boolean>;
+  errors?: Array<{ field: string; code: string }>;
+}
+
 export interface OfficeDisabledOneShotRuntimeDispatchPayload {
   exact_target_allowlist_ref: string;
   idempotency_key: string;
@@ -860,6 +906,20 @@ export const api = {
     if (params.approval_record_ref) qs.set("approval_record_ref", params.approval_record_ref);
     const suffix = qs.toString() ? `?${qs.toString()}` : "";
     return fetchJSON<OfficeManualApprovalDispatchGateReadinessStatus>(`/api/office/controlled-mutation/manual-approval-dispatch-gate-readiness-status${suffix}`);
+  },
+  writeOfficeControlledMutationManualDispatchGateOpenRecord: (body: OfficeManualDispatchGateOpenRecordPayload) =>
+    fetchJSON<OfficeManualDispatchGateOpenRecordAppendResult>("/api/office/controlled-mutation/manual-dispatch-gate-open-record", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
+  getOfficeControlledMutationManualDispatchGateOpenRecordStatus: (params: { dispatch_gate_ref?: string; approval_record_ref?: string; limit?: number } = {}) => {
+    const qs = new URLSearchParams();
+    if (params.dispatch_gate_ref) qs.set("dispatch_gate_ref", params.dispatch_gate_ref);
+    if (params.approval_record_ref) qs.set("approval_record_ref", params.approval_record_ref);
+    if (typeof params.limit === "number") qs.set("limit", String(params.limit));
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+    return fetchJSON<OfficeManualDispatchGateOpenRecordStatus>(`/api/office/controlled-mutation/manual-dispatch-gate-open-record-status${suffix}`);
   },
   executeOfficeControlledMutationDisabledOneShotRuntimeDispatch: (body: OfficeDisabledOneShotRuntimeDispatchPayload) =>
     fetchJSON<OfficeDisabledOneShotRuntimeDispatchRefusal>("/api/office/controlled-mutation/disabled-one-shot-runtime-dispatch-executor-skeleton/execute", {
