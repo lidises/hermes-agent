@@ -1,12 +1,14 @@
-Last updated: 2026-05-19 14:09 KST
+Last updated: 2026-05-19 14:12 KST
 
-## Manual approval dispatch gate readiness implemented locally (readiness-only)
+## Manual approval dispatch gate readiness deployed (readiness-only)
 - Added approval-backed dispatch gate readiness projection after bounded approval-record write.
 - Backend GET: `/api/office/controlled-mutation/manual-approval-dispatch-gate-readiness-status`.
 - The lane reads stored manual approval records and projects readiness refs (`exact_target_allowlist_ref`, `idempotency_key`, `replay_lookup_ref`, `rollback_disable_ref`, `dry_run_evidence_ref`) while keeping `ready_for_dispatch_gate_open=false` and `ready_for_runtime_dispatch_execution=false`.
 - Frontend API wrapper and display-only `/office` readiness panel added; no form/button/input/select/textarea controls.
 - Boundary remains closed: no dispatch gate open, runtime command inclusion/execution, adapter binding/dispatch, replay-store write, rollback, target/Kanban/NAS/VPS mutation, watcher/cron, service restart by lane, public exposure, or credential authority.
 - RED confirmed missing backend helper/API and frontend wrapper/panel first (`2 failed` backend, `2 failed` frontend). GREEN local: focused backend `11 passed`, broader controlled-mutation chain `20 passed`, frontend API/RPG `116 passed`, `py_compile`, `git diff --check`, added-line secret scan, and `npm run build` passed with existing Vite chunk warning only.
+- Commit `e51476c4` pushed and deployed to VPS source/dashboard worktrees; `web_dist` copied to both; restarted only `hermes-agent-dashboard.service`; `hermes-gateway.service` stayed active without restart.
+- VPS focused backend preflight+draft/approval-readiness tests passed (`15 passed`). Live private `/office?dispatch-readiness=e51476c4` returned HTTP 200. Protected API smoke stored one draft and one bounded manual approval record, then read dispatch readiness back with `approval_record_present=true`, `approval_record_written=true`, `ready_for_dispatch_gate_open=false`, `ready_for_runtime_dispatch_execution=false`, dispatch/runtime/target/Kanban/NAS/VPS mutation false, real dispatch disabled, raw leak false, and browser console JS errors 0.
 
 ## Manual approval record write gate deployed (approval-record-only)
 - Added bounded manual approval-record write gate after draft-review readiness.
