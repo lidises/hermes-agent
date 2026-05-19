@@ -1,4 +1,14 @@
-Last updated: 2026-05-19 12:26 KST
+Last updated: 2026-05-19 12:53 KST
+
+## Manual approval-recording draft persistence implemented locally (draft-only)
+- Added protected draft-only approval-record persistence after the refusal-only preflight rung.
+- Backend POST: `/api/office/controlled-mutation/manual-approval-recording-draft`.
+- Backend readback GET: `/api/office/controlled-mutation/manual-approval-recording-draft-status`.
+- Storage is profile-scoped controlled-mutation JSONL and accepts only safe DTO fields; unsupported raw extras are ignored and never stored/returned.
+- Draft status is always `draft_only`; duplicate draft-level refs are rejected with safe `{field, code}` errors.
+- Frontend API wrappers and display-only `/office` draft status panel added; the UI reads back draft status but does not auto-submit a draft.
+- Local RED confirmed missing helper/routes first (`4 failed`); focused GREEN backend preflight+draft `8 passed`, executor chain `13 passed`, frontend API/RPG `110 passed`, `py_compile`, `git diff --check`, and `npm run build` passed with the existing Vite chunk warning only.
+- Boundary: this is a bounded draft write/readback only. It does not write a real approval record, open a dispatch gate, materialize or execute runtime commands, create adapter binding/dispatch, write idempotency replay state, execute rollback, mutate targets/Kanban/NAS/VPS files, start watcher/cron automation, restart services by itself, push from the lane, expose public routes, or grant VPS direct NAS mount/credential/write authority.
 
 ## Manual approval-recording preflight implemented locally (refusal-only)
 - Added refusal-only manual approval-recording preflight surface after approved real dispatch gate design.

@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -4855,6 +4855,57 @@ export function ManualApprovalRecordingPreflightStatusPanel({
 }
 
 
+export function ManualApprovalRecordingDraftStatusPanel({
+  status,
+  error,
+}: {
+  status: OfficeManualApprovalRecordingDraftStatus | null;
+  error?: string | null;
+}) {
+  const caps = status?.capabilities ?? {};
+  const latest = status?.latest_refs ?? {};
+  return (
+    <section
+      className="border border-emerald-300/20 bg-emerald-950/10 p-4"
+      data-office-manual-approval-recording-draft-status="true"
+      data-office-manual-approval-recording-draft-count={String(status?.draft_count ?? 0)}
+      data-office-manual-approval-recording-draft-storage-enabled={String(Boolean(caps.approval_record_draft_storage_enabled))}
+      data-office-manual-approval-recording-draft-readback-enabled={String(Boolean(caps.approval_record_draft_readback_enabled))}
+      data-office-manual-approval-recording-draft-approval-recording-enabled={String(Boolean(caps.approval_recording_enabled))}
+      data-office-manual-approval-recording-draft-dispatch-gate-open={String(Boolean(caps.dispatch_gate_open))}
+      data-office-manual-approval-recording-draft-real-dispatch-enabled={String(Boolean(caps.real_dispatch_execution_enabled))}
+      data-office-manual-approval-recording-draft-replay-store-write-enabled={String(Boolean(caps.idempotency_replay_store_write_enabled))}
+      data-office-manual-approval-recording-draft-target-mutation-enabled={String(Boolean(caps.target_mutation_enabled))}
+      data-office-manual-approval-recording-draft-kanban-mutation-enabled={String(Boolean(caps.kanban_mutation_enabled))}
+      data-office-manual-approval-recording-draft-nas-save-enabled={String(Boolean(caps.nas_save_enabled))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">Manual approval-recording draft status</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">draft-only records · dispatch still closed</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Reads back safe approval-record drafts stored for review only. Draft persistence does not approve dispatch, write replay state, execute runtime commands, or mutate targets.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "readback request failed" : `${status?.draft_count ?? 0} draft(s)`}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-2" data-office-manual-approval-recording-draft-latest-refs="true">
+        {Object.entries(latest).map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-manual-approval-recording-draft-latest-ref={key}>{key}: {value}</div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-manual-approval-recording-draft-boundaries="true">
+        {Object.entries(caps).filter(([key]) => /enabled|open/.test(key)).map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-manual-approval-recording-draft-boundary={key}>{key}: {String(Boolean(value))}</div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+
 export function ApprovedRealOneShotDispatchGateDesignPanel({
   status,
   error,
@@ -6255,6 +6306,8 @@ export default function OfficePage() {
   const [approvedRealOneShotDispatchGateDesignError, setApprovedRealOneShotDispatchGateDesignError] = useState<string | null>(null);
   const [manualApprovalRecordingPreflightStatus, setManualApprovalRecordingPreflightStatus] = useState<OfficeManualApprovalRecordingPreflightStatus | null>(null);
   const [manualApprovalRecordingPreflightStatusError, setManualApprovalRecordingPreflightStatusError] = useState<string | null>(null);
+  const [manualApprovalRecordingDraftStatus, setManualApprovalRecordingDraftStatus] = useState<OfficeManualApprovalRecordingDraftStatus | null>(null);
+  const [manualApprovalRecordingDraftStatusError, setManualApprovalRecordingDraftStatusError] = useState<string | null>(null);
   const [nasKeeperQueueReadbackLoading, setNasKeeperQueueReadbackLoading] = useState(false);
   const [nasKeeperQueueReadbackError, setNasKeeperQueueReadbackError] = useState<string | null>(null);
   const [nasKeeperExecutionDraft, setNasKeeperExecutionDraft] = useState<OfficeNasKeeperExecutionFromPreviewPayload>(DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT);
@@ -6737,6 +6790,20 @@ export default function OfficePage() {
         if (!cancelled) {
           setManualApprovalRecordingPreflightStatus(null);
           setManualApprovalRecordingPreflightStatusError("request failed");
+        }
+      });
+    api
+      .getOfficeControlledMutationManualApprovalRecordingDraftStatus({ limit: 10 })
+      .then((next) => {
+        if (!cancelled) {
+          setManualApprovalRecordingDraftStatus(next);
+          setManualApprovalRecordingDraftStatusError(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setManualApprovalRecordingDraftStatus(null);
+          setManualApprovalRecordingDraftStatusError("request failed");
         }
       });
     api
@@ -7334,6 +7401,7 @@ export default function OfficePage() {
       <DisabledOneShotRuntimeDispatchExecutorSkeletonPanel status={disabledOneShotRuntimeDispatchExecutorSkeleton} error={disabledOneShotRuntimeDispatchExecutorSkeletonError} />
       <ApprovedRealOneShotDispatchGateDesignPanel status={approvedRealOneShotDispatchGateDesign} error={approvedRealOneShotDispatchGateDesignError} />
       <ManualApprovalRecordingPreflightStatusPanel status={manualApprovalRecordingPreflightStatus} error={manualApprovalRecordingPreflightStatusError} />
+      <ManualApprovalRecordingDraftStatusPanel status={manualApprovalRecordingDraftStatus} error={manualApprovalRecordingDraftStatusError} />
 
       <NasKeeperExecutionOperatorActionPanel
         action={nasKeeperExecutionOperatorAction}

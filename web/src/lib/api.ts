@@ -495,6 +495,47 @@ export interface OfficeManualApprovalRecordingPreflightRefusal {
   redaction: Record<string, boolean>;
 }
 
+export interface OfficeManualApprovalRecordingDraftPayload extends OfficeManualApprovalRecordingPreflightPayload {
+  requested_by: string;
+  requested_at: string;
+  safe_summary: string;
+  evidence_refs: string[];
+}
+
+export interface OfficeManualApprovalRecordingDraft {
+  schema_version: number;
+  mode: "stored_manual_approval_recording_draft";
+  draft_status: "draft_only";
+  approval_record_ref: string;
+  idempotency_key: string;
+  approval_record_written: false;
+  dispatch_gate_open: false;
+  runtime_command_executed: false;
+  target_mutation_created: false;
+  idempotency_replay_store_written: false;
+  capabilities: Record<string, boolean>;
+  redaction: Record<string, boolean>;
+}
+
+export interface OfficeManualApprovalRecordingDraftAppendResult {
+  stored: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: OfficeManualApprovalRecordingDraft | null;
+}
+
+export interface OfficeManualApprovalRecordingDraftStatus {
+  schema_version: number;
+  mode: "stored_manual_approval_recording_drafts_readback";
+  draft_count: number;
+  limit: number;
+  skipped_count: number;
+  drafts: OfficeManualApprovalRecordingDraft[];
+  latest_refs: Record<string, string>;
+  capabilities: Record<string, boolean>;
+  redaction: Record<string, boolean>;
+  errors: Array<{ field: string; code: string }>;
+}
+
 export interface OfficeDisabledOneShotRuntimeDispatchPayload {
   exact_target_allowlist_ref: string;
   idempotency_key: string;
@@ -714,6 +755,19 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     }),
+  appendOfficeControlledMutationManualApprovalRecordingDraft: (body: OfficeManualApprovalRecordingDraftPayload) =>
+    fetchJSON<OfficeManualApprovalRecordingDraftAppendResult>("/api/office/controlled-mutation/manual-approval-recording-draft", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
+  getOfficeControlledMutationManualApprovalRecordingDraftStatus: (params: { approval_record_ref?: string; limit?: number } = {}) => {
+    const qs = new URLSearchParams();
+    if (params.approval_record_ref) qs.set("approval_record_ref", params.approval_record_ref);
+    if (params.limit !== undefined) qs.set("limit", String(params.limit));
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+    return fetchJSON<OfficeManualApprovalRecordingDraftStatus>(`/api/office/controlled-mutation/manual-approval-recording-draft-status${suffix}`);
+  },
   executeOfficeControlledMutationDisabledOneShotRuntimeDispatch: (body: OfficeDisabledOneShotRuntimeDispatchPayload) =>
     fetchJSON<OfficeDisabledOneShotRuntimeDispatchRefusal>("/api/office/controlled-mutation/disabled-one-shot-runtime-dispatch-executor-skeleton/execute", {
       method: "POST",

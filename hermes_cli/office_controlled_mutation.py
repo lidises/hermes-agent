@@ -111,6 +111,19 @@ _AUDIT_EVENT_FIELDS = {
     "recorded_at",
 }
 _AUDIT_EVENT_KINDS = {"request_recorded", "decision_recorded", "dry_run_result_recorded", "execution_blocked"}
+_APPROVAL_RECORDING_DRAFT_FIELDS = {
+    "approval_record_ref",
+    "exact_target_allowlist_ref",
+    "idempotency_key",
+    "replay_lookup_ref",
+    "rollback_disable_ref",
+    "dry_run_evidence_ref",
+    "operator_confirmation",
+    "requested_by",
+    "requested_at",
+    "safe_summary",
+    "evidence_refs",
+}
 _AUTHORITY_REGISTRY_FIELDS = {
     "adapter_ref",
     "adapter_kind",
@@ -250,6 +263,7 @@ def _has_raw_marker(value: str) -> bool:
     raw_markers = (
         "traceback",
         "/users/",
+        "/home/",
         "/mnt/",
         "smb://",
         "mount -t",
@@ -2812,6 +2826,203 @@ def build_office_controlled_mutation_approved_real_one_shot_dispatch_gate_design
         "errors": [],
     }
 
+
+
+def _default_approval_recording_draft_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "approval_record_drafts.jsonl"
+
+
+def _approval_recording_draft_capabilities() -> dict[str, bool]:
+    return {
+        "approval_record_draft_storage_enabled": True,
+        "approval_record_draft_readback_enabled": True,
+        "draft_duplicate_detection_enabled": True,
+        "approval_recording_enabled": False,
+        "real_dispatch_execution_enabled": False,
+        "dispatch_gate_open": False,
+        "runtime_command_materialization_enabled": False,
+        "runtime_command_execution_enabled": False,
+        "adapter_binding_enabled": False,
+        "adapter_dispatch_enabled": False,
+        "idempotency_replay_store_write_enabled": False,
+        "rollback_execution_enabled": False,
+        "target_mutation_enabled": False,
+        "kanban_mutation_enabled": False,
+        "nas_save_enabled": False,
+        "vps_file_change_enabled": False,
+        "service_restart_enabled": False,
+        "git_push_enabled": False,
+        "credential_access_enabled": False,
+        "public_exposure_enabled": False,
+    }
+
+
+def validate_office_controlled_mutation_manual_approval_recording_draft(payload: object) -> dict[str, object]:
+    errors: list[dict[str, str]] = []
+    if not isinstance(payload, Mapping):
+        return {"valid": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+
+    for field in sorted(_APPROVAL_RECORDING_DRAFT_FIELDS):
+        if field not in payload:
+            errors.append(_error(field, "required"))
+    for field in sorted(set(payload) - _APPROVAL_RECORDING_DRAFT_FIELDS):
+        _ = field
+
+    ref_specs = (
+        ("approval_record_ref", "approval-"),
+        ("exact_target_allowlist_ref", "allowlist-"),
+        ("idempotency_key", "idem-"),
+        ("replay_lookup_ref", "replay-"),
+        ("rollback_disable_ref", "rollback-"),
+        ("dry_run_evidence_ref", "dryrun-"),
+    )
+    for field, prefix in ref_specs:
+        if field in payload and not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get(field), prefix):
+            errors.append(_error(field, "unsupported_ref_shape"))
+    if "operator_confirmation" in payload and payload.get("operator_confirmation") != "confirmed-draft-record-only":
+        errors.append(_error("operator_confirmation", "unsupported_confirmation"))
+    if "requested_by" in payload and not _is_opaque_ref(payload.get("requested_by")):
+        errors.append(_error("requested_by", "invalid_opaque_ref"))
+    if "requested_at" in payload and not (
+        isinstance(payload.get("requested_at"), str) and _ISO_UTC_RE.fullmatch(payload["requested_at"])
+    ):
+        errors.append(_error("requested_at", "invalid_timestamp"))
+    if "safe_summary" in payload and not _is_safe_text(payload.get("safe_summary")):
+        errors.append(_error("safe_summary", "invalid_safe_text"))
+    if "evidence_refs" in payload and not _validate_evidence_refs(payload.get("evidence_refs")):
+        errors.append(_error("evidence_refs", "invalid_opaque_ref"))
+
+    errors = sorted(errors, key=lambda item: (item["field"], item["code"]))
+    if errors:
+        return {"valid": False, "errors": errors, "dto": None}
+
+    dto = {
+        "schema_version": 1,
+        "mode": "stored_manual_approval_recording_draft",
+        "draft_status": "draft_only",
+        "approval_record_ref": payload["approval_record_ref"],
+        "exact_target_allowlist_ref": payload["exact_target_allowlist_ref"],
+        "idempotency_key": payload["idempotency_key"],
+        "replay_lookup_ref": payload["replay_lookup_ref"],
+        "rollback_disable_ref": payload["rollback_disable_ref"],
+        "dry_run_evidence_ref": payload["dry_run_evidence_ref"],
+        "operator_confirmation": "confirmed-draft-record-only",
+        "requested_by": payload["requested_by"],
+        "requested_at": payload["requested_at"],
+        "safe_summary": payload["safe_summary"],
+        "evidence_refs": list(payload["evidence_refs"]),
+        "approval_record_written": False,
+        "dispatch_gate_open": False,
+        "runtime_command_included": False,
+        "runtime_command_executed": False,
+        "adapter_binding_created": False,
+        "adapter_dispatch_created": False,
+        "idempotency_replay_store_written": False,
+        "rollback_executed": False,
+        "target_mutation_created": False,
+        "watcher_or_cron_created": False,
+        "capabilities": _approval_recording_draft_capabilities(),
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "opaque_refs_only": True,
+            "safe_summaries_only": True,
+            "unsupported_values_echoed": False,
+            "credentials_echoed": False,
+        },
+    }
+    return {"valid": True, "errors": [], "dto": dto}
+
+
+def _normalize_stored_approval_recording_draft(item: object) -> dict[str, object] | None:
+    if not isinstance(item, Mapping):
+        return None
+    payload = {field: item.get(field) for field in _APPROVAL_RECORDING_DRAFT_FIELDS if field in item}
+    validation = validate_office_controlled_mutation_manual_approval_recording_draft(payload)
+    if not validation["valid"]:
+        return None
+    return cast(dict[str, object], validation["dto"])
+
+
+def _read_approval_recording_draft_store(path: Path) -> tuple[list[dict[str, object]], int]:
+    drafts: list[dict[str, object]] = []
+    skipped_count = 0
+    if not path.exists():
+        return drafts, skipped_count
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped_count += 1
+                continue
+            normalized = _normalize_stored_approval_recording_draft(item)
+            if normalized is None:
+                skipped_count += 1
+                continue
+            drafts.append(normalized)
+    return drafts, skipped_count
+
+
+def append_office_controlled_mutation_manual_approval_recording_draft(
+    payload: object, *, store_path: Path | None = None
+) -> dict[str, object]:
+    validation = validate_office_controlled_mutation_manual_approval_recording_draft(payload)
+    if not validation["valid"]:
+        return {"stored": False, "errors": validation["errors"], "dto": None}
+    dto = cast(dict[str, object], validation["dto"])
+    path = store_path or _default_approval_recording_draft_store_path()
+    existing, _ = _read_approval_recording_draft_store(path)
+    if any(item.get("approval_record_ref") == dto["approval_record_ref"] for item in existing):
+        return {"stored": False, "errors": [_error("approval_record_ref", "duplicate_approval_record_ref")], "dto": None}
+    if any(item.get("idempotency_key") == dto["idempotency_key"] for item in existing):
+        return {"stored": False, "errors": [_error("idempotency_key", "duplicate_idempotency_key")], "dto": None}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(dto, sort_keys=True, separators=(",", ":")) + "\n")
+    return {"stored": True, "errors": [], "dto": dto}
+
+
+def list_office_controlled_mutation_manual_approval_recording_drafts(
+    *, store_path: Path | None = None, limit: int = 50, approval_record_ref: str | None = None
+) -> dict[str, object]:
+    path = store_path or _default_approval_recording_draft_store_path()
+    errors: list[dict[str, str]] = []
+    drafts, skipped_count = _read_approval_recording_draft_store(path)
+    if approval_record_ref is not None:
+        if _office_disabled_runtime_dispatch_valid_prefixed_ref(approval_record_ref, "approval-"):
+            drafts = [item for item in drafts if item.get("approval_record_ref") == approval_record_ref]
+        else:
+            errors.append(_error("approval_record_ref", "unsupported_ref_shape"))
+            drafts = []
+    max_items = max(0, min(limit, 200))
+    drafts = drafts[-max_items:] if max_items else []
+    latest_refs: dict[str, str] = {}
+    if drafts:
+        latest = drafts[-1]
+        for key in ("approval_record_ref", "idempotency_key"):
+            value = latest.get(key)
+            if isinstance(value, str):
+                latest_refs[key] = value
+    return {
+        "schema_version": 1,
+        "mode": "stored_manual_approval_recording_drafts_readback",
+        "draft_count": len(drafts),
+        "limit": max_items,
+        "skipped_count": skipped_count,
+        "drafts": drafts,
+        "latest_refs": latest_refs,
+        "capabilities": _approval_recording_draft_capabilities(),
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "opaque_refs_only": True,
+            "safe_summaries_only": True,
+            "unsupported_values_echoed": False,
+            "credentials_echoed": False,
+        },
+        "errors": errors,
+    }
 
 
 def build_office_controlled_mutation_manual_approval_recording_preflight_status(

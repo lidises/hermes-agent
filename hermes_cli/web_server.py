@@ -50,6 +50,7 @@ from hermes_cli.config import (
 from gateway.status import get_running_pid, read_runtime_status
 from hermes_cli.office_controlled_mutation import (
     append_office_controlled_mutation_audit_event,
+    append_office_controlled_mutation_manual_approval_recording_draft,
     append_office_controlled_mutation_authority_adapter_registry_event,
     append_office_controlled_mutation_decision_event,
     append_office_controlled_mutation_dry_run_result_event,
@@ -96,6 +97,7 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_nas_evidence_package_events,
     list_office_controlled_mutation_nas_path_resolution_preview_events,
     list_office_controlled_mutation_audit_events,
+    list_office_controlled_mutation_manual_approval_recording_drafts,
     list_office_controlled_mutation_authority_adapter_registry_events,
     list_office_controlled_mutation_request_events,
     preview_office_controlled_mutation_nas_path_resolution,
@@ -1084,6 +1086,24 @@ async def get_office_controlled_mutation_manual_approval_recording_preflight_sta
 async def execute_office_controlled_mutation_manual_approval_recording_preflight(payload: Mapping[str, Any]):
     """Refuse manual approval recording while returning safe validation metadata."""
     return refuse_office_controlled_mutation_manual_approval_recording_preflight(payload)
+
+
+@app.post("/api/office/controlled-mutation/manual-approval-recording-draft")
+async def append_office_controlled_mutation_manual_approval_recording_draft_endpoint(payload: Mapping[str, Any]):
+    """Store a draft-only approval record without opening dispatch or execution."""
+    return append_office_controlled_mutation_manual_approval_recording_draft(payload)
+
+
+@app.get("/api/office/controlled-mutation/manual-approval-recording-draft-status")
+async def get_office_controlled_mutation_manual_approval_recording_draft_status(
+    approval_record_ref: str | None = None,
+    limit: int = 50,
+):
+    """Read back stored draft-only approval records without returning raw inputs."""
+    return list_office_controlled_mutation_manual_approval_recording_drafts(
+        approval_record_ref=approval_record_ref,
+        limit=limit,
+    )
 
 
 @app.post("/api/office/controlled-mutation/disabled-one-shot-runtime-dispatch-executor-skeleton/execute")
