@@ -1,6 +1,6 @@
-Last updated: 2026-05-19 23:38 KST
+Last updated: 2026-05-19 23:42 KST
 
-## Manual NAS save record implemented locally (NAS save marker opened, direct VPS NAS authority still closed)
+## Manual NAS save record deployed (NAS save marker opened, direct VPS NAS authority still closed)
 - Added Kanban-mutation-backed NAS save write/readback after Kanban mutation metadata.
 - Backend POST: `/api/office/controlled-mutation/manual-nas-save-record`.
 - Backend GET: `/api/office/controlled-mutation/manual-nas-save-record-status`.
@@ -8,7 +8,8 @@ Last updated: 2026-05-19 23:38 KST
 - Stored NAS save records set `nas_save_created=true` and `nas_save_result=safe_nas_save_marker_written`, but keep direct VPS NAS authority false, real NAS execution false, VPS file change false, service restart false, git push false, credential/public authority false, and real dispatch execution false.
 - Frontend typed API wrappers and display-only `/office` NAS save panel added; no form/button/input/select/textarea controls.
 - RED confirmed missing backend helper/API and frontend wrapper/panel first. GREEN local: focused backend NAS-save tests `2 passed`, broader controlled-mutation chain `38 passed`, frontend API/RPG `134 passed`, `py_compile`, `git diff --check`, added-line secret scan, and `npm run build` passed with existing Vite chunk warning only.
-- Not yet committed/pushed/deployed in this section until final verification/deploy finishes.
+- Commit `0e8c00a0` pushed and deployed to VPS source/dashboard worktrees; `web_dist` copied to both; restarted only `hermes-agent-dashboard.service`; `hermes-gateway.service` stayed active without restart.
+- VPS focused backend preflight+draft/approval/gate-open/preview/inclusion/execution/readiness/target-mutation/adapter-dispatch/Kanban-mutation/NAS-save tests passed (`33 passed`). Live private `/office?nas-save=0e8c00a0` returned HTTP 200. Protected API smoke stored prerequisite Kanban-mutation chain plus NAS save record and read back `nas_save_created=true`, `kanban_mutation_created=true`, direct VPS NAS authority false, real NAS execution false, real dispatch false, count 1, raw markdown/path value leak false, and unauth POST 401.
 
 ## Manual Kanban mutation record deployed (Kanban marker opened, NAS still closed)
 - Added adapter-dispatch-backed Kanban mutation write/readback after adapter dispatch metadata.
