@@ -2045,6 +2045,84 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(markup).not.toMatch(/raw command|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
   });
 
+  it("renders adapter binding dry-run status as registry-only without binding, dispatch, or target mutation", () => {
+    const AdapterBindingDryRunStatusPanel = (OfficePageModule as unknown as {
+      AdapterBindingDryRunStatusPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.AdapterBindingDryRunStatusPanel>>;
+    }).AdapterBindingDryRunStatusPanel;
+    const status = {
+      schema_version: 1,
+      mode: "adapter_binding_dry_run_status" as const,
+      adapter_binding_dry_run_complete: true,
+      source_manual_one_shot_lane: "manual_one_shot_runtime_dry_run_status",
+      next_manual_lane: "human_reviewed_single_dispatch_status",
+      adapter_registry: {
+        registry_readback_enabled: true,
+        candidate_adapter_ref: "adapter_candidate_manual_runtime_dry_run",
+        binding_mode: "dry_run_only",
+        binding_created: false,
+        dispatch_created: false,
+      },
+      binding_scope: {
+        adapter_registry_readback_allowed: true,
+        binding_plan_metadata_allowed: true,
+        adapter_binding_allowed: false,
+        adapter_dispatch_allowed: false,
+        target_mutation_allowed: false,
+      },
+      forbidden_boundaries: ["adapter_binding", "adapter_dispatch", "target_mutation"],
+      capabilities: {
+        adapter_binding_dry_run_readback_enabled: true,
+        adapter_registry_readback_enabled: true,
+        binding_plan_metadata_enabled: true,
+        adapter_binding_enabled: false,
+        adapter_dispatch_enabled: false,
+        runtime_command_execution_enabled: false,
+        watcher_daemon_enabled: false,
+        cron_enabled: false,
+        target_mutation_enabled: false,
+        kanban_mutation_enabled: false,
+        nas_save_enabled: false,
+        vps_file_change_enabled: false,
+        service_restart_enabled: false,
+        git_push_enabled: false,
+        credential_access_enabled: false,
+        public_exposure_enabled: false,
+      },
+      redaction: { raw_excluded: true },
+      errors: [],
+    };
+
+    const markup = renderToStaticMarkup(<AdapterBindingDryRunStatusPanel status={status} error={null} />);
+
+    expect(markup).toContain('data-office-adapter-binding-dry-run-status="true"');
+    expect(markup).toContain('data-office-adapter-binding-dry-run-status-complete="true"');
+    expect(markup).toContain('data-office-adapter-binding-dry-run-status-readback-enabled="true"');
+    expect(markup).toContain('data-office-adapter-binding-dry-run-status-registry-readback-enabled="true"');
+    expect(markup).toContain('data-office-adapter-binding-dry-run-status-plan-metadata-enabled="true"');
+    expect(markup).toContain('data-office-adapter-binding-dry-run-status-binding-enabled="false"');
+    expect(markup).toContain('data-office-adapter-binding-dry-run-status-dispatch-enabled="false"');
+    expect(markup).toContain('data-office-adapter-binding-dry-run-status-runtime-execution-enabled="false"');
+    expect(markup).toContain('data-office-adapter-binding-dry-run-status-watcher-enabled="false"');
+    expect(markup).toContain('data-office-adapter-binding-dry-run-status-cron-enabled="false"');
+    expect(markup).toContain('data-office-adapter-binding-dry-run-status-target-mutation-enabled="false"');
+    expect(markup).toContain('data-office-adapter-binding-dry-run-status-kanban-mutation-enabled="false"');
+    expect(markup).toContain('data-office-adapter-binding-dry-run-status-nas-save-enabled="false"');
+    expect(markup).toContain('data-office-adapter-binding-dry-run-status-vps-file-change-enabled="false"');
+    expect(markup).toContain('data-office-adapter-binding-dry-run-status-service-restart-enabled="false"');
+    expect(markup).toContain('data-office-adapter-binding-dry-run-status-git-push-enabled="false"');
+    expect(markup).toContain('data-office-adapter-binding-dry-run-status-credential-access-enabled="false"');
+    expect(markup).toContain('data-office-adapter-binding-dry-run-status-public-exposure-enabled="false"');
+    expect(markup).toContain('data-office-adapter-binding-dry-run-status-registry="candidate_adapter_ref"');
+    expect(markup).toContain('data-office-adapter-binding-dry-run-status-scope="adapter_binding_allowed"');
+    expect(markup).toContain('data-office-adapter-binding-dry-run-status-forbidden-boundary="adapter_dispatch"');
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw adapter|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
+  });
+
   it("renders the queue-state manual review surface without executable controls or raw markdown", () => {
     const NasKeeperQueueManualEvidenceReviewSurfacePanel = (OfficePageModule as unknown as { NasKeeperQueueManualEvidenceReviewSurfacePanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.NasKeeperQueueManualEvidenceReviewSurfacePanel>> }).NasKeeperQueueManualEvidenceReviewSurfacePanel;
     const boundary = { detailKind: "nas_runtime_n3_approval_boundary_status_surface" } as ReturnType<typeof buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface>;

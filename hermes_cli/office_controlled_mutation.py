@@ -2210,6 +2210,77 @@ def build_office_controlled_mutation_manual_one_shot_runtime_dry_run_status(
     }
 
 
+def build_office_controlled_mutation_adapter_binding_dry_run_status(
+    *, unsafe_examples: Mapping[str, Any] | None = None
+) -> dict[str, object]:
+    """Project adapter binding readiness as dry-run metadata without binding or dispatch."""
+
+    _ = unsafe_examples
+    return {
+        "schema_version": 1,
+        "mode": "adapter_binding_dry_run_status",
+        "adapter_binding_dry_run_complete": True,
+        "source_manual_one_shot_lane": "manual_one_shot_runtime_dry_run_status",
+        "next_manual_lane": "human_reviewed_single_dispatch_status",
+        "adapter_registry": {
+            "registry_readback_enabled": True,
+            "candidate_adapter_ref": "adapter_candidate_manual_runtime_dry_run",
+            "binding_mode": "dry_run_only",
+            "binding_created": False,
+            "dispatch_created": False,
+        },
+        "binding_scope": {
+            "adapter_registry_readback_allowed": True,
+            "binding_plan_metadata_allowed": True,
+            "adapter_binding_allowed": False,
+            "adapter_dispatch_allowed": False,
+            "target_mutation_allowed": False,
+        },
+        "forbidden_boundaries": [
+            "adapter_binding",
+            "adapter_dispatch",
+            "runtime_command_execution",
+            "target_mutation",
+            "watcher_daemon_activation",
+            "cron_job_installation",
+            "kanban_mutation",
+            "nas_save",
+            "vps_file_change",
+            "service_restart",
+            "git_push",
+            "credential_access",
+            "public_exposure",
+        ],
+        "capabilities": {
+            "adapter_binding_dry_run_readback_enabled": True,
+            "adapter_registry_readback_enabled": True,
+            "binding_plan_metadata_enabled": True,
+            "adapter_binding_enabled": False,
+            "adapter_dispatch_enabled": False,
+            "runtime_command_execution_enabled": False,
+            "watcher_daemon_enabled": False,
+            "cron_enabled": False,
+            "target_mutation_enabled": False,
+            "kanban_mutation_enabled": False,
+            "nas_save_enabled": False,
+            "vps_file_change_enabled": False,
+            "service_restart_enabled": False,
+            "git_push_enabled": False,
+            "credential_access_enabled": False,
+            "public_exposure_enabled": False,
+        },
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "opaque_refs_only": True,
+            "safe_summaries_only": True,
+            "unsupported_values_echoed": False,
+            "credentials_echoed": False,
+        },
+        "errors": [],
+    }
+
+
 def _dispatcher_authority_metadata_append_status_capabilities() -> dict[str, bool]:
     return {
         "metadata_append_readback_enabled": True,

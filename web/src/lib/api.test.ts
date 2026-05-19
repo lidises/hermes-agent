@@ -587,6 +587,51 @@ describe("fetchJSON", () => {
     expect(JSON.stringify(fetchMock.mock.calls[0]?.[1])).not.toMatch(/method|body|\/Users\/|\/home\/|token=|sk-|provider/i);
   });
 
+  it("gets adapter binding dry-run status through the protected readback route", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        __HERMES_SESSION_TOKEN__: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers({ "content-type": "application/json" }),
+      json: async () => ({
+        mode: "adapter_binding_dry_run_status",
+        adapter_binding_dry_run_complete: true,
+        capabilities: {
+          adapter_binding_dry_run_readback_enabled: true,
+          adapter_registry_readback_enabled: true,
+          binding_plan_metadata_enabled: true,
+          adapter_binding_enabled: false,
+          adapter_dispatch_enabled: false,
+          target_mutation_enabled: false,
+        },
+      }),
+    } as Response);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await api.getOfficeControlledMutationAdapterBindingDryRunStatus();
+
+    expect(result.mode).toBe("adapter_binding_dry_run_status");
+    expect(result.adapter_binding_dry_run_complete).toBe(true);
+    expect(result.capabilities.adapter_registry_readback_enabled).toBe(true);
+    expect(result.capabilities.binding_plan_metadata_enabled).toBe(true);
+    expect(result.capabilities.adapter_binding_enabled).toBe(false);
+    expect(result.capabilities.adapter_dispatch_enabled).toBe(false);
+    expect(result.capabilities.target_mutation_enabled).toBe(false);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/office/controlled-mutation/adapter-binding-dry-run-status",
+      expect.objectContaining({ headers: expect.any(Headers) }),
+    );
+    const headers = fetchMock.mock.calls[0]?.[1]?.headers as Headers;
+    expect(headers.get("X-Hermes-Session-Token")).toBe("session-token-for-header-only");
+    expect(JSON.stringify(fetchMock.mock.calls[0]?.[1])).not.toMatch(/method|body|\/Users\/|\/home\/|token=|sk-|provider/i);
+  });
+
   it("posts safe NAS Keeper Mac relay write payload through the protected execution route", async () => {
     Object.defineProperty(globalThis, "window", {
       configurable: true,

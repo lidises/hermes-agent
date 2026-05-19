@@ -1,6 +1,12 @@
-# Hermes AI Office — STATUS
+Last updated: 2026-05-19 09:56 KST
 
-Last updated: 2026-05-19 09:39 KST
+## Adapter binding dry-run status lane
+
+Implemented the recommended shortest follow-up after `manual_one_shot_runtime_dry_run_status`: a protected adapter binding dry-run status lane. Backend adds `build_office_controlled_mutation_adapter_binding_dry_run_status(...)` plus protected GET `/api/office/controlled-mutation/adapter-binding-dry-run-status`; frontend adds a typed API wrapper and display-only `/office` panel with stable `data-office-adapter-binding-dry-run-status-*` hooks. It models registry readback and binding-plan metadata only, while keeping adapter binding, adapter dispatch, runtime command execution, watcher daemon, cron, target/Kanban/NAS mutation, VPS file changes, service restart, git push, credential access, and public exposure disabled.
+
+Verification 2026-05-19 09:56 KST: RED backend tests first failed for missing helper/route; RED frontend tests first failed for missing API wrapper/panel. GREEN focused backend adapter-binding+manual-one-shot tests passed (`4 passed`); focused frontend adapter-binding API/RPG tests passed (`2 passed`, `91 skipped`). Broader verification/build pending in this slice.
+
+Boundary: this is status/readback/UI only. It does not create an adapter binding, dispatch an adapter, execute runtime commands, start watcher/cron automation, mutate targets/Kanban/NAS/VPS files, restart services by itself, push from the lane, expose public routes, or grant VPS direct NAS mount/credential/write authority.
 
 ## Manual one-shot runtime dry-run status lane
 

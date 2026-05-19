@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAdapterBindingDryRunStatus, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -4496,6 +4496,77 @@ export function ManualOneShotRuntimeDryRunStatusPanel({
 }
 
 
+export function AdapterBindingDryRunStatusPanel({
+  status,
+  error,
+}: {
+  status: OfficeAdapterBindingDryRunStatus | null;
+  error?: string | null;
+}) {
+  const caps = status?.capabilities ?? {};
+  const registry = status?.adapter_registry ?? {};
+  const scope = status?.binding_scope ?? {};
+  return (
+    <section
+      className="border border-sky-300/20 bg-sky-950/10 p-4"
+      data-office-adapter-binding-dry-run-status="true"
+      data-office-adapter-binding-dry-run-status-complete={String(Boolean(status?.adapter_binding_dry_run_complete))}
+      data-office-adapter-binding-dry-run-status-readback-enabled={String(Boolean(caps.adapter_binding_dry_run_readback_enabled))}
+      data-office-adapter-binding-dry-run-status-registry-readback-enabled={String(Boolean(caps.adapter_registry_readback_enabled))}
+      data-office-adapter-binding-dry-run-status-plan-metadata-enabled={String(Boolean(caps.binding_plan_metadata_enabled))}
+      data-office-adapter-binding-dry-run-status-binding-enabled={String(Boolean(caps.adapter_binding_enabled))}
+      data-office-adapter-binding-dry-run-status-dispatch-enabled={String(Boolean(caps.adapter_dispatch_enabled))}
+      data-office-adapter-binding-dry-run-status-runtime-execution-enabled={String(Boolean(caps.runtime_command_execution_enabled))}
+      data-office-adapter-binding-dry-run-status-watcher-enabled={String(Boolean(caps.watcher_daemon_enabled))}
+      data-office-adapter-binding-dry-run-status-cron-enabled={String(Boolean(caps.cron_enabled))}
+      data-office-adapter-binding-dry-run-status-target-mutation-enabled={String(Boolean(caps.target_mutation_enabled))}
+      data-office-adapter-binding-dry-run-status-kanban-mutation-enabled={String(Boolean(caps.kanban_mutation_enabled))}
+      data-office-adapter-binding-dry-run-status-nas-save-enabled={String(Boolean(caps.nas_save_enabled))}
+      data-office-adapter-binding-dry-run-status-vps-file-change-enabled={String(Boolean(caps.vps_file_change_enabled))}
+      data-office-adapter-binding-dry-run-status-service-restart-enabled={String(Boolean(caps.service_restart_enabled))}
+      data-office-adapter-binding-dry-run-status-git-push-enabled={String(Boolean(caps.git_push_enabled))}
+      data-office-adapter-binding-dry-run-status-credential-access-enabled={String(Boolean(caps.credential_access_enabled))}
+      data-office-adapter-binding-dry-run-status-public-exposure-enabled={String(Boolean(caps.public_exposure_enabled))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-200/70">Adapter binding dry-run</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">registry-only · no binding or dispatch</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Reads and displays the candidate adapter binding plan as metadata only. Adapter binding, dispatch, runtime execution, and target mutation remain disabled.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "readback request failed" : `next ${status?.next_manual_lane ?? "human_reviewed_single_dispatch_status"}`}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-5" data-office-adapter-binding-dry-run-status-registry-list="true">
+        {Object.entries(registry).map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-adapter-binding-dry-run-status-registry={key}>
+            {key}: {String(value)}
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-5" data-office-adapter-binding-dry-run-status-scope-list="true">
+        {Object.entries(scope).map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-adapter-binding-dry-run-status-scope={key} data-office-adapter-binding-dry-run-status-scope-enabled={String(Boolean(value))}>
+            {key}: {String(Boolean(value))}
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-2" data-office-adapter-binding-dry-run-status-forbidden-boundaries="true">
+        {(status?.forbidden_boundaries ?? []).map((boundary) => (
+          <div key={boundary} className="border border-red-300/20 bg-red-950/10 p-2 text-xs text-red-100/80" data-office-adapter-binding-dry-run-status-forbidden-boundary={boundary}>{boundary}</div>
+        ))}
+      </div>
+      <div className="mt-3 border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+        source: {status?.source_manual_one_shot_lane ?? "manual_one_shot_runtime_dry_run_status"}
+      </div>
+    </section>
+  );
+}
+
+
 export function NasKeeperQueueManualEvidenceReviewSurfacePanel({
   surface,
   readback,
@@ -5719,6 +5790,8 @@ export default function OfficePage() {
   const [runtimePreflightStatusError, setRuntimePreflightStatusError] = useState<string | null>(null);
   const [manualOneShotRuntimeDryRunStatus, setManualOneShotRuntimeDryRunStatus] = useState<OfficeManualOneShotRuntimeDryRunStatus | null>(null);
   const [manualOneShotRuntimeDryRunStatusError, setManualOneShotRuntimeDryRunStatusError] = useState<string | null>(null);
+  const [adapterBindingDryRunStatus, setAdapterBindingDryRunStatus] = useState<OfficeAdapterBindingDryRunStatus | null>(null);
+  const [adapterBindingDryRunStatusError, setAdapterBindingDryRunStatusError] = useState<string | null>(null);
   const [nasKeeperQueueReadbackLoading, setNasKeeperQueueReadbackLoading] = useState(false);
   const [nasKeeperQueueReadbackError, setNasKeeperQueueReadbackError] = useState<string | null>(null);
   const [nasKeeperExecutionDraft, setNasKeeperExecutionDraft] = useState<OfficeNasKeeperExecutionFromPreviewPayload>(DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT);
@@ -6103,6 +6176,20 @@ export default function OfficePage() {
         if (!cancelled) {
           setManualOneShotRuntimeDryRunStatus(null);
           setManualOneShotRuntimeDryRunStatusError("request failed");
+        }
+      });
+    api
+      .getOfficeControlledMutationAdapterBindingDryRunStatus()
+      .then((next) => {
+        if (!cancelled) {
+          setAdapterBindingDryRunStatus(next);
+          setAdapterBindingDryRunStatusError(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setAdapterBindingDryRunStatus(null);
+          setAdapterBindingDryRunStatusError("request failed");
         }
       });
     api
@@ -6693,6 +6780,7 @@ export default function OfficePage() {
       <RuntimeActivationReviewStatusPanel status={runtimeActivationReviewStatus} error={runtimeActivationReviewStatusError} />
       <RuntimePreflightStatusPanel status={runtimePreflightStatus} error={runtimePreflightStatusError} />
       <ManualOneShotRuntimeDryRunStatusPanel status={manualOneShotRuntimeDryRunStatus} error={manualOneShotRuntimeDryRunStatusError} />
+      <AdapterBindingDryRunStatusPanel status={adapterBindingDryRunStatus} error={adapterBindingDryRunStatusError} />
 
       <NasKeeperExecutionOperatorActionPanel
         action={nasKeeperExecutionOperatorAction}
