@@ -57,6 +57,7 @@ from hermes_cli.office_controlled_mutation import (
     append_office_controlled_mutation_manual_runtime_command_inclusion_record,
     append_office_controlled_mutation_manual_runtime_command_execution_record,
     append_office_controlled_mutation_manual_target_mutation_readiness_record,
+    append_office_controlled_mutation_manual_target_mutation_record,
     append_office_controlled_mutation_authority_adapter_registry_event,
     append_office_controlled_mutation_decision_event,
     append_office_controlled_mutation_dry_run_result_event,
@@ -111,6 +112,7 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_manual_runtime_command_inclusion_records,
     list_office_controlled_mutation_manual_runtime_command_execution_records,
     list_office_controlled_mutation_manual_target_mutation_readiness_records,
+    list_office_controlled_mutation_manual_target_mutation_records,
     list_office_controlled_mutation_manual_approval_recording_drafts,
     list_office_controlled_mutation_authority_adapter_registry_events,
     list_office_controlled_mutation_request_events,
@@ -1244,6 +1246,26 @@ async def get_office_controlled_mutation_manual_target_mutation_readiness_record
     return list_office_controlled_mutation_manual_target_mutation_readiness_records(
         runtime_execution_ref=runtime_execution_ref,
         target_mutation_readiness_ref=target_mutation_readiness_ref,
+        limit=limit,
+    )
+
+
+@app.post("/api/office/controlled-mutation/manual-target-mutation-record")
+async def append_office_controlled_mutation_manual_target_mutation_record_endpoint(payload: Mapping[str, Any]):
+    """Store exact target mutation metadata while keeping Kanban/NAS closed."""
+    return append_office_controlled_mutation_manual_target_mutation_record(payload)
+
+
+@app.get("/api/office/controlled-mutation/manual-target-mutation-record-status")
+async def get_office_controlled_mutation_manual_target_mutation_record_status(
+    target_mutation_readiness_ref: str | None = None,
+    target_mutation_ref: str | None = None,
+    limit: int = 50,
+):
+    """Read back exact target mutation metadata without exposing raw targets."""
+    return list_office_controlled_mutation_manual_target_mutation_records(
+        target_mutation_readiness_ref=target_mutation_readiness_ref,
+        target_mutation_ref=target_mutation_ref,
         limit=limit,
     )
 

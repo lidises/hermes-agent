@@ -1036,6 +1036,135 @@ def test_manual_target_mutation_readiness_record_api_is_protected_and_safe(monke
     assert readback_body["capabilities"]["target_mutation_enabled"] is False
 
 
+def _seed_target_mutation_readiness_chain(tmp_path):
+    from hermes_cli.office_controlled_mutation import append_office_controlled_mutation_manual_target_mutation_readiness_record
+
+    execution_store = _seed_runtime_command_execution_chain(tmp_path)
+    readiness_store = tmp_path / "office" / "controlled-mutation" / "target_mutation_readiness_records.jsonl"
+    append_office_controlled_mutation_manual_target_mutation_readiness_record(
+        {
+            "runtime_execution_ref": "exec-office-dispatch-1",
+            "target_mutation_readiness_ref": "targetready-office-dispatch-1",
+            "exact_target_allowlist_ref": "allowlist-office-target-1",
+            "target_ref": "target-office-dispatch-1",
+            "dry_run_evidence_ref": "dryrun-office-dispatch-1",
+            "rollback_disable_ref": "rollback-office-dispatch-1",
+            "operator_confirmation": "confirmed-target-mutation-readiness-no-mutate",
+            "verified_by": "actor:ai_office_operator",
+            "verified_at": "2026-05-19T06:40:00Z",
+            "readiness_evidence_refs": ["exec:exec-office-dispatch-1"],
+        },
+        execution_store_path=execution_store,
+        store_path=readiness_store,
+    )
+    return readiness_store
+
+
+def test_manual_target_mutation_record_creates_exact_target_without_kanban_or_nas(tmp_path):
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_manual_target_mutation_record,
+        list_office_controlled_mutation_manual_target_mutation_records,
+    )
+
+    readiness_store = _seed_target_mutation_readiness_chain(tmp_path)
+    mutation_store = tmp_path / "target_mutation_records.jsonl"
+    result = append_office_controlled_mutation_manual_target_mutation_record(
+        {
+            "target_mutation_readiness_ref": "targetready-office-dispatch-1",
+            "target_mutation_ref": "targetmut-office-dispatch-1",
+            "operator_confirmation": "confirmed-target-mutation-write-only",
+            "mutated_by": "actor:ai_office_operator",
+            "mutated_at": "2026-05-19T07:00:00Z",
+            "mutation_evidence_refs": ["targetready:targetready-office-dispatch-1"],
+            "raw_target_path": "/home/hermes/private-target",
+        },
+        readiness_store_path=readiness_store,
+        store_path=mutation_store,
+    )
+
+    assert result["stored"] is True
+    dto = result["dto"]
+    assert dto["mode"] == "stored_manual_target_mutation_record"
+    assert dto["target_mutation_created"] is True
+    assert dto["target_mutation_result"] == "safe_target_marker_written"
+    assert dto["target_mutation_readiness_verified"] is True
+    assert dto["exact_target_allowlist_verified"] is True
+    assert dto["runtime_command_executed"] is True
+    assert dto["idempotency_replay_store_written"] is True
+    assert dto["kanban_mutation_created"] is False
+    assert dto["nas_save_created"] is False
+    assert dto["adapter_dispatch_created"] is False
+    assert dto["real_dispatch_execution_enabled"] is False
+    assert "raw_target_path" not in dto
+    assert "private-target" not in repr(dto)
+
+    duplicate = append_office_controlled_mutation_manual_target_mutation_record(
+        {
+            "target_mutation_readiness_ref": "targetready-office-dispatch-1",
+            "target_mutation_ref": "targetmut-office-dispatch-2",
+            "operator_confirmation": "confirmed-target-mutation-write-only",
+            "mutated_by": "actor:ai_office_operator",
+            "mutated_at": "2026-05-19T07:01:00Z",
+            "mutation_evidence_refs": ["targetready:targetready-office-dispatch-1"],
+        },
+        readiness_store_path=readiness_store,
+        store_path=mutation_store,
+    )
+    assert duplicate["stored"] is False
+    assert duplicate["errors"] == [{"field": "target_mutation_readiness_ref", "code": "duplicate_target_mutation_readiness_ref"}]
+
+    readback = list_office_controlled_mutation_manual_target_mutation_records(store_path=mutation_store)
+    assert readback["mode"] == "stored_manual_target_mutation_records_readback"
+    assert readback["target_mutation_record_count"] == 1
+    assert readback["records"][0]["target_mutation_created"] is True
+    assert readback["capabilities"]["target_mutation_enabled"] is True
+    assert readback["capabilities"]["kanban_mutation_enabled"] is False
+    assert readback["capabilities"]["nas_write_enabled"] is False
+
+
+def test_manual_target_mutation_record_api_is_protected_and_safe(monkeypatch, tmp_path):
+    from fastapi.testclient import TestClient
+    import hermes_cli.web_server as web_server
+
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+    _seed_target_mutation_readiness_chain(tmp_path)
+    client = TestClient(web_server.app)
+    post_path = "/api/office/controlled-mutation/manual-target-mutation-record"
+    get_path = "/api/office/controlled-mutation/manual-target-mutation-record-status?target_mutation_ref=targetmut-office-dispatch-1"
+    body = {
+        "target_mutation_readiness_ref": "targetready-office-dispatch-1",
+        "target_mutation_ref": "targetmut-office-dispatch-1",
+        "operator_confirmation": "confirmed-target-mutation-write-only",
+        "mutated_by": "actor:ai_office_operator",
+        "mutated_at": "2026-05-19T07:00:00Z",
+        "mutation_evidence_refs": ["targetready:targetready-office-dispatch-1"],
+        "raw_target_path": "/home/hermes/private-target",
+    }
+
+    assert client.post(post_path, json=body).status_code == 401
+    assert client.get(get_path).status_code == 401
+
+    stored = client.post(post_path, headers={web_server._SESSION_HEADER_NAME: web_server._SESSION_TOKEN}, json=body)
+    assert stored.status_code == 200
+    payload = stored.json()
+    assert payload["stored"] is True
+    assert payload["dto"]["target_mutation_created"] is True
+    assert payload["dto"]["kanban_mutation_created"] is False
+    assert payload["dto"]["nas_save_created"] is False
+    assert payload["dto"]["real_dispatch_execution_enabled"] is False
+    assert "private-target" not in repr(payload)
+    assert "raw_target_path" not in payload["dto"]
+
+    readback = client.get(get_path, headers={web_server._SESSION_HEADER_NAME: web_server._SESSION_TOKEN})
+    assert readback.status_code == 200
+    readback_body = readback.json()
+    assert readback_body["target_mutation_record_count"] == 1
+    assert readback_body["records"][0]["target_mutation_ref"] == "targetmut-office-dispatch-1"
+    assert readback_body["capabilities"]["target_mutation_enabled"] is True
+    assert readback_body["capabilities"]["kanban_mutation_enabled"] is False
+    assert readback_body["capabilities"]["nas_write_enabled"] is False
+
+
 def test_manual_runtime_command_preview_record_api_is_protected_and_safe(monkeypatch, tmp_path):
     from fastapi.testclient import TestClient
     import hermes_cli.web_server as web_server

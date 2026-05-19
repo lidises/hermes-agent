@@ -869,6 +869,64 @@ export interface OfficeManualTargetMutationReadinessRecordStatus {
   errors?: Array<{ field: string; code: string }>;
 }
 
+export interface OfficeManualTargetMutationRecordPayload {
+  target_mutation_readiness_ref: string;
+  target_mutation_ref: string;
+  operator_confirmation: "confirmed-target-mutation-write-only";
+  mutated_by: string;
+  mutated_at: string;
+  mutation_evidence_refs: string[];
+}
+
+export interface OfficeManualTargetMutationRecord {
+  schema_version: number;
+  mode: "stored_manual_target_mutation_record";
+  mutation_status?: "exact_target_mutated_no_kanban_or_nas";
+  target_mutation_result?: "safe_target_marker_written";
+  target_mutation_readiness_ref: string;
+  target_mutation_ref: string;
+  runtime_execution_ref?: string;
+  runtime_command_ref?: string;
+  runtime_command_preview_ref?: string;
+  idempotency_key?: string;
+  dispatch_gate_ref?: string;
+  approval_record_ref?: string;
+  exact_target_allowlist_ref?: string;
+  target_ref?: string;
+  dry_run_evidence_ref?: string;
+  rollback_disable_ref?: string;
+  target_mutation_readiness_verified?: boolean;
+  exact_target_allowlist_verified?: boolean;
+  runtime_command_executed?: boolean;
+  idempotency_replay_store_written?: boolean;
+  rollback_executed?: boolean;
+  target_mutation_created: boolean;
+  kanban_mutation_created: boolean;
+  nas_save_created: boolean;
+  real_dispatch_execution_enabled: boolean;
+  capabilities?: Record<string, boolean>;
+  redaction?: Record<string, boolean>;
+}
+
+export interface OfficeManualTargetMutationRecordAppendResult {
+  stored: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: OfficeManualTargetMutationRecord | null;
+}
+
+export interface OfficeManualTargetMutationRecordStatus {
+  schema_version: number;
+  mode: "stored_manual_target_mutation_records_readback";
+  target_mutation_record_count: number;
+  limit?: number;
+  skipped_count?: number;
+  records: OfficeManualTargetMutationRecord[];
+  latest_refs?: Record<string, string>;
+  capabilities: Record<string, boolean>;
+  redaction?: Record<string, boolean>;
+  errors?: Array<{ field: string; code: string }>;
+}
+
 export interface OfficeDisabledOneShotRuntimeDispatchPayload {
   exact_target_allowlist_ref: string;
   idempotency_key: string;
@@ -1195,6 +1253,20 @@ export const api = {
     if (typeof params.limit === "number") qs.set("limit", String(params.limit));
     const suffix = qs.toString() ? `?${qs.toString()}` : "";
     return fetchJSON<OfficeManualTargetMutationReadinessRecordStatus>(`/api/office/controlled-mutation/manual-target-mutation-readiness-record-status${suffix}`);
+  },
+  writeOfficeControlledMutationManualTargetMutationRecord: (body: OfficeManualTargetMutationRecordPayload) =>
+    fetchJSON<OfficeManualTargetMutationRecordAppendResult>("/api/office/controlled-mutation/manual-target-mutation-record", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
+  getOfficeControlledMutationManualTargetMutationRecordStatus: (params: { target_mutation_readiness_ref?: string; target_mutation_ref?: string; limit?: number } = {}) => {
+    const qs = new URLSearchParams();
+    if (params.target_mutation_readiness_ref) qs.set("target_mutation_readiness_ref", params.target_mutation_readiness_ref);
+    if (params.target_mutation_ref) qs.set("target_mutation_ref", params.target_mutation_ref);
+    if (typeof params.limit === "number") qs.set("limit", String(params.limit));
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+    return fetchJSON<OfficeManualTargetMutationRecordStatus>(`/api/office/controlled-mutation/manual-target-mutation-record-status${suffix}`);
   },
   executeOfficeControlledMutationDisabledOneShotRuntimeDispatch: (body: OfficeDisabledOneShotRuntimeDispatchPayload) =>
     fetchJSON<OfficeDisabledOneShotRuntimeDispatchRefusal>("/api/office/controlled-mutation/disabled-one-shot-runtime-dispatch-executor-skeleton/execute", {
