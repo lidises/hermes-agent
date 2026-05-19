@@ -1,6 +1,6 @@
-Last updated: 2026-05-19 12:53 KST
+Last updated: 2026-05-19 13:02 KST
 
-## Manual approval-recording draft persistence implemented locally (draft-only)
+## Manual approval-recording draft persistence deployed (draft-only)
 - Added protected draft-only approval-record persistence after the refusal-only preflight rung.
 - Backend POST: `/api/office/controlled-mutation/manual-approval-recording-draft`.
 - Backend readback GET: `/api/office/controlled-mutation/manual-approval-recording-draft-status`.
@@ -8,6 +8,8 @@ Last updated: 2026-05-19 12:53 KST
 - Draft status is always `draft_only`; duplicate draft-level refs are rejected with safe `{field, code}` errors.
 - Frontend API wrappers and display-only `/office` draft status panel added; the UI reads back draft status but does not auto-submit a draft.
 - Local RED confirmed missing helper/routes first (`4 failed`); focused GREEN backend preflight+draft `8 passed`, executor chain `13 passed`, frontend API/RPG `110 passed`, `py_compile`, `git diff --check`, and `npm run build` passed with the existing Vite chunk warning only.
+- Commit `ae2cea6c` pushed and deployed to VPS source/dashboard worktrees; `web_dist` copied to both; restarted only `hermes-agent-dashboard.service`; `hermes-gateway.service` stayed active without restart.
+- VPS focused backend preflight+draft tests passed (`8 passed`). Live private `/office?approval-draft=ae2cea6c` returned HTTP 200. Protected API smoke stored one draft-only record (`draft_status=draft_only`) and read it back; approval-record-written, dispatch gate, runtime command inclusion/execution, target mutation, NAS save, and Kanban mutation remained false; unsupported raw command/token/path values were not echoed; scoped controls count 0; browser console JS errors 0.
 - Boundary: this is a bounded draft write/readback only. It does not write a real approval record, open a dispatch gate, materialize or execute runtime commands, create adapter binding/dispatch, write idempotency replay state, execute rollback, mutate targets/Kanban/NAS/VPS files, start watcher/cron automation, restart services by itself, push from the lane, expose public routes, or grant VPS direct NAS mount/credential/write authority.
 
 ## Manual approval-recording preflight implemented locally (refusal-only)
