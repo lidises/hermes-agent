@@ -3250,6 +3250,72 @@ def list_office_controlled_mutation_manual_approval_records(
     }
 
 
+def build_office_controlled_mutation_manual_approval_dispatch_gate_readiness_status(
+    *,
+    approval_store_path: Path | None = None,
+    approval_record_ref: str | None = None,
+    unsafe_examples: Mapping[str, Any] | None = None,
+) -> dict[str, object]:
+    """Project dispatch-gate readiness from a bounded approval record without opening the gate."""
+    _ = unsafe_examples
+    readback = list_office_controlled_mutation_manual_approval_records(
+        store_path=approval_store_path,
+        approval_record_ref=approval_record_ref,
+        limit=1,
+    )
+    records = cast(list[dict[str, object]], readback.get("records", []))
+    latest = records[-1] if records else None
+    approval_present = latest is not None
+    return {
+        "schema_version": 1,
+        "mode": "manual_approval_dispatch_gate_readiness_status",
+        "manual_approval_dispatch_gate_readiness_complete": approval_present,
+        "source_design_lane": "manual_approval_record_write_gate",
+        "next_manual_lane": "separate_dispatch_gate_open_boundary",
+        "readiness": {
+            "approval_record_present": approval_present,
+            "approval_record_written": bool(latest.get("approval_record_written")) if latest else False,
+            "ready_for_dispatch_gate_open": False,
+            "ready_for_runtime_dispatch_execution": False,
+            "exact_target_allowlist_ref": latest.get("exact_target_allowlist_ref") if latest else None,
+            "idempotency_key": latest.get("idempotency_key") if latest else None,
+            "replay_lookup_ref": latest.get("replay_lookup_ref") if latest else None,
+            "rollback_disable_ref": latest.get("rollback_disable_ref") if latest else None,
+            "dry_run_evidence_ref": latest.get("dry_run_evidence_ref") if latest else None,
+            "approval_record_ref": latest.get("approval_record_ref") if latest else None,
+        },
+        "readback": {
+            "approval_record_count": readback.get("approval_record_count", 0),
+            "latest_refs": readback.get("latest_refs", {}),
+            "skipped_count": readback.get("skipped_count", 0),
+        },
+        "execution_boundary": {
+            "approval_record_written": bool(latest.get("approval_record_written")) if latest else False,
+            "dispatch_gate_open": False,
+            "runtime_command_included": False,
+            "runtime_command_executed": False,
+            "adapter_binding_created": False,
+            "adapter_dispatch_created": False,
+            "idempotency_replay_store_written": False,
+            "rollback_executed": False,
+            "target_mutation_created": False,
+            "watcher_or_cron_created": False,
+            "kanban_mutation_created": False,
+            "nas_save_created": False,
+            "vps_file_change_created": False,
+        },
+        "capabilities": _approval_record_capabilities(),
+        "redaction": {
+            "raw_excluded": True,
+            "allowlisted_fields_only": True,
+            "opaque_refs_only": True,
+            "unsupported_values_echoed": False,
+            "credentials_echoed": False,
+        },
+        "errors": readback.get("errors", []),
+    }
+
+
 def build_office_controlled_mutation_manual_approval_recording_draft_review_status(
     *,
     store_path: Path | None = None,

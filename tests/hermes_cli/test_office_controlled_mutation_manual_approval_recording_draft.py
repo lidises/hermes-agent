@@ -321,3 +321,93 @@ def test_manual_approval_record_write_gate_api_is_protected_and_readback_safe(mo
     assert readback_body["capabilities"]["approval_recording_enabled"] is True
     assert readback_body["capabilities"]["dispatch_gate_open"] is False
     assert readback_body["capabilities"]["real_dispatch_execution_enabled"] is False
+
+
+def test_manual_approval_dispatch_gate_readiness_projects_closed_gate_from_approval_record(tmp_path):
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_manual_approval_record,
+        append_office_controlled_mutation_manual_approval_recording_draft,
+        build_office_controlled_mutation_manual_approval_dispatch_gate_readiness_status,
+    )
+
+    draft_store = tmp_path / "approval_record_drafts.jsonl"
+    approval_store = tmp_path / "approval_records.jsonl"
+    append_office_controlled_mutation_manual_approval_recording_draft(_valid_payload(), store_path=draft_store)
+    append_office_controlled_mutation_manual_approval_record(
+        {
+            "approval_record_ref": "approval-office-dispatch-1",
+            "operator_confirmation": "confirmed-real-approval-record-write-only",
+            "approved_by": "actor:ai_office_operator",
+            "approved_at": "2026-05-19T04:30:00Z",
+            "approval_evidence_refs": ["approval:approval-office-dispatch-1", "dryrun:dryrun-office-dispatch-1"],
+            "raw_command": "unsafe-runtime-command-redacted",
+        },
+        draft_store_path=draft_store,
+        store_path=approval_store,
+    )
+
+    status = build_office_controlled_mutation_manual_approval_dispatch_gate_readiness_status(
+        approval_store_path=approval_store,
+        approval_record_ref="approval-office-dispatch-1",
+        unsafe_examples={"raw_command": "unsafe-runtime-command-redacted", "unsafe_ref": "secret-like-value"},
+    )
+
+    assert status["mode"] == "manual_approval_dispatch_gate_readiness_status"
+    assert status["manual_approval_dispatch_gate_readiness_complete"] is True
+    assert status["readiness"]["approval_record_present"] is True
+    assert status["readiness"]["approval_record_written"] is True
+    assert status["readiness"]["ready_for_dispatch_gate_open"] is False
+    assert status["readiness"]["ready_for_runtime_dispatch_execution"] is False
+    assert status["readiness"]["exact_target_allowlist_ref"] == "allowlist-office-target-1"
+    assert status["readiness"]["idempotency_key"] == "idem-office-dispatch-1"
+    assert status["readiness"]["rollback_disable_ref"] == "rollback-office-dispatch-1"
+    assert status["execution_boundary"]["dispatch_gate_open"] is False
+    assert status["execution_boundary"]["runtime_command_included"] is False
+    assert status["execution_boundary"]["runtime_command_executed"] is False
+    assert status["execution_boundary"]["target_mutation_created"] is False
+    assert status["execution_boundary"]["kanban_mutation_created"] is False
+    assert status["execution_boundary"]["nas_save_created"] is False
+    assert status["capabilities"]["approval_recording_enabled"] is True
+    assert status["capabilities"]["dispatch_gate_open"] is False
+    assert status["capabilities"]["real_dispatch_execution_enabled"] is False
+    rendered = repr(status)
+    assert "/home/hermes" not in rendered
+    assert "/Users/lidises" not in rendered
+    assert "secret-like-value" not in rendered
+    assert "raw_command" not in rendered
+
+
+def test_manual_approval_dispatch_gate_readiness_api_is_protected_and_safe(monkeypatch, tmp_path):
+    from fastapi.testclient import TestClient
+    import hermes_cli.web_server as web_server
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_manual_approval_record,
+        append_office_controlled_mutation_manual_approval_recording_draft,
+    )
+
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path))
+    append_office_controlled_mutation_manual_approval_recording_draft(_valid_payload())
+    append_office_controlled_mutation_manual_approval_record(
+        {
+            "approval_record_ref": "approval-office-dispatch-1",
+            "operator_confirmation": "confirmed-real-approval-record-write-only",
+            "approved_by": "actor:ai_office_operator",
+            "approved_at": "2026-05-19T04:30:00Z",
+            "approval_evidence_refs": ["approval:approval-office-dispatch-1"],
+        }
+    )
+    client = TestClient(web_server.app)
+    path = "/api/office/controlled-mutation/manual-approval-dispatch-gate-readiness-status?approval_record_ref=approval-office-dispatch-1"
+
+    assert client.get(path).status_code == 401
+    response = client.get(path, headers={web_server._SESSION_HEADER_NAME: web_server._SESSION_TOKEN})
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["manual_approval_dispatch_gate_readiness_complete"] is True
+    assert payload["readiness"]["approval_record_present"] is True
+    assert payload["readiness"]["ready_for_dispatch_gate_open"] is False
+    assert payload["execution_boundary"]["dispatch_gate_open"] is False
+    assert payload["execution_boundary"]["runtime_command_executed"] is False
+    assert payload["capabilities"]["real_dispatch_execution_enabled"] is False
+    assert payload["errors"] == []

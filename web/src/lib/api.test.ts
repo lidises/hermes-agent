@@ -1140,6 +1140,52 @@ describe("fetchJSON", () => {
     );
   });
 
+  it("gets manual approval dispatch gate readiness through the protected readback route", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        __HERMES_SESSION_TOKEN__: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers({ "content-type": "application/json" }),
+      json: async () => ({
+        mode: "manual_approval_dispatch_gate_readiness_status",
+        manual_approval_dispatch_gate_readiness_complete: true,
+        readiness: {
+          approval_record_present: true,
+          approval_record_written: true,
+          ready_for_dispatch_gate_open: false,
+          ready_for_runtime_dispatch_execution: false,
+          exact_target_allowlist_ref: "allowlist-office-target-1",
+        },
+        execution_boundary: { dispatch_gate_open: false, runtime_command_executed: false, target_mutation_created: false },
+        capabilities: { approval_recording_enabled: true, dispatch_gate_open: false, real_dispatch_execution_enabled: false },
+        errors: [],
+      }),
+    } as Response);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await api.getOfficeControlledMutationManualApprovalDispatchGateReadinessStatus({ approval_record_ref: "approval-office-dispatch-1" });
+
+    expect(result.mode).toBe("manual_approval_dispatch_gate_readiness_status");
+    expect(result.manual_approval_dispatch_gate_readiness_complete).toBe(true);
+    expect(result.readiness.approval_record_present).toBe(true);
+    expect(result.readiness.ready_for_dispatch_gate_open).toBe(false);
+    expect(result.execution_boundary.dispatch_gate_open).toBe(false);
+    expect(result.capabilities.real_dispatch_execution_enabled).toBe(false);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/office/controlled-mutation/manual-approval-dispatch-gate-readiness-status?approval_record_ref=approval-office-dispatch-1",
+      expect.objectContaining({ headers: expect.any(Headers) }),
+    );
+    const headers = fetchMock.mock.calls[0]?.[1]?.headers as Headers;
+    expect(headers.get("X-Hermes-Session-Token")).toBe("session-token-for-header-only");
+    expect(JSON.stringify(fetchMock.mock.calls[0]?.[1])).not.toMatch(/method|body|private-path|secret-marker|credential-marker|provider|raw_command/i);
+  });
+
   it("gets approved real one-shot dispatch gate design through the protected readback route", async () => {
     Object.defineProperty(globalThis, "window", {
       configurable: true,
