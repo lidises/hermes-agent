@@ -1,6 +1,6 @@
-Last updated: 2026-05-19 13:51 KST
+Last updated: 2026-05-19 13:53 KST
 
-## Manual approval record write gate implemented locally (approval-record-only)
+## Manual approval record write gate deployed (approval-record-only)
 - Added bounded manual approval-record write gate after draft-review readiness.
 - Backend POST: `/api/office/controlled-mutation/manual-approval-record`.
 - Backend readback GET: `/api/office/controlled-mutation/manual-approval-record-status`.
@@ -8,7 +8,8 @@ Last updated: 2026-05-19 13:51 KST
 - Stored approval records set `approval_record_written=true`, but keep `dispatch_gate_open=false`, `runtime_command_included=false`, `runtime_command_executed=false`, `target_mutation_created=false`, `idempotency_replay_store_written=false`, `kanban_mutation_created=false`, and `nas_save_created=false`.
 - Frontend API wrapper and display-only `/office` readback panel added; no form/button/input/select/textarea controls.
 - RED confirmed missing backend helper/API and frontend wrapper/panel first (`3 failed` backend, `2 failed` frontend). GREEN focused backend `9 passed`, broader controlled-mutation chain `18 passed`, frontend API/RPG `114 passed`, `py_compile`, `git diff --check`, added-line secret scan, and `npm run build` passed with existing Vite chunk warning only.
-- Pending deploy verification in this session: commit/push, VPS sync, dashboard restart, VPS tests, live smoke.
+- Commit `5cd6abf8` pushed and deployed to VPS source/dashboard worktrees; `web_dist` copied to both; restarted only `hermes-agent-dashboard.service`; `hermes-gateway.service` stayed active without restart.
+- VPS focused backend preflight+draft/approval-record tests passed (`13 passed`). Live private `/office?approval-record=5cd6abf8` returned HTTP 200. Protected API smoke stored one draft and one bounded manual approval record (`approval_record_written=true`) and read it back; dispatch gate, runtime command inclusion/execution, replay-store write, target mutation, Kanban mutation, NAS save, and real dispatch stayed false; unsupported raw path/command values were not echoed; browser console JS errors 0.
 
 ## Manual approval-recording draft review readiness deployed (review-only)
 - Added protected review/readiness projection after draft persistence.
