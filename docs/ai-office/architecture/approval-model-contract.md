@@ -1,6 +1,6 @@
 # AI Office Approval Model Contract 1
 
-Last updated: 2026-05-20 17:18 KST
+Last updated: 2026-05-20 17:47 KST
 Status: architecture contract, documentation-only. This document does not approve implementation of mutation endpoints, browser execution controls, Kanban writes, projection promote/transfer, watcher/cron enablement, service restart, public exposure, NAS mount, direct credentials, or raw-source reads.
 
 ## Purpose
@@ -12,6 +12,29 @@ It answers one question:
 > When the RPG operating room shows “승인 필요”, what exact non-raw request, evidence, human decision, and audit shape would be required before any real mutation is allowed?
 
 This is a contract for future design and tests, not a permission to execute those mutations now.
+
+
+## Kanban mutation dry-run readiness surface
+
+`Kanban mutation dry-run readiness 1` is approved only as an A0 display-only/readiness review surface.
+
+Allowed in this slice:
+
+- frontend read-only evidence/check cards derived from the allowlisted Kanban projection DTO;
+- candidate safe `task_ref`, `board_id`, and status display;
+- local docs/tests/build/deploy follow-through;
+- dashboard-only VPS sync and dashboard service restart.
+
+Still not approved by this surface:
+
+- Kanban create/update/transition/comment/reassign/delete;
+- dry-run result metadata append or audit JSONL write;
+- approval record creation or gate-open record creation;
+- NAS Keeper/Mac relay write;
+- watcher/cron/dispatcher/daemon activation;
+- gateway restart or public exposure change.
+
+A future Kanban mutation or dry-run result write needs a separate explicit approval that names the exact candidate transition, rollback/readback evidence, idempotency/audit shape, and failure boundary.
 
 ## Current state
 

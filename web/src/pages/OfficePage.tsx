@@ -231,6 +231,7 @@ import {
   type OfficeCharacterFacilitySourceLedgerStrip,
   type OfficeCharacterFacilityCompletionReview,
   type OfficeCharacter,
+  type OfficeKanbanMutationDryRunReadiness,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
   type OfficeMapNode,
@@ -1181,6 +1182,58 @@ export function ControlledMutationSafeContinuationCompletionReviewPanel({ review
         ))}
       </div>
     </section>
+  );
+}
+
+
+export function OfficeKanbanMutationDryRunReadinessPanel({ readiness }: { readiness: OfficeKanbanMutationDryRunReadiness }) {
+  return (
+    <div
+      className="border border-fuchsia-300/15 bg-fuchsia-950/10 p-3"
+      data-office-kanban-mutation-dry-run-readiness="true"
+      data-office-kanban-mutation-dry-run-only={String(readiness.dryRunOnly)}
+      data-office-kanban-mutation-readiness-enabled-controls={String(readiness.enabledControls)}
+      data-office-kanban-mutation-readiness-form-control-enabled={String(readiness.formControlEnabled)}
+      data-office-kanban-mutation-readiness-kanban-mutation-enabled={String(readiness.kanbanMutationEnabled)}
+      data-office-kanban-mutation-readiness-execution-enabled={String(readiness.executionEnabled)}
+      data-office-kanban-mutation-readiness-dry-run-result-write-enabled={String(readiness.dryRunResultWriteEnabled)}
+      data-office-kanban-mutation-readiness-approval-record-write-enabled={String(readiness.approvalRecordWriteEnabled)}
+      data-office-kanban-mutation-readiness-watcher-cron-enabled={String(readiness.watcherCronEnabled)}
+      data-office-kanban-mutation-readiness-nas-write-enabled={String(readiness.nasWriteEnabled)}
+      data-office-kanban-mutation-readiness-gateway-restart-enabled={String(readiness.gatewayRestartEnabled)}
+      data-office-kanban-mutation-readiness-raw-excluded={String(readiness.rawExcluded)}
+      data-office-kanban-mutation-readiness-candidate-ref={readiness.candidateTransitionRef}
+      data-office-kanban-mutation-readiness-candidate-board={readiness.candidateBoardId}
+      data-office-kanban-mutation-readiness-candidate-status={readiness.candidateStatus}
+    >
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <SectionLabel>{readiness.stageLabel}</SectionLabel>
+          <div className="mt-1 text-sm text-foreground">future transition preview: {readiness.candidateTransitionRef}</div>
+          <div className="mt-1 text-xs leading-5 text-midground/65">source of truth: {readiness.sourceOfTruth} · read-only readiness review · no mutation controls</div>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          checks: {readiness.summary.evidenceCheckCount} · blocked: {readiness.summary.blockedCapabilityCount} · controls: {readiness.summary.enabledControls}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-3" data-office-kanban-mutation-readiness-evidence-checks="true">
+        {readiness.evidenceChecks.map((check) => (
+          <div key={check.id} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-kanban-mutation-readiness-evidence-check={check.id} data-office-kanban-mutation-readiness-evidence-status={check.status}>
+            <div className="font-semibold text-foreground">{check.label}</div>
+            <div className="mt-1 uppercase tracking-[0.14em] text-midground/55">{check.status}</div>
+            <div className="mt-2 leading-5 text-midground/70">{check.detail}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-3" data-office-kanban-mutation-readiness-blocked-capabilities="true">
+        {readiness.blockedCapabilities.map((capability) => (
+          <div key={capability.id} className="border border-amber-300/20 bg-amber-950/10 p-3 text-xs" data-office-kanban-mutation-readiness-blocked-capability={capability.id}>
+            <div className="font-semibold text-amber-100">{capability.label}</div>
+            <div className="mt-2 leading-5 text-amber-100/70">{capability.detail}</div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -9988,6 +10041,7 @@ export default function OfficePage() {
                 ))}
               </div>
             </div>
+            <OfficeKanbanMutationDryRunReadinessPanel readiness={kanbanProjection.mutationDryRunReadiness} />
             <div className="border border-amber-300/15 bg-amber-950/10 p-3" data-office-kanban-observability="true">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <SectionLabel>{kanbanProjection.observability.stageLabel}</SectionLabel>

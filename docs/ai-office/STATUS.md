@@ -1,3 +1,34 @@
+
+## 2026-05-20 — Kanban mutation dry-run readiness 1
+
+Status: local implementation and verification complete; deployment handoff pending in this slice.
+
+What changed:
+
+- `buildOfficeKanbanProjection` now includes `mutationDryRunReadiness`, a read-only A0 readiness DTO.
+- `/office` renders `OfficeKanbanMutationDryRunReadinessPanel` in the Kanban operations room.
+- The panel shows candidate safe `task_ref`/board/status, six evidence checks, and six blocked capabilities.
+- It deliberately exposes no form controls and enables no writes or execution controls.
+
+Safety boundary:
+
+- Kanban mutation: disabled.
+- Dry-run result write: disabled.
+- Approval record write: disabled.
+- NAS write: disabled.
+- Watcher/cron/dispatcher activation: disabled.
+- Gateway restart/public exposure change: disabled.
+
+Verification so far:
+
+- Focused readiness tests: 2 passed.
+- Combined Office tests: 252 passed.
+- ESLint: 0 errors, existing Fast Refresh warnings only.
+- Build: passed, existing Vite large chunk warning only.
+- Local browser DOM smoke: readiness=1, checks=6, blocked=6, controls=0, forms=0, rawLeak=false.
+- Local vision smoke: read-only checklist/capability cards visible, no executable controls.
+
+
 Last updated: 2026-05-20 17:31 KST
 
 ## Controlled Mutation Approval Boundary 1 completed and VPS-synced

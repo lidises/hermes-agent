@@ -1,3 +1,20 @@
+
+## Current next — Kanban mutation dry-run readiness deployed
+
+Completed slice:
+
+- Added `Kanban mutation dry-run readiness 1` to the read-only `/office` Kanban operations room.
+- The surface displays only allowlisted candidate safe refs/status plus evidence checks and blocked capabilities.
+- It keeps `enabledControls=0`, `kanbanMutationEnabled=false`, `dryRunResultWriteEnabled=false`, `approvalRecordWriteEnabled=false`, `nasWriteEnabled=false`, `watcherCronEnabled=false`, and `gatewayRestartEnabled=false`.
+- No Kanban mutation, dry-run write, approval record write, NAS write, watcher/cron activation, gateway restart, or public exposure change is approved by this slice.
+
+Recommended next safe lane:
+
+1. If stronger write authority is still desired, create a separately approved Kanban mutation dry-run result schema/store plan first.
+2. Keep it non-executing until the exact transition/ref, rollback/readback plan, and audit/idempotency record shape are named.
+3. Do not bind target mutation execution or dispatcher authority in the same slice.
+
+
 ## Next safest lane
 - Current completed lane: Controlled Mutation Approval Boundary 1 at `46b3e72e`, deployed to the private VPS dashboard with dashboard-only restart. Handoff: `docs/ai-office/plans/2026-05-20-controlled-mutation-approval-boundary-handoff.md`.
 - Preserve the blocked boundary: no Kanban mutation, NAS write, watcher/cron/daemon activation, dispatcher/authority-adapter binding, target mutation, direct VPS NAS authority, public exposure change, or gateway restart.

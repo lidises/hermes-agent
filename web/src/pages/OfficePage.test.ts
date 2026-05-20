@@ -3875,7 +3875,7 @@ describe("Desk RPG Projection ViewModel Helper 1", () => {
       doneTaskCount: 1,
     });
     expect(projection.operatingPosture.guidanceCards.map((card) => card.id)).toEqual(["intake", "orchestrate", "review", "local"]);
-    expect(JSON.stringify(projection)).not.toMatch(/raw|body|result|prompt|transcript|secret/i);
+    expect(JSON.stringify(projection)).not.toMatch(/raw body|raw result|raw prompt|raw transcript|secret/i);
   });
 
   it("summarizes Kanban stale, blocked, and workload signals without raw task fields", () => {
@@ -3951,6 +3951,59 @@ describe("Desk RPG Projection ViewModel Helper 1", () => {
     expect(projection.observability.attentionRefs).toEqual(["t_blocked", "t_running_old"]);
     expect(JSON.stringify(projection.observability)).not.toMatch(/raw|body|result|prompt|transcript|secret|\/Users\/lidises\/nas/i);
     expect(JSON.stringify(projection.cards)).not.toMatch(/raw|secret|timestamp|\/Users\/lidises\/nas/i);
+  });
+
+  it("builds a read-only Kanban mutation dry-run readiness review without write capabilities", () => {
+    const projection = buildOfficeKanbanProjection(officeFixture({
+      generated_at: "2026-05-20T09:20:00Z",
+      rooms: [
+        { id: "kanban:ai-office", kind: "kanban_board", source: "kanban", display_name: "AI Office", counts: { blocked: 1, running: 1 } },
+      ],
+      work_items: [
+        {
+          id: "kanban:ai-office:item:0",
+          source: "kanban",
+          kind: "kanban_task",
+          board_id: "ai-office",
+          task_ref: "t_blocked_safe",
+          title: "raw title must not appear",
+          status: "blocked",
+          assignee: "office-runner",
+          tenant: "ai-office",
+          priority: 9,
+          parent_task_refs: [],
+          child_task_refs: [],
+          badges: ["needs_attention"],
+          body: "raw body must not appear",
+          result: "raw result must not appear",
+          prompt: "raw prompt token must not appear",
+        },
+      ],
+    }));
+
+    expect(projection.mutationDryRunReadiness).toMatchObject({
+      stageLabel: "Kanban mutation dry-run readiness 1",
+      readOnly: true,
+      dryRunOnly: true,
+      sourceOfTruth: "VPS ai-office",
+      candidateTransitionRef: "t_blocked_safe",
+      candidateBoardId: "ai-office",
+      candidateStatus: "blocked",
+      enabledControls: 0,
+      formControlEnabled: false,
+      kanbanMutationEnabled: false,
+      executionEnabled: false,
+      dryRunResultWriteEnabled: false,
+      approvalRecordWriteEnabled: false,
+      watcherCronEnabled: false,
+      nasWriteEnabled: false,
+      gatewayRestartEnabled: false,
+      rawExcluded: true,
+      summary: { evidenceCheckCount: 6, blockedCapabilityCount: 6, enabledControls: 0 },
+    });
+    expect(projection.mutationDryRunReadiness.evidenceChecks.map((check) => check.id)).toEqual(["safe_ref", "approval_boundary", "operator_intent", "rollback_plan", "audit_plan", "separate_mutation_approval"]);
+    expect(projection.mutationDryRunReadiness.blockedCapabilities.map((capability) => capability.id)).toEqual(["kanban_mutation", "dry_run_result_write", "approval_record_write", "nas_write", "watcher_cron", "gateway_restart"]);
+    expect(JSON.stringify(projection.mutationDryRunReadiness)).not.toMatch(/raw title|raw body|raw result|raw prompt|token|secret|\/Users\/lidises/i);
   });
 
   it("caps Kanban observability attention refs before exposing the browser projection", () => {

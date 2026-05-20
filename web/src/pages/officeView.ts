@@ -8630,6 +8630,42 @@ export type OfficeKanbanOperatingPosture = {
   }>;
 };
 
+export type OfficeKanbanMutationDryRunReadiness = {
+  stageLabel: "Kanban mutation dry-run readiness 1";
+  readOnly: true;
+  dryRunOnly: true;
+  sourceOfTruth: "VPS ai-office";
+  candidateTransitionRef: string;
+  candidateBoardId: string;
+  candidateStatus: string;
+  enabledControls: 0;
+  formControlEnabled: false;
+  kanbanMutationEnabled: false;
+  executionEnabled: false;
+  dryRunResultWriteEnabled: false;
+  approvalRecordWriteEnabled: false;
+  watcherCronEnabled: false;
+  nasWriteEnabled: false;
+  gatewayRestartEnabled: false;
+  rawExcluded: true;
+  evidenceChecks: Array<{
+    id: "safe_ref" | "approval_boundary" | "operator_intent" | "rollback_plan" | "audit_plan" | "separate_mutation_approval";
+    label: string;
+    status: "ready_for_review" | "blocked_until_explicit_approval" | "missing_candidate";
+    detail: string;
+  }>;
+  blockedCapabilities: Array<{
+    id: "kanban_mutation" | "dry_run_result_write" | "approval_record_write" | "nas_write" | "watcher_cron" | "gateway_restart";
+    label: string;
+    detail: string;
+  }>;
+  summary: {
+    evidenceCheckCount: number;
+    blockedCapabilityCount: number;
+    enabledControls: 0;
+  };
+};
+
 export type OfficeKanbanProjection = {
   stageLabel: "칸반 운영실";
   readOnly: true;
@@ -8641,6 +8677,7 @@ export type OfficeKanbanProjection = {
   cards: OfficeKanbanProjectionCard[];
   observability: OfficeKanbanObservability;
   operatingPosture: OfficeKanbanOperatingPosture;
+  mutationDryRunReadiness: OfficeKanbanMutationDryRunReadiness;
 };
 
 function safeStringList(value: unknown): string[] {
@@ -8727,8 +8764,89 @@ function buildOfficeKanbanObservability(state: OfficeState, boards: OfficeKanban
   };
 }
 
-function buildOfficeKanbanOperatingPosture(cards: OfficeKanbanProjectionCard[]): OfficeKanbanOperatingPosture {
-  const activeTaskCount = cards.filter((card) => isKanbanRunningStatus(card.status) || card.status === "ready" || card.status === "todo" || card.status === "triage").length;
+
+function buildOfficeKanbanMutationDryRunReadiness(cards: OfficeKanbanProjectionCard[]): OfficeKanbanMutationDryRunReadiness {
+  const candidate = cards.find((card) => isKanbanBlockedCard(card)) ?? cards.find((card) => isKanbanRunningStatus(card.status)) ?? cards.find((card) => card.status === "ready" || card.status === "todo") ?? cards[0] ?? null;
+  const candidateTransitionRef = candidate?.taskRef ?? "no-safe-kanban-candidate";
+  const candidateBoardId = candidate?.boardId ?? "ai-office";
+  const candidateStatus = candidate?.status ?? "missing";
+  const hasCandidate = candidate !== null;
+  const evidenceChecks: OfficeKanbanMutationDryRunReadiness["evidenceChecks"] = [
+    {
+      id: "safe_ref",
+      label: "safe task ref",
+      status: hasCandidate ? "ready_for_review" : "missing_candidate",
+      detail: hasCandidate ? `candidate ${candidateTransitionRef} on ${candidateBoardId}` : "No allowlisted kanban task_ref is available in the current OfficeState DTO",
+    },
+    {
+      id: "approval_boundary",
+      label: "approval boundary",
+      status: "ready_for_review",
+      detail: "Previous boundary allows docs/read-only summary/deploy follow-through only; mutation remains gated",
+    },
+    {
+      id: "operator_intent",
+      label: "operator intent",
+      status: "blocked_until_explicit_approval",
+      detail: "A future mutation must name the exact bounded transition and confirmation string",
+    },
+    {
+      id: "rollback_plan",
+      label: "rollback/readback plan",
+      status: "blocked_until_explicit_approval",
+      detail: "A future write needs rollback/readback evidence before any Kanban state change",
+    },
+    {
+      id: "audit_plan",
+      label: "audit metadata plan",
+      status: "blocked_until_explicit_approval",
+      detail: "A future dry-run result or approval record must store only safe refs/counts/hashes",
+    },
+    {
+      id: "separate_mutation_approval",
+      label: "separate mutation approval",
+      status: "blocked_until_explicit_approval",
+      detail: "This panel is readiness review only and does not approve kanban mutation",
+    },
+  ];
+  const blockedCapabilities: OfficeKanbanMutationDryRunReadiness["blockedCapabilities"] = [
+    { id: "kanban_mutation", label: "Kanban mutation", detail: "No create/update/transition/comment/reassign/write is executed by this surface" },
+    { id: "dry_run_result_write", label: "dry-run result write", detail: "No JSONL/audit/dry-run-result metadata append is performed" },
+    { id: "approval_record_write", label: "approval record write", detail: "No approval record or gate-open record is created" },
+    { id: "nas_write", label: "NAS write", detail: "No NAS Keeper or Mac relay write is triggered" },
+    { id: "watcher_cron", label: "watcher/cron", detail: "No dispatcher, watcher, cron, or daemon activation is introduced" },
+    { id: "gateway_restart", label: "gateway restart", detail: "Dashboard-only work does not restart the gateway" },
+  ];
+
+  return {
+    stageLabel: "Kanban mutation dry-run readiness 1",
+    readOnly: true,
+    dryRunOnly: true,
+    sourceOfTruth: "VPS ai-office",
+    candidateTransitionRef,
+    candidateBoardId,
+    candidateStatus,
+    enabledControls: 0,
+    formControlEnabled: false,
+    kanbanMutationEnabled: false,
+    executionEnabled: false,
+    dryRunResultWriteEnabled: false,
+    approvalRecordWriteEnabled: false,
+    watcherCronEnabled: false,
+    nasWriteEnabled: false,
+    gatewayRestartEnabled: false,
+    rawExcluded: true,
+    evidenceChecks,
+    blockedCapabilities,
+    summary: {
+      evidenceCheckCount: evidenceChecks.length,
+      blockedCapabilityCount: blockedCapabilities.length,
+      enabledControls: 0,
+    },
+  };
+}
+
+function buildOfficeKanbanOperatingPosture(cards: OfficeKanbanProjectionCard[]): OfficeKanbanOperatingPosture {  const activeTaskCount = cards.filter((card) => isKanbanRunningStatus(card.status) || card.status === "ready" || card.status === "todo" || card.status === "triage").length;
   const blockedTaskCount = cards.filter((card) => isKanbanBlockedCard(card)).length;
   const doneTaskCount = cards.filter((card) => card.status === "done" || card.status === "archived").length;
   const openTaskCount = Math.max(0, cards.length - doneTaskCount);
@@ -8824,6 +8942,7 @@ export function buildOfficeKanbanProjection(state: OfficeState): OfficeKanbanPro
 
   const observability = buildOfficeKanbanObservability(state, boards, cards);
   const operatingPosture = buildOfficeKanbanOperatingPosture(cards);
+  const mutationDryRunReadiness = buildOfficeKanbanMutationDryRunReadiness(cards);
 
   return {
     stageLabel: "칸반 운영실",
@@ -8836,6 +8955,7 @@ export function buildOfficeKanbanProjection(state: OfficeState): OfficeKanbanPro
     cards,
     observability,
     operatingPosture,
+    mutationDryRunReadiness,
   };
 }
 
