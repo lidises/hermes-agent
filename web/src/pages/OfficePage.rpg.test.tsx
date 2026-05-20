@@ -88,6 +88,8 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("data-office-rpg-filter=\"severity\"");
     expect(markup).toContain("data-office-rpg-filter=\"role\"");
     expect(markup).toContain("data-office-rpg-visual-map=\"true\"");
+    expect(markup).toContain("data-office-rpg-primary-view=\"true\"");
+    expect(markup.indexOf("data-office-rpg-visual-map=\"true\"")).toBeLessThan(markup.indexOf("data-office-rpg-mission-storyboard=\"true\""));
     expect(markup).toContain("data-office-rpg-map-svg=\"true\"");
     expect(markup).toContain("data-office-rpg-map-path=\"command-to-board\"");
     expect(markup).toContain("data-office-rpg-map-door=\"command-agent_desks\"");
@@ -95,6 +97,9 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("data-office-rpg-character-sprite");
     expect(markup.match(/data-office-rpg-character-sprite=/g)?.length).toBe(scene.entities.length);
     expect(markup).toContain("data-office-rpg-character-overlap-index");
+    expect(markup).toContain("data-office-rpg-character-density-tier");
+    expect(markup).toContain("data-office-rpg-character-density-tier=\"compact\"");
+    expect(markup).toContain("data-office-rpg-character-label-slot");
     expect(markup).toContain("data-office-rpg-character-nameplate");
     expect(markup).toContain("data-office-rpg-character-label-anchor");
     expect(markup).toContain("data-office-rpg-character-keyboard-target=\"true\"");
