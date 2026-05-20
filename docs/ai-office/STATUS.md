@@ -1,7 +1,7 @@
 
 ## 2026-05-20 — Runtime-command execution-noop live surface slice
 
-Status: in progress; local verification passed, deploy pending.
+Status: complete; local verification and VPS dashboard-only deploy/live smoke passed.
 
 What changed:
 
@@ -21,7 +21,9 @@ Verification so far:
 
 Handoff: `docs/ai-office/plans/2026-05-20-runtime-command-execution-noop-live-surface-handoff.md`.
 
-Last updated: 2026-05-20 22:14 KST
+Deployed commit: `8f693fe11eb911b9ae8610c7b2a632562d10aa03`. Dashboard-only restart completed; gateway untouched/active.
+
+Last updated: 2026-05-20 22:17 KST
 
 ## 2026-05-20 — Runtime-command inclusion live surface slice
 

@@ -125,3 +125,66 @@ Local browser smoke:
   - console JS errors=0
 
 Local verification updated: 2026-05-20 22:14 KST
+
+
+## Deployment verification
+
+Code/docs commit pushed:
+
+- `8f693fe1 feat(office): surface runtime command execution noop status`
+- full commit: `8f693fe11eb911b9ae8610c7b2a632562d10aa03`
+
+VPS sync/restart:
+
+- `/home/hermes/.hermes/ai-office-dashboard` reset to `8f693fe11eb911b9ae8610c7b2a632562d10aa03`.
+- `/home/hermes/.hermes/hermes-agent` reset to `8f693fe11eb911b9ae8610c7b2a632562d10aa03` via user-fork `lidises/main`.
+- `hermes_cli/web_dist` rsynced to both worktrees.
+- Relative content hash matched local/dashboard/agent:
+  - `193b5255acc9677df119713f7bf63c77be65c5d787afa6c3b9836c562019a379`
+  - file count: 22
+- Restarted dashboard only:
+  - `hermes-agent-dashboard.service`: active
+  - `hermes-gateway.service`: active and untouched
+
+VPS API smoke:
+
+- URL base: `http://100.122.57.85:8765`
+- protected API chain stored:
+  - manual approval draft = true
+  - manual approval record = true
+  - dispatch gate open = true
+  - runtime command preview = true
+  - runtime command inclusion = true
+  - runtime command execution-noop = true
+- filtered readback for `exec-office-vps-execution-8f693fe1`:
+  - count=1
+  - executed=true
+  - replay=true
+  - result=`noop_probe_succeeded`
+  - target_mutation=false
+  - Kanban=false
+  - NAS=false
+  - real_dispatch=false
+  - unsafe command value leak=false
+  - private path leak=false
+
+VPS browser smoke:
+
+- URL: `http://100.122.57.85:8765/office?execution-vps-browser=8f693fe1`
+- DOM:
+  - execution panel present=true
+  - live panel total count=5 (includes prior safe smoke records)
+  - executed=true
+  - targetMutated=false
+  - realDispatch=false
+  - controls=0 within scoped execution panel
+  - unsafe command value leak=false
+  - private path leak=false
+  - console JS errors=0
+
+Final boundary preserved:
+
+- Runtime command execution-noop metadata only.
+- Adapter dispatch, rollback execution, target mutation, Kanban mutation, NAS save/write/direct VPS NAS authority, watcher/cron, credential access, public exposure, and gateway restart were not performed.
+
+Final updated: 2026-05-20 22:17 KST

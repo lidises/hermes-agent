@@ -16,11 +16,13 @@ Verification so far:
 
 - RED placement test failed when execution-noop panel was only inside legacy diagnostics.
 - GREEN focused placement test passed after live-visible placement.
-- Full local verification and local API/browser smoke passed; commit/push and VPS dashboard-only deploy/live smoke pending.
+- Full local verification, commit/push, VPS dashboard-only sync/restart, protected API smoke, and browser smoke passed.
 
 Handoff: `docs/ai-office/plans/2026-05-20-runtime-command-execution-noop-live-surface-handoff.md`.
 
-Last updated: 2026-05-20 22:14 KST
+Deployed commit: `8f693fe11eb911b9ae8610c7b2a632562d10aa03`. Dashboard-only restart completed; gateway untouched/active.
+
+Last updated: 2026-05-20 22:17 KST
 
 ## Current next — Runtime-command inclusion live surface in progress
 
