@@ -1,4 +1,28 @@
 
+## 2026-05-20 — Runtime-command execution-noop live surface slice
+
+Status: in progress; local verification passed, deploy pending.
+
+What changed:
+
+- Added placement regression coverage for the live-visible runtime-command execution-noop status panel.
+- Moved `ManualRuntimeCommandExecutionRecordStatusPanel` outside the legacy diagnostic block so `/office` production browser smoke can see it.
+
+Safety boundary:
+
+- Metadata/readback only for bounded runtime-command execution-noop.
+- Runtime command execution is limited to noop probe metadata; adapter dispatch, rollback execution, target mutation, Kanban mutation, NAS write/save, watcher/cron, credential access, public exposure, and gateway restart remain disabled.
+
+Verification so far:
+
+- RED placement test failed first on execution panel after `SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES`.
+- GREEN focused placement test passed.
+- Full verification/deploy pending.
+
+Handoff: `docs/ai-office/plans/2026-05-20-runtime-command-execution-noop-live-surface-handoff.md`.
+
+Last updated: 2026-05-20 22:14 KST
+
 ## 2026-05-20 — Runtime-command inclusion live surface slice
 
 Status: complete; local verification and VPS dashboard-only deploy/live smoke passed.

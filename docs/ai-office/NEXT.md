@@ -1,4 +1,27 @@
 
+## Current next — Runtime-command execution-noop live surface in progress
+
+Current slice:
+
+- User approved continuing the recommended controlled-mutation path with bounded writes and slightly stronger authority.
+- Existing protected runtime-command execution-noop metadata store/API/readback implementation is being surfaced in the live `/office` page.
+- Added RED/GREEN placement regression so the execution-noop panel stays outside `SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES` and appears in production/browser smoke.
+
+Safety boundary remains:
+
+- Bounded runtime-command execution-noop metadata readback/status only; smoke may write a noop execution record backed by an existing inclusion record.
+- Adapter binding/dispatch, rollback execution, target mutation, Kanban mutation, NAS save/write/direct VPS NAS authority, watcher/cron activation, credential access, public exposure, and gateway restart remain blocked.
+
+Verification so far:
+
+- RED placement test failed when execution-noop panel was only inside legacy diagnostics.
+- GREEN focused placement test passed after live-visible placement.
+- Full local verification and local API/browser smoke passed; commit/push and VPS dashboard-only deploy/live smoke pending.
+
+Handoff: `docs/ai-office/plans/2026-05-20-runtime-command-execution-noop-live-surface-handoff.md`.
+
+Last updated: 2026-05-20 22:14 KST
+
 ## Current next — Runtime-command inclusion live surface in progress
 
 Current slice:

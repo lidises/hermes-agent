@@ -8971,6 +8971,7 @@ export default function OfficePage() {
       <ManualDispatchGateOpenRecordStatusPanel status={manualDispatchGateOpenRecordStatus} error={manualDispatchGateOpenRecordStatusError} />
       <ManualRuntimeCommandPreviewRecordStatusPanel status={manualRuntimeCommandPreviewRecordStatus} error={manualRuntimeCommandPreviewRecordStatusError} />
       <ManualRuntimeCommandInclusionRecordStatusPanel status={manualRuntimeCommandInclusionRecordStatus} error={manualRuntimeCommandInclusionRecordStatusError} />
+      <ManualRuntimeCommandExecutionRecordStatusPanel status={manualRuntimeCommandExecutionRecordStatus} error={manualRuntimeCommandExecutionRecordStatusError} />
 
       {SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES ? (
         <>
@@ -9075,7 +9076,6 @@ export default function OfficePage() {
       <ManualDispatchGateOpenRecordStatusPanel status={manualDispatchGateOpenRecordStatus} error={manualDispatchGateOpenRecordStatusError} />
       <ManualRuntimeCommandPreviewRecordStatusPanel status={manualRuntimeCommandPreviewRecordStatus} error={manualRuntimeCommandPreviewRecordStatusError} />
       <ManualRuntimeCommandInclusionRecordStatusPanel status={manualRuntimeCommandInclusionRecordStatus} error={manualRuntimeCommandInclusionRecordStatusError} />
-      <ManualRuntimeCommandExecutionRecordStatusPanel status={manualRuntimeCommandExecutionRecordStatus} error={manualRuntimeCommandExecutionRecordStatusError} />
       <ManualTargetMutationReadinessRecordStatusPanel status={manualTargetMutationReadinessRecordStatus} error={manualTargetMutationReadinessRecordStatusError} />
       <ManualTargetMutationRecordStatusPanel status={manualTargetMutationRecordStatus} error={manualTargetMutationRecordStatusError} />
       <ManualAdapterDispatchRecordStatusPanel status={manualAdapterDispatchRecordStatus} error={manualAdapterDispatchRecordStatusError} />
