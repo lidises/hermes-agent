@@ -119,3 +119,65 @@ Commit/push and VPS verification pending.
 ## Next likely rung after this completes
 
 If the user again approves raising risk by the shortest safe path, the next rung is runtime-command execution-noop metadata, not target mutation. Keep execution noop backed by inclusion, with target/Kanban/NAS/adapter/real dispatch still false.
+
+
+## Deployment verification
+
+Code/docs commit pushed:
+
+- `2a604cf9 feat(office): surface runtime command inclusion status`
+- full commit: `2a604cf9bb836179d1fe0d8f2ceba8207f009be6`
+
+VPS sync/restart:
+
+- `/home/hermes/.hermes/ai-office-dashboard` reset to `2a604cf9bb836179d1fe0d8f2ceba8207f009be6`.
+- `/home/hermes/.hermes/hermes-agent` reset to `2a604cf9bb836179d1fe0d8f2ceba8207f009be6` via user-fork `lidises/main`.
+- `hermes_cli/web_dist` rsynced to both worktrees.
+- Relative content hash matched local/dashboard:
+  - `7b9e38b2eea56bd24770e758df6e74da298276c64dabd7636705cf6d9afeeab4`
+  - file count: 22
+- Restarted dashboard only:
+  - `hermes-agent-dashboard.service`: active
+  - `hermes-gateway.service`: active and untouched
+
+VPS API smoke:
+
+- URL base: `http://100.122.57.85:8765`
+- protected API chain stored:
+  - manual approval draft = true
+  - manual approval record = true
+  - dispatch gate open = true
+  - runtime command preview = true
+  - runtime command inclusion = true
+- filtered readback for `cmd-office-vps-inclusion-2a604cf9`:
+  - count=1
+  - included=true
+  - executed=false
+  - checksum length=64
+  - target_mutation=false
+  - Kanban=false
+  - NAS=false
+  - real_dispatch=false
+  - unsafe command value leak=false
+  - private path leak=false
+
+VPS browser smoke:
+
+- URL: `http://100.122.57.85:8765/office?inclusion-vps-browser=2a604cf9`
+- DOM:
+  - inclusion panel present=true
+  - live panel total count=6 (includes prior safe smoke records)
+  - included=true
+  - executed=false
+  - realDispatch=false
+  - controls=0 within scoped inclusion panel
+  - unsafe command value leak=false
+  - private path leak=false
+  - console JS errors=0
+
+Final boundary preserved:
+
+- Runtime command inclusion metadata only.
+- Runtime command execution, adapter dispatch, replay execution, target mutation, Kanban mutation, NAS save/write/direct VPS NAS authority, watcher/cron, credential access, public exposure, and gateway restart were not performed.
+
+Final updated: 2026-05-20 22:00 KST
