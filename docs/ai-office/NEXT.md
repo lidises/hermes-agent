@@ -1,8 +1,8 @@
 ## Next safest lane
-- Current active lane: Controlled Mutation Approval Boundary 1. User approved bounded writes/follow-through for repo documentation, read-only `/office` summary, local verification, commit/push, and private VPS dashboard-only sync/restart/smoke.
+- Current completed lane: Controlled Mutation Approval Boundary 1 at `46b3e72e`, deployed to the private VPS dashboard with dashboard-only restart. Handoff: `docs/ai-office/plans/2026-05-20-controlled-mutation-approval-boundary-handoff.md`.
 - Preserve the blocked boundary: no Kanban mutation, NAS write, watcher/cron/daemon activation, dispatcher/authority-adapter binding, target mutation, direct VPS NAS authority, public exposure change, or gateway restart.
-- Current implementation target: `buildOfficeControlledMutationApprovalBoundarySummary(...)` plus `ControlledMutationApprovalBoundarySummaryPanel` with `data-office-controlled-mutation-approval-boundary-*` hooks, `enabledControls=0`, and no form/executable controls.
-- Verification sequence before handoff: focused approval-boundary tests, combined Office tests, ESLint, build, `git diff --check`, changed-line safety scan, local/private browser smoke, commit/push, private VPS dashboard-only sync/restart/smoke.
+- Recommended next safe lane: a read-only Kanban mutation dry-run/readiness review surface only. It may display required evidence/checks for a future bounded Kanban transition, but must keep mutation/execution controls disabled until a separate explicit approval.
+- Before starting the next lane, re-check git/NEXT/STATUS and private `/office`; treat unauthenticated browser 401 on `/api/office/state` as an auth-context limitation, not as evidence that mutation controls are safe.
 
 # Hermes AI Office — NEXT
 

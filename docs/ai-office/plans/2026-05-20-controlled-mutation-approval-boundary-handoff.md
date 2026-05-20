@@ -1,6 +1,6 @@
 # Controlled Mutation Approval Boundary 1 handoff
 
-Last updated: 2026-05-20 17:24 KST
+Last updated: 2026-05-20 17:31 KST
 
 ## Completed in this slice
 
@@ -53,6 +53,18 @@ Still blocked and requiring a separate explicit approval:
   - `rawLeak=false`
   - console JS errors `0`
 - Vision smoke confirmed the panel is a read-only summary with approved and blocked cards and no form controls.
+
+
+## Commit/deploy result
+
+- Code/docs commit pushed: `46b3e72e` (`feat(office): add controlled mutation approval boundary`).
+- Private VPS dashboard worktree reset to `46b3e72e` and clean.
+- Private VPS core/hermes-agent worktree reset to the user-fork `46b3e72e` and clean.
+- `hermes_cli/web_dist` rsynced into both VPS worktrees. Relative content hash matched local and both VPS copies: `c48e2ed002417d888857611eca6d863a441998960f4c5015defd8a1ff5dbc80d` across 22 files.
+- Restarted `hermes-agent-dashboard.service` only. `hermes-gateway.service` stayed active and was not restarted.
+- Private `/office?approval-boundary=46b3e72e` returned HTTP 200 after dashboard readiness.
+- Deployed asset contains the `data-office-controlled-mutation-approval-boundary-*` hooks.
+- Browser against the unauthenticated private VPS page loaded the shell but stayed at OfficeState loading because `/api/office/state` returned 401 without dashboard auth in the browser context; therefore final live VPS DOM state was verified by deployed asset hook scan plus service/HTTP readiness, while local authenticated/dev DOM and vision smoke verified the rendered panel.
 
 ## Next recommended step after deploy
 
