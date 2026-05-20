@@ -1,19 +1,21 @@
 
-## Current next — Desk RPG runtime fan-out drill-down local slice
+## Current next — Desk RPG runtime fan-out drill-down deployed
 
-Completed local slice:
+Completed slice:
 
 - Added a read-only runtime fan-out drill-down panel to `/office` beneath the rendered Desk RPG facility/approval sections and before the legacy fallback filters.
 - The map still renders only the bounded representative actor cast: User/Boss, Orchestrator, Search Worker capped at 3 visible clones, Reviewer, Wiki Writer, NAS Keeper.
 - Suppressed worker/runtime/source/work rows are now discoverable as aggregate-only lanes: representative actors, hidden workers, board rows, automation rows, and source rows.
 - Safety posture remains display-only: `enabledControls=0`, assignment/dispatch/backend-write false, no forms/buttons/inputs inside the drill-down panel, no raw rows, and no backend/API/storage/Kanban/NAS/cron/gateway change.
 - Local verification passed: focused runtime fan-out tests 2 passed, combined Office tests 254 passed, ESLint 0 errors with existing Fast Refresh warnings, build passed with existing Vite large chunk warning, diff-check passed, local browser DOM smoke panel=1/lanes=5/scoped controls=0/rawLeak=false/console JS errors=0.
+- Deployed code commit `c617660d` to the private VPS dashboard with dashboard-only restart; gateway stayed active and was not restarted. `web_dist` relative hash matched both VPS worktrees: `a5879df500be1fac295411aaf206e68d8d4b57d9ade18dc14f3fb7485f12cd0f` (22 files). VPS browser smoke showed panel=true, lanes=5, hiddenCount=47, enabledControls=0, scopedControls=0, sprites=8, fallbackRows=8, rawLeak=false, console JS errors=0.
+- Handoff: `docs/ai-office/plans/2026-05-20-desk-rpg-runtime-fanout-drilldown-handoff.md`.
 
 Recommended next safe lane:
 
-1. Commit/push this frontend-only read-only slice and do a dashboard-only private VPS sync/restart, leaving gateway untouched.
-2. After live smoke, update this handoff with the deployed commit/hash evidence and fast-forward docs only if needed without restarting for docs-only changes.
-3. Do not add mutation controls, backend write routes, Kanban transitions, NAS writes, watcher/cron activation, authority binding, public exposure, or gateway restart as part of this drill-down slice.
+1. If continuing Desk RPG UX, refine aggregate-lane inspector/details as read-only only; do not return to raw row sprite fan-out.
+2. If raising authority, use the controlled-mutation request/approval event path, not direct worker/facility controls.
+3. Do not add mutation controls, backend write routes, Kanban transitions, NAS writes, watcher/cron activation, authority binding, public exposure, or gateway restart as part of the next visual slice.
 
 
 ## Current next — Kanban mutation dry-run readiness deployed

@@ -1,7 +1,7 @@
 
 ## 2026-05-20 — Desk RPG runtime fan-out drill-down slice
 
-Status: implemented and locally verified; dashboard-only VPS sync pending this commit.
+Status: implemented, verified, committed, pushed, and deployed dashboard-only to VPS.
 
 What changed:
 
@@ -26,8 +26,11 @@ Verification so far:
 - `git diff --check`: passed.
 - Local changed-line safety scan: no production fetch/storage/beacon additions, no production private-path/provider sentinel leakage; write-related terms are false capability flags/tests only.
 - Local browser DOM smoke at `/office?runtime-fanout-drilldown=local`: panel=true, lanes=5, hiddenCount=47 on live local data, enabledControls=0, assignment=false, dispatch=false, backendWrite=false, scopedControls=0, visualMap=1, mapSvg=1, characterSprite hooks=8, fallbackRows=8, rawLeak=false, console JS errors=0.
+- Deployment: code commit `c617660d` pushed to `origin/main`; both private VPS worktrees were synced to the user-fork commit; Mac-built `hermes_cli/web_dist` was rsynced into both worktrees with matching relative content hash `a5879df500be1fac295411aaf206e68d8d4b57d9ade18dc14f3fb7485f12cd0f` (22 files); only `hermes-agent-dashboard.service` was restarted. `hermes-gateway.service` stayed active and was not restarted.
+- VPS live smoke at `/office?runtime-fanout-drilldown=c617660d`: private HTTP 200 after listener readiness; dashboard/gateway active; DOM `panel=true`, `lanes=5`, `hiddenCount=47`, `enabledControls=0`, `assignment=false`, `dispatch=false`, `backendWrite=false`, `scopedControls=0`, `visualMap=1`, `mapSvg=1`, `sprites=8`, `fallbackRows=8`, `rawLeak=false`; console JS errors 0. Vision smoke confirmed read-only aggregate/drill-down posture and no obvious form controls inside the fan-out panel.
+- Handoff: `docs/ai-office/plans/2026-05-20-desk-rpg-runtime-fanout-drilldown-handoff.md`.
 
-Last updated: 2026-05-20 18:51 KST
+Last updated: 2026-05-20 18:56 KST
 
 ## 2026-05-20 — Desk RPG representative actors slice
 
