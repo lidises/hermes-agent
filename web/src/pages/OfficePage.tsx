@@ -2166,6 +2166,33 @@ export function OfficeRpgRuntimeFanoutDrilldownPanel({ drilldown }: { drilldown:
           </div>
         ))}
       </div>
+      <div
+        className="mt-3 border border-emerald-300/15 bg-black/20 p-2 text-xs"
+        data-office-rpg-runtime-fanout-inspector="true"
+        data-office-rpg-runtime-fanout-inspector-enabled-controls={drilldown.enabledControls}
+        data-office-rpg-runtime-fanout-inspector-write-enabled="false"
+      >
+        <div className="font-semibold uppercase tracking-[0.16em] text-emerald-100/80">Aggregate inspector detail</div>
+        <div className="mt-2 grid gap-2 md:grid-cols-5">
+          {drilldown.inspectorDetails.map((detail) => (
+            <div
+              key={detail.laneId}
+              className="border border-current/10 bg-black/15 p-2"
+              data-office-rpg-runtime-fanout-inspector-detail={detail.laneId}
+              data-office-rpg-runtime-fanout-inspector-target={detail.inspectorTarget}
+              data-office-rpg-runtime-fanout-inspector-suppressed-count={detail.suppressedCount}
+              data-office-rpg-runtime-fanout-inspector-safe-projection-only={String(detail.safeProjectionOnly)}
+              data-office-rpg-runtime-fanout-inspector-raw-rows-visible={String(detail.rawRowsVisible)}
+              data-office-rpg-runtime-fanout-inspector-write-enabled={String(detail.writeEnabled)}
+            >
+              <div className="font-semibold text-foreground">{detail.label}</div>
+              <div className="mt-1 text-midground/60">{detail.inspectorTarget} · suppressed {detail.suppressedCount}</div>
+              <div className="mt-2 leading-5 text-midground/70">{detail.reviewHint}</div>
+              <div className="mt-1 leading-5 text-midground/60">다음 경계: {detail.nextBoundary}</div>
+            </div>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }

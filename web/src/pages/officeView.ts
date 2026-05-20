@@ -906,8 +906,10 @@ export type OfficeRpgScene = {
   };
 };
 
+export type OfficeRpgRuntimeFanoutDrilldownLaneId = "representative_actors" | "hidden_workers" | "board_rows" | "automation_rows" | "source_rows";
+
 export type OfficeRpgRuntimeFanoutDrilldownLane = {
-  id: "representative_actors" | "hidden_workers" | "board_rows" | "automation_rows" | "source_rows";
+  id: OfficeRpgRuntimeFanoutDrilldownLaneId;
   label: string;
   count: number;
   room: OfficeRpgRoomId;
@@ -917,12 +919,25 @@ export type OfficeRpgRuntimeFanoutDrilldownLane = {
   mutationEnabled: false;
 };
 
+export type OfficeRpgRuntimeFanoutInspectorDetail = {
+  laneId: OfficeRpgRuntimeFanoutDrilldownLaneId;
+  label: string;
+  inspectorTarget: string;
+  suppressedCount: number;
+  reviewHint: string;
+  nextBoundary: string;
+  safeProjectionOnly: true;
+  rawRowsVisible: false;
+  writeEnabled: false;
+};
+
 export type OfficeRpgRuntimeFanoutDrilldown = {
   stageLabel: "Desk RPG Runtime Fan-out Drill-down 1";
   title: string;
   visibleActorCount: number;
   hiddenRuntimeCount: number;
   lanes: OfficeRpgRuntimeFanoutDrilldownLane[];
+  inspectorDetails: OfficeRpgRuntimeFanoutInspectorDetail[];
   assignmentEnabled: false;
   dispatchEnabled: false;
   backendWriteEnabled: false;
@@ -6529,63 +6544,78 @@ export function buildOfficeRpgRuntimeFanoutDrilldown(scene: OfficeRpgScene): Off
   const automationCount = rpgRoomCount(scene, "cron_room", "automations");
   const sourceCount = rpgRoomCount(scene, "source_archive", "sources");
 
+  const lanes: OfficeRpgRuntimeFanoutDrilldownLane[] = [
+    {
+      id: "representative_actors",
+      label: "Representative actors",
+      count: visibleActorCount,
+      room: "command",
+      posture: "visible",
+      detail: "지도에는 영속 대표 역할 avatar만 표시합니다.",
+      rawRowsVisible: false,
+      mutationEnabled: false,
+    },
+    {
+      id: "hidden_workers",
+      label: "Hidden worker/runtime rows",
+      count: hiddenRuntimeCount,
+      room: "agent_desks",
+      posture: "aggregate_only",
+      detail: "Search Worker 초과분은 지도 스프라이트가 아니라 집계/drill-down으로만 표시합니다.",
+      rawRowsVisible: false,
+      mutationEnabled: false,
+    },
+    {
+      id: "board_rows",
+      label: "Board/work rows",
+      count: workCount,
+      room: "task_board",
+      posture: "aggregate_only",
+      detail: "Kanban/Paperclip 업무 행은 보드 카운터와 safe inspector 경로에서만 다룹니다.",
+      rawRowsVisible: false,
+      mutationEnabled: false,
+    },
+    {
+      id: "automation_rows",
+      label: "Automation rows",
+      count: automationCount,
+      room: "cron_room",
+      posture: "aggregate_only",
+      detail: "cron/watch/runtime 항목은 활성화 없이 상태 카운터로만 남깁니다.",
+      rawRowsVisible: false,
+      mutationEnabled: false,
+    },
+    {
+      id: "source_rows",
+      label: "Source/evidence rows",
+      count: sourceCount,
+      room: "source_archive",
+      posture: "aggregate_only",
+      detail: "sourceTags/근거 원문은 노출하지 않고 자료실 집계로만 표시합니다.",
+      rawRowsVisible: false,
+      mutationEnabled: false,
+    },
+  ];
+
+  const inspectorDetails: OfficeRpgRuntimeFanoutInspectorDetail[] = lanes.map((lane) => ({
+    laneId: lane.id,
+    label: lane.label,
+    inspectorTarget: `#office-rpg-${lane.room}`,
+    suppressedCount: lane.id === "hidden_workers" ? hiddenRuntimeCount : lane.posture === "aggregate_only" ? lane.count : 0,
+    reviewHint: lane.id === "hidden_workers" ? "스프라이트 증설 금지 · Search Worker 초과분은 집계로만 검토" : `${lane.room} 안전 집계만 검사`,
+    nextBoundary: lane.id === "representative_actors" ? "대표 actor 유지" : "controlled-mutation request/approval event path before write",
+    safeProjectionOnly: true,
+    rawRowsVisible: false,
+    writeEnabled: false,
+  }));
+
   return {
     stageLabel: "Desk RPG Runtime Fan-out Drill-down 1",
     title: "Runtime fan-out drill-down",
     visibleActorCount,
     hiddenRuntimeCount,
-    lanes: [
-      {
-        id: "representative_actors",
-        label: "Representative actors",
-        count: visibleActorCount,
-        room: "command",
-        posture: "visible",
-        detail: "지도에는 영속 대표 역할 avatar만 표시합니다.",
-        rawRowsVisible: false,
-        mutationEnabled: false,
-      },
-      {
-        id: "hidden_workers",
-        label: "Hidden worker/runtime rows",
-        count: hiddenRuntimeCount,
-        room: "agent_desks",
-        posture: "aggregate_only",
-        detail: "Search Worker 초과분은 지도 스프라이트가 아니라 집계/drill-down으로만 표시합니다.",
-        rawRowsVisible: false,
-        mutationEnabled: false,
-      },
-      {
-        id: "board_rows",
-        label: "Board/work rows",
-        count: workCount,
-        room: "task_board",
-        posture: "aggregate_only",
-        detail: "Kanban/Paperclip 업무 행은 보드 카운터와 safe inspector 경로에서만 다룹니다.",
-        rawRowsVisible: false,
-        mutationEnabled: false,
-      },
-      {
-        id: "automation_rows",
-        label: "Automation rows",
-        count: automationCount,
-        room: "cron_room",
-        posture: "aggregate_only",
-        detail: "cron/watch/runtime 항목은 활성화 없이 상태 카운터로만 남깁니다.",
-        rawRowsVisible: false,
-        mutationEnabled: false,
-      },
-      {
-        id: "source_rows",
-        label: "Source/evidence rows",
-        count: sourceCount,
-        room: "source_archive",
-        posture: "aggregate_only",
-        detail: "sourceTags/근거 원문은 노출하지 않고 자료실 집계로만 표시합니다.",
-        rawRowsVisible: false,
-        mutationEnabled: false,
-      },
-    ],
+    lanes,
+    inspectorDetails,
     assignmentEnabled: false,
     dispatchEnabled: false,
     backendWriteEnabled: false,

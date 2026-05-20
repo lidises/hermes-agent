@@ -182,11 +182,14 @@ describe("OfficeRpgMap", () => {
     expect(drilldown.rawExcluded).toBe(true);
     expect(drilldown.lanes.map((lane) => lane.id)).toEqual(["representative_actors", "hidden_workers", "board_rows", "automation_rows", "source_rows"]);
     expect(drilldown.lanes.find((lane) => lane.id === "hidden_workers")?.count).toBe(4);
+    expect(drilldown.inspectorDetails.map((detail) => detail.laneId)).toEqual(["representative_actors", "hidden_workers", "board_rows", "automation_rows", "source_rows"]);
+    expect(drilldown.inspectorDetails.find((detail) => detail.laneId === "hidden_workers")?.suppressedCount).toBe(4);
+    expect(drilldown.inspectorDetails.every((detail) => detail.safeProjectionOnly && !detail.rawRowsVisible && !detail.writeEnabled)).toBe(true);
     expect(JSON.stringify(drilldown)).not.toMatch(/raw fanout|\/Users\/lidises|token-shaped-fanout-sentinel|private-fanout-provider/i);
   });
 
 
-  it("renders the runtime fan-out drill-down as aggregate-only read-only rows", () => {
+  it("renders the runtime fan-out drill-down as aggregate-only read-only rows with inspector details", () => {
     const scene = buildOfficeRpgScene(officeFixture({
       agents: Array.from({ length: 7 }, (_, index) => ({ id: `agent-${index}`, status: "active", prompt: "raw panel prompt", provider: "private-panel-provider" })),
       work_items: [
@@ -216,6 +219,13 @@ describe("OfficeRpgMap", () => {
       expect(markup).toContain(`data-office-rpg-runtime-fanout-lane="${lane}"`);
     }
     expect(markup.match(/data-office-rpg-runtime-fanout-lane=/g)?.length).toBe(5);
+    expect(markup).toContain("data-office-rpg-runtime-fanout-inspector=\"true\"");
+    expect(markup).toContain("data-office-rpg-runtime-fanout-inspector-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-rpg-runtime-fanout-inspector-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-rpg-runtime-fanout-inspector-detail=\"hidden_workers\"");
+    expect(markup).toContain("data-office-rpg-runtime-fanout-inspector-suppressed-count=\"4\"");
+    expect(markup).toContain("data-office-rpg-runtime-fanout-inspector-raw-rows-visible=\"false\"");
+    expect(markup).toContain("스프라이트 증설 금지");
     expect(panelMarkup).not.toMatch(/<form|<button|<input|<select|<textarea/i);
     expect(markup).not.toMatch(/raw panel|\/Users\/lidises|private-panel-provider/i);
   });
