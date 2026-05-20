@@ -1,17 +1,19 @@
 
-## Current next — Desk RPG representative actors local slice
+## Current next — Desk RPG runtime fan-out drill-down local slice
 
 Completed local slice:
 
-- Re-aligned the rendered Desk RPG map with the original MVP actor set: User/Boss, Orchestrator, Search Worker capped at 3 visible clones, Reviewer, Wiki Writer, NAS Keeper.
-- The map no longer renders every safe agent/work/cron/source row as a character sprite. Those counts remain visible through rooms/facilities/boards and inspector-safe summaries.
-- Local verification passed: focused RPG scene/map tests 3 passed, combined Office tests 252 passed, ESLint 0 errors with existing Fast Refresh warnings, build passed with existing Vite large chunk warning, diff-check passed, browser DOM smoke sprites=8/fallbackRows=8/rawLeak=false/scoped controls=0/console errors=0.
+- Added a read-only runtime fan-out drill-down panel to `/office` beneath the rendered Desk RPG facility/approval sections and before the legacy fallback filters.
+- The map still renders only the bounded representative actor cast: User/Boss, Orchestrator, Search Worker capped at 3 visible clones, Reviewer, Wiki Writer, NAS Keeper.
+- Suppressed worker/runtime/source/work rows are now discoverable as aggregate-only lanes: representative actors, hidden workers, board rows, automation rows, and source rows.
+- Safety posture remains display-only: `enabledControls=0`, assignment/dispatch/backend-write false, no forms/buttons/inputs inside the drill-down panel, no raw rows, and no backend/API/storage/Kanban/NAS/cron/gateway change.
+- Local verification passed: focused runtime fan-out tests 2 passed, combined Office tests 254 passed, ESLint 0 errors with existing Fast Refresh warnings, build passed with existing Vite large chunk warning, diff-check passed, local browser DOM smoke panel=1/lanes=5/scoped controls=0/rawLeak=false/console JS errors=0.
 
 Recommended next safe lane:
 
-1. If this visual direction is acceptable, commit/push and do a dashboard-only private VPS sync/restart, leaving gateway untouched.
-2. Then optionally add a read-only "runtime fan-out drill-down" panel under the inspector/fallback area so suppressed worker/runtime/source rows are discoverable without becoming map sprites.
-3. Do not add mutation controls, backend write routes, Kanban transitions, NAS writes, watcher/cron activation, authority binding, public exposure, or gateway restart as part of this visual density correction.
+1. Commit/push this frontend-only read-only slice and do a dashboard-only private VPS sync/restart, leaving gateway untouched.
+2. After live smoke, update this handoff with the deployed commit/hash evidence and fast-forward docs only if needed without restarting for docs-only changes.
+3. Do not add mutation controls, backend write routes, Kanban transitions, NAS writes, watcher/cron activation, authority binding, public exposure, or gateway restart as part of this drill-down slice.
 
 
 ## Current next — Kanban mutation dry-run readiness deployed

@@ -1,4 +1,34 @@
 
+## 2026-05-20 — Desk RPG runtime fan-out drill-down slice
+
+Status: implemented and locally verified; dashboard-only VPS sync pending this commit.
+
+What changed:
+
+- `/office` now includes `OfficeRpgRuntimeFanoutDrilldownPanel`, a display-only aggregate drill-down for suppressed runtime fan-out under the Desk RPG rendered map/facility flow.
+- `buildOfficeRpgRuntimeFanoutDrilldown` summarizes the representative actor count, hidden Search Worker/runtime count, work row count, automation count, and source count from safe `OfficeRpgScene` room counters.
+- The rendered map remains bounded to the representative actor set instead of returning to raw row fan-out.
+- The drill-down lanes expose only aggregate counts/details and safe room/posture metadata; raw agent prompts, provider IDs, task bodies, cron scripts, source error text, local paths, token-shaped values, and raw rows remain excluded.
+
+Safety boundary:
+
+- Assignment controls: disabled.
+- Runtime dispatch: disabled.
+- Backend write/API/storage changes: disabled.
+- Kanban mutation, NAS write, watcher/cron activation, dispatcher/authority binding, target mutation, direct VPS NAS authority, public exposure change, and gateway restart: not part of this slice.
+
+Verification so far:
+
+- Focused runtime fan-out tests: 2 passed.
+- Combined Office tests: 254 passed.
+- ESLint: 0 errors, existing Fast Refresh warnings only.
+- Build: passed, existing Vite large chunk warning only.
+- `git diff --check`: passed.
+- Local changed-line safety scan: no production fetch/storage/beacon additions, no production private-path/provider sentinel leakage; write-related terms are false capability flags/tests only.
+- Local browser DOM smoke at `/office?runtime-fanout-drilldown=local`: panel=true, lanes=5, hiddenCount=47 on live local data, enabledControls=0, assignment=false, dispatch=false, backendWrite=false, scopedControls=0, visualMap=1, mapSvg=1, characterSprite hooks=8, fallbackRows=8, rawLeak=false, console JS errors=0.
+
+Last updated: 2026-05-20 18:51 KST
+
 ## 2026-05-20 — Desk RPG representative actors slice
 
 Status: implemented and locally verified.

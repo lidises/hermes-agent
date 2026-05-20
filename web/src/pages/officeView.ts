@@ -906,6 +906,31 @@ export type OfficeRpgScene = {
   };
 };
 
+export type OfficeRpgRuntimeFanoutDrilldownLane = {
+  id: "representative_actors" | "hidden_workers" | "board_rows" | "automation_rows" | "source_rows";
+  label: string;
+  count: number;
+  room: OfficeRpgRoomId;
+  posture: "visible" | "aggregate_only";
+  detail: string;
+  rawRowsVisible: false;
+  mutationEnabled: false;
+};
+
+export type OfficeRpgRuntimeFanoutDrilldown = {
+  stageLabel: "Desk RPG Runtime Fan-out Drill-down 1";
+  title: string;
+  visibleActorCount: number;
+  hiddenRuntimeCount: number;
+  lanes: OfficeRpgRuntimeFanoutDrilldownLane[];
+  assignmentEnabled: false;
+  dispatchEnabled: false;
+  backendWriteEnabled: false;
+  enabledControls: 0;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeDeskRpgProjectionActorRole = "user_boss" | "orchestrator" | "search_worker" | "reviewer" | "wiki_writer" | "nas_keeper";
 
 export type OfficeDeskRpgProjectionFacilityId = "boss_desk" | "orchestrator_desk" | "worker_cluster" | "central_board" | "right_inspector" | "nas_vault" | "security_ops_corner" | "calm_activity_lane";
@@ -6493,6 +6518,81 @@ export function buildOfficeRpgScene(state: OfficeState): OfficeRpgScene {
 function rpgRoomCount(scene: OfficeRpgScene, roomId: OfficeRpgRoomId, key: string): number {
   const value = scene.rooms.find((room) => room.id === roomId)?.counts[key];
   return typeof value === "number" && Number.isFinite(value) ? Math.max(0, value) : 0;
+}
+
+export function buildOfficeRpgRuntimeFanoutDrilldown(scene: OfficeRpgScene): OfficeRpgRuntimeFanoutDrilldown {
+  const visibleActorCount = scene.entities.length;
+  const visibleSearchWorkers = scene.entities.filter((entity) => entity.kind === "search_worker").length;
+  const agentCount = rpgRoomCount(scene, "agent_desks", "agents");
+  const hiddenRuntimeCount = Math.max(0, agentCount - visibleSearchWorkers);
+  const workCount = rpgRoomCount(scene, "task_board", "work_items");
+  const automationCount = rpgRoomCount(scene, "cron_room", "automations");
+  const sourceCount = rpgRoomCount(scene, "source_archive", "sources");
+
+  return {
+    stageLabel: "Desk RPG Runtime Fan-out Drill-down 1",
+    title: "Runtime fan-out drill-down",
+    visibleActorCount,
+    hiddenRuntimeCount,
+    lanes: [
+      {
+        id: "representative_actors",
+        label: "Representative actors",
+        count: visibleActorCount,
+        room: "command",
+        posture: "visible",
+        detail: "지도에는 영속 대표 역할 avatar만 표시합니다.",
+        rawRowsVisible: false,
+        mutationEnabled: false,
+      },
+      {
+        id: "hidden_workers",
+        label: "Hidden worker/runtime rows",
+        count: hiddenRuntimeCount,
+        room: "agent_desks",
+        posture: "aggregate_only",
+        detail: "Search Worker 초과분은 지도 스프라이트가 아니라 집계/drill-down으로만 표시합니다.",
+        rawRowsVisible: false,
+        mutationEnabled: false,
+      },
+      {
+        id: "board_rows",
+        label: "Board/work rows",
+        count: workCount,
+        room: "task_board",
+        posture: "aggregate_only",
+        detail: "Kanban/Paperclip 업무 행은 보드 카운터와 safe inspector 경로에서만 다룹니다.",
+        rawRowsVisible: false,
+        mutationEnabled: false,
+      },
+      {
+        id: "automation_rows",
+        label: "Automation rows",
+        count: automationCount,
+        room: "cron_room",
+        posture: "aggregate_only",
+        detail: "cron/watch/runtime 항목은 활성화 없이 상태 카운터로만 남깁니다.",
+        rawRowsVisible: false,
+        mutationEnabled: false,
+      },
+      {
+        id: "source_rows",
+        label: "Source/evidence rows",
+        count: sourceCount,
+        room: "source_archive",
+        posture: "aggregate_only",
+        detail: "sourceTags/근거 원문은 노출하지 않고 자료실 집계로만 표시합니다.",
+        rawRowsVisible: false,
+        mutationEnabled: false,
+      },
+    ],
+    assignmentEnabled: false,
+    dispatchEnabled: false,
+    backendWriteEnabled: false,
+    enabledControls: 0,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
 }
 
 function rpgStoryboardTone(count: number, fallback: OfficeRpgSeverity = "info"): OfficeRpgSeverity {

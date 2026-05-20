@@ -19,7 +19,7 @@ vi.mock("@/lib/api", () => ({
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
 import type { NasKeeperExecutionStateDraft } from "./OfficePage";
-import { buildOfficeKanbanProjection, buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerAssignmentCandidateGate, buildOfficeWorkerRequestDraftPreview, buildOfficeWorkerHumanConfirmationEnvelope, buildOfficeWorkerAuthorityHandoffEnvelope, buildOfficeWorkerDispatchDryRunEnvelope, buildOfficeWorkerAuditPreviewEnvelope, buildOfficeWorkerRollbackPreviewEnvelope, buildOfficeWorkerFinalGateChecklist, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeNasKeeperSaveRequestGate, buildOfficeNasKeeperRollbackEvidencePreview, buildOfficeNasEvidencePackageStoreReadbackStatus, buildOfficeNasPathValidationStatusSurface, buildOfficeNasPathPreviewStatusSurface, buildOfficeNasPathPreviewStoreReadbackStatusSurface, buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface, buildOfficeNasRuntimeSingleFileWriteApprovalAction, buildOfficeNasKeeperQueueManualEvidenceReviewSurface, buildOfficeNasKeeperExecutionOperatorAction, buildOfficeDeskRpgReadOnlyChainCompletionReview, buildOfficeEventDrivenCharacterStateProjection, buildOfficeCharacterStateRoomOverlay, buildOfficeCharacterRoomInteractionPosture, buildOfficeCharacterInspectorDetailPosture, buildOfficeCharacterDetailSafeDialogueCopy, buildOfficeCharacterBubbleInspectorAlignment, buildOfficeCharacterPanelBoundarySummary, buildOfficeCharacterFacilityRoleLegend, buildOfficeCharacterFacilityBoundaryStrip, buildOfficeCharacterFacilitySourceLedgerStrip, buildOfficeCharacterFacilityCompletionReview, buildOfficeControlledMutationProposalContract, buildOfficeControlledMutationDryRunPlan, buildOfficeControlledMutationAuditSinkPlan, buildOfficeControlledMutationRollbackVerificationPlan, buildOfficeControlledMutationHumanApprovalPlan, buildOfficeControlledMutationAuthoritySummary, buildOfficeControlledMutationExecutionReadinessSummary, buildOfficeControlledMutationContractPostureProjection, buildOfficeControlledMutationContractPosturePolish, buildOfficeControlledMutationReadinessHandoffRibbon, buildOfficeControlledMutationReadinessSummaryPolish, buildOfficeControlledMutationRequestStorePosture, buildOfficeControlledMutationRequestStoreHardeningPlan, buildOfficeControlledMutationNextApprovalBoundary, buildOfficeControlledMutationPostDecisionApprovalBoundary, buildOfficeControlledMutationPostRegistryApprovalBoundary, buildOfficeControlledMutationTargetDispatchForbiddenBoundary, buildOfficeControlledMutationSafeContinuationCompletionReview, buildOfficeControlledMutationApprovalBoundarySummary, buildOfficeRpgScene } from "./officeView";
+import { buildOfficeKanbanProjection, buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerAssignmentCandidateGate, buildOfficeWorkerRequestDraftPreview, buildOfficeWorkerHumanConfirmationEnvelope, buildOfficeWorkerAuthorityHandoffEnvelope, buildOfficeWorkerDispatchDryRunEnvelope, buildOfficeWorkerAuditPreviewEnvelope, buildOfficeWorkerRollbackPreviewEnvelope, buildOfficeWorkerFinalGateChecklist, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeNasKeeperSaveRequestGate, buildOfficeNasKeeperRollbackEvidencePreview, buildOfficeNasEvidencePackageStoreReadbackStatus, buildOfficeNasPathValidationStatusSurface, buildOfficeNasPathPreviewStatusSurface, buildOfficeNasPathPreviewStoreReadbackStatusSurface, buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface, buildOfficeNasRuntimeSingleFileWriteApprovalAction, buildOfficeNasKeeperQueueManualEvidenceReviewSurface, buildOfficeNasKeeperExecutionOperatorAction, buildOfficeDeskRpgReadOnlyChainCompletionReview, buildOfficeEventDrivenCharacterStateProjection, buildOfficeCharacterStateRoomOverlay, buildOfficeCharacterRoomInteractionPosture, buildOfficeCharacterInspectorDetailPosture, buildOfficeCharacterDetailSafeDialogueCopy, buildOfficeCharacterBubbleInspectorAlignment, buildOfficeCharacterPanelBoundarySummary, buildOfficeCharacterFacilityRoleLegend, buildOfficeCharacterFacilityBoundaryStrip, buildOfficeCharacterFacilitySourceLedgerStrip, buildOfficeCharacterFacilityCompletionReview, buildOfficeControlledMutationProposalContract, buildOfficeControlledMutationDryRunPlan, buildOfficeControlledMutationAuditSinkPlan, buildOfficeControlledMutationRollbackVerificationPlan, buildOfficeControlledMutationHumanApprovalPlan, buildOfficeControlledMutationAuthoritySummary, buildOfficeControlledMutationExecutionReadinessSummary, buildOfficeControlledMutationContractPostureProjection, buildOfficeControlledMutationContractPosturePolish, buildOfficeControlledMutationReadinessHandoffRibbon, buildOfficeControlledMutationReadinessSummaryPolish, buildOfficeControlledMutationRequestStorePosture, buildOfficeControlledMutationRequestStoreHardeningPlan, buildOfficeControlledMutationNextApprovalBoundary, buildOfficeControlledMutationPostDecisionApprovalBoundary, buildOfficeControlledMutationPostRegistryApprovalBoundary, buildOfficeControlledMutationTargetDispatchForbiddenBoundary, buildOfficeControlledMutationSafeContinuationCompletionReview, buildOfficeControlledMutationApprovalBoundarySummary, buildOfficeRpgRuntimeFanoutDrilldown, buildOfficeRpgScene } from "./officeView";
 import type { OfficeAuthorityMetadataHandoffStatus, OfficeDispatcherAuthorityDryRunSurface, OfficeDispatcherAuthorityMetadataAppendStatus, OfficeDispatcherAuthorityMetadataRecordingDraft, OfficeDispatcherExecutionSimulationStatus, OfficeNasKeeperExecutionFromPreviewPayload, OfficeNasKeeperExecutionFromPreviewResult, OfficeNasKeeperExecutionStateResult, OfficeNasKeeperHandoffQueueReadback, OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
@@ -147,6 +147,79 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("최근 안전 이벤트");
     expect(markup).not.toMatch(/raw prompt|raw transcript|raw task|secret body|raw token|raw warning|\/Users\/lidises|private-model/i);
   });
+
+  it("builds a read-only runtime fan-out drill-down from aggregate scene counts", () => {
+    const scene = buildOfficeRpgScene(officeFixture({
+      agents: Array.from({ length: 7 }, (_, index) => ({
+        id: `agent-${index}`,
+        status: "active",
+        prompt: "raw fanout prompt must not leak",
+        provider: "private-fanout-provider",
+        api_key: "token-shaped-fanout-sentinel",
+      })),
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw fanout task", body: "/Users/lidises/private/fanout.md" } as unknown as OfficeState["work_items"][number],
+        { id: "task-2", status: "done", transcript: "raw fanout transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      automations: [
+        { id: "job-1", state: "scheduled", last_status: "ok", script: "/Users/lidises/private/cron.py" } as unknown as OfficeState["automations"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-20T09:00:00Z", item_count: 3, warning_count: 1, error_summary: "raw source failure" },
+        { id: "kanban", status: "ok", checked_at: "2026-05-20T09:01:00Z", item_count: 2, warning_count: 0 },
+      ],
+    }));
+
+    const drilldown = buildOfficeRpgRuntimeFanoutDrilldown(scene);
+
+    expect(drilldown.stageLabel).toBe("Desk RPG Runtime Fan-out Drill-down 1");
+    expect(drilldown.visibleActorCount).toBe(8);
+    expect(drilldown.hiddenRuntimeCount).toBe(4);
+    expect(drilldown.enabledControls).toBe(0);
+    expect(drilldown.assignmentEnabled).toBe(false);
+    expect(drilldown.dispatchEnabled).toBe(false);
+    expect(drilldown.backendWriteEnabled).toBe(false);
+    expect(drilldown.rawExcluded).toBe(true);
+    expect(drilldown.lanes.map((lane) => lane.id)).toEqual(["representative_actors", "hidden_workers", "board_rows", "automation_rows", "source_rows"]);
+    expect(drilldown.lanes.find((lane) => lane.id === "hidden_workers")?.count).toBe(4);
+    expect(JSON.stringify(drilldown)).not.toMatch(/raw fanout|\/Users\/lidises|token-shaped-fanout-sentinel|private-fanout-provider/i);
+  });
+
+
+  it("renders the runtime fan-out drill-down as aggregate-only read-only rows", () => {
+    const scene = buildOfficeRpgScene(officeFixture({
+      agents: Array.from({ length: 7 }, (_, index) => ({ id: `agent-${index}`, status: "active", prompt: "raw panel prompt", provider: "private-panel-provider" })),
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw panel task", body: "/Users/lidises/private/panel.md" } as unknown as OfficeState["work_items"][number],
+      ],
+      automations: [
+        { id: "job-1", state: "scheduled", last_status: "ok", script: "/Users/lidises/private/panel-cron.py" } as unknown as OfficeState["automations"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-20T09:00:00Z", item_count: 3, warning_count: 1, error_summary: "raw panel source" },
+      ],
+    }));
+
+    const markup = renderToStaticMarkup(<OfficeRpgMap scene={scene} onInspectEntity={() => undefined} selectedEntityId={null} />);
+
+    const panelStart = markup.indexOf("data-office-rpg-runtime-fanout-drilldown=\"true\"");
+    const panelEnd = markup.indexOf("data-office-rpg-filters=\"true\"", panelStart);
+    const panelMarkup = markup.slice(panelStart, panelEnd);
+
+    expect(markup).toContain("data-office-rpg-runtime-fanout-drilldown=\"true\"");
+    expect(markup).toContain("data-office-rpg-runtime-fanout-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-rpg-runtime-fanout-assignment-enabled=\"false\"");
+    expect(markup).toContain("data-office-rpg-runtime-fanout-dispatch-enabled=\"false\"");
+    expect(markup).toContain("data-office-rpg-runtime-fanout-backend-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-rpg-runtime-fanout-hidden-count=\"4\"");
+    for (const lane of ["representative_actors", "hidden_workers", "board_rows", "automation_rows", "source_rows"]) {
+      expect(markup).toContain(`data-office-rpg-runtime-fanout-lane="${lane}"`);
+    }
+    expect(markup.match(/data-office-rpg-runtime-fanout-lane=/g)?.length).toBe(5);
+    expect(panelMarkup).not.toMatch(/<form|<button|<input|<select|<textarea/i);
+    expect(markup).not.toMatch(/raw panel|\/Users\/lidises|private-panel-provider/i);
+  });
+
   it("renders the Kanban mutation dry-run readiness review as read-only evidence cards", () => {
     const OfficeKanbanMutationDryRunReadinessPanel = (OfficePageModule as unknown as {
       OfficeKanbanMutationDryRunReadinessPanel: React.ComponentType<{ readiness: ReturnType<typeof buildOfficeKanbanProjection>["mutationDryRunReadiness"] }>;

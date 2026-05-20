@@ -85,6 +85,7 @@ import {
   buildOfficeRpgSourceArchiveFacility,
   buildOfficeRpgReviewCornerFacility,
   buildOfficeRpgApprovalConsoleFacility,
+  buildOfficeRpgRuntimeFanoutDrilldown,
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
   buildOfficeApprovalRequestView,
@@ -239,6 +240,7 @@ import {
   type OfficePageSectionPlan,
   type OfficeRecentChange,
   type OfficeRpgRoomId,
+  type OfficeRpgRuntimeFanoutDrilldown,
   type OfficeRpgScene,
   type OfficeRpgSceneEntity,
   type OfficeRpgSeverity,
@@ -2127,6 +2129,47 @@ function rpgCharacterPose(entity: OfficeRpgSceneEntity) {
   return "idle";
 }
 
+export function OfficeRpgRuntimeFanoutDrilldownPanel({ drilldown }: { drilldown: OfficeRpgRuntimeFanoutDrilldown }) {
+  return (
+    <section
+      className="border border-emerald-300/20 bg-emerald-950/10 p-3"
+      data-office-rpg-runtime-fanout-drilldown="true"
+      data-office-rpg-runtime-fanout-enabled-controls={drilldown.enabledControls}
+      data-office-rpg-runtime-fanout-assignment-enabled={String(drilldown.assignmentEnabled)}
+      data-office-rpg-runtime-fanout-dispatch-enabled={String(drilldown.dispatchEnabled)}
+      data-office-rpg-runtime-fanout-backend-write-enabled={String(drilldown.backendWriteEnabled)}
+      data-office-rpg-runtime-fanout-hidden-count={drilldown.hiddenRuntimeCount}
+      aria-label={drilldown.title}
+    >
+      <div className="flex flex-col gap-1 text-xs text-midground/70 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <div className="font-semibold uppercase tracking-[0.18em] text-emerald-100">{drilldown.stageLabel}</div>
+          <div className="mt-1 text-sm font-semibold text-foreground">대표 actor {drilldown.visibleActorCount}명 · 숨김 runtime {drilldown.hiddenRuntimeCount}개</div>
+        </div>
+        <div>aggregate-only · raw rows hidden · controls {drilldown.enabledControls}</div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-5">
+        {drilldown.lanes.map((lane) => (
+          <div
+            key={lane.id}
+            className="border border-current/15 bg-black/15 p-2 text-xs"
+            data-office-rpg-runtime-fanout-lane={lane.id}
+            data-office-rpg-runtime-fanout-lane-room={lane.room}
+            data-office-rpg-runtime-fanout-lane-count={lane.count}
+            data-office-rpg-runtime-fanout-lane-posture={lane.posture}
+            data-office-rpg-runtime-fanout-lane-raw-rows-visible={String(lane.rawRowsVisible)}
+            data-office-rpg-runtime-fanout-lane-mutation-enabled={String(lane.mutationEnabled)}
+          >
+            <div className="font-semibold text-foreground">{lane.label}</div>
+            <div className="mt-1 text-midground/60">{lane.room} · {lane.count} · {lane.posture}</div>
+            <div className="mt-2 leading-5 text-midground/70">{lane.detail}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function OfficeRpgMap({
   scene,
   selectedEntityId,
@@ -2156,6 +2199,7 @@ export function OfficeRpgMap({
   const sourceArchiveFacility = buildOfficeRpgSourceArchiveFacility(scene);
   const reviewCornerFacility = buildOfficeRpgReviewCornerFacility(scene);
   const approvalConsoleFacility = buildOfficeRpgApprovalConsoleFacility(scene);
+  const runtimeFanoutDrilldown = buildOfficeRpgRuntimeFanoutDrilldown(scene);
   const visualEntities = rpgVisualEntities(visibleEntities);
 
   return (
@@ -2432,6 +2476,7 @@ export function OfficeRpgMap({
             ))}
           </div>
         </section>
+        <OfficeRpgRuntimeFanoutDrilldownPanel drilldown={runtimeFanoutDrilldown} />
         <div className="grid gap-2 text-xs md:grid-cols-4" data-office-rpg-filters="true">
           <label className="grid gap-1 text-midground/65">
             <span>방</span>
