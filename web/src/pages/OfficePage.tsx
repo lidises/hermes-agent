@@ -1939,24 +1939,40 @@ function rpgVisualOverlapOffset(index: number) {
 }
 
 function rpgVisualLabelLayout(entity: OfficeRpgSceneEntity, overlapIndex: number, roomIndex: number) {
-  const crowdedRoom = entity.room === "agent_desks" || entity.room === "source_archive";
-  const densityTier = crowdedRoom && roomIndex >= 1 ? "compact" : "standard";
-  const slot = crowdedRoom ? roomIndex % 8 : overlapIndex % 6;
-  const labelX = densityTier === "compact"
-    ? (slot === 2 || slot === 3 || slot === 6 ? -58 : 15)
-    : (slot === 2 || slot === 3 ? -88 : 16);
-  const compactYs = [-38, 31, -52, 47, -20, 63, 6, 78];
-  const standardYs = [-44, 39, -60, 55, -26, 73];
-  const labelY = (densityTier === "compact" ? compactYs : standardYs)[slot] ?? -42;
+  const crowdedRoom = new Set<OfficeRpgRoomId>(["agent_desks", "task_board", "cron_room", "source_archive"]).has(entity.room);
+  const densityTier = crowdedRoom ? "compact" : "standard";
+  const slot = crowdedRoom ? roomIndex % 10 : overlapIndex % 6;
+  const compactSlots = [
+    { x: 15, y: -38 },
+    { x: 15, y: 31 },
+    { x: -58, y: -52 },
+    { x: -58, y: 47 },
+    { x: 15, y: -20 },
+    { x: 15, y: 63 },
+    { x: -58, y: 4 },
+    { x: -58, y: 78 },
+    { x: -28, y: -70 },
+    { x: -28, y: 92 },
+  ];
+  const standardSlots = [
+    { x: 16, y: -44 },
+    { x: 16, y: 39 },
+    { x: -88, y: -60 },
+    { x: -88, y: 55 },
+    { x: 16, y: -26 },
+    { x: 16, y: 73 },
+  ];
+  const label = (densityTier === "compact" ? compactSlots : standardSlots)[slot] ?? standardSlots[0];
   const width = densityTier === "compact" ? 46 : 72;
   return {
+    densityRoom: crowdedRoom ? entity.room : "standard",
     densityTier,
     slot,
-    labelX,
-    labelY,
+    labelX: label.x,
+    labelY: label.y,
     width,
-    labelLineStartX: labelX > 0 ? 8 : -8,
-    labelLineEndX: labelX > 0 ? labelX + 1 : labelX + width - 1,
+    labelLineStartX: label.x > 0 ? 8 : -8,
+    labelLineEndX: label.x > 0 ? label.x + 1 : label.x + width - 1,
     fontSize: densityTier === "compact" ? 8 : 9,
     textX: densityTier === "compact" ? 6 : 7,
   };
@@ -2055,6 +2071,7 @@ export function OfficeRpgMap({
           ))}
         </nav>
         <section
+          id="office-rpg-map"
           className="office-rpg-visual-map"
           data-office-rpg-visual-map="true"
           data-office-rpg-primary-view="true"
@@ -2137,6 +2154,7 @@ export function OfficeRpgMap({
                   data-office-rpg-character-overlap-index={overlapIndex}
                   data-office-rpg-character-room-index={roomIndex}
                   data-office-rpg-character-density-tier={labelLayout.densityTier}
+                  data-office-rpg-character-density-room={labelLayout.densityRoom}
                   data-office-rpg-character-label-slot={labelLayout.slot}
                   data-office-rpg-character-selected={selected ? "true" : "false"}
                   data-office-rpg-character-keyboard-target="true"
@@ -2327,7 +2345,12 @@ export function OfficeRpgMap({
             </select>
           </label>
         </div>
-        <div id="office-rpg-map" className="office-rpg-map__floor" role="region" aria-label="읽기 전용 AI Office RPG 2D 지도">
+        <section className="border border-current/15 bg-black/10 p-3" data-office-rpg-legacy-fallback-map="true" aria-label="보조 격자 지도와 텍스트 대체 목록">
+          <div className="mb-3 flex flex-col gap-1 text-xs text-midground/65 sm:flex-row sm:items-center sm:justify-between">
+            <div className="font-semibold uppercase tracking-[0.18em]">보조 격자 지도 · fallback</div>
+            <div>Primary SVG 지도가 기준이며, 이 영역은 read-only 필터/접근성 대체 경로입니다.</div>
+          </div>
+          <div id="office-rpg-legacy-map" className="office-rpg-map__floor" role="region" aria-label="보조 fallback AI Office RPG 2D 격자 지도">
           {scene.rooms.map((room) => {
             const roomEntities = visibleEntities.filter((entity) => entity.room === room.id);
             return (
@@ -2363,8 +2386,8 @@ export function OfficeRpgMap({
               </section>
             );
           })}
-        </div>
-        <div className="grid gap-3 lg:grid-cols-[1.2fr_0.8fr]">
+          </div>
+          <div className="grid gap-3 lg:grid-cols-[1.2fr_0.8fr]">
           <div id="office-rpg-fallback" className="border border-current/15 bg-black/15 p-3" data-office-rpg-fallback="true">
             <div className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-midground/65">텍스트 대체 목록</div>
             <div className="grid gap-2">
@@ -2397,7 +2420,8 @@ export function OfficeRpgMap({
               <div className="border border-dashed border-current/15 p-3 text-xs text-midground/55">최근 안전 이벤트가 없습니다. 임의 진행도나 가짜 움직임은 만들지 않습니다.</div>
             )}
           </div>
-        </div>
+          </div>
+        </section>
       </CardContent>
     </Card>
   );

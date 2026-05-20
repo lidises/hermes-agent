@@ -99,6 +99,8 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("data-office-rpg-character-overlap-index");
     expect(markup).toContain("data-office-rpg-character-density-tier");
     expect(markup).toContain("data-office-rpg-character-density-tier=\"compact\"");
+    expect(markup).toContain("data-office-rpg-character-density-room=\"task_board\"");
+    expect(markup).toContain("data-office-rpg-character-density-room=\"cron_room\"");
     expect(markup).toContain("data-office-rpg-character-label-slot");
     expect(markup).toContain("data-office-rpg-character-nameplate");
     expect(markup).toContain("data-office-rpg-character-label-anchor");
@@ -136,6 +138,8 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("Source Archive");
     expect(markup).toContain("Incident Corner");
     expect(markup.match(/data-office-rpg-entity=/g)?.length).toBe(scene.entities.length);
+    expect(markup).toContain("data-office-rpg-legacy-fallback-map=\"true\"");
+    expect(markup).toContain("보조 격자 지도");
     expect(markup.match(/data-office-rpg-fallback-row=/g)?.length).toBe(scene.entities.length);
     expect(markup).toContain("최근 안전 이벤트");
     expect(markup).not.toMatch(/raw prompt|raw transcript|raw task|secret body|raw token|raw warning|\/Users\/lidises|private-model/i);
