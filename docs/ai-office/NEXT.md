@@ -1,6 +1,6 @@
 ## Next safest lane
-- Current lane in progress: mount the guarded NAS Keeper live operator lane outside hidden legacy diagnostics so the private /office dashboard can read the authorized queue and expose the already-approved safe-ref execution+inline-state operator without page-load execution.
-- Boundary: UI surface only plus deploy/smoke; approval checkbox remains false by default, inline state-record default remains true, markdown body/raw path/credential fields are not projected, and VPS direct NAS authority plus watcher/cron/dispatch daemon remain false.
+- Completed lane: guarded NAS Keeper live operator lane is mounted outside hidden legacy diagnostics on the private /office dashboard and can read the authorized queue plus expose the existing safe-ref execution+inline-state operator without page-load execution.
+- Boundary preserved: UI surface deploy/smoke only; approval checkbox remains false by default, inline state-record default remains true, markdown body/raw path/credential fields are not projected, and VPS direct NAS authority plus watcher/cron/dispatch daemon remain false.
 - Next higher-risk candidate after this deploy/smoke: one browser-click execution through the visible guarded operator against an isolated temporary Mac relay queue/root, with readback/hash/audit evidence, still no durable production queue, Kanban mutation, watcher/cron, VPS direct NAS authority, public exposure, or gateway restart.
 
 
