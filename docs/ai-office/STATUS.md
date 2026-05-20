@@ -1,4 +1,13 @@
-Last updated: 2026-05-20 13:17 KST
+Last updated: 2026-05-20 13:21 KST
+
+## NAS Keeper real Mac relay execution-from-preview completed
+- Raised the NAS Keeper/Mac relay boundary from authorization + payload preview to one actual Mac-local relay execution-from-preview with inline execution-state recording.
+- First attempted the already-previewed handoff `handoff_nas_keeper_runtime_20260520124446` against `/Users/lidises/nas`; it failed closed before writing with `write_target_unavailable` because the target vault directory `vault_personal_wiki_demo` was not creatable at the NAS root. No file was written and no queue terminal state was recorded for that handoff.
+- Completed the concrete write boundary with a fresh safe handoff targeting an existing writable NAS vault: `handoff_nas_keeper_real_execute_20260520142136`; authorization `authz_nas_keeper_real_execute_20260520142136`; relay execution `relay_exec_nas_keeper_real_execute_20260520142136`; execution record `exec_record_nas_keeper_real_execute_20260520142136`.
+- Real Mac relay target: `Hermes::nas-keeper-runtime-progress-marker-20260520142136.md`; readback SHA-256 `faf8c497a4f22f1d166f24ca6bf555193b46d61de6f999a2edc4ab4d61a7a38a`; bytes written 136; first line `# NAS Keeper runtime progress marker`; audit `audit_write_nas_keeper_real_execute_20260520142136` exists.
+- Queue readback for the executed handoff: count 1; `queue_status=mac_relay_execution_succeeded`; `execution_record_ref=exec_record_nas_keeper_real_execute_20260520142136`; `markdown_body_included=false`; raw-value probe over private paths, provider/token/secret sentinels, credential-like values, and queued markdown text returned no hits.
+- Safety posture: Mac relay write and actual NAS write were true only for this bounded execution; `vps_nas_mount_enabled=false`; `vps_credential_access_enabled=false`; `direct_vps_nas_write_enabled=false`; `watcher_enabled=false`; `cron_enabled=false`; `dispatch_enabled=false`; `authority_adapter_binding_enabled=false`; no dashboard/gateway restart or public exposure was performed.
+- Verification: real file readback and SHA-256 matched; audit file exists; `py_compile` passed for `office_controlled_mutation.py` and `web_server.py`; focused execution-from-preview/execution-state/queue-readback tests passed (`12 passed`); `git diff --check` passed.
 
 ## NAS Keeper handoff authorization and execution-payload preview recorded
 - Raised the bounded NAS Keeper/Mac relay handoff queue marker to authorization metadata and payload-preview metadata for the existing handoff `handoff_nas_keeper_runtime_20260520124446`.
