@@ -1,4 +1,12 @@
-Last updated: 2026-05-20 12:16 KST
+Last updated: 2026-05-20 12:20 KST
+
+## NAS Keeper runtime-command preview metadata recorded
+- Raised the boundary from dispatch-gate-open metadata to a checksum-only runtime-command preview record backed by `gate-nas-keeper-runtime-dispatch-20260520121600`.
+- Safe preview ref: `cmdpreview-nas-keeper-runtime-20260520122800`; checksum: `1471afa1a2ad7aceb238c251feb033e28155b1ec86c934bc200ae69233530527`.
+- Result evidence: runtime-command preview count 1; checksum length 64; `runtime_command_preview_created=true`; `runtime_command_included=false`; `runtime_command_executed=false`; `target_mutation_created=false`; `real_dispatch_execution_enabled=false`.
+- Raw-leak probe over preview readback returned no raw path/token/command sentinel hits; only safe refs, booleans, and checksum metadata are retained.
+- Verification: `py_compile` passed for `office_controlled_mutation.py` and `web_server.py`; adjacent approval/dispatch tests passed (`35 passed`); `git diff --check` passed.
+- Still not performed: raw command body inclusion, runtime command execution, adapter binding/dispatch, target mutation, Kanban mutation, NAS save marker, watcher/cron/daemon activation, service restart, VPS runtime mutation, credential/public authority expansion.
 
 ## NAS Keeper runtime dispatch gate metadata opened
 - Raised the boundary from completed durable queue real-NAS execution to a bounded operator-reviewed runtime dispatch gate metadata write. This created the local-profile controlled-mutation chain: draft approval record, bounded approval record, and dispatch-gate-open metadata record.

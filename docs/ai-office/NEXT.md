@@ -1,7 +1,7 @@
 ## Next safest lane
-- Completed lane: local-profile controlled-mutation metadata now contains a bounded operator-reviewed dispatch gate for NAS Keeper runtime follow-up: draft approval record + approval record + dispatch-gate-open metadata record. The gate ref is `gate-nas-keeper-runtime-dispatch-20260520121600` and it is metadata-only.
-- Boundary preserved: runtime command materialization/execution, adapter binding/dispatch, target mutation, real Kanban mutation, watcher/cron/daemon activation, VPS direct NAS authority, dashboard/gateway restart, public exposure, VPS runtime file mutation, and credential expansion remain closed.
-- Next higher-risk candidate: create a checksum-only runtime-command preview record backed by the open dispatch gate. Keep raw command inclusion/execution, adapter dispatch, target/Kanban/NAS mutation, watcher/cron, service restart, and public/credential authority disabled.
+- Completed lane: local-profile controlled-mutation metadata now contains a checksum-only runtime-command preview record backed by the open dispatch gate. Preview ref `cmdpreview-nas-keeper-runtime-20260520122800` has checksum `1471afa1a2ad7aceb238c251feb033e28155b1ec86c934bc200ae69233530527`.
+- Boundary preserved: raw command body inclusion, runtime command execution, adapter binding/dispatch, target mutation, real Kanban mutation, watcher/cron/daemon activation, VPS direct NAS authority, dashboard/gateway restart, public exposure, VPS runtime file mutation, and credential expansion remain closed.
+- Next higher-risk candidate: bounded runtime-command inclusion record backed by the preview record, storing only safe command refs/body refs plus SHA-256. Keep actual execution, adapter dispatch, target/Kanban/NAS mutation, watcher/cron, service restart, and public/credential authority disabled.
 
 
 # Hermes AI Office — NEXT
