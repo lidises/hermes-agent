@@ -1,4 +1,27 @@
 
+## Current next — Adapter-dispatch live surface in progress
+
+Current slice:
+
+- User approved continuing the recommended controlled-mutation path with bounded writes and slightly stronger authority.
+- Existing protected adapter-dispatch marker metadata store/API/readback implementation is being surfaced in the live `/office` page.
+- Added RED/GREEN placement regression so the adapter-dispatch panel stays outside `SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES` and appears in production/browser smoke.
+
+Safety boundary remains:
+
+- Bounded adapter-dispatch marker metadata readback/status only; smoke may write an adapter-dispatch marker record backed by an existing verified target-mutation record.
+- Kanban mutation, NAS save/write/direct VPS NAS authority, rollback execution, real dispatch, watcher/cron activation, credential access, public exposure, and gateway restart remain blocked.
+
+Verification so far:
+
+- RED placement test failed when adapter-dispatch panel was only inside legacy diagnostics.
+- GREEN focused placement test passed after live-visible placement.
+- Full local verification and local API/browser smoke passed; commit/push and VPS dashboard-only deploy/live smoke pending.
+
+Handoff: `docs/ai-office/plans/2026-05-20-adapter-dispatch-live-surface-handoff.md`.
+
+Last updated: 2026-05-20 23:46 KST
+
 ## Current next — Target-mutation live surface in progress
 
 Current slice:
