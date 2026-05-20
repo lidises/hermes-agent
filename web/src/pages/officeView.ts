@@ -2249,6 +2249,35 @@ export type OfficeNasKeeperQueueEvidenceConsolidation = {
   rawExcluded: true;
 };
 
+export type OfficeNasKeeperQueueReviewChecklistCheck = {
+  id: "terminal_evidence" | "open_authorized" | "manual_review" | "unsafe_skips" | "next_boundary";
+  label: string;
+  status: "complete" | "blocked";
+  count: number;
+  operatorSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeNasKeeperQueueReviewChecklist = {
+  stageLabel: "NAS Keeper Queue Review Checklist 1";
+  title: string;
+  sourceStageLabel: OfficeNasKeeperQueueEvidenceConsolidation["stageLabel"];
+  checkCount: number;
+  completedCheckCount: number;
+  blockingCheckCount: number;
+  readyForReplaceRollbackSmoke: boolean;
+  nextRecommendedAction: "replace_rollback_smoke_candidate" | "close_open_authorized_or_manual_review_items_first";
+  enabledControls: 0;
+  queueMutationEnabled: false;
+  macRelayExecutionEnabled: false;
+  nasWriteEnabled: false;
+  watcherCronDaemonEnabled: false;
+  authorityAdapterBindingEnabled: false;
+  markdownBodyProjected: false;
+  checks: OfficeNasKeeperQueueReviewChecklistCheck[];
+  rawExcluded: true;
+};
+
 export type OfficeNasKeeperExecutionOperatorAction = {
   stageLabel: "NAS Keeper Execution Operator Action 1";
   title: string;
@@ -5565,6 +5594,72 @@ export function buildOfficeNasKeeperQueueEvidenceConsolidation(readback?: Office
     watcherCronDaemonEnabled: false,
     authorityAdapterBindingEnabled: false,
     lanes: visibleLanes,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeNasKeeperQueueReviewChecklist(consolidation: OfficeNasKeeperQueueEvidenceConsolidation): OfficeNasKeeperQueueReviewChecklist {
+  const checks: OfficeNasKeeperQueueReviewChecklistCheck[] = [
+    {
+      id: "terminal_evidence",
+      label: "Terminal evidence refs present",
+      status: consolidation.terminalCount > 0 && consolidation.evidenceRefCount > 0 ? "complete" : "blocked",
+      count: consolidation.evidenceRefCount,
+      operatorSummary: "성공/실패 terminal queue item의 safe evidence ref 수를 확인합니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "open_authorized",
+      label: "No open authorized item",
+      status: consolidation.openAuthorizedCount === 0 ? "complete" : "blocked",
+      count: consolidation.openAuthorizedCount,
+      operatorSummary: "authorized_for_mac_relay_execution 상태가 남아 있으면 replace/rollback smoke 전에 먼저 닫습니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "manual_review",
+      label: "No manual-review queue item",
+      status: consolidation.manualReviewCount === 0 ? "complete" : "blocked",
+      count: consolidation.manualReviewCount,
+      operatorSummary: "manual-review 상태가 남아 있으면 실행/교체가 아니라 사람 검토로 고정합니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "unsafe_skips",
+      label: "Unsafe queue entries skipped",
+      status: consolidation.skippedUnsafeCount > 0 ? "blocked" : "complete",
+      count: consolidation.skippedUnsafeCount,
+      operatorSummary: "unsafe skip은 raw projection 없이 카운트만 보고 별도 큐 위생 점검 후보로 남깁니다.",
+      rawExcluded: true,
+    },
+    {
+      id: "next_boundary",
+      label: "Next boundary remains explicit",
+      status: "complete",
+      count: consolidation.laneCount,
+      operatorSummary: "다음 단계는 deliberate replace/rollback smoke 또는 queue hygiene이며 자동 watcher/daemon으로 넘어가지 않습니다.",
+      rawExcluded: true,
+    },
+  ];
+  const blockingCheckCount = checks.filter((check) => check.status === "blocked").length;
+  const readyForReplaceRollbackSmoke = blockingCheckCount === 0 && consolidation.succeededCount > 0;
+  return {
+    stageLabel: "NAS Keeper Queue Review Checklist 1",
+    title: "NAS Keeper queue evidence operator review checklist",
+    sourceStageLabel: consolidation.stageLabel,
+    checkCount: checks.length,
+    completedCheckCount: checks.length - blockingCheckCount,
+    blockingCheckCount,
+    readyForReplaceRollbackSmoke,
+    nextRecommendedAction: readyForReplaceRollbackSmoke ? "replace_rollback_smoke_candidate" : "close_open_authorized_or_manual_review_items_first",
+    enabledControls: 0,
+    queueMutationEnabled: false,
+    macRelayExecutionEnabled: false,
+    nasWriteEnabled: false,
+    watcherCronDaemonEnabled: false,
+    authorityAdapterBindingEnabled: false,
+    markdownBodyProjected: false,
+    checks,
     rawExcluded: true,
   };
 }

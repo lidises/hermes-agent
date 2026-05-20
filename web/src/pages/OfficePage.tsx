@@ -150,6 +150,7 @@ import {
   buildOfficeNasRuntimeSingleFileWriteApprovalAction,
   buildOfficeNasKeeperQueueManualEvidenceReviewSurface,
   buildOfficeNasKeeperQueueEvidenceConsolidation,
+  buildOfficeNasKeeperQueueReviewChecklist,
   buildOfficeNasKeeperExecutionOperatorAction,
   buildOfficeDeskRpgReadOnlyChainCompletionReview,
   buildOfficeEventDrivenCharacterStateProjection,
@@ -5909,6 +5910,7 @@ export function NasKeeperQueueManualEvidenceReviewSurfacePanel({
       )
     : [];
   const evidenceConsolidation = buildOfficeNasKeeperQueueEvidenceConsolidation(readback);
+  const reviewChecklist = buildOfficeNasKeeperQueueReviewChecklist(evidenceConsolidation);
   return (
     <Card
       data-office-nas-keeper-queue-manual-review="true"
@@ -6021,6 +6023,39 @@ export function NasKeeperQueueManualEvidenceReviewSurfacePanel({
                       ))}
                     </div>
                   ) : null}
+                  <div
+                    className="mt-2 border border-lime-300/20 bg-lime-950/10 p-3"
+                    data-office-nas-keeper-queue-review-checklist="true"
+                    data-office-nas-keeper-queue-review-checklist-enabled-controls={reviewChecklist.enabledControls}
+                    data-office-nas-keeper-queue-review-checklist-completed-count={reviewChecklist.completedCheckCount}
+                    data-office-nas-keeper-queue-review-checklist-blocking-count={reviewChecklist.blockingCheckCount}
+                    data-office-nas-keeper-queue-review-checklist-ready-for-replace-rollback-smoke={String(reviewChecklist.readyForReplaceRollbackSmoke)}
+                    data-office-nas-keeper-queue-review-checklist-next-action={reviewChecklist.nextRecommendedAction}
+                    data-office-nas-keeper-queue-review-checklist-queue-mutation-enabled={String(reviewChecklist.queueMutationEnabled)}
+                    data-office-nas-keeper-queue-review-checklist-mac-relay-execution-enabled={String(reviewChecklist.macRelayExecutionEnabled)}
+                    data-office-nas-keeper-queue-review-checklist-nas-write-enabled={String(reviewChecklist.nasWriteEnabled)}
+                    data-office-nas-keeper-queue-review-checklist-markdown-body-projected={String(reviewChecklist.markdownBodyProjected)}
+                  >
+                    <div className="font-semibold text-lime-100">operator review checklist</div>
+                    <div className="mt-1 leading-5">
+                      complete {reviewChecklist.completedCheckCount}/{reviewChecklist.checkCount} · blockers {reviewChecklist.blockingCheckCount} · next {reviewChecklist.nextRecommendedAction}
+                    </div>
+                    <div className="mt-2 grid gap-2 md:grid-cols-3">
+                      {reviewChecklist.checks.map((check) => (
+                        <div
+                          key={check.id}
+                          className="border border-lime-300/15 bg-lime-950/10 p-2"
+                          data-office-nas-keeper-queue-review-checklist-check={check.id}
+                          data-office-nas-keeper-queue-review-checklist-check-status={check.status}
+                          data-office-nas-keeper-queue-review-checklist-check-count={check.count}
+                        >
+                          <div className="font-semibold text-lime-100">{check.label}</div>
+                          <div className="mt-1 font-mono text-[10px] text-lime-100/70">{check.status} · count {check.count}</div>
+                          <div className="mt-1 text-midground/60">{check.operatorSummary}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                   <div className="mt-2 text-midground/60">queue rewrite, relay dispatch, service restart, NAS write, and markdown body projection remain disabled.</div>
                 </div>
                 <div className="mt-2 grid gap-2 md:grid-cols-2">

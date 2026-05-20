@@ -1,4 +1,9 @@
-Last updated: 2026-05-20 14:02 KST
+Last updated: 2026-05-20 14:19 KST
+
+## NAS Keeper operator review checklist added
+- Added a read-only `/office` operator review checklist derived from the NAS Keeper queue evidence consolidation surface. It turns terminal evidence refs, open authorized items, manual-review items, unsafe skip counts, and the next boundary into explicit complete/blocked review checks.
+- Safety posture: enabled controls remain 0; queue mutation, Mac relay execution, NAS write, watcher/cron, authority adapter binding, and markdown body projection remain disabled in this checklist.
+- Verification: RED focused helper test first failed with missing `buildOfficeNasKeeperQueueReviewChecklist`; GREEN focused helper and SSR tests passed; combined `npm run test -- OfficePage.test.ts OfficePage.rpg.test.tsx` passed (`248 passed`).
 
 ## Operator-visible NAS Keeper evidence consolidation added
 - Added a read-only `/office` queue evidence consolidation helper and panel section for completed/failed/manual-review NAS Keeper handoffs. It aggregates safe queue readback metadata into terminal/open/manual-review lanes and evidence-ref counts without projecting queued markdown bodies.

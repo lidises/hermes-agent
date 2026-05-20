@@ -3380,6 +3380,13 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(markup).toContain('data-office-nas-keeper-queue-evidence-consolidation-mac-relay-execution-enabled="false"');
     expect(markup).toContain('data-office-nas-keeper-queue-evidence-consolidation-nas-write-enabled="false"');
     expect(markup).toContain('data-office-nas-keeper-queue-evidence-consolidation-lane="manual_review"');
+    expect(markup).toContain('data-office-nas-keeper-queue-review-checklist="true"');
+    expect(markup).toContain('data-office-nas-keeper-queue-review-checklist-enabled-controls="0"');
+    expect(markup).toContain('data-office-nas-keeper-queue-review-checklist-ready-for-replace-rollback-smoke="false"');
+    expect(markup).toContain('data-office-nas-keeper-queue-review-checklist-next-action="close_open_authorized_or_manual_review_items_first"');
+    expect(markup).toContain('data-office-nas-keeper-queue-review-checklist-check="manual_review"');
+    expect(markup).toContain('data-office-nas-keeper-queue-review-checklist-mac-relay-execution-enabled="false"');
+    expect(markup).toContain('data-office-nas-keeper-queue-review-checklist-nas-write-enabled="false"');
     expect(markup).toContain("completed/failed handoff evidence consolidation");
     expect(markup).toContain("Manual review");
     expect(markup).toContain("Manual review needed");

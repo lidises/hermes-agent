@@ -139,6 +139,7 @@ import {
   buildOfficeNasRuntimeSingleFileWriteApprovalAction,
   buildOfficeNasKeeperQueueManualEvidenceReviewSurface,
   buildOfficeNasKeeperQueueEvidenceConsolidation,
+  buildOfficeNasKeeperQueueReviewChecklist,
   buildOfficeDeskRpgReadOnlyChainCompletionReview,
   buildOfficeEventDrivenCharacterStateProjection,
   buildOfficeCharacterStateRoomOverlay,
@@ -287,6 +288,55 @@ describe("NAS Keeper Queue Evidence Consolidation 1", () => {
     expect(consolidation.nasWriteEnabled).toBe(false);
     expect(consolidation.markdownBodyProjected).toBe(false);
     expect(JSON.stringify(consolidation)).not.toMatch(/raw markdown body|Traceback|\/Users\/lidises|token-shaped-evidence|private-provider/i);
+  });
+});
+
+
+describe("NAS Keeper Queue Review Checklist 1", () => {
+  it("turns queue evidence consolidation into an explicit operator review checklist without enabling writes", () => {
+    const readback = {
+      listed: true,
+      errors: [],
+      dto: {
+        schema_version: 1,
+        mode: "nas_keeper_handoff_queue_readback",
+        listed: true,
+        queue_storage_ref: "queue:canonical",
+        filters: {},
+        effective_limit: 20,
+        available_count: 3,
+        count: 3,
+        skipped_count: 1,
+        markdown_body_included: false,
+        capabilities: { read: true, write: false },
+        next_required_boundary: "operator_review",
+        items: [
+          { handoff_ref: "handoff-succeeded", queue_ref: "queue-1", queue_status: "mac_relay_execution_succeeded", execution_evidence_refs: ["audit:ok", "readback:ok"], markdown_body_included: false },
+          { handoff_ref: "handoff-failed", queue_ref: "queue-2", queue_status: "mac_relay_execution_failed", execution_evidence_refs: ["audit:failed"], markdown_body_included: false },
+          { handoff_ref: "handoff-authorized", queue_ref: "queue-3", queue_status: "authorized_for_mac_relay_execution", execution_evidence_refs: [], markdown_body_included: false },
+        ],
+      },
+    } as unknown as Parameters<typeof buildOfficeNasKeeperQueueEvidenceConsolidation>[0];
+    const consolidation = buildOfficeNasKeeperQueueEvidenceConsolidation(readback);
+
+    const checklist = buildOfficeNasKeeperQueueReviewChecklist(consolidation);
+
+    expect(checklist.stageLabel).toBe("NAS Keeper Queue Review Checklist 1");
+    expect(checklist.sourceStageLabel).toBe("NAS Keeper Queue Evidence Consolidation 1");
+    expect(checklist.checks.map((check) => check.id)).toEqual(["terminal_evidence", "open_authorized", "manual_review", "unsafe_skips", "next_boundary"]);
+    expect(checklist.completedCheckCount).toBe(3);
+    expect(checklist.blockingCheckCount).toBe(2);
+    expect(checklist.readyForReplaceRollbackSmoke).toBe(false);
+    expect(checklist.nextRecommendedAction).toBe("close_open_authorized_or_manual_review_items_first");
+    expect(checklist.enabledControls).toBe(0);
+    expect(checklist.queueMutationEnabled).toBe(false);
+    expect(checklist.macRelayExecutionEnabled).toBe(false);
+    expect(checklist.nasWriteEnabled).toBe(false);
+    expect(checklist.watcherCronDaemonEnabled).toBe(false);
+    expect(checklist.authorityAdapterBindingEnabled).toBe(false);
+    expect(checklist.markdownBodyProjected).toBe(false);
+    expect(checklist.rawExcluded).toBe(true);
+    expect(JSON.stringify(checklist)).not.toMatch(/raw markdown body|Traceback|\/Users\/lidises|token-shaped-review-checklist|private-provider/i);
   });
 });
 
