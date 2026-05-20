@@ -1,7 +1,7 @@
 
 ## 2026-05-20 — Target-readiness live surface slice
 
-Status: in progress; local verification passed, deploy pending.
+Status: complete; local verification and VPS dashboard-only deploy/live smoke passed.
 
 What changed:
 
@@ -18,11 +18,13 @@ Verification so far:
 
 - RED placement test failed when target-readiness panel was only inside legacy diagnostics.
 - GREEN focused placement test passed after live-visible placement.
-- Full local verification and local API/browser smoke passed; commit/push and VPS dashboard-only deploy/live smoke pending.
+- Full local verification, commit/push, VPS dashboard-only sync/restart, protected API smoke, and browser smoke passed.
 
 Handoff: `docs/ai-office/plans/2026-05-20-target-readiness-live-surface-handoff.md`.
 
-Last updated: 2026-05-20 22:26 KST
+Deployed commit: `da7a49f03e2022c871d02ae2ca663c2ef4d92f62`. Dashboard-only restart completed; gateway untouched/active.
+
+Last updated: 2026-05-20 22:29 KST
 
 ## 2026-05-20 — Runtime-command execution-noop live surface slice
 
