@@ -8967,6 +8967,8 @@ export default function OfficePage() {
 
       <ControlledMutationApprovalBoundarySummaryPanel boundary={controlledMutationApprovalBoundarySummary} />
 
+      <ApprovalEventEnvelopeStatusPanel status={approvalEventEnvelopeStatus} error={approvalEventEnvelopeStatusError} />
+
       {SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES ? (
         <>
       <OfficeDeskRpgRoomShell projection={deskRpgProjection} />
