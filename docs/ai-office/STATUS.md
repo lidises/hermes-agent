@@ -1,4 +1,11 @@
-Last updated: 2026-05-20 13:31 KST
+Last updated: 2026-05-20 13:41 KST
+
+## Stale NAS Keeper handoff closed as failed terminal state
+- Reviewed the remaining NAS Keeper handoff queue and found one stale authorized item after the successful real Mac relay write: `handoff_nas_keeper_runtime_20260520124446`, targeting `vault_personal_wiki_demo::nas-keeper-runtime-progress-marker.md`.
+- Per operator review, recorded a safe terminal execution state instead of deleting queue history. Execution record `exec_record_nas_keeper_runtime_failed_20260520134112` changed the queue from `authorized_for_mac_relay_execution` to `mac_relay_execution_failed` with evidence refs `error:write_target_unavailable`, `target:vault_personal_wiki_demo`, and `review:stale_authorized_handoff_cleanup_20260520`.
+- No target file exists for the failed demo-vault handoff, and the previously successful real NAS marker still reads back with SHA-256 `faf8c497a4f22f1d166f24ca6bf555193b46d61de6f999a2edc4ab4d61a7a38a`.
+- Queue review after cleanup: `authorized_for_mac_relay_execution` count is 0; `mac_relay_execution_failed` count is 1 for the stale handoff; `markdown_body_included=false`; raw-value probe over private paths, token/secret sentinels, and queued body probes returned no hits.
+- Verification: `py_compile` passed for `office_controlled_mutation.py` and `web_server.py`; focused execution-from-preview/execution-state/queue-readback tests passed (`12 passed`).
 
 ## VPS sync/smoke after real Mac relay execution docs
 - Committed and pushed documentation update `aad1c1d0` (`docs(ai-office): record real Mac relay execution`) to `origin/main`.
