@@ -1,12 +1,13 @@
 ## Next safest lane
-- Completed lane: local-profile controlled-mutation metadata now contains an execution-backed exact target-readiness record. Readiness ref `targetready-nas-keeper-runtime-20260520124021` verified allowlist `allowlist-nas-keeper-single-durable-handoff` for target `target-nas-keeper-durable-handoff-noop`.
-- Boundary preserved: actual target mutation, adapter binding/dispatch, rollback execution, real Kanban mutation, NAS save marker, watcher/cron/daemon activation, VPS direct NAS authority, dashboard/gateway restart, public exposure, VPS runtime file mutation, and credential expansion remain closed.
-- Next higher-risk candidate: first exact target-mutation metadata record. Keep adapter dispatch, rollback execution, Kanban/NAS/VPS mutation, watcher/cron, service restart, and public/credential authority disabled.
+- Completed lane: local-profile controlled-mutation metadata now reaches the NAS Keeper/Mac relay handoff queue marker. The chain records exact target mutation `targetmut-nas-keeper-runtime-20260520124446`, adapter dispatch `adapterdispatch-nas-keeper-runtime-20260520124446`, Kanban marker `kanbanmut-nas-keeper-runtime-20260520124446`, NAS save marker `nassave-nas-keeper-runtime-20260520124446`, and handoff queue `handoff_nas_keeper_runtime_20260520124446`.
+- Boundary preserved: the handoff is only queued metadata with `queue_status=pending_nas_keeper_authorization`; direct VPS NAS write/authority, Mac relay write, actual NAS write, real NAS execution, watcher/cron/daemon activation, service restart, public exposure, VPS runtime file mutation, credential expansion, and real dispatch execution remain closed.
+- Next higher-risk candidate: NAS Keeper authorization/Mac relay execution preview boundary for this queued handoff. Keep actual NAS execution/write, direct VPS NAS mount/credentials, watcher/cron, gateway restart, public exposure, and credential authority disabled unless separately approved as a concrete gate.
+
 
 
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-19 00:55 KST
+Last updated: 2026-05-20 12:48 KST
 
 ## Start here after `/new`
 

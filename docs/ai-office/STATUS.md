@@ -1,4 +1,13 @@
-Last updated: 2026-05-20 12:42 KST
+Last updated: 2026-05-20 12:48 KST
+
+## NAS Keeper controlled-mutation ladder markers recorded through handoff queue
+- Raised the local-profile controlled-mutation metadata chain from execution-backed target-readiness to bounded marker writes for exact target mutation, adapter dispatch, Kanban mutation, NAS save marker, and NAS Keeper/Mac relay handoff queue metadata.
+- Safe refs: target mutation `targetmut-nas-keeper-runtime-20260520124446`; adapter dispatch `adapterdispatch-nas-keeper-runtime-20260520124446`; Kanban marker `kanbanmut-nas-keeper-runtime-20260520124446`; NAS save marker `nassave-nas-keeper-runtime-20260520124446`; handoff queue `handoff_nas_keeper_runtime_20260520124446`.
+- Result evidence: each readback count is 1. The final NAS-save readback has `target_mutation_created=true`, `adapter_dispatch_created=true`, `kanban_mutation_created=true`, and `nas_save_created=true`, while `vps_direct_nas_authority_enabled=false`, `real_nas_execution_enabled=false`, `real_dispatch_execution_enabled=false`, `vps_file_change_created=false`, `service_restart_created=false`, and `git_push_created=false`.
+- Handoff evidence: `nas_keeper_handoff_queued=true`; `queue_status=pending_nas_keeper_authorization`; `direct_vps_nas_write_enabled=false`; `mac_relay_write_enabled=false`; `actual_nas_write_enabled=false`; `real_nas_execution_enabled=false`; `watcher_enabled=false`; `cron_enabled=false`; `dispatch_enabled=false`.
+- Readbacks retained safe refs/display metadata and redaction booleans. Raw value probe over private paths, command/provider/token/secret sentinels, queued body text, and credential-like values returned no raw-value hits; redaction flag field names such as `raw_nas_path_excluded` may appear intentionally.
+- Verification: `py_compile` passed for `office_controlled_mutation.py` and `web_server.py`; focused controlled-mutation approval/dispatch tests passed (`31 passed`); `git diff --check` passed.
+- Still not performed: actual Mac relay execution from this handoff, actual NAS file write from this handoff, VPS direct NAS mount/credentials/write authority, watcher/cron/daemon activation, service restart, VPS runtime file mutation, public exposure, credential authority expansion, or real dispatch execution.
 
 ## NAS Keeper target-readiness metadata recorded
 - Raised the boundary from noop runtime-command execution/replay metadata to an execution-backed exact target-readiness record backed by `exec-nas-keeper-runtime-noop-20260520123414`.
