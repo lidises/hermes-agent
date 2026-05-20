@@ -1,11 +1,13 @@
-Last updated: 2026-05-20 09:31 KST
+Last updated: 2026-05-20 09:41 KST
 
-## NAS Keeper execution payload preview frontend bridge implemented locally (preview callable, Mac/NAS writes still closed)
+## NAS Keeper execution payload preview frontend bridge deployed (preview callable, Mac/NAS writes still closed)
 - Added frontend typed payload/result contracts and API wrapper for protected POST `/api/office/controlled-mutation/nas-runtime/nas-keeper-execution-payload-preview`.
 - This exposes only a callable dashboard API-client bridge for the existing preview-only backend route; it adds no visible `/office` controls, no page-load route calls, no queue mutation, no Mac relay execution, no actual NAS write, no watcher/cron, and no VPS NAS authority.
 - The wrapper accepts only safe refs/timestamps (`handoff_ref`, `relay_execution_ref`, `nas_keeper_ref`, `relay_node_ref`, `relay_authorized_by`, `relay_authorized_at`) and does not include markdown bodies, raw NAS paths, or credentials.
-- RED confirmed the missing frontend wrapper first. GREEN local: focused frontend API test passed, frontend API/RPG `137 passed`, backend preview/from-preview focused tests `7 passed`, `py_compile`, `git diff --check`, added-line secret scan, and `npm run build` passed with existing Vite chunk warning only.
-- Not yet committed/pushed/deployed in this section until final verification/deploy finishes.
+- Commit `136c9b35` pushed and deployed to VPS source/dashboard worktrees; `web_dist` copied to both; restarted only `hermes-agent-dashboard.service`; `hermes-gateway.service` stayed active without restart.
+- Local verification: focused frontend API test passed, frontend API/RPG `137 passed`, backend preview/from-preview focused tests `7 passed`, `py_compile`, `git diff --check`, added-line secret scan, and `npm run build` passed with existing Vite chunk warning only.
+- VPS verification: focused backend preview/from-preview tests `7 passed`; protected API smoke unauth 401/auth 200, previewed true, queue status `authorized_for_mac_relay_execution`, `markdown_body_included=false`, `mac_relay_write_enabled=false`, `actual_nas_write_enabled=false`, `queue_mutation_enabled=false`, raw body/path/secret leak false.
+- Browser/live smoke: `/office?preview-bridge=136c9b35` HTTP 200; built asset `index-HqIDH3Nr.js` loaded; existing Office page rendered; scoped forms/inputs/selects/textareas all 0; raw leak regex false; console JS errors 0; listener remains Tailscale-private and public IPv4 port 8765 probe timed out/unreachable.
 
 ## Manual NAS Keeper handoff record deployed (Mac relay queue marker opened, real NAS execution still closed)
 - Added NAS-save-backed NAS Keeper/Mac relay handoff write/readback after NAS save metadata.
