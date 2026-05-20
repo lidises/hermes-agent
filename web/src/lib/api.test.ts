@@ -2051,6 +2051,80 @@ describe("fetchJSON", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  it("previews NAS Keeper Mac relay execution payload through the protected route without sending markdown bodies or raw paths", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        location: { origin: "https://office.example" },
+        __HERMES_SESSION_TOKEN__: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+      expect(String(input)).toBe("/api/office/controlled-mutation/nas-runtime/nas-keeper-execution-payload-preview");
+      expect(init?.method).toBe("POST");
+      const headers = init?.headers as Headers;
+      expect(headers.get("Content-Type")).toBe("application/json");
+      const body = JSON.parse(String(init?.body));
+      expect(body).toEqual({
+        handoff_ref: "handoff_manual_nas_keeper_1",
+        relay_execution_ref: "relay_exec_manual_nas_keeper_1",
+        nas_keeper_ref: "agent_nas_keeper",
+        relay_node_ref: "mac_relay_primary",
+        relay_authorized_by: "agent_nas_keeper",
+        relay_authorized_at: "2026-05-19T08:30:00Z",
+      });
+      expect(JSON.stringify(body)).not.toMatch(/markdown_body|raw_nas_path|credential|\/Users\/|\/home\/|token=|sk-/i);
+      expect(headers.get("X-Hermes-Session-Token")).toBe("session-token-for-header-only");
+      return {
+        ok: true,
+        status: 200,
+        headers: new Headers({ "content-type": "application/json" }),
+        json: async () => ({
+          previewed: true,
+          errors: [],
+          dto: {
+            schema_version: 1,
+            mode: "nas_keeper_mac_relay_execution_payload_preview",
+            previewed: true,
+            handoff_ref: "handoff_manual_nas_keeper_1",
+            relay_execution_ref: "relay_exec_manual_nas_keeper_1",
+            queue_status: "authorized_for_mac_relay_execution",
+            relay_authorized_by: "agent_nas_keeper",
+            relay_authorized_at: "2026-05-19T08:30:00Z",
+            markdown_body_ref: "queued_handoff_markdown_body::handoff_manual_nas_keeper_1",
+            markdown_body_bytes: 64,
+            markdown_body_sha256: "a".repeat(64),
+            markdown_body_included: false,
+            capabilities: {
+              execution_payload_preview_enabled: true,
+              queue_mutation_enabled: false,
+              mac_relay_write_enabled: false,
+              actual_nas_write_enabled: false,
+            },
+          },
+        }),
+      } as Response;
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const preview = await api.previewOfficeControlledMutationNasKeeperExecutionPayload({
+      handoff_ref: "handoff_manual_nas_keeper_1",
+      relay_execution_ref: "relay_exec_manual_nas_keeper_1",
+      nas_keeper_ref: "agent_nas_keeper",
+      relay_node_ref: "mac_relay_primary",
+      relay_authorized_by: "agent_nas_keeper",
+      relay_authorized_at: "2026-05-19T08:30:00Z",
+    });
+
+    expect(preview.previewed).toBe(true);
+    expect(preview.dto?.markdown_body_included).toBe(false);
+    expect(preview.dto?.capabilities.execution_payload_preview_enabled).toBe(true);
+    expect(preview.dto?.capabilities.mac_relay_write_enabled).toBe(false);
+    expect(preview.dto?.capabilities.actual_nas_write_enabled).toBe(false);
+    expect(JSON.stringify(preview)).not.toMatch(/# Manual|\/Users\/lidises|credential|sk-/i);
+  });
+
   it("gets approved real one-shot dispatch gate design through the protected readback route", async () => {
     Object.defineProperty(globalThis, "window", {
       configurable: true,

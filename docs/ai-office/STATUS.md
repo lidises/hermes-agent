@@ -1,4 +1,11 @@
-Last updated: 2026-05-20 00:14 KST
+Last updated: 2026-05-20 09:31 KST
+
+## NAS Keeper execution payload preview frontend bridge implemented locally (preview callable, Mac/NAS writes still closed)
+- Added frontend typed payload/result contracts and API wrapper for protected POST `/api/office/controlled-mutation/nas-runtime/nas-keeper-execution-payload-preview`.
+- This exposes only a callable dashboard API-client bridge for the existing preview-only backend route; it adds no visible `/office` controls, no page-load route calls, no queue mutation, no Mac relay execution, no actual NAS write, no watcher/cron, and no VPS NAS authority.
+- The wrapper accepts only safe refs/timestamps (`handoff_ref`, `relay_execution_ref`, `nas_keeper_ref`, `relay_node_ref`, `relay_authorized_by`, `relay_authorized_at`) and does not include markdown bodies, raw NAS paths, or credentials.
+- RED confirmed the missing frontend wrapper first. GREEN local: focused frontend API test passed, frontend API/RPG `137 passed`, backend preview/from-preview focused tests `7 passed`, `py_compile`, `git diff --check`, added-line secret scan, and `npm run build` passed with existing Vite chunk warning only.
+- Not yet committed/pushed/deployed in this section until final verification/deploy finishes.
 
 ## Manual NAS Keeper handoff record deployed (Mac relay queue marker opened, real NAS execution still closed)
 - Added NAS-save-backed NAS Keeper/Mac relay handoff write/readback after NAS save metadata.

@@ -1170,6 +1170,48 @@ export interface OfficeDispatcherCompletionReviewStatusParams {
   limit?: number;
 }
 
+export interface OfficeNasKeeperExecutionPayloadPreviewPayload {
+  handoff_ref: string;
+  relay_execution_ref: string;
+  nas_keeper_ref: string;
+  relay_node_ref: string;
+  relay_authorized_by: string;
+  relay_authorized_at: string;
+}
+
+export interface OfficeNasKeeperExecutionPayloadPreviewResult {
+  previewed: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: null | {
+    schema_version: number;
+    mode: "nas_keeper_mac_relay_execution_payload_preview";
+    previewed: true;
+    handoff_ref: string;
+    authorization_ref?: string;
+    relay_execution_ref: string;
+    queue_ref?: string;
+    queue_status: string;
+    authorization_decision?: string;
+    authorized_by?: string;
+    authorized_at?: string;
+    relay_authorized_by: string;
+    relay_authorized_at: string;
+    execution_payload_preview?: Record<string, string>;
+    execution_payload_fields?: string[];
+    markdown_body_ref: string;
+    markdown_body_bytes: number;
+    markdown_body_sha256: string;
+    markdown_body_included: false;
+    execution_path?: string[];
+    payload_preview_path?: string[];
+    safe_logical_path?: string;
+    safe_display_path?: string;
+    payload_bytes?: number;
+    capabilities: Record<string, boolean>;
+    next_required_boundary?: string;
+  };
+}
+
 export interface OfficeNasKeeperExecutionFromPreviewPayload {
   handoff_ref: string;
   relay_execution_ref: string;
@@ -1553,6 +1595,12 @@ export const api = {
     }),
   executeOfficeControlledMutationNasMacRelayWrite: (body: OfficeNasMacRelayWritePayload) =>
     fetchJSON<OfficeNasMacRelayWriteResult>("/api/office/controlled-mutation/nas-runtime/mac-relay-write-execute", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
+  previewOfficeControlledMutationNasKeeperExecutionPayload: (body: OfficeNasKeeperExecutionPayloadPreviewPayload) =>
+    fetchJSON<OfficeNasKeeperExecutionPayloadPreviewResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-execution-payload-preview", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
