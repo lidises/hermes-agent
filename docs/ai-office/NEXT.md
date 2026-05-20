@@ -1,4 +1,27 @@
 
+## Current next — Kanban-mutation live surface in progress
+
+Current slice:
+
+- User approved continuing the recommended controlled-mutation path with bounded writes and slightly stronger authority.
+- Existing protected Kanban-mutation marker metadata store/API/readback implementation is being surfaced in the live `/office` page.
+- Added RED/GREEN placement regression so the Kanban-mutation panel stays outside `SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES` and appears in production/browser smoke.
+
+Safety boundary remains:
+
+- Bounded Kanban-mutation marker metadata readback/status only; smoke may write a Kanban-mutation marker record backed by an existing verified adapter-dispatch record.
+- NAS save/write/direct VPS NAS authority, rollback execution, real dispatch, watcher/cron activation, credential access, public exposure, and gateway restart remain blocked.
+
+Verification so far:
+
+- RED placement test failed when Kanban-mutation panel was only inside legacy diagnostics.
+- GREEN focused placement test passed after live-visible placement.
+- Full local verification and local API/browser smoke passed; commit/push and VPS dashboard-only deploy/live smoke pending.
+
+Handoff: `docs/ai-office/plans/2026-05-21-kanban-mutation-live-surface-handoff.md`.
+
+Last updated: 2026-05-21 00:23 KST
+
 ## Current next — Adapter-dispatch live surface in progress
 
 Current slice:

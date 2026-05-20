@@ -8975,6 +8975,7 @@ export default function OfficePage() {
       <ManualTargetMutationReadinessRecordStatusPanel status={manualTargetMutationReadinessRecordStatus} error={manualTargetMutationReadinessRecordStatusError} />
       <ManualTargetMutationRecordStatusPanel status={manualTargetMutationRecordStatus} error={manualTargetMutationRecordStatusError} />
       <ManualAdapterDispatchRecordStatusPanel status={manualAdapterDispatchRecordStatus} error={manualAdapterDispatchRecordStatusError} />
+      <ManualKanbanMutationRecordStatusPanel status={manualKanbanMutationRecordStatus} error={manualKanbanMutationRecordStatusError} />
 
       {SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES ? (
         <>
@@ -9079,7 +9080,6 @@ export default function OfficePage() {
       <ManualDispatchGateOpenRecordStatusPanel status={manualDispatchGateOpenRecordStatus} error={manualDispatchGateOpenRecordStatusError} />
       <ManualRuntimeCommandPreviewRecordStatusPanel status={manualRuntimeCommandPreviewRecordStatus} error={manualRuntimeCommandPreviewRecordStatusError} />
       <ManualRuntimeCommandInclusionRecordStatusPanel status={manualRuntimeCommandInclusionRecordStatus} error={manualRuntimeCommandInclusionRecordStatusError} />
-      <ManualKanbanMutationRecordStatusPanel status={manualKanbanMutationRecordStatus} error={manualKanbanMutationRecordStatusError} />
       <ManualNasSaveRecordStatusPanel status={manualNasSaveRecordStatus} error={manualNasSaveRecordStatusError} />
       <ManualNasKeeperHandoffRecordStatusPanel status={manualNasKeeperHandoffRecordStatus} error={manualNasKeeperHandoffRecordStatusError} />
 
