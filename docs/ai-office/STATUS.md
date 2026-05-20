@@ -1,7 +1,7 @@
 
 ## 2026-05-21 — Kanban-mutation live surface slice
 
-Status: in progress; local verification passed, deploy pending.
+Status: complete; local verification and VPS dashboard-only deploy/live smoke passed.
 
 What changed:
 
@@ -18,11 +18,13 @@ Verification so far:
 
 - RED placement test failed when Kanban-mutation panel was only inside legacy diagnostics.
 - GREEN focused placement test passed after live-visible placement.
-- Full local verification and local API/browser smoke passed; commit/push and VPS dashboard-only deploy/live smoke pending.
+- Full local verification, commit/push, VPS dashboard-only sync/restart, protected API smoke, and browser smoke passed.
 
 Handoff: `docs/ai-office/plans/2026-05-21-kanban-mutation-live-surface-handoff.md`.
 
-Last updated: 2026-05-21 00:23 KST
+Deployed commit: `e8181319b7d968da63dbec2b3f752896370903c0`. Dashboard-only restart completed; gateway untouched/active.
+
+Last updated: 2026-05-21 00:26 KST
 
 ## 2026-05-20 — Adapter-dispatch live surface slice
 

@@ -58,8 +58,7 @@ GREEN:
 In progress at handoff creation time:
 
 - Focused GREEN passed.
-- Full local verification and local API/browser smoke passed.
-- Commit/push and VPS dashboard-only deploy/live smoke pending.
+- Full local verification, commit/push, VPS dashboard-only sync/restart, protected API smoke, and browser smoke passed.
 
 ## Next recommended gate after completion
 
@@ -115,3 +114,56 @@ Local browser smoke:
   - console JS errors=0
 
 Local verification updated: 2026-05-21 00:23 KST
+
+
+## Deployment verification
+
+Code/docs commit pushed:
+
+- `e8181319 feat(office): surface kanban mutation status`
+- full commit: `e8181319b7d968da63dbec2b3f752896370903c0`
+
+VPS sync/restart:
+
+- `/home/hermes/.hermes/ai-office-dashboard` reset to `e8181319b7d968da63dbec2b3f752896370903c0`.
+- `/home/hermes/.hermes/hermes-agent` reset to `e8181319b7d968da63dbec2b3f752896370903c0` via user-fork `lidises/main`.
+- `hermes_cli/web_dist` rsynced to both worktrees.
+- Relative content hash matched local/dashboard/agent:
+  - `59eb20befa282315312adc307ee646b9e4c8690211a5d230cd9b9630a5a11cf5`
+  - file count: 22
+- Restarted dashboard only:
+  - `hermes-agent-dashboard.service`: active
+  - `hermes-gateway.service`: active and untouched
+
+VPS API smoke:
+
+- URL base: `http://100.122.57.85:8765`
+- protected API chain stored through Kanban-mutation marker.
+- filtered readback for `kanbanmut-office-vps-kanbanmut-e8181319`:
+  - count=1
+  - kanban=true
+  - result=`safe_kanban_marker_written`
+  - adapter=true
+  - NAS=false
+  - real_dispatch=false
+  - raw card/provider/path leak=false
+
+VPS browser smoke:
+
+- URL: `http://100.122.57.85:8765/office?kanbanmut-vps-browser=e8181319`
+- DOM:
+  - Kanban-mutation panel present=true
+  - live panel total count=2 (includes prior safe smoke records)
+  - kanban=true
+  - NAS=false
+  - realDispatch=false
+  - scoped controls=0
+  - raw card/provider/path leak=false
+  - console JS errors=0
+
+Final boundary preserved:
+
+- Kanban-mutation marker metadata only.
+- NAS save/write/direct VPS NAS authority, rollback execution, real dispatch, watcher/cron, credential access, public exposure, and gateway restart were not performed.
+
+Final updated: 2026-05-21 00:26 KST
