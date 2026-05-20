@@ -1,7 +1,7 @@
 ## Next safest lane
-- Completed lane: one durable local-profile NAS Keeper production queue rehearsal/readback was performed. The run created and authorized a single durable queue item for Mac relay review, previewed only safe execution metadata, rendered it in `/office`, and verified that readback/payload preview excluded queued markdown body and kept actual NAS write, watcher, cron, and dispatch disabled.
-- Boundary preserved: no production queue execution, no Mac relay write from the durable queue, no Kanban mutation, no watcher/cron/dispatch daemon, no authority-adapter binding, no VPS direct NAS authority, no dashboard/gateway restart, no public exposure, and no VPS runtime file mutation.
-- Next higher-risk candidate after this rehearsal: execute exactly the existing durable queue item once through the guarded `/office` operator against the real Mac relay NAS root, with one-shot approval, inline state recording, readback hash, rollback if replacement occurs, and no watcher/cron/dispatch/adapter binding.
+- Completed lane: the existing durable local-profile NAS Keeper queue item was executed exactly once through the guarded `/office` operator against the real Mac relay NAS root, with inline state recording. The queue terminal state is `mac_relay_execution_succeeded`; readback SHA matched the queued markdown SHA; browser approval reset unchecked; no second durable queue item was created.
+- Boundary preserved: no watcher/cron/dispatch daemon activation, no authority-adapter binding, no Kanban mutation, no VPS direct NAS authority, no dashboard/gateway restart, no public exposure, and no VPS runtime file mutation.
+- Next higher-risk candidate: design/record a bounded operator-reviewed runtime dispatch plan for NAS Keeper automation, still disabled by default. Do not jump directly to watcher/cron/daemon activation or authority-adapter binding without a separate preflight/gate record and rollback/disable plan.
 
 
 # Hermes AI Office — NEXT

@@ -1,4 +1,12 @@
-Last updated: 2026-05-20 11:56 KST
+Last updated: 2026-05-20 12:05 KST
+
+## NAS Keeper durable production queue real-NAS execute-and-record completed
+- Raised the boundary from durable production queue rehearsal/readback to one guarded `/office` execution of the existing durable queue item against the real Mac relay NAS root. The run used the existing authorized handoff `handoff_durable_queue_rehearsal_20260520114732` and did not create a second durable queue item.
+- Safe logical target: `Hermes::durable-queue-rehearsal-20260520114732.md`; relay execution `relay_exec_durable_queue_execute_20260520120400`; execution record `exec_record_durable_queue_execute_20260520120400`.
+- Result evidence: queue line count 1; target row count 1; terminal queue status `mac_relay_execution_succeeded`; execution evidence refs count 3; browser showed succeeded state, approval reset unchecked, inline record checkbox still checked, scoped raw-leak=false, console JS errors 0.
+- Real NAS readback SHA-256 and queued markdown SHA-256 both matched: `8bdce4544c8cbe68e1e96149a49fe90a58745ae13f535f55314df4f13a7a2dc4`; public queue summary raw-leak=false.
+- Focused NAS Keeper/NAS runtime regression after clearing inherited smoke env: `30 passed`; `git diff --check` passed; worktree clean before docs update.
+- Still not performed: watcher/cron/dispatch daemon activation, authority-adapter binding, Kanban mutation, VPS direct NAS mount/credential/write authority, gateway restart, dashboard restart, public exposure, or VPS runtime file mutation.
 
 ## NAS Keeper durable production queue rehearsal/readback completed (no execution)
 - Raised the boundary from temporary-queue real-NAS browser smokes to one durable local-profile NAS Keeper handoff queue rehearsal/readback. The durable queue was initially absent; this run created one production queue item and authorized it for Mac relay execution review, then stopped before execution.
