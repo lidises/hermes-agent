@@ -1768,6 +1768,20 @@ code { font-size: 0.875rem; }
   cursor: pointer;
   outline: none;
 }
+.office-rpg-character-sprite [data-office-rpg-character-nameplate],
+.office-rpg-character-sprite [data-office-rpg-character-label-anchor] {
+  opacity: 0.82;
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+.office-rpg-character-sprite:hover [data-office-rpg-character-nameplate],
+.office-rpg-character-sprite:focus-visible [data-office-rpg-character-nameplate],
+.office-rpg-character-sprite[data-office-rpg-character-selected="true"] [data-office-rpg-character-nameplate] {
+  opacity: 1;
+}
+.office-rpg-character-sprite[data-office-rpg-character-selected="true"] [data-office-rpg-character-label-anchor] {
+  opacity: 1;
+  stroke-width: 2;
+}
 .office-rpg-character-sprite:focus-visible path:first-of-type,
 .office-rpg-character-sprite:hover path:first-of-type {
   stroke-width: 3;

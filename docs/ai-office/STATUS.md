@@ -1,4 +1,10 @@
-Last updated: 2026-05-20 15:20 KST
+Last updated: 2026-05-20 15:48 KST
+
+## Desk RPG visual polish slice completed locally
+- Read-only live revalidation from the rendered-map handoff passed before implementation: local `HEAD=origin/main=13158a61`, remote `origin/main=13158a61`, VPS dashboard/core worktrees both `13158a61` and clean, dashboard/gateway services active, private `/office` HTTP 200, browser DOM smoke `visualMap=1`, `mapSvg=1`, `mapRooms=6`, `sprites=51`, `bubbles=51`, raw-leak=false, console JS errors 0.
+- Completed the recommended safest next lane locally: frontend-only visual polish for sprite overlap/readability. Added deterministic overlap offsets plus nameplate/label-anchor hooks for SVG sprites, preserving the existing read-only inspector click path and no write-capable controls in the visual map.
+- Verification: RED focused RPG test failed on missing polish hooks; GREEN focused RPG test passed (`94 passed`); combined Office frontend tests passed (`248 passed`); focused ESLint returned 0 errors with two pre-existing Fast Refresh warnings; `npm run build` passed with the existing large-chunk warning; `git diff --check` passed; added-line safety scan passed. Local source-dashboard browser smoke at `/office?visual-polish=final` showed `visualMap=1`, `mapSvg=1`, `mapRooms=6`, local `sprites=21`, `bubbles=21`, `nameplates=21`, `labelAnchors=21`, `overlapAttrs=21`, `formsInVisual=0`, raw-leak=false, click inspection selected one sprite, and console JS errors 0. Vision smoke confirmed the SVG map, rooms/furniture/pathways/sprites/status bubbles/nameplates render with no blocking broken-rendering issue; dense AGT/SRC labels remain a non-blocking future polish target.
+- Safety posture remains unchanged: no VPS mutation/restart, no gateway restart, no Kanban mutation, no NAS write, no watcher/cron/daemon activation, no dispatcher/authority-adapter binding, no target mutation, no direct VPS NAS authority, and no public exposure change.
 
 ## Desk RPG rendered SVG map/sprite slice deployed
 - Implemented and deployed commit `b5c18596` (`feat(office): render desk rpg map sprites`) to the private VPS dashboard. This corrects the earlier status-only gap: `/office` now renders an actual SVG RPG map, not just RPG status cards or DTO counts.

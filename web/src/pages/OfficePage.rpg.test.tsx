@@ -93,6 +93,9 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("data-office-rpg-map-furniture=\"central-board\"");
     expect(markup).toContain("data-office-rpg-character-sprite");
     expect(markup.match(/data-office-rpg-character-sprite=/g)?.length).toBe(scene.entities.length);
+    expect(markup).toContain("data-office-rpg-character-overlap-index");
+    expect(markup).toContain("data-office-rpg-character-nameplate");
+    expect(markup).toContain("data-office-rpg-character-label-anchor");
     expect(markup).toContain("data-office-rpg-character-bubble");
     expect(markup).toContain("data-office-rpg-mission-storyboard=\"true\"");
     expect(markup).toContain("data-office-rpg-mission-step=\"orchestrate\"");

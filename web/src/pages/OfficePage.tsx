@@ -1927,6 +1927,37 @@ function rpgVisualPosition(entity: OfficeRpgSceneEntity) {
   };
 }
 
+function rpgVisualOverlapOffset(index: number) {
+  if (index === 0) return { x: 0, y: 0 };
+  const ring = Math.ceil(index / 6);
+  const angle = ((index - 1) % 6) * (Math.PI / 3) - Math.PI / 6;
+  const radius = 12 + ring * 6;
+  return {
+    x: Math.cos(angle) * radius,
+    y: Math.sin(angle) * radius,
+  };
+}
+
+function rpgVisualEntities(entities: OfficeRpgSceneEntity[]) {
+  const seen = new Map<string, number>();
+  return entities.map((entity) => {
+    const base = rpgVisualPosition(entity);
+    const key = `${entity.room}:${Math.round(entity.positionHint.x / 8)}:${Math.round(entity.positionHint.y / 8)}`;
+    const overlapIndex = seen.get(key) ?? 0;
+    seen.set(key, overlapIndex + 1);
+    const offset = rpgVisualOverlapOffset(overlapIndex);
+    return {
+      entity,
+      overlapIndex,
+      position: {
+        x: base.x + offset.x,
+        y: base.y + offset.y,
+      },
+      pose: rpgCharacterPose(entity),
+    };
+  });
+}
+
 function rpgCharacterPose(entity: OfficeRpgSceneEntity) {
   if (entity.status === "blocked" || entity.severity === "danger") return "blocked";
   if (entity.status === "working" || entity.status === "warning") return "active";
@@ -1963,11 +1994,7 @@ export function OfficeRpgMap({
   const sourceArchiveFacility = buildOfficeRpgSourceArchiveFacility(scene);
   const reviewCornerFacility = buildOfficeRpgReviewCornerFacility(scene);
   const approvalConsoleFacility = buildOfficeRpgApprovalConsoleFacility(scene);
-  const visualEntities = visibleEntities.map((entity) => ({
-    entity,
-    position: rpgVisualPosition(entity),
-    pose: rpgCharacterPose(entity),
-  }));
+  const visualEntities = rpgVisualEntities(visibleEntities);
 
   return (
     <Card className="overflow-hidden border-emerald-300/25 bg-black/25" data-office-rpg-map="true">
@@ -2187,10 +2214,15 @@ export function OfficeRpgMap({
             <rect x="224" y="74" width="18" height="28" rx="3" fill="#fef3c7" opacity="0.82" data-office-rpg-map-door="command-agent_desks" />
             <rect x="491" y="74" width="18" height="28" rx="3" fill="#fef3c7" opacity="0.82" data-office-rpg-map-door="agent_desks-task_board" />
             <rect x="590" y="246" width="22" height="28" rx="3" fill="#fef3c7" opacity="0.82" data-office-rpg-map-door="source_archive-incident_corner" />
-            {visualEntities.map(({ entity, position, pose }) => {
+            {visualEntities.map(({ entity, position, pose, overlapIndex }) => {
               const selected = selectedEntityId === entity.id;
               const fill = RPG_STATUS_FILL[entity.severity];
               const stroke = selected ? "#ffffff" : RPG_STATUS_STROKE[entity.severity];
+              const labelSlot = overlapIndex % 6;
+              const labelX = labelSlot === 2 || labelSlot === 3 ? -88 : 16;
+              const labelY = [-44, 39, -60, 55, -26, 73][labelSlot] ?? -42;
+              const labelLineStartX = labelX > 0 ? 8 : -8;
+              const labelLineEndX = labelX > 0 ? labelX + 1 : labelX + 71;
               return (
                 <g
                   key={`visual-entity-${entity.id}`}
@@ -2205,6 +2237,7 @@ export function OfficeRpgMap({
                   data-office-rpg-character-sprite={entity.id}
                   data-office-rpg-character-kind={entity.kind}
                   data-office-rpg-character-pose={pose}
+                  data-office-rpg-character-overlap-index={overlapIndex}
                   data-office-rpg-character-selected={selected ? "true" : "false"}
                   aria-label={`${RPG_KIND_LABEL[entity.kind]} ${entity.label} SVG sprite`}
                 >
@@ -2214,6 +2247,11 @@ export function OfficeRpgMap({
                   <path d={pose === "active" ? "M-5 -8 H5 M-5 -3 H3" : pose === "waiting" ? "M-4 -6 H4 M-4 -2 H4" : "M-4 -5 H4"} stroke="#0f172a" strokeWidth="1.6" strokeLinecap="round" />
                   <path d={pose === "active" ? "M-10 7 L-18 1 M10 7 L18 2" : "M-10 8 L-15 12 M10 8 L15 12"} stroke={stroke} strokeWidth="2" strokeLinecap="round" />
                   <path d="M-5 17 L-8 26 M5 17 L8 26" stroke={stroke} strokeWidth="2" strokeLinecap="round" />
+                  <line x1={labelLineStartX} y1={labelY > 0 ? 22 : -20} x2={labelLineEndX} y2={labelY + 9} stroke={stroke} strokeWidth="1" opacity="0.72" data-office-rpg-character-label-anchor={entity.id} />
+                  <g transform={`translate(${labelX} ${labelY})`} data-office-rpg-character-nameplate={entity.id}>
+                    <rect x="0" y="0" width="72" height="18" rx="7" fill="rgba(2,6,23,0.9)" stroke={stroke} strokeWidth="1" />
+                    <text x="7" y="12" fill="#ecfdf5" fontSize="9">{RPG_KIND_LABEL[entity.kind]}</text>
+                  </g>
                   <g transform="translate(12 -25)" data-office-rpg-character-bubble={entity.id}>
                     <rect x="0" y="0" width="58" height="18" rx="7" fill="rgba(2,6,23,0.88)" stroke={stroke} strokeWidth="1" />
                     <text x="7" y="12" fill="#ecfdf5" fontSize="9">{entity.status}</text>
