@@ -1,4 +1,12 @@
-Last updated: 2026-05-20 11:20 KST
+Last updated: 2026-05-20 11:32 KST
+
+## NAS Keeper real-NAS browser-click replacement/rollback smoke completed (temporary queue)
+- Raised the boundary from one real-NAS browser-click create smoke to a create+replace browser-click sequence against the same safe logical note through the private `/office` guarded NAS Keeper operator. The smoke used an isolated temporary `HERMES_HOME` queue and did not touch the durable production queue.
+- Safe logical target: `Hermes::real-nas-rollback-browser-smoke-20260520112449.md`; browser-origin execution used create handoff `handoff_real_nas_rollback_create_20260520112449` and replace handoff `handoff_real_nas_rollback_replace_20260520112449`, with inline state recording enabled for both clicks.
+- Result evidence: both queue rows reached `mac_relay_execution_succeeded`; final note contains the replacement body only; approval checkbox reset false after each execution; inline-record checkbox stayed true; raw DOM leak=false; console JS errors 0.
+- Final real NAS readback SHA-256: `59a2f27968aeb085c588031f8d161e580775c4a596b0cb6976043f6e3b93b552`; rollback evidence ref `rollback_write_real_nas_rollback_replace_20260520112449` exists and preserved the initial-body SHA-256 `d5a857bdfffebd9f336c81018875af9e531b4cce878970b14226fd209038d24c`.
+- Focused regression after clearing inherited smoke env: NAS Keeper from-preview/state/payload-preview/Mac relay write/NAS runtime/queue-readback tests `30 passed`; `git diff --check` passed; worktree clean before docs update.
+- Still not performed: durable production queue execution, Kanban mutation, watcher/cron/dispatch daemon activation, authority-adapter binding, VPS direct NAS mount/credential/write authority, gateway restart, dashboard restart, public exposure, or VPS file mutation.
 
 ## NAS Keeper real-NAS browser-click execute-and-record smoke completed (temporary queue)
 - Raised the boundary from temporary-root browser-click execution to one actual browser click against the real Mac relay NAS root through the private `/office` guarded NAS Keeper operator. The smoke used an isolated temporary `HERMES_HOME` handoff queue and did not touch the durable production queue.
