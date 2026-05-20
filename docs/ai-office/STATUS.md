@@ -1,7 +1,7 @@
 
 ## 2026-05-21 — NAS-save live surface slice
 
-Status: in progress; local verification passed, deploy pending.
+Status: complete; local verification and VPS dashboard-only deploy/live smoke passed.
 
 What changed:
 
@@ -18,11 +18,13 @@ Verification so far:
 
 - RED placement test failed when NAS-save panel was only inside legacy diagnostics.
 - GREEN focused placement test passed after live-visible placement.
-- Full local verification and local API/browser smoke passed; commit/push and VPS dashboard-only deploy/live smoke pending.
+- Full local verification, commit/push, VPS dashboard-only sync/restart, protected API smoke, and browser smoke passed.
 
 Handoff: `docs/ai-office/plans/2026-05-21-nas-save-live-surface-handoff.md`.
 
-Last updated: 2026-05-21 00:37 KST
+Deployed commit: `27f44b6ea7c6dd08fbea7b702918ce26779f4d0c`. Dashboard-only restart completed; gateway untouched/active.
+
+Last updated: 2026-05-21 00:39 KST
 
 ## 2026-05-21 — Kanban-mutation live surface slice
 

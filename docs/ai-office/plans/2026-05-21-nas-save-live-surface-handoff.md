@@ -61,8 +61,7 @@ GREEN:
 In progress at handoff creation time:
 
 - Focused GREEN passed.
-- Full local verification and local API/browser smoke passed.
-- Commit/push and VPS dashboard-only deploy/live smoke pending.
+- Full local verification, commit/push, VPS dashboard-only sync/restart, protected API smoke, and browser smoke passed.
 
 ## Next recommended gate after completion
 
@@ -119,3 +118,58 @@ Local browser smoke:
   - console JS errors=0
 
 Local verification updated: 2026-05-21 00:37 KST
+
+
+## Deployment verification
+
+Code/docs commit pushed:
+
+- `27f44b6e feat(office): surface nas save status`
+- full commit: `27f44b6ea7c6dd08fbea7b702918ce26779f4d0c`
+
+VPS sync/restart:
+
+- `/home/hermes/.hermes/ai-office-dashboard` reset to `27f44b6ea7c6dd08fbea7b702918ce26779f4d0c`.
+- `/home/hermes/.hermes/hermes-agent` reset to `27f44b6ea7c6dd08fbea7b702918ce26779f4d0c` via user-fork `lidises/main`.
+- `hermes_cli/web_dist` rsynced to both worktrees.
+- Relative content hash matched local/dashboard/agent:
+  - `6f25d6418d959db68177d175533ef70d23acf35d6cf6bd6e15a5e6c1a99db3fe`
+  - file count: 22
+- Restarted dashboard only:
+  - `hermes-agent-dashboard.service`: active
+  - `hermes-gateway.service`: active and untouched
+
+VPS API smoke:
+
+- URL base: `http://100.122.57.85:8765`
+- protected API chain stored through NAS-save marker.
+- filtered readback for `nassave-office-vps-nassave-27f44b6e`:
+  - count=1
+  - nas=true
+  - result=`safe_nas_save_marker_written`
+  - kanban=true
+  - direct_vps_nas=false
+  - real_nas=false
+  - real_dispatch=false
+  - raw markdown/NAS path/provider leak=false
+
+VPS browser smoke:
+
+- URL: `http://100.122.57.85:8765/office?nassave-vps-browser=27f44b6e`
+- DOM:
+  - NAS-save panel present=true
+  - live panel total count=2 (includes prior safe smoke records)
+  - nas=true
+  - directVpsNas=false
+  - vpsAuthority=false
+  - realExecution=false
+  - scoped controls=0
+  - raw markdown/NAS path/provider leak=false
+  - console JS errors=0
+
+Final boundary preserved:
+
+- NAS-save marker metadata only.
+- Real NAS execution, direct VPS NAS authority/mount/credentials, Mac relay write, rollback execution, real dispatch, watcher/cron, credential access, public exposure, and gateway restart were not performed.
+
+Final updated: 2026-05-21 00:39 KST
