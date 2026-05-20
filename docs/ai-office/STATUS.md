@@ -1,4 +1,12 @@
-Last updated: 2026-05-20 11:10 KST
+Last updated: 2026-05-20 11:20 KST
+
+## NAS Keeper real-NAS browser-click execute-and-record smoke completed (temporary queue)
+- Raised the boundary from temporary-root browser-click execution to one actual browser click against the real Mac relay NAS root through the private `/office` guarded NAS Keeper operator. The smoke used an isolated temporary `HERMES_HOME` handoff queue and did not touch the durable production queue.
+- Safe logical target: `Hermes::real-nas-browser-smoke-20260520111716.md`; browser-origin execution used `handoff_real_nas_browser_20260520111716`, `relay_exec_real_nas_browser_20260520111716`, and inline state recording enabled.
+- Result evidence: queue status `mac_relay_execution_succeeded`; browser panel showed executed=true and written=true, state result present, approval checkbox reset false, inline-record checkbox stayed true, raw DOM leak=false, console JS errors 0.
+- Real NAS readback SHA-256: `28da29a91d4621d1da991cc7d2a0378427b197cc7747840d400fba35fcf812ae`; queue terminal record includes `execution_record_ref=exec_record_real_nas_browser_20260520111716` and safe evidence refs for audit/readback/markdown hash.
+- Focused regression after clearing inherited smoke env: NAS Keeper from-preview/state/payload-preview/Mac relay write/NAS runtime/queue-readback tests `30 passed`; `git diff --check` passed; worktree clean before docs update.
+- Still not performed: durable production queue execution, Kanban mutation, watcher/cron/dispatch daemon activation, authority-adapter binding, VPS direct NAS mount/credential/write authority, gateway restart, dashboard restart, public exposure, or VPS file mutation.
 
 ## NAS Keeper visible browser-click execute-and-record smoke completed (temporary Mac relay root)
 - Raised the boundary from deployed guarded-operator visibility to one actual browser click on the private `/office` `NAS Keeper → Mac relay 실행+기록` button. The smoke used an isolated temporary `HERMES_HOME` queue plus a temporary Mac relay root; it did not touch the durable production queue or real NAS root.

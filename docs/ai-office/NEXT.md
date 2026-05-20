@@ -1,7 +1,7 @@
 ## Next safest lane
-- Completed lane: visible guarded NAS Keeper `/office` operator was exercised by one actual browser click against an isolated temporary `HERMES_HOME` queue and temporary Mac relay root. The click executed+recorded a safe handoff, reset approval to false, kept inline recording true, and verified readback/audit/hash without using durable production queue or real NAS root.
-- Boundary preserved: no durable production queue execution, no real NAS write for this browser-click lane, no Kanban mutation, no watcher/cron/dispatch daemon, no authority-adapter binding, no VPS direct NAS authority, no dashboard/gateway restart, no public exposure, and no VPS file mutation.
-- Next higher-risk candidate after this smoke: one explicitly authorized durable-production-queue rehearsal/readback design or a separate real-NAS browser-click smoke, but not both at once; keep watcher/cron/dispatch/adapter binding/VPS NAS authority/public exposure separately gated.
+- Completed lane: visible guarded NAS Keeper `/office` operator was exercised by one actual browser click against the real Mac relay NAS root using an isolated temporary `HERMES_HOME` queue. The click executed+recorded a safe handoff, reset approval to false, kept inline recording true, and verified real NAS readback/audit/hash without using the durable production queue.
+- Boundary preserved: no durable production queue execution, no Kanban mutation, no watcher/cron/dispatch daemon, no authority-adapter binding, no VPS direct NAS authority, no dashboard/gateway restart, no public exposure, and no VPS file mutation.
+- Next higher-risk candidate after this smoke: durable-production-queue rehearsal/readback design or a second real-NAS replacement/rollback browser-click smoke, but not both at once; keep watcher/cron/dispatch/adapter binding/VPS NAS authority/public exposure separately gated.
 
 
 # Hermes AI Office — NEXT
