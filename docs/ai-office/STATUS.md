@@ -1,7 +1,7 @@
 
 ## 2026-05-20 — Adapter-dispatch live surface slice
 
-Status: in progress; local verification passed, deploy pending.
+Status: complete; local verification and VPS dashboard-only deploy/live smoke passed.
 
 What changed:
 
@@ -18,11 +18,13 @@ Verification so far:
 
 - RED placement test failed when adapter-dispatch panel was only inside legacy diagnostics.
 - GREEN focused placement test passed after live-visible placement.
-- Full local verification and local API/browser smoke passed; commit/push and VPS dashboard-only deploy/live smoke pending.
+- Full local verification, commit/push, VPS dashboard-only sync/restart, protected API smoke, and browser smoke passed.
 
 Handoff: `docs/ai-office/plans/2026-05-20-adapter-dispatch-live-surface-handoff.md`.
 
-Last updated: 2026-05-20 23:46 KST
+Deployed commit: `03bb4baaebfd4cedb77ed5187bc6150af2cad98a`. Dashboard-only restart completed; gateway untouched/active.
+
+Last updated: 2026-05-20 23:48 KST
 
 ## 2026-05-20 — Target-mutation live surface slice
 

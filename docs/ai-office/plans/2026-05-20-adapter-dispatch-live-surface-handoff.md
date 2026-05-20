@@ -58,8 +58,7 @@ GREEN:
 In progress at handoff creation time:
 
 - Focused GREEN passed.
-- Full local verification and local API/browser smoke passed.
-- Commit/push and VPS dashboard-only deploy/live smoke pending.
+- Full local verification, commit/push, VPS dashboard-only sync/restart, protected API smoke, and browser smoke passed.
 
 ## Next recommended gate after completion
 
@@ -117,3 +116,58 @@ Local browser smoke:
   - console JS errors=0
 
 Local verification updated: 2026-05-20 23:46 KST
+
+
+## Deployment verification
+
+Code/docs commit pushed:
+
+- `03bb4baa feat(office): surface adapter dispatch status`
+- full commit: `03bb4baaebfd4cedb77ed5187bc6150af2cad98a`
+
+VPS sync/restart:
+
+- `/home/hermes/.hermes/ai-office-dashboard` reset to `03bb4baaebfd4cedb77ed5187bc6150af2cad98a`.
+- `/home/hermes/.hermes/hermes-agent` reset to `03bb4baaebfd4cedb77ed5187bc6150af2cad98a` via user-fork `lidises/main`.
+- `hermes_cli/web_dist` rsynced to both worktrees.
+- Relative content hash matched local/dashboard/agent:
+  - `6d84e9e097a68b52ca91ea54eae6484a8425977ac732667584460abd59905ee3`
+  - file count: 22
+- Restarted dashboard only:
+  - `hermes-agent-dashboard.service`: active
+  - `hermes-gateway.service`: active and untouched
+
+VPS API smoke:
+
+- URL base: `http://100.122.57.85:8765`
+- protected API chain stored through adapter-dispatch marker.
+- filtered readback for `adapterdispatch-office-vps-adapterdispatch-03bb4baa`:
+  - count=1
+  - adapter=true
+  - result=`safe_adapter_dispatch_marker_written`
+  - target_mutation=true
+  - Kanban=false
+  - NAS=false
+  - real_dispatch=false
+  - raw provider/path leak=false
+
+VPS browser smoke:
+
+- URL: `http://100.122.57.85:8765/office?adapterdispatch-vps-browser=03bb4baa`
+- DOM:
+  - adapter-dispatch panel present=true
+  - live panel total count=2 (includes prior safe smoke records)
+  - adapter=true
+  - Kanban=false
+  - NAS=false
+  - realDispatch=false
+  - scoped controls=0
+  - raw provider/path leak=false
+  - console JS errors=0
+
+Final boundary preserved:
+
+- Adapter-dispatch marker metadata only.
+- Kanban mutation, NAS save/write/direct VPS NAS authority, rollback execution, real dispatch, watcher/cron, credential access, public exposure, and gateway restart were not performed.
+
+Final updated: 2026-05-20 23:48 KST
