@@ -1,4 +1,11 @@
-Last updated: 2026-05-20 09:41 KST
+Last updated: 2026-05-20 09:46 KST
+
+## NAS Keeper execution-from-preview temp-root smoke completed (Mac-local write bridge proven, real NAS still untouched)
+- Raised the boundary from preview-callable to actual Mac-local execution-from-preview against an isolated temporary safe root only; no durable production queue, real NAS root, VPS NAS mount/credentials, watcher/cron, dispatch, authority-adapter binding, public exposure, or gateway restart.
+- Smoke used a temporary NAS Keeper handoff queue and two authorized handoffs to the same safe logical target `vault_temp_relay_smoke::temp-root-execution-smoke.md`: first create, then replace to prove rollback-before-replace.
+- Evidence: create and replace both had queued=true, authorized=true, previewed=true, executed=true, written=true, readback_verified=true, audit_written=true, `markdown_body_included=false`, and queue unchanged by execute=true. First rollback_created=false; replace rollback_created=true with safe rollback ref `rollback_write_20260520_temp_exec_smoke_replace`.
+- Final replacement readback SHA-256 matched expected body SHA-256: `e3e1f185cca227b2733fecfe5c6da366868a1adc63010125bd6e65d32fa87965`; serialized smoke result had raw leak=false.
+- Focused regression passed locally: `py_compile` plus NAS Keeper preview/from-preview, Mac relay write execute, and NAS runtime write tests `22 passed`; `git diff --check` and added-line secret/path scan passed.
 
 ## NAS Keeper execution payload preview frontend bridge deployed (preview callable, Mac/NAS writes still closed)
 - Added frontend typed payload/result contracts and API wrapper for protected POST `/api/office/controlled-mutation/nas-runtime/nas-keeper-execution-payload-preview`.
