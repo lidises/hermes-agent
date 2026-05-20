@@ -1,4 +1,10 @@
-Last updated: 2026-05-20 10:12 KST
+Last updated: 2026-05-20 10:26 KST
+
+## NAS Keeper current browser/API execute-and-record smoke completed (actual Mac NAS write)
+- Raised the boundary from deployed guarded-operator hooks/no actual execution to one explicit browser-origin protected API call against a local Mac relay dashboard context. Used isolated temporary `HERMES_HOME` queue and Mac-local relay root; safe target timestamp `20260520012423` under the Hermes vault.
+- Seeded one authorized NAS Keeper queue item, then called protected `/api/office/controlled-mutation/nas-runtime/nas-keeper-execution-from-preview` from the browser context with only safe refs/timestamps and `record_execution_state_after_write=true`. Result: HTTP 200, executed=true, written=true, recorded=true, readback_verified=true, audit_written=true, markdown_body_included=false, queue_status_after=`mac_relay_execution_succeeded`, rollback_created=false.
+- Readback verified on the Mac NAS relay target: SHA-256 `db843efc77843245e315a356b70e29dafd86f636f6959a7a42c06828aa89c694` matched the seeded safe body. Queue terminal record has `execution_record_ref=exec_record_current_ui_risk_20260520012423` and `relay_execution_ref=relay_exec_current_ui_risk_20260520012423`.
+- Browser console JS errors were 0. Local focused verification passed after clearing the smoke env from the test shell: backend protected route/API tests `19 passed`; focused operator UI test `4 passed`. Public IPv4 probe to VPS dashboard remained `http=000` timeout, dashboard/gateway services stayed active; no VPS NAS mount/credential/write authority, watcher/cron/dispatch daemon, authority adapter, Kanban mutation, durable production queue execution, gateway restart, or public exposure was added.
 
 ## NAS Keeper guarded browser operator UI hardening prepared (safe attrs, no page-load execution)
 - Raised the boundary from backend/CLI inline execute-and-record smoke toward the guarded browser/API operator path by adding explicit operator DOM contract attributes for inline-record default, approval default, and safe request field allowlist.
