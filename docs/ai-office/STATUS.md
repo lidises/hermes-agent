@@ -1,4 +1,12 @@
-Last updated: 2026-05-20 11:32 KST
+Last updated: 2026-05-20 11:56 KST
+
+## NAS Keeper durable production queue rehearsal/readback completed (no execution)
+- Raised the boundary from temporary-queue real-NAS browser smokes to one durable local-profile NAS Keeper handoff queue rehearsal/readback. The durable queue was initially absent; this run created one production queue item and authorized it for Mac relay execution review, then stopped before execution.
+- Safe logical target: `Hermes::durable-queue-rehearsal-20260520114732.md`; handoff `handoff_durable_queue_rehearsal_20260520114732`; authorization `authz_durable_queue_rehearsal_20260520114732`; preview-only relay ref `relay_exec_preview_only_durable_queue_rehearsal_20260520114732`.
+- Result evidence: durable queue line count 1; target row count 1; queue status `authorized_for_mac_relay_execution`; queue readback count 1/1; skipped unsafe 0; `markdown_body_included=false` in readback and preview; preview actual NAS write=false, dispatch=false, watcher=false.
+- Markdown SHA-256: `8bdce4544c8cbe68e1e96149a49fe90a58745ae13f535f55314df4f13a7a2dc4`; public summary raw-leak=false; rendered `/office` scoped DOM showed the durable queue item, approval unchecked, execute button disabled before manual approval, raw-leak=false, console JS errors 0.
+- Real NAS target for this rehearsal did not exist after the run, confirming no execution/write occurred. Focused queue/authorization/readback/payload-preview/claim-dry-run regression after clearing inherited smoke env: `16 passed`; `git diff --check` passed; worktree clean before docs update.
+- Still not performed: production queue execution, Mac relay write from the durable queue, watcher/cron/dispatch daemon activation, authority-adapter binding, Kanban mutation, VPS direct NAS mount/credential/write authority, gateway restart, dashboard restart, public exposure, or VPS runtime file mutation.
 
 ## NAS Keeper real-NAS browser-click replacement/rollback smoke completed (temporary queue)
 - Raised the boundary from one real-NAS browser-click create smoke to a create+replace browser-click sequence against the same safe logical note through the private `/office` guarded NAS Keeper operator. The smoke used an isolated temporary `HERMES_HOME` queue and did not touch the durable production queue.
