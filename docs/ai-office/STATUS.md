@@ -1,4 +1,12 @@
-Last updated: 2026-05-20 12:31 KST
+Last updated: 2026-05-20 12:36 KST
+
+## NAS Keeper noop runtime-command execution metadata recorded
+- Raised the boundary from runtime-command inclusion metadata to an inclusion-backed noop runtime-command execution/replay record backed by `cmd-nas-keeper-runtime-inclusion-20260520122846`.
+- Safe execution ref: `exec-nas-keeper-runtime-noop-20260520123414`; idempotency key: `idem-nas-keeper-runtime-noop-20260520123414`; result: `noop_probe_succeeded`.
+- Result evidence: runtime-command execution count 1; `runtime_command_executed=true`; `idempotency_replay_store_written=true`; `runtime_execution_result=noop_probe_succeeded`; `adapter_dispatch_created=false`; `rollback_executed=false`; `target_mutation_created=false`; `kanban_mutation_created=false`; `nas_save_created=false`; `vps_file_change_created=false`; `real_dispatch_execution_enabled=false`.
+- Readback retained only safe refs/checksums/booleans/result metadata; raw value probe over path/token/command/provider/private-runtime sentinels returned no hits.
+- Verification: `py_compile` passed for `office_controlled_mutation.py` and `web_server.py`; focused approval/dispatch tests passed (`31 passed`); `git diff --check` passed.
+- Still not performed: adapter binding/dispatch, rollback execution, target mutation, Kanban mutation, NAS save marker, watcher/cron/daemon activation, service restart, VPS runtime mutation, credential/public authority expansion, real dispatch execution.
 
 ## NAS Keeper runtime-command inclusion metadata recorded
 - Raised the boundary from checksum-only runtime-command preview metadata to a bounded runtime-command inclusion record backed by `cmdpreview-nas-keeper-runtime-20260520122800`.
