@@ -1,4 +1,37 @@
 
+
+## 2026-05-20 — Desk RPG fan-out approval event bridge slice
+
+Status: implemented, verified, committed, pushed, and deployed dashboard-only to VPS.
+
+What changed:
+
+- `/office` Desk RPG runtime fan-out area now includes a read-only fan-out → approval event bridge.
+- `buildOfficeRpgFanoutApprovalEventBridge` joins aggregate runtime fan-out posture with the approval request route detail posture.
+- `RpgFanoutApprovalEventBridgePanel` exposes stable DOM hooks for aggregate fan-out, request envelope, approval event gate, and write boundary cards.
+
+Safety boundary:
+
+- Enabled controls: 0.
+- Request creation, approval event creation, event persistence, Kanban write, dispatch, audit write, and NAS save: disabled.
+- Kanban mutation, NAS write, watcher/cron activation, dispatcher/authority binding, target mutation, direct VPS NAS authority, public exposure change, and gateway restart: not part of this slice.
+
+Verification so far:
+
+- RED focused tests failed first on the missing bridge builder/panel contract.
+- Focused bridge tests: 2 passed.
+- Combined Office frontend tests: 256 passed.
+- ESLint: 0 errors, existing Fast Refresh warnings only.
+- Build: passed, existing Vite large chunk warning only.
+- `git diff --check`: passed.
+- Safety scan: no production `fetch`, storage, beacon, private path, or token-like additions; only test assertions mention raw sentinel strings and `<form`.
+- Local browser DOM smoke: bridge=true, cards=4, enabledControls=0, all request/event/write flags false, scopedControls=0, visualMap=1, mapSvg=1, sprites=8, fallbackRows=8, rawLeak=false, console JS errors=0.
+- Deployment: code commit `d0bd86cc` pushed and synced to both private VPS worktrees. `web_dist` relative hash matched local and both VPS copies: `e111de66f5383dbfda0db17920c21a37733f172176d8b0e0c7e6cc607a2d4c11` (22 files). Only `hermes-agent-dashboard.service` restarted; gateway stayed active and was not restarted.
+- VPS live smoke: private `/office?fanout-approval-event=d0bd86cc` HTTP 200; dashboard/gateway active; DOM bridge=true, cards=4, enabledControls=0, all request/event/write flags false, scopedControls=0, visualMap=1, mapSvg=1, mapRooms=6, sprites=8, bubbles=8, fallbackRows=8, rawLeak=false; console JS errors 0.
+- Handoff: `docs/ai-office/plans/2026-05-20-desk-rpg-fanout-approval-event-bridge-handoff.md`.
+
+Last updated: 2026-05-20 20:36 KST
+
 ## 2026-05-20 — Desk RPG fan-out inspector detail slice
 
 Status: implemented, verified, committed, pushed, and deployed dashboard-only to VPS.

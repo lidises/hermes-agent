@@ -1,4 +1,24 @@
 
+
+## Current next — Desk RPG fan-out approval event bridge deployed
+
+Completed slice:
+
+- Added a read-only Desk RPG fan-out → approval event bridge under the runtime fan-out drill-down.
+- The bridge connects aggregate fan-out posture to the approval request route posture without creating request rows, approval events, persisted event payloads, Kanban writes, dispatch, audit writes, or NAS saves.
+- Safety posture remains display-only: `enabledControls=0`, request/approval-event/event-persistence/Kanban/dispatch/audit/NAS flags false, no scoped controls, raw rows excluded.
+- Code/deploy commit `d0bd86cc` was pushed to `origin/main`, synced to both private VPS worktrees, and dashboard-only restarted. `web_dist` relative hash matched local and both VPS copies: `e111de66f5383dbfda0db17920c21a37733f172176d8b0e0c7e6cc607a2d4c11` (22 files).
+- Local verification passed: focused bridge tests 2 passed, combined Office tests 256 passed, ESLint 0 errors with existing Fast Refresh warnings, build passed with existing Vite large chunk warning, diff-check passed, browser DOM smoke bridge=true/cards=4/scopedControls=0/rawLeak=false/console JS errors=0.
+- VPS live smoke at `/office?fanout-approval-event=d0bd86cc` showed bridge=true, cards=4, enabledControls=0, all request/event/write flags false, visualMap=1, mapSvg=1, mapRooms=6, sprites=8, bubbles=8, fallbackRows=8, rawLeak=false, console JS errors=0.
+- Handoff: `docs/ai-office/plans/2026-05-20-desk-rpg-fanout-approval-event-bridge-handoff.md`.
+
+Recommended next safe lane:
+
+1. Deepen the request/approval event path as read-only only: event envelope/detail, idempotency/readback/audit checks, and blocked capabilities.
+2. Do not create request rows, approval events, event stores, Kanban transitions, NAS writes, watcher/cron activation, dispatcher/authority binding, direct VPS NAS authority, public exposure, or gateway restart unless separately approved.
+
+Last updated: 2026-05-20 20:36 KST
+
 ## Current next — Desk RPG fan-out inspector detail deployed
 
 Completed slice:
