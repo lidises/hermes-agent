@@ -1,4 +1,11 @@
-Last updated: 2026-05-20 09:46 KST
+Last updated: 2026-05-20 09:56 KST
+
+## NAS Keeper real Mac NAS smoke completed (temporary queue, create+replace, no automation)
+- Raised the boundary from isolated temp-root execution to actual Mac-local real NAS execution-from-preview for one harmless smoke note, still through a temporary handoff queue and still without durable production queue mutation, watcher/cron, dispatch daemon, authority-adapter binding, direct VPS NAS mount/credentials, public exposure, Kanban mutation, or gateway restart.
+- Safe logical target: `Hermes::ai-office-real-nas-smoke-20260520-0950.md`; smoke performed create then replace against the same logical note to prove rollback-before-replace/readback behavior.
+- Evidence: create and replace both had queued=true, authorized=true, previewed=true, executed=true, written=true, readback_verified=true, audit_written=true, `markdown_body_included=false`, and queue unchanged by execute=true. First rollback_created=false; replacement rollback_created=true with safe rollback ref `rollback_write_20260520_real_nas_smoke_0950_replace`.
+- Final replacement readback SHA-256 matched expected body SHA-256: `d3694214c4ab2ace03225aeea627d54775d251167c33d58cc02689c4c5aa30af`; target_exists_after=true; serialized smoke result had raw leak=false.
+- Focused regression passed locally: `py_compile` plus NAS Keeper preview/from-preview, Mac relay write execute, and NAS runtime write tests `22 passed`; `git diff --check` and added-line secret/path scan passed.
 
 ## NAS Keeper execution-from-preview temp-root smoke completed (Mac-local write bridge proven, real NAS still untouched)
 - Raised the boundary from preview-callable to actual Mac-local execution-from-preview against an isolated temporary safe root only; no durable production queue, real NAS root, VPS NAS mount/credentials, watcher/cron, dispatch, authority-adapter binding, public exposure, or gateway restart.
