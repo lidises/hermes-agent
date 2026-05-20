@@ -2794,6 +2794,56 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(markup).not.toMatch(/raw command|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
   });
 
+  it("renders approval-event envelope metadata without executable controls", () => {
+    const ApprovalEventEnvelopeStatusPanel = (OfficePageModule as unknown as {
+      ApprovalEventEnvelopeStatusPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.ApprovalEventEnvelopeStatusPanel>>;
+    }).ApprovalEventEnvelopeStatusPanel;
+    const status = {
+      schema_version: 1,
+      mode: "stored_approval_event_envelopes_readback" as const,
+      approval_event_envelope_count: 1,
+      records: [
+        {
+          schema_version: 1,
+          mode: "stored_approval_event_envelope" as const,
+          event_status: "approval_event_envelope_metadata_recorded" as const,
+          approval_event_ref: "event-office-approval-1",
+          approval_record_ref: "approval-office-dispatch-1",
+          event_envelope_ref: "envelope-office-approval-1",
+          approval_record_written: true,
+          approval_event_envelope_written: true as const,
+          dispatch_gate_open: false as const,
+          runtime_command_executed: false as const,
+          target_mutation_created: false as const,
+          kanban_mutation_created: false as const,
+          nas_save_created: false as const,
+          capabilities: { approval_event_envelope_storage_enabled: true, dispatch_gate_open: false, real_dispatch_execution_enabled: false },
+          redaction: { raw_excluded: true },
+        },
+      ],
+      latest_refs: { approval_event_ref: "event-office-approval-1", approval_record_ref: "approval-office-dispatch-1", event_envelope_ref: "envelope-office-approval-1" },
+      capabilities: { approval_event_envelope_readback_enabled: true, dispatch_gate_open: false, real_dispatch_execution_enabled: false, target_mutation_enabled: false, kanban_mutation_enabled: false, nas_save_enabled: false },
+      redaction: { raw_excluded: true },
+      errors: [],
+    };
+
+    const markup = renderToStaticMarkup(<ApprovalEventEnvelopeStatusPanel status={status} error={null} />);
+
+    expect(markup).toContain('data-office-approval-event-envelope-status="true"');
+    expect(markup).toContain('data-office-approval-event-envelope-count="1"');
+    expect(markup).toContain('data-office-approval-event-envelope-written="true"');
+    expect(markup).toContain('data-office-approval-event-envelope-dispatch-gate-open="false"');
+    expect(markup).toContain('data-office-approval-event-envelope-real-dispatch-enabled="false"');
+    expect(markup).toContain('data-office-approval-event-envelope-kanban-enabled="false"');
+    expect(markup).toContain('data-office-approval-event-envelope-nas-enabled="false"');
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw command|Traceback|\/Users\/lidises|\/home\/hermes|sk-|private-runtime|provider/i);
+  });
+
   it("renders manual approval dispatch gate readiness with dispatch still closed", () => {
     const ManualApprovalDispatchGateReadinessPanel = (OfficePageModule as unknown as {
       ManualApprovalDispatchGateReadinessPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.ManualApprovalDispatchGateReadinessPanel>>;

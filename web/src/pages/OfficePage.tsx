@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeManualApprovalRecordingDraftReviewStatus, type OfficeManualApprovalRecordStatus, type OfficeManualApprovalDispatchGateReadinessStatus, type OfficeManualDispatchGateOpenRecordStatus, type OfficeManualRuntimeCommandPreviewRecordStatus, type OfficeManualRuntimeCommandInclusionRecordStatus, type OfficeManualRuntimeCommandExecutionRecordStatus, type OfficeManualTargetMutationReadinessRecordStatus, type OfficeManualTargetMutationRecordStatus, type OfficeManualAdapterDispatchRecordStatus, type OfficeManualKanbanMutationRecordStatus, type OfficeManualNasSaveRecordStatus, type OfficeManualNasKeeperHandoffRecordStatus, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeManualApprovalRecordingDraftReviewStatus, type OfficeManualApprovalRecordStatus, type OfficeApprovalEventEnvelopeStatus, type OfficeManualApprovalDispatchGateReadinessStatus, type OfficeManualDispatchGateOpenRecordStatus, type OfficeManualRuntimeCommandPreviewRecordStatus, type OfficeManualRuntimeCommandInclusionRecordStatus, type OfficeManualRuntimeCommandExecutionRecordStatus, type OfficeManualTargetMutationReadinessRecordStatus, type OfficeManualTargetMutationRecordStatus, type OfficeManualAdapterDispatchRecordStatus, type OfficeManualKanbanMutationRecordStatus, type OfficeManualNasSaveRecordStatus, type OfficeManualNasKeeperHandoffRecordStatus, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -5566,6 +5566,58 @@ export function ManualApprovalRecordStatusPanel({
 }
 
 
+export function ApprovalEventEnvelopeStatusPanel({
+  status,
+  error,
+}: {
+  status: OfficeApprovalEventEnvelopeStatus | null;
+  error?: string | null;
+}) {
+  const latest = status?.records?.[status.records.length - 1] ?? null;
+  const caps = status?.capabilities ?? {};
+  return (
+    <section
+      className="border border-violet-300/20 bg-violet-950/10 p-4"
+      data-office-approval-event-envelope-status="true"
+      data-office-approval-event-envelope-count={String(status?.approval_event_envelope_count ?? 0)}
+      data-office-approval-event-envelope-written={String(Boolean(latest?.approval_event_envelope_written))}
+      data-office-approval-event-envelope-dispatch-gate-open={String(Boolean(caps.dispatch_gate_open))}
+      data-office-approval-event-envelope-real-dispatch-enabled={String(Boolean(caps.real_dispatch_execution_enabled))}
+      data-office-approval-event-envelope-target-mutation-enabled={String(Boolean(caps.target_mutation_enabled))}
+      data-office-approval-event-envelope-kanban-enabled={String(Boolean(caps.kanban_mutation_enabled))}
+      data-office-approval-event-envelope-nas-enabled={String(Boolean(caps.nas_save_enabled || caps.nas_write_enabled))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-violet-200/70">Approval event envelope</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">event metadata written · execution still closed</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Reads stored approval-event envelope metadata. It records the approval event envelope only; dispatch, runtime commands, target mutation, Kanban, NAS, and cron remain closed.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "event readback request failed" : `${status?.approval_event_envelope_count ?? 0} event envelope(s)`}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-approval-event-envelope-boundaries="true">
+        {[
+          ["approval_event_envelope_written", Boolean(latest?.approval_event_envelope_written)],
+          ["approval_record_written", Boolean(latest?.approval_record_written)],
+          ["dispatch_gate_open", Boolean(caps.dispatch_gate_open)],
+          ["runtime_command_executed", Boolean(latest?.runtime_command_executed)],
+          ["target_mutation_created", Boolean(latest?.target_mutation_created)],
+          ["kanban_mutation_created", Boolean(latest?.kanban_mutation_created)],
+          ["nas_save_created", Boolean(latest?.nas_save_created)],
+          ["real_dispatch_execution_enabled", Boolean(caps.real_dispatch_execution_enabled)],
+        ].map(([key, value]) => (
+          <div key={String(key)} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-approval-event-envelope-boundary={String(key)}>{String(key)}: {String(Boolean(value))}</div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+
 export function ManualApprovalDispatchGateReadinessPanel({
   status,
   error,
@@ -7653,6 +7705,8 @@ export default function OfficePage() {
   const [manualApprovalRecordingDraftReviewStatusError, setManualApprovalRecordingDraftReviewStatusError] = useState<string | null>(null);
   const [manualApprovalRecordStatus, setManualApprovalRecordStatus] = useState<OfficeManualApprovalRecordStatus | null>(null);
   const [manualApprovalRecordStatusError, setManualApprovalRecordStatusError] = useState<string | null>(null);
+  const [approvalEventEnvelopeStatus, setApprovalEventEnvelopeStatus] = useState<OfficeApprovalEventEnvelopeStatus | null>(null);
+  const [approvalEventEnvelopeStatusError, setApprovalEventEnvelopeStatusError] = useState<string | null>(null);
   const [manualApprovalDispatchGateReadinessStatus, setManualApprovalDispatchGateReadinessStatus] = useState<OfficeManualApprovalDispatchGateReadinessStatus | null>(null);
   const [manualApprovalDispatchGateReadinessStatusError, setManualApprovalDispatchGateReadinessStatusError] = useState<string | null>(null);
   const [manualDispatchGateOpenRecordStatus, setManualDispatchGateOpenRecordStatus] = useState<OfficeManualDispatchGateOpenRecordStatus | null>(null);
@@ -8199,6 +8253,20 @@ export default function OfficePage() {
         if (!cancelled) {
           setManualApprovalRecordStatus(null);
           setManualApprovalRecordStatusError("request failed");
+        }
+      });
+    api
+      .getOfficeControlledMutationApprovalEventEnvelopeStatus({ limit: 10 })
+      .then((next) => {
+        if (!cancelled) {
+          setApprovalEventEnvelopeStatus(next);
+          setApprovalEventEnvelopeStatusError(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setApprovalEventEnvelopeStatus(null);
+          setApprovalEventEnvelopeStatusError("request failed");
         }
       });
     api
@@ -8997,6 +9065,7 @@ export default function OfficePage() {
       <ManualApprovalRecordingDraftStatusPanel status={manualApprovalRecordingDraftStatus} error={manualApprovalRecordingDraftStatusError} />
       <ManualApprovalRecordingDraftReviewStatusPanel status={manualApprovalRecordingDraftReviewStatus} error={manualApprovalRecordingDraftReviewStatusError} />
       <ManualApprovalRecordStatusPanel status={manualApprovalRecordStatus} error={manualApprovalRecordStatusError} />
+      <ApprovalEventEnvelopeStatusPanel status={approvalEventEnvelopeStatus} error={approvalEventEnvelopeStatusError} />
       <ManualApprovalDispatchGateReadinessPanel status={manualApprovalDispatchGateReadinessStatus} error={manualApprovalDispatchGateReadinessStatusError} />
       <ManualDispatchGateOpenRecordStatusPanel status={manualDispatchGateOpenRecordStatus} error={manualDispatchGateOpenRecordStatusError} />
       <ManualRuntimeCommandPreviewRecordStatusPanel status={manualRuntimeCommandPreviewRecordStatus} error={manualRuntimeCommandPreviewRecordStatusError} />

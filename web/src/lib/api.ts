@@ -590,6 +590,43 @@ export interface OfficeManualApprovalRecordStatus {
   errors: Array<{ field: string; code: string }>;
 }
 
+export interface OfficeApprovalEventEnvelopeRecord {
+  schema_version: number;
+  mode: "stored_approval_event_envelope";
+  event_status?: "approval_event_envelope_metadata_recorded";
+  approval_event_ref: string;
+  approval_record_ref: string;
+  event_envelope_ref: string;
+  approval_record_written: boolean;
+  approval_event_envelope_written: true;
+  dispatch_gate_open: false;
+  runtime_command_executed: false;
+  target_mutation_created: false;
+  kanban_mutation_created?: false;
+  nas_save_created?: false;
+  capabilities: Record<string, boolean>;
+  redaction?: Record<string, boolean>;
+}
+
+export interface OfficeApprovalEventEnvelopeAppendResult {
+  stored: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: OfficeApprovalEventEnvelopeRecord | null;
+}
+
+export interface OfficeApprovalEventEnvelopeStatus {
+  schema_version: number;
+  mode: "stored_approval_event_envelopes_readback";
+  approval_event_envelope_count: number;
+  limit?: number;
+  skipped_count?: number;
+  records: OfficeApprovalEventEnvelopeRecord[];
+  latest_refs: Record<string, string>;
+  capabilities: Record<string, boolean>;
+  redaction?: Record<string, boolean>;
+  errors: Array<{ field: string; code: string }>;
+}
+
 export interface OfficeManualApprovalDispatchGateReadinessStatus {
   schema_version: number;
   mode: "manual_approval_dispatch_gate_readiness_status";
@@ -1440,6 +1477,14 @@ export const api = {
     if (params.approval_record_ref) qs.set("approval_record_ref", params.approval_record_ref);
     const suffix = qs.toString() ? `?${qs.toString()}` : "";
     return fetchJSON<OfficeManualApprovalDispatchGateReadinessStatus>(`/api/office/controlled-mutation/manual-approval-dispatch-gate-readiness-status${suffix}`);
+  },
+  getOfficeControlledMutationApprovalEventEnvelopeStatus: (params: { approval_event_ref?: string; approval_record_ref?: string; limit?: number } = {}) => {
+    const qs = new URLSearchParams();
+    if (params.approval_event_ref) qs.set("approval_event_ref", params.approval_event_ref);
+    if (params.approval_record_ref) qs.set("approval_record_ref", params.approval_record_ref);
+    if (typeof params.limit === "number") qs.set("limit", String(params.limit));
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+    return fetchJSON<OfficeApprovalEventEnvelopeStatus>(`/api/office/controlled-mutation/approval-event-envelope-status${suffix}`);
   },
   writeOfficeControlledMutationManualDispatchGateOpenRecord: (body: OfficeManualDispatchGateOpenRecordPayload) =>
     fetchJSON<OfficeManualDispatchGateOpenRecordAppendResult>("/api/office/controlled-mutation/manual-dispatch-gate-open-record", {

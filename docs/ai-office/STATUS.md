@@ -1,5 +1,32 @@
 
 
+## 2026-05-20 — Approval-event envelope metadata write/readback slice
+
+Status: in progress; focused GREEN achieved, full verification/deploy pending.
+
+What changed:
+
+- Added bounded approval-event envelope metadata helpers and protected API routes.
+- Added frontend API type/readback wrapper and `/office` display-only panel.
+- Added focused backend and frontend tests.
+
+Safety boundary:
+
+- Writes only sanitized approval-event envelope metadata to controlled-mutation JSONL.
+- Dispatch, runtime execution, adapter binding/dispatch, target mutation, Kanban mutation, NAS write/save, watcher/cron, credential access, public exposure, and gateway restart remain disabled.
+
+Verification so far:
+
+- RED: focused backend test failed on missing helper/import/API route.
+- GREEN focused backend: 4 passed.
+- GREEN focused frontend: 1 passed.
+- Combined backend/frontend tests, py_compile, ESLint, build, diff-check, safety scan, and local API smoke passed; deploy still pending.
+
+Handoff: `docs/ai-office/plans/2026-05-20-approval-event-envelope-write-readback-handoff.md`.
+
+Last updated: 2026-05-20 21:03 KST
+
+
 ## 2026-05-20 — Desk RPG fan-out approval event bridge slice
 
 Status: implemented, verified, committed, pushed, and deployed dashboard-only to VPS.

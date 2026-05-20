@@ -1,5 +1,32 @@
 
 
+## Current next — Approval-event envelope metadata write/readback in progress
+
+Current slice:
+
+- User approved continuing the recommended request/approval event path with write included and slightly stronger authority.
+- Added RED/GREEN path for bounded approval-event envelope metadata storage/readback.
+- Target store is local Hermes controlled-mutation JSONL: `$HERMES_HOME/office/controlled-mutation/approval_event_envelopes.jsonl`.
+- Protected backend routes: `POST /api/office/controlled-mutation/approval-event-envelope` and `GET /api/office/controlled-mutation/approval-event-envelope-status`.
+- `/office` adds a display-only approval-event envelope readback panel.
+
+Safety boundary remains:
+
+- Approval-event envelope metadata write/readback only.
+- Dispatch gate opening, runtime command execution, adapter binding/dispatch, target mutation, Kanban mutation, NAS save/write/direct VPS NAS authority, watcher/cron activation, credential access, public exposure, and gateway restart remain blocked.
+
+Verification so far:
+
+- RED focused backend test failed on missing helper imports and missing API route.
+- Focused backend approval-event envelope tests: 4 passed.
+- Focused frontend panel test: 1 passed.
+- Full local verification passed; commit/push and VPS sync/restart/live smoke still pending in this slice.
+
+Handoff: `docs/ai-office/plans/2026-05-20-approval-event-envelope-write-readback-handoff.md`.
+
+Last updated: 2026-05-20 21:03 KST
+
+
 ## Current next — Desk RPG fan-out approval event bridge deployed
 
 Completed slice:
