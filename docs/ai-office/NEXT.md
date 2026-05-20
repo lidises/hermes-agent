@@ -1,14 +1,15 @@
 ## Next safest lane
-- Completed lane: deliberate replace/restore smoke has now been run on the previously successful NAS Keeper real Mac relay note `Hermes::nas-keeper-runtime-progress-marker-20260520142136.md`. Replace readback SHA-256 was `346a118745d69dd2c96381f971b2e93c73a2c87340ae00b1da993f0b8e9e4a0f`; restore readback SHA-256 returned to the original `faf8c497a4f22f1d166f24ca6bf555193b46d61de6f999a2edc4ab4d61a7a38a`; both temporary queue items ended `mac_relay_execution_succeeded` with audit/rollback refs, readback verification, no markdown projection, and raw-leak=false.
-- Previous completed lane remains valid: operator review checklist was added on top of the NAS Keeper evidence consolidation surface and synced to the VPS dashboard worktrees at commit `8d3fe56e`; follow-up docs are at `8d00a1a5`.
-- Boundary preserved: direct VPS NAS write/authority, VPS NAS mount/credentials, watcher/cron/daemon activation, dashboard/gateway restart, public exposure, credential expansion, authority-adapter binding, generalized dispatcher execution, and raw markdown projection remain closed.
-- Next higher-risk candidate: decide whether to create a new durable production queue item with explicit operator review, or stay in read-only/dashboard polish. Do not expand to watcher/cron/direct VPS NAS authority/generalized dispatcher without a separate concrete gate.
+- Completed lane: B안 Desk RPG rendered-map slice is deployed at `b5c18596`. The private `/office` page now has an actual SVG visual map with room/tile/door/furniture/path hooks, live character sprites/state bubbles, text fallback rows, and safe inspector linkage. VPS live smoke passed with `visualMap=1`, `mapSvg=1`, `mapRooms=6`, live `sprites=51`, `bubbles=51`, raw-leak=false, console JS errors 0.
+- Fresh-session handoff for this exact state: `docs/ai-office/plans/2026-05-20-desk-rpg-rendered-map-handoff.md`.
+- Boundary preserved: no Kanban mutation, NAS write, watcher/cron/daemon activation, dispatcher/authority-adapter binding, target mutation, direct VPS NAS authority, public exposure change, or gateway restart occurred for the visual slice.
+- Recommended next product options: (1) frontend-only visual polish for sprite overlap/labels/responsive layout, (2) frontend-only interaction polish for selected-state/inspector anchoring/keyboard affordances, or (3) UX/IA decision on whether the rendered map should become the primary top-of-page `/office` view.
+- Higher-risk options still require separate concrete approval: real dispatcher actions, Kanban writes, NAS writes, watcher/cron automation, authority adapter binding, public exposure, or direct VPS NAS authority.
 
 
 
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-20 14:41 KST
+Last updated: 2026-05-20 15:20 KST
 
 ## Start here after `/new`
 

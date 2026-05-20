@@ -1,4 +1,13 @@
-Last updated: 2026-05-20 14:41 KST
+Last updated: 2026-05-20 15:20 KST
+
+## Desk RPG rendered SVG map/sprite slice deployed
+- Implemented and deployed commit `b5c18596` (`feat(office): render desk rpg map sprites`) to the private VPS dashboard. This corrects the earlier status-only gap: `/office` now renders an actual SVG RPG map, not just RPG status cards or DTO counts.
+- Visual contract now includes `data-office-rpg-visual-map="true"`, `data-office-rpg-map-svg="true"`, room/tile/door/furniture/path hooks, and `data-office-rpg-character-sprite` plus state bubbles for each visible entity.
+- Local verification: Office frontend tests passed (`248 passed`), ESLint returned 0 errors with two pre-existing Fast Refresh warnings, `npm run build` passed with the existing Vite large-chunk warning, and `git diff --check` passed.
+- Deploy evidence: VPS dashboard worktree `/home/hermes/.hermes/ai-office-dashboard` reset to `b5c18596`; Mac-built `hermes_cli/web_dist` rsynced with matching relative content hash `dcd81c339657467222a8f5ef361604efb1f722de836839a1c55b4cac5882d7cc`; `hermes-agent-dashboard.service` restarted only; `hermes-gateway.service` stayed active and was not restarted.
+- VPS live browser smoke at `/office?desk-rpg-rendered-map=b5c18596`: HTTP 200, `visualMap=1`, `mapSvg=1`, `mapRooms=6`, `mapTiles=7`, `mapDoors=3`, `mapFurniture=5`, `mapPaths=2`, live `sprites=51`, `bubbles=51`, `fallbackRows=51`, `formsInVisual=0`, raw-leak probe false, console JS errors 0, sprite click opened the safe inspector, and vision confirmed visible rooms/furniture/doors/paths/sprites/status bubbles.
+- New-session handoff: `docs/ai-office/plans/2026-05-20-desk-rpg-rendered-map-handoff.md`.
+- Safety posture: no Kanban mutation, no NAS write, no watcher/cron/daemon activation, no dispatcher/authority-adapter binding, no target mutation, no VPS direct NAS authority, no public exposure change, and no gateway restart were performed.
 
 ## NAS Keeper replace/rollback smoke completed on successful real Mac relay note
 - Completed the next deliberate replace/restore smoke on the previously successful safe note `Hermes::nas-keeper-runtime-progress-marker-20260520142136.md` through the existing NAS Keeper -> Mac relay execution-from-preview path, using an isolated temporary handoff queue and the Mac-local relay root.
