@@ -138,6 +138,7 @@ import {
   buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface,
   buildOfficeNasRuntimeSingleFileWriteApprovalAction,
   buildOfficeNasKeeperQueueManualEvidenceReviewSurface,
+  buildOfficeNasKeeperQueueEvidenceConsolidation,
   buildOfficeDeskRpgReadOnlyChainCompletionReview,
   buildOfficeEventDrivenCharacterStateProjection,
   buildOfficeCharacterStateRoomOverlay,
@@ -238,6 +239,57 @@ describe("NAS Keeper Queue Manual Evidence Review Surface 1", () => {
     expect(JSON.stringify(surface)).not.toMatch(/raw queue prompt|raw markdown body|Traceback|\/Users\/lidises|token-shaped-queue-review|private-queue-provider/i);
   });
 });
+
+
+describe("NAS Keeper Queue Evidence Consolidation 1", () => {
+  it("summarizes completed, failed, and manual-review queue evidence without enabling writes", () => {
+    const readback = {
+      listed: true,
+      errors: [],
+      dto: {
+        schema_version: 1,
+        mode: "nas_keeper_handoff_queue_readback",
+        listed: true,
+        queue_storage_ref: "queue:canonical",
+        filters: {},
+        effective_limit: 20,
+        available_count: 5,
+        count: 5,
+        skipped_count: 1,
+        markdown_body_included: false,
+        capabilities: { read: true, write: false },
+        next_required_boundary: "operator_review",
+        items: [
+          { handoff_ref: "handoff-succeeded", queue_ref: "queue-1", queue_status: "mac_relay_execution_succeeded", execution_evidence_refs: ["audit:ok", "readback:ok"], markdown_body_included: false },
+          { handoff_ref: "handoff-failed", queue_ref: "queue-2", queue_status: "mac_relay_execution_failed", execution_evidence_refs: ["audit:failed"], markdown_body_included: false },
+          { handoff_ref: "handoff-manual", queue_ref: "queue-3", queue_status: "manual_review_required", execution_evidence_refs: [], markdown_body_included: false },
+          { handoff_ref: "handoff-authorized", queue_ref: "queue-4", queue_status: "authorized_for_mac_relay_execution", execution_evidence_refs: [], markdown_body_included: false },
+          { handoff_ref: "handoff-pending", queue_ref: "queue-5", queue_status: "pending_nas_keeper_authorization", execution_evidence_refs: [], markdown_body_included: false },
+        ],
+      },
+    } as unknown as Parameters<typeof buildOfficeNasKeeperQueueEvidenceConsolidation>[0];
+
+    const consolidation = buildOfficeNasKeeperQueueEvidenceConsolidation(readback);
+
+    expect(consolidation.stageLabel).toBe("NAS Keeper Queue Evidence Consolidation 1");
+    expect(consolidation.totalItems).toBe(5);
+    expect(consolidation.skippedUnsafeCount).toBe(1);
+    expect(consolidation.terminalCount).toBe(2);
+    expect(consolidation.succeededCount).toBe(1);
+    expect(consolidation.failedCount).toBe(1);
+    expect(consolidation.manualReviewCount).toBe(1);
+    expect(consolidation.openAuthorizedCount).toBe(1);
+    expect(consolidation.evidenceRefCount).toBe(3);
+    expect(consolidation.lanes.map((lane) => lane.id)).toEqual(["succeeded", "failed", "manual_review", "authorized", "pending"]);
+    expect(consolidation.lanes.find((lane) => lane.id === "succeeded")?.terminal).toBe(true);
+    expect(consolidation.queueMutationEnabled).toBe(false);
+    expect(consolidation.macRelayExecutionEnabled).toBe(false);
+    expect(consolidation.nasWriteEnabled).toBe(false);
+    expect(consolidation.markdownBodyProjected).toBe(false);
+    expect(JSON.stringify(consolidation)).not.toMatch(/raw markdown body|Traceback|\/Users\/lidises|token-shaped-evidence|private-provider/i);
+  });
+});
+
 
 
 describe("Worker Facility Lane Polish 1", () => {

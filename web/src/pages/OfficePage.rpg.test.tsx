@@ -3372,6 +3372,16 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(markup).toContain('data-office-nas-keeper-queue-manual-review-triage-lane="manual_review_required"');
     expect(markup).toContain('data-office-nas-keeper-queue-manual-review-triage-lane-count="1"');
     expect(markup).toContain('data-office-nas-keeper-queue-manual-review-triage-lane-next-boundary="manual_nas_keeper_execution_evidence_review_if_needed"');
+    expect(markup).toContain('data-office-nas-keeper-queue-evidence-consolidation="true"');
+    expect(markup).toContain('data-office-nas-keeper-queue-evidence-consolidation-terminal-count="0"');
+    expect(markup).toContain('data-office-nas-keeper-queue-evidence-consolidation-manual-review-count="1"');
+    expect(markup).toContain('data-office-nas-keeper-queue-evidence-consolidation-evidence-ref-count="1"');
+    expect(markup).toContain('data-office-nas-keeper-queue-evidence-consolidation-queue-mutation-enabled="false"');
+    expect(markup).toContain('data-office-nas-keeper-queue-evidence-consolidation-mac-relay-execution-enabled="false"');
+    expect(markup).toContain('data-office-nas-keeper-queue-evidence-consolidation-nas-write-enabled="false"');
+    expect(markup).toContain('data-office-nas-keeper-queue-evidence-consolidation-lane="manual_review"');
+    expect(markup).toContain("completed/failed handoff evidence consolidation");
+    expect(markup).toContain("Manual review");
     expect(markup).toContain("Manual review needed");
     expect(markup).toContain("Queue panel demo");
     expect(markup).toContain("manual_nas_keeper_execution_evidence_review_if_needed");

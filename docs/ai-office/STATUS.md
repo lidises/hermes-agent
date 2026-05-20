@@ -1,4 +1,9 @@
-Last updated: 2026-05-20 13:41 KST
+Last updated: 2026-05-20 14:02 KST
+
+## Operator-visible NAS Keeper evidence consolidation added
+- Added a read-only `/office` queue evidence consolidation helper and panel section for completed/failed/manual-review NAS Keeper handoffs. It aggregates safe queue readback metadata into terminal/open/manual-review lanes and evidence-ref counts without projecting queued markdown bodies.
+- Safety posture: queue mutation, Mac relay execution, NAS write, watcher/cron, authority adapter binding, service restart, and markdown body projection remain disabled in this surface.
+- Verification: `npm run test -- OfficePage.test.ts OfficePage.rpg.test.tsx` passed (`247 passed`); `npm run build` passed; `npm run lint` passed with 23 pre-existing warnings and 0 errors; `git diff --check` passed.
 
 ## Stale NAS Keeper handoff closed as failed terminal state
 - Reviewed the remaining NAS Keeper handoff queue and found one stale authorized item after the successful real Mac relay write: `handoff_nas_keeper_runtime_20260520124446`, targeting `vault_personal_wiki_demo::nas-keeper-runtime-progress-marker.md`.

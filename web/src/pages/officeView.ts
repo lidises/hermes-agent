@@ -1,4 +1,4 @@
-import type { OfficeSourceStatus, OfficeState } from "@/lib/api";
+import type { OfficeNasKeeperHandoffQueueReadback, OfficeSourceStatus, OfficeState } from "@/lib/api";
 
 export type AttentionItem = {
   id: string;
@@ -2215,6 +2215,39 @@ export type OfficeNasKeeperQueueManualEvidenceReviewSurface = {
   rawExcluded: true;
 };
 
+
+export type OfficeNasKeeperQueueEvidenceConsolidationLane = {
+  id: "succeeded" | "failed" | "manual_review" | "authorized" | "pending" | "other";
+  label: string;
+  count: number;
+  evidenceRefCount: number;
+  terminal: boolean;
+  operatorSummary: string;
+  rawExcluded: true;
+};
+
+export type OfficeNasKeeperQueueEvidenceConsolidation = {
+  stageLabel: "NAS Keeper Queue Evidence Consolidation 1";
+  title: string;
+  laneCount: number;
+  totalItems: number;
+  availableCount: number;
+  skippedUnsafeCount: number;
+  openAuthorizedCount: number;
+  terminalCount: number;
+  succeededCount: number;
+  failedCount: number;
+  manualReviewCount: number;
+  evidenceRefCount: number;
+  markdownBodyProjected: false;
+  queueMutationEnabled: false;
+  macRelayExecutionEnabled: false;
+  nasWriteEnabled: false;
+  watcherCronDaemonEnabled: false;
+  authorityAdapterBindingEnabled: false;
+  lanes: OfficeNasKeeperQueueEvidenceConsolidationLane[];
+  rawExcluded: true;
+};
 
 export type OfficeNasKeeperExecutionOperatorAction = {
   stageLabel: "NAS Keeper Execution Operator Action 1";
@@ -5474,6 +5507,64 @@ export function buildOfficeNasKeeperQueueManualEvidenceReviewSurface(action: Off
     dashboardRestartEnabled: false,
     gatewayRestartEnabled: false,
     markdownBodyProjected: false,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeNasKeeperQueueEvidenceConsolidation(readback?: OfficeNasKeeperHandoffQueueReadback | null): OfficeNasKeeperQueueEvidenceConsolidation {
+  const items = readback?.dto?.items ?? [];
+  const laneSeed: OfficeNasKeeperQueueEvidenceConsolidationLane[] = [
+    { id: "succeeded", label: "Succeeded terminal", count: 0, evidenceRefCount: 0, terminal: true, operatorSummary: "Mac relay write completed with safe evidence refs.", rawExcluded: true },
+    { id: "failed", label: "Failed terminal", count: 0, evidenceRefCount: 0, terminal: true, operatorSummary: "Failed handoff is closed with safe failure evidence refs.", rawExcluded: true },
+    { id: "manual_review", label: "Manual review", count: 0, evidenceRefCount: 0, terminal: false, operatorSummary: "Manual evidence review is still required before further action.", rawExcluded: true },
+    { id: "authorized", label: "Authorized open", count: 0, evidenceRefCount: 0, terminal: false, operatorSummary: "Authorized queue item remains open for an explicit operator decision.", rawExcluded: true },
+    { id: "pending", label: "Pending authorization", count: 0, evidenceRefCount: 0, terminal: false, operatorSummary: "Handoff is queued but not authorized for Mac relay execution.", rawExcluded: true },
+    { id: "other", label: "Other safe state", count: 0, evidenceRefCount: 0, terminal: false, operatorSummary: "Queue item is visible only as safe status metadata.", rawExcluded: true },
+  ];
+  const lanes = new Map(laneSeed.map((lane) => [lane.id, { ...lane }]));
+  for (const item of items) {
+    const status = item.queue_status;
+    const laneId: OfficeNasKeeperQueueEvidenceConsolidationLane["id"] = status === "mac_relay_execution_succeeded"
+      ? "succeeded"
+      : status === "mac_relay_execution_failed"
+        ? "failed"
+        : status === "mac_relay_execution_manual_review_required" || status === "manual_review_required"
+          ? "manual_review"
+          : status === "authorized_for_mac_relay_execution"
+            ? "authorized"
+            : status === "pending_nas_keeper_authorization"
+              ? "pending"
+              : "other";
+    const lane = lanes.get(laneId)!;
+    lane.count += 1;
+    lane.evidenceRefCount += item.execution_evidence_refs?.length ?? 0;
+  }
+  const visibleLanes = Array.from(lanes.values()).filter((lane) => lane.count > 0);
+  const evidenceRefCount = visibleLanes.reduce((total, lane) => total + lane.evidenceRefCount, 0);
+  const succeededCount = lanes.get("succeeded")?.count ?? 0;
+  const failedCount = lanes.get("failed")?.count ?? 0;
+  const manualReviewCount = lanes.get("manual_review")?.count ?? 0;
+  const openAuthorizedCount = lanes.get("authorized")?.count ?? 0;
+  return {
+    stageLabel: "NAS Keeper Queue Evidence Consolidation 1",
+    title: "NAS Keeper completed/failed handoff evidence consolidation",
+    laneCount: visibleLanes.length,
+    totalItems: readback?.dto?.count ?? 0,
+    availableCount: readback?.dto?.available_count ?? 0,
+    skippedUnsafeCount: readback?.dto?.skipped_count ?? 0,
+    openAuthorizedCount,
+    terminalCount: succeededCount + failedCount,
+    succeededCount,
+    failedCount,
+    manualReviewCount,
+    evidenceRefCount,
+    markdownBodyProjected: false,
+    queueMutationEnabled: false,
+    macRelayExecutionEnabled: false,
+    nasWriteEnabled: false,
+    watcherCronDaemonEnabled: false,
+    authorityAdapterBindingEnabled: false,
+    lanes: visibleLanes,
     rawExcluded: true,
   };
 }

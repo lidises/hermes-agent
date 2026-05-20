@@ -149,6 +149,7 @@ import {
   buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface,
   buildOfficeNasRuntimeSingleFileWriteApprovalAction,
   buildOfficeNasKeeperQueueManualEvidenceReviewSurface,
+  buildOfficeNasKeeperQueueEvidenceConsolidation,
   buildOfficeNasKeeperExecutionOperatorAction,
   buildOfficeDeskRpgReadOnlyChainCompletionReview,
   buildOfficeEventDrivenCharacterStateProjection,
@@ -5907,6 +5908,7 @@ export function NasKeeperQueueManualEvidenceReviewSurfacePanel({
           .values(),
       )
     : [];
+  const evidenceConsolidation = buildOfficeNasKeeperQueueEvidenceConsolidation(readback);
   return (
     <Card
       data-office-nas-keeper-queue-manual-review="true"
@@ -5984,6 +5986,43 @@ export function NasKeeperQueueManualEvidenceReviewSurfacePanel({
                     ))}
                   </div>
                 ) : null}
+                <div
+                  className="mt-2 border border-emerald-300/20 bg-emerald-950/10 p-3"
+                  data-office-nas-keeper-queue-evidence-consolidation="true"
+                  data-office-nas-keeper-queue-evidence-consolidation-terminal-count={evidenceConsolidation.terminalCount}
+                  data-office-nas-keeper-queue-evidence-consolidation-succeeded-count={evidenceConsolidation.succeededCount}
+                  data-office-nas-keeper-queue-evidence-consolidation-failed-count={evidenceConsolidation.failedCount}
+                  data-office-nas-keeper-queue-evidence-consolidation-manual-review-count={evidenceConsolidation.manualReviewCount}
+                  data-office-nas-keeper-queue-evidence-consolidation-open-authorized-count={evidenceConsolidation.openAuthorizedCount}
+                  data-office-nas-keeper-queue-evidence-consolidation-evidence-ref-count={evidenceConsolidation.evidenceRefCount}
+                  data-office-nas-keeper-queue-evidence-consolidation-queue-mutation-enabled={String(evidenceConsolidation.queueMutationEnabled)}
+                  data-office-nas-keeper-queue-evidence-consolidation-mac-relay-execution-enabled={String(evidenceConsolidation.macRelayExecutionEnabled)}
+                  data-office-nas-keeper-queue-evidence-consolidation-nas-write-enabled={String(evidenceConsolidation.nasWriteEnabled)}
+                  data-office-nas-keeper-queue-evidence-consolidation-markdown-body-projected={String(evidenceConsolidation.markdownBodyProjected)}
+                >
+                  <div className="font-semibold text-emerald-100">completed/failed handoff evidence consolidation</div>
+                  <div className="mt-1 leading-5">
+                    terminal {evidenceConsolidation.terminalCount} · succeeded {evidenceConsolidation.succeededCount} · failed {evidenceConsolidation.failedCount} · manual review {evidenceConsolidation.manualReviewCount} · evidence refs {evidenceConsolidation.evidenceRefCount}
+                  </div>
+                  {evidenceConsolidation.lanes.length ? (
+                    <div className="mt-2 grid gap-2 md:grid-cols-3" data-office-nas-keeper-queue-evidence-consolidation-lanes="true">
+                      {evidenceConsolidation.lanes.map((lane) => (
+                        <div
+                          key={lane.id}
+                          className="border border-emerald-300/15 bg-emerald-950/10 p-2"
+                          data-office-nas-keeper-queue-evidence-consolidation-lane={lane.id}
+                          data-office-nas-keeper-queue-evidence-consolidation-lane-count={lane.count}
+                          data-office-nas-keeper-queue-evidence-consolidation-lane-terminal={String(lane.terminal)}
+                        >
+                          <div className="font-semibold text-emerald-100">{lane.label}</div>
+                          <div className="mt-1 font-mono text-[10px] text-emerald-100/70">{lane.count} item(s) · evidence refs {lane.evidenceRefCount}</div>
+                          <div className="mt-1 text-midground/60">{lane.operatorSummary}</div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                  <div className="mt-2 text-midground/60">queue rewrite, relay dispatch, service restart, NAS write, and markdown body projection remain disabled.</div>
+                </div>
                 <div className="mt-2 grid gap-2 md:grid-cols-2">
                   {dto.items.slice(0, 6).map((item) => (
                     <div
