@@ -1,4 +1,27 @@
 
+## Current next — Target-readiness live surface in progress
+
+Current slice:
+
+- User approved continuing the recommended controlled-mutation path with bounded writes and slightly stronger authority.
+- Existing protected target-readiness metadata store/API/readback implementation is being surfaced in the live `/office` page.
+- Added RED/GREEN placement regression so the target-readiness panel stays outside `SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES` and appears in production/browser smoke.
+
+Safety boundary remains:
+
+- Bounded target-readiness metadata readback/status only; smoke may write a readiness record backed by an existing noop execution record.
+- Actual target mutation, adapter binding/dispatch, rollback execution, Kanban mutation, NAS save/write/direct VPS NAS authority, watcher/cron activation, credential access, public exposure, and gateway restart remain blocked.
+
+Verification so far:
+
+- RED placement test failed when target-readiness panel was only inside legacy diagnostics.
+- GREEN focused placement test passed after live-visible placement.
+- Full local verification and local API/browser smoke passed; commit/push and VPS dashboard-only deploy/live smoke pending.
+
+Handoff: `docs/ai-office/plans/2026-05-20-target-readiness-live-surface-handoff.md`.
+
+Last updated: 2026-05-20 22:26 KST
+
 ## Current next — Runtime-command execution-noop live surface in progress
 
 Current slice:

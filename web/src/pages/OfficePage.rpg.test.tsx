@@ -53,7 +53,7 @@ function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
 }
 
 describe("Office controlled-mutation runtime status panel placement", () => {
-  it("keeps gate-open, runtime preview, runtime inclusion, and runtime execution status panels live-visible outside legacy diagnostic lanes", () => {
+  it("keeps gate-open, runtime preview, runtime inclusion, runtime execution, and target-readiness status panels live-visible outside legacy diagnostic lanes", () => {
     const source = officePageSource;
     const legacyIndex = source.indexOf("{SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES ?");
     expect(legacyIndex).toBeGreaterThan(0);
@@ -63,6 +63,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
       "<ManualRuntimeCommandPreviewRecordStatusPanel",
       "<ManualRuntimeCommandInclusionRecordStatusPanel",
       "<ManualRuntimeCommandExecutionRecordStatusPanel",
+      "<ManualTargetMutationReadinessRecordStatusPanel",
     ]) {
       const panelIndex = source.indexOf(panel);
       expect(panelIndex).toBeGreaterThan(0);
