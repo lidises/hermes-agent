@@ -1,14 +1,14 @@
 ## Next safest lane
-- Completed lane: operator review checklist has been added on top of the NAS Keeper evidence consolidation surface and synced to the VPS dashboard worktrees at commit `8d3fe56e`. It classifies terminal evidence refs, open authorized items, manual-review items, unsafe skip counts, and the next boundary into read-only complete/blocked checks; deployed asset smoke confirmed the checklist marker and `/office` returned HTTP 200.
-- Previous consolidation remains valid: completed/failed/manual-review queue readbacks are aggregated without projecting raw markdown bodies. Previous queue cleanup remains valid: successful handoff `handoff_nas_keeper_real_execute_20260520142136` wrote `Hermes::nas-keeper-runtime-progress-marker-20260520142136.md` through the Mac relay root, and stale handoff `handoff_nas_keeper_runtime_20260520124446` is terminally recorded as `mac_relay_execution_failed`.
-- Boundary preserved: this slice is frontend/read-only checklisting. Direct VPS NAS write/authority, VPS NAS mount/credentials, watcher/cron/daemon activation, dashboard/gateway restart, public exposure, credential expansion, authority-adapter binding, generalized dispatcher execution, and raw markdown projection remain closed.
-- Next higher-risk candidate: if live queue checklist has no blockers, run a deliberate replace/rollback smoke on the successful safe note; otherwise first close/open-review any authorized/manual-review/unsafe-skip queue hygiene item. Keep direct VPS NAS mount/credentials, watcher/cron, gateway restart, public exposure, credential authority, and generalized dispatcher/daemon disabled.
+- Completed lane: deliberate replace/restore smoke has now been run on the previously successful NAS Keeper real Mac relay note `Hermes::nas-keeper-runtime-progress-marker-20260520142136.md`. Replace readback SHA-256 was `346a118745d69dd2c96381f971b2e93c73a2c87340ae00b1da993f0b8e9e4a0f`; restore readback SHA-256 returned to the original `faf8c497a4f22f1d166f24ca6bf555193b46d61de6f999a2edc4ab4d61a7a38a`; both temporary queue items ended `mac_relay_execution_succeeded` with audit/rollback refs, readback verification, no markdown projection, and raw-leak=false.
+- Previous completed lane remains valid: operator review checklist was added on top of the NAS Keeper evidence consolidation surface and synced to the VPS dashboard worktrees at commit `8d3fe56e`; follow-up docs are at `8d00a1a5`.
+- Boundary preserved: direct VPS NAS write/authority, VPS NAS mount/credentials, watcher/cron/daemon activation, dashboard/gateway restart, public exposure, credential expansion, authority-adapter binding, generalized dispatcher execution, and raw markdown projection remain closed.
+- Next higher-risk candidate: decide whether to create a new durable production queue item with explicit operator review, or stay in read-only/dashboard polish. Do not expand to watcher/cron/direct VPS NAS authority/generalized dispatcher without a separate concrete gate.
 
 
 
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-20 13:17 KST
+Last updated: 2026-05-20 14:41 KST
 
 ## Start here after `/new`
 

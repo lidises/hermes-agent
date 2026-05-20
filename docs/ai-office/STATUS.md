@@ -1,4 +1,11 @@
-Last updated: 2026-05-20 14:30 KST
+Last updated: 2026-05-20 14:41 KST
+
+## NAS Keeper replace/rollback smoke completed on successful real Mac relay note
+- Completed the next deliberate replace/restore smoke on the previously successful safe note `Hermes::nas-keeper-runtime-progress-marker-20260520142136.md` through the existing NAS Keeper -> Mac relay execution-from-preview path, using an isolated temporary handoff queue and the Mac-local relay root.
+- Replace execution evidence: handoff `handoff_runtime_marker_replace_20260520054052`; relay execution `relay_exec_runtime_marker_replace_20260520054052`; execution record `exec_record_runtime_marker_replace_20260520054052`; rollback ref `rollback_write_runtime_marker_replace_20260520054052`; readback SHA-256 `346a118745d69dd2c96381f971b2e93c73a2c87340ae00b1da993f0b8e9e4a0f`.
+- Restore execution evidence: handoff `handoff_runtime_marker_restore_20260520054052`; relay execution `relay_exec_runtime_marker_restore_20260520054052`; execution record `exec_record_runtime_marker_restore_20260520054052`; rollback ref `rollback_write_runtime_marker_restore_20260520054052`; restored/readback SHA-256 `faf8c497a4f22f1d166f24ca6bf555193b46d61de6f999a2edc4ab4d61a7a38a`, matching the original hash.
+- Queue evidence: both temporary queue items ended as `mac_relay_execution_succeeded`; `readback_verified=true`; `audit_written=true`; `markdown_body_included=false`; `skipped_count=0`; serialized safe evidence raw-leak probe returned false.
+- Safety posture: this intentionally used the Mac relay write path for one bounded replace/restore smoke only. Direct VPS NAS mount/credentials/write authority, watcher/cron/daemon activation, generalized dispatch, authority adapter binding, service restart, public exposure, and VPS file mutation remained closed.
 
 ## NAS Keeper operator review checklist added and VPS-synced
 - Added a read-only `/office` operator review checklist derived from the NAS Keeper queue evidence consolidation surface. It turns terminal evidence refs, open authorized items, manual-review items, unsafe skip counts, and the next boundary into explicit complete/blocked review checks.
