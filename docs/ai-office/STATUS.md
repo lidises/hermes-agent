@@ -1,4 +1,10 @@
-Last updated: 2026-05-20 10:04 KST
+Last updated: 2026-05-20 10:12 KST
+
+## NAS Keeper guarded browser operator UI hardening prepared (safe attrs, no page-load execution)
+- Raised the boundary from backend/CLI inline execute-and-record smoke toward the guarded browser/API operator path by adding explicit operator DOM contract attributes for inline-record default, approval default, and safe request field allowlist.
+- The browser operator remains write-capable only after explicit approval: `execution_from_preview_approved` defaults false, inline `record_execution_state_after_write` defaults true, request safe fields are limited to refs/booleans/timestamps (`handoff_ref`, `relay_execution_ref`, `nas_keeper_ref`, `relay_node_ref`, `relay_authorized_by`, `relay_authorized_at`, `record_execution_state_after_write`, `execution_record_ref`, `recorded_by`, `recorded_at`). No `markdown_body`, raw path, provider/log/credential/token field, watcher/cron/dispatch/authority-adapter, restart, or direct VPS NAS authority is added.
+- TDD evidence: RED SSR test failed for missing operator safe-field/default attrs; GREEN added only three safe data attributes on `NasKeeperExecutionOperatorActionPanel`.
+- Verification passed locally: focused operator test `4 passed`, Office frontend tests `289 passed`, backend protected route/API tests `19 passed`, `py_compile` passed, `npm run build` passed with existing large chunk warning, `git diff --check` and added-line secret/path scan passed.
 
 ## NAS Keeper real NAS inline execute-and-record smoke completed (temporary queue, terminal queue state recorded)
 - Raised the boundary from separate real NAS execution smoke to one-call inline execution-state recording after real Mac-local NAS write success. This used temporary isolated handoff queues only and still did not touch durable production queue, watcher/cron, dispatch daemon, authority-adapter binding, direct VPS NAS mount/credentials, public exposure, Kanban, service config, or gateway/dashboard restart.

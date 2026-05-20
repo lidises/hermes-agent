@@ -3782,6 +3782,9 @@ export function NasKeeperExecutionOperatorActionPanel({
       data-office-nas-keeper-execution-operator-markdown-body-projected={String(action.markdownBodyProjected)}
       data-office-nas-keeper-execution-operator-vps-nas-authority-enabled={String(action.vpsNasAuthorityEnabled)}
       data-office-nas-keeper-execution-operator-watcher-cron-daemon-enabled={String(action.watcherCronDaemonEnabled)}
+      data-office-nas-keeper-execution-operator-inline-record-default={String(recordStateAfterWrite)}
+      data-office-nas-keeper-execution-operator-approval-default={String(approved)}
+      data-office-nas-keeper-execution-operator-request-safe-fields="handoff_ref,relay_execution_ref,nas_keeper_ref,relay_node_ref,relay_authorized_by,relay_authorized_at,record_execution_state_after_write,execution_record_ref,recorded_by,recorded_at"
       data-office-nas-keeper-execution-operator-relay-dispatch-enabled={String(action.relayDispatchEnabled)}
       data-office-nas-keeper-execution-operator-authority-adapter-binding-enabled={String(action.authorityAdapterBindingEnabled)}
     >
