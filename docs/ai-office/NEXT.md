@@ -18,11 +18,11 @@ Verification so far:
 
 - RED placement test failed when gate-open/runtime-preview panels were only inside legacy diagnostics.
 - GREEN focused placement test passed after live-visible placement.
-- Full local verification and local API/browser smoke passed; commit/push and VPS dashboard-only sync/restart/live smoke pending.
+- Full local verification, commit/push, VPS dashboard-only sync/restart, API smoke, and browser smoke passed.
 
 Handoff: `docs/ai-office/plans/2026-05-20-dispatch-gate-runtime-preview-live-surface-handoff.md`.
 
-Last updated: 2026-05-20 21:36 KST
+Last updated: 2026-05-20 21:40 KST
 
 ## Current next — Approval-event envelope metadata write/readback in progress
 

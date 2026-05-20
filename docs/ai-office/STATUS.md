@@ -3,7 +3,7 @@
 
 ## 2026-05-20 — Dispatch gate + runtime preview live surface slice
 
-Status: in progress; focused GREEN achieved, full verification/deploy pending.
+Status: completed and deployed; local/VPS verification passed.
 
 What changed:
 
@@ -19,11 +19,11 @@ Verification so far:
 
 - RED placement test failed first on panels after `SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES`.
 - GREEN focused placement test passed.
-- Full local verification and local API/browser smoke passed; commit/push and VPS dashboard-only deploy/live smoke pending.
+- Full local verification, commit/push, VPS dashboard-only deploy, API smoke, and browser smoke passed.
 
 Handoff: `docs/ai-office/plans/2026-05-20-dispatch-gate-runtime-preview-live-surface-handoff.md`.
 
-Last updated: 2026-05-20 21:36 KST
+Last updated: 2026-05-20 21:40 KST
 
 ## 2026-05-20 — Approval-event envelope metadata write/readback slice
 

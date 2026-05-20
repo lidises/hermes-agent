@@ -110,5 +110,58 @@ Local browser smoke:
   - unsafe raw command leak=false
   - console JS errors=0
 
-Deploy verification pending.
+Deploy verification:
 
+- Code/docs commit pushed:
+  - b8afe867 feat(office): surface dispatch gate preview status
+- VPS worktrees synced:
+  - `/home/hermes/.hermes/ai-office-dashboard` HEAD = b8afe86754f3ffc8d70dfb45c8c44a0bd219aa42
+  - `/home/hermes/.hermes/hermes-agent` HEAD = b8afe86754f3ffc8d70dfb45c8c44a0bd219aa42
+- `web_dist` rsynced to both worktrees.
+  - relative content hash: 96daa63e368ccf7d80bc33b4782be52e14ad6d0d4344210bd1c5a40416e7b21b
+  - file count: 22
+- Restarted:
+  - `hermes-agent-dashboard.service` only, via hermes user systemd.
+- Not restarted:
+  - `hermes-gateway.service`.
+- Final services:
+  - dashboard active
+  - gateway active
+
+VPS API smoke:
+
+- URL base: `http://100.122.57.85:8765`
+- Protected API chain stored:
+  - manual approval draft = true
+  - manual approval record = true
+  - manual dispatch gate open = true
+  - manual runtime command preview = true
+- Readback:
+  - gate_count=1 for final unique filter
+  - preview_count=1 for final unique filter
+  - gate_open=true
+  - preview_created=true
+  - checksum length=64
+  - runtime_included=false
+  - runtime_executed=false
+  - real_dispatch=false
+  - target_mutation=false
+  - Kanban=false
+  - NAS=false
+  - unsafe raw command leak=false
+
+VPS browser smoke:
+
+- URL: `http://100.122.57.85:8765/office?gate-preview-vps=b8afe867`
+- DOM:
+  - dispatch-gate-open panel present=true
+  - runtime-preview panel present=true
+  - controls=0
+  - gateOpen=true
+  - previewCreated=true
+  - previewExecuted=false
+  - previewRealDispatch=false
+  - unsafe raw command leak=false
+  - console JS errors=0
+
+Final note: live panel counts can exceed the unique filtered API smoke counts because previous safe metadata-only smoke records remain in the VPS store.
