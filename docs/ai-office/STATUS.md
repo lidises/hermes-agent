@@ -1,4 +1,38 @@
 
+## 2026-05-20 — Desk RPG fan-out inspector detail slice
+
+Status: implemented, verified, committed, pushed, and deployed dashboard-only to VPS.
+
+What changed:
+
+- `/office` Desk RPG runtime fan-out drill-down now includes an aggregate inspector detail section.
+- `buildOfficeRpgRuntimeFanoutDrilldown` returns `inspectorDetails` for the five aggregate lanes.
+- The rendered map remains representative-avatar based; hidden fan-out remains aggregate/detail-only.
+
+Safety boundary:
+
+- Inspector controls: 0.
+- Inspector write: disabled.
+- Assignment/dispatch/backend write: disabled.
+- Kanban mutation, NAS write, watcher/cron activation, dispatcher/authority binding, target mutation, direct VPS NAS authority, public exposure change, and gateway restart: not part of this slice.
+
+Verification so far:
+
+- RED focused test failed on missing inspector detail contract before implementation.
+- Focused runtime fan-out tests: 2 passed.
+- Combined Office frontend tests: 254 passed.
+- ESLint: 0 errors, existing Fast Refresh warnings only.
+- Build: passed, existing Vite large chunk warning only.
+- `git diff --check`: passed.
+- Safety scan: no production `fetch`, storage, beacon, `<form>`, or private path/provider/token-like additions.
+- Local browser DOM smoke: panel=true, lanes=5, inspector=true, details=5, hidden suppressed count=47, enabledControls=0, inspectorControls=0, writeEnabled=false, scopedControls=0, visualMap=1, mapSvg=1, sprites=8, fallbackRows=8, rawLeak=false, console JS errors=0.
+- Deployment: code commit `bb1bb84c` pushed and synced to both private VPS worktrees. `web_dist` relative hash matched local and both VPS copies: `93813e211efd3d5a06ce9dc0c3f4db8853e378424c5609366ef2221c790153cd` (22 files). Only `hermes-agent-dashboard.service` restarted; gateway stayed active and was not restarted.
+- VPS live smoke: private `/office?fanout-inspector=bb1bb84c` HTTP 200; dashboard/gateway active; DOM panel=true, lanes=5, inspector=true, details=5, hidden suppressed count=47, enabledControls=0, inspectorControls=0, writeEnabled=false, scopedControls=0, visualMap=1, mapSvg=1, sprites=8, fallbackRows=8, rawLeak=false; console JS errors 0. Vision smoke confirmed read-only aggregate/inspector posture.
+- Handoff: `docs/ai-office/plans/2026-05-20-desk-rpg-fanout-inspector-handoff.md`.
+
+Last updated: 2026-05-20 20:03 KST
+
+
 ## 2026-05-20 — Desk RPG runtime fan-out drill-down slice
 
 Status: implemented, verified, committed, pushed, and deployed dashboard-only to VPS.

@@ -1,4 +1,26 @@
 
+## Current next — Desk RPG fan-out inspector detail deployed
+
+Completed slice:
+
+- Added read-only aggregate inspector details under the Desk RPG runtime fan-out drill-down.
+- The rendered map remains bounded to representative actors only: User/Boss, Orchestrator, Search Worker capped at 3, Reviewer, Wiki Writer, and NAS Keeper.
+- The fan-out panel now exposes lane-level inspector detail hooks for representative actors, hidden workers, board rows, automation rows, and source rows without raw rows or mutation controls.
+- Safety posture remains display-only: `enabledControls=0`, inspector write=false, assignment/dispatch/backend-write false, no forms/buttons/inputs inside the scoped fan-out panel, no backend/API/storage/Kanban/NAS/cron/gateway expansion.
+- Code/deploy commit `bb1bb84c` was pushed to `origin/main`, synced to both private VPS worktrees, and dashboard-only restarted. `web_dist` relative hash matched local and both VPS copies: `93813e211efd3d5a06ce9dc0c3f4db8853e378424c5609366ef2221c790153cd` (22 files).
+- Local verification passed: focused runtime fan-out tests 2 passed, combined Office tests 254 passed, ESLint 0 errors with existing Fast Refresh warnings, build passed with existing Vite large chunk warning, diff-check passed, browser DOM smoke panel=1/lanes=5/inspector=1/details=5/scoped controls=0/rawLeak=false/console JS errors=0.
+- VPS live smoke at `/office?fanout-inspector=bb1bb84c` showed panel=true, lanes=5, inspector=true, details=5, hidden suppressed count=47, enabledControls=0, inspectorControls=0, writeEnabled=false, scopedControls=0, sprites=8, fallbackRows=8, rawLeak=false, console JS errors=0.
+- Handoff: `docs/ai-office/plans/2026-05-20-desk-rpg-fanout-inspector-handoff.md`.
+
+Recommended next safe lane:
+
+1. Move from aggregate visualization toward the controlled-mutation request/approval event path, not direct worker/facility buttons.
+2. Next frontend-safe slice: a read-only request/approval event posture or approval-envelope detail that names the future write gate while keeping actual writes disabled.
+3. Do not add Kanban transitions, NAS writes, watcher/cron activation, dispatcher/authority binding, direct VPS NAS authority, public exposure, or gateway restart as part of the next slice unless separately approved.
+
+Last updated: 2026-05-20 20:03 KST
+
+
 ## Current next — Desk RPG runtime fan-out drill-down deployed
 
 Completed slice:
