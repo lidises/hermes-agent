@@ -1,7 +1,7 @@
 ## Next safest lane
-- Completed lane: local-profile controlled-mutation metadata now contains a checksum-only runtime-command preview record backed by the open dispatch gate. Preview ref `cmdpreview-nas-keeper-runtime-20260520122800` has checksum `1471afa1a2ad7aceb238c251feb033e28155b1ec86c934bc200ae69233530527`.
-- Boundary preserved: raw command body inclusion, runtime command execution, adapter binding/dispatch, target mutation, real Kanban mutation, watcher/cron/daemon activation, VPS direct NAS authority, dashboard/gateway restart, public exposure, VPS runtime file mutation, and credential expansion remain closed.
-- Next higher-risk candidate: bounded runtime-command inclusion record backed by the preview record, storing only safe command refs/body refs plus SHA-256. Keep actual execution, adapter dispatch, target/Kanban/NAS mutation, watcher/cron, service restart, and public/credential authority disabled.
+- Completed lane: local-profile controlled-mutation metadata now contains a bounded runtime-command inclusion record backed by the checksum-only preview record. Command ref `cmd-nas-keeper-runtime-inclusion-20260520122846` has command-body checksum `b054668025bfc495c1453854580d47326cd66a4973028c7cffcca69b4b846f9a`.
+- Boundary preserved: runtime command execution, replay-store write, adapter binding/dispatch, rollback execution, target mutation, real Kanban mutation, NAS save marker, watcher/cron/daemon activation, VPS direct NAS authority, dashboard/gateway restart, public exposure, VPS runtime file mutation, and credential expansion remain closed.
+- Next higher-risk candidate: inclusion-backed noop runtime-command execution/replay record. Keep adapter dispatch, rollback, target/Kanban/NAS/VPS mutation, watcher/cron, service restart, and public/credential authority disabled.
 
 
 # Hermes AI Office — NEXT

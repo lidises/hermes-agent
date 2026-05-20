@@ -1,4 +1,12 @@
-Last updated: 2026-05-20 12:20 KST
+Last updated: 2026-05-20 12:31 KST
+
+## NAS Keeper runtime-command inclusion metadata recorded
+- Raised the boundary from checksum-only runtime-command preview metadata to a bounded runtime-command inclusion record backed by `cmdpreview-nas-keeper-runtime-20260520122800`.
+- Safe command ref: `cmd-nas-keeper-runtime-inclusion-20260520122846`; command-body checksum: `b054668025bfc495c1453854580d47326cd66a4973028c7cffcca69b4b846f9a`.
+- Result evidence: runtime-command inclusion count 1; checksum length 64; `runtime_command_included=true`; `runtime_command_executed=false`; `idempotency_replay_store_written=false`; `adapter_dispatch_created=false`; `target_mutation_created=false`; `kanban_mutation_created=false`; `nas_save_created=false`; `real_dispatch_execution_enabled=false`.
+- Readback retained only the safe command-body refs (`target-*`, `dryrun-*`, `rollback-*`) plus checksums/booleans; raw value probe over path/token/command/provider sentinels returned no hits.
+- Verification: `py_compile` passed for `office_controlled_mutation.py` and `web_server.py`; focused approval/dispatch tests passed (`31 passed`); `git diff --check` passed.
+- Still not performed: runtime command execution, replay write, adapter binding/dispatch, rollback execution, target mutation, Kanban mutation, NAS save marker, watcher/cron/daemon activation, service restart, VPS runtime mutation, credential/public authority expansion.
 
 ## NAS Keeper runtime-command preview metadata recorded
 - Raised the boundary from dispatch-gate-open metadata to a checksum-only runtime-command preview record backed by `gate-nas-keeper-runtime-dispatch-20260520121600`.
