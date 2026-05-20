@@ -3658,6 +3658,67 @@ export type OfficeControlledMutationSafeContinuationCompletionReview = {
   explicitApprovalBoundaries: OfficeControlledMutationSafeContinuationApprovalBoundary[];
 };
 
+export type OfficeControlledMutationApprovalBoundarySummaryItem = {
+  id:
+    | "docs_boundary_record"
+    | "readonly_office_summary"
+    | "local_verification"
+    | "dashboard_only_followthrough";
+  label: string;
+  status: "approved_in_current_scope";
+  detail: string;
+  rawExcluded: true;
+};
+
+export type OfficeControlledMutationApprovalBoundaryBlockedCapability = {
+  id:
+    | "kanban_mutation"
+    | "nas_write"
+    | "watcher_cron_activation"
+    | "dispatcher_authority_binding"
+    | "target_mutation"
+    | "direct_vps_nas_authority"
+    | "public_exposure_change"
+    | "gateway_restart";
+  label: string;
+  status: "blocked_requires_separate_approval";
+  detail: string;
+  rawExcluded: true;
+};
+
+export type OfficeControlledMutationApprovalBoundarySummary = {
+  stageLabel: "Controlled Mutation Approval Boundary 1";
+  sourceStageLabel: OfficeControlledMutationSafeContinuationCompletionReview["stageLabel"];
+  detailKind: "controlled_mutation_approval_boundary_summary";
+  title: string;
+  safeBoundary: string;
+  enabledControls: 0;
+  formControlEnabled: false;
+  browserExecutableControlsEnabled: false;
+  localDocumentationWriteApproved: true;
+  frontendReadOnlySummaryApproved: true;
+  commitPushApproved: true;
+  vpsDashboardSyncApproved: true;
+  dashboardRestartApproved: true;
+  gatewayRestartApproved: false;
+  kanbanMutationEnabled: false;
+  nasWriteEnabled: false;
+  watcherCronEnabled: false;
+  dispatcherAuthorityAdapterBindingEnabled: false;
+  targetMutationEnabled: false;
+  directVpsNasAuthorityEnabled: false;
+  publicExposureChangeEnabled: false;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+  disabledSurfaceSummary: {
+    approvedScopeItems: number;
+    blockedCapabilityItems: number;
+    enabledControls: 0;
+  };
+  approvedScopeItems: OfficeControlledMutationApprovalBoundarySummaryItem[];
+  blockedCapabilityItems: OfficeControlledMutationApprovalBoundaryBlockedCapability[];
+};
+
 export type OfficeControlledMutationPostRegistryApprovalBoundary = {
   stageLabel: "Controlled Mutation Post Registry Approval Boundary 1";
   sourceStageLabel: OfficeControlledMutationPostDecisionApprovalBoundary["stageLabel"];
@@ -8459,6 +8520,56 @@ export function buildOfficeControlledMutationSafeContinuationCompletionReview(
     },
     completedSlices,
     explicitApprovalBoundaries,
+  };
+}
+
+
+export function buildOfficeControlledMutationApprovalBoundarySummary(
+  review: OfficeControlledMutationSafeContinuationCompletionReview,
+): OfficeControlledMutationApprovalBoundarySummary {
+  const approvedScopeItems: OfficeControlledMutationApprovalBoundarySummaryItem[] = [
+    { id: "docs_boundary_record", label: "Boundary documentation", status: "approved_in_current_scope", detail: "Record the current approval boundary in repo documentation and handoff only", rawExcluded: true },
+    { id: "readonly_office_summary", label: "Read-only /office summary", status: "approved_in_current_scope", detail: "Render a browser summary of approved follow-through and blocked mutation classes without form controls or executable browser actions", rawExcluded: true },
+    { id: "local_verification", label: "Local verification", status: "approved_in_current_scope", detail: "Run focused tests, lint, build, diff checks, and browser smoke for the read-only dashboard surface", rawExcluded: true },
+    { id: "dashboard_only_followthrough", label: "Dashboard-only follow-through", status: "approved_in_current_scope", detail: "Commit, push, sync dashboard assets, and restart only the dashboard service when verification passes", rawExcluded: true },
+  ];
+  const blockedCapabilityItems: OfficeControlledMutationApprovalBoundaryBlockedCapability[] = [
+    { id: "kanban_mutation", label: "Kanban mutation", status: "blocked_requires_separate_approval", detail: "No Kanban state mutation, transition, assignment, or queue write is granted by this boundary", rawExcluded: true },
+    { id: "nas_write", label: "NAS write", status: "blocked_requires_separate_approval", detail: "No NAS save, NAS raw read, NAS credential access, or NAS mutation is granted by this boundary", rawExcluded: true },
+    { id: "watcher_cron_activation", label: "Watcher/cron activation", status: "blocked_requires_separate_approval", detail: "No watcher, cron, daemon, or subscription activation is granted by this boundary", rawExcluded: true },
+    { id: "dispatcher_authority_binding", label: "Dispatcher/authority adapter binding", status: "blocked_requires_separate_approval", detail: "No real dispatcher, authority adapter, or executable target binding is granted by this boundary", rawExcluded: true },
+    { id: "target_mutation", label: "Target mutation", status: "blocked_requires_separate_approval", detail: "No target runtime, service target, or external system mutation is granted by this boundary", rawExcluded: true },
+    { id: "direct_vps_nas_authority", label: "Direct VPS NAS authority", status: "blocked_requires_separate_approval", detail: "No direct VPS NAS authority or NAS credential path is introduced by this boundary", rawExcluded: true },
+    { id: "public_exposure_change", label: "Public exposure change", status: "blocked_requires_separate_approval", detail: "No public routing, firewall, gateway, domain, or exposure change is granted by this boundary", rawExcluded: true },
+    { id: "gateway_restart", label: "Gateway restart", status: "blocked_requires_separate_approval", detail: "Gateway service restart remains outside the approved dashboard-only follow-through", rawExcluded: true },
+  ];
+  return {
+    stageLabel: "Controlled Mutation Approval Boundary 1",
+    sourceStageLabel: review.stageLabel,
+    detailKind: "controlled_mutation_approval_boundary_summary",
+    title: "승인된 범위: 문서·read-only /office 요약·dashboard-only follow-through",
+    safeBoundary: "approval boundary summary only · user-approved writes are limited to repo docs/frontend read-only summary, verification, commit/push, VPS dashboard sync, and dashboard restart; mutation-capability classes remain disabled",
+    enabledControls: 0,
+    formControlEnabled: false,
+    browserExecutableControlsEnabled: false,
+    localDocumentationWriteApproved: true,
+    frontendReadOnlySummaryApproved: true,
+    commitPushApproved: true,
+    vpsDashboardSyncApproved: true,
+    dashboardRestartApproved: true,
+    gatewayRestartApproved: false,
+    kanbanMutationEnabled: false,
+    nasWriteEnabled: false,
+    watcherCronEnabled: false,
+    dispatcherAuthorityAdapterBindingEnabled: false,
+    targetMutationEnabled: false,
+    directVpsNasAuthorityEnabled: false,
+    publicExposureChangeEnabled: false,
+    safeProjectionOnly: review.safeProjectionOnly,
+    rawExcluded: true,
+    disabledSurfaceSummary: { approvedScopeItems: approvedScopeItems.length, blockedCapabilityItems: blockedCapabilityItems.length, enabledControls: 0 },
+    approvedScopeItems,
+    blockedCapabilityItems,
   };
 }
 

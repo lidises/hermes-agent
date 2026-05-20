@@ -107,6 +107,7 @@ import {
   buildOfficeControlledMutationPostRegistryApprovalBoundary,
   buildOfficeControlledMutationTargetDispatchForbiddenBoundary,
   buildOfficeControlledMutationSafeContinuationCompletionReview,
+  buildOfficeControlledMutationApprovalBoundarySummary,
   buildOfficeRpgScene,
   buildOfficeDeskRpgProjectionModel,
   buildOfficeDeskRpgWorkerRoleVisibility,
@@ -3538,6 +3539,53 @@ describe("Desk RPG Projection ViewModel Helper 1", () => {
     ]);
     expect(review.disabledSurfaceSummary).toEqual({ completedSlices: 7, explicitApprovalBoundaries: 4, enabledControls: 0 });
     expect(JSON.stringify(review)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw safe continuation|private-safe-continuation-provider|token-shaped-value/i);
+  });
+
+  it("builds Controlled Mutation Approval Boundary 1 as the approved read-only summary gate", () => {
+    const executionReadiness = buildOfficeControlledMutationExecutionReadinessSummary(buildOfficeControlledMutationAuthoritySummary(buildOfficeControlledMutationHumanApprovalPlan(buildOfficeControlledMutationRollbackVerificationPlan(buildOfficeControlledMutationAuditSinkPlan(buildOfficeControlledMutationDryRunPlan(buildOfficeControlledMutationProposalContract(buildOfficeWorkerFinalGateChecklist(buildOfficeWorkerRollbackPreviewEnvelope(buildOfficeWorkerAuditPreviewEnvelope(buildOfficeWorkerDispatchDryRunEnvelope(buildOfficeWorkerAuthorityHandoffEnvelope(buildOfficeWorkerHumanConfirmationEnvelope(buildOfficeWorkerRequestDraftPreview(buildOfficeWorkerAssignmentCandidateGate(buildOfficeWorkerFacilityReadiness(buildOfficeWorkerIntentRouting(buildOfficeOrchestratorMediationQueue(buildOfficeAuthorityAdapterContract(buildOfficeApprovalExecutionGate(buildOfficeApprovalAuditTimeline(buildOfficeApprovalRequestView(officeFixture({
+      generated_at: "2026-05-20T08:40:00Z",
+      data_sources: [{ id: "paperclip:/Users/lidises/approval-boundary", status: "partial", checked_at: "2026-05-20T08:40:00Z", item_count: 1, warning_count: 1, error_summary: "raw approval boundary token" } as unknown as OfficeState["data_sources"][number]],
+      agents: [{ id: "agent-approval-boundary", status: "active", prompt: "raw approval boundary prompt token-shaped-value", provider: "private-approval-boundary-provider" }],
+      work_items: [{ id: "w-approval-boundary", status: "blocked", title: "raw approval boundary task", body: "/Users/lidises/private/approval-boundary.md" } as unknown as OfficeState["work_items"][number]],
+    })))))))))))))))))))))));
+    const projection = buildOfficeControlledMutationContractPostureProjection(executionReadiness);
+    const polish = buildOfficeControlledMutationContractPosturePolish(projection);
+    const ribbon = buildOfficeControlledMutationReadinessHandoffRibbon(polish);
+    const summary = buildOfficeControlledMutationReadinessSummaryPolish(ribbon);
+    const posture = buildOfficeControlledMutationRequestStorePosture(summary);
+    const hardening = buildOfficeControlledMutationRequestStoreHardeningPlan(posture);
+    const nextBoundary = buildOfficeControlledMutationNextApprovalBoundary(hardening);
+    const postDecisionBoundary = buildOfficeControlledMutationPostDecisionApprovalBoundary(nextBoundary);
+    const postRegistryBoundary = buildOfficeControlledMutationPostRegistryApprovalBoundary(postDecisionBoundary);
+    const targetForbiddenBoundary = buildOfficeControlledMutationTargetDispatchForbiddenBoundary(postRegistryBoundary);
+    const review = buildOfficeControlledMutationSafeContinuationCompletionReview(targetForbiddenBoundary);
+    const boundary = buildOfficeControlledMutationApprovalBoundarySummary(review);
+
+    expect(boundary.stageLabel).toBe("Controlled Mutation Approval Boundary 1");
+    expect(boundary.sourceStageLabel).toBe("Controlled Mutation Safe Continuation Completion Review 1");
+    expect(boundary.detailKind).toBe("controlled_mutation_approval_boundary_summary");
+    expect(boundary.enabledControls).toBe(0);
+    expect(boundary.formControlEnabled).toBe(false);
+    expect(boundary.browserExecutableControlsEnabled).toBe(false);
+    expect(boundary.localDocumentationWriteApproved).toBe(true);
+    expect(boundary.frontendReadOnlySummaryApproved).toBe(true);
+    expect(boundary.commitPushApproved).toBe(true);
+    expect(boundary.vpsDashboardSyncApproved).toBe(true);
+    expect(boundary.dashboardRestartApproved).toBe(true);
+    expect(boundary.gatewayRestartApproved).toBe(false);
+    expect(boundary.kanbanMutationEnabled).toBe(false);
+    expect(boundary.nasWriteEnabled).toBe(false);
+    expect(boundary.watcherCronEnabled).toBe(false);
+    expect(boundary.dispatcherAuthorityAdapterBindingEnabled).toBe(false);
+    expect(boundary.targetMutationEnabled).toBe(false);
+    expect(boundary.directVpsNasAuthorityEnabled).toBe(false);
+    expect(boundary.publicExposureChangeEnabled).toBe(false);
+    expect(boundary.safeProjectionOnly).toBe(true);
+    expect(boundary.rawExcluded).toBe(true);
+    expect(boundary.approvedScopeItems.map((item) => item.id)).toEqual(["docs_boundary_record", "readonly_office_summary", "local_verification", "dashboard_only_followthrough"]);
+    expect(boundary.blockedCapabilityItems.map((item) => item.id)).toEqual(["kanban_mutation", "nas_write", "watcher_cron_activation", "dispatcher_authority_binding", "target_mutation", "direct_vps_nas_authority", "public_exposure_change", "gateway_restart"]);
+    expect(boundary.disabledSurfaceSummary).toEqual({ approvedScopeItems: 4, blockedCapabilityItems: 8, enabledControls: 0 });
+    expect(JSON.stringify(boundary)).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw approval boundary|private-approval-boundary-provider|token-shaped-value/i);
   });
 
 

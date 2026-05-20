@@ -1,4 +1,9 @@
-Last updated: 2026-05-20 16:43 KST
+Last updated: 2026-05-20 17:18 KST
+
+## Controlled Mutation Approval Boundary 1 in progress
+- Current slice: implementing the user-approved bounded follow-through after `Controlled Mutation Safe Continuation Completion Review 1`. Scope is repo docs + read-only `/office` approval-boundary summary + local verification + commit/push + private VPS dashboard-only sync/restart/smoke.
+- Safety boundary: the new surface is display-only with stable `data-office-controlled-mutation-approval-boundary-*` hooks and `enabledControls=0`; no forms/buttons/inputs/selects/textareas, no Kanban mutation, no NAS write, no watcher/cron/daemon activation, no dispatcher/authority-adapter binding, no target mutation, no direct VPS NAS authority, no public exposure change, and no gateway restart.
+- Implementation status: helper and SSR RED tests were added first; focused approval-boundary tests now pass (`2 passed`, remaining Office tests skipped by `-t`). Full Office tests, lint, build, local browser/vision smoke, commit/push, VPS sync/restart/smoke are being tracked in `docs/ai-office/plans/2026-05-20-controlled-mutation-approval-boundary-handoff.md`.
 
 ## Desk RPG dense label/fallback demotion slice completed and VPS-synced
 - Completed and deployed the recommended frontend-only/read-only continuation after the primary-map density polish: crowded-room compact label layout now covers BRD/CRON/SRC-capable rooms through `data-office-rpg-character-density-room` and a 10-slot compact spread, and the nav `#office-rpg-map` target now lands on the primary rendered SVG map instead of the old CSS grid.

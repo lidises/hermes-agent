@@ -1,6 +1,6 @@
 # AI Office Approval Model Contract 1
 
-Last updated: 2026-05-14 12:12 KST
+Last updated: 2026-05-20 17:18 KST
 Status: architecture contract, documentation-only. This document does not approve implementation of mutation endpoints, browser execution controls, Kanban writes, projection promote/transfer, watcher/cron enablement, service restart, public exposure, NAS mount, direct credentials, or raw-source reads.
 
 ## Purpose
@@ -258,6 +258,30 @@ Required gates:
 - rollback ref exists;
 - no shell command shown in browser DTO;
 - gateway/core restart remains separately approval-gated.
+
+
+## Controlled Mutation Approval Boundary 1 — current approved follow-through
+
+As of 2026-05-20 17:18 KST, the user approved a bounded write/follow-through scope after the frontend-only controlled-mutation completion review. This approval is intentionally narrower than general mutation authority.
+
+Approved in this boundary:
+
+- repo documentation update for the boundary and handoff;
+- read-only `/office` summary rendering for the approved scope and blocked capability classes;
+- local verification: focused Office tests, lint, build, diff/safety checks, and browser smoke;
+- commit/push and private VPS dashboard-only sync;
+- restart of `hermes-agent-dashboard.service` only after verification.
+
+Still explicitly not approved by this boundary:
+
+- Kanban state mutation, assignment, transition, or queue write;
+- NAS write, direct NAS raw read, NAS credential access, or direct VPS NAS authority;
+- watcher, cron, daemon, or subscription activation;
+- dispatcher or authority-adapter binding to real targets;
+- target runtime mutation or generalized execution;
+- public exposure, firewall/domain/routing change, or gateway restart.
+
+The matching `/office` surface must remain A0/display-only: no forms, no buttons, no browser-executable controls, no storage/network side effects beyond normal dashboard read traffic, and no raw task/provider/path/source projection. Stable DOM hooks use the `data-office-controlled-mutation-approval-boundary-*` prefix so browser smoke can assert the approved and blocked classes without inspecting raw records.
 
 ## UI requirements before enabling any control
 

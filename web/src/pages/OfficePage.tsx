@@ -120,6 +120,7 @@ import {
   buildOfficeControlledMutationPostRegistryApprovalBoundary,
   buildOfficeControlledMutationTargetDispatchForbiddenBoundary,
   buildOfficeControlledMutationSafeContinuationCompletionReview,
+  buildOfficeControlledMutationApprovalBoundarySummary,
   buildOfficeDeskRpgWorkerRoleVisibility,
   buildOfficeDisabledApprovalDialoguePosture,
   buildOfficeReviewerWikiHandoffPosture,
@@ -217,6 +218,7 @@ import {
   type OfficeControlledMutationPostRegistryApprovalBoundary,
   type OfficeControlledMutationTargetDispatchForbiddenBoundary,
   type OfficeControlledMutationSafeContinuationCompletionReview,
+  type OfficeControlledMutationApprovalBoundarySummary,
   type OfficeEventDrivenCharacterStateProjection,
   type OfficeCharacterStateRoomOverlay,
   type OfficeCharacterRoomInteractionPosture,
@@ -1172,6 +1174,62 @@ export function ControlledMutationSafeContinuationCompletionReviewPanel({ review
       <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-controlled-mutation-safe-continuation-completion-review-explicit-approval-boundaries="true">
         {review.explicitApprovalBoundaries.map((item) => (
           <div key={item.id} className="border border-amber-300/20 bg-amber-950/10 p-3" data-office-controlled-mutation-safe-continuation-completion-review-explicit-approval-boundary={item.id} data-office-controlled-mutation-safe-continuation-completion-review-explicit-approval-boundary-status={item.status}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-200/70">{item.status}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+            <div className="mt-2 text-xs leading-5 text-midground/70">{item.detail}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function ControlledMutationApprovalBoundarySummaryPanel({ boundary }: { boundary: OfficeControlledMutationApprovalBoundarySummary }) {
+  return (
+    <section
+      className="border border-sky-300/20 bg-sky-950/10 p-4"
+      data-office-controlled-mutation-approval-boundary="true"
+      data-office-controlled-mutation-approval-boundary-enabled-controls={boundary.enabledControls}
+      data-office-controlled-mutation-approval-boundary-form-control-enabled={String(boundary.formControlEnabled)}
+      data-office-controlled-mutation-approval-boundary-browser-executable-controls-enabled={String(boundary.browserExecutableControlsEnabled)}
+      data-office-controlled-mutation-approval-boundary-local-documentation-write-approved={String(boundary.localDocumentationWriteApproved)}
+      data-office-controlled-mutation-approval-boundary-frontend-readonly-summary-approved={String(boundary.frontendReadOnlySummaryApproved)}
+      data-office-controlled-mutation-approval-boundary-commit-push-approved={String(boundary.commitPushApproved)}
+      data-office-controlled-mutation-approval-boundary-vps-dashboard-sync-approved={String(boundary.vpsDashboardSyncApproved)}
+      data-office-controlled-mutation-approval-boundary-dashboard-restart-approved={String(boundary.dashboardRestartApproved)}
+      data-office-controlled-mutation-approval-boundary-gateway-restart-approved={String(boundary.gatewayRestartApproved)}
+      data-office-controlled-mutation-approval-boundary-kanban-mutation-enabled={String(boundary.kanbanMutationEnabled)}
+      data-office-controlled-mutation-approval-boundary-nas-write-enabled={String(boundary.nasWriteEnabled)}
+      data-office-controlled-mutation-approval-boundary-watcher-cron-enabled={String(boundary.watcherCronEnabled)}
+      data-office-controlled-mutation-approval-boundary-dispatcher-authority-adapter-binding-enabled={String(boundary.dispatcherAuthorityAdapterBindingEnabled)}
+      data-office-controlled-mutation-approval-boundary-target-mutation-enabled={String(boundary.targetMutationEnabled)}
+      data-office-controlled-mutation-approval-boundary-direct-vps-nas-authority-enabled={String(boundary.directVpsNasAuthorityEnabled)}
+      data-office-controlled-mutation-approval-boundary-public-exposure-change-enabled={String(boundary.publicExposureChangeEnabled)}
+      data-office-controlled-mutation-approval-boundary-safe-projection-only={String(boundary.safeProjectionOnly)}
+      data-office-controlled-mutation-approval-boundary-raw-excluded={String(boundary.rawExcluded)}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-200/70">{boundary.stageLabel}</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">{boundary.title}</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">{boundary.safeBoundary}</p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          approved: {boundary.disabledSurfaceSummary.approvedScopeItems} · blocked: {boundary.disabledSurfaceSummary.blockedCapabilityItems} · controls: {boundary.disabledSurfaceSummary.enabledControls}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-controlled-mutation-approval-boundary-approved-scopes="true">
+        {boundary.approvedScopeItems.map((item) => (
+          <div key={item.id} className="border border-emerald-300/20 bg-emerald-950/10 p-3" data-office-controlled-mutation-approval-boundary-approved-scope={item.id} data-office-controlled-mutation-approval-boundary-approved-scope-status={item.status}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-200/65">{item.status}</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
+            <div className="mt-2 text-xs leading-5 text-midground/70">{item.detail}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-controlled-mutation-approval-boundary-blocked-capabilities="true">
+        {boundary.blockedCapabilityItems.map((item) => (
+          <div key={item.id} className="border border-amber-300/20 bg-amber-950/10 p-3" data-office-controlled-mutation-approval-boundary-blocked-capability={item.id} data-office-controlled-mutation-approval-boundary-blocked-capability-status={item.status}>
             <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-200/70">{item.status}</div>
             <div className="mt-1 text-sm font-semibold text-foreground">{item.label}</div>
             <div className="mt-2 text-xs leading-5 text-midground/70">{item.detail}</div>
@@ -8244,6 +8302,7 @@ export default function OfficePage() {
   const controlledMutationPostRegistryApprovalBoundary = useMemo(() => buildOfficeControlledMutationPostRegistryApprovalBoundary(controlledMutationPostDecisionApprovalBoundary), [controlledMutationPostDecisionApprovalBoundary]);
   const controlledMutationTargetDispatchForbiddenBoundary = useMemo(() => buildOfficeControlledMutationTargetDispatchForbiddenBoundary(controlledMutationPostRegistryApprovalBoundary), [controlledMutationPostRegistryApprovalBoundary]);
   const controlledMutationSafeContinuationCompletionReview = useMemo(() => buildOfficeControlledMutationSafeContinuationCompletionReview(controlledMutationTargetDispatchForbiddenBoundary), [controlledMutationTargetDispatchForbiddenBoundary]);
+  const controlledMutationApprovalBoundarySummary = useMemo(() => buildOfficeControlledMutationApprovalBoundarySummary(controlledMutationSafeContinuationCompletionReview), [controlledMutationSafeContinuationCompletionReview]);
   const deskRpgProjection = useMemo(() => buildOfficeDeskRpgProjectionModel(state ?? { ...EMPTY_OFFICE_STATE }), [state]);
   const deskRpgWorkerRoleVisibility = useMemo(() => buildOfficeDeskRpgWorkerRoleVisibility(deskRpgProjection), [deskRpgProjection]);
   const disabledApprovalDialoguePosture = useMemo(() => buildOfficeDisabledApprovalDialoguePosture(deskRpgProjection), [deskRpgProjection]);
@@ -8660,6 +8719,8 @@ export default function OfficePage() {
         onExecute={executeNasKeeperExecutionFromPreview}
         onRecordState={recordNasKeeperExecutionState}
       />
+
+      <ControlledMutationApprovalBoundarySummaryPanel boundary={controlledMutationApprovalBoundarySummary} />
 
       {SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES ? (
         <>
@@ -9555,6 +9616,7 @@ export default function OfficePage() {
       <ControlledMutationPostRegistryApprovalBoundaryPanel boundary={controlledMutationPostRegistryApprovalBoundary} />
       <ControlledMutationTargetDispatchForbiddenBoundaryPanel boundary={controlledMutationTargetDispatchForbiddenBoundary} />
       <ControlledMutationSafeContinuationCompletionReviewPanel review={controlledMutationSafeContinuationCompletionReview} />
+      <ControlledMutationApprovalBoundarySummaryPanel boundary={controlledMutationApprovalBoundarySummary} />
 
       {showOverview ? (
         <OfficeRpgMap
