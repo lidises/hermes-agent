@@ -1,5 +1,30 @@
 
 
+
+## 2026-05-20 — Dispatch gate + runtime preview live surface slice
+
+Status: in progress; focused GREEN achieved, full verification/deploy pending.
+
+What changed:
+
+- Added a placement regression test for live-visible gate-open/runtime-preview panels.
+- Moved `ManualDispatchGateOpenRecordStatusPanel` and `ManualRuntimeCommandPreviewRecordStatusPanel` outside the legacy diagnostic block so `/office` production browser smoke can see them.
+
+Safety boundary:
+
+- Metadata/readback only for dispatch-gate-open and checksum-only runtime preview.
+- Runtime command inclusion/execution, adapter dispatch, target mutation, Kanban mutation, NAS write/save, watcher/cron, credential access, public exposure, and gateway restart remain disabled.
+
+Verification so far:
+
+- RED placement test failed first on panels after `SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES`.
+- GREEN focused placement test passed.
+- Full local verification and local API/browser smoke passed; commit/push and VPS dashboard-only deploy/live smoke pending.
+
+Handoff: `docs/ai-office/plans/2026-05-20-dispatch-gate-runtime-preview-live-surface-handoff.md`.
+
+Last updated: 2026-05-20 21:36 KST
+
 ## 2026-05-20 — Approval-event envelope metadata write/readback slice
 
 Status: complete and deployed to VPS dashboard.

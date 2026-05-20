@@ -1,3 +1,4 @@
+import officePageSource from "./OfficePage.tsx?raw";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
@@ -50,6 +51,23 @@ function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
     ...overrides,
   };
 }
+
+describe("Office controlled-mutation runtime status panel placement", () => {
+  it("keeps gate-open and runtime preview status panels live-visible outside legacy diagnostic lanes", () => {
+    const source = officePageSource;
+    const legacyIndex = source.indexOf("{SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES ?");
+    expect(legacyIndex).toBeGreaterThan(0);
+
+    for (const panel of [
+      "<ManualDispatchGateOpenRecordStatusPanel",
+      "<ManualRuntimeCommandPreviewRecordStatusPanel",
+    ]) {
+      const panelIndex = source.indexOf(panel);
+      expect(panelIndex).toBeGreaterThan(0);
+      expect(panelIndex).toBeLessThan(legacyIndex);
+    }
+  });
+});
 
 describe("OfficeRpgMap", () => {
   it("renders the read-only RPG room map and mirrors every entity in a text fallback", () => {

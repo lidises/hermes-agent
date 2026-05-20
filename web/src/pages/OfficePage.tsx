@@ -8968,6 +8968,8 @@ export default function OfficePage() {
       <ControlledMutationApprovalBoundarySummaryPanel boundary={controlledMutationApprovalBoundarySummary} />
 
       <ApprovalEventEnvelopeStatusPanel status={approvalEventEnvelopeStatus} error={approvalEventEnvelopeStatusError} />
+      <ManualDispatchGateOpenRecordStatusPanel status={manualDispatchGateOpenRecordStatus} error={manualDispatchGateOpenRecordStatusError} />
+      <ManualRuntimeCommandPreviewRecordStatusPanel status={manualRuntimeCommandPreviewRecordStatus} error={manualRuntimeCommandPreviewRecordStatusError} />
 
       {SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES ? (
         <>

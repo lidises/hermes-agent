@@ -1,5 +1,29 @@
 
 
+
+## Current next — Dispatch gate + runtime preview live surface in progress
+
+Current slice:
+
+- User approved continuing the recommended path with bounded writes and slightly stronger authority.
+- Existing protected controlled-mutation rungs for dispatch-gate-open metadata and runtime-command preview checksum-only metadata are being surfaced in the live `/office` page.
+- Added a RED/GREEN regression test so these panels stay outside `SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES` and therefore appear in production/browser smoke.
+
+Safety boundary remains:
+
+- Dispatch-gate-open metadata and runtime-command preview checksum-only readback/status only.
+- Runtime command body inclusion, runtime command execution, adapter binding/dispatch, target mutation, Kanban mutation, NAS save/write/direct VPS NAS authority, watcher/cron activation, credential access, public exposure, and gateway restart remain blocked.
+
+Verification so far:
+
+- RED placement test failed when gate-open/runtime-preview panels were only inside legacy diagnostics.
+- GREEN focused placement test passed after live-visible placement.
+- Full local verification and local API/browser smoke passed; commit/push and VPS dashboard-only sync/restart/live smoke pending.
+
+Handoff: `docs/ai-office/plans/2026-05-20-dispatch-gate-runtime-preview-live-surface-handoff.md`.
+
+Last updated: 2026-05-20 21:36 KST
+
 ## Current next — Approval-event envelope metadata write/readback in progress
 
 Current slice:
