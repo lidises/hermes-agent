@@ -1,9 +1,10 @@
-Last updated: 2026-05-20 14:19 KST
+Last updated: 2026-05-20 14:30 KST
 
-## NAS Keeper operator review checklist added
+## NAS Keeper operator review checklist added and VPS-synced
 - Added a read-only `/office` operator review checklist derived from the NAS Keeper queue evidence consolidation surface. It turns terminal evidence refs, open authorized items, manual-review items, unsafe skip counts, and the next boundary into explicit complete/blocked review checks.
 - Safety posture: enabled controls remain 0; queue mutation, Mac relay execution, NAS write, watcher/cron, authority adapter binding, and markdown body projection remain disabled in this checklist.
-- Verification: RED focused helper test first failed with missing `buildOfficeNasKeeperQueueReviewChecklist`; GREEN focused helper and SSR tests passed; combined `npm run test -- OfficePage.test.ts OfficePage.rpg.test.tsx` passed (`248 passed`).
+- Verification: RED focused helper test first failed with missing `buildOfficeNasKeeperQueueReviewChecklist`; GREEN focused helper and SSR tests passed; combined `npm run test -- OfficePage.test.ts OfficePage.rpg.test.tsx` passed (`248 passed`); `npm run build && npm run lint` passed with pre-existing warnings only.
+- VPS sync: commit `8d3fe56e` was pushed to `origin/main`, both VPS worktrees were reset to `8d3fe56e`, Mac-built `hermes_cli/web_dist/` was rsynced into both VPS worktrees, dashboard/gateway services remained active, and Tailscale-only `/office` returned HTTP 200 with the checklist marker present in the deployed asset.
 
 ## Operator-visible NAS Keeper evidence consolidation added
 - Added a read-only `/office` queue evidence consolidation helper and panel section for completed/failed/manual-review NAS Keeper handoffs. It aggregates safe queue readback metadata into terminal/open/manual-review lanes and evidence-ref counts without projecting queued markdown bodies.
