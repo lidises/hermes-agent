@@ -1744,6 +1744,34 @@ code { font-size: 0.875rem; }
 .office-rpg-approval__control--warning { border-color: rgba(251, 191, 36, 0.38); }
 .office-rpg-approval__control--neutral { border-color: rgba(255,255,255,0.14); }
 
+.office-rpg-visual-map {
+  overflow: hidden;
+  border: 1px solid rgba(110, 231, 183, 0.2);
+  background: radial-gradient(circle at 18% 0%, rgba(16, 185, 129, 0.16), transparent 28%), rgba(2, 6, 23, 0.62);
+  padding: 0.75rem;
+}
+.office-rpg-visual-map__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+.office-rpg-visual-map__svg {
+  display: block;
+  width: 100%;
+  min-height: 20rem;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: #020617;
+}
+.office-rpg-character-sprite {
+  cursor: pointer;
+  outline: none;
+}
+.office-rpg-character-sprite:focus-visible path:first-of-type,
+.office-rpg-character-sprite:hover path:first-of-type {
+  stroke-width: 3;
+}
 .office-rpg-map__floor {
   position: relative;
   display: grid;

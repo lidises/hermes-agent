@@ -235,8 +235,10 @@ import {
   type OfficePaperclipWorkbenchSource,
   type OfficePageSectionPlan,
   type OfficeRecentChange,
+  type OfficeRpgRoomId,
   type OfficeRpgScene,
   type OfficeRpgSceneEntity,
+  type OfficeRpgSeverity,
   type OfficeSceneObject,
   type OfficeStateDelta,
 } from "./officeView";
@@ -1894,6 +1896,44 @@ const RPG_KIND_LABEL: Record<OfficeRpgSceneEntity["kind"], string> = {
   report: "보고",
 };
 
+const RPG_ROOM_LAYOUT: Record<OfficeRpgRoomId, { x: number; y: number; w: number; h: number; short: string }> = {
+  command: { x: 36, y: 28, w: 178, h: 118, short: "CMD" },
+  agent_desks: { x: 252, y: 28, w: 228, h: 118, short: "AGT" },
+  task_board: { x: 520, y: 28, w: 244, h: 118, short: "BRD" },
+  cron_room: { x: 36, y: 198, w: 196, h: 126, short: "CRON" },
+  source_archive: { x: 280, y: 198, w: 300, h: 126, short: "SRC" },
+  incident_corner: { x: 624, y: 198, w: 140, h: 126, short: "REV" },
+};
+
+const RPG_STATUS_FILL: Record<OfficeRpgSeverity, string> = {
+  normal: "#a7f3d0",
+  info: "#7dd3fc",
+  warning: "#fde68a",
+  danger: "#fecaca",
+};
+
+const RPG_STATUS_STROKE: Record<OfficeRpgSeverity, string> = {
+  normal: "#34d399",
+  info: "#38bdf8",
+  warning: "#f59e0b",
+  danger: "#ef4444",
+};
+
+function rpgVisualPosition(entity: OfficeRpgSceneEntity) {
+  const room = RPG_ROOM_LAYOUT[entity.room];
+  return {
+    x: room.x + (room.w * entity.positionHint.x) / 100,
+    y: room.y + (room.h * entity.positionHint.y) / 100,
+  };
+}
+
+function rpgCharacterPose(entity: OfficeRpgSceneEntity) {
+  if (entity.status === "blocked" || entity.severity === "danger") return "blocked";
+  if (entity.status === "working" || entity.status === "warning") return "active";
+  if (entity.status === "waiting") return "waiting";
+  return "idle";
+}
+
 export function OfficeRpgMap({
   scene,
   selectedEntityId,
@@ -1923,6 +1963,11 @@ export function OfficeRpgMap({
   const sourceArchiveFacility = buildOfficeRpgSourceArchiveFacility(scene);
   const reviewCornerFacility = buildOfficeRpgReviewCornerFacility(scene);
   const approvalConsoleFacility = buildOfficeRpgApprovalConsoleFacility(scene);
+  const visualEntities = visibleEntities.map((entity) => ({
+    entity,
+    position: rpgVisualPosition(entity),
+    pose: rpgCharacterPose(entity),
+  }));
 
   return (
     <Card className="overflow-hidden border-emerald-300/25 bg-black/25" data-office-rpg-map="true">
@@ -2083,6 +2128,100 @@ export function OfficeRpgMap({
               </div>
             ))}
           </div>
+        </section>
+        <section
+          className="office-rpg-visual-map"
+          data-office-rpg-visual-map="true"
+          aria-label="SVG 기반 AI Office RPG 지도와 캐릭터 스프라이트"
+        >
+          <div className="office-rpg-visual-map__header">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">Rendered RPG Map</div>
+              <h3 className="text-sm font-semibold text-foreground">실제 SVG 지도 · 방/가구/문/경로/캐릭터</h3>
+            </div>
+            <div className="text-xs text-midground/65">read-only sprites · inspector 연결 · 저장/배포/전환 없음</div>
+          </div>
+          <svg
+            className="office-rpg-visual-map__svg"
+            viewBox="0 0 800 360"
+            role="img"
+            aria-label="AI Office Desk RPG rendered floor map"
+            data-office-rpg-map-svg="true"
+          >
+            <defs>
+              <pattern id="office-rpg-tile-grid" width="18" height="18" patternUnits="userSpaceOnUse">
+                <path d="M 18 0 L 0 0 0 18" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+              </pattern>
+              <linearGradient id="office-rpg-room-fill" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0" stopColor="#052e2b" />
+                <stop offset="1" stopColor="#07111f" />
+              </linearGradient>
+              <filter id="office-rpg-soft-glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="2.2" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+            <rect x="0" y="0" width="800" height="360" rx="18" fill="#020617" />
+            <rect x="12" y="12" width="776" height="336" rx="14" fill="url(#office-rpg-tile-grid)" opacity="0.72" data-office-rpg-map-tile="floor" />
+            <path d="M214 88 H252 M480 88 H520 M392 146 V198 M232 260 H280 M580 260 H624" stroke="#34d399" strokeWidth="10" strokeLinecap="round" opacity="0.18" data-office-rpg-map-path="command-to-board" />
+            <path d="M214 88 H252 M480 88 H520 M580 260 H624" stroke="#a7f3d0" strokeWidth="2" strokeDasharray="7 7" opacity="0.7" data-office-rpg-map-path="worker-review-loop" />
+            {scene.rooms.map((room) => {
+              const layout = RPG_ROOM_LAYOUT[room.id];
+              return (
+                <g key={`visual-room-${room.id}`} data-office-rpg-map-room={room.id}>
+                  <rect x={layout.x} y={layout.y} width={layout.w} height={layout.h} rx="12" fill="url(#office-rpg-room-fill)" stroke={RPG_STATUS_STROKE[room.severity]} strokeWidth="2" opacity="0.94" />
+                  <rect x={layout.x + 8} y={layout.y + 8} width={layout.w - 16} height={layout.h - 16} rx="8" fill="url(#office-rpg-tile-grid)" opacity="0.42" data-office-rpg-map-tile={room.id} />
+                  <text x={layout.x + 14} y={layout.y + 24} fill="#d1fae5" fontSize="12" fontWeight="700" letterSpacing="1.5">{layout.short}</text>
+                  <text x={layout.x + 14} y={layout.y + 42} fill="rgba(209,250,229,0.72)" fontSize="10">{room.label}</text>
+                </g>
+              );
+            })}
+            <rect x="78" y="98" width="54" height="26" rx="6" fill="#0f766e" stroke="#5eead4" opacity="0.82" data-office-rpg-map-furniture="boss-desk" />
+            <rect x="326" y="70" width="82" height="28" rx="7" fill="#075985" stroke="#7dd3fc" opacity="0.78" data-office-rpg-map-furniture="orchestrator-desk" />
+            <rect x="594" y="58" width="118" height="46" rx="8" fill="#713f12" stroke="#fde68a" opacity="0.84" data-office-rpg-map-furniture="central-board" />
+            <rect x="354" y="228" width="154" height="54" rx="8" fill="#164e63" stroke="#67e8f9" opacity="0.76" data-office-rpg-map-furniture="source-shelves" />
+            <rect x="652" y="238" width="82" height="42" rx="8" fill="#7f1d1d" stroke="#fecaca" opacity="0.72" data-office-rpg-map-furniture="review-corner" />
+            <rect x="224" y="74" width="18" height="28" rx="3" fill="#fef3c7" opacity="0.82" data-office-rpg-map-door="command-agent_desks" />
+            <rect x="491" y="74" width="18" height="28" rx="3" fill="#fef3c7" opacity="0.82" data-office-rpg-map-door="agent_desks-task_board" />
+            <rect x="590" y="246" width="22" height="28" rx="3" fill="#fef3c7" opacity="0.82" data-office-rpg-map-door="source_archive-incident_corner" />
+            {visualEntities.map(({ entity, position, pose }) => {
+              const selected = selectedEntityId === entity.id;
+              const fill = RPG_STATUS_FILL[entity.severity];
+              const stroke = selected ? "#ffffff" : RPG_STATUS_STROKE[entity.severity];
+              return (
+                <g
+                  key={`visual-entity-${entity.id}`}
+                  className="office-rpg-character-sprite"
+                  transform={`translate(${position.x} ${position.y})`}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => onInspectEntity(entity)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") onInspectEntity(entity);
+                  }}
+                  data-office-rpg-character-sprite={entity.id}
+                  data-office-rpg-character-kind={entity.kind}
+                  data-office-rpg-character-pose={pose}
+                  data-office-rpg-character-selected={selected ? "true" : "false"}
+                  aria-label={`${RPG_KIND_LABEL[entity.kind]} ${entity.label} SVG sprite`}
+                >
+                  <ellipse cx="0" cy="18" rx="13" ry="4" fill="rgba(0,0,0,0.36)" />
+                  <path d={pose === "blocked" ? "M-9 3 L9 3 L7 17 L-7 17 Z" : "M-8 2 H8 L10 17 H-10 Z"} fill={fill} stroke={stroke} strokeWidth="2" filter="url(#office-rpg-soft-glow)" />
+                  <circle cx="0" cy="-7" r="9" fill={fill} stroke={stroke} strokeWidth="2" />
+                  <path d={pose === "active" ? "M-5 -8 H5 M-5 -3 H3" : pose === "waiting" ? "M-4 -6 H4 M-4 -2 H4" : "M-4 -5 H4"} stroke="#0f172a" strokeWidth="1.6" strokeLinecap="round" />
+                  <path d={pose === "active" ? "M-10 7 L-18 1 M10 7 L18 2" : "M-10 8 L-15 12 M10 8 L15 12"} stroke={stroke} strokeWidth="2" strokeLinecap="round" />
+                  <path d="M-5 17 L-8 26 M5 17 L8 26" stroke={stroke} strokeWidth="2" strokeLinecap="round" />
+                  <g transform="translate(12 -25)" data-office-rpg-character-bubble={entity.id}>
+                    <rect x="0" y="0" width="58" height="18" rx="7" fill="rgba(2,6,23,0.88)" stroke={stroke} strokeWidth="1" />
+                    <text x="7" y="12" fill="#ecfdf5" fontSize="9">{entity.status}</text>
+                  </g>
+                </g>
+              );
+            })}
+          </svg>
         </section>
         <div className="grid gap-2 text-xs md:grid-cols-4" data-office-rpg-filters="true">
           <label className="grid gap-1 text-midground/65">
@@ -8379,6 +8518,26 @@ export default function OfficePage() {
           ))}
         </div>
       </section>
+
+      {showOverview ? (
+        <OfficeRpgMap
+          scene={rpgScene}
+          selectedEntityId={selectedRpgEntityId}
+          onInspectEntity={(entity) => {
+            setSelectedRpgEntityId(entity.id);
+            inspectRecord("RPG 안전 엔티티", entity.label, [
+              ["종류", entity.kind],
+              ["안전 참조", entity.linkTarget.ref],
+              ["방", entity.room],
+              ["상태", entity.status],
+              ["심각도", entity.severity],
+              ["요약", entity.summary],
+              ["마지막 이벤트", fmt(entity.lastEventAt)],
+              ["출처 범주", entity.linkTarget.type],
+            ]);
+          }}
+        />
+      ) : null}
 
       <NasKeeperLiveOperatorLanePanel
         queueSurface={nasKeeperQueueManualEvidenceReviewSurface}

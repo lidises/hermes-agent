@@ -86,6 +86,14 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("data-office-rpg-filter=\"status\"");
     expect(markup).toContain("data-office-rpg-filter=\"severity\"");
     expect(markup).toContain("data-office-rpg-filter=\"role\"");
+    expect(markup).toContain("data-office-rpg-visual-map=\"true\"");
+    expect(markup).toContain("data-office-rpg-map-svg=\"true\"");
+    expect(markup).toContain("data-office-rpg-map-path=\"command-to-board\"");
+    expect(markup).toContain("data-office-rpg-map-door=\"command-agent_desks\"");
+    expect(markup).toContain("data-office-rpg-map-furniture=\"central-board\"");
+    expect(markup).toContain("data-office-rpg-character-sprite");
+    expect(markup.match(/data-office-rpg-character-sprite=/g)?.length).toBe(scene.entities.length);
+    expect(markup).toContain("data-office-rpg-character-bubble");
     expect(markup).toContain("data-office-rpg-mission-storyboard=\"true\"");
     expect(markup).toContain("data-office-rpg-mission-step=\"orchestrate\"");
     expect(markup).toContain("data-office-rpg-orchestrator-desk=\"true\"");
