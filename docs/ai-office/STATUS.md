@@ -1,4 +1,11 @@
-Last updated: 2026-05-20 09:56 KST
+Last updated: 2026-05-20 10:04 KST
+
+## NAS Keeper real NAS inline execute-and-record smoke completed (temporary queue, terminal queue state recorded)
+- Raised the boundary from separate real NAS execution smoke to one-call inline execution-state recording after real Mac-local NAS write success. This used temporary isolated handoff queues only and still did not touch durable production queue, watcher/cron, dispatch daemon, authority-adapter binding, direct VPS NAS mount/credentials, public exposure, Kanban, service config, or gateway/dashboard restart.
+- Primary corrected smoke target: `Hermes::ai-office-real-nas-inline-record-20260520-1010.md`; queued=true, authorized=true, previewed=true, executed=true, written=true, recorded=true, readback_verified=true, audit_written=true, execution_state_recorded=true, queue_status_after=`mac_relay_execution_succeeded`, `markdown_body_included=false`, target_exists_after=true, raw_leak=false.
+- Execution record ref: `exec_record_20260520_real_nas_inline_record_1010`; final/readback SHA-256 matched `fa51f9e8cc1458e72f7b4bb74c406b87223143d5782f6a817915c107bf49a62e`.
+- Transparency note: an initial inline smoke pass used `Hermes::ai-office-real-nas-inline-record-20260520-1005.md` and completed the actual write/state recording before a local verification assertion failed on the queue JSON shape; readback confirmed the same final SHA-256. The corrected `1010` smoke above is the evidence target used for this handoff.
+- Focused regression passed locally: `py_compile` plus NAS Keeper from-preview, execution-state record, payload-preview, Mac relay write execute, NAS runtime write, and queue-readback tests `30 passed`; `git diff --check` and added-line secret/path scan passed.
 
 ## NAS Keeper real Mac NAS smoke completed (temporary queue, create+replace, no automation)
 - Raised the boundary from isolated temp-root execution to actual Mac-local real NAS execution-from-preview for one harmless smoke note, still through a temporary handoff queue and still without durable production queue mutation, watcher/cron, dispatch daemon, authority-adapter binding, direct VPS NAS mount/credentials, public exposure, Kanban mutation, or gateway restart.
