@@ -58,8 +58,7 @@ GREEN:
 In progress at handoff creation time:
 
 - Focused GREEN passed.
-- Full local verification and local API/browser smoke passed.
-- Commit/push and VPS dashboard-only deploy/live smoke pending.
+- Full local verification, commit/push, VPS dashboard-only sync/restart, protected API smoke, and browser smoke passed.
 
 ## Next recommended gate after completion
 
@@ -119,3 +118,62 @@ Local browser smoke:
   - console JS errors=0
 
 Local verification updated: 2026-05-20 23:18 KST
+
+
+## Deployment verification
+
+Code/docs commit pushed:
+
+- `543d9724 feat(office): surface target mutation status`
+- full commit: `543d9724c88da51b67171c4fbfaa6dabb8a335f9`
+
+VPS sync/restart:
+
+- `/home/hermes/.hermes/ai-office-dashboard` reset to `543d9724c88da51b67171c4fbfaa6dabb8a335f9`.
+- `/home/hermes/.hermes/hermes-agent` reset to `543d9724c88da51b67171c4fbfaa6dabb8a335f9` via user-fork `lidises/main`.
+- `hermes_cli/web_dist` rsynced to both worktrees.
+- Relative content hash matched local/dashboard/agent:
+  - `7aeee75e2908623463ec29007e0029f1d80d73a2e51ef2a0c5c15e4216ebf2d8`
+  - file count: 22
+- Restarted dashboard only:
+  - `hermes-agent-dashboard.service`: active
+  - `hermes-gateway.service`: active and untouched
+
+VPS API smoke:
+
+- URL base: `http://100.122.57.85:8765`
+- protected API chain stored through target-mutation marker.
+- filtered readback for `targetmut-office-vps-targetmut-543d9724`:
+  - count=1
+  - target_mutation=true
+  - result=`safe_target_marker_written`
+  - readiness=true
+  - allowlist=true
+  - executed=true
+  - replay=true
+  - adapter=false
+  - Kanban=false
+  - NAS=false
+  - real_dispatch=false
+  - raw target/path leak=false
+
+VPS browser smoke:
+
+- URL: `http://100.122.57.85:8765/office?targetmut-vps-browser=543d9724`
+- DOM:
+  - target-mutation panel present=true
+  - live panel total count=2 (includes prior safe smoke records)
+  - targetMutation=true
+  - Kanban=false
+  - NAS=false
+  - realDispatch=false
+  - scoped controls=0
+  - raw target/path leak=false
+  - console JS errors=0
+
+Final boundary preserved:
+
+- Target-mutation marker metadata only.
+- Adapter dispatch, Kanban mutation, NAS save/write/direct VPS NAS authority, rollback execution, real dispatch, watcher/cron, credential access, public exposure, and gateway restart were not performed.
+
+Final updated: 2026-05-20 23:21 KST
