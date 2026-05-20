@@ -74,7 +74,8 @@ describe("OfficeRpgMap", () => {
       redactions: { policy_version: 1, redacted_field_count: 2, omitted_sections: ["prompt", "transcript"], warnings: ["raw warning"] },
     }));
 
-    const markup = renderToStaticMarkup(<OfficeRpgMap scene={scene} onInspectEntity={() => undefined} selectedEntityId={null} />);
+    const selectedEntity = scene.entities[0];
+    const markup = renderToStaticMarkup(<OfficeRpgMap scene={scene} onInspectEntity={() => undefined} selectedEntityId={selectedEntity.id} />);
 
     expect(markup).toContain("data-office-rpg-map");
     expect(markup).toContain("data-office-rpg-jump-target=\"map\"");
@@ -96,6 +97,12 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("data-office-rpg-character-overlap-index");
     expect(markup).toContain("data-office-rpg-character-nameplate");
     expect(markup).toContain("data-office-rpg-character-label-anchor");
+    expect(markup).toContain("data-office-rpg-character-keyboard-target=\"true\"");
+    expect(markup).toContain("aria-keyshortcuts=\"Enter Space\"");
+    expect(markup).toContain("data-office-rpg-character-selection-halo");
+    expect(markup).toContain("data-office-rpg-selected-inspector-anchor=\"#office-safe-inspector\"");
+    expect(markup).toContain("data-office-rpg-keyboard-help=\"true\"");
+    expect(markup).toContain("Enter/Space");
     expect(markup).toContain("data-office-rpg-character-bubble");
     expect(markup).toContain("data-office-rpg-mission-storyboard=\"true\"");
     expect(markup).toContain("data-office-rpg-mission-step=\"orchestrate\"");

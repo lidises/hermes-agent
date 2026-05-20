@@ -2166,8 +2166,11 @@ export function OfficeRpgMap({
               <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">Rendered RPG Map</div>
               <h3 className="text-sm font-semibold text-foreground">실제 SVG 지도 · 방/가구/문/경로/캐릭터</h3>
             </div>
-            <div className="text-xs text-midground/65">read-only sprites · inspector 연결 · 저장/배포/전환 없음</div>
+            <div className="text-xs text-midground/65">read-only sprites · inspector 연결 · Enter/Space 선택 · 저장/배포/전환 없음</div>
           </div>
+          <p className="sr-only" id="office-rpg-keyboard-help" data-office-rpg-keyboard-help="true">
+            캐릭터 스프라이트는 Enter/Space로 안전 검사 패널에 연결됩니다. 저장, 배포, 상태 전환은 실행하지 않습니다.
+          </p>
           <svg
             className="office-rpg-visual-map__svg"
             viewBox="0 0 800 360"
@@ -2239,9 +2242,14 @@ export function OfficeRpgMap({
                   data-office-rpg-character-pose={pose}
                   data-office-rpg-character-overlap-index={overlapIndex}
                   data-office-rpg-character-selected={selected ? "true" : "false"}
+                  data-office-rpg-character-keyboard-target="true"
+                  data-office-rpg-selected-inspector-anchor={selected ? "#office-safe-inspector" : undefined}
                   aria-label={`${RPG_KIND_LABEL[entity.kind]} ${entity.label} SVG sprite`}
+                  aria-describedby="office-rpg-keyboard-help"
+                  aria-keyshortcuts="Enter Space"
                 >
                   <ellipse cx="0" cy="18" rx="13" ry="4" fill="rgba(0,0,0,0.36)" />
+                  {selected ? <circle cx="0" cy="4" r="22" fill="none" stroke="#ffffff" strokeDasharray="4 4" strokeWidth="2" opacity="0.82" data-office-rpg-character-selection-halo={entity.id} /> : null}
                   <path d={pose === "blocked" ? "M-9 3 L9 3 L7 17 L-7 17 Z" : "M-8 2 H8 L10 17 H-10 Z"} fill={fill} stroke={stroke} strokeWidth="2" filter="url(#office-rpg-soft-glow)" />
                   <circle cx="0" cy="-7" r="9" fill={fill} stroke={stroke} strokeWidth="2" />
                   <path d={pose === "active" ? "M-5 -8 H5 M-5 -3 H3" : pose === "waiting" ? "M-4 -6 H4 M-4 -2 H4" : "M-4 -5 H4"} stroke="#0f172a" strokeWidth="1.6" strokeLinecap="round" />
