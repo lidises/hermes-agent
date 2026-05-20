@@ -1,4 +1,9 @@
-Last updated: 2026-05-20 10:26 KST
+Last updated: 2026-05-20 10:43 KST
+
+## NAS Keeper live operator lane implementation in progress (private dashboard visible guarded controls)
+- Raised the boundary from browser-console/protected-API smoke toward the visible private /office operator path by mounting `NasKeeperLiveOperatorLanePanel` outside `SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES`. The lane combines authorized queue readback plus the existing guarded execution-from-preview/state-record operator.
+- Safety posture: execution approval remains unchecked by default, inline execution-state recording remains enabled by default, only safe refs/timestamps are accepted by the operator, markdown bodies/raw NAS paths/provider IDs/credentials are not projected, and explicit false DOM flags remain for VPS direct NAS authority plus watcher/cron daemon.
+- Local TDD evidence so far: RED focused SSR test failed because the live lane component was absent; GREEN added the minimal exported panel and mounted it on /office. Focused frontend verification passed: `src/pages/OfficePage.rpg.test.tsx src/lib/api.test.ts` = 138 passed; `npm run build` passed with the existing Vite large chunk warning; `git diff --check` passed. No VPS sync/restart/NAS write/Kanban mutation has been performed yet for this lane.
 
 ## NAS Keeper current browser/API execute-and-record smoke completed (actual Mac NAS write)
 - Raised the boundary from deployed guarded-operator hooks/no actual execution to one explicit browser-origin protected API call against a local Mac relay dashboard context. Used isolated temporary `HERMES_HOME` queue and Mac-local relay root; safe target timestamp `20260520012423` under the Hermes vault.

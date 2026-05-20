@@ -3852,6 +3852,94 @@ export function NasKeeperExecutionOperatorActionPanel({
   );
 }
 
+export function NasKeeperLiveOperatorLanePanel({
+  queueSurface,
+  queueReadback,
+  queueLoading,
+  queueError,
+  onPrefillExecutionFromQueue,
+  operatorAction,
+  executionDraft,
+  executionStateDraft,
+  executionApproved,
+  recordStateAfterWrite,
+  executionBusy,
+  executionResult,
+  stateBusy,
+  stateResult,
+  executionError,
+  onExecutionDraftChange,
+  onExecutionStateDraftChange,
+  onExecutionApprovalChange,
+  onRecordStateAfterWriteChange,
+  onExecute,
+  onRecordState,
+}: {
+  queueSurface: OfficeNasKeeperQueueManualEvidenceReviewSurface;
+  queueReadback: OfficeNasKeeperHandoffQueueReadback | null;
+  queueLoading: boolean;
+  queueError: string | null;
+  onPrefillExecutionFromQueue: (item: OfficeNasKeeperHandoffQueueItemSummary) => void;
+  operatorAction: OfficeNasKeeperExecutionOperatorAction;
+  executionDraft: OfficeNasKeeperExecutionFromPreviewPayload;
+  executionStateDraft: NasKeeperExecutionStateDraft;
+  executionApproved: boolean;
+  recordStateAfterWrite: boolean;
+  executionBusy: boolean;
+  executionResult: OfficeNasKeeperExecutionFromPreviewResult | null;
+  stateBusy: boolean;
+  stateResult: OfficeNasKeeperExecutionStateResult | null;
+  executionError: string | null;
+  onExecutionDraftChange: (field: NasKeeperExecutionFromPreviewDraftField, value: string) => void;
+  onExecutionStateDraftChange: (field: keyof NasKeeperExecutionStateDraft, value: string) => void;
+  onExecutionApprovalChange: (approved: boolean) => void;
+  onRecordStateAfterWriteChange: (enabled: boolean) => void;
+  onExecute: () => void;
+  onRecordState: () => void;
+}) {
+  return (
+    <section
+      className="space-y-4 border border-amber-300/20 bg-amber-950/5 p-4"
+      data-office-nas-keeper-live-operator-lane="true"
+      data-office-nas-keeper-live-operator-lane-approval-default={String(executionApproved)}
+      data-office-nas-keeper-live-operator-lane-inline-record-default={String(recordStateAfterWrite)}
+      data-office-nas-keeper-live-operator-lane-markdown-body-projected="false"
+      data-office-nas-keeper-live-operator-lane-vps-nas-authority-enabled="false"
+      data-office-nas-keeper-live-operator-lane-watcher-cron-daemon-enabled="false"
+    >
+      <div className="border border-current/15 bg-black/20 p-3 text-xs text-midground/70">
+        <div className="font-semibold uppercase tracking-[0.16em] text-amber-100">NAS Keeper live operator lane</div>
+        <div className="mt-1 leading-5">Authorized queue readback and guarded execution operator are mounted on the live dashboard; execution still requires the explicit approval checkbox and safe refs only.</div>
+      </div>
+      <NasKeeperQueueManualEvidenceReviewSurfacePanel
+        surface={queueSurface}
+        readback={queueReadback}
+        loading={queueLoading}
+        error={queueError}
+        onPrefillExecutionFromQueue={onPrefillExecutionFromQueue}
+      />
+      <NasKeeperExecutionOperatorActionPanel
+        action={operatorAction}
+        draft={executionDraft}
+        stateDraft={executionStateDraft}
+        approved={executionApproved}
+        recordStateAfterWrite={recordStateAfterWrite}
+        busy={executionBusy}
+        result={executionResult}
+        stateBusy={stateBusy}
+        stateResult={stateResult}
+        error={executionError}
+        onDraftChange={onExecutionDraftChange}
+        onStateDraftChange={onExecutionStateDraftChange}
+        onApprovalChange={onExecutionApprovalChange}
+        onRecordStateAfterWriteChange={onRecordStateAfterWriteChange}
+        onExecute={onExecute}
+        onRecordState={onRecordState}
+      />
+    </section>
+  );
+}
+
 export function AuthorityMetadataHandoffStatusPanel({
   status,
   error,
@@ -8218,6 +8306,30 @@ export default function OfficePage() {
         </div>
       </section>
 
+      <NasKeeperLiveOperatorLanePanel
+        queueSurface={nasKeeperQueueManualEvidenceReviewSurface}
+        queueReadback={nasKeeperQueueReadback}
+        queueLoading={nasKeeperQueueReadbackLoading}
+        queueError={nasKeeperQueueReadbackError}
+        onPrefillExecutionFromQueue={prefillNasKeeperExecutionFromQueue}
+        operatorAction={nasKeeperExecutionOperatorAction}
+        executionDraft={nasKeeperExecutionDraft}
+        executionStateDraft={nasKeeperExecutionStateDraft}
+        executionApproved={nasKeeperExecutionApproved}
+        recordStateAfterWrite={nasKeeperExecutionRecordStateAfterWrite}
+        executionBusy={nasKeeperExecutionBusy}
+        executionResult={nasKeeperExecutionResult}
+        stateBusy={nasKeeperExecutionStateBusy}
+        stateResult={nasKeeperExecutionStateResult}
+        executionError={nasKeeperExecutionError}
+        onExecutionDraftChange={updateNasKeeperExecutionDraft}
+        onExecutionStateDraftChange={updateNasKeeperExecutionStateDraft}
+        onExecutionApprovalChange={setNasKeeperExecutionApproved}
+        onRecordStateAfterWriteChange={setNasKeeperExecutionRecordStateAfterWrite}
+        onExecute={executeNasKeeperExecutionFromPreview}
+        onRecordState={recordNasKeeperExecutionState}
+      />
+
       {SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES ? (
         <>
       <OfficeDeskRpgRoomShell projection={deskRpgProjection} />
@@ -8290,14 +8402,6 @@ export default function OfficePage() {
         onExecute={executeNasSingleFileWrite}
       />
 
-      <NasKeeperQueueManualEvidenceReviewSurfacePanel
-        surface={nasKeeperQueueManualEvidenceReviewSurface}
-        readback={nasKeeperQueueReadback}
-        loading={nasKeeperQueueReadbackLoading}
-        error={nasKeeperQueueReadbackError}
-        onPrefillExecutionFromQueue={prefillNasKeeperExecutionFromQueue}
-      />
-
       <AuthorityMetadataHandoffStatusPanel status={authorityMetadataHandoff} error={authorityMetadataHandoffError} />
 
       <DispatcherAuthorityDryRunSurfacePanel surface={dispatcherAuthorityDryRun} error={dispatcherAuthorityDryRunError} />
@@ -8335,25 +8439,6 @@ export default function OfficePage() {
       <ManualKanbanMutationRecordStatusPanel status={manualKanbanMutationRecordStatus} error={manualKanbanMutationRecordStatusError} />
       <ManualNasSaveRecordStatusPanel status={manualNasSaveRecordStatus} error={manualNasSaveRecordStatusError} />
       <ManualNasKeeperHandoffRecordStatusPanel status={manualNasKeeperHandoffRecordStatus} error={manualNasKeeperHandoffRecordStatusError} />
-
-      <NasKeeperExecutionOperatorActionPanel
-        action={nasKeeperExecutionOperatorAction}
-        draft={nasKeeperExecutionDraft}
-        stateDraft={nasKeeperExecutionStateDraft}
-        approved={nasKeeperExecutionApproved}
-        recordStateAfterWrite={nasKeeperExecutionRecordStateAfterWrite}
-        busy={nasKeeperExecutionBusy}
-        result={nasKeeperExecutionResult}
-        stateBusy={nasKeeperExecutionStateBusy}
-        stateResult={nasKeeperExecutionStateResult}
-        error={nasKeeperExecutionError}
-        onDraftChange={updateNasKeeperExecutionDraft}
-        onStateDraftChange={updateNasKeeperExecutionStateDraft}
-        onApprovalChange={setNasKeeperExecutionApproved}
-        onRecordStateAfterWriteChange={setNasKeeperExecutionRecordStateAfterWrite}
-        onExecute={executeNasKeeperExecutionFromPreview}
-        onRecordState={recordNasKeeperExecutionState}
-      />
 
       <DeskRpgReadOnlyChainCompletionReviewPanel review={deskRpgReadOnlyChainCompletionReview} />
 

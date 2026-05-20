@@ -18,8 +18,9 @@ vi.mock("@/lib/api", () => ({
 
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
+import type { NasKeeperExecutionStateDraft } from "./OfficePage";
 import { buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerAssignmentCandidateGate, buildOfficeWorkerRequestDraftPreview, buildOfficeWorkerHumanConfirmationEnvelope, buildOfficeWorkerAuthorityHandoffEnvelope, buildOfficeWorkerDispatchDryRunEnvelope, buildOfficeWorkerAuditPreviewEnvelope, buildOfficeWorkerRollbackPreviewEnvelope, buildOfficeWorkerFinalGateChecklist, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeNasKeeperSaveRequestGate, buildOfficeNasKeeperRollbackEvidencePreview, buildOfficeNasEvidencePackageStoreReadbackStatus, buildOfficeNasPathValidationStatusSurface, buildOfficeNasPathPreviewStatusSurface, buildOfficeNasPathPreviewStoreReadbackStatusSurface, buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface, buildOfficeNasRuntimeSingleFileWriteApprovalAction, buildOfficeNasKeeperQueueManualEvidenceReviewSurface, buildOfficeNasKeeperExecutionOperatorAction, buildOfficeDeskRpgReadOnlyChainCompletionReview, buildOfficeEventDrivenCharacterStateProjection, buildOfficeCharacterStateRoomOverlay, buildOfficeCharacterRoomInteractionPosture, buildOfficeCharacterInspectorDetailPosture, buildOfficeCharacterDetailSafeDialogueCopy, buildOfficeCharacterBubbleInspectorAlignment, buildOfficeCharacterPanelBoundarySummary, buildOfficeCharacterFacilityRoleLegend, buildOfficeCharacterFacilityBoundaryStrip, buildOfficeCharacterFacilitySourceLedgerStrip, buildOfficeCharacterFacilityCompletionReview, buildOfficeControlledMutationProposalContract, buildOfficeControlledMutationDryRunPlan, buildOfficeControlledMutationAuditSinkPlan, buildOfficeControlledMutationRollbackVerificationPlan, buildOfficeControlledMutationHumanApprovalPlan, buildOfficeControlledMutationAuthoritySummary, buildOfficeControlledMutationExecutionReadinessSummary, buildOfficeControlledMutationContractPostureProjection, buildOfficeControlledMutationContractPosturePolish, buildOfficeControlledMutationReadinessHandoffRibbon, buildOfficeControlledMutationReadinessSummaryPolish, buildOfficeControlledMutationRequestStorePosture, buildOfficeControlledMutationRequestStoreHardeningPlan, buildOfficeControlledMutationNextApprovalBoundary, buildOfficeControlledMutationPostDecisionApprovalBoundary, buildOfficeControlledMutationPostRegistryApprovalBoundary, buildOfficeControlledMutationTargetDispatchForbiddenBoundary, buildOfficeControlledMutationSafeContinuationCompletionReview, buildOfficeRpgScene } from "./officeView";
-import type { OfficeAuthorityMetadataHandoffStatus, OfficeDispatcherAuthorityDryRunSurface, OfficeDispatcherAuthorityMetadataAppendStatus, OfficeDispatcherAuthorityMetadataRecordingDraft, OfficeDispatcherExecutionSimulationStatus, OfficeNasKeeperExecutionFromPreviewResult, OfficeNasKeeperHandoffQueueReadback, OfficeState } from "@/lib/api";
+import type { OfficeAuthorityMetadataHandoffStatus, OfficeDispatcherAuthorityDryRunSurface, OfficeDispatcherAuthorityMetadataAppendStatus, OfficeDispatcherAuthorityMetadataRecordingDraft, OfficeDispatcherExecutionSimulationStatus, OfficeNasKeeperExecutionFromPreviewPayload, OfficeNasKeeperExecutionFromPreviewResult, OfficeNasKeeperExecutionStateResult, OfficeNasKeeperHandoffQueueReadback, OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
   return {
@@ -3714,6 +3715,86 @@ describe("NasKeeperExecutionOperatorActionPanel", () => {
     expect(markup).not.toContain('name="markdown_body"');
     expect(markup).not.toContain('name="raw_path"');
     expect(markup).not.toContain('name="token"');
+    expect(markup).not.toMatch(/raw operator prompt|raw markdown body|Traceback|\/Users\/lidises|token-shaped-operator|private-operator-provider/i);
+  });
+
+  it("renders the live NAS Keeper queue and operator lane outside legacy diagnostics", () => {
+    const NasKeeperLiveOperatorLanePanel = (OfficePageModule as unknown as {
+      NasKeeperLiveOperatorLanePanel: React.ComponentType<{
+        queueSurface: ReturnType<typeof buildOfficeNasKeeperQueueManualEvidenceReviewSurface>;
+        queueReadback: OfficeNasKeeperHandoffQueueReadback | null;
+        queueLoading: boolean;
+        queueError: string | null;
+        onPrefillExecutionFromQueue: () => undefined;
+        operatorAction: ReturnType<typeof buildOfficeNasKeeperExecutionOperatorAction>;
+        executionDraft: OfficeNasKeeperExecutionFromPreviewPayload;
+        executionStateDraft: NasKeeperExecutionStateDraft;
+        executionApproved: boolean;
+        recordStateAfterWrite: boolean;
+        executionBusy: boolean;
+        executionResult: OfficeNasKeeperExecutionFromPreviewResult | null;
+        stateBusy: boolean;
+        stateResult: OfficeNasKeeperExecutionStateResult | null;
+        executionError: string | null;
+        onExecutionDraftChange: () => undefined;
+        onExecutionStateDraftChange: () => undefined;
+        onExecutionApprovalChange: () => undefined;
+        onRecordStateAfterWriteChange: () => undefined;
+        onExecute: () => undefined;
+        onRecordState: () => undefined;
+      }>;
+    }).NasKeeperLiveOperatorLanePanel;
+    const boundary = { detailKind: "nas_runtime_n3_approval_boundary_status_surface" } as ReturnType<typeof buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface>;
+    const action = buildOfficeNasRuntimeSingleFileWriteApprovalAction(boundary);
+    const queueSurface = buildOfficeNasKeeperQueueManualEvidenceReviewSurface(action);
+    const operatorAction = buildOfficeNasKeeperExecutionOperatorAction(queueSurface);
+
+    const markup = renderToStaticMarkup(
+      <NasKeeperLiveOperatorLanePanel
+        queueSurface={queueSurface}
+        queueReadback={null}
+        queueLoading={false}
+        queueError={null}
+        onPrefillExecutionFromQueue={() => undefined}
+        operatorAction={operatorAction}
+        executionDraft={{
+          handoff_ref: "handoff_live_operator_demo",
+          relay_execution_ref: "relay_exec_live_operator_demo",
+          nas_keeper_ref: "agent_nas_keeper",
+          relay_node_ref: "mac_relay_primary",
+          relay_authorized_by: "agent_nas_keeper",
+          relay_authorized_at: "2026-05-20T01:40:00Z",
+        }}
+        executionStateDraft={{
+          execution_record_ref: "exec_record_live_operator_demo",
+          recorded_by: "agent_nas_keeper",
+          recorded_at: "2026-05-20T01:41:00Z",
+          execution_status: "succeeded",
+          safe_summary: "safe execution result recorded",
+          evidence_refs: "evidence_live_operator_demo",
+        }}
+        executionApproved={false}
+        recordStateAfterWrite={true}
+        executionBusy={false}
+        executionResult={null}
+        stateBusy={false}
+        stateResult={null}
+        executionError={null}
+        onExecutionDraftChange={() => undefined}
+        onExecutionStateDraftChange={() => undefined}
+        onExecutionApprovalChange={() => undefined}
+        onRecordStateAfterWriteChange={() => undefined}
+        onExecute={() => undefined}
+        onRecordState={() => undefined}
+      />,
+    );
+
+    expect(markup).toContain('data-office-nas-keeper-live-operator-lane="true"');
+    expect(markup).toContain('data-office-nas-keeper-queue-manual-review="true"');
+    expect(markup).toContain('data-office-nas-keeper-execution-operator-action="true"');
+    expect(markup).toContain('data-office-nas-keeper-live-operator-lane-approval-default="false"');
+    expect(markup).toContain('data-office-nas-keeper-live-operator-lane-inline-record-default="true"');
+    expect(markup).not.toContain('name="markdown_body"');
     expect(markup).not.toMatch(/raw operator prompt|raw markdown body|Traceback|\/Users\/lidises|token-shaped-operator|private-operator-provider/i);
   });
 });

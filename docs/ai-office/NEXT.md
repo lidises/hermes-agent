@@ -1,7 +1,7 @@
 ## Next safest lane
-- Continue from deployed manual approval-recording preflight. Next implementation candidate: approval-record write draft surface that still refuses persistence unless a separate explicit approval gate is added.
-- After deploy, next implementation candidate: approval-record write draft surface that still refuses persistence unless a separate explicit approval gate is added.
-- Keep forbidden until separate approval: actual approval record write, dispatch gate open, runtime command execution, target mutation, replay-store write, rollback execution, watcher/cron, NAS/Kanban/VPS mutation, credential access.
+- Current lane in progress: mount the guarded NAS Keeper live operator lane outside hidden legacy diagnostics so the private /office dashboard can read the authorized queue and expose the already-approved safe-ref execution+inline-state operator without page-load execution.
+- Boundary: UI surface only plus deploy/smoke; approval checkbox remains false by default, inline state-record default remains true, markdown body/raw path/credential fields are not projected, and VPS direct NAS authority plus watcher/cron/dispatch daemon remain false.
+- Next higher-risk candidate after this deploy/smoke: one browser-click execution through the visible guarded operator against an isolated temporary Mac relay queue/root, with readback/hash/audit evidence, still no durable production queue, Kanban mutation, watcher/cron, VPS direct NAS authority, public exposure, or gateway restart.
 
 
 # Hermes AI Office — NEXT
