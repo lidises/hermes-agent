@@ -1,4 +1,10 @@
-Last updated: 2026-05-20 13:21 KST
+Last updated: 2026-05-20 13:31 KST
+
+## VPS sync/smoke after real Mac relay execution docs
+- Committed and pushed documentation update `aad1c1d0` (`docs(ai-office): record real Mac relay execution`) to `origin/main`.
+- Synced restricted VPS source worktree `/home/hermes/.hermes/hermes-agent` and dashboard worktree `/home/hermes/.hermes/ai-office-dashboard` to `aad1c1d0` by fetching from the user's fork/remotes and hard-resetting both worktrees. No service restart was performed.
+- VPS verification after sync: `hermes-agent-dashboard.service=active`, `hermes-gateway.service=active`; private dashboard HTTP smoke against `http://100.122.57.85:8765/office?topic=ai-office-vps-sync-smoke` returned 200 with HTML/root content.
+- VPS focused backend verification with `/home/hermes/.hermes/hermes-agent/venv/bin/python`: `py_compile` passed for `office_controlled_mutation.py` and `web_server.py`; focused execution-from-preview/execution-state/queue-readback tests passed (`12 passed`).
 
 ## NAS Keeper real Mac relay execution-from-preview completed
 - Raised the NAS Keeper/Mac relay boundary from authorization + payload preview to one actual Mac-local relay execution-from-preview with inline execution-state recording.
