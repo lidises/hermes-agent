@@ -686,3 +686,6 @@ Keep constraints: no renderer/dependency, no backend/API/schema changes, no muta
 ## Reviewer/Wiki Evidence Detail Posture 1 handoff (2026-05-15 08:26 KST)
 
 - Complete locally; follow-up Board Evidence-to-Inspector Drill-down 1 is also complete. Next: Boss/Orchestrator Request Posture Detail 1 or approval/request route detail.
+
+
+Handoff: `docs/ai-office/plans/2026-05-20-kanban-mutation-readiness-handoff.md`.

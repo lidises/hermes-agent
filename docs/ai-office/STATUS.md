@@ -1,11 +1,12 @@
 
 ## 2026-05-20 — Kanban mutation dry-run readiness 1
 
-Status: local implementation and verification complete; deployment handoff pending in this slice.
+Status: implemented, verified, committed, pushed, and deployed dashboard-only to VPS.
 
 What changed:
 
 - `buildOfficeKanbanProjection` now includes `mutationDryRunReadiness`, a read-only A0 readiness DTO.
+- Commit/deploy: `0d063f43 feat(office): add kanban mutation readiness review`.
 - `/office` renders `OfficeKanbanMutationDryRunReadinessPanel` in the Kanban operations room.
 - The panel shows candidate safe `task_ref`/board/status, six evidence checks, and six blocked capabilities.
 - It deliberately exposes no form controls and enables no writes or execution controls.
@@ -5080,3 +5081,6 @@ Next Stage 14-E candidate: compact safe route compass or room heartbeat legend t
 - Evidence: `docs/ai-office/plans/2026-05-13-mutation-control-v2-dry-run-evidence.md`.
 - Deployed to VPS dashboard worktree at `2d29d13a`; restarted only `hermes-agent-dashboard.service`; private `/office?v=2d29d13a` returned HTTP 200; browser smoke found 4 gates, 4 disabled dry-run-only controls, 0 enabled controls, 0 forms, raw leak false, console/js errors 0.
 - Not performed: gateway restart, gateway/core checkout mutation, public exposure change, NAS mount/direct credentials, Kanban write, cron/watcher automation, executable browser mutation controls, non-dry-run projection promote.
+
+
+Handoff: `docs/ai-office/plans/2026-05-20-kanban-mutation-readiness-handoff.md`.
