@@ -109,6 +109,8 @@ import {
   buildOfficeControlledMutationSafeContinuationCompletionReview,
   buildOfficeControlledMutationApprovalBoundarySummary,
   buildOfficeRpgScene,
+  buildOfficeRpgRuntimeFanoutDrilldown,
+  buildOfficeRpgFanoutApprovalEventBridge,
   buildOfficeDeskRpgProjectionModel,
   buildOfficeDeskRpgWorkerRoleVisibility,
   buildOfficeDisabledApprovalDialoguePosture,
@@ -673,6 +675,58 @@ describe("Board Evidence-to-Inspector Drill-down 1", () => {
     expect(drilldown.safeProjectionOnly).toBe(true);
     expect(drilldown.rawExcluded).toBe(true);
     expect(JSON.stringify(drilldown)).not.toMatch(/raw drilldown prompt|raw drilldown task title|Traceback|\/Users\/lidises|token-shaped-drilldown-sentinel|private-drilldown-provider/i);
+  });
+});
+
+describe("Desk RPG Fanout Approval Event Bridge 1", () => {
+  it("bridges aggregate fan-out lanes toward approval event posture without writes or raw row leakage", () => {
+    const secretSentinel = ["token", "shaped", "fanout", "bridge"].join("-");
+    const state = officeFixture({
+      agents: [
+        { id: "agent-1", status: "active", prompt: "raw fanout bridge prompt", provider: "private-fanout-provider", api_key: secretSentinel },
+        { id: "agent-2", status: "active", prompt: "raw fanout bridge prompt", provider: "private-fanout-provider", api_key: secretSentinel },
+        { id: "agent-3", status: "active", prompt: "raw fanout bridge prompt", provider: "private-fanout-provider", api_key: secretSentinel },
+        { id: "agent-4", status: "active", prompt: "raw fanout bridge prompt", provider: "private-fanout-provider", api_key: secretSentinel },
+      ],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw fanout bridge task", body: "/Users/lidises/private/fanout-bridge.md", transcript: "Traceback fanout bridge transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      automations: [
+        { id: "cron-1", status: "paused", name: "raw fanout bridge cron", schedule: "* * * * *" },
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 13, warning_count: 6, error_summary: "Traceback fanout bridge source" },
+      ],
+    });
+    const projection = buildOfficeDeskRpgProjectionModel(state);
+    const scene = buildOfficeRpgScene(state);
+    const fanout = buildOfficeRpgRuntimeFanoutDrilldown(scene);
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const posture = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
+    const envelope = buildOfficeOrchestratorRequestEnvelopeDetail(projection, posture);
+    const route = buildOfficeApprovalRequestRouteDetail(envelope, dialogue);
+
+    const bridge = buildOfficeRpgFanoutApprovalEventBridge(fanout, route);
+
+    expect(bridge.stageLabel).toBe("Desk RPG Fanout Approval Event Bridge 1");
+    expect(bridge.bridgeKind).toBe("desk_rpg_fanout_approval_event_bridge");
+    expect(bridge.cards.map((card) => card.id)).toEqual(["aggregate_fanout", "request_envelope", "approval_event_gate", "write_boundary"]);
+    expect(bridge.sourceFanoutKind).toBe("runtime_fanout_drilldown");
+    expect(bridge.sourceRouteKind).toBe("approval_request_route_detail");
+    expect(bridge.aggregateLaneCount).toBe(5);
+    expect(bridge.hiddenRuntimeCount).toBeGreaterThanOrEqual(1);
+    expect(bridge.approvalRouteCardCount).toBe(4);
+    expect(bridge.enabledControls).toBe(0);
+    expect(bridge.requestCreationEnabled).toBe(false);
+    expect(bridge.approvalEventCreationEnabled).toBe(false);
+    expect(bridge.eventPersistenceEnabled).toBe(false);
+    expect(bridge.kanbanWriteEnabled).toBe(false);
+    expect(bridge.dispatchEnabled).toBe(false);
+    expect(bridge.auditWriteEnabled).toBe(false);
+    expect(bridge.nasSaveEnabled).toBe(false);
+    expect(bridge.safeProjectionOnly).toBe(true);
+    expect(bridge.rawExcluded).toBe(true);
+    expect(JSON.stringify(bridge)).not.toMatch(/raw fanout bridge prompt|raw fanout bridge task|Traceback|\/Users\/lidises|token-shaped-fanout-bridge|private-fanout-provider/i);
   });
 });
 

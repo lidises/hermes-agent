@@ -86,6 +86,7 @@ import {
   buildOfficeRpgReviewCornerFacility,
   buildOfficeRpgApprovalConsoleFacility,
   buildOfficeRpgRuntimeFanoutDrilldown,
+  buildOfficeRpgFanoutApprovalEventBridge,
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
   buildOfficeApprovalRequestView,
@@ -241,6 +242,7 @@ import {
   type OfficeRecentChange,
   type OfficeRpgRoomId,
   type OfficeRpgRuntimeFanoutDrilldown,
+  type OfficeRpgFanoutApprovalEventBridge,
   type OfficeRpgScene,
   type OfficeRpgSceneEntity,
   type OfficeRpgSeverity,
@@ -2197,14 +2199,52 @@ export function OfficeRpgRuntimeFanoutDrilldownPanel({ drilldown }: { drilldown:
   );
 }
 
+export function RpgFanoutApprovalEventBridgePanel({ bridge }: { bridge: OfficeRpgFanoutApprovalEventBridge }) {
+  return (
+    <section
+      className="border border-violet-300/20 bg-violet-950/10 p-3"
+      data-office-rpg-fanout-approval-event-bridge="true"
+      data-office-rpg-fanout-approval-event-bridge-enabled-controls={bridge.enabledControls}
+      data-office-rpg-fanout-approval-event-bridge-request-creation-enabled={String(bridge.requestCreationEnabled)}
+      data-office-rpg-fanout-approval-event-bridge-approval-event-creation-enabled={String(bridge.approvalEventCreationEnabled)}
+      data-office-rpg-fanout-approval-event-bridge-event-persistence-enabled={String(bridge.eventPersistenceEnabled)}
+      data-office-rpg-fanout-approval-event-bridge-kanban-write-enabled={String(bridge.kanbanWriteEnabled)}
+      data-office-rpg-fanout-approval-event-bridge-dispatch-enabled={String(bridge.dispatchEnabled)}
+      data-office-rpg-fanout-approval-event-bridge-audit-write-enabled={String(bridge.auditWriteEnabled)}
+      data-office-rpg-fanout-approval-event-bridge-nas-save-enabled={String(bridge.nasSaveEnabled)}
+      data-office-rpg-fanout-approval-event-bridge-safe-projection-only={String(bridge.safeProjectionOnly)}
+      data-office-rpg-fanout-approval-event-bridge-raw-excluded={String(bridge.rawExcluded)}
+      aria-label={bridge.title}
+    >
+      <div className="flex flex-col gap-1 text-xs text-midground/70 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <div className="font-semibold uppercase tracking-[0.18em] text-violet-100">{bridge.stageLabel}</div>
+          <div className="mt-1 text-sm font-semibold text-foreground">Desk RPG fan-out → approval event bridge</div>
+        </div>
+        <div>aggregate lanes {bridge.aggregateLaneCount} · route cards {bridge.approvalRouteCardCount} · controls {bridge.enabledControls}</div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4">
+        {bridge.cards.map((card) => (
+          <div key={card.id} className="border border-current/15 bg-black/15 p-2 text-xs" data-office-rpg-fanout-approval-event-bridge-card={card.id} data-office-rpg-fanout-approval-event-bridge-card-tone={card.tone}>
+            <div className="font-semibold text-foreground">{card.label}</div>
+            <div className="mt-2 leading-5 text-midground/70">{card.summary}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function OfficeRpgMap({
   scene,
   selectedEntityId,
   onInspectEntity,
+  fanoutApprovalEventBridge,
 }: {
   scene: OfficeRpgScene;
   selectedEntityId: string | null;
   onInspectEntity: (entity: OfficeRpgSceneEntity) => void;
+  fanoutApprovalEventBridge?: OfficeRpgFanoutApprovalEventBridge;
 }) {
   const [roomFilter, setRoomFilter] = useState<OfficeRpgSceneEntity["room"] | "all">("all");
   const [statusFilter, setStatusFilter] = useState<OfficeRpgSceneEntity["status"] | "all">("all");
@@ -2504,6 +2544,7 @@ export function OfficeRpgMap({
           </div>
         </section>
         <OfficeRpgRuntimeFanoutDrilldownPanel drilldown={runtimeFanoutDrilldown} />
+        {fanoutApprovalEventBridge ? <RpgFanoutApprovalEventBridgePanel bridge={fanoutApprovalEventBridge} /> : null}
         <div className="grid gap-2 text-xs md:grid-cols-4" data-office-rpg-filters="true">
           <label className="grid gap-1 text-midground/65">
             <span>방</span>
@@ -8462,6 +8503,10 @@ export default function OfficePage() {
     () => buildOfficeApprovalRequestRouteDetail(orchestratorRequestEnvelopeDetail, disabledApprovalDialoguePosture),
     [orchestratorRequestEnvelopeDetail, disabledApprovalDialoguePosture],
   );
+  const rpgFanoutApprovalEventBridge = useMemo(
+    () => buildOfficeRpgFanoutApprovalEventBridge(buildOfficeRpgRuntimeFanoutDrilldown(rpgScene), approvalRequestRouteDetail),
+    [rpgScene, approvalRequestRouteDetail],
+  );
   const eventRequestContractProjection = useMemo(
     () => buildOfficeEventRequestContractProjection(approvalRequestRouteDetail),
     [approvalRequestRouteDetail],
@@ -8811,6 +8856,7 @@ export default function OfficePage() {
         <OfficeRpgMap
           scene={rpgScene}
           selectedEntityId={selectedRpgEntityId}
+          fanoutApprovalEventBridge={rpgFanoutApprovalEventBridge}
           onInspectEntity={(entity) => {
             setSelectedRpgEntityId(entity.id);
             inspectRecord("RPG 안전 엔티티", entity.label, [

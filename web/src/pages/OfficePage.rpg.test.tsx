@@ -19,7 +19,7 @@ vi.mock("@/lib/api", () => ({
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
 import type { NasKeeperExecutionStateDraft } from "./OfficePage";
-import { buildOfficeKanbanProjection, buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerAssignmentCandidateGate, buildOfficeWorkerRequestDraftPreview, buildOfficeWorkerHumanConfirmationEnvelope, buildOfficeWorkerAuthorityHandoffEnvelope, buildOfficeWorkerDispatchDryRunEnvelope, buildOfficeWorkerAuditPreviewEnvelope, buildOfficeWorkerRollbackPreviewEnvelope, buildOfficeWorkerFinalGateChecklist, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeNasKeeperSaveRequestGate, buildOfficeNasKeeperRollbackEvidencePreview, buildOfficeNasEvidencePackageStoreReadbackStatus, buildOfficeNasPathValidationStatusSurface, buildOfficeNasPathPreviewStatusSurface, buildOfficeNasPathPreviewStoreReadbackStatusSurface, buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface, buildOfficeNasRuntimeSingleFileWriteApprovalAction, buildOfficeNasKeeperQueueManualEvidenceReviewSurface, buildOfficeNasKeeperExecutionOperatorAction, buildOfficeDeskRpgReadOnlyChainCompletionReview, buildOfficeEventDrivenCharacterStateProjection, buildOfficeCharacterStateRoomOverlay, buildOfficeCharacterRoomInteractionPosture, buildOfficeCharacterInspectorDetailPosture, buildOfficeCharacterDetailSafeDialogueCopy, buildOfficeCharacterBubbleInspectorAlignment, buildOfficeCharacterPanelBoundarySummary, buildOfficeCharacterFacilityRoleLegend, buildOfficeCharacterFacilityBoundaryStrip, buildOfficeCharacterFacilitySourceLedgerStrip, buildOfficeCharacterFacilityCompletionReview, buildOfficeControlledMutationProposalContract, buildOfficeControlledMutationDryRunPlan, buildOfficeControlledMutationAuditSinkPlan, buildOfficeControlledMutationRollbackVerificationPlan, buildOfficeControlledMutationHumanApprovalPlan, buildOfficeControlledMutationAuthoritySummary, buildOfficeControlledMutationExecutionReadinessSummary, buildOfficeControlledMutationContractPostureProjection, buildOfficeControlledMutationContractPosturePolish, buildOfficeControlledMutationReadinessHandoffRibbon, buildOfficeControlledMutationReadinessSummaryPolish, buildOfficeControlledMutationRequestStorePosture, buildOfficeControlledMutationRequestStoreHardeningPlan, buildOfficeControlledMutationNextApprovalBoundary, buildOfficeControlledMutationPostDecisionApprovalBoundary, buildOfficeControlledMutationPostRegistryApprovalBoundary, buildOfficeControlledMutationTargetDispatchForbiddenBoundary, buildOfficeControlledMutationSafeContinuationCompletionReview, buildOfficeControlledMutationApprovalBoundarySummary, buildOfficeRpgRuntimeFanoutDrilldown, buildOfficeRpgScene } from "./officeView";
+import { buildOfficeKanbanProjection, buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerAssignmentCandidateGate, buildOfficeWorkerRequestDraftPreview, buildOfficeWorkerHumanConfirmationEnvelope, buildOfficeWorkerAuthorityHandoffEnvelope, buildOfficeWorkerDispatchDryRunEnvelope, buildOfficeWorkerAuditPreviewEnvelope, buildOfficeWorkerRollbackPreviewEnvelope, buildOfficeWorkerFinalGateChecklist, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeNasKeeperSaveRequestGate, buildOfficeNasKeeperRollbackEvidencePreview, buildOfficeNasEvidencePackageStoreReadbackStatus, buildOfficeNasPathValidationStatusSurface, buildOfficeNasPathPreviewStatusSurface, buildOfficeNasPathPreviewStoreReadbackStatusSurface, buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface, buildOfficeNasRuntimeSingleFileWriteApprovalAction, buildOfficeNasKeeperQueueManualEvidenceReviewSurface, buildOfficeNasKeeperExecutionOperatorAction, buildOfficeDeskRpgReadOnlyChainCompletionReview, buildOfficeEventDrivenCharacterStateProjection, buildOfficeCharacterStateRoomOverlay, buildOfficeCharacterRoomInteractionPosture, buildOfficeCharacterInspectorDetailPosture, buildOfficeCharacterDetailSafeDialogueCopy, buildOfficeCharacterBubbleInspectorAlignment, buildOfficeCharacterPanelBoundarySummary, buildOfficeCharacterFacilityRoleLegend, buildOfficeCharacterFacilityBoundaryStrip, buildOfficeCharacterFacilitySourceLedgerStrip, buildOfficeCharacterFacilityCompletionReview, buildOfficeControlledMutationProposalContract, buildOfficeControlledMutationDryRunPlan, buildOfficeControlledMutationAuditSinkPlan, buildOfficeControlledMutationRollbackVerificationPlan, buildOfficeControlledMutationHumanApprovalPlan, buildOfficeControlledMutationAuthoritySummary, buildOfficeControlledMutationExecutionReadinessSummary, buildOfficeControlledMutationContractPostureProjection, buildOfficeControlledMutationContractPosturePolish, buildOfficeControlledMutationReadinessHandoffRibbon, buildOfficeControlledMutationReadinessSummaryPolish, buildOfficeControlledMutationRequestStorePosture, buildOfficeControlledMutationRequestStoreHardeningPlan, buildOfficeControlledMutationNextApprovalBoundary, buildOfficeControlledMutationPostDecisionApprovalBoundary, buildOfficeControlledMutationPostRegistryApprovalBoundary, buildOfficeControlledMutationTargetDispatchForbiddenBoundary, buildOfficeControlledMutationSafeContinuationCompletionReview, buildOfficeControlledMutationApprovalBoundarySummary, buildOfficeRpgRuntimeFanoutDrilldown, buildOfficeRpgFanoutApprovalEventBridge, buildOfficeRpgScene } from "./officeView";
 import type { OfficeAuthorityMetadataHandoffStatus, OfficeDispatcherAuthorityDryRunSurface, OfficeDispatcherAuthorityMetadataAppendStatus, OfficeDispatcherAuthorityMetadataRecordingDraft, OfficeDispatcherExecutionSimulationStatus, OfficeNasKeeperExecutionFromPreviewPayload, OfficeNasKeeperExecutionFromPreviewResult, OfficeNasKeeperExecutionStateResult, OfficeNasKeeperHandoffQueueReadback, OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
@@ -636,6 +636,58 @@ describe("BoardEvidenceInspectorDrilldownPanel", () => {
     expect(markup).not.toContain("<button");
     expect(markup).not.toContain("<input");
     expect(markup).not.toMatch(/raw drilldown prompt|raw drilldown task title|Traceback|\/Users\/lidises|token-shaped-drilldown-sentinel|private-drilldown-provider/i);
+  });
+});
+
+describe("RpgFanoutApprovalEventBridgePanel", () => {
+  it("renders a read-only fanout-to-approval event bridge without controls", () => {
+    const RpgFanoutApprovalEventBridgePanel = (OfficePageModule as unknown as {
+      RpgFanoutApprovalEventBridgePanel: React.ComponentType<{ bridge: ReturnType<typeof buildOfficeRpgFanoutApprovalEventBridge> }>;
+    }).RpgFanoutApprovalEventBridgePanel;
+    const secretSentinel = ["token", "shaped", "fanout", "bridge"].join("-");
+    const state = officeFixture({
+      agents: [
+        { id: "agent-1", status: "active", prompt: "raw fanout bridge prompt", provider: "private-fanout-provider", api_key: secretSentinel },
+        { id: "agent-2", status: "active", prompt: "raw fanout bridge prompt", provider: "private-fanout-provider", api_key: secretSentinel },
+        { id: "agent-3", status: "active", prompt: "raw fanout bridge prompt", provider: "private-fanout-provider", api_key: secretSentinel },
+        { id: "agent-4", status: "active", prompt: "raw fanout bridge prompt", provider: "private-fanout-provider", api_key: secretSentinel },
+      ],
+      work_items: [
+        { id: "task-1", status: "blocked", title: "raw fanout bridge task", body: "/Users/lidises/private/fanout-bridge.md", transcript: "Traceback fanout bridge transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-14T00:00:00Z", item_count: 13, warning_count: 6, error_summary: "Traceback fanout bridge source" },
+      ],
+    });
+    const projection = buildOfficeDeskRpgProjectionModel(state);
+    const scene = buildOfficeRpgScene(state);
+    const fanout = buildOfficeRpgRuntimeFanoutDrilldown(scene);
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const posture = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
+    const envelope = buildOfficeOrchestratorRequestEnvelopeDetail(projection, posture);
+    const route = buildOfficeApprovalRequestRouteDetail(envelope, dialogue);
+    const bridge = buildOfficeRpgFanoutApprovalEventBridge(fanout, route);
+
+    const markup = renderToStaticMarkup(<RpgFanoutApprovalEventBridgePanel bridge={bridge} />);
+
+    expect(markup).toContain("data-office-rpg-fanout-approval-event-bridge=\"true\"");
+    expect(markup).toContain("data-office-rpg-fanout-approval-event-bridge-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-rpg-fanout-approval-event-bridge-request-creation-enabled=\"false\"");
+    expect(markup).toContain("data-office-rpg-fanout-approval-event-bridge-approval-event-creation-enabled=\"false\"");
+    expect(markup).toContain("data-office-rpg-fanout-approval-event-bridge-event-persistence-enabled=\"false\"");
+    expect(markup).toContain("data-office-rpg-fanout-approval-event-bridge-kanban-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-rpg-fanout-approval-event-bridge-dispatch-enabled=\"false\"");
+    expect(markup).toContain("data-office-rpg-fanout-approval-event-bridge-audit-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-rpg-fanout-approval-event-bridge-nas-save-enabled=\"false\"");
+    expect(markup).toContain("data-office-rpg-fanout-approval-event-bridge-safe-projection-only=\"true\"");
+    expect(markup).toContain("data-office-rpg-fanout-approval-event-bridge-raw-excluded=\"true\"");
+    expect(markup.match(/data-office-rpg-fanout-approval-event-bridge-card=/g)?.length).toBe(4);
+    expect(markup).toContain("Desk RPG fan-out → approval event bridge");
+    expect(markup).toContain("aggregate fan-out → request/approval event gate");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toMatch(/raw fanout bridge prompt|raw fanout bridge task|Traceback|\/Users\/lidises|token-shaped-fanout-bridge|private-fanout-provider/i);
   });
 });
 

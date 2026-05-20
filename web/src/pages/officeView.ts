@@ -946,6 +946,36 @@ export type OfficeRpgRuntimeFanoutDrilldown = {
   rawExcluded: true;
 };
 
+export type OfficeRpgFanoutApprovalEventBridgeCard = {
+  id: "aggregate_fanout" | "request_envelope" | "approval_event_gate" | "write_boundary";
+  label: string;
+  summary: string;
+  tone: "info" | "warning" | "blocked";
+  rawExcluded: true;
+};
+
+export type OfficeRpgFanoutApprovalEventBridge = {
+  stageLabel: "Desk RPG Fanout Approval Event Bridge 1";
+  title: string;
+  bridgeKind: "desk_rpg_fanout_approval_event_bridge";
+  cards: OfficeRpgFanoutApprovalEventBridgeCard[];
+  sourceFanoutKind: "runtime_fanout_drilldown";
+  sourceRouteKind: OfficeApprovalRequestRouteDetail["detailKind"];
+  aggregateLaneCount: number;
+  hiddenRuntimeCount: number;
+  approvalRouteCardCount: number;
+  requestCreationEnabled: false;
+  approvalEventCreationEnabled: false;
+  eventPersistenceEnabled: false;
+  kanbanWriteEnabled: false;
+  dispatchEnabled: false;
+  auditWriteEnabled: false;
+  nasSaveEnabled: false;
+  enabledControls: 0;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeDeskRpgProjectionActorRole = "user_boss" | "orchestrator" | "search_worker" | "reviewer" | "wiki_writer" | "nas_keeper";
 
 export type OfficeDeskRpgProjectionFacilityId = "boss_desk" | "orchestrator_desk" | "worker_cluster" | "central_board" | "right_inspector" | "nas_vault" | "security_ops_corner" | "calm_activity_lane";
@@ -6619,6 +6649,62 @@ export function buildOfficeRpgRuntimeFanoutDrilldown(scene: OfficeRpgScene): Off
     assignmentEnabled: false,
     dispatchEnabled: false,
     backendWriteEnabled: false,
+    enabledControls: 0,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+export function buildOfficeRpgFanoutApprovalEventBridge(
+  fanout: OfficeRpgRuntimeFanoutDrilldown,
+  route: OfficeApprovalRequestRouteDetail,
+): OfficeRpgFanoutApprovalEventBridge {
+  return {
+    stageLabel: "Desk RPG Fanout Approval Event Bridge 1",
+    title: "Desk RPG fan-out → approval event bridge",
+    bridgeKind: "desk_rpg_fanout_approval_event_bridge",
+    cards: [
+      {
+        id: "aggregate_fanout",
+        label: "aggregate fan-out",
+        summary: `Representative map actor(s) stay capped at ${fanout.visibleActorCount}; ${fanout.hiddenRuntimeCount} hidden runtime row(s) remain aggregate-only across ${fanout.lanes.length} lane(s).`,
+        tone: fanout.hiddenRuntimeCount > 0 ? "warning" : "info",
+        rawExcluded: true,
+      },
+      {
+        id: "request_envelope",
+        label: "request envelope",
+        summary: `Approval route context stays at ${route.evidenceCount} evidence aggregate(s), ${route.blockedWorkCount} blocked signal(s), and ${route.dialogueLineCount} dialogue line(s).`,
+        tone: route.blockedWorkCount > 0 ? "warning" : "info",
+        rawExcluded: true,
+      },
+      {
+        id: "approval_event_gate",
+        label: "approval event gate",
+        summary: "aggregate fan-out → request/approval event gate is visible as posture only; no request row, approval event, or persisted payload is created.",
+        tone: "info",
+        rawExcluded: true,
+      },
+      {
+        id: "write_boundary",
+        label: "write boundary",
+        summary: "Request creation, approval event creation, event persistence, Kanban write, dispatch, audit write, and NAS save remain disabled.",
+        tone: "blocked",
+        rawExcluded: true,
+      },
+    ],
+    sourceFanoutKind: "runtime_fanout_drilldown",
+    sourceRouteKind: route.detailKind,
+    aggregateLaneCount: fanout.lanes.length,
+    hiddenRuntimeCount: fanout.hiddenRuntimeCount,
+    approvalRouteCardCount: route.cards.length,
+    requestCreationEnabled: false,
+    approvalEventCreationEnabled: false,
+    eventPersistenceEnabled: false,
+    kanbanWriteEnabled: false,
+    dispatchEnabled: false,
+    auditWriteEnabled: false,
+    nasSaveEnabled: false,
     enabledControls: 0,
     safeProjectionOnly: true,
     rawExcluded: true,
