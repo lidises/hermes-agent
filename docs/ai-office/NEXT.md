@@ -1,13 +1,13 @@
 ## Next safest lane
-- Completed lane: local-profile controlled-mutation metadata now reaches the NAS Keeper/Mac relay handoff queue marker. The chain records exact target mutation `targetmut-nas-keeper-runtime-20260520124446`, adapter dispatch `adapterdispatch-nas-keeper-runtime-20260520124446`, Kanban marker `kanbanmut-nas-keeper-runtime-20260520124446`, NAS save marker `nassave-nas-keeper-runtime-20260520124446`, and handoff queue `handoff_nas_keeper_runtime_20260520124446`.
-- Boundary preserved: the handoff is only queued metadata with `queue_status=pending_nas_keeper_authorization`; direct VPS NAS write/authority, Mac relay write, actual NAS write, real NAS execution, watcher/cron/daemon activation, service restart, public exposure, VPS runtime file mutation, credential expansion, and real dispatch execution remain closed.
-- Next higher-risk candidate: NAS Keeper authorization/Mac relay execution preview boundary for this queued handoff. Keep actual NAS execution/write, direct VPS NAS mount/credentials, watcher/cron, gateway restart, public exposure, and credential authority disabled unless separately approved as a concrete gate.
+- Completed lane: local-profile NAS Keeper/Mac relay handoff metadata is now authorized and previewed. Handoff `handoff_nas_keeper_runtime_20260520124446` has authorization `authz_nas_keeper_runtime_20260520131729`, `queue_status=authorized_for_mac_relay_execution`, and payload preview `relay_exec_nas_keeper_runtime_preview_20260520131729` with `markdown_body_included=false` and safe body hash `73a80138324a58cdddb433cdf20e061248ae68af4119aec72b38bb08fd915843`.
+- Boundary preserved: this is authorization + payload preview only. Direct VPS NAS write/authority, Mac relay write, actual NAS write, real NAS execution, watcher/cron/daemon activation, service restart, public exposure, VPS runtime file mutation, credential expansion, and real dispatch execution remain closed.
+- Next higher-risk candidate: authenticated Mac relay execution-from-preview for this authorized handoff, preferably first as an explicitly bounded concrete gate. Keep direct VPS NAS mount/credentials, watcher/cron, gateway restart, public exposure, credential authority, and any generalized dispatcher/daemon disabled.
 
 
 
 # Hermes AI Office — NEXT
 
-Last updated: 2026-05-20 12:48 KST
+Last updated: 2026-05-20 13:17 KST
 
 ## Start here after `/new`
 

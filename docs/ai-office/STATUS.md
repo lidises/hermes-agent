@@ -1,4 +1,13 @@
-Last updated: 2026-05-20 12:48 KST
+Last updated: 2026-05-20 13:17 KST
+
+## NAS Keeper handoff authorization and execution-payload preview recorded
+- Raised the bounded NAS Keeper/Mac relay handoff queue marker to authorization metadata and payload-preview metadata for the existing handoff `handoff_nas_keeper_runtime_20260520124446`.
+- Authorization evidence: `authorization_ref=authz_nas_keeper_runtime_20260520131729`; `queue_status_before=pending_nas_keeper_authorization`; `queue_status_after=authorized_for_mac_relay_execution`; `authorization_decision=authorize_mac_relay_execution`; next boundary remains `mac_relay_authenticated_execution_from_authorized_handoff`.
+- Preview evidence: `relay_execution_ref=relay_exec_nas_keeper_runtime_preview_20260520131729`; `queue_status=authorized_for_mac_relay_execution`; `markdown_body_included=false`; `markdown_body_sha256=73a80138324a58cdddb433cdf20e061248ae68af4119aec72b38bb08fd915843`; next boundary remains `mac_relay_authenticated_execution_from_previewed_payload`.
+- Safety posture remained closed: `queue_mutation_enabled=false` during preview; `direct_vps_nas_write_enabled=false`; `mac_relay_write_enabled=false`; `actual_nas_write_enabled=false`; `watcher_enabled=false`; `cron_enabled=false`; `dispatch_enabled=false`; `authority_adapter_binding_enabled=false`.
+- Raw-value probe over private paths, provider/token/secret sentinels, credential-like values, and queued markdown text returned no hits. Preview exposes safe refs, hashes, field names, and display metadata only.
+- Verification: `py_compile` passed for `office_controlled_mutation.py` and `web_server.py`; focused NAS Keeper authorization + execution-payload preview tests passed (`6 passed`); `git diff --check` passed.
+- Still not performed: authenticated Mac relay execution, actual NAS file write from this handoff, direct VPS NAS mount/credentials/write authority, watcher/cron/daemon activation, service restart, VPS runtime file mutation, public exposure, credential authority expansion, or real dispatch execution.
 
 ## NAS Keeper controlled-mutation ladder markers recorded through handoff queue
 - Raised the local-profile controlled-mutation metadata chain from execution-backed target-readiness to bounded marker writes for exact target mutation, adapter dispatch, Kanban mutation, NAS save marker, and NAS Keeper/Mac relay handoff queue metadata.
