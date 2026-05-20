@@ -1,7 +1,7 @@
 ## Next safest lane
-- Completed lane: local-profile controlled-mutation metadata now contains an inclusion-backed noop runtime-command execution/replay record. Execution ref `exec-nas-keeper-runtime-noop-20260520123414` has result `noop_probe_succeeded` and idempotency key `idem-nas-keeper-runtime-noop-20260520123414`.
-- Boundary preserved: adapter binding/dispatch, rollback execution, target mutation, real Kanban mutation, NAS save marker, watcher/cron/daemon activation, VPS direct NAS authority, dashboard/gateway restart, public exposure, VPS runtime file mutation, and credential expansion remain closed.
-- Next higher-risk candidate: execution-backed exact target-readiness metadata record. Keep actual target mutation, adapter dispatch, rollback, Kanban/NAS/VPS mutation, watcher/cron, service restart, and public/credential authority disabled.
+- Completed lane: local-profile controlled-mutation metadata now contains an execution-backed exact target-readiness record. Readiness ref `targetready-nas-keeper-runtime-20260520124021` verified allowlist `allowlist-nas-keeper-single-durable-handoff` for target `target-nas-keeper-durable-handoff-noop`.
+- Boundary preserved: actual target mutation, adapter binding/dispatch, rollback execution, real Kanban mutation, NAS save marker, watcher/cron/daemon activation, VPS direct NAS authority, dashboard/gateway restart, public exposure, VPS runtime file mutation, and credential expansion remain closed.
+- Next higher-risk candidate: first exact target-mutation metadata record. Keep adapter dispatch, rollback execution, Kanban/NAS/VPS mutation, watcher/cron, service restart, and public/credential authority disabled.
 
 
 # Hermes AI Office — NEXT
