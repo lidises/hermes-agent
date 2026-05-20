@@ -1,4 +1,27 @@
 
+## Current next — NAS-save live surface in progress
+
+Current slice:
+
+- User approved continuing the recommended controlled-mutation path with bounded writes and slightly stronger authority.
+- Existing protected NAS-save marker metadata store/API/readback implementation is being surfaced in the live `/office` page.
+- Added RED/GREEN placement regression so the NAS-save panel stays outside `SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES` and appears in production/browser smoke.
+
+Safety boundary remains:
+
+- Bounded NAS-save marker metadata readback/status only; smoke may write a NAS-save marker record backed by an existing verified Kanban-mutation record.
+- Real NAS execution, direct VPS NAS authority/mount/credentials, Mac relay write, rollback execution, real dispatch, watcher/cron activation, credential access, public exposure, and gateway restart remain blocked.
+
+Verification so far:
+
+- RED placement test failed when NAS-save panel was only inside legacy diagnostics.
+- GREEN focused placement test passed after live-visible placement.
+- Full local verification and local API/browser smoke passed; commit/push and VPS dashboard-only deploy/live smoke pending.
+
+Handoff: `docs/ai-office/plans/2026-05-21-nas-save-live-surface-handoff.md`.
+
+Last updated: 2026-05-21 00:37 KST
+
 ## Current next — Kanban-mutation live surface in progress
 
 Current slice:
