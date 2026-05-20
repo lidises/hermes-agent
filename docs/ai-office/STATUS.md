@@ -1,4 +1,12 @@
-Last updated: 2026-05-20 12:05 KST
+Last updated: 2026-05-20 12:16 KST
+
+## NAS Keeper runtime dispatch gate metadata opened
+- Raised the boundary from completed durable queue real-NAS execution to a bounded operator-reviewed runtime dispatch gate metadata write. This created the local-profile controlled-mutation chain: draft approval record, bounded approval record, and dispatch-gate-open metadata record.
+- Safe refs: approval `approval-nas-keeper-runtime-gate-20260520121600`; dispatch gate `gate-nas-keeper-runtime-dispatch-20260520121600`.
+- Result evidence: draft count 1; approval record count 1; dispatch-gate-open record count 1; `dispatch_gate_open=true`; `runtime_command_executed=false`; `target_mutation_created=false`; `adapter_dispatch_created=false`; `kanban_mutation_created=false`; `nas_save_created=false`.
+- Raw-leak probe over dispatch-gate readback returned no raw path/token/command/provider sentinel hits.
+- Verification: `py_compile` passed for `office_controlled_mutation.py` and `web_server.py`; focused approval/dispatch design tests passed (`39 passed`); `git diff --check` passed.
+- Still not performed: runtime command materialization or execution, adapter binding/dispatch, target mutation, real Kanban mutation, NAS save marker beyond the already completed browser-triggered real NAS execution, watcher/cron/daemon activation, service restart, VPS runtime mutation, credential/public authority expansion.
 
 ## NAS Keeper durable production queue real-NAS execute-and-record completed
 - Raised the boundary from durable production queue rehearsal/readback to one guarded `/office` execution of the existing durable queue item against the real Mac relay NAS root. The run used the existing authorized handoff `handoff_durable_queue_rehearsal_20260520114732` and did not create a second durable queue item.

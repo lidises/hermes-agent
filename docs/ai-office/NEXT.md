@@ -1,7 +1,7 @@
 ## Next safest lane
-- Completed lane: the existing durable local-profile NAS Keeper queue item was executed exactly once through the guarded `/office` operator against the real Mac relay NAS root, with inline state recording. The queue terminal state is `mac_relay_execution_succeeded`; readback SHA matched the queued markdown SHA; browser approval reset unchecked; no second durable queue item was created.
-- Boundary preserved: no watcher/cron/dispatch daemon activation, no authority-adapter binding, no Kanban mutation, no VPS direct NAS authority, no dashboard/gateway restart, no public exposure, and no VPS runtime file mutation.
-- Next higher-risk candidate: design/record a bounded operator-reviewed runtime dispatch plan for NAS Keeper automation, still disabled by default. Do not jump directly to watcher/cron/daemon activation or authority-adapter binding without a separate preflight/gate record and rollback/disable plan.
+- Completed lane: local-profile controlled-mutation metadata now contains a bounded operator-reviewed dispatch gate for NAS Keeper runtime follow-up: draft approval record + approval record + dispatch-gate-open metadata record. The gate ref is `gate-nas-keeper-runtime-dispatch-20260520121600` and it is metadata-only.
+- Boundary preserved: runtime command materialization/execution, adapter binding/dispatch, target mutation, real Kanban mutation, watcher/cron/daemon activation, VPS direct NAS authority, dashboard/gateway restart, public exposure, VPS runtime file mutation, and credential expansion remain closed.
+- Next higher-risk candidate: create a checksum-only runtime-command preview record backed by the open dispatch gate. Keep raw command inclusion/execution, adapter dispatch, target/Kanban/NAS mutation, watcher/cron, service restart, and public/credential authority disabled.
 
 
 # Hermes AI Office — NEXT
