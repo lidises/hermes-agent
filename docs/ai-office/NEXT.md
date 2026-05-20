@@ -20,11 +20,11 @@ Verification so far:
 - RED focused backend test failed on missing helper imports and missing API route.
 - Focused backend approval-event envelope tests: 4 passed.
 - Focused frontend panel test: 1 passed.
-- Full local verification passed; commit/push and VPS sync/restart/live smoke still pending in this slice.
+- Full local verification passed; committed/pushed; VPS dashboard-only sync/restart/live API and browser smoke passed.
 
 Handoff: `docs/ai-office/plans/2026-05-20-approval-event-envelope-write-readback-handoff.md`.
 
-Last updated: 2026-05-20 21:03 KST
+Last updated: 2026-05-20 21:16 KST
 
 
 ## Current next — Desk RPG fan-out approval event bridge deployed

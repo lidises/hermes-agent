@@ -2,7 +2,7 @@
 
 ## 2026-05-20 — Approval-event envelope metadata write/readback slice
 
-Status: in progress; focused GREEN achieved, full verification/deploy pending.
+Status: complete and deployed to VPS dashboard.
 
 What changed:
 
@@ -20,11 +20,11 @@ Verification so far:
 - RED: focused backend test failed on missing helper/import/API route.
 - GREEN focused backend: 4 passed.
 - GREEN focused frontend: 1 passed.
-- Combined backend/frontend tests, py_compile, ESLint, build, diff-check, safety scan, and local API smoke passed; deploy still pending.
+- Combined backend/frontend tests, py_compile, ESLint, build, diff-check, safety scan, local API smoke, VPS dashboard-only sync/restart, protected API write/readback, and live browser smoke passed.
 
 Handoff: `docs/ai-office/plans/2026-05-20-approval-event-envelope-write-readback-handoff.md`.
 
-Last updated: 2026-05-20 21:03 KST
+Last updated: 2026-05-20 21:16 KST
 
 
 ## 2026-05-20 — Desk RPG fan-out approval event bridge slice
