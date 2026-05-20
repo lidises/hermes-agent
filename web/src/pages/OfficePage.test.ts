@@ -2222,9 +2222,12 @@ describe("Desk RPG Projection ViewModel Helper 1", () => {
     expect(scene.rooms.find((room) => room.id === "agent_desks")).toMatchObject({ label: "Agent Desks", counts: { agents: 2 }, severity: "info" });
     expect(scene.rooms.find((room) => room.id === "task_board")).toMatchObject({ counts: { work_items: 3, blocked: 1, completed: 1 }, severity: "danger" });
     expect(scene.rooms.find((room) => room.id === "incident_corner")).toMatchObject({ counts: { incidents: 3 }, severity: "danger" });
-    expect(scene.entities.map((entity) => entity.kind)).toEqual(expect.arrayContaining(["agent", "work_item", "cron_job", "source", "incident", "report"]));
-    expect(scene.entities.find((entity) => entity.id === "work-1")).toMatchObject({ kind: "work_item", room: "task_board", status: "blocked", severity: "danger", linkTarget: { type: "inspector", ref: "work_items:1" } });
-    expect(scene.entities.find((entity) => entity.id === "report-0")).toMatchObject({ kind: "report", room: "task_board", status: "completed", severity: "info" });
+    expect(scene.entities).toHaveLength(7);
+    expect(scene.entities.map((entity) => entity.kind)).toEqual(expect.arrayContaining(["user_boss", "orchestrator", "search_worker", "reviewer", "wiki_writer", "nas_keeper"]));
+    expect(scene.entities.filter((entity) => entity.kind === "search_worker")).toHaveLength(2);
+    expect(scene.entities.find((entity) => entity.id === "orchestrator-0")).toMatchObject({ kind: "orchestrator", room: "command", status: "working", severity: "info", linkTarget: { type: "safe_ref", ref: "actor:orchestrator" } });
+    expect(scene.entities.find((entity) => entity.id === "reviewer-0")).toMatchObject({ kind: "reviewer", room: "incident_corner", status: "blocked", severity: "danger" });
+    expect(scene.entities.find((entity) => entity.id === "nas_keeper-0")).toMatchObject({ kind: "nas_keeper", room: "incident_corner", status: "blocked", severity: "danger" });
     expect(scene.recentEvents).toEqual([{ id: "event-0", label: "최근 안전 이벤트", room: "task_board", severity: "warning", at: "2026-05-13T09:55:00Z" }]);
     expect(scene.entities.every((entity) => entity.positionHint.x >= 8 && entity.positionHint.x <= 92 && entity.positionHint.y >= 10 && entity.positionHint.y <= 88)).toBe(true);
     expect(JSON.stringify(scene)).not.toMatch(/raw prompt|raw transcript|raw task|raw blocked|raw done|raw result|secret body|secret script|raw token|raw warning|\/Users\/lidises|private-model|private-provider/i);

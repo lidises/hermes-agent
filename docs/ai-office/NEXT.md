@@ -1,4 +1,19 @@
 
+## Current next — Desk RPG representative actors local slice
+
+Completed local slice:
+
+- Re-aligned the rendered Desk RPG map with the original MVP actor set: User/Boss, Orchestrator, Search Worker capped at 3 visible clones, Reviewer, Wiki Writer, NAS Keeper.
+- The map no longer renders every safe agent/work/cron/source row as a character sprite. Those counts remain visible through rooms/facilities/boards and inspector-safe summaries.
+- Local verification passed: focused RPG scene/map tests 3 passed, combined Office tests 252 passed, ESLint 0 errors with existing Fast Refresh warnings, build passed with existing Vite large chunk warning, diff-check passed, browser DOM smoke sprites=8/fallbackRows=8/rawLeak=false/scoped controls=0/console errors=0.
+
+Recommended next safe lane:
+
+1. If this visual direction is acceptable, commit/push and do a dashboard-only private VPS sync/restart, leaving gateway untouched.
+2. Then optionally add a read-only "runtime fan-out drill-down" panel under the inspector/fallback area so suppressed worker/runtime/source rows are discoverable without becoming map sprites.
+3. Do not add mutation controls, backend write routes, Kanban transitions, NAS writes, watcher/cron activation, authority binding, public exposure, or gateway restart as part of this visual density correction.
+
+
 ## Current next — Kanban mutation dry-run readiness deployed
 
 Completed slice:

@@ -859,7 +859,7 @@ export type OfficeRpgRoomId = "command" | "agent_desks" | "task_board" | "cron_r
 
 export type OfficeRpgStatus = "idle" | "working" | "waiting" | "blocked" | "failed" | "completed" | "warning" | "unknown";
 
-export type OfficeRpgEntityKind = "agent" | "session" | "work_item" | "cron_job" | "source" | "incident" | "report";
+export type OfficeRpgEntityKind = "agent" | "session" | "work_item" | "cron_job" | "source" | "incident" | "report" | OfficeDeskRpgProjectionActorRole;
 
 export type OfficeRpgSeverity = "normal" | "info" | "warning" | "danger";
 
@@ -3817,12 +3817,6 @@ function rpgSeverityFromStatus(status: OfficeRpgStatus): OfficeRpgSeverity {
   return "normal";
 }
 
-function rpgStatusFromSourceStatus(status: OfficeSourceStatus): OfficeRpgStatus {
-  if (status === "error") return "failed";
-  if (status === "partial" || status === "missing" || status === "unavailable") return "warning";
-  return "idle";
-}
-
 function rpgSeverityFromSourceStatus(status: OfficeSourceStatus, warningCount = 0): OfficeRpgSeverity {
   if (status === "error") return "danger";
   if (status === "partial" || status === "missing" || status === "unavailable" || warningCount > 0) return "warning";
@@ -3847,6 +3841,31 @@ function rpgSeverityFromTone(value: unknown): OfficeRpgSeverity {
 function rpgTimestamp(value: unknown): string | null {
   return typeof value === "string" && value.length > 0 && Number.isFinite(Date.parse(value)) ? value : null;
 }
+
+function rpgStatusFromProjectionActorStatus(status: OfficeDeskRpgProjectionActor["status"]): OfficeRpgStatus {
+  if (status === "working") return "working";
+  if (status === "waiting") return "waiting";
+  if (status === "blocked") return "blocked";
+  return "idle";
+}
+
+const RPG_ACTOR_ROOM: Record<OfficeDeskRpgProjectionActorRole, OfficeRpgRoomId> = {
+  user_boss: "command",
+  orchestrator: "command",
+  search_worker: "agent_desks",
+  reviewer: "incident_corner",
+  wiki_writer: "task_board",
+  nas_keeper: "incident_corner",
+};
+
+const RPG_ACTOR_POSITION_INDEX: Record<OfficeDeskRpgProjectionActorRole, number> = {
+  user_boss: 0,
+  orchestrator: 1,
+  search_worker: 0,
+  reviewer: 0,
+  wiki_writer: 0,
+  nas_keeper: 1,
+};
 
 export function buildOfficeDeskRpgProjectionModel(state: OfficeState): OfficeDeskRpgProjectionModel {
   const blockedCount = state.work_items.filter((item) => String(item.status ?? "").toLowerCase().includes("block")).length;
@@ -6380,108 +6399,46 @@ export function buildOfficeCharacterFacilityCompletionReview(ledger: OfficeChara
 export function buildOfficeRpgScene(state: OfficeState): OfficeRpgScene {
   const entities: OfficeRpgSceneEntity[] = [];
   const incidentSeverities: OfficeRpgSeverity[] = [];
+  const projection = buildOfficeDeskRpgProjectionModel(state);
 
-  state.agents.slice(0, 12).forEach((agent, index) => {
-    const statusText = String(agent.status ?? "").toLowerCase();
-    const status: OfficeRpgStatus = statusText.includes("active") || statusText.includes("run") ? "working" : statusText.includes("idle") ? "idle" : statusText.length > 0 ? "waiting" : "unknown";
-    entities.push({
-      id: `agent-${index}`,
-      kind: "agent",
-      label: `직원 ${index + 1}`,
-      status,
-      room: "agent_desks",
-      positionHint: rpgPosition(index, "agent_desks"),
-      severity: rpgSeverityFromStatus(status),
-      lastEventAt: null,
-      summary: `세션/에이전트 안전 상태 ${status}`,
-      linkTarget: { type: "inspector", ref: `agents:${index}` },
-    });
+  state.work_items.forEach((item) => {
+    const severity = rpgSeverityFromStatus(rpgStatusFromWorkStatus(item.status));
+    if (severity === "danger") incidentSeverities.push(severity);
+  });
+  state.automations.forEach((job) => {
+    const severity = rpgSeverityFromStatus(rpgStatusFromAutomation(job));
+    if (severity === "danger") incidentSeverities.push(severity);
+  });
+  state.data_sources.forEach((source) => {
+    const severity = rpgSeverityFromSourceStatus(source.status, Math.max(0, source.warning_count ?? 0));
+    if (severity === "danger" || severity === "warning") incidentSeverities.push(severity);
   });
 
-  state.work_items.slice(0, 12).forEach((item, index) => {
-    const status = rpgStatusFromWorkStatus(item.status);
-    const severity = rpgSeverityFromStatus(status);
-    if (severity === "danger") incidentSeverities.push(severity);
-    entities.push({
-      id: `work-${index}`,
-      kind: "work_item",
-      label: `업무 ${index + 1}`,
-      status,
-      room: "task_board",
-      positionHint: rpgPosition(index, "task_board"),
-      severity,
-      lastEventAt: rpgTimestamp(item.updated_at) ?? rpgTimestamp(item.last_heartbeat_at),
-      summary: `업무 안전 상태 ${status}`,
-      linkTarget: { type: "inspector", ref: `work_items:${index}` },
-    });
-    if (status === "completed") {
+  projection.actors.forEach((actor) => {
+    const room = RPG_ACTOR_ROOM[actor.role];
+    const instanceCount = Math.max(1, actor.visibleInstances);
+    for (let index = 0; index < instanceCount; index += 1) {
+      const status = rpgStatusFromProjectionActorStatus(actor.status);
+      const suffix = actor.role === "search_worker" && instanceCount > 1 ? ` ${index + 1}` : "";
+      const suppressedDetail = actor.role === "search_worker" && projection.suppressedCounts.search_worker > 0
+        ? ` · 숨김 런타임 ${projection.suppressedCounts.search_worker}개 집계`
+        : "";
       entities.push({
-        id: `report-${entities.filter((entity) => entity.kind === "report").length}`,
-        kind: "report",
-        label: "완료 보고",
-        status: "completed",
-        room: "task_board",
-        positionHint: rpgPosition(index + 6, "task_board"),
-        severity: "info",
-        lastEventAt: rpgTimestamp(item.updated_at),
-        summary: "완료 상태 업무의 안전 보고 표시",
-        linkTarget: { type: "filter", ref: "work_items:completed" },
+        id: `${actor.role}-${index}`,
+        kind: actor.role,
+        label: `${actor.label}${suffix}`,
+        status,
+        room,
+        positionHint: rpgPosition(RPG_ACTOR_POSITION_INDEX[actor.role] + index, room),
+        severity: rpgSeverityFromStatus(status),
+        lastEventAt: null,
+        summary: `${actor.safeSummary}${suppressedDetail}`,
+        linkTarget: { type: "safe_ref", ref: `actor:${actor.role}` },
       });
     }
   });
 
-  state.automations.slice(0, 8).forEach((job, index) => {
-    const status = rpgStatusFromAutomation(job);
-    const severity = rpgSeverityFromStatus(status);
-    if (severity === "danger") incidentSeverities.push(severity);
-    entities.push({
-      id: `cron-${index}`,
-      kind: "cron_job",
-      label: `자동화 ${index + 1}`,
-      status,
-      room: "cron_room",
-      positionHint: rpgPosition(index, "cron_room"),
-      severity,
-      lastEventAt: rpgTimestamp(job.next_run_at) ?? rpgTimestamp(job.last_run_at),
-      summary: `자동화 안전 상태 ${status}`,
-      linkTarget: { type: "inspector", ref: `automations:${index}` },
-    });
-  });
-
-  state.data_sources.slice(0, 10).forEach((source, index) => {
-    const warningCount = Math.max(0, source.warning_count ?? 0);
-    const status = rpgStatusFromSourceStatus(source.status);
-    const severity = rpgSeverityFromSourceStatus(source.status, warningCount);
-    if (severity === "danger" || severity === "warning") incidentSeverities.push(severity);
-    entities.push({
-      id: `source-${index}`,
-      kind: "source",
-      label: `소스 ${index + 1}`,
-      status,
-      room: "source_archive",
-      positionHint: rpgPosition(index, "source_archive"),
-      severity,
-      lastEventAt: rpgTimestamp(source.checked_at),
-      summary: `소스 상태 ${source.status} · 경고 ${warningCount}`,
-      linkTarget: { type: "safe_ref", ref: `data_sources:${index}` },
-    });
-  });
-
   const incidentCount = incidentSeverities.length;
-  if (incidentCount > 0) {
-    entities.push({
-      id: "incident-summary",
-      kind: "incident",
-      label: "확인 필요",
-      status: incidentSeverities.some((severity) => severity === "danger") ? "blocked" : "warning",
-      room: "incident_corner",
-      positionHint: rpgPosition(0, "incident_corner"),
-      severity: maxRpgSeverity(incidentSeverities),
-      lastEventAt: null,
-      summary: `확인 필요 안전 신호 ${incidentCount}개`,
-      linkTarget: { type: "filter", ref: "incidents" },
-    });
-  }
 
   const recentEvents = state.events.slice(0, 6).map((event, index) => ({
     id: `event-${index}`,

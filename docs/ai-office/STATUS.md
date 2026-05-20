@@ -1,4 +1,34 @@
 
+## 2026-05-20 — Desk RPG representative actors slice
+
+Status: implemented and locally verified.
+
+What changed:
+
+- `/office` rendered RPG map now uses the existing Desk RPG MVP actor projection as the sprite source instead of rendering one sprite per raw agent/work item/automation/source.
+- Visible actor set is bounded to: User/Boss avatar, Orchestrator, Search Worker visible clones capped at 3, Reviewer, Wiki Writer, and NAS Keeper.
+- Work/Kanban/source/automation counts remain on room/facility surfaces; individual runtime rows are represented as board/facility state or Search Worker suppressed runtime count, not as extra map characters.
+- Safety posture remains read-only: inspector selection only, no save/deploy/transition controls, no backend/schema/API/storage/Kanban/NAS/cron/gateway change.
+
+Verification so far:
+
+- Focused RPG scene/map tests: 3 passed.
+- Combined Office tests: 252 passed.
+- ESLint: 0 errors, existing Fast Refresh warnings only.
+- Build: passed, existing Vite large chunk warning only.
+- `git diff --check`: passed.
+- Local browser DOM smoke at `/office?representative-actors=local`: sprites=8, fallbackRows=8, kinds=user_boss/orchestrator/search_worker/search_worker/search_worker/reviewer/wiki_writer/nas_keeper, scoped controls=0, rawLeak=false, console JS errors=0.
+- Local vision smoke confirmed the map is now representative-character scale and read-only.
+
+System rethink:
+
+- RPG map characters should be persistent role avatars, not a direct row renderer.
+- Kanban/Paperclip/cron/source state belongs in facilities/boards/counters/inspector drill-downs.
+- Runtime fan-out should appear as capped Search Worker clones plus suppressed-instance counts.
+- Future writes should enter through Orchestrator request/approval events, not worker/direct facility controls.
+
+Last updated: 2026-05-20 18:08 KST
+
 ## 2026-05-20 — Kanban mutation dry-run readiness 1
 
 Status: implemented, verified, committed, pushed, and deployed dashboard-only to VPS.

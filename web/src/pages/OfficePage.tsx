@@ -2005,6 +2005,12 @@ const RPG_KIND_LABEL: Record<OfficeRpgSceneEntity["kind"], string> = {
   source: "자료실",
   incident: "확인",
   report: "보고",
+  user_boss: "사장",
+  orchestrator: "오케스트레이터",
+  search_worker: "검색",
+  reviewer: "리뷰",
+  wiki_writer: "위키",
+  nas_keeper: "NAS",
 };
 
 const RPG_ROOM_LAYOUT: Record<OfficeRpgRoomId, { x: number; y: number; w: number; h: number; short: string }> = {

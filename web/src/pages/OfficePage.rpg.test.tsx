@@ -95,12 +95,15 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("data-office-rpg-map-door=\"command-agent_desks\"");
     expect(markup).toContain("data-office-rpg-map-furniture=\"central-board\"");
     expect(markup).toContain("data-office-rpg-character-sprite");
+    expect(scene.entities.length).toBeLessThanOrEqual(8);
     expect(markup.match(/data-office-rpg-character-sprite=/g)?.length).toBe(scene.entities.length);
     expect(markup).toContain("data-office-rpg-character-overlap-index");
     expect(markup).toContain("data-office-rpg-character-density-tier");
     expect(markup).toContain("data-office-rpg-character-density-tier=\"compact\"");
     expect(markup).toContain("data-office-rpg-character-density-room=\"task_board\"");
-    expect(markup).toContain("data-office-rpg-character-density-room=\"cron_room\"");
+    expect(markup).toContain("data-office-rpg-character-kind=\"orchestrator\"");
+    expect(markup).toContain("data-office-rpg-character-kind=\"search_worker\"");
+    expect(markup).toContain("data-office-rpg-character-kind=\"nas_keeper\"");
     expect(markup).toContain("data-office-rpg-character-label-slot");
     expect(markup).toContain("data-office-rpg-character-nameplate");
     expect(markup).toContain("data-office-rpg-character-label-anchor");
