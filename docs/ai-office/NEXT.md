@@ -1,7 +1,7 @@
 ## Next safest lane
-- Completed lane: guarded NAS Keeper live operator lane is mounted outside hidden legacy diagnostics on the private /office dashboard and can read the authorized queue plus expose the existing safe-ref execution+inline-state operator without page-load execution.
-- Boundary preserved: UI surface deploy/smoke only; approval checkbox remains false by default, inline state-record default remains true, markdown body/raw path/credential fields are not projected, and VPS direct NAS authority plus watcher/cron/dispatch daemon remain false.
-- Next higher-risk candidate after this deploy/smoke: one browser-click execution through the visible guarded operator against an isolated temporary Mac relay queue/root, with readback/hash/audit evidence, still no durable production queue, Kanban mutation, watcher/cron, VPS direct NAS authority, public exposure, or gateway restart.
+- Completed lane: visible guarded NAS Keeper `/office` operator was exercised by one actual browser click against an isolated temporary `HERMES_HOME` queue and temporary Mac relay root. The click executed+recorded a safe handoff, reset approval to false, kept inline recording true, and verified readback/audit/hash without using durable production queue or real NAS root.
+- Boundary preserved: no durable production queue execution, no real NAS write for this browser-click lane, no Kanban mutation, no watcher/cron/dispatch daemon, no authority-adapter binding, no VPS direct NAS authority, no dashboard/gateway restart, no public exposure, and no VPS file mutation.
+- Next higher-risk candidate after this smoke: one explicitly authorized durable-production-queue rehearsal/readback design or a separate real-NAS browser-click smoke, but not both at once; keep watcher/cron/dispatch/adapter binding/VPS NAS authority/public exposure separately gated.
 
 
 # Hermes AI Office — NEXT

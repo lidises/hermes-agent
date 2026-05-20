@@ -1,4 +1,12 @@
-Last updated: 2026-05-20 10:48 KST
+Last updated: 2026-05-20 11:10 KST
+
+## NAS Keeper visible browser-click execute-and-record smoke completed (temporary Mac relay root)
+- Raised the boundary from deployed guarded-operator visibility to one actual browser click on the private `/office` `NAS Keeper → Mac relay 실행+기록` button. The smoke used an isolated temporary `HERMES_HOME` queue plus a temporary Mac relay root; it did not touch the durable production queue or real NAS root.
+- Safe logical target: `vault_temp_operator_smoke::visible-operator-smoke-20260520110648.md`; browser-origin execution used `handoff_visible_operator_20260520110648`, `relay_exec_visible_operator_20260520110648`, and inline state recording enabled.
+- Result evidence: queue status `mac_relay_execution_succeeded`; executed=true, written=true, recorded=true, readback_verified=true, audit_written=true, approval checkbox reset false, inline-record checkbox stayed true, raw DOM leak=false, console JS errors 0.
+- Readback SHA-256: `410e68f2e4c8a28ad6083f002a8a7bb6340a06d166773b6fe881cbf8a7f5e19f`; queue terminal record includes `execution_record_ref=exec_record_visible_operator_20260520110648` and safe evidence refs for audit/readback/markdown hash.
+- Focused regression after clearing inherited smoke env: NAS Keeper from-preview/state/payload-preview/Mac relay write/NAS runtime/queue-readback tests `30 passed`; `git diff --check` passed. An unintended temp-root test artifact in the repo root was removed before verification, leaving the worktree clean before docs update.
+- Still not performed: durable production queue execution, real NAS write for this browser-click lane, Kanban mutation, watcher/cron/dispatch daemon activation, authority-adapter binding, VPS direct NAS mount/credential/write authority, gateway restart, dashboard restart, public exposure, or VPS file mutation.
 
 ## NAS Keeper live operator lane deployed (private dashboard visible guarded controls)
 - Raised the boundary from browser-console/protected-API smoke toward the visible private /office operator path by mounting `NasKeeperLiveOperatorLanePanel` outside `SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES`. The lane combines authorized queue readback plus the existing guarded execution-from-preview/state-record operator.
