@@ -1,4 +1,27 @@
 
+## Current next — Runtime-command inclusion live surface in progress
+
+Current slice:
+
+- User approved continuing the recommended controlled-mutation path with bounded writes and slightly stronger authority.
+- Existing protected runtime-command inclusion metadata store/API/readback implementation is being surfaced in the live `/office` page.
+- Added RED/GREEN placement regression so the inclusion panel stays outside `SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES` and appears in production/browser smoke.
+
+Safety boundary remains:
+
+- Bounded runtime-command inclusion metadata readback/status only; safe command-body refs/checksum may be written during smoke.
+- Runtime command execution, adapter binding/dispatch, replay execution, target mutation, Kanban mutation, NAS save/write/direct VPS NAS authority, watcher/cron activation, credential access, public exposure, and gateway restart remain blocked.
+
+Verification so far:
+
+- RED placement test failed when inclusion panel was only inside legacy diagnostics.
+- GREEN focused placement test passed after live-visible placement.
+- Full local verification and local API/browser smoke passed; commit/push and VPS dashboard-only deploy/live smoke pending.
+
+Handoff: `docs/ai-office/plans/2026-05-20-runtime-command-inclusion-live-surface-handoff.md`.
+
+Last updated: 2026-05-20 21:52 KST
+
 
 
 ## Current next — Dispatch gate + runtime preview live surface in progress

@@ -8970,6 +8970,7 @@ export default function OfficePage() {
       <ApprovalEventEnvelopeStatusPanel status={approvalEventEnvelopeStatus} error={approvalEventEnvelopeStatusError} />
       <ManualDispatchGateOpenRecordStatusPanel status={manualDispatchGateOpenRecordStatus} error={manualDispatchGateOpenRecordStatusError} />
       <ManualRuntimeCommandPreviewRecordStatusPanel status={manualRuntimeCommandPreviewRecordStatus} error={manualRuntimeCommandPreviewRecordStatusError} />
+      <ManualRuntimeCommandInclusionRecordStatusPanel status={manualRuntimeCommandInclusionRecordStatus} error={manualRuntimeCommandInclusionRecordStatusError} />
 
       {SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES ? (
         <>
