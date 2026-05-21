@@ -1,7 +1,7 @@
 
 ## 2026-05-21 — NAS Keeper handoff live surface slice
 
-Status: in progress; local verification passed, deploy pending.
+Status: complete; local verification and VPS dashboard-only deploy/live smoke passed.
 
 What changed:
 
@@ -18,11 +18,13 @@ Verification so far:
 
 - RED placement test failed when NAS Keeper handoff panel was only inside legacy diagnostics.
 - GREEN focused placement test passed after live-visible placement.
-- Full local verification and local API/browser smoke passed; commit/push and VPS dashboard-only deploy/live smoke pending.
+- Full local verification, commit/push, VPS dashboard-only sync/restart, protected API smoke, and browser smoke passed.
 
 Handoff: `docs/ai-office/plans/2026-05-21-nas-keeper-handoff-live-surface-handoff.md`.
 
-Last updated: 2026-05-21 09:35 KST
+Deployed commit: `652d351982583a7f9a7d4d11dcffca692c53bfd9`. Dashboard-only restart completed; gateway untouched/active.
+
+Last updated: 2026-05-21 09:38 KST
 
 ## 2026-05-21 — NAS-save live surface slice
 
