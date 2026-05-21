@@ -8970,6 +8970,10 @@ export default function OfficePage() {
       <RuntimeActivationReviewStatusPanel status={runtimeActivationReviewStatus} error={runtimeActivationReviewStatusError} />
       <RuntimePreflightStatusPanel status={runtimePreflightStatus} error={runtimePreflightStatusError} />
       <ManualOneShotRuntimeDryRunStatusPanel status={manualOneShotRuntimeDryRunStatus} error={manualOneShotRuntimeDryRunStatusError} />
+      <AdapterBindingDryRunStatusPanel status={adapterBindingDryRunStatus} error={adapterBindingDryRunStatusError} />
+      <HumanReviewedSingleDispatchStatusPanel status={humanReviewedSingleDispatchStatus} error={humanReviewedSingleDispatchStatusError} />
+      <ExplicitRuntimeDispatchApprovalStatusPanel status={explicitRuntimeDispatchApprovalStatus} error={explicitRuntimeDispatchApprovalStatusError} />
+      <ConcreteRuntimeSingleDispatchSliceDesignPanel status={concreteRuntimeSingleDispatchSliceDesign} error={concreteRuntimeSingleDispatchSliceDesignError} />
 
       <ApprovalEventEnvelopeStatusPanel status={approvalEventEnvelopeStatus} error={approvalEventEnvelopeStatusError} />
       <ManualDispatchGateOpenRecordStatusPanel status={manualDispatchGateOpenRecordStatus} error={manualDispatchGateOpenRecordStatusError} />
@@ -9068,10 +9072,6 @@ export default function OfficePage() {
       <DispatcherCompletionReviewStatusPanel status={dispatcherCompletionReviewStatus} error={dispatcherCompletionReviewStatusError} />
       <TargetDispatchContractStatusPanel status={targetDispatchContractStatus} error={targetDispatchContractStatusError} />
       <WatcherCronContractStatusPanel status={watcherCronContractStatus} error={watcherCronContractStatusError} />
-      <AdapterBindingDryRunStatusPanel status={adapterBindingDryRunStatus} error={adapterBindingDryRunStatusError} />
-      <HumanReviewedSingleDispatchStatusPanel status={humanReviewedSingleDispatchStatus} error={humanReviewedSingleDispatchStatusError} />
-      <ExplicitRuntimeDispatchApprovalStatusPanel status={explicitRuntimeDispatchApprovalStatus} error={explicitRuntimeDispatchApprovalStatusError} />
-      <ConcreteRuntimeSingleDispatchSliceDesignPanel status={concreteRuntimeSingleDispatchSliceDesign} error={concreteRuntimeSingleDispatchSliceDesignError} />
       <DisabledOneShotRuntimeDispatchExecutorSkeletonPanel status={disabledOneShotRuntimeDispatchExecutorSkeleton} error={disabledOneShotRuntimeDispatchExecutorSkeletonError} />
       <ApprovedRealOneShotDispatchGateDesignPanel status={approvedRealOneShotDispatchGateDesign} error={approvedRealOneShotDispatchGateDesignError} />
       <ManualApprovalRecordingPreflightStatusPanel status={manualApprovalRecordingPreflightStatus} error={manualApprovalRecordingPreflightStatusError} />
