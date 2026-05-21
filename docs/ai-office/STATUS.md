@@ -1,4 +1,51 @@
 
+## Current next — manual dispatch gate open metadata record complete
+
+Current slice:
+
+- User's standing goal approved continuing from approval-backed dispatch-gate readiness into the next bounded write rung.
+- Hardened the protected `ManualDispatchGateOpenRecordStatusPanel` placement: it remains visible in live `/office` before the legacy diagnostic gate, and the duplicate legacy-only instance was removed.
+- Exercised the existing protected dispatch-gate-open metadata-only POST/GET routes on the private VPS.
+- Wrote `dispatch_gate_open=true` metadata only. No runtime command materialization/inclusion/execution, adapter binding/dispatch, replay-store write, rollback execution, target/Kanban/NAS mutation, watcher/cron/daemon, direct VPS NAS authority, public exposure, or gateway restart was added.
+
+Code commit/deploy:
+
+- Code commit: `8d774767 feat(office): harden dispatch gate open panel placement`.
+- Synced both VPS worktrees to `8d774767`.
+- Rsynced local built `hermes_cli/web_dist/` to both worktrees.
+- Restarted only `hermes-agent-dashboard.service`; did not restart gateway.
+- Final services: dashboard active, gateway active.
+
+Local verification:
+
+- `py_compile` passed for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py`.
+- Focused backend manual approval/dispatch gate tests passed (`31 passed`).
+- Frontend `web/` tests passed: `src/lib/api.test.ts` + `src/pages/OfficePage.rpg.test.tsx` (`145 passed`).
+- `npm run build` passed with existing Vite large chunk warning.
+- `git diff --check` passed.
+- Added-line sentinel scan found no new raw path/token/provider sentinels.
+
+VPS protected API smoke:
+
+- `/office?gate-open=8d774767` returned HTTP 200 after dashboard restart readiness delay.
+- Session token extracted from SPA shell and protected APIs called with `X-Hermes-Session-Token`.
+- Existing approval record source: `approval-b81c79ee-live-smoke-1224`.
+- New gate-open metadata ref: `gate-8d774767-live-smoke-1255`.
+- POST `/api/office/controlled-mutation/manual-dispatch-gate-open-record` returned unauth=401, stored=true, dto.mode=`stored_manual_dispatch_gate_open_record`, dispatch_gate_open=true, runtime_command_included=false, runtime_command_executed=false, target_mutation_created=false, kanban_mutation_created=false, nas_save_created=false, real_dispatch_execution_enabled=false, and did not echo unsafe extras.
+- GET `/api/office/controlled-mutation/manual-dispatch-gate-open-record-status?dispatch_gate_ref=gate-8d774767-live-smoke-1255` returned unauth=401, mode=`stored_manual_dispatch_gate_open_records_readback`, dispatch_gate_open_record_count=1 for the queried ref, capabilities.dispatch_gate_open=true, false risky capabilities, and no raw leak.
+
+VPS live DOM smoke:
+
+- `data-office-manual-dispatch-gate-open-record-status="true"`: exists=true, controls=0, gate-open=true, runtime-executed=false, real-dispatch=false.
+- Page body includes the safe gate smoke ref.
+- Raw leak sentinels absent from page body; browser console messages/errors after smoke: 0.
+
+Handoff: `docs/ai-office/plans/2026-05-21-manual-dispatch-gate-open-record-handoff.md`.
+
+Next recommended rung: `manual_runtime_command_preview_record`, only if the next prompt keeps bounded write approval. This may store runtime-command preview metadata/checksum only; raw command inclusion, runtime execution, adapter dispatch, replay-store write, rollback, target/Kanban/NAS/VPS mutation, service/git/credential/public authority, watcher/cron, gateway restart, and direct VPS NAS authority must remain closed.
+
+Last updated: 2026-05-21 12:58 KST
+
 ## Current next — manual approval dispatch-gate readiness visible panel complete
 
 Current slice:
