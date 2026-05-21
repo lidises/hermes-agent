@@ -6768,6 +6768,64 @@ export function MacLocalRelayRootAuthorityConfigContractPanel({
   );
 }
 
+
+export function MacLocalRelayRootReadinessProbeContractPanel({
+  terminalResult,
+  error,
+}: {
+  terminalResult: OfficeNasKeeperExecutionStateResult | null;
+  error?: string | null;
+}) {
+  const dto = terminalResult?.dto ?? null;
+  const terminalClosed = dto?.execution_status === "failed_guarded" && dto?.queue_status_after === "mac_relay_execution_failed_guarded";
+  const caps = dto?.capabilities ?? {};
+  const proofFields = [
+    ["root_configured", "boolean placeholder; true only after a Mac-local runtime check."],
+    ["root_readable", "boolean placeholder; directory readability proof without path echo."],
+    ["root_writable", "boolean placeholder; writable readiness proof without creating final NAS content."],
+    ["safe_probe_ref", "opaque safe ref such as probe-macrelay-<hash>; no filesystem value."],
+    ["sanitized_root_label", "coarse label only, for example mac_local_relay_root."],
+    ["redaction_policy_version", "versioned rule proving root values and credentials were suppressed."],
+    ["probe_errors", "safe enum list only; never raw exception text with paths."],
+    ["write_payload_included", "false until the separate one-shot write arm/review rung."],
+  ];
+  return (
+    <section
+      className="border border-emerald-300/20 bg-emerald-950/10 p-4"
+      data-office-mac-local-relay-root-readiness-probe-contract="true"
+      data-office-mac-local-relay-root-readiness-probe-contract-read-only="true"
+      data-office-mac-local-relay-root-readiness-probe-contract-probe-executed="false"
+      data-office-mac-local-relay-root-readiness-probe-contract-write-enabled={String(Boolean(caps.mac_relay_write_enabled || caps.actual_nas_write_enabled))}
+      data-office-mac-local-relay-root-readiness-probe-contract-vps-nas-authority={String(Boolean(caps.vps_nas_mount_enabled || caps.direct_vps_nas_write_enabled))}
+      data-office-mac-local-relay-root-readiness-probe-contract-terminal-closed={String(Boolean(terminalClosed))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">Mac-local relay root readiness probe contract</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">sanitized proof payload shape · no probe execution yet</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            This rung defines the future Mac-local readiness probe DTO. It may report configured/readable/writable booleans, a safe probe ref, a sanitized root label, and redaction policy version; it must not include raw paths, credentials, write payloads, watcher/cron/daemon state, VPS NAS mount authority, or final NAS writes.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "probe contract unavailable" : terminalClosed ? "ready for probe contract review" : "waiting for terminal guard evidence"}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-mac-local-relay-root-readiness-probe-contract-fields="true">
+        {proofFields.map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-mac-local-relay-root-readiness-probe-contract-field={key}>
+            <div className="font-semibold text-foreground">{key}</div>
+            <div className="mt-1 leading-5 text-midground/70">{value}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 border border-current/15 bg-black/20 p-3 text-xs leading-5 text-midground/70" data-office-mac-local-relay-root-readiness-probe-contract-boundary="true">
+        Completion of this contract should raise actual write readiness only by clarifying proof shape. It does not configure the Mac relay root, run a probe, create write payloads, mount NAS on the VPS, or authorize actual NAS writes.
+      </div>
+    </section>
+  );
+}
+
 export function ApprovedRealOneShotDispatchGateDesignPanel({
   status,
   error,
@@ -9718,6 +9776,7 @@ export default function OfficePage() {
 
       <MacLocalRelayRootAuthorityPreflightPanel terminalResult={nasKeeperGuardedFailureStateResult} error={nasKeeperGuardedFailureStateError} />
       <MacLocalRelayRootAuthorityConfigContractPanel terminalResult={nasKeeperGuardedFailureStateResult} error={nasKeeperGuardedFailureStateError} />
+      <MacLocalRelayRootReadinessProbeContractPanel terminalResult={nasKeeperGuardedFailureStateResult} error={nasKeeperGuardedFailureStateError} />
 
       <OfficeVisualizerEvidenceDrawer terminalResult={nasKeeperGuardedFailureStateResult}>
       <NasKeeperLiveOperatorLanePanel

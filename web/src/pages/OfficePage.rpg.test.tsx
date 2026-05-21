@@ -65,6 +65,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
     expect(source).toContain('data-office-visualizer-evidence-drawer="true"');
     expect(source).toContain("<MacLocalRelayRootAuthorityPreflightPanel");
     expect(source).toContain("<MacLocalRelayRootAuthorityConfigContractPanel");
+    expect(source).toContain("<MacLocalRelayRootReadinessProbeContractPanel");
 
     for (const panel of [
       "<NasKeeperLiveOperatorLanePanel",
@@ -3910,6 +3911,62 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).toContain("masked_root_present");
     expect(html).toContain("writable_probe_required");
     expect(html).toContain("write execution remains a later rung");
+    expect(html).not.toContain("/Users/lidises");
+    expect(html).not.toContain("/home/hermes");
+    expect(html).not.toContain("/volume1");
+    expect(html).not.toContain("sk-test");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("<form");
+    expect(html).not.toContain("<input");
+    expect(html).not.toContain("<select");
+    expect(html).not.toContain("<textarea");
+  });
+
+  it("renders Mac-local relay root readiness probe contract as sanitized proof shape only", () => {
+    const MacLocalRelayRootReadinessProbeContractPanel = (OfficePageModule as unknown as {
+      MacLocalRelayRootReadinessProbeContractPanel: React.ComponentType<{ terminalResult: unknown; error?: string | null }>;
+    }).MacLocalRelayRootReadinessProbeContractPanel;
+    expect(MacLocalRelayRootReadinessProbeContractPanel).toBeTypeOf("function");
+
+    const html = renderToStaticMarkup(
+      <MacLocalRelayRootReadinessProbeContractPanel
+        error={null}
+        terminalResult={{
+          recorded: true,
+          errors: [],
+          dto: {
+            recorded: true,
+            queue_status_after: "mac_relay_execution_failed_guarded",
+            execution_status: "failed_guarded",
+            next_required_boundary: "none_terminal_execution_state_recorded",
+            capabilities: {
+              queue_mutation_enabled: true,
+              mac_relay_write_enabled: false,
+              actual_nas_write_enabled: false,
+              vps_nas_mount_enabled: false,
+              direct_vps_nas_write_enabled: false,
+              watcher_enabled: false,
+              cron_enabled: false,
+              dispatch_enabled: false,
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(html).toContain('data-office-mac-local-relay-root-readiness-probe-contract="true"');
+    expect(html).toContain('data-office-mac-local-relay-root-readiness-probe-contract-read-only="true"');
+    expect(html).toContain('data-office-mac-local-relay-root-readiness-probe-contract-probe-executed="false"');
+    expect(html).toContain('data-office-mac-local-relay-root-readiness-probe-contract-write-enabled="false"');
+    expect(html).toContain('data-office-mac-local-relay-root-readiness-probe-contract-vps-nas-authority="false"');
+    expect(html).toContain("Mac-local relay root readiness probe contract");
+    expect(html).toContain("sanitized proof payload shape");
+    expect(html).toContain("root_configured");
+    expect(html).toContain("root_readable");
+    expect(html).toContain("root_writable");
+    expect(html).toContain("safe_probe_ref");
+    expect(html).toContain("sanitized_root_label");
+    expect(html).toContain("redaction_policy_version");
     expect(html).not.toContain("/Users/lidises");
     expect(html).not.toContain("/home/hermes");
     expect(html).not.toContain("/volume1");
