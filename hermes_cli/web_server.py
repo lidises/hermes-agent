@@ -96,6 +96,7 @@ from hermes_cli.office_controlled_mutation import (
     execute_office_controlled_mutation_nas_mac_relay_write,
     probe_office_controlled_mutation_mac_relay_root_readiness,
     review_office_controlled_mutation_nas_keeper_one_shot_write_payload_arm,
+    get_office_controlled_mutation_nas_keeper_last_successful_mac_relay_write,
     execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_preview,
     record_office_controlled_mutation_nas_keeper_mac_relay_execution_state,
     list_office_controlled_mutation_nas_keeper_mac_relay_handoff_queue,
@@ -711,6 +712,12 @@ async def review_office_controlled_mutation_nas_keeper_one_shot_write_payload_ar
         payload,
         root_path=os.environ.get("HERMES_AI_OFFICE_MAC_RELAY_NAS_ROOT"),
     )
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-last-successful-mac-relay-write")
+async def get_office_controlled_mutation_nas_keeper_last_successful_mac_relay_write_route():
+    """Return last successful bounded Mac relay write refs/readback without replay authority."""
+    return get_office_controlled_mutation_nas_keeper_last_successful_mac_relay_write()
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-execution-from-preview")

@@ -7165,6 +7165,154 @@ def _safe_nas_keeper_queue_summary(item: Mapping[str, object]) -> dict[str, obje
     return summary
 
 
+def _extract_safe_execution_ref_sha(evidence_refs: object, prefix: str) -> str | None:
+    if not isinstance(evidence_refs, Sequence) or isinstance(evidence_refs, (str, bytes)):
+        return None
+    marker = f"{prefix}:"
+    for ref in evidence_refs:
+        if not isinstance(ref, str) or not ref.startswith(marker):
+            continue
+        candidate = ref[len(marker) :]
+        if re.fullmatch(r"[0-9a-f]{64}", candidate):
+            return candidate
+    return None
+
+
+def get_office_controlled_mutation_nas_keeper_last_successful_mac_relay_write(
+    *, queue_dir: Path | str | None = None
+) -> dict[str, object]:
+    """Return the latest successful bounded Mac relay write as safe refs only.
+
+    This readback is intentionally display-only. It helps operators see the last
+    verified one-shot write and the repeat-safety contract, but it never returns
+    markdown bodies, raw root paths, credentials, replay payloads, or enables
+    daemonized/repeated execution.
+    """
+
+    listed = list_office_controlled_mutation_nas_keeper_mac_relay_handoff_queue(
+        {"queue_status": "mac_relay_execution_succeeded", "limit": 200}, queue_dir=queue_dir
+    )
+    if not listed.get("listed"):
+        return {"found": False, "errors": cast(list[dict[str, str]], listed.get("errors") or []), "dto": None}
+    dto = cast(dict[str, object], listed.get("dto") or {})
+    raw_items = dto.get("items", [])
+    items = [item for item in raw_items if isinstance(item, Mapping)] if isinstance(raw_items, Sequence) else []
+    successes: list[Mapping[str, object]] = []
+    for item in items:
+        if item.get("queue_status") != "mac_relay_execution_succeeded" or item.get("execution_status") != "succeeded":
+            continue
+        if not _is_opaque_id(item.get("handoff_ref")):
+            continue
+        if not _is_opaque_id(item.get("relay_execution_ref")) or not _is_opaque_id(item.get("execution_record_ref")):
+            continue
+        readback_sha = _extract_safe_execution_ref_sha(item.get("execution_evidence_refs"), "readback")
+        markdown_sha = _extract_safe_execution_ref_sha(item.get("execution_evidence_refs"), "markdown")
+        if readback_sha is None:
+            continue
+        if markdown_sha is not None and markdown_sha != readback_sha:
+            continue
+        successes.append(item)
+    if not successes:
+        return {
+            "found": False,
+            "errors": [],
+            "dto": {
+                "schema_version": 1,
+                "mode": "nas_keeper_mac_relay_last_successful_bounded_write_readback",
+                "last_successful_write_found": False,
+                "count": 0,
+                "markdown_body_included": False,
+                "raw_root_path_included": False,
+                "credential_value_included": False,
+                "repeat_execution_replay_allowed": False,
+                "fresh_handoff_required_per_write": True,
+                "fresh_authorization_required_per_write": True,
+                "fresh_execution_ref_required_per_write": True,
+                "capabilities": {
+                    "queue_read_enabled": True,
+                    "last_successful_write_readback_enabled": True,
+                    "repeat_execution_replay_enabled": False,
+                    "actual_nas_write_enabled": False,
+                    "watcher_enabled": False,
+                    "cron_enabled": False,
+                    "dispatch_enabled": False,
+                    "authority_adapter_binding_enabled": False,
+                    "vps_nas_mount_enabled": False,
+                    "vps_credential_access_enabled": False,
+                    "direct_vps_nas_write_enabled": False,
+                },
+                "next_required_boundary": "fresh_handoff_authorization_execution_refs_required",
+            },
+        }
+
+    def sort_key(item: Mapping[str, object]) -> tuple[str, str]:
+        return (str(item.get("execution_recorded_at") or ""), str(item.get("handoff_ref") or ""))
+
+    latest = sorted(successes, key=sort_key, reverse=True)[0]
+    readback_sha = _extract_safe_execution_ref_sha(latest.get("execution_evidence_refs"), "readback") or ""
+    markdown_sha = _extract_safe_execution_ref_sha(latest.get("execution_evidence_refs"), "markdown")
+    safe_refs = {
+        "handoff_ref": latest.get("handoff_ref"),
+        "authorization_ref": latest.get("authorization_ref"),
+        "relay_execution_ref": latest.get("relay_execution_ref"),
+        "execution_record_ref": latest.get("execution_record_ref"),
+        "target_vault_ref": latest.get("target_vault_ref"),
+        "safe_slug": latest.get("safe_slug"),
+        "safe_display_path": latest.get("safe_display_path"),
+        "queue_ref": latest.get("queue_ref"),
+        "queue_status": latest.get("queue_status"),
+        "execution_status": latest.get("execution_status"),
+    }
+    result_dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_mac_relay_last_successful_bounded_write_readback",
+        "last_successful_write_found": True,
+        "last_success_rank": 1,
+        "count": len(successes),
+        **safe_refs,
+        "execution_recorded_at": latest.get("execution_recorded_at"),
+        "execution_recorded_by": latest.get("execution_recorded_by"),
+        "readback_sha256": readback_sha,
+        "markdown_body_sha256": markdown_sha,
+        "readback_verified": bool(markdown_sha is None or markdown_sha == readback_sha),
+        "payload_bytes": latest.get("payload_bytes"),
+        "execution_evidence_refs": list(cast(Sequence[object], latest.get("execution_evidence_refs") or [])),
+        "markdown_body_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "write_payload_included": False,
+        "repeat_execution_replay_allowed": False,
+        "fresh_handoff_required_per_write": True,
+        "fresh_authorization_required_per_write": True,
+        "fresh_execution_ref_required_per_write": True,
+        "operator_flow_contract": [
+            "display_last_successful_write_refs_only",
+            "require_fresh_handoff_ref_per_write",
+            "require_fresh_authorization_ref_per_write",
+            "require_fresh_execution_ref_per_write",
+            "do_not_replay_previous_execution_payload",
+            "keep_automation_off",
+        ],
+        "capabilities": {
+            "queue_read_enabled": True,
+            "last_successful_write_readback_enabled": True,
+            "repeat_execution_replay_enabled": False,
+            "execution_payload_replay_enabled": False,
+            "actual_nas_write_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_credential_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+        },
+        "next_required_boundary": "fresh_handoff_authorization_execution_refs_required",
+    }
+    return {"found": True, "errors": [], "dto": result_dto}
+
+
+
 def list_office_controlled_mutation_nas_keeper_mac_relay_handoff_queue(
     filters: object | None = None, *, queue_dir: Path | str | None = None
 ) -> dict[str, object]:

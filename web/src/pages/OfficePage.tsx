@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeManualApprovalRecordingDraftReviewStatus, type OfficeManualApprovalRecordStatus, type OfficeApprovalEventEnvelopeStatus, type OfficeManualApprovalDispatchGateReadinessStatus, type OfficeManualDispatchGateOpenRecordStatus, type OfficeManualRuntimeCommandPreviewRecordStatus, type OfficeManualRuntimeCommandInclusionRecordStatus, type OfficeManualRuntimeCommandExecutionRecordStatus, type OfficeManualTargetMutationReadinessRecordStatus, type OfficeManualTargetMutationRecordStatus, type OfficeManualAdapterDispatchRecordStatus, type OfficeManualKanbanMutationRecordStatus, type OfficeManualNasSaveRecordStatus, type OfficeManualNasKeeperHandoffRecordStatus, type OfficeNasKeeperHandoffClaimDryRunResult, type OfficeNasKeeperHandoffAuthorizationResult, type OfficeNasKeeperExecutionPayloadPreviewResult, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeMacRelayRootReadinessProbeResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeManualApprovalRecordingDraftReviewStatus, type OfficeManualApprovalRecordStatus, type OfficeApprovalEventEnvelopeStatus, type OfficeManualApprovalDispatchGateReadinessStatus, type OfficeManualDispatchGateOpenRecordStatus, type OfficeManualRuntimeCommandPreviewRecordStatus, type OfficeManualRuntimeCommandInclusionRecordStatus, type OfficeManualRuntimeCommandExecutionRecordStatus, type OfficeManualTargetMutationReadinessRecordStatus, type OfficeManualTargetMutationRecordStatus, type OfficeManualAdapterDispatchRecordStatus, type OfficeManualKanbanMutationRecordStatus, type OfficeManualNasSaveRecordStatus, type OfficeManualNasKeeperHandoffRecordStatus, type OfficeNasKeeperHandoffClaimDryRunResult, type OfficeNasKeeperHandoffAuthorizationResult, type OfficeNasKeeperExecutionPayloadPreviewResult, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeMacRelayRootReadinessProbeResult, type OfficeNasKeeperLastSuccessfulMacRelayWriteResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -6834,6 +6834,72 @@ export function MacLocalRelayRootReadinessProbeContractPanel({
   );
 }
 
+export function NasKeeperLastSuccessfulMacRelayWriteStatusPanel({
+  result,
+  error,
+}: {
+  result: OfficeNasKeeperLastSuccessfulMacRelayWriteResult | null;
+  error?: string | null;
+}) {
+  const dto = result?.dto ?? null;
+  const caps = dto?.capabilities ?? {};
+  const found = Boolean(result?.found && dto?.last_successful_write_found);
+  const readback = Boolean(dto?.readback_verified);
+  const rows = [
+    ["handoff_ref", dto?.handoff_ref ?? "waiting for first successful bounded write"],
+    ["relay_execution_ref", dto?.relay_execution_ref ?? "fresh ref required per write"],
+    ["execution_record_ref", dto?.execution_record_ref ?? "fresh record required per write"],
+    ["safe_display_path", dto?.safe_display_path ?? "safe vault-relative display path only"],
+    ["readback_sha256", dto?.readback_sha256 ?? "safe checksum only"],
+    ["queue_status", dto?.queue_status ?? "waiting"],
+    ["execution_status", dto?.execution_status ?? "waiting"],
+    ["next_required_boundary", dto?.next_required_boundary ?? "fresh_handoff_authorization_execution_refs_required"],
+  ];
+  return (
+    <section
+      className="border border-sky-300/20 bg-sky-950/10 p-4"
+      data-office-nas-keeper-last-successful-mac-relay-write="true"
+      data-office-nas-keeper-last-successful-mac-relay-write-found={String(found)}
+      data-office-nas-keeper-last-successful-mac-relay-write-readback-verified={String(readback)}
+      data-office-nas-keeper-last-successful-mac-relay-write-repeat-replay-enabled={String(Boolean(caps.repeat_execution_replay_enabled || dto?.repeat_execution_replay_allowed))}
+      data-office-nas-keeper-last-successful-mac-relay-write-fresh-handoff-required={String(Boolean(dto?.fresh_handoff_required_per_write))}
+      data-office-nas-keeper-last-successful-mac-relay-write-fresh-authorization-required={String(Boolean(dto?.fresh_authorization_required_per_write))}
+      data-office-nas-keeper-last-successful-mac-relay-write-fresh-execution-ref-required={String(Boolean(dto?.fresh_execution_ref_required_per_write))}
+      data-office-nas-keeper-last-successful-mac-relay-write-automation-enabled={String(Boolean(caps.watcher_enabled || caps.cron_enabled || caps.dispatch_enabled || caps.authority_adapter_binding_enabled))}
+      data-office-nas-keeper-last-successful-mac-relay-write-vps-nas-authority={String(Boolean(caps.vps_nas_mount_enabled || caps.direct_vps_nas_write_enabled || caps.vps_credential_access_enabled))}
+      data-office-nas-keeper-last-successful-mac-relay-write-markdown-body-included={String(Boolean(dto?.markdown_body_included))}
+      data-office-nas-keeper-last-successful-mac-relay-write-raw-root-path-included={String(Boolean(dto?.raw_root_path_included))}
+      data-office-nas-keeper-last-successful-mac-relay-write-credential-value-included={String(Boolean(dto?.credential_value_included))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-200/70">Repeat-safe Mac relay operator flow</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">last bounded write readback · fresh refs required</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Shows the last successful bounded Mac-local write using only safe refs and checksums. It deliberately disables replay, automation, raw root path disclosure, credential disclosure, and VPS NAS authority; every future write must use fresh handoff, authorization, and execution refs.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "readback unavailable" : found ? "last write verified" : "no successful write yet"}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-nas-keeper-last-successful-mac-relay-write-fields="true">
+        {rows.map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-nas-keeper-last-successful-mac-relay-write-field={key}>
+            <div className="font-semibold text-foreground">{key}</div>
+            <div className="mt-1 break-words leading-5 text-midground/70">{value}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-3" data-office-nas-keeper-last-successful-mac-relay-write-guards="true">
+        <div className="border border-current/15 bg-black/20 p-3 text-xs">fresh_handoff_required: {String(Boolean(dto?.fresh_handoff_required_per_write))}</div>
+        <div className="border border-current/15 bg-black/20 p-3 text-xs">fresh_authorization_required: {String(Boolean(dto?.fresh_authorization_required_per_write))}</div>
+        <div className="border border-current/15 bg-black/20 p-3 text-xs">fresh_execution_ref_required: {String(Boolean(dto?.fresh_execution_ref_required_per_write))}</div>
+      </div>
+    </section>
+  );
+}
+
 export function ApprovedRealOneShotDispatchGateDesignPanel({
   status,
   error,
@@ -8348,6 +8414,8 @@ export default function OfficePage() {
   const [nasKeeperGuardedFailureStateError, setNasKeeperGuardedFailureStateError] = useState<string | null>(null);
   const [macRelayRootReadinessProbeResult, setMacRelayRootReadinessProbeResult] = useState<OfficeMacRelayRootReadinessProbeResult | null>(null);
   const [macRelayRootReadinessProbeError, setMacRelayRootReadinessProbeError] = useState<string | null>(null);
+  const [nasKeeperLastSuccessfulMacRelayWriteResult, setNasKeeperLastSuccessfulMacRelayWriteResult] = useState<OfficeNasKeeperLastSuccessfulMacRelayWriteResult | null>(null);
+  const [nasKeeperLastSuccessfulMacRelayWriteError, setNasKeeperLastSuccessfulMacRelayWriteError] = useState<string | null>(null);
   const nasKeeperClaimDryRunKeyRef = useRef<string | null>(null);
   const nasKeeperAuthorizationKeyRef = useRef<string | null>(null);
   const nasKeeperPayloadPreviewKeyRef = useRef<string | null>(null);
@@ -8663,6 +8731,19 @@ export default function OfficePage() {
         setMacRelayRootReadinessProbeError("request failed");
       });
   }, [macRelayRootReadinessProbeResult, nasKeeperGuardedFailureStateResult]);
+
+  useEffect(() => {
+    if (nasKeeperLastSuccessfulMacRelayWriteResult?.dto) return;
+    api.getOfficeControlledMutationNasKeeperLastSuccessfulMacRelayWrite()
+      .then((result) => {
+        setNasKeeperLastSuccessfulMacRelayWriteResult(result);
+        setNasKeeperLastSuccessfulMacRelayWriteError(null);
+      })
+      .catch(() => {
+        setNasKeeperLastSuccessfulMacRelayWriteResult(null);
+        setNasKeeperLastSuccessfulMacRelayWriteError("request failed");
+      });
+  }, [nasKeeperLastSuccessfulMacRelayWriteResult]);
 
   const executeNasSingleFileWrite = useCallback(async () => {
     if (!nasSingleWriteApproved) {
@@ -9802,6 +9883,7 @@ export default function OfficePage() {
       <MacLocalRelayRootAuthorityPreflightPanel terminalResult={nasKeeperGuardedFailureStateResult} error={nasKeeperGuardedFailureStateError} />
       <MacLocalRelayRootAuthorityConfigContractPanel terminalResult={nasKeeperGuardedFailureStateResult} error={nasKeeperGuardedFailureStateError} />
       <MacLocalRelayRootReadinessProbeContractPanel terminalResult={nasKeeperGuardedFailureStateResult} probeResult={macRelayRootReadinessProbeResult} error={nasKeeperGuardedFailureStateError ?? macRelayRootReadinessProbeError} />
+      <NasKeeperLastSuccessfulMacRelayWriteStatusPanel result={nasKeeperLastSuccessfulMacRelayWriteResult} error={nasKeeperLastSuccessfulMacRelayWriteError} />
 
       <OfficeVisualizerEvidenceDrawer terminalResult={nasKeeperGuardedFailureStateResult}>
       <NasKeeperLiveOperatorLanePanel

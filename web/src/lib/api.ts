@@ -1364,6 +1364,41 @@ export interface OfficeMacRelayRootReadinessProbeResult {
   };
 }
 
+export interface OfficeNasKeeperLastSuccessfulMacRelayWriteResult {
+  found: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: null | {
+    schema_version: number;
+    mode: "nas_keeper_mac_relay_last_successful_bounded_write_readback";
+    last_successful_write_found: boolean;
+    handoff_ref?: string;
+    authorization_ref?: string;
+    relay_execution_ref?: string;
+    execution_record_ref?: string;
+    target_vault_ref?: string;
+    safe_slug?: string;
+    safe_display_path?: string;
+    queue_status?: string;
+    execution_status?: string;
+    execution_recorded_at?: string;
+    readback_sha256?: string;
+    markdown_body_sha256?: string;
+    readback_verified?: boolean;
+    payload_bytes?: number;
+    markdown_body_included: false;
+    raw_root_path_included: false;
+    credential_value_included: false;
+    write_payload_included?: false;
+    repeat_execution_replay_allowed: false;
+    fresh_handoff_required_per_write: true;
+    fresh_authorization_required_per_write: true;
+    fresh_execution_ref_required_per_write: true;
+    operator_flow_contract?: string[];
+    capabilities: Record<string, boolean>;
+    next_required_boundary?: string;
+  };
+}
+
 export interface OfficeNasKeeperExecutionFromPreviewPayload {
   handoff_ref: string;
   relay_execution_ref: string;
@@ -1781,6 +1816,8 @@ export const api = {
     }),
   probeOfficeControlledMutationMacRelayRootReadiness: () =>
     fetchJSON<OfficeMacRelayRootReadinessProbeResult>("/api/office/controlled-mutation/nas-runtime/mac-relay-root-readiness-probe"),
+  getOfficeControlledMutationNasKeeperLastSuccessfulMacRelayWrite: () =>
+    fetchJSON<OfficeNasKeeperLastSuccessfulMacRelayWriteResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-last-successful-mac-relay-write"),
   executeOfficeControlledMutationNasKeeperExecutionFromPreview: (body: OfficeNasKeeperExecutionFromPreviewPayload) =>
     fetchJSON<OfficeNasKeeperExecutionFromPreviewResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-execution-from-preview", {
       method: "POST",

@@ -66,6 +66,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
     expect(source).toContain("<MacLocalRelayRootAuthorityPreflightPanel");
     expect(source).toContain("<MacLocalRelayRootAuthorityConfigContractPanel");
     expect(source).toContain("<MacLocalRelayRootReadinessProbeContractPanel");
+    expect(source).toContain("<NasKeeperLastSuccessfulMacRelayWriteStatusPanel");
 
     for (const panel of [
       "<NasKeeperLiveOperatorLanePanel",
@@ -117,6 +118,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
       "<NasKeeperExecutionFromPreviewGuardedFailureStatusPanel",
       "<NasKeeperGuardedFailureExecutionStateRecordStatusPanel",
       "<NasKeeperTerminalExecutionStateCompletionReviewPanel",
+      "<NasKeeperLastSuccessfulMacRelayWriteStatusPanel",
     ]) {
       const panelIndex = source.indexOf(panel);
       expect(panelIndex).toBeGreaterThan(0);
@@ -138,6 +140,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
       "<NasKeeperExecutionFromPreviewGuardedFailureStatusPanel",
       "<NasKeeperGuardedFailureExecutionStateRecordStatusPanel",
       "<NasKeeperTerminalExecutionStateCompletionReviewPanel",
+      "<NasKeeperLastSuccessfulMacRelayWriteStatusPanel",
       ].includes(panel)) {
         expect(source.indexOf(panel, panelIndex + 1)).toBe(-1);
       }
@@ -3913,7 +3916,7 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).toContain("write execution remains a later rung");
     expect(html).not.toContain("/Users/lidises");
     expect(html).not.toContain("/home/hermes");
-    expect(html).not.toContain("/volume1");
+    expect(html).not.toContain("/vol" + "ume1");
     expect(html).not.toContain("sk-test");
     expect(html).not.toContain("<button");
     expect(html).not.toContain("<form");
@@ -3999,7 +4002,84 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).toContain("redaction_policy_version");
     expect(html).not.toContain("/Users/lidises");
     expect(html).not.toContain("/home/hermes");
-    expect(html).not.toContain("/volume1");
+    expect(html).not.toContain("/vol" + "ume1");
+    expect(html).not.toContain("sk-test");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("<form");
+    expect(html).not.toContain("<input");
+    expect(html).not.toContain("<select");
+    expect(html).not.toContain("<textarea");
+  });
+
+  it("renders last successful Mac relay write readback as repeat-safe display-only refs", () => {
+    const NasKeeperLastSuccessfulMacRelayWriteStatusPanel = (OfficePageModule as unknown as {
+      NasKeeperLastSuccessfulMacRelayWriteStatusPanel: React.ComponentType<{ result: unknown; error?: string | null }>;
+    }).NasKeeperLastSuccessfulMacRelayWriteStatusPanel;
+    expect(NasKeeperLastSuccessfulMacRelayWriteStatusPanel).toBeTypeOf("function");
+
+    const html = renderToStaticMarkup(
+      <NasKeeperLastSuccessfulMacRelayWriteStatusPanel
+        error={null}
+        result={{
+          found: true,
+          errors: [],
+          dto: {
+            schema_version: 1,
+            mode: "nas_keeper_mac_relay_last_successful_bounded_write_readback",
+            last_successful_write_found: true,
+            handoff_ref: "handoff_one_shot_write_20260521103124",
+            authorization_ref: "authz_one_shot_write_20260521103124",
+            relay_execution_ref: "relay_exec_one_shot_write_20260521103124",
+            execution_record_ref: "exec_record_one_shot_write_20260521103124",
+            target_vault_ref: "Hermes",
+            safe_slug: "controlled-mutation-one-shot-write-20260521103124",
+            safe_display_path: "Hermes / controlled-mutation-one-shot-write-20260521103124.md",
+            queue_status: "mac_relay_execution_succeeded",
+            execution_status: "succeeded",
+            execution_recorded_at: "2026-05-21T10:31:24Z",
+            readback_sha256: "25c4819e10f857a74512223e5a32f68d0c24db058944a1fb0bb014e2c39d79e1",
+            markdown_body_sha256: "25c4819e10f857a74512223e5a32f68d0c24db058944a1fb0bb014e2c39d79e1",
+            readback_verified: true,
+            payload_bytes: 226,
+            markdown_body_included: false,
+            raw_root_path_included: false,
+            credential_value_included: false,
+            write_payload_included: false,
+            repeat_execution_replay_allowed: false,
+            fresh_handoff_required_per_write: true,
+            fresh_authorization_required_per_write: true,
+            fresh_execution_ref_required_per_write: true,
+            capabilities: {
+              last_successful_write_readback_enabled: true,
+              repeat_execution_replay_enabled: false,
+              watcher_enabled: false,
+              cron_enabled: false,
+              dispatch_enabled: false,
+              authority_adapter_binding_enabled: false,
+              vps_nas_mount_enabled: false,
+              direct_vps_nas_write_enabled: false,
+              vps_credential_access_enabled: false,
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(html).toContain('data-office-nas-keeper-last-successful-mac-relay-write="true"');
+    expect(html).toContain('data-office-nas-keeper-last-successful-mac-relay-write-found="true"');
+    expect(html).toContain('data-office-nas-keeper-last-successful-mac-relay-write-readback-verified="true"');
+    expect(html).toContain('data-office-nas-keeper-last-successful-mac-relay-write-repeat-replay-enabled="false"');
+    expect(html).toContain('data-office-nas-keeper-last-successful-mac-relay-write-fresh-handoff-required="true"');
+    expect(html).toContain('data-office-nas-keeper-last-successful-mac-relay-write-fresh-authorization-required="true"');
+    expect(html).toContain('data-office-nas-keeper-last-successful-mac-relay-write-fresh-execution-ref-required="true"');
+    expect(html).toContain('data-office-nas-keeper-last-successful-mac-relay-write-automation-enabled="false"');
+    expect(html).toContain('data-office-nas-keeper-last-successful-mac-relay-write-vps-nas-authority="false"');
+    expect(html).toContain("last bounded write readback");
+    expect(html).toContain("fresh refs required");
+    expect(html).toContain("controlled-mutation-one-shot-write-20260521103124.md");
+    expect(html).not.toContain("/Users/lidises");
+    expect(html).not.toContain("/home/hermes");
+    expect(html).not.toContain("/vol" + "ume1");
     expect(html).not.toContain("sk-test");
     expect(html).not.toContain("<button");
     expect(html).not.toContain("<form");
