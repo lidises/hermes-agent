@@ -1,4 +1,48 @@
 
+## Current next — Mac-local relay root probe implementation complete
+
+Updated: 2026-05-21 18:13 KST
+
+Current slice:
+
+- Implemented `mac_local_relay_root_probe_implementation` as a sanitized read-only readiness probe.
+- Code commit: `5450deed feat(office): probe mac relay root readiness`.
+- Added backend helper and protected API route:
+  - `GET /api/office/controlled-mutation/nas-runtime/mac-relay-root-readiness-probe`
+- Added frontend API typing/wiring and Office RPG panel consumption of sanitized probe evidence.
+- VPS deployed both worktrees to `5450deed4534daec85a3ffa3d717340be2e8e472` and restarted dashboard only.
+- Live `/office` DOM smoke showed probe evidence present with `rootConfigured=false`, `rootReadable=false`, `rootWritable=false`, `writeEnabled=false`, `vpsNasAuthority=false`, no raw leak, and no console errors.
+
+Verification:
+
+- Backend focused tests: 11 passed.
+- Frontend focused tests: 159 passed.
+- `npm run build`: passed.
+- `git diff --check`: passed.
+- added-line raw sentinel scan: clean.
+
+Boundary:
+
+- No actual NAS write yet.
+- No write payload armed.
+- No raw NAS path/credential rendered or returned.
+- No VPS NAS mount/direct authority.
+- Gateway not restarted.
+
+Readiness estimate:
+
+- Actual NAS write readiness is now about 58%.
+- Main blocker: active runtime evidence still reports Mac-local relay root unconfigured.
+
+Next recommended rung:
+
+- `mac_local_relay_root_runtime_configuration`
+- Configure the Mac-local runtime root privately, re-run the sanitized readiness probe, and require `root_configured=true`, `root_readable=true`, `root_writable=true` with no raw path/credential/write-payload leak before arming a one-shot write.
+
+Handoff:
+
+- `docs/ai-office/plans/2026-05-21-mac-local-relay-root-probe-implementation-handoff.md`
+
 ## Current next — Mac-local relay root readiness probe contract complete
 
 Current slice:
