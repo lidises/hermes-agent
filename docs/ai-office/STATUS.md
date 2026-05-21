@@ -1,4 +1,52 @@
 
+## Current next — manual runtime command execution noop record complete
+
+Current slice:
+
+- User's standing goal approved continuing from runtime-command inclusion into the next bounded write rung.
+- Hardened the protected `ManualRuntimeCommandExecutionRecordStatusPanel` placement regression: the panel was already live-visible and unique before this slice, so the added uniqueness regression passed immediately and no production source change was required for visibility.
+- Exercised the existing protected runtime-command-execution noop/idempotency POST/GET routes on the private VPS.
+- Wrote `runtime_command_executed=true`, `idempotency_replay_store_written=true`, and `runtime_execution_result=noop_probe_succeeded` only for the approved noop probe lane. No adapter binding/dispatch, rollback execution, target/Kanban/NAS mutation, watcher/cron/daemon, direct VPS NAS authority, public exposure, real target dispatch, or gateway restart was added.
+
+Code/test commit/deploy:
+
+- Commit: `c9c4dd43 test(office): harden runtime command execution panel placement`.
+- Synced both VPS worktrees to `c9c4dd43`.
+- Rsynced local built `hermes_cli/web_dist/` to both worktrees.
+- Restarted only `hermes-agent-dashboard.service`; did not restart gateway.
+- Final services: dashboard active, gateway active.
+
+Local verification:
+
+- `py_compile` passed for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py`.
+- Focused backend manual approval/runtime execution tests passed (`31 passed`).
+- Frontend `web/` tests passed: placement focused test, `src/lib/api.test.ts`, and `src/pages/OfficePage.rpg.test.tsx` (`145 passed`).
+- `npm run build` passed with existing Vite large chunk warning.
+- `git diff --check` passed.
+- Added-line sentinel scan found no new raw path/token/provider sentinels.
+
+VPS protected API smoke:
+
+- `/office?runtime-execution=c9c4dd43` returned HTTP 200 after dashboard restart readiness delay.
+- Session token extracted from SPA shell and protected APIs called with `X-Hermes-Session-Token`.
+- Existing inclusion source: `cmd-2cedb274-live-smoke-1320`.
+- New execution ref: `exec-c9c4dd43-live-smoke-1405`.
+- New idempotency key: `idem-c9c4dd43-live-smoke-1405`.
+- POST `/api/office/controlled-mutation/manual-runtime-command-execution-record` returned unauth=401, stored=true, dto.mode=`stored_manual_runtime_command_execution_record`, runtime_command_ref=`cmd-2cedb274-live-smoke-1320`, runtime_execution_ref=`exec-c9c4dd43-live-smoke-1405`, idempotency_key=`idem-c9c4dd43-live-smoke-1405`, runtime_command_executed=true, idempotency_replay_store_written=true, runtime_execution_result=`noop_probe_succeeded`, target_mutation_created=false, kanban_mutation_created=false, nas_save_created=false, real_dispatch_execution_enabled=false, and did not echo unsafe extras.
+- GET `/api/office/controlled-mutation/manual-runtime-command-execution-record-status?runtime_execution_ref=exec-c9c4dd43-live-smoke-1405` returned unauth=401, mode=`stored_manual_runtime_command_execution_records_readback`, runtime_command_execution_record_count=1 for the queried ref, latest runtime_command_executed=true, false risky capabilities, and no raw leak.
+
+VPS live DOM smoke:
+
+- `data-office-manual-runtime-command-execution-record-status="true"`: exists=true, controls=0, global profile count=10.
+- Page body includes the safe execution smoke ref.
+- Raw leak sentinels absent from page body; browser console messages/errors after smoke: 0.
+
+Handoff: `docs/ai-office/plans/2026-05-21-runtime-command-execution-noop-record-handoff.md`.
+
+Next recommended rung: `manual_target_mutation_readiness_record`, only if the next prompt keeps bounded write approval. This should project/store target mutation readiness metadata after noop execution; actual target mutation, adapter dispatch, Kanban/NAS/VPS mutation, service/git/credential/public authority, watcher/cron, gateway restart, and direct VPS NAS authority must remain closed.
+
+Last updated: 2026-05-21 14:08 KST
+
 ## Current next — manual runtime command inclusion record complete
 
 Current slice:
