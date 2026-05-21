@@ -1,4 +1,53 @@
 
+## Current next — manual target mutation readiness record complete
+
+Current slice:
+
+- User's standing goal approved continuing from runtime-command noop execution into the next bounded write rung.
+- Hardened the protected `ManualTargetMutationReadinessRecordStatusPanel` placement regression: the panel was already live-visible and unique before this slice, so the added uniqueness regression passed immediately and no production source change was required for visibility.
+- Exercised the existing protected target-mutation-readiness metadata-only POST/GET routes on the private VPS.
+- Wrote only safe readiness metadata/refs: target readiness ref, exact target allowlist ref, target ref, dry-run evidence ref, rollback-disable ref, and readiness evidence refs.
+- Set `target_mutation_readiness_verified=true`, `exact_target_allowlist_verified=true`, `rollback_disable_verified=true`, and `dry_run_evidence_verified=true`; kept actual target mutation, adapter dispatch, rollback execution, Kanban/NAS mutation, watcher/cron/daemon, direct VPS NAS authority, public exposure, real target dispatch, and gateway restart closed.
+
+Code/test commit/deploy:
+
+- Commit: `53b14ee1 test(office): harden target mutation readiness panel placement`.
+- Synced both VPS worktrees to `53b14ee1`.
+- Rsynced local built `hermes_cli/web_dist/` to both worktrees.
+- Restarted only `hermes-agent-dashboard.service`; did not restart gateway.
+- Final services: dashboard active, gateway active.
+
+Local verification:
+
+- `py_compile` passed for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py`.
+- Focused backend controlled-mutation tests passed (`31 passed`).
+- Frontend `web/` tests passed: placement focused test, `src/lib/api.test.ts`, and `src/pages/OfficePage.rpg.test.tsx` (`145 passed`).
+- `npm run build` passed with existing Vite large chunk warning.
+- `git diff --check` passed.
+- Added-line sentinel scan found no new raw path/token/provider sentinels.
+
+VPS protected API smoke:
+
+- `/office?target-ready=53b14ee1` returned HTTP 200 after dashboard restart readiness delay.
+- Session token extracted from SPA shell and protected APIs called with `X-Hermes-Session-Token`.
+- Existing noop execution source: `exec-c9c4dd43-live-smoke-1405`.
+- New target readiness ref: `targetready-53b14ee1-live-smoke-1415`.
+- Safe refs: `target-53b14ee1-noop-probe-target`, `allowlist-53b14ee1-exact-target`, `dryrun-53b14ee1-noop-evidence`, `rollback-53b14ee1-disabled`.
+- POST `/api/office/controlled-mutation/manual-target-mutation-readiness-record` returned unauth=401, stored=true, dto.mode=`stored_manual_target_mutation_readiness_record`, target_mutation_readiness_verified=true, exact_target_allowlist_verified=true, rollback_disable_verified=true, dry_run_evidence_verified=true, runtime_command_executed=true, target_mutation_created=false, adapter_dispatch_created=false, kanban_mutation_created=false, nas_save_created=false, real_dispatch_execution_enabled=false, and did not echo unsafe extras.
+- GET `/api/office/controlled-mutation/manual-target-mutation-readiness-record-status?target_mutation_readiness_ref=targetready-53b14ee1-live-smoke-1415` returned unauth=401, mode=`stored_manual_target_mutation_readiness_records_readback`, target_mutation_readiness_record_count=1 for the queried ref, latest verified=true, target_mutation_readiness_enabled=true, false risky capabilities, and no raw leak.
+
+VPS live DOM smoke:
+
+- `data-office-manual-target-mutation-readiness-record-status="true"`: exists=true, controls=0, global profile count=9.
+- Page body includes the safe target readiness smoke ref.
+- Raw leak sentinels absent from page body; browser console messages/errors after smoke: 0.
+
+Handoff: `docs/ai-office/plans/2026-05-21-target-mutation-readiness-record-handoff.md`.
+
+Next recommended rung: `manual_target_mutation_record`, only if the next prompt keeps bounded write approval and explicitly accepts crossing from readiness into target mutation metadata. This should still be constrained to a controlled safe-ref target mutation record; adapter dispatch, Kanban/NAS/VPS mutation beyond the controlled record, service/git/credential/public authority, watcher/cron, gateway restart, and direct VPS NAS authority should remain closed unless specifically approved.
+
+Last updated: 2026-05-21 14:18 KST
+
 ## Current next — manual runtime command execution noop record complete
 
 Current slice:
