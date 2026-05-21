@@ -94,6 +94,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
         "<ManualRuntimeCommandExecutionRecordStatusPanel",
         "<ManualTargetMutationReadinessRecordStatusPanel",
         "<ManualTargetMutationRecordStatusPanel",
+        "<ManualAdapterDispatchRecordStatusPanel",
       ].includes(panel)) {
         expect(source.indexOf(panel, panelIndex + 1)).toBe(-1);
       }
