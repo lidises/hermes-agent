@@ -733,9 +733,25 @@ async def build_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_re
 
 
 @app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger")
-async def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_route(limit: Optional[int] = None):
+async def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_route(
+    limit: Optional[int] = None,
+    outcome: Optional[str] = None,
+    queue_status: Optional[str] = None,
+    ref_prefix: Optional[str] = None,
+    since: Optional[str] = None,
+    until: Optional[str] = None,
+    export_safe: Optional[bool] = None,
+):
     """Read recent fresh request-builder outcomes as sanitized refs/checksums only."""
-    return get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_readback(limit=limit or 20)
+    return get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_readback(
+        limit=limit or 20,
+        outcome=outcome,
+        queue_status=queue_status,
+        ref_prefix=ref_prefix,
+        since=since,
+        until=until,
+        export_safe=bool(export_safe),
+    )
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-one-shot-operator-write")

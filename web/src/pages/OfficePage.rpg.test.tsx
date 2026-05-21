@@ -4260,6 +4260,28 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
             authority_adapter_binding_enabled: false,
             vps_nas_mount_enabled: false,
             capabilities: {},
+            filters_applied: { outcome: "written", queue_status: "mac_relay_execution_succeeded" },
+            safe_export_enabled: true,
+            safe_export: {
+              format: "fresh_request_builder_safe_export_v1",
+              count: 1,
+              markdown_body_included: false,
+              write_payload_included: false,
+              raw_root_path_included: false,
+              credential_value_included: false,
+              items: [{
+                operator_request_outcome: "written",
+                handoff_ref: "handoff_ledger_readback_20260521143000_abc12345",
+                authorization_ref: "authz_ledger_readback_20260521143000_abc12345",
+                relay_execution_ref: "relay_exec_ledger_readback_20260521143000_abc12345",
+                execution_record_ref: "exec_record_ledger_readback_20260521143000_abc12345",
+                queue_status: "mac_relay_execution_succeeded",
+                execution_status: "succeeded",
+                markdown_body_sha256: "a".repeat(64),
+                readback_sha256: "b".repeat(64),
+                readback_verified: true,
+              }],
+            },
             next_required_boundary: "fresh_request_builder_operator_review",
             items: [{
               schema_version: 1,
@@ -4300,6 +4322,11 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-automation-enabled="false"');
     expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-vps-nas-authority="false"');
     expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-markdown-body-included="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-safe-export-enabled="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-safe-export="true"');
+    expect(html).toContain("fresh_request_builder_safe_export_v1");
+    expect(html).toContain("copyable safe export");
+    expect(html).toContain("filters_applied");
     expect(html).toContain("handoff_ledger_readback_20260521143000_abc12345");
     expect(html).toContain("sanitized outcomes · dry-review-before-write proof");
     expect(html).not.toContain("Ledger readback safe body");

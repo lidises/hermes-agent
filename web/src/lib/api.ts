@@ -1511,6 +1511,17 @@ export interface OfficeNasKeeperFreshRequestBuilderLedgerReadbackResult {
       credential_value_included: false;
       repeat_execution_replay_allowed: false;
     }>;
+    filters_applied: Record<string, string>;
+    safe_export_enabled: boolean;
+    safe_export: null | {
+      format: "fresh_request_builder_safe_export_v1";
+      count: number;
+      items: Array<Record<string, string | number | boolean | null | undefined>>;
+      markdown_body_included: false;
+      write_payload_included: false;
+      raw_root_path_included: false;
+      credential_value_included: false;
+    };
     dry_review_before_write_verified: boolean;
     markdown_body_included: false;
     write_payload_included: false;
@@ -1953,7 +1964,7 @@ export const api = {
       body: JSON.stringify(body),
     }),
   getOfficeControlledMutationNasKeeperFreshRequestBuilderLedger: () =>
-    fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerReadbackResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger"),
+    fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerReadbackResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger?export_safe=true&limit=20"),
   executeOfficeControlledMutationNasKeeperFreshOneShotOperatorWrite: (body: Record<string, unknown>) =>
     fetchJSON<OfficeNasKeeperFreshOneShotOperatorWriteResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-one-shot-operator-write", {
       method: "POST",

@@ -8206,9 +8206,90 @@ def _safe_request_builder_ledger_item(item: Mapping[str, object]) -> dict[str, o
     }
 
 
+def _safe_ledger_filter_string(value: object) -> str | None:
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        return None
+    stripped = value.strip()
+    if not stripped:
+        return None
+    return stripped if _is_opaque_id(stripped) else "__invalid__"
+
+
+def _safe_ledger_filter_time(value: object) -> str | None:
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        return None
+    stripped = value.strip()
+    if not stripped:
+        return None
+    return stripped if _ISO_UTC_RE.fullmatch(stripped) else "__invalid__"
+
+
+def _fresh_request_builder_safe_export(items: list[dict[str, object]]) -> dict[str, object]:
+    export_items = []
+    for item in items:
+        export_items.append({
+            "operator_request_outcome": item.get("operator_request_outcome"),
+            "handoff_ref": item.get("handoff_ref"),
+            "authorization_ref": item.get("authorization_ref"),
+            "relay_execution_ref": item.get("relay_execution_ref"),
+            "execution_record_ref": item.get("execution_record_ref"),
+            "safe_slug": item.get("safe_slug"),
+            "safe_title": item.get("safe_title"),
+            "queue_status": item.get("queue_status"),
+            "execution_status": item.get("execution_status"),
+            "dry_reviewed_at": item.get("dry_reviewed_at"),
+            "authorized_at": item.get("authorized_at"),
+            "executed_at": item.get("executed_at"),
+            "dry_review_before_write_verified": item.get("dry_review_before_write_verified"),
+            "markdown_body_sha256": item.get("markdown_body_sha256"),
+            "readback_sha256": item.get("readback_sha256"),
+            "readback_verified": item.get("readback_verified"),
+            "payload_bytes": item.get("payload_bytes"),
+        })
+    return {
+        "format": "fresh_request_builder_safe_export_v1",
+        "count": len(export_items),
+        "items": export_items,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+    }
+
+
 def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_readback(
-    *, queue_dir: Path | str | None = None, limit: int = 20
+    *,
+    queue_dir: Path | str | None = None,
+    limit: int = 20,
+    outcome: object = None,
+    queue_status: object = None,
+    ref_prefix: object = None,
+    since: object = None,
+    until: object = None,
+    export_safe: bool = False,
 ) -> dict[str, object]:
+    safe_outcome = _safe_ledger_filter_string(outcome)
+    safe_queue_status = _safe_ledger_filter_string(queue_status)
+    safe_ref_prefix = _safe_ledger_filter_string(ref_prefix)
+    safe_since = _safe_ledger_filter_time(since)
+    safe_until = _safe_ledger_filter_time(until)
+    errors: list[dict[str, str]] = []
+    for field, value in (
+        ("outcome", safe_outcome),
+        ("queue_status", safe_queue_status),
+        ("ref_prefix", safe_ref_prefix),
+        ("since", safe_since),
+        ("until", safe_until),
+    ):
+        if value == "__invalid__":
+            errors.append(_error(field, "invalid_safe_filter"))
+    if errors:
+        return {"found": False, "errors": errors, "dto": None}
+
     queue_file = _nas_keeper_handoff_queue_file(queue_dir)
     items: list[dict[str, object]] = []
     if queue_file.exists():
@@ -8222,18 +8303,45 @@ def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_readb
             if not isinstance(raw, Mapping):
                 continue
             item = _safe_request_builder_ledger_item(raw)
-            if item is not None:
-                items.append(item)
+            if item is None:
+                continue
+            dry_reviewed_at = str(item.get("dry_reviewed_at") or "")
+            refs = [str(item.get(key) or "") for key in ("handoff_ref", "authorization_ref", "relay_execution_ref", "execution_record_ref")]
+            if safe_outcome and item.get("operator_request_outcome") != safe_outcome:
+                continue
+            if safe_queue_status and item.get("queue_status") != safe_queue_status:
+                continue
+            if safe_ref_prefix and not any(ref.startswith(safe_ref_prefix) for ref in refs):
+                continue
+            if safe_since and dry_reviewed_at < safe_since:
+                continue
+            if safe_until and dry_reviewed_at > safe_until:
+                continue
+            items.append(item)
     items.sort(key=lambda item: (str(item.get("dry_reviewed_at") or ""), str(item.get("handoff_ref") or "")), reverse=True)
     safe_limit = max(1, min(int(limit), 100)) if isinstance(limit, int) else 20
     items = items[:safe_limit]
     all_written = [item for item in items if item.get("operator_request_outcome") == "written"]
     ordering_verified = bool(all_written) and all(bool(item.get("dry_review_before_write_verified")) for item in all_written)
+    filters_applied = {
+        key: value
+        for key, value in {
+            "outcome": safe_outcome,
+            "queue_status": safe_queue_status,
+            "ref_prefix": safe_ref_prefix,
+            "since": safe_since,
+            "until": safe_until,
+        }.items()
+        if value
+    }
     dto = {
         "schema_version": 1,
         "mode": "nas_keeper_fresh_request_builder_ledger_readback",
         "count": len(items),
         "items": items,
+        "filters_applied": filters_applied,
+        "safe_export_enabled": bool(export_safe),
+        "safe_export": _fresh_request_builder_safe_export(items) if export_safe else None,
         "dry_review_before_write_verified": ordering_verified,
         "markdown_body_included": False,
         "write_payload_included": False,
@@ -8247,6 +8355,8 @@ def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_readb
         "vps_nas_mount_enabled": False,
         "capabilities": {
             "request_builder_ledger_readback_enabled": True,
+            "safe_filtering_enabled": True,
+            "safe_export_enabled": bool(export_safe),
             "actual_write_execution_enabled": False,
             "repeat_execution_replay_enabled": False,
             "watcher_enabled": False,

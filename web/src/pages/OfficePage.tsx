@@ -7026,8 +7026,12 @@ export function NasKeeperFreshRequestBuilderLedgerPanel({
 }) {
   const dto = ledger?.dto ?? null;
   const latest = dto?.items?.[0] ?? null;
+  const safeExport = dto?.safe_export ?? null;
+  const exportPreview = safeExport ? JSON.stringify(safeExport, null, 2) : "safe export available when requested";
   const rows = [
     ["count", String(dto?.count ?? 0)],
+    ["filters_applied", Object.keys(dto?.filters_applied ?? {}).length ? JSON.stringify(dto?.filters_applied) : "none"],
+    ["safe_export", safeExport ? `${safeExport.format} · ${safeExport.count} item(s)` : "disabled"],
     ["latest_outcome", latest?.operator_request_outcome ?? "no request-builder outcome yet"],
     ["handoff_ref", latest?.handoff_ref ?? "available after approved builder write"],
     ["authorization_ref", latest?.authorization_ref ?? "available after approved builder write"],
@@ -7049,13 +7053,14 @@ export function NasKeeperFreshRequestBuilderLedgerPanel({
       data-office-nas-keeper-fresh-request-builder-ledger-write-payload-included={String(Boolean(dto?.write_payload_included))}
       data-office-nas-keeper-fresh-request-builder-ledger-raw-root-path-included={String(Boolean(dto?.raw_root_path_included))}
       data-office-nas-keeper-fresh-request-builder-ledger-credential-value-included={String(Boolean(dto?.credential_value_included))}
+      data-office-nas-keeper-fresh-request-builder-ledger-safe-export-enabled={String(Boolean(dto?.safe_export_enabled))}
     >
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
           <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-indigo-200/70">Fresh request ledger</div>
           <h2 className="mt-1 text-lg font-semibold text-foreground">sanitized outcomes · dry-review-before-write proof</h2>
           <p className="mt-2 text-xs leading-5 text-midground/70">
-            Lists recent fresh request-builder outcomes as safe refs, statuses, and checksums only. It proves the dry-review → authorization → write ordering when a write exists, without rendering markdown bodies, write payloads, raw paths, credentials, replay controls, automation, or VPS NAS authority.
+            Lists recent fresh request-builder outcomes as safe refs, statuses, and checksums only. It proves the dry-review → authorization → write ordering when a write exists, without rendering markdown bodies, write payloads, raw paths, credentials, replay controls, automation, or VPS NAS authority. Safe filtering/export is display-only and contains refs/checksums/statuses only.
           </p>
         </div>
         <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
@@ -7069,6 +7074,10 @@ export function NasKeeperFreshRequestBuilderLedgerPanel({
             <div className="mt-1 break-words leading-5 text-midground/70">{value}</div>
           </div>
         ))}
+      </div>
+      <div className="mt-3 rounded border border-current/15 bg-black/30 p-3 text-[11px] leading-5 text-midground/70" data-office-nas-keeper-fresh-request-builder-ledger-safe-export="true">
+        <div className="mb-2 font-semibold text-foreground">copyable safe export</div>
+        <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words">{exportPreview}</pre>
       </div>
     </section>
   );
