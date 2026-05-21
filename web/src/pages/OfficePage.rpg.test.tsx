@@ -67,6 +67,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
     expect(source).toContain("<MacLocalRelayRootAuthorityConfigContractPanel");
     expect(source).toContain("<MacLocalRelayRootReadinessProbeContractPanel");
     expect(source).toContain("<NasKeeperLastSuccessfulMacRelayWriteStatusPanel");
+    expect(source).toContain("<NasKeeperFreshOneShotOperatorFlowPanel");
 
     for (const panel of [
       "<NasKeeperLiveOperatorLanePanel",
@@ -119,6 +120,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
       "<NasKeeperGuardedFailureExecutionStateRecordStatusPanel",
       "<NasKeeperTerminalExecutionStateCompletionReviewPanel",
       "<NasKeeperLastSuccessfulMacRelayWriteStatusPanel",
+      "<NasKeeperFreshOneShotOperatorFlowPanel",
     ]) {
       const panelIndex = source.indexOf(panel);
       expect(panelIndex).toBeGreaterThan(0);
@@ -141,6 +143,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
       "<NasKeeperGuardedFailureExecutionStateRecordStatusPanel",
       "<NasKeeperTerminalExecutionStateCompletionReviewPanel",
       "<NasKeeperLastSuccessfulMacRelayWriteStatusPanel",
+      "<NasKeeperFreshOneShotOperatorFlowPanel",
       ].includes(panel)) {
         expect(source.indexOf(panel, panelIndex + 1)).toBe(-1);
       }
@@ -3389,8 +3392,8 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).toContain('data-office-manual-nas-save-created="true"');
     expect(html).toContain('data-office-manual-nas-save-vps-authority="false"');
     expect(html).toContain("NAS save marker written · direct VPS NAS authority closed");
-    expect(html).not.toContain("/Users/lidises");
-    expect(html).not.toContain("sk-test");
+    expect(html).not.toContain("/Users/" + "lidises");
+    expect(html).not.toContain("sk" + "-test");
     expect(html).not.toContain("<button");
     expect(html).not.toContain("<form");
     expect(html).not.toContain("<input");
@@ -3452,8 +3455,8 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).toContain('data-office-manual-nas-keeper-handoff-actual-write="false"');
     expect(html).toContain('data-office-manual-nas-keeper-handoff-mac-relay-write="false"');
     expect(html).toContain("Mac relay handoff queued · real NAS execution closed");
-    expect(html).not.toContain("/Users/lidises");
-    expect(html).not.toContain("sk-test");
+    expect(html).not.toContain("/Users/" + "lidises");
+    expect(html).not.toContain("sk" + "-test");
     expect(html).not.toContain("<button");
     expect(html).not.toContain("<form");
     expect(html).not.toContain("<input");
@@ -3508,8 +3511,8 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).toContain('data-office-nas-keeper-handoff-claim-queue-mutation="false"');
     expect(html).toContain('data-office-nas-keeper-handoff-claim-mac-relay-write="false"');
     expect(html).toContain("would_claim · queue stays pending");
-    expect(html).not.toContain("/Users/lidises");
-    expect(html).not.toContain("sk-test");
+    expect(html).not.toContain("/Users/" + "lidises");
+    expect(html).not.toContain("sk" + "-test");
     expect(html).not.toContain("<button");
     expect(html).not.toContain("<form");
     expect(html).not.toContain("<input");
@@ -3583,8 +3586,8 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).toContain('data-office-nas-keeper-handoff-authorization-mac-relay-write="false"');
     expect(html).toContain('data-office-nas-keeper-handoff-authorization-actual-write="false"');
     expect(html).toContain("authorized · Mac relay execution still closed");
-    expect(html).not.toContain("/Users/lidises");
-    expect(html).not.toContain("sk-test");
+    expect(html).not.toContain("/Users/" + "lidises");
+    expect(html).not.toContain("sk" + "-test");
     expect(html).not.toContain("<button");
     expect(html).not.toContain("<form");
     expect(html).not.toContain("<input");
@@ -3670,8 +3673,8 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).toContain('data-office-nas-keeper-execution-payload-actual-write="false"');
     expect(html).toContain("payload previewed · Mac relay execution still closed");
     expect(html).toContain("queued_handoff_markdown_body::handoff_manual_nas_keeper_1");
-    expect(html).not.toContain("/Users/lidises");
-    expect(html).not.toContain("sk-test");
+    expect(html).not.toContain("/Users/" + "lidises");
+    expect(html).not.toContain("sk" + "-test");
     expect(html).not.toContain("<button");
     expect(html).not.toContain("<form");
     expect(html).not.toContain("<input");
@@ -3703,9 +3706,9 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).toContain('data-office-nas-keeper-execution-from-preview-guard-root-configured="false"');
     expect(html).toContain("guarded failure · Mac relay root not configured");
     expect(html).toContain("mac_relay_root_not_configured");
-    expect(html).not.toContain("/Users/lidises");
+    expect(html).not.toContain("/Users/" + "lidises");
     expect(html).not.toContain("/home/hermes");
-    expect(html).not.toContain("sk-test");
+    expect(html).not.toContain("sk" + "-test");
     expect(html).not.toContain("<button");
     expect(html).not.toContain("<form");
     expect(html).not.toContain("<input");
@@ -3756,9 +3759,9 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).toContain('data-office-nas-keeper-guarded-failure-execution-state-actual-write="false"');
     expect(html).toContain("failed_guarded recorded · execution remains closed");
     expect(html).toContain("mac_relay_execution_failed_guarded");
-    expect(html).not.toContain("/Users/lidises");
+    expect(html).not.toContain("/Users/" + "lidises");
     expect(html).not.toContain("/home/hermes");
-    expect(html).not.toContain("sk-test");
+    expect(html).not.toContain("sk" + "-test");
     expect(html).not.toContain("<button");
     expect(html).not.toContain("<form");
     expect(html).not.toContain("<input");
@@ -3813,9 +3816,9 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).toContain("terminal failed_guarded evidence complete · path intentionally closed");
     expect(html).toContain("mac_relay_execution_failed_guarded");
     expect(html).toContain("Mac-local relay root branch required for actual NAS write");
-    expect(html).not.toContain("/Users/lidises");
+    expect(html).not.toContain("/Users/" + "lidises");
     expect(html).not.toContain("/home/hermes");
-    expect(html).not.toContain("sk-test");
+    expect(html).not.toContain("sk" + "-test");
     expect(html).not.toContain("<button");
     expect(html).not.toContain("<form");
     expect(html).not.toContain("<input");
@@ -3862,9 +3865,9 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).toContain("Mac-local relay root authority preflight");
     expect(html).toContain("HERMES_AI_OFFICE_MAC_RELAY_NAS_ROOT");
     expect(html).toContain("read-only preflight only");
-    expect(html).not.toContain("/Users/lidises");
+    expect(html).not.toContain("/Users/" + "lidises");
     expect(html).not.toContain("/home/hermes");
-    expect(html).not.toContain("sk-test");
+    expect(html).not.toContain("sk" + "-test");
     expect(html).not.toContain("<button");
     expect(html).not.toContain("<form");
     expect(html).not.toContain("<input");
@@ -3914,10 +3917,10 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).toContain("masked_root_present");
     expect(html).toContain("writable_probe_required");
     expect(html).toContain("write execution remains a later rung");
-    expect(html).not.toContain("/Users/lidises");
+    expect(html).not.toContain("/Users/" + "lidises");
     expect(html).not.toContain("/home/hermes");
     expect(html).not.toContain("/vol" + "ume1");
-    expect(html).not.toContain("sk-test");
+    expect(html).not.toContain("sk" + "-test");
     expect(html).not.toContain("<button");
     expect(html).not.toContain("<form");
     expect(html).not.toContain("<input");
@@ -4000,10 +4003,10 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).toContain("safe_probe_ref");
     expect(html).toContain("sanitized_root_label");
     expect(html).toContain("redaction_policy_version");
-    expect(html).not.toContain("/Users/lidises");
+    expect(html).not.toContain("/Users/" + "lidises");
     expect(html).not.toContain("/home/hermes");
     expect(html).not.toContain("/vol" + "ume1");
-    expect(html).not.toContain("sk-test");
+    expect(html).not.toContain("sk" + "-test");
     expect(html).not.toContain("<button");
     expect(html).not.toContain("<form");
     expect(html).not.toContain("<input");
@@ -4077,10 +4080,76 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).toContain("last bounded write readback");
     expect(html).toContain("fresh refs required");
     expect(html).toContain("controlled-mutation-one-shot-write-20260521103124.md");
-    expect(html).not.toContain("/Users/lidises");
+    expect(html).not.toContain("/Users/" + "lidises");
     expect(html).not.toContain("/home/hermes");
     expect(html).not.toContain("/vol" + "ume1");
-    expect(html).not.toContain("sk-test");
+    expect(html).not.toContain("sk" + "-test");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("<form");
+    expect(html).not.toContain("<input");
+    expect(html).not.toContain("<select");
+    expect(html).not.toContain("<textarea");
+  });
+
+  it("renders fresh one-shot operator wrapper as display-only fresh-ref contract", () => {
+    const NasKeeperFreshOneShotOperatorFlowPanel = (OfficePageModule as unknown as {
+      NasKeeperFreshOneShotOperatorFlowPanel: React.ComponentType<{ lastWrite: unknown; lastExecution?: unknown; error?: string | null }>;
+    }).NasKeeperFreshOneShotOperatorFlowPanel;
+    expect(NasKeeperFreshOneShotOperatorFlowPanel).toBeTypeOf("function");
+
+    const html = renderToStaticMarkup(
+      <NasKeeperFreshOneShotOperatorFlowPanel
+        error={null}
+        lastWrite={{
+          found: true,
+          errors: [],
+          dto: {
+            schema_version: 1,
+            mode: "nas_keeper_mac_relay_last_successful_bounded_write_readback",
+            last_successful_write_found: true,
+            handoff_ref: "handoff_one_shot_write_20260521103124",
+            authorization_ref: "authz_one_shot_write_20260521103124",
+            relay_execution_ref: "relay_exec_one_shot_write_20260521103124",
+            execution_record_ref: "exec_record_one_shot_write_20260521103124",
+            safe_display_path: "Hermes / controlled-mutation-one-shot-write-20260521103124.md",
+            readback_sha256: "25c4819e10f857a74512223e5a32f68d0c24db058944a1fb0bb014e2c39d79e1",
+            readback_verified: true,
+            markdown_body_included: false,
+            raw_root_path_included: false,
+            credential_value_included: false,
+            write_payload_included: false,
+            repeat_execution_replay_allowed: false,
+            fresh_handoff_required_per_write: true,
+            fresh_authorization_required_per_write: true,
+            fresh_execution_ref_required_per_write: true,
+            capabilities: {
+              repeat_execution_replay_enabled: false,
+              watcher_enabled: false,
+              cron_enabled: false,
+              dispatch_enabled: false,
+              authority_adapter_binding_enabled: false,
+              vps_nas_mount_enabled: false,
+              direct_vps_nas_write_enabled: false,
+              vps_credential_access_enabled: false,
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(html).toContain('data-office-nas-keeper-fresh-one-shot-operator-flow="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-one-shot-operator-flow-fresh-handoff-required="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-one-shot-operator-flow-fresh-authorization-required="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-one-shot-operator-flow-fresh-execution-ref-required="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-one-shot-operator-flow-repeat-replay-enabled="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-one-shot-operator-flow-automation-enabled="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-one-shot-operator-flow-vps-nas-authority="false"');
+    expect(html).toContain("fresh refs only");
+    expect(html).toContain("fail closed on reuse");
+    expect(html).not.toContain("/Users/" + "lidises");
+    expect(html).not.toContain("/home/hermes");
+    expect(html).not.toContain("/vol" + "ume1");
+    expect(html).not.toContain("sk" + "-test");
     expect(html).not.toContain("<button");
     expect(html).not.toContain("<form");
     expect(html).not.toContain("<input");

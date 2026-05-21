@@ -1399,6 +1399,43 @@ export interface OfficeNasKeeperLastSuccessfulMacRelayWriteResult {
   };
 }
 
+export interface OfficeNasKeeperFreshOneShotOperatorWriteResult {
+  executed: boolean;
+  written: boolean;
+  recorded: boolean;
+  fresh_refs_verified: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: null | {
+    schema_version: number;
+    mode: "nas_keeper_mac_relay_fresh_one_shot_operator_write_completed";
+    fresh_refs_verified: true;
+    handoff_ref: string;
+    authorization_ref: string;
+    relay_execution_ref: string;
+    execution_record_ref: string;
+    queue_ref?: string;
+    queue_status?: string;
+    execution_status?: string;
+    safe_display_path?: string;
+    safe_logical_path?: string;
+    payload_bytes?: number;
+    markdown_body_sha256?: string;
+    readback_sha256?: string;
+    readback_verified: boolean;
+    execution_state_recorded: boolean;
+    markdown_body_included: false;
+    write_payload_included: false;
+    raw_root_path_included: false;
+    credential_value_included: false;
+    repeat_execution_replay_allowed: false;
+    fresh_handoff_required_per_write: true;
+    fresh_authorization_required_per_write: true;
+    fresh_execution_ref_required_per_write: true;
+    capabilities: Record<string, boolean>;
+    next_required_boundary: string;
+  };
+}
+
 export interface OfficeNasKeeperExecutionFromPreviewPayload {
   handoff_ref: string;
   relay_execution_ref: string;
@@ -1818,6 +1855,12 @@ export const api = {
     fetchJSON<OfficeMacRelayRootReadinessProbeResult>("/api/office/controlled-mutation/nas-runtime/mac-relay-root-readiness-probe"),
   getOfficeControlledMutationNasKeeperLastSuccessfulMacRelayWrite: () =>
     fetchJSON<OfficeNasKeeperLastSuccessfulMacRelayWriteResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-last-successful-mac-relay-write"),
+  executeOfficeControlledMutationNasKeeperFreshOneShotOperatorWrite: (body: Record<string, unknown>) =>
+    fetchJSON<OfficeNasKeeperFreshOneShotOperatorWriteResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-one-shot-operator-write", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
   executeOfficeControlledMutationNasKeeperExecutionFromPreview: (body: OfficeNasKeeperExecutionFromPreviewPayload) =>
     fetchJSON<OfficeNasKeeperExecutionFromPreviewResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-execution-from-preview", {
       method: "POST",

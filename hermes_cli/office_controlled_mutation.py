@@ -335,6 +335,12 @@ _NAS_KEEPER_HANDOFF_EXECUTION_STATE_FIELDS = {
     "safe_summary",
     "evidence_refs",
 }
+_NAS_KEEPER_FRESH_ONE_SHOT_OPERATOR_WRITE_FIELDS = (
+    _NAS_KEEPER_HANDOFF_QUEUE_FIELDS
+    | _NAS_KEEPER_HANDOFF_AUTHORIZE_FIELDS
+    | _NAS_KEEPER_HANDOFF_EXECUTION_PAYLOAD_PREVIEW_FIELDS
+    | {"execution_record_ref", "recorded_by", "recorded_at"}
+) - {"authorization_decision"}
 _NAS_KEEPER_HANDOFF_EXECUTION_STATUSES = {
     "succeeded": "mac_relay_execution_succeeded",
     "failed": "mac_relay_execution_failed",
@@ -7899,6 +7905,200 @@ def review_office_controlled_mutation_nas_keeper_one_shot_write_payload_arm(
         "executed": False,
         "written": False,
         "errors": errors,
+        "dto": dto,
+    }
+
+
+
+def _fresh_one_shot_existing_refs(queue_file: Path) -> dict[str, set[str]]:
+    refs = {
+        "handoff_ref": set(),
+        "authorization_ref": set(),
+        "relay_execution_ref": set(),
+        "execution_record_ref": set(),
+    }
+    if not queue_file.exists():
+        return refs
+    for line in queue_file.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            item = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(item, Mapping):
+            continue
+        for field in refs:
+            value = item.get(field)
+            if isinstance(value, str):
+                refs[field].add(value)
+    return refs
+
+
+def execute_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_write(
+    payload: object, *, queue_dir: Path | str | None = None, root_path: Path | str | None = None
+) -> dict[str, object]:
+    """Run one fresh-ref Mac relay write through queue/authorization/preview.
+
+    This wrapper intentionally remains an operator one-shot, not daemonization. It
+    fails closed before execution when any handoff/authorization/execution ref was
+    seen before, records the terminal execution state on success, and returns only
+    safe refs/checksums/readback metadata.
+    """
+
+    if not isinstance(payload, Mapping):
+        return {
+            "executed": False,
+            "written": False,
+            "recorded": False,
+            "fresh_refs_verified": False,
+            "errors": [_error("payload", "invalid_payload_type")],
+            "dto": None,
+        }
+    errors: list[dict[str, str]] = []
+    if set(payload) - _NAS_KEEPER_FRESH_ONE_SHOT_OPERATOR_WRITE_FIELDS:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+    for field in sorted(_NAS_KEEPER_FRESH_ONE_SHOT_OPERATOR_WRITE_FIELDS):
+        if field not in payload:
+            errors.append(_error(field, "missing_field"))
+    if errors:
+        return {
+            "executed": False,
+            "written": False,
+            "recorded": False,
+            "fresh_refs_verified": False,
+            "errors": sorted(errors, key=lambda item: (item["field"], item["code"])),
+            "dto": None,
+        }
+
+    queue_file = _nas_keeper_handoff_queue_file(queue_dir)
+    existing_refs = _fresh_one_shot_existing_refs(queue_file)
+    reuse_errors = []
+    for field, code in (
+        ("handoff_ref", "reused_handoff_ref"),
+        ("authorization_ref", "reused_authorization_ref"),
+        ("relay_execution_ref", "reused_relay_execution_ref"),
+        ("execution_record_ref", "reused_execution_record_ref"),
+    ):
+        if str(payload[field]) in existing_refs[field]:
+            reuse_errors.append(_error(field, code))
+    if reuse_errors:
+        return {
+            "executed": False,
+            "written": False,
+            "recorded": False,
+            "fresh_refs_verified": False,
+            "errors": sorted(reuse_errors, key=lambda item: (item["field"], item["code"])),
+            "dto": None,
+        }
+
+    handoff_payload = {field: payload[field] for field in _NAS_KEEPER_HANDOFF_QUEUE_FIELDS}
+    queued = enqueue_office_controlled_mutation_nas_keeper_mac_relay_handoff(handoff_payload, queue_dir=queue_dir)
+    if not queued.get("queued"):
+        return {
+            "executed": False,
+            "written": False,
+            "recorded": False,
+            "fresh_refs_verified": True,
+            "errors": cast(list[dict[str, str]], queued.get("errors") or []),
+            "dto": None,
+        }
+
+    authorization_payload = {
+        "handoff_ref": payload["handoff_ref"],
+        "authorization_ref": payload["authorization_ref"],
+        "nas_keeper_ref": payload["nas_keeper_ref"],
+        "relay_node_ref": payload["relay_node_ref"],
+        "authorized_by": payload["authorized_by"],
+        "authorized_at": payload["authorized_at"],
+        "authorization_decision": "authorize_mac_relay_execution",
+    }
+    authorized = authorize_office_controlled_mutation_nas_keeper_mac_relay_handoff(authorization_payload, queue_dir=queue_dir)
+    if not authorized.get("authorized"):
+        return {
+            "executed": False,
+            "written": False,
+            "recorded": False,
+            "fresh_refs_verified": True,
+            "errors": cast(list[dict[str, str]], authorized.get("errors") or []),
+            "dto": None,
+        }
+
+    execution_payload = {
+        "handoff_ref": payload["handoff_ref"],
+        "relay_execution_ref": payload["relay_execution_ref"],
+        "nas_keeper_ref": payload["nas_keeper_ref"],
+        "relay_node_ref": payload["relay_node_ref"],
+        "relay_authorized_by": payload["relay_authorized_by"],
+        "relay_authorized_at": payload["relay_authorized_at"],
+        "record_execution_state_after_write": True,
+        "execution_record_ref": payload["execution_record_ref"],
+        "recorded_by": payload["recorded_by"],
+        "recorded_at": payload["recorded_at"],
+    }
+    executed = execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_preview(
+        execution_payload, queue_dir=queue_dir, root_path=root_path
+    )
+    if not executed.get("executed"):
+        return {
+            "executed": False,
+            "written": False,
+            "recorded": False,
+            "fresh_refs_verified": True,
+            "errors": cast(list[dict[str, str]], executed.get("errors") or []),
+            "dto": None,
+        }
+    execution_dto = dict(cast(dict[str, object], executed["dto"]))
+    state_dto = cast(dict[str, object], execution_dto.get("execution_state") or {})
+    capabilities = dict(cast(dict[str, object], execution_dto.get("capabilities") or {}))
+    capabilities.update(
+        {
+            "fresh_one_shot_operator_write_enabled": True,
+            "repeat_execution_replay_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_credential_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+        }
+    )
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_mac_relay_fresh_one_shot_operator_write_completed",
+        "fresh_refs_verified": True,
+        "handoff_ref": payload["handoff_ref"],
+        "authorization_ref": payload["authorization_ref"],
+        "relay_execution_ref": payload["relay_execution_ref"],
+        "execution_record_ref": payload["execution_record_ref"],
+        "queue_ref": execution_dto.get("queue_ref"),
+        "queue_status": state_dto.get("queue_status_after", "mac_relay_execution_succeeded"),
+        "execution_status": state_dto.get("execution_status", "succeeded"),
+        "safe_display_path": execution_dto.get("safe_display_path"),
+        "safe_logical_path": execution_dto.get("safe_logical_path"),
+        "payload_bytes": execution_dto.get("payload_bytes"),
+        "markdown_body_sha256": execution_dto.get("markdown_body_sha256"),
+        "readback_sha256": execution_dto.get("readback_sha256"),
+        "readback_verified": execution_dto.get("readback_verified") is True,
+        "execution_state_recorded": execution_dto.get("execution_state_recorded") is True,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "repeat_execution_replay_allowed": False,
+        "fresh_handoff_required_per_write": True,
+        "fresh_authorization_required_per_write": True,
+        "fresh_execution_ref_required_per_write": True,
+        "capabilities": capabilities,
+        "next_required_boundary": "fresh_one_shot_operator_review_or_new_refs",
+    }
+    return {
+        "executed": True,
+        "written": True,
+        "recorded": executed.get("recorded") is True,
+        "fresh_refs_verified": True,
+        "errors": [],
         "dto": dto,
     }
 

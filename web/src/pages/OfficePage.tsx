@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeManualApprovalRecordingDraftReviewStatus, type OfficeManualApprovalRecordStatus, type OfficeApprovalEventEnvelopeStatus, type OfficeManualApprovalDispatchGateReadinessStatus, type OfficeManualDispatchGateOpenRecordStatus, type OfficeManualRuntimeCommandPreviewRecordStatus, type OfficeManualRuntimeCommandInclusionRecordStatus, type OfficeManualRuntimeCommandExecutionRecordStatus, type OfficeManualTargetMutationReadinessRecordStatus, type OfficeManualTargetMutationRecordStatus, type OfficeManualAdapterDispatchRecordStatus, type OfficeManualKanbanMutationRecordStatus, type OfficeManualNasSaveRecordStatus, type OfficeManualNasKeeperHandoffRecordStatus, type OfficeNasKeeperHandoffClaimDryRunResult, type OfficeNasKeeperHandoffAuthorizationResult, type OfficeNasKeeperExecutionPayloadPreviewResult, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeMacRelayRootReadinessProbeResult, type OfficeNasKeeperLastSuccessfulMacRelayWriteResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeManualApprovalRecordingDraftReviewStatus, type OfficeManualApprovalRecordStatus, type OfficeApprovalEventEnvelopeStatus, type OfficeManualApprovalDispatchGateReadinessStatus, type OfficeManualDispatchGateOpenRecordStatus, type OfficeManualRuntimeCommandPreviewRecordStatus, type OfficeManualRuntimeCommandInclusionRecordStatus, type OfficeManualRuntimeCommandExecutionRecordStatus, type OfficeManualTargetMutationReadinessRecordStatus, type OfficeManualTargetMutationRecordStatus, type OfficeManualAdapterDispatchRecordStatus, type OfficeManualKanbanMutationRecordStatus, type OfficeManualNasSaveRecordStatus, type OfficeManualNasKeeperHandoffRecordStatus, type OfficeNasKeeperHandoffClaimDryRunResult, type OfficeNasKeeperHandoffAuthorizationResult, type OfficeNasKeeperExecutionPayloadPreviewResult, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeMacRelayRootReadinessProbeResult, type OfficeNasKeeperLastSuccessfulMacRelayWriteResult, type OfficeNasKeeperFreshOneShotOperatorWriteResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -6900,6 +6900,64 @@ export function NasKeeperLastSuccessfulMacRelayWriteStatusPanel({
   );
 }
 
+export function NasKeeperFreshOneShotOperatorFlowPanel({
+  lastWrite,
+  lastExecution,
+  error,
+}: {
+  lastWrite: OfficeNasKeeperLastSuccessfulMacRelayWriteResult | null;
+  lastExecution?: OfficeNasKeeperFreshOneShotOperatorWriteResult | null;
+  error?: string | null;
+}) {
+  const latest = lastExecution?.dto ?? null;
+  const readback = latest ?? lastWrite?.dto ?? null;
+  const caps = readback?.capabilities ?? {};
+  const rows = [
+    ["handoff_ref", readback?.handoff_ref ?? "fresh handoff ref required"],
+    ["authorization_ref", readback?.authorization_ref ?? "fresh authorization ref required"],
+    ["relay_execution_ref", readback?.relay_execution_ref ?? "fresh execution ref required"],
+    ["execution_record_ref", readback?.execution_record_ref ?? "fresh execution record ref required"],
+    ["readback_sha256", readback?.readback_sha256 ?? "available after bounded write"],
+    ["next_required_boundary", readback?.next_required_boundary ?? "fresh_one_shot_operator_write"],
+  ];
+  return (
+    <section
+      className="border border-cyan-300/20 bg-cyan-950/10 p-4"
+      data-office-nas-keeper-fresh-one-shot-operator-flow="true"
+      data-office-nas-keeper-fresh-one-shot-operator-flow-fresh-handoff-required="true"
+      data-office-nas-keeper-fresh-one-shot-operator-flow-fresh-authorization-required="true"
+      data-office-nas-keeper-fresh-one-shot-operator-flow-fresh-execution-ref-required="true"
+      data-office-nas-keeper-fresh-one-shot-operator-flow-repeat-replay-enabled={String(Boolean(caps.repeat_execution_replay_enabled || readback?.repeat_execution_replay_allowed))}
+      data-office-nas-keeper-fresh-one-shot-operator-flow-automation-enabled={String(Boolean(caps.watcher_enabled || caps.cron_enabled || caps.dispatch_enabled || caps.authority_adapter_binding_enabled))}
+      data-office-nas-keeper-fresh-one-shot-operator-flow-vps-nas-authority={String(Boolean(caps.vps_nas_mount_enabled || caps.direct_vps_nas_write_enabled || caps.vps_credential_access_enabled))}
+      data-office-nas-keeper-fresh-one-shot-operator-flow-markdown-body-included={String(Boolean(readback?.markdown_body_included))}
+      data-office-nas-keeper-fresh-one-shot-operator-flow-raw-root-path-included={String(Boolean(readback?.raw_root_path_included))}
+      data-office-nas-keeper-fresh-one-shot-operator-flow-credential-value-included={String(Boolean(readback?.credential_value_included))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-200/70">Fresh one-shot operator wrapper</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">fresh refs only · fail closed on reuse</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            This live-visible contract keeps the next write as a human/operator one-shot: every write must provide new handoff, authorization, relay execution, and execution-record refs. It exposes no form controls here, does not replay the last write, and keeps watcher, cron, dispatcher, authority-adapter binding, and VPS NAS authority disabled.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "wrapper status unavailable" : latest ? "fresh write completed" : "ready for fresh refs"}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-3" data-office-nas-keeper-fresh-one-shot-operator-flow-fields="true">
+        {rows.map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-nas-keeper-fresh-one-shot-operator-flow-field={key}>
+            <div className="font-semibold text-foreground">{key}</div>
+            <div className="mt-1 break-words leading-5 text-midground/70">{value}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function ApprovedRealOneShotDispatchGateDesignPanel({
   status,
   error,
@@ -9884,6 +9942,7 @@ export default function OfficePage() {
       <MacLocalRelayRootAuthorityConfigContractPanel terminalResult={nasKeeperGuardedFailureStateResult} error={nasKeeperGuardedFailureStateError} />
       <MacLocalRelayRootReadinessProbeContractPanel terminalResult={nasKeeperGuardedFailureStateResult} probeResult={macRelayRootReadinessProbeResult} error={nasKeeperGuardedFailureStateError ?? macRelayRootReadinessProbeError} />
       <NasKeeperLastSuccessfulMacRelayWriteStatusPanel result={nasKeeperLastSuccessfulMacRelayWriteResult} error={nasKeeperLastSuccessfulMacRelayWriteError} />
+      <NasKeeperFreshOneShotOperatorFlowPanel lastWrite={nasKeeperLastSuccessfulMacRelayWriteResult} error={nasKeeperLastSuccessfulMacRelayWriteError} />
 
       <OfficeVisualizerEvidenceDrawer terminalResult={nasKeeperGuardedFailureStateResult}>
       <NasKeeperLiveOperatorLanePanel
