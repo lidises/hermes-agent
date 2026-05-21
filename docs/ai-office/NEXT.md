@@ -1,4 +1,70 @@
 
+## Current status — Fresh request-builder ledger/readback deployed
+
+Updated: 2026-05-21 23:42 KST
+
+Completed slice:
+
+- Implemented/deployed sanitized operator request-builder ledger/readback.
+- Added protected API: `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger`.
+- Added backend readback helper: `get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_readback(...)`.
+- Added Office display-only panel: `NasKeeperFreshRequestBuilderLedgerPanel`.
+- The panel/API list recent outcomes as safe refs/status/checksums only and prove dry-review → authorization → write ordering for successful writes.
+- No markdown body, write payload, raw root path, or credential value is returned.
+- No replay control, watcher, cron, dispatcher, authority-adapter binding, VPS NAS mount, or direct VPS NAS write authority is enabled.
+
+Verification:
+
+- Python focused ledger + builder tests: 6 passed.
+- Web focused RPG panel tests: 115 passed.
+- `npm run build`: passed with existing Vite large chunk warning only.
+- `git diff --check`: passed.
+- Added-line leak sentinel scan: passed.
+- VPS `/office` live smoke: ledger panel present, controls 0, repeat replay false, automation false, VPS NAS authority false, markdown body included false, API status 200.
+- Browser console JS errors: 0.
+
+Actual bounded Mac-local write for this rung:
+
+- `built=true`, `dry_reviewed=true`, `executed=true`, `written=true`, `approval_required=false`, errors none.
+- Safe display path: `Hermes / ledger-actual-readback-20260521144700-5afe2043.md`.
+- Payload bytes: 48.
+- Readback verified: true.
+- Readback SHA-256: `2f682c885385acfeacbb9e171013038dbf9f3bf26f6f56561d90b9eee951e6d8`.
+- Refs:
+  - `handoff_ledger_actual_readback_20260521144700_5afe2043`
+  - `authz_ledger_actual_readback_20260521144700_5afe2043`
+  - `relay_exec_ledger_actual_readback_20260521144700_5afe2043`
+  - `exec_record_ledger_actual_readback_20260521144700_5afe2043`
+- Local ledger readback found latest outcome `written`, `dry_review_before_write_verified=true`, `readback_verified=true`.
+
+Deploy:
+
+- Code commit: `52042ee7 feat(office): read back fresh request ledger`.
+- VPS `/home/hermes/.hermes/ai-office-dashboard` and `/home/hermes/.hermes/hermes-agent` reset to `52042ee7`.
+- `web_dist` rsync complete.
+- Restarted dashboard only; gateway stayed active and was not restarted.
+
+Recommended next rung:
+
+- `operator_request_ledger_filtering_and_export`:
+  - add safe filters for outcome/status/ref prefix/time window;
+  - add copyable safe ledger export with only refs/checksums/statuses;
+  - keep actual execution manual/one-shot;
+  - keep watcher/cron/dispatcher/authority-adapter/VPS NAS authority off.
+
+Boundaries preserved:
+
+- No watcher/cron/daemon activation.
+- No dispatcher binding.
+- No authority-adapter binding.
+- No gateway restart.
+- No public exposure changes.
+- No VPS NAS mount/write/credential authority.
+- No prior successful write replay.
+- No raw root path / markdown body / write payload / credential value exposure.
+
+
+
 ## Current status — Fresh one-shot request builder deployed
 
 Updated: 2026-05-21 23:20 KST
