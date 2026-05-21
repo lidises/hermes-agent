@@ -1,4 +1,55 @@
 
+## Current next — manual NAS keeper handoff record complete
+
+Current slice:
+
+- User's standing goal approved continuing from controlled NAS save into the next bounded write rung.
+- Hardened the protected `ManualNasKeeperHandoffRecordStatusPanel` placement regression: the panel was already live-visible and unique before this slice, so the added uniqueness regression passed immediately and no production source change was required for visibility.
+- Exercised the existing protected controlled NAS keeper/Mac relay handoff safe-ref POST/GET routes on the private VPS.
+- Wrote a controlled handoff record plus pending queue item and set `nas_keeper_handoff_queued=true` only inside that controlled handoff record lane.
+- Kept NAS keeper authorization, Mac relay write execution, direct VPS NAS authority/mount/credentials/path/write, real NAS execution, rollback execution, watcher/cron/daemon, public exposure, real external dispatch, and gateway restart closed.
+
+Code/test commit/deploy:
+
+- Commit: `fbb4275f test(office): harden nas keeper handoff panel placement`.
+- Synced both VPS worktrees to `fbb4275f`.
+- Rsynced local built `hermes_cli/web_dist/` to both worktrees.
+- Restarted only `hermes-agent-dashboard.service`; did not restart gateway.
+- Final services: dashboard active, gateway active.
+
+Local verification:
+
+- `py_compile` passed for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py`.
+- Focused backend controlled-mutation tests passed (`31 passed`).
+- Frontend `web/` tests passed: placement focused test, `src/lib/api.test.ts`, and `src/pages/OfficePage.rpg.test.tsx` (`145 passed`).
+- `npm run build` passed with existing Vite large chunk warning.
+- `git diff --check` passed.
+- Added-line sentinel scan found no new raw path/token/provider sentinels.
+
+VPS protected API smoke:
+
+- `/office?nas-keeper-handoff=fbb4275f` returned HTTP 200 after dashboard restart readiness delay.
+- Session token extracted from SPA shell and protected APIs called with `X-Hermes-Session-Token`.
+- Existing NAS save source: `nassave-c40a2620-live-smoke-1501`.
+- New handoff ref: `handoff:fbb4275f.live.smoke.1511`.
+- New relay/write/package refs: `relayreq:fbb4275f.safe2`, `write:fbb4275f.safe2`, `package:fbb4275f.safe2`.
+- POST `/api/office/controlled-mutation/manual-nas-keeper-handoff-record` returned unauth=401, queued=true, dto.mode=`manual_nas_keeper_handoff_queued`, queue_status=`pending_nas_keeper_authorization`, nas_save_created=true, nas_keeper_handoff_queued=true, direct_vps_nas_write_enabled=false, vps_direct_nas_authority_enabled=false, mac_relay_write_enabled=false, actual_nas_write_enabled=false, real_nas_execution_enabled=false, real_dispatch_execution_enabled=false, and did not echo unsafe extras.
+- GET `/api/office/controlled-mutation/manual-nas-keeper-handoff-record-status?handoff_ref=handoff%3Afbb4275f.live.smoke.1511` returned unauth=401, mode=`manual_nas_keeper_handoff_records_readback`, nas_keeper_handoff_record_count=1 for the queried ref, latest queued=true, latest queue_status=`pending_nas_keeper_authorization`, nas_keeper_handoff_enabled=true, queue_append_enabled=true, false risky capabilities, and no raw leak.
+
+VPS live DOM smoke:
+
+- `data-office-manual-nas-keeper-handoff-record-status="true"`: exists=true, controls=0, global profile count=3.
+- Page body includes the safe handoff smoke ref.
+- Raw leak sentinels absent from page body; browser console messages/errors after smoke: 0.
+
+Note: the handoff queue validator rejects markdown bodies containing raw-marker language. The first smoke attempt used too-strong prose and was rejected with `markdown_body/raw_marker_detected`; the successful smoke used a minimal safe body.
+
+Handoff: `docs/ai-office/plans/2026-05-21-nas-keeper-handoff-record-handoff.md`.
+
+Next recommended rung: `nas_keeper_handoff_claim_dry_run` or the equivalent queue readback/claim dry-run visibility rung, only if the next prompt keeps bounded authority. This should remain dry-run/readback only. NAS keeper authorization, Mac relay execution, direct VPS NAS mount/credentials, real NAS execution, public exposure, service/git/credential authority beyond the controlled record, watcher/cron, gateway restart, and real external dispatch should remain closed unless specifically approved.
+
+Last updated: 2026-05-21 15:17 KST
+
 ## Current next — manual NAS save record complete
 
 Current slice:
