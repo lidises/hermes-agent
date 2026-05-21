@@ -215,6 +215,53 @@ export interface OfficeNasKeeperHandoffClaimDryRunResult {
   };
 }
 
+
+export interface OfficeNasKeeperHandoffAuthorizationPayload {
+  handoff_ref: string;
+  authorization_ref: string;
+  nas_keeper_ref: string;
+  relay_node_ref: string;
+  authorization_decision: "authorize_mac_relay_execution";
+  authorized_by: string;
+  authorized_at: string;
+}
+
+export interface OfficeNasKeeperHandoffAuthorizationResult {
+  authorized: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: null | {
+    schema_version: number;
+    mode: "nas_keeper_mac_relay_handoff_authorized";
+    authorized: boolean;
+    handoff_ref: string;
+    authorization_ref: string;
+    authorization_decision: string;
+    queue_ref?: string;
+    queue_status_before: string;
+    queue_status_after: string;
+    authorized_by: string;
+    authorized_at: string;
+    relay_request_ref: string;
+    write_ref: string;
+    package_ref: string;
+    target_vault_ref: string;
+    safe_slug: string;
+    safe_title: string;
+    requested_by: string;
+    requested_at: string;
+    nas_keeper_ref: string;
+    relay_node_ref: string;
+    execution_path: string[];
+    authorization_path: string[];
+    safe_logical_path: string;
+    safe_display_path: string;
+    payload_bytes: number;
+    execution_payload_preview_fields: string[];
+    capabilities: Record<string, boolean>;
+    next_required_boundary: string;
+  };
+}
+
 export interface OfficeAuthorityMetadataHandoffStatus {
   schema_version: number;
   mode: "authority_metadata_handoff_status";
@@ -1412,6 +1459,13 @@ export const api = {
 
   dryRunOfficeControlledMutationNasKeeperHandoffClaim: (body: OfficeNasKeeperHandoffClaimDryRunPayload) =>
     fetchJSON<OfficeNasKeeperHandoffClaimDryRunResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-handoff-claim-dry-run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
+
+  authorizeOfficeControlledMutationNasKeeperHandoff: (body: OfficeNasKeeperHandoffAuthorizationPayload) =>
+    fetchJSON<OfficeNasKeeperHandoffAuthorizationResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-handoff-authorize", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),

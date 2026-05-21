@@ -188,6 +188,57 @@ describe("fetchJSON", () => {
     expect(JSON.stringify(fetchMock.mock.calls[0]?.[1])).not.toMatch(/\/Users\/|\/home\/|token=|sk-|raw markdown body/i);
   });
 
+  it("posts safe NAS Keeper handoff authorization through the protected queue-mutation route", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        __HERMES_SESSION_TOKEN__: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        authorized: true,
+        errors: [],
+        dto: {
+          schema_version: 1,
+          mode: "nas_keeper_mac_relay_handoff_authorized",
+          authorized: true,
+          handoff_ref: "handoff_ui_demo",
+          authorization_ref: "auth_ui_demo",
+          authorization_decision: "authorize_mac_relay_execution" as const,
+          queue_status_before: "pending_nas_keeper_authorization",
+          queue_status_after: "authorized_for_mac_relay_execution",
+          capabilities: { queue_mutation_enabled: true, mac_relay_write_enabled: false, actual_nas_write_enabled: false },
+        },
+      }),
+    } as Response);
+
+    const payload = {
+      handoff_ref: "handoff_ui_demo",
+      authorization_ref: "auth_ui_demo",
+      nas_keeper_ref: "keeper_manual_review",
+      relay_node_ref: "relay_mac_safe",
+      authorization_decision: "authorize_mac_relay_execution" as const,
+      authorized_by: "operator_ai_office",
+      authorized_at: "2026-05-21T06:40:00Z",
+    };
+    const result = await api.authorizeOfficeControlledMutationNasKeeperHandoff(payload);
+
+    expect(result.authorized).toBe(true);
+    expect(result.dto?.capabilities.queue_mutation_enabled).toBe(true);
+    expect(result.dto?.capabilities.mac_relay_write_enabled).toBe(false);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/office/controlled-mutation/nas-runtime/nas-keeper-handoff-authorize",
+      expect.objectContaining({ method: "POST", headers: expect.any(Headers), body: JSON.stringify(payload) }),
+    );
+    const headers = fetchMock.mock.calls[0]?.[1]?.headers as Headers;
+    expect(headers.get("X-Hermes-Session-Token")).toBe("session-token-for-header-only");
+    expect(headers.get("Content-Type")).toBe("application/json");
+    expect(JSON.stringify(fetchMock.mock.calls[0]?.[1])).not.toMatch(/\/Users\/|\/home\/|token=|sk-|raw markdown body/i);
+  });
+
   it("reads safe authority metadata handoff status through the protected readback route", async () => {
     Object.defineProperty(globalThis, "window", {
       configurable: true,
