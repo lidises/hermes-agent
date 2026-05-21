@@ -1,4 +1,58 @@
 
+## Current next — NAS Keeper terminal execution-state completion review complete
+
+Current slice:
+
+- User's standing goal approved continuing from guarded failure execution-state record into the terminal evidence completion review rung.
+- Added live display-only `NasKeeperTerminalExecutionStateCompletionReviewPanel`.
+- The panel reads the existing guarded failure execution-state result and marks completion only for `execution_status=failed_guarded`, `queue_status_after=mac_relay_execution_failed_guarded`, and `next_required_boundary=none_terminal_execution_state_recorded`.
+- This rung did not add another backend write. It verifies/presents terminal completion evidence and documents the branch boundary.
+- Current VPS queue path is intentionally complete/closed as a guarded failure; actual NAS write requires a Mac-local relay root/authority branch. Direct VPS NAS authority remains excluded.
+- Kept Mac relay write execution, actual NAS file write, direct VPS NAS authority/mount/credentials/path/write, real NAS execution, watcher/cron/daemon activation, public exposure, gateway restart, and real external dispatch closed.
+
+Code/test commit/deploy:
+
+- `d719847f feat(office): review terminal nas keeper state`.
+- Synced both VPS worktrees to `d719847f`.
+- Rsynced local built `hermes_cli/web_dist/` to both worktrees.
+- Restarted only `hermes-agent-dashboard.service`; did not restart gateway.
+- Final services: dashboard active, gateway active.
+
+Local verification:
+
+- RED: frontend failed first because `NasKeeperTerminalExecutionStateCompletionReviewPanel` was missing.
+- GREEN: focused frontend panel test and placement/uniqueness test passed.
+- `py_compile` passed for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py`.
+- Focused NAS Keeper execution-state/readback tests passed (`8 passed`).
+- Frontend `web/` combined tests passed: `src/lib/api.test.ts` + `src/pages/OfficePage.rpg.test.tsx` (`154 passed`).
+- `npm run build` passed with existing Vite large chunk warning.
+- `git diff --check` passed.
+- Added-line sentinel scan found no new raw path/token/provider sentinels.
+
+VPS live DOM smoke:
+
+- `/office?terminal-review=d719847f` returned HTTP 200 after dashboard restart readiness delay.
+- `data-office-nas-keeper-terminal-completion-review-status="true"`: exists=true, controls=0.
+- Attributes confirmed complete=true, path_closed=true, mac_relay_write=false, actual_write=false, vps_nas_mount=false.
+- Page body includes `failed_guarded`, `mac_relay_execution_failed_guarded`, and `Mac-local relay root branch required for actual NAS write`.
+- Raw leak sentinels absent from page body; browser console messages/errors after smoke: 0.
+
+VPS protected queue readback smoke:
+
+- Session token extracted from SPA shell and protected GET called with `X-Hermes-Session-Token`.
+- GET `/api/office/controlled-mutation/nas-runtime/nas-keeper-handoff-queue?handoff_ref=handoff%3Afbb4275f.live.smoke.1511`.
+- unauth GET=401.
+- authenticated GET returned HTTP 200, count=1, terminal_complete=true, latest `queue_status=mac_relay_execution_failed_guarded`, `execution_status=failed_guarded`, `markdown_body_included=false`.
+- Latest refs: `execution_record_ref=execrecord_relayexec_auth_780a0c24_live_smoke_1551_failed_guarded`, `relay_execution_ref=relayexec-auth-780a0c24-live-smoke-1551`.
+- Evidence refs: `guard:relayexec_auth_780a0c24_live_smoke_1551`, `guard:mac_relay_root_not_configured`.
+- Raw leak sentinels absent.
+
+Handoff: `docs/ai-office/plans/2026-05-21-nas-keeper-terminal-completion-review-handoff.md`.
+
+Next recommended rung: `mac_local_relay_root_authority_preflight` / Mac-local relay authority readiness preflight. This should be read-only/preflight first: inspect Mac-side relay-root configuration requirements and present a readiness panel. It must not create or expose NAS credentials, must not mount NAS on the VPS, must not execute a write, and must not start watchers/cron/daemons. Direct VPS NAS authority remains excluded.
+
+Last updated: 2026-05-21 16:57 KST
+
 ## Current next — NAS Keeper guarded failure execution-state record complete
 
 Current slice:
