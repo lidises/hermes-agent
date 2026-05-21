@@ -1,4 +1,72 @@
 
+## Current status — Fresh one-shot operator write wrapper deployed
+
+Updated: 2026-05-21 20:27 KST
+
+Completed slice:
+
+- Implemented/deployed a fresh-ref one-shot Mac-local relay operator wrapper.
+- Code commits:
+  - `c0144357 feat(office): enforce fresh one-shot relay writes`
+  - `c9076db6 fix(office): report fresh write payload bytes`
+- Added protected API:
+  - `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-one-shot-operator-write`
+- Added helper:
+  - `execute_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_write(...)`
+- Added Office UI display-only panel:
+  - `NasKeeperFreshOneShotOperatorFlowPanel`
+  - `data-office-nas-keeper-fresh-one-shot-operator-flow="true"`
+- Wrapper enforces fresh refs per write and fails closed before write on reuse of:
+  - `handoff_ref`
+  - `authorization_ref`
+  - `relay_execution_ref`
+  - `execution_record_ref`
+- Wrapper returns only safe refs/checksum/readback metadata; no markdown body, raw root path, or credential value.
+
+Actual bounded Mac-local write completed:
+
+- safe display path: `Hermes / fresh-one-shot-operator-write-20260521112456.md`
+- payload_bytes: 223
+- readback_verified: true
+- readback_sha256: `22f4c409bf93162bec31173c0cda54356258ee69dcd68c8dbccd753848097989`
+- handoff_ref: `handoff_fresh_one_shot_operator_20260521112456`
+- authorization_ref: `authz_fresh_one_shot_operator_20260521112456`
+- relay_execution_ref: `relay_exec_fresh_one_shot_operator_20260521112456`
+- execution_record_ref: `exec_record_fresh_one_shot_operator_20260521112456`
+
+Verification:
+
+- Python focused tests: 6 passed.
+- Web focused tests: 161 passed.
+- `npm run build` passed with only the existing Vite large chunk warning.
+- `git diff --check` passed.
+- added-line leak sentinel scan passed.
+
+VPS:
+
+- `/home/hermes/.hermes/ai-office-dashboard` HEAD `c9076db6`, clean at deploy time.
+- `/home/hermes/.hermes/hermes-agent` HEAD `c9076db69`, clean at deploy time.
+- `web_dist` rsync complete.
+- Restarted only user service `hermes-agent-dashboard.service`; did not restart gateway.
+- `hermes-agent-dashboard.service` active; `hermes-gateway.service` active.
+- private `/office` GET returned content.
+- Live DOM smoke: fresh wrapper panel present, controls 0, repeat replay false, automation false, VPS NAS authority false, raw leak sentinels none, browser console JS errors 0.
+- Live API smoke on VPS safely returned `mac_relay_root_not_configured` with `executed=false`, `written=false`, and `fresh_refs_verified=true`; expected because VPS has no Mac relay root authority.
+
+Boundaries preserved:
+
+- No watcher/cron/daemon activation.
+- No dispatcher or authority-adapter binding.
+- No gateway restart.
+- No public exposure change.
+- No VPS NAS mount/write/credential authority.
+- No replay of prior successful writes.
+- No raw root path or credential value returned in API/DOM/docs.
+
+Next recommended rung:
+
+- Add an operator-side fresh write request builder: generate unique refs from a single safe intent, dry-review payload first, require explicit operator approval for actual write, execute exactly once, then readback/record terminal state. Keep watcher/cron/dispatcher/authority-adapter binding disabled.
+
 ## Current status — Repeat-safe Mac relay readback deployed
 
 Updated: 2026-05-21 20:08 KST
