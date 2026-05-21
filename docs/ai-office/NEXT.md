@@ -1,4 +1,48 @@
 
+## Current next — Mac-local relay authority config contract complete
+
+Current slice:
+
+- User approved continuing from the RPG-focused Office view and Mac-local relay authority preflight through the next recommended rung, with bounded write authority.
+- Per the controlled-mutation ladder, this rung remained contract-first/read-only: it defines how the Mac-local runtime should prove relay-root readiness without exposing the value.
+- Added `MacLocalRelayRootAuthorityConfigContractPanel`, placed outside the evidence drawer beside the Mac-local preflight panel while preserving the RPG-focused Office page.
+- Contract fields shown: `masked_root_present`, `root_kind`, `read_probe_required`, `writable_probe_required`, `credential_value_visible=false`, `raw_nas_path_visible=false`, `vps_nas_mount_enabled=false`, `direct_vps_nas_write_enabled=false`.
+- Stable DOM hook: `data-office-mac-local-relay-root-config-contract="true"`.
+- Kept Mac relay write execution, actual NAS file write, direct VPS NAS authority/mount/credentials/path/write, real NAS execution, watcher/cron/daemon activation, public exposure, gateway restart, and real external dispatch closed.
+
+Code/test commit/deploy:
+
+- `16c4ecee feat(office): define mac relay authority contract`.
+- Synced both VPS worktrees to `16c4ecee`.
+- Rsynced local built `hermes_cli/web_dist/` to both worktrees.
+- Restarted only `hermes-agent-dashboard.service`; did not restart gateway.
+- Final services: dashboard active, gateway active.
+
+Local verification:
+
+- RED: config contract placement/render tests failed because the panel did not exist.
+- GREEN: focused config contract tests passed.
+- `py_compile` passed for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py`.
+- Focused NAS Keeper execution-state/readback tests passed (`8 passed`).
+- Frontend `web/` combined tests passed: `src/lib/api.test.ts` + `src/pages/OfficePage.rpg.test.tsx` (`157 passed`).
+- `npm run build` passed with existing Vite large chunk warning.
+- `git diff --check` passed.
+- Added-line sentinel scan found no new raw path/token/provider sentinels.
+
+VPS live DOM smoke:
+
+- `/office?mac-contract=16c4ecee` returned HTTP 200 after dashboard restart readiness delay.
+- RPG-focused shell exists; visual map and SVG map exist; sprites=8.
+- Evidence drawer remains closed by default.
+- Config contract exists with read_only=true, root_value_visible=false, write_enabled=false, vps_nas_authority=false, rows=8.
+- Raw leak sentinels absent from page body; browser console messages/errors after smoke: 0.
+
+Handoff: `docs/ai-office/plans/2026-05-21-mac-local-relay-authority-config-contract-handoff.md`.
+
+Next recommended rung: `mac_local_relay_root_readiness_probe_contract` / Mac-local relay root readiness probe contract. Define the exact sanitized proof payload shape for a future Mac-local probe, still without executing a write: boolean root configured/readable/writable placeholders, safe probe ref, sanitized root label only, redaction policy version, no raw path, no credential, no write payload, no watcher/cron/daemon, no VPS NAS mount.
+
+Last updated: 2026-05-21 17:34 KST
+
 ## Current next — Office RPG-focused view + Mac-local relay authority preflight complete
 
 Current slice:
