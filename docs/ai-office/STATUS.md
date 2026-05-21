@@ -1,4 +1,50 @@
 
+## Current next — Office RPG-focused view + Mac-local relay authority preflight complete
+
+Current slice:
+
+- User said the Office section had accumulated too much material and should show only necessary parts, centered on the RPG visualizer.
+- Added `data-office-rpg-focused-shell="true"` main shell and `OfficeVisualizerEvidenceDrawer`, a closed-by-default details drawer for accumulated technical evidence/approval ladder panels.
+- Existing NAS Keeper/operator/controlled-mutation status panels remain available for smoke/debugging but no longer flood the default Office view.
+- Added next recommended rung `mac_local_relay_root_authority_preflight` as `MacLocalRelayRootAuthorityPreflightPanel`, display-only/read-only.
+- The preflight panel states `HERMES_AI_OFFICE_MAC_RELAY_NAS_ROOT` must be configured on the Mac-local relay runtime, while never displaying the value, credentials, or raw NAS path.
+- Kept Mac relay write execution, actual NAS file write, direct VPS NAS authority/mount/credentials/path/write, real NAS execution, watcher/cron/daemon activation, public exposure, gateway restart, and real external dispatch closed.
+
+Code/test commit/deploy:
+
+- `0143b3f0 feat(office): focus rpg visualizer view`.
+- Synced both VPS worktrees to `0143b3f0`.
+- Rsynced local built `hermes_cli/web_dist/` to both worktrees.
+- Restarted only `hermes-agent-dashboard.service`; did not restart gateway.
+- Final services: dashboard active, gateway active.
+
+Local verification:
+
+- RED: RPG-focused drawer regression failed because the drawer did not exist; Mac-local relay preflight test failed because the panel did not exist.
+- GREEN: focused drawer/preflight/placement tests passed.
+- `py_compile` passed for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py`.
+- Focused NAS Keeper execution-state/readback tests passed (`8 passed`).
+- Frontend `web/` combined tests passed: `src/lib/api.test.ts` + `src/pages/OfficePage.rpg.test.tsx` (`156 passed`).
+- `npm run build` passed with existing Vite large chunk warning.
+- `git diff --check` passed.
+- Added-line sentinel scan found no new raw path/token/provider sentinels.
+
+VPS live DOM/vision smoke:
+
+- `/office?rpg-focus=0143b3f0` returned HTTP 200 after dashboard restart readiness delay.
+- RPG-focused shell exists; visual map and SVG map exist; sprites=8; bubbles=8.
+- Evidence drawer exists and is closed by default.
+- Mac-local relay root preflight exists with ready=false, read_only=true, vps_nas_authority=false.
+- Raw leak sentinels absent from page body; browser console messages/errors after smoke: 0.
+- Vision smoke confirmed first screen is now RPG Visualizer-centered and technical/evidence/approval-ladder material is summarized/collapsed rather than flooding the main page.
+- VPS environment check showed `HERMES_AI_OFFICE_MAC_RELAY_NAS_ROOT` is not configured in the checked environment; value was not echoed.
+
+Handoff: `docs/ai-office/plans/2026-05-21-office-rpg-focused-view-mac-relay-preflight-handoff.md`.
+
+Next recommended rung: `mac_local_relay_root_authority_config_contract` / Mac-local relay authority configuration contract. Define the safe contract for how the Mac-local runtime will prove relay-root readiness without exposing the value. This should still be read-only/contract-first and must not create credentials, expose paths, execute a write, mount NAS on the VPS, or start watcher/cron/daemon processes.
+
+Last updated: 2026-05-21 17:18 KST
+
 ## Current next — NAS Keeper terminal execution-state completion review complete
 
 Current slice:
