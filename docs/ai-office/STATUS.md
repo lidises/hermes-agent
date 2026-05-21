@@ -1,4 +1,55 @@
 
+## Current next — NAS Keeper authorization record complete
+
+Current slice:
+
+- User's standing goal approved continuing from NAS Keeper handoff claim dry-run into the next bounded write rung.
+- Added a live display-only `NasKeeperHandoffAuthorizationRecordStatusPanel` and a protected frontend API client for the existing authorization route.
+- Recorded one safe-ref NAS Keeper authorization for the pending handoff queue item, mutating only that safe queue item from `pending_nas_keeper_authorization` to `authorized_for_mac_relay_execution`.
+- Kept Mac relay write execution, actual NAS file write, direct VPS NAS authority/mount/credentials/path/write, real NAS execution, watcher/cron/daemon activation, public exposure, gateway restart, and real external dispatch closed.
+
+Code/test commits/deploy:
+
+- `780a0c24 feat(office): record nas keeper authorization`.
+- `b78f2090 fix(office): show nas keeper authorization readback`.
+- Synced both VPS worktrees to `b78f2090`.
+- Rsynced local built `hermes_cli/web_dist/` to both worktrees.
+- Restarted only `hermes-agent-dashboard.service`; did not restart gateway.
+- Final services: dashboard active, gateway active.
+
+Local verification:
+
+- RED: focused panel test failed first because `NasKeeperHandoffAuthorizationRecordStatusPanel` was missing; focused API test failed first because `authorizeOfficeControlledMutationNasKeeperHandoff` was missing.
+- GREEN: focused panel test, focused API client test, and placement/uniqueness test passed.
+- `py_compile` passed for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py`.
+- Focused backend controlled-mutation tests passed (`31 passed`).
+- Frontend `web/` combined tests passed: `src/lib/api.test.ts` + `src/pages/OfficePage.rpg.test.tsx` (`149 passed`).
+- `npm run build` passed with existing Vite large chunk warning.
+- `git diff --check` passed.
+- Added-line sentinel scan found no new raw path/token/provider sentinels.
+
+VPS protected API smoke:
+
+- `/office?auth-record=b78f2090` returned HTTP 200 after dashboard restart readiness delay.
+- Session token extracted from SPA shell and protected APIs called with `X-Hermes-Session-Token`.
+- Existing handoff source: `handoff:fbb4275f.live.smoke.1511`, relay node `relay:mac_relay_safe`, keeper `keeper:manual_review`.
+- Authorization ref: `auth-780a0c24-live-smoke-1551`.
+- POST `/api/office/controlled-mutation/nas-runtime/nas-keeper-handoff-authorize` returned unauth=401, authorized=true, mode=`nas_keeper_mac_relay_handoff_authorized`, queue_status_before=`pending_nas_keeper_authorization`, queue_status_after=`authorized_for_mac_relay_execution`, queue_mutation_enabled=true, authorization_recording_enabled=true, Mac relay write false, actual NAS write false, VPS NAS mount false, VPS credential access false, direct VPS NAS write false, watcher/cron/dispatch/authority binding false, and no raw leak.
+- GET `/api/office/controlled-mutation/nas-runtime/nas-keeper-handoff-queue?handoff_ref=handoff%3Afbb4275f.live.smoke.1511` returned unauth=401, listed=true, count=1 for the queried ref, queue_status=`authorized_for_mac_relay_execution`, authorization_ref=`auth-780a0c24-live-smoke-1551`, markdown_body_included=false, and no raw leak.
+
+VPS live DOM smoke:
+
+- `data-office-nas-keeper-handoff-authorization-record-status="true"`: exists=true, controls=0.
+- Attributes confirmed authorized=true, queue_mutation=true, authorization_recording=true, mac_relay_write=false, actual_write=false, vps_nas_mount=false.
+- Page body includes the safe authorization ref and `authorized_for_mac_relay_execution`.
+- Raw leak sentinels absent from page body; browser console messages/errors after smoke: 0.
+
+Handoff: `docs/ai-office/plans/2026-05-21-nas-keeper-authorization-record-handoff.md`.
+
+Next recommended rung: `mac_relay_execution_payload_preview` / `nas_keeper_mac_relay_execution_preview`, only if bounded authority remains acceptable. This should read the authorized handoff and preview the Mac relay execution payload only. It still should not execute Mac relay writes, write NAS files, mount NAS on the VPS, expose credentials, start watcher/cron/daemon processes, restart the gateway, or expose public authority.
+
+Last updated: 2026-05-21 15:58 KST
+
 ## Current next — NAS Keeper handoff claim dry-run complete
 
 Current slice:
