@@ -1,4 +1,41 @@
 
+## Current next — NAS Keeper previewed payload execution complete
+
+Current slice:
+
+- User approved continuing from the recommended rung with bounded writes and slightly stronger authority.
+- Executed the already authorized NAS Keeper/Mac relay handoff from its previewed payload and recorded execution state inline after write/readback success.
+- This was Mac-local relay execution only; no watcher/cron/daemon, relay dispatch loop, authority-adapter binding, direct VPS NAS authority, public exposure, or service restart was added.
+
+Refs:
+
+- handoff_ref=`handoff-durable-exec-20260521-014337`
+- authorization_ref=`auth-durable-exec-20260521-020144`
+- relay_execution_ref=`relayexec-durable-exec-20260521-020144`
+- execution_record_ref=`exec-record-durable-exec-20260521-020633`
+- nas_keeper_ref=`agent_nas_keeper`
+- relay_node_ref=`mac_relay_primary`
+
+Verification:
+
+- Precheck: local HEAD/origin `6a3449c9d76ca7b4445ac24fa3c91462a9deea03`, local clean; VPS dashboard/source clean at same commit; dashboard/gateway active.
+- Queue/preview precheck: count=1, queue_status=`authorized_for_mac_relay_execution`, previewed=true, preview_hash=`b18ffa51d2a35f215c1c336efec875fc87b89a7917da4b1132ec4f9982930924`, markdown_body_included=false, Mac relay root available.
+- Execution result: executed=true, written=true, recorded=true, mode=`nas_keeper_mac_relay_execution_from_preview_completed`.
+- Queue status transition: `authorized_for_mac_relay_execution` -> `mac_relay_execution_succeeded`.
+- Execution state: execution_status=`succeeded`, execution_record_ref=`exec-record-durable-exec-20260521-020633`.
+- NAS readback: target_exists=true; expected/readback SHA-256 both `b18ffa51d2a35f215c1c336efec875fc87b89a7917da4b1132ec4f9982930924`; sha_match=true.
+- Audit/rollback: audit_written=true, audit_ref_present=true, rollback_created=false.
+- Safe logical/display path: `Hermes::controlled-mutation-durable-exec-20260521-014337.md` / `Hermes / controlled-mutation-durable-exec-20260521-014337.md`.
+- Capability flags: queue_mutation_enabled=true, execution_state_recording_enabled=true, mac_relay_write_enabled=true, actual_nas_write_enabled=true; direct_vps_nas_write_enabled=false, watcher_enabled=false, cron_enabled=false, dispatch_enabled=false, authority_adapter_binding_enabled=false.
+- Raw-value leak scan passed: queued markdown text, private paths, command/NAS/provider/card/markdown sentinels, and token/secret sentinels were absent from safe DTO/readback surfaces.
+- Focused regression passed: `py_compile`; execution-from-preview/state-record/mac-relay-write tests (`17 passed`); `git diff --check`.
+
+Handoff: `docs/ai-office/plans/2026-05-21-nas-keeper-previewed-payload-execution-handoff.md`.
+
+Next recommended rung: bounded replace-then-restore smoke for the same safe logical note, verifying final SHA-256 returns to `b18ffa51d2a35f215c1c336efec875fc87b89a7917da4b1132ec4f9982930924`. Stop before watcher/cron/daemon activation, direct VPS NAS authority, public exposure, and gateway restart.
+
+Last updated: 2026-05-21 11:06 KST
+
 ## Current next — NAS Keeper authorized handoff payload preview complete
 
 Current slice:
