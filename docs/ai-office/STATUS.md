@@ -1,4 +1,55 @@
 
+## Current next — NAS Keeper Mac relay execution payload preview complete
+
+Current slice:
+
+- User's standing goal approved continuing from NAS Keeper authorization record into the next bounded rung.
+- Added a live display-only `NasKeeperMacRelayExecutionPayloadPreviewStatusPanel` for an already-authorized NAS Keeper handoff.
+- Used the existing protected backend preview route to preview only safe refs/checksums/metadata for a future Mac-local relay execution call.
+- Kept Mac relay write execution, actual NAS file write, direct VPS NAS authority/mount/credentials/path/write, real NAS execution, watcher/cron/daemon activation, public exposure, gateway restart, queue mutation beyond prior authorization, and real external dispatch closed.
+
+Code/test commit/deploy:
+
+- `30e67f6c feat(office): preview nas keeper relay payload`.
+- Synced both VPS worktrees to `30e67f6c`.
+- Rsynced local built `hermes_cli/web_dist/` to both worktrees.
+- Restarted only `hermes-agent-dashboard.service`; did not restart gateway.
+- Final services: dashboard active, gateway active.
+
+Local verification:
+
+- RED: focused panel test failed first because `NasKeeperMacRelayExecutionPayloadPreviewStatusPanel` was missing.
+- API client test already passed because the protected preview client/types existed; the new test now protects that contract.
+- GREEN: focused panel test and placement/uniqueness test passed.
+- `py_compile` passed for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py`.
+- Focused backend controlled-mutation tests passed (`31 passed`).
+- Frontend `web/` combined tests passed: `src/lib/api.test.ts` + `src/pages/OfficePage.rpg.test.tsx` (`151 passed`).
+- `npm run build` passed with existing Vite large chunk warning.
+- `git diff --check` passed.
+- Added-line sentinel scan found no new raw path/token/provider sentinels.
+
+VPS protected API smoke:
+
+- `/office?payload-preview=30e67f6c` returned HTTP 200 after dashboard restart readiness delay.
+- Session token extracted from SPA shell and protected APIs called with `X-Hermes-Session-Token`.
+- Existing authorized handoff source: `handoff:fbb4275f.live.smoke.1511`, authorization ref `auth-780a0c24-live-smoke-1551`, queue_status `authorized_for_mac_relay_execution`.
+- Preview relay execution ref: `relayexec-30e67f6c-live-smoke-1604`.
+- POST `/api/office/controlled-mutation/nas-runtime/nas-keeper-execution-payload-preview` returned unauth=401, previewed=true, mode=`nas_keeper_mac_relay_execution_payload_preview`, markdown_body_included=false, markdown_body_sha256 length=64, execution_payload_preview_enabled=true, queue_mutation=false, authorization_recording=false, Mac relay write false, actual NAS write false, VPS NAS mount false, VPS credential access false, direct VPS NAS write false, watcher/cron/dispatch/authority binding false, and no raw leak.
+- GET queue readback for source selection returned unauth=401 and no raw leak.
+
+VPS live DOM smoke:
+
+- `data-office-nas-keeper-execution-payload-preview-status="true"`: exists=true, controls=0.
+- Attributes confirmed previewed=true, preview_enabled=true, queue_mutation=false, mac_relay_write=false, actual_write=false, vps_nas_mount=false.
+- Page body includes `relayexec-`, `payload previewed`, and `authorized_for_mac_relay_execution`.
+- Raw leak sentinels absent from page body; browser console messages/errors after smoke: 0.
+
+Handoff: `docs/ai-office/plans/2026-05-21-nas-keeper-payload-preview-handoff.md`.
+
+Next recommended rung: `mac_relay_execution_from_preview_guarded_failure` / disabled execution-from-preview guard smoke, only if bounded authority remains acceptable. This should attempt the protected execution-from-preview route without a configured Mac relay root and verify it fails safely (`executed=false`, `written=false`, root not configured) while still not writing NAS files, mounting NAS on the VPS, exposing credentials, starting watcher/cron/daemon processes, restarting the gateway, or exposing public authority.
+
+Last updated: 2026-05-21 16:08 KST
+
 ## Current next — NAS Keeper authorization record complete
 
 Current slice:
