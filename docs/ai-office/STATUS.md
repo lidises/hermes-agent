@@ -1,4 +1,48 @@
 
+## Current next — approval preflight visible panel complete
+
+Current slice:
+
+- User approved continuing from disabled-executor visible panels with bounded write authority.
+- Moved the protected `ManualApprovalRecordingPreflightStatusPanel` out of legacy diagnostic-only gating so it is visible in live `/office` with stable display-only hooks and zero controls.
+- Exercised the existing manual approval-recording preflight POST route only as refusal metadata.
+- No real approval record write, dispatch gate open, runtime command materialization/execution, adapter binding/dispatch, replay-store write, target/Kanban/NAS/VPS mutation, watcher/cron/daemon, direct VPS NAS authority, public exposure, or gateway restart was added.
+
+Code commit/deploy:
+
+- Code commit: `67cae610 feat(office): surface approval preflight status panel`.
+- Synced both VPS worktrees to `67cae610`.
+- Rsynced local built `hermes_cli/web_dist/` to both worktrees.
+- Restarted only `hermes-agent-dashboard.service`; did not restart gateway.
+- Final services: dashboard active, gateway active.
+
+Local verification:
+
+- `py_compile` passed for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py`.
+- Focused backend manual approval-recording preflight tests passed (`4 passed`).
+- Frontend `web/` tests passed: `src/lib/api.test.ts` + `src/pages/OfficePage.rpg.test.tsx` (`145 passed`).
+- `npm run build` passed with existing Vite large chunk warning.
+- `git diff --check` passed.
+- Added-line sentinel scan found no new raw path/token/provider sentinels.
+
+VPS protected API smoke:
+
+- `/office?approval-preflight=67cae610` returned HTTP 200 after dashboard restart readiness delay.
+- Session token extracted from SPA shell and protected APIs called with `X-Hermes-Session-Token`.
+- GET `/api/office/controlled-mutation/manual-approval-recording-preflight` returned unauth=401, mode=`manual_approval_recording_preflight_status`, complete=true, errors=[], and risky capabilities all false.
+- POST `/api/office/controlled-mutation/manual-approval-recording-preflight/preflight` returned mode=`manual_approval_recording_preflight_refusal`, refusal_code=`approval_recording_disabled_by_default`, accepted=false, approval_record_written=false, dispatch_gate_open=false, runtime_command_executed=false, target_mutation_created=false, idempotency_replay_store_written=false, and did not echo unsafe extras.
+
+VPS live DOM smoke:
+
+- `data-office-manual-approval-recording-preflight="true"`: exists=true, controls=0, complete=true, readback=true, approval-recording=false, real-dispatch=false, replay-store-write=false, target-mutation=false.
+- Raw leak sentinels absent from page body; browser console messages/errors after smoke: 0.
+
+Handoff: `docs/ai-office/plans/2026-05-21-approval-preflight-visible-panel-handoff.md`.
+
+Next recommended rung: continue to `manual_approval_recording_draft_persistence`, the first bounded draft-only write/readback rung. Store only allowlisted safe refs and `draft_status=draft_only`; keep real approval write, dispatch gate open, runtime command inclusion/execution, adapter binding/dispatch, replay-store write, rollback execution, target/Kanban/NAS/VPS mutation, service/git/credential/public authority, watcher/cron, gateway restart, and direct VPS NAS authority false.
+
+Last updated: 2026-05-21 12:11 KST
+
 ## Current next — disabled executor visible panels complete
 
 Current slice:
