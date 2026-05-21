@@ -1,4 +1,51 @@
 
+## Current next — manual runtime command preview metadata record complete
+
+Current slice:
+
+- User's standing goal approved continuing from manual dispatch-gate-open metadata into the next bounded write rung.
+- Hardened the protected `ManualRuntimeCommandPreviewRecordStatusPanel` placement: it remains visible in live `/office` before the legacy diagnostic gate, and the duplicate legacy-only instance was removed.
+- Exercised the existing protected runtime-command-preview metadata/checksum-only POST/GET routes on the private VPS.
+- Wrote `runtime_command_preview_created=true` and a SHA-256 checksum only. No command body inclusion, runtime command execution, adapter binding/dispatch, replay-store write, rollback execution, target/Kanban/NAS mutation, watcher/cron/daemon, direct VPS NAS authority, public exposure, or gateway restart was added.
+
+Code commit/deploy:
+
+- Code commit: `81a6215b feat(office): harden runtime command preview panel placement`.
+- Synced both VPS worktrees to `81a6215b`.
+- Rsynced local built `hermes_cli/web_dist/` to both worktrees.
+- Restarted only `hermes-agent-dashboard.service`; did not restart gateway.
+- Final services: dashboard active, gateway active.
+
+Local verification:
+
+- `py_compile` passed for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py`.
+- Focused backend manual approval/runtime preview tests passed (`31 passed`).
+- Frontend `web/` tests passed: `src/lib/api.test.ts` + `src/pages/OfficePage.rpg.test.tsx` (`145 passed`).
+- `npm run build` passed with existing Vite large chunk warning.
+- `git diff --check` passed.
+- Added-line sentinel scan found no new raw path/token/provider sentinels.
+
+VPS protected API smoke:
+
+- `/office?runtime-preview=81a6215b` returned HTTP 200 after dashboard restart readiness delay.
+- Session token extracted from SPA shell and protected APIs called with `X-Hermes-Session-Token`.
+- Existing dispatch gate source: `gate-8d774767-live-smoke-1255`.
+- New preview metadata ref: `cmdpreview-81a6215b-live-smoke-1305`.
+- POST `/api/office/controlled-mutation/manual-runtime-command-preview-record` returned unauth=401, stored=true, dto.mode=`stored_manual_runtime_command_preview_record`, runtime_command_preview_created=true, checksum length=64, runtime_command_included=false, runtime_command_executed=false, target_mutation_created=false, kanban_mutation_created=false, nas_save_created=false, real_dispatch_execution_enabled=false, and did not echo unsafe extras.
+- GET `/api/office/controlled-mutation/manual-runtime-command-preview-record-status?runtime_command_preview_ref=cmdpreview-81a6215b-live-smoke-1305` returned unauth=401, mode=`stored_manual_runtime_command_preview_records_readback`, runtime_command_preview_record_count=1 for the queried ref, capabilities.runtime_command_preview_enabled=true, false risky capabilities, and no raw leak.
+
+VPS live DOM smoke:
+
+- `data-office-manual-runtime-command-preview-record-status="true"`: exists=true, controls=0, global profile count=10.
+- Page body includes the safe preview smoke ref.
+- Raw leak sentinels absent from page body; browser console messages/errors after smoke: 0.
+
+Handoff: `docs/ai-office/plans/2026-05-21-runtime-command-preview-record-handoff.md`.
+
+Next recommended rung: `manual_runtime_command_inclusion_record`, only if the next prompt keeps bounded write approval. This may store a safe command-body reference record and checksum; shell body storage, runtime execution, adapter dispatch, replay-store write, rollback, target/Kanban/NAS/VPS mutation, service/git/credential/public authority, watcher/cron, gateway restart, and direct VPS NAS authority must remain closed.
+
+Last updated: 2026-05-21 13:08 KST
+
 ## Current next — manual dispatch gate open metadata record complete
 
 Current slice:
