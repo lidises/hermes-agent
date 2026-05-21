@@ -53,7 +53,33 @@ function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
 }
 
 describe("Office controlled-mutation runtime status panel placement", () => {
-  it("keeps gate-open, runtime preview, runtime inclusion, runtime execution, target-readiness, target-mutation, adapter-dispatch, Kanban-mutation, NAS-save, and NAS Keeper handoff status panels live-visible outside legacy diagnostic lanes", () => {
+  it("keeps accumulated technical evidence collapsed behind the RPG visualizer instead of flooding the main Office view", () => {
+    const source = officePageSource;
+    const rpgIndex = source.indexOf("<OfficeRpgMap");
+    const drawerIndex = source.indexOf("<OfficeVisualizerEvidenceDrawer");
+    const drawerCloseIndex = source.indexOf("</OfficeVisualizerEvidenceDrawer>");
+    expect(rpgIndex).toBeGreaterThan(0);
+    expect(drawerIndex).toBeGreaterThan(rpgIndex);
+    expect(drawerCloseIndex).toBeGreaterThan(drawerIndex);
+    expect(source).toContain('data-office-rpg-focused-shell="true"');
+    expect(source).toContain('data-office-visualizer-evidence-drawer="true"');
+    expect(source).toContain("<MacLocalRelayRootAuthorityPreflightPanel");
+
+    for (const panel of [
+      "<NasKeeperLiveOperatorLanePanel",
+      "<ControlledMutationApprovalBoundarySummaryPanel",
+      "<RuntimeActivationReviewStatusPanel",
+      "<ManualRuntimeCommandExecutionRecordStatusPanel",
+      "<ManualNasKeeperHandoffRecordStatusPanel",
+      "<NasKeeperTerminalExecutionStateCompletionReviewPanel",
+    ]) {
+      const panelIndex = source.indexOf(panel);
+      expect(panelIndex).toBeGreaterThan(drawerIndex);
+      expect(panelIndex).toBeLessThan(drawerCloseIndex);
+    }
+  });
+
+  it("keeps graduated status panels available outside legacy diagnostic lanes for smoke hooks", () => {
     const source = officePageSource;
     const legacyIndex = source.indexOf("{SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES ?");
     expect(legacyIndex).toBeGreaterThan(0);
@@ -3782,6 +3808,55 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).toContain("terminal failed_guarded evidence complete · path intentionally closed");
     expect(html).toContain("mac_relay_execution_failed_guarded");
     expect(html).toContain("Mac-local relay root branch required for actual NAS write");
+    expect(html).not.toContain("/Users/lidises");
+    expect(html).not.toContain("/home/hermes");
+    expect(html).not.toContain("sk-test");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("<form");
+    expect(html).not.toContain("<input");
+    expect(html).not.toContain("<select");
+    expect(html).not.toContain("<textarea");
+  });
+
+  it("renders Mac-local relay root authority preflight without credentials or write controls", () => {
+    const MacLocalRelayRootAuthorityPreflightPanel = (OfficePageModule as unknown as {
+      MacLocalRelayRootAuthorityPreflightPanel: React.ComponentType<{ terminalResult: unknown; error?: string | null }>;
+    }).MacLocalRelayRootAuthorityPreflightPanel;
+    expect(MacLocalRelayRootAuthorityPreflightPanel).toBeTypeOf("function");
+
+    const html = renderToStaticMarkup(
+      <MacLocalRelayRootAuthorityPreflightPanel
+        error={null}
+        terminalResult={{
+          recorded: true,
+          errors: [],
+          dto: {
+            recorded: true,
+            queue_status_after: "mac_relay_execution_failed_guarded",
+            execution_status: "failed_guarded",
+            next_required_boundary: "none_terminal_execution_state_recorded",
+            capabilities: {
+              queue_mutation_enabled: true,
+              mac_relay_write_enabled: false,
+              actual_nas_write_enabled: false,
+              vps_nas_mount_enabled: false,
+              direct_vps_nas_write_enabled: false,
+              watcher_enabled: false,
+              cron_enabled: false,
+              dispatch_enabled: false,
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(html).toContain('data-office-mac-local-relay-root-preflight="true"');
+    expect(html).toContain('data-office-mac-local-relay-root-preflight-ready="false"');
+    expect(html).toContain('data-office-mac-local-relay-root-preflight-read-only="true"');
+    expect(html).toContain('data-office-mac-local-relay-root-preflight-vps-nas-authority="false"');
+    expect(html).toContain("Mac-local relay root authority preflight");
+    expect(html).toContain("HERMES_AI_OFFICE_MAC_RELAY_NAS_ROOT");
+    expect(html).toContain("read-only preflight only");
     expect(html).not.toContain("/Users/lidises");
     expect(html).not.toContain("/home/hermes");
     expect(html).not.toContain("sk-test");

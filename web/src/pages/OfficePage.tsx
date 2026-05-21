@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Activity,
   AlertTriangle,
@@ -6621,6 +6621,95 @@ export function NasKeeperTerminalExecutionStateCompletionReviewPanel({
   );
 }
 
+
+export function OfficeVisualizerEvidenceDrawer({
+  children,
+  terminalResult,
+}: {
+  children: ReactNode;
+  terminalResult: OfficeNasKeeperExecutionStateResult | null;
+}) {
+  const dto = terminalResult?.dto ?? null;
+  const terminal = dto?.execution_status === "failed_guarded" && dto?.queue_status_after === "mac_relay_execution_failed_guarded";
+  return (
+    <details
+      className="border border-white/10 bg-black/20 p-4 text-sm text-midground/80"
+      data-office-visualizer-evidence-drawer="true"
+      data-office-visualizer-evidence-drawer-default-open="false"
+      data-office-visualizer-evidence-drawer-terminal-complete={String(Boolean(terminal))}
+    >
+      <summary className="cursor-pointer list-none text-sm font-semibold text-foreground" data-office-visualizer-evidence-drawer-summary="true">
+        기술 증거 / 승인 사다리 보기 · 기본 화면에서는 RPG visualizer만 보기
+      </summary>
+      <p className="mt-2 max-w-3xl text-xs leading-5 text-midground/65">
+        사용자가 직접 볼 필요가 적은 상태 패널과 승인 사다리는 접어둡니다. 필요할 때만 펼쳐서 확인하며, 이 접힘은 실행/저장/배포 권한을 열지 않습니다.
+      </p>
+      <div className="mt-4 grid gap-4" data-office-visualizer-evidence-drawer-content="true">
+        {children}
+      </div>
+    </details>
+  );
+}
+
+export function MacLocalRelayRootAuthorityPreflightPanel({
+  terminalResult,
+  error,
+}: {
+  terminalResult: OfficeNasKeeperExecutionStateResult | null;
+  error?: string | null;
+}) {
+  const dto = terminalResult?.dto ?? null;
+  const terminalClosed = dto?.execution_status === "failed_guarded" && dto?.queue_status_after === "mac_relay_execution_failed_guarded";
+  const caps = dto?.capabilities ?? {};
+  return (
+    <section
+      className="border border-indigo-300/20 bg-indigo-950/10 p-4"
+      data-office-mac-local-relay-root-preflight="true"
+      data-office-mac-local-relay-root-preflight-ready="false"
+      data-office-mac-local-relay-root-preflight-read-only="true"
+      data-office-mac-local-relay-root-preflight-terminal-closed={String(Boolean(terminalClosed))}
+      data-office-mac-local-relay-root-preflight-vps-nas-authority={String(Boolean(caps.vps_nas_mount_enabled || caps.direct_vps_nas_write_enabled))}
+      data-office-mac-local-relay-root-preflight-mac-relay-write={String(Boolean(caps.mac_relay_write_enabled))}
+      data-office-mac-local-relay-root-preflight-actual-write={String(Boolean(caps.actual_nas_write_enabled))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-indigo-200/70">Mac-local relay root authority preflight</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">read-only preflight only · actual NAS write still closed</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            다음 실제 NAS write branch는 Mac-local relay root authority가 필요합니다. 이 패널은 요구사항만 표시합니다: `HERMES_AI_OFFICE_MAC_RELAY_NAS_ROOT` must be configured on the Mac-local relay runtime, but the value, credentials, and raw NAS path are never shown here.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "preflight unavailable" : terminalClosed ? "terminal guard evidence ready" : "waiting for terminal evidence"}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-mac-local-relay-root-preflight-requirements="true">
+        {[
+          ["terminal_guarded_failure_evidence", terminalClosed],
+          ["mac_local_env_var_required", true],
+          ["credential_value_visible", false],
+          ["raw_nas_path_visible", false],
+          ["vps_nas_mount_enabled", Boolean(caps.vps_nas_mount_enabled)],
+          ["direct_vps_nas_write_enabled", Boolean(caps.direct_vps_nas_write_enabled)],
+          ["mac_relay_write_enabled", Boolean(caps.mac_relay_write_enabled)],
+          ["actual_nas_write_enabled", Boolean(caps.actual_nas_write_enabled)],
+          ["watcher_enabled", Boolean(caps.watcher_enabled)],
+          ["cron_enabled", Boolean(caps.cron_enabled)],
+          ["dispatch_enabled", Boolean(caps.dispatch_enabled)],
+        ].map(([key, value]) => (
+          <div key={String(key)} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-mac-local-relay-root-preflight-requirement={String(key)}>
+            {String(key)}: {String(Boolean(value))}
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 border border-current/15 bg-black/20 p-3 text-xs leading-5 text-midground/70">
+        Safe next branch: configure/check Mac-local relay authority outside the VPS; do not mount NAS on the VPS, do not expose credentials, do not execute a write, and do not start watcher/cron/daemon processes in this rung.
+      </div>
+    </section>
+  );
+}
+
 export function ApprovedRealOneShotDispatchGateDesignPanel({
   status,
   error,
@@ -9507,7 +9596,7 @@ export default function OfficePage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 normal-case">
+    <div className="flex flex-col gap-6 normal-case" data-office-rpg-focused-shell="true">
       <section
         className="border border-emerald-300/25 bg-gradient-to-br from-emerald-950/25 via-black/30 to-sky-950/20 p-5"
         data-office-unified-workbench="true"
@@ -9569,6 +9658,9 @@ export default function OfficePage() {
         />
       ) : null}
 
+      <MacLocalRelayRootAuthorityPreflightPanel terminalResult={nasKeeperGuardedFailureStateResult} error={nasKeeperGuardedFailureStateError} />
+
+      <OfficeVisualizerEvidenceDrawer terminalResult={nasKeeperGuardedFailureStateResult}>
       <NasKeeperLiveOperatorLanePanel
         queueSurface={nasKeeperQueueManualEvidenceReviewSurface}
         queueReadback={nasKeeperQueueReadback}
@@ -9627,6 +9719,7 @@ export default function OfficePage() {
       <NasKeeperExecutionFromPreviewGuardedFailureStatusPanel result={nasKeeperExecutionGuardResult} error={nasKeeperExecutionGuardError} />
       <NasKeeperGuardedFailureExecutionStateRecordStatusPanel result={nasKeeperGuardedFailureStateResult} error={nasKeeperGuardedFailureStateError} />
       <NasKeeperTerminalExecutionStateCompletionReviewPanel result={nasKeeperGuardedFailureStateResult} error={nasKeeperGuardedFailureStateError} />
+      </OfficeVisualizerEvidenceDrawer>
 
       {SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES ? (
         <>
