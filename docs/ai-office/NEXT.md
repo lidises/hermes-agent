@@ -1,4 +1,51 @@
 
+## Current next — runtime readiness visible panels complete
+
+Current slice:
+
+- User approved continuing from protected runtime-readiness API evidence with bounded write authority.
+- Moved the runtime-readiness panels out of legacy diagnostic-only gating so they are visible in live `/office` with stable display-only hooks and zero controls:
+  - `RuntimeActivationReviewStatusPanel`
+  - `RuntimePreflightStatusPanel`
+  - `ManualOneShotRuntimeDryRunStatusPanel`
+- No watcher/cron/daemon, systemd/cron file, adapter dispatch, authority-adapter binding, target mutation, Kanban mutation, NAS save/write, direct VPS NAS authority, public exposure, or gateway restart was added.
+
+Code commit/deploy:
+
+- Code commit: `b603b5d3 feat(office): surface runtime readiness status panels`.
+- Synced both VPS worktrees to `b603b5d3`.
+- Rsynced local built `hermes_cli/web_dist/` to both worktrees.
+- Restarted only `hermes-agent-dashboard.service`; did not restart gateway.
+- Final services: dashboard active, gateway active.
+
+Local verification:
+
+- `py_compile` passed for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py`.
+- Focused backend runtime status tests passed (`6 passed`).
+- Frontend `web/` tests passed: `src/lib/api.test.ts` + `src/pages/OfficePage.rpg.test.tsx` (`145 passed`).
+- `npm run build` passed with existing Vite large chunk warning.
+- `git diff --check` passed.
+- Added-line sentinel scan found no new raw path/token/provider sentinels.
+
+VPS protected API smoke:
+
+- `/office?runtime-panels=b603b5d3` returned HTTP 200.
+- Session token extracted from SPA shell and protected APIs called with `X-Hermes-Session-Token`.
+- Runtime activation review, runtime preflight, and manual one-shot dry-run status routes returned complete=true, errors=[], and risky capabilities all false; unauthenticated calls returned 401.
+
+VPS live DOM smoke:
+
+- `data-office-runtime-activation-review-status="true"`: exists=true, controls=0, complete=true, readback=true, raw_excluded=true, risky capability hooks false.
+- `data-office-runtime-preflight-status="true"`: exists=true, controls=0, complete=true, readback=true, runtime-ready=false, raw_excluded=true, risky capability hooks false.
+- `data-office-manual-one-shot-runtime-dry-run-status="true"`: exists=true, controls=0, complete=true, readback=true, runtime-execution=false, risky capability hooks false.
+- Raw leak sentinels absent from page body; browser console messages/errors after smoke: 0.
+
+Handoff: `docs/ai-office/plans/2026-05-21-runtime-readiness-visible-panels-handoff.md`.
+
+Next recommended rung: continue only through protected readback/status or bounded metadata-write rungs already in the ladder. Do not activate watcher/cron/daemon or open adapter dispatch/target/Kanban/NAS mutation yet without an exact separate approval/rollback/kill-switch boundary.
+
+Last updated: 2026-05-21 11:36 KST
+
 ## Current next — runtime readiness protected API evidence complete
 
 Current slice:
