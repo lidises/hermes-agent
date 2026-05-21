@@ -1,4 +1,51 @@
 
+## Current next — disabled executor visible panels complete
+
+Current slice:
+
+- User approved continuing from dispatch-readiness visible panels with bounded write authority.
+- Moved the next protected executor-readiness/readback panels out of legacy diagnostic-only gating so they are visible in live `/office` with stable display-only hooks and zero controls:
+  - `DisabledOneShotRuntimeDispatchExecutorSkeletonPanel`
+  - `ApprovedRealOneShotDispatchGateDesignPanel`
+- Exercised the existing disabled executor POST route only as refusal metadata: accepted=false, dispatch/runtime/target mutation false, unsafe extras not echoed.
+- No watcher/cron/daemon, systemd/cron file, adapter binding, adapter dispatch, real approval recording, runtime command materialization/execution, target mutation, Kanban mutation, NAS save/write, direct VPS NAS authority, public exposure, or gateway restart was added.
+
+Code commit/deploy:
+
+- Code commit: `5676ba6d feat(office): surface disabled executor status panels`.
+- Synced both VPS worktrees to `5676ba6d`.
+- Rsynced local built `hermes_cli/web_dist/` to both worktrees.
+- Restarted only `hermes-agent-dashboard.service`; did not restart gateway.
+- Final services: dashboard active, gateway active.
+
+Local verification:
+
+- `py_compile` passed for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py`.
+- Focused backend disabled-executor / approved-gate tests passed (`7 passed`).
+- Frontend `web/` tests passed: `src/lib/api.test.ts` + `src/pages/OfficePage.rpg.test.tsx` (`145 passed`).
+- `npm run build` passed with existing Vite large chunk warning.
+- `git diff --check` passed.
+- Added-line sentinel scan found no new raw path/token/provider sentinels.
+
+VPS protected API smoke:
+
+- `/office?disabled-executor=5676ba6d` returned HTTP 200 after dashboard restart readiness delay.
+- Session token extracted from SPA shell and protected APIs called with `X-Hermes-Session-Token`.
+- Disabled executor skeleton and approved real one-shot dispatch gate design routes returned complete=true, errors=[], unauth=401, and risky capabilities all false.
+- Disabled executor POST `/execute` returned mode=`disabled_one_shot_runtime_dispatch_executor_refusal`, refusal_code=`runtime_dispatch_disabled_by_default`, accepted=false, dispatch_created=false, runtime_command_executed=false, target_mutation_created=false, and did not echo unsafe extras.
+
+VPS live DOM smoke:
+
+- `data-office-disabled-one-shot-runtime-dispatch-executor-skeleton="true"`: exists=true, controls=0, complete=true, readback=true, endpoint-present=true, refusal-validation=true, runtime-gate-open=false, dispatch-approved=false, binding/dispatch/runtime/target/Kanban/NAS/VPS-file/service/git/credential/public/watcher/cron false.
+- `data-office-approved-real-one-shot-dispatch-gate-design="true"`: exists=true, controls=0, complete=true, readback=true, real-dispatch=false, approval-recording=false, replay-store-write=false, target-mutation=false.
+- Raw leak sentinels absent from page body; browser console messages/errors after smoke: 0.
+
+Handoff: `docs/ai-office/plans/2026-05-21-disabled-executor-visible-panels-handoff.md`.
+
+Next recommended rung: continue to `manual_approval_recording_preflight_status` visibility/readback/refusal-only verification, keeping page UI display-only and protected POST behavior refusal-only. Do not activate watcher/cron/daemon or open adapter dispatch/target/Kanban/NAS mutation without an exact separate approval/rollback/kill-switch boundary.
+
+Last updated: 2026-05-21 11:57 KST
+
 ## Current next — dispatch readiness visible panels complete
 
 Current slice:
