@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeManualApprovalRecordingDraftReviewStatus, type OfficeManualApprovalRecordStatus, type OfficeApprovalEventEnvelopeStatus, type OfficeManualApprovalDispatchGateReadinessStatus, type OfficeManualDispatchGateOpenRecordStatus, type OfficeManualRuntimeCommandPreviewRecordStatus, type OfficeManualRuntimeCommandInclusionRecordStatus, type OfficeManualRuntimeCommandExecutionRecordStatus, type OfficeManualTargetMutationReadinessRecordStatus, type OfficeManualTargetMutationRecordStatus, type OfficeManualAdapterDispatchRecordStatus, type OfficeManualKanbanMutationRecordStatus, type OfficeManualNasSaveRecordStatus, type OfficeManualNasKeeperHandoffRecordStatus, type OfficeNasKeeperHandoffClaimDryRunResult, type OfficeNasKeeperHandoffAuthorizationResult, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeManualApprovalRecordingDraftReviewStatus, type OfficeManualApprovalRecordStatus, type OfficeApprovalEventEnvelopeStatus, type OfficeManualApprovalDispatchGateReadinessStatus, type OfficeManualDispatchGateOpenRecordStatus, type OfficeManualRuntimeCommandPreviewRecordStatus, type OfficeManualRuntimeCommandInclusionRecordStatus, type OfficeManualRuntimeCommandExecutionRecordStatus, type OfficeManualTargetMutationReadinessRecordStatus, type OfficeManualTargetMutationRecordStatus, type OfficeManualAdapterDispatchRecordStatus, type OfficeManualKanbanMutationRecordStatus, type OfficeManualNasSaveRecordStatus, type OfficeManualNasKeeperHandoffRecordStatus, type OfficeNasKeeperHandoffClaimDryRunResult, type OfficeNasKeeperHandoffAuthorizationResult, type OfficeNasKeeperExecutionPayloadPreviewResult, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -6343,6 +6343,73 @@ export function NasKeeperHandoffAuthorizationRecordStatusPanel({
   );
 }
 
+
+export function NasKeeperMacRelayExecutionPayloadPreviewStatusPanel({
+  result,
+  error,
+}: {
+  result: OfficeNasKeeperExecutionPayloadPreviewResult | null;
+  error?: string | null;
+}) {
+  const dto = result?.dto ?? null;
+  const caps = dto?.capabilities ?? {};
+  const previewFields = dto?.execution_payload_fields ?? Object.keys(dto?.execution_payload_preview ?? {});
+  return (
+    <section
+      className="border border-sky-300/20 bg-sky-950/10 p-4"
+      data-office-nas-keeper-execution-payload-preview-status="true"
+      data-office-nas-keeper-execution-payload-previewed={String(Boolean(result?.previewed ?? dto?.previewed))}
+      data-office-nas-keeper-execution-payload-preview-enabled={String(Boolean(caps.execution_payload_preview_enabled))}
+      data-office-nas-keeper-execution-payload-queue-mutation={String(Boolean(caps.queue_mutation_enabled))}
+      data-office-nas-keeper-execution-payload-mac-relay-write={String(Boolean(caps.mac_relay_write_enabled))}
+      data-office-nas-keeper-execution-payload-actual-write={String(Boolean(caps.actual_nas_write_enabled))}
+      data-office-nas-keeper-execution-payload-vps-nas-mount={String(Boolean(caps.vps_nas_mount_enabled))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-200/70">Mac relay execution payload preview</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">payload previewed · Mac relay execution still closed</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Reads the authorized handoff and previews only safe refs/checksums for a future Mac-local relay call. It does not execute the relay, include raw markdown, write NAS files, mount NAS on the VPS, start watchers, or bind dispatch authority.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "preview request failed" : String(dto?.relay_execution_ref ?? "preview pending")}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-nas-keeper-execution-payload-boundaries="true">
+        {[
+          ["queue_read_enabled", Boolean(caps.queue_read_enabled)],
+          ["execution_payload_preview_enabled", Boolean(caps.execution_payload_preview_enabled)],
+          ["queue_mutation_enabled", Boolean(caps.queue_mutation_enabled)],
+          ["nas_keeper_authorization_recording_enabled", Boolean(caps.nas_keeper_authorization_recording_enabled)],
+          ["vps_nas_mount_enabled", Boolean(caps.vps_nas_mount_enabled)],
+          ["vps_credential_access_enabled", Boolean(caps.vps_credential_access_enabled)],
+          ["direct_vps_nas_write_enabled", Boolean(caps.direct_vps_nas_write_enabled)],
+          ["mac_relay_write_enabled", Boolean(caps.mac_relay_write_enabled)],
+          ["actual_nas_write_enabled", Boolean(caps.actual_nas_write_enabled)],
+          ["watcher_enabled", Boolean(caps.watcher_enabled)],
+          ["cron_enabled", Boolean(caps.cron_enabled)],
+          ["dispatch_enabled", Boolean(caps.dispatch_enabled)],
+          ["authority_adapter_binding_enabled", Boolean(caps.authority_adapter_binding_enabled)],
+        ].map(([key, value]) => (
+          <div key={String(key)} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-nas-keeper-execution-payload-boundary={String(key)}>
+            {String(key)}: {String(Boolean(value))}
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-3">
+        <div className="border border-current/15 bg-black/20 p-3 text-xs text-midground/70">handoff {dto?.handoff_ref ?? "pending"}</div>
+        <div className="border border-current/15 bg-black/20 p-3 text-xs text-midground/70">auth {dto?.authorization_ref ?? "pending"}</div>
+        <div className="border border-current/15 bg-black/20 p-3 text-xs text-midground/70">markdown {dto?.markdown_body_ref ?? "not included"}</div>
+      </div>
+      <div className="mt-3 border border-current/15 bg-black/20 p-3 text-xs text-midground/70">
+        fields {previewFields.join(", ") || "pending"} · sha256 {dto?.markdown_body_sha256 ?? "pending"}
+      </div>
+    </section>
+  );
+}
+
 export function ApprovedRealOneShotDispatchGateDesignPanel({
   status,
   error,
@@ -7849,8 +7916,11 @@ export default function OfficePage() {
   const [nasKeeperClaimDryRunError, setNasKeeperClaimDryRunError] = useState<string | null>(null);
   const [nasKeeperAuthorizationResult, setNasKeeperAuthorizationResult] = useState<OfficeNasKeeperHandoffAuthorizationResult | null>(null);
   const [nasKeeperAuthorizationError, setNasKeeperAuthorizationError] = useState<string | null>(null);
+  const [nasKeeperPayloadPreviewResult, setNasKeeperPayloadPreviewResult] = useState<OfficeNasKeeperExecutionPayloadPreviewResult | null>(null);
+  const [nasKeeperPayloadPreviewError, setNasKeeperPayloadPreviewError] = useState<string | null>(null);
   const nasKeeperClaimDryRunKeyRef = useRef<string | null>(null);
   const nasKeeperAuthorizationKeyRef = useRef<string | null>(null);
+  const nasKeeperPayloadPreviewKeyRef = useRef<string | null>(null);
   const [nasKeeperQueueReadbackLoading, setNasKeeperQueueReadbackLoading] = useState(false);
   const [nasKeeperQueueReadbackError, setNasKeeperQueueReadbackError] = useState<string | null>(null);
   const [nasKeeperExecutionDraft, setNasKeeperExecutionDraft] = useState<OfficeNasKeeperExecutionFromPreviewPayload>(DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT);
@@ -8038,6 +8108,31 @@ export default function OfficePage() {
         setNasKeeperAuthorizationError("request failed");
       });
   }, [loadNasKeeperQueueReadback, nasKeeperClaimDryRunResult]);
+
+  useEffect(() => {
+    const dto = nasKeeperAuthorizationResult?.dto;
+    if (!dto || !dto.authorized || dto.queue_status_after !== "authorized_for_mac_relay_execution") return;
+    const key = `${dto.handoff_ref}:${dto.authorization_ref}:${dto.relay_node_ref}`;
+    if (nasKeeperPayloadPreviewKeyRef.current === key) return;
+    nasKeeperPayloadPreviewKeyRef.current = key;
+    const relayAuthorizedAt = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+    api.previewOfficeControlledMutationNasKeeperExecutionPayload({
+      handoff_ref: dto.handoff_ref,
+      relay_execution_ref: `relayexec-${dto.authorization_ref}`.slice(0, 120),
+      nas_keeper_ref: dto.nas_keeper_ref,
+      relay_node_ref: dto.relay_node_ref,
+      relay_authorized_by: dto.authorized_by,
+      relay_authorized_at: relayAuthorizedAt,
+    })
+      .then((result) => {
+        setNasKeeperPayloadPreviewResult(result);
+        setNasKeeperPayloadPreviewError(null);
+      })
+      .catch(() => {
+        setNasKeeperPayloadPreviewResult(null);
+        setNasKeeperPayloadPreviewError("request failed");
+      });
+  }, [nasKeeperAuthorizationResult]);
 
   const executeNasSingleFileWrite = useCallback(async () => {
     if (!nasSingleWriteApproved) {
@@ -9228,6 +9323,7 @@ export default function OfficePage() {
       <ManualNasKeeperHandoffRecordStatusPanel status={manualNasKeeperHandoffRecordStatus} error={manualNasKeeperHandoffRecordStatusError} />
       <NasKeeperHandoffClaimDryRunStatusPanel result={nasKeeperClaimDryRunResult} error={nasKeeperClaimDryRunError} />
       <NasKeeperHandoffAuthorizationRecordStatusPanel result={nasKeeperAuthorizationResult} error={nasKeeperAuthorizationError} />
+      <NasKeeperMacRelayExecutionPayloadPreviewStatusPanel result={nasKeeperPayloadPreviewResult} error={nasKeeperPayloadPreviewError} />
 
       {SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES ? (
         <>

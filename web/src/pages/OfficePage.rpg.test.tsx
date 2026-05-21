@@ -85,6 +85,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
       "<ManualNasKeeperHandoffRecordStatusPanel",
       "<NasKeeperHandoffClaimDryRunStatusPanel",
       "<NasKeeperHandoffAuthorizationRecordStatusPanel",
+      "<NasKeeperMacRelayExecutionPayloadPreviewStatusPanel",
     ]) {
       const panelIndex = source.indexOf(panel);
       expect(panelIndex).toBeGreaterThan(0);
@@ -102,6 +103,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
         "<ManualNasKeeperHandoffRecordStatusPanel",
       "<NasKeeperHandoffClaimDryRunStatusPanel",
       "<NasKeeperHandoffAuthorizationRecordStatusPanel",
+      "<NasKeeperMacRelayExecutionPayloadPreviewStatusPanel",
       ].includes(panel)) {
         expect(source.indexOf(panel, panelIndex + 1)).toBe(-1);
       }
@@ -3544,6 +3546,93 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).toContain('data-office-nas-keeper-handoff-authorization-mac-relay-write="false"');
     expect(html).toContain('data-office-nas-keeper-handoff-authorization-actual-write="false"');
     expect(html).toContain("authorized · Mac relay execution still closed");
+    expect(html).not.toContain("/Users/lidises");
+    expect(html).not.toContain("sk-test");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("<form");
+    expect(html).not.toContain("<input");
+    expect(html).not.toContain("<select");
+    expect(html).not.toContain("<textarea");
+  });
+
+  it("renders NAS Keeper Mac relay execution payload preview without executing writes", () => {
+    const NasKeeperMacRelayExecutionPayloadPreviewStatusPanel = (OfficePageModule as unknown as {
+      NasKeeperMacRelayExecutionPayloadPreviewStatusPanel: React.ComponentType<{ result: unknown; error?: string | null }>;
+    }).NasKeeperMacRelayExecutionPayloadPreviewStatusPanel;
+    expect(NasKeeperMacRelayExecutionPayloadPreviewStatusPanel).toBeTypeOf("function");
+
+    const html = renderToStaticMarkup(
+      <NasKeeperMacRelayExecutionPayloadPreviewStatusPanel
+        error={null}
+        result={{
+          previewed: true,
+          errors: [],
+          dto: {
+            schema_version: 1,
+            mode: "nas_keeper_mac_relay_execution_payload_preview",
+            previewed: true,
+            handoff_ref: "handoff_manual_nas_keeper_1",
+            authorization_ref: "auth_manual_nas_keeper_1",
+            relay_execution_ref: "relay_exec_manual_nas_keeper_1",
+            queue_status: "authorized_for_mac_relay_execution",
+            authorization_decision: "authorize_mac_relay_execution",
+            authorized_by: "operator_ai_office",
+            authorized_at: "2026-05-21T06:40:00Z",
+            relay_authorized_by: "operator_ai_office",
+            relay_authorized_at: "2026-05-21T06:58:00Z",
+            execution_payload_preview: {
+              relay_request_ref: "relay_req_manual_nas_keeper_1",
+              relay_execution_ref: "relay_exec_manual_nas_keeper_1",
+              write_ref: "write_manual_nas_keeper_1",
+              package_ref: "pkg_manual_nas_keeper_1",
+              target_vault_ref: "vault_personal_wiki_demo",
+              safe_slug: "manual-nas-save-handoff",
+              safe_title: "Manual NAS save handoff",
+              requested_by: "operator_ai_office",
+              requested_at: "2026-05-21T06:00:00Z",
+              nas_keeper_ref: "keeper_manual_review",
+              relay_node_ref: "relay_mac_safe",
+              relay_authorized_by: "operator_ai_office",
+              relay_authorized_at: "2026-05-21T06:58:00Z",
+            },
+            execution_payload_fields: ["write_ref", "relay_execution_ref"],
+            markdown_body_ref: "queued_handoff_markdown_body::handoff_manual_nas_keeper_1",
+            markdown_body_bytes: 39,
+            markdown_body_sha256: "a".repeat(64),
+            markdown_body_included: false,
+            execution_path: ["prepared_request_validated", "mac_relay_write_pending"],
+            payload_preview_path: ["authorized_queue_item_read", "safe_execution_payload_previewed", "mac_relay_execution_pending", "no_real_nas_write"],
+            safe_logical_path: "wiki/safe/manual-nas-save-handoff.md",
+            safe_display_path: "Personal Wiki / safe / manual-nas-save-handoff.md",
+            payload_bytes: 128,
+            capabilities: {
+              queue_read_enabled: true,
+              execution_payload_preview_enabled: true,
+              queue_mutation_enabled: false,
+              nas_keeper_authorization_recording_enabled: false,
+              vps_nas_mount_enabled: false,
+              vps_credential_access_enabled: false,
+              direct_vps_nas_write_enabled: false,
+              mac_relay_write_enabled: false,
+              actual_nas_write_enabled: false,
+              watcher_enabled: false,
+              cron_enabled: false,
+              dispatch_enabled: false,
+              authority_adapter_binding_enabled: false,
+            },
+            next_required_boundary: "mac_relay_authenticated_execution_from_previewed_payload",
+          },
+        }}
+      />,
+    );
+
+    expect(html).toContain('data-office-nas-keeper-execution-payload-preview-status="true"');
+    expect(html).toContain('data-office-nas-keeper-execution-payload-previewed="true"');
+    expect(html).toContain('data-office-nas-keeper-execution-payload-preview-enabled="true"');
+    expect(html).toContain('data-office-nas-keeper-execution-payload-mac-relay-write="false"');
+    expect(html).toContain('data-office-nas-keeper-execution-payload-actual-write="false"');
+    expect(html).toContain("payload previewed · Mac relay execution still closed");
+    expect(html).toContain("queued_handoff_markdown_body::handoff_manual_nas_keeper_1");
     expect(html).not.toContain("/Users/lidises");
     expect(html).not.toContain("sk-test");
     expect(html).not.toContain("<button");
