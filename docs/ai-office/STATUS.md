@@ -1,4 +1,75 @@
 
+## Current status — Fresh request ledger selected export review deployed
+
+Updated: 2026-05-22 00:37 KST
+
+Completed slice:
+
+- Implemented/deployed display-only selected export review for the fresh request-builder ledger.
+- Added protected API `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-export-selection-review`.
+- The first supported selection profile is `latest_written`, which reuses the safe ledger export filtered to `outcome=written` and `queue_status=mac_relay_execution_succeeded`.
+- The review verifies selected export item count and checksum-set integrity before any downstream use.
+- Downstream use remains disabled; actual execution remains manual/one-shot.
+- Added Office display-only `NasKeeperFreshRequestBuilderLedgerExportSelectionReviewPanel` with no controls.
+
+Verification:
+
+- Python focused selection/filter/readback tests: 9 passed.
+- Web focused RPG panel tests: 116 passed.
+- `npm run build`: passed with existing Vite large chunk warning only.
+- `git diff --check`: passed.
+- Added-line leak sentinel scan: passed.
+- VPS `/office` live smoke: selected export panel present, controls 0, item-count verified true, checksum-set verified true, downstream use false, repeat replay false, automation false, VPS NAS authority false, markdown body included false, API status 200.
+- Browser console JS errors: 0.
+
+Actual bounded Mac-local write for this rung:
+
+- `built=true`, `dry_reviewed=true`, `executed=true`, `written=true`, `approval_required=false`, errors none.
+- Safe display path: `Hermes / selection-review-actual-20260521154000-7afe4101.md`.
+- Payload bytes: 55.
+- Readback verified: true.
+- Readback SHA-256: `6e5d95055e6acb2dd44964b364a41a926152d903dc63502056dffd2c6ab9ff8e`.
+- Refs:
+  - `handoff_selection_review_actual_20260521154000_7afe4101`
+  - `authz_selection_review_actual_20260521154000_7afe4101`
+  - `relay_exec_selection_review_actual_20260521154000_7afe4101`
+  - `exec_record_selection_review_actual_20260521154000_7afe4101`
+- Local selected export review then reported:
+  - selected item count 5
+  - export item count verified true
+  - checksum set verified true
+  - checksum set SHA-256 `50d478bbaf5bc443c8a020fe445faea99d0c6a9f946fd289617ccda55bbb60b7`
+  - downstream use enabled false
+  - downstream use ready true
+
+Deploy:
+
+- Code commit: `07bbf95b feat(office): review selected ledger export`.
+- VPS `/home/hermes/.hermes/ai-office-dashboard` and `/home/hermes/.hermes/hermes-agent` reset to `07bbf95b`.
+- `web_dist` rsync complete.
+- Restarted dashboard only; gateway stayed active and was not restarted.
+
+Recommended next rung:
+
+- `operator_request_ledger_downstream_use_preflight`:
+  - display-only preflight proving the selected export review can be consumed only after manual operator review;
+  - keep downstream use disabled by default;
+  - no replay, no watcher/cron/dispatcher/authority-adapter/VPS NAS authority;
+  - actual execution remains manual/one-shot.
+
+Boundaries preserved:
+
+- No watcher/cron/daemon activation.
+- No dispatcher binding.
+- No authority-adapter binding.
+- No gateway restart.
+- No public exposure changes.
+- No VPS NAS mount/write/credential authority.
+- No prior successful write replay.
+- No raw root path / markdown body / write payload / credential value exposure.
+
+
+
 ## Current status — Fresh request ledger filtering/export deployed
 
 Updated: 2026-05-22 00:05 KST
