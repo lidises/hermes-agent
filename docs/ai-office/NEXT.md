@@ -1,4 +1,55 @@
 
+## Current next — NAS Keeper handoff claim dry-run complete
+
+Current slice:
+
+- User's standing goal approved continuing from controlled NAS keeper handoff into the next bounded rung.
+- Added a live display-only `NasKeeperHandoffClaimDryRunStatusPanel` and a protected frontend API client for the existing dry-run claim route.
+- Auto-previewed a claim dry-run for the latest pending NAS Keeper handoff queue item.
+- Exercised the protected dry-run POST plus queue readback GET on the private VPS.
+- Kept queue mutation, NAS Keeper authorization recording, Mac relay write execution, direct VPS NAS authority/mount/credentials/path/write, real NAS execution, watcher/cron/daemon activation, public exposure, gateway restart, and real external dispatch closed.
+
+Code/test commit/deploy:
+
+- Commit: `1976625b feat(office): surface nas keeper claim dry run`.
+- Synced both VPS worktrees to `1976625b`.
+- Rsynced local built `hermes_cli/web_dist/` to both worktrees.
+- Restarted only `hermes-agent-dashboard.service`; did not restart gateway.
+- Final services: dashboard active, gateway active.
+
+Local verification:
+
+- RED: focused panel test failed first because `NasKeeperHandoffClaimDryRunStatusPanel` was missing.
+- GREEN: focused panel test, focused API client test, and placement/uniqueness test passed.
+- `py_compile` passed for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py`.
+- Focused backend controlled-mutation tests passed (`31 passed`).
+- Frontend `web/` combined tests passed: `src/lib/api.test.ts` + `src/pages/OfficePage.rpg.test.tsx` (`147 passed`).
+- `npm run build` passed with existing Vite large chunk warning.
+- `git diff --check` passed.
+- Added-line sentinel scan found no new raw path/token/provider sentinels.
+
+VPS protected API smoke:
+
+- `/office?claim-dry-run=1976625b` returned HTTP 200 after dashboard restart readiness delay.
+- Session token extracted from SPA shell and protected APIs called with `X-Hermes-Session-Token`.
+- Existing handoff source: `handoff:fbb4275f.live.smoke.1511`, relay node `relay:mac_relay_safe`.
+- Claim dry-run ref: `claim:1976625b.live.smoke.1526`.
+- POST `/api/office/controlled-mutation/nas-runtime/nas-keeper-handoff-claim-dry-run` returned unauth=401, claimed=false, dry_run=true, mode=`nas_keeper_mac_relay_handoff_claim_dry_run`, claim_status=`would_claim`, queue_status_before=`pending_nas_keeper_authorization`, queue_status_after=`pending_nas_keeper_authorization`, claim_dry_run_enabled=true, queue_mutation_enabled=false, authorization recording false, Mac relay write false, actual NAS write false, watcher/cron/dispatch/authority binding false, and no raw leak. Unsupported raw extras in an invalid request also did not echo unsafe values.
+- GET `/api/office/controlled-mutation/nas-runtime/nas-keeper-handoff-queue?handoff_ref=handoff%3Afbb4275f.live.smoke.1511` returned unauth=401, listed=true, count=1 for the queried ref, queue_status=`pending_nas_keeper_authorization`, markdown_body_included=false, and no raw leak.
+
+VPS live DOM smoke:
+
+- `data-office-nas-keeper-handoff-claim-dry-run-status="true"`: exists=true, controls=0.
+- Attributes confirmed dry_run=true, claimed=false, queue_mutation=false, authorization_recording=false, mac_relay_write=false, actual_write=false.
+- Page body includes the safe handoff ref and `would_claim`.
+- Raw leak sentinels absent from page body; browser console messages/errors after smoke: 0.
+
+Handoff: `docs/ai-office/plans/2026-05-21-nas-keeper-claim-dry-run-handoff.md`.
+
+Next recommended rung: `nas_keeper_handoff_authorization_record`, only if bounded write authority remains acceptable. This is the first queue-mutation/authorization-recording boundary. It still should not execute Mac relay writes, write NAS files, mount NAS on the VPS, expose credentials, start watcher/cron/daemon processes, restart the gateway, or expose public authority.
+
+Last updated: 2026-05-21 15:30 KST
+
 ## Current next — manual NAS keeper handoff record complete
 
 Current slice:
