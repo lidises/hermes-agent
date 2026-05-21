@@ -1,4 +1,30 @@
 
+## Current next — NAS Keeper temp-root execution-from-preview complete
+
+Current slice:
+
+- User approved continuing the recommended controlled-mutation path with bounded writes and slightly stronger authority.
+- Raised NAS Keeper/Mac relay from authorization + execution-payload preview to actual Mac-local execution-from-preview against an isolated temporary safe root only.
+- Used a temporary handoff queue and the safe logical target `vault_temp_relay_smoke::temp-root-execution-smoke.md`.
+
+Safety boundary preserved:
+
+- Temp-root Mac relay write only; real NAS root write, durable production NAS Keeper queue mutation, direct VPS NAS authority/mount/credentials, watcher/cron/daemon activation, relay daemon dispatch, authority-adapter binding, Kanban mutation, public exposure, and gateway restart remain blocked.
+- Raw markdown body, temp/root path, private filesystem path, credential/provider values, and executable command text were not projected.
+
+Verification:
+
+- Create run: queued/authorized/previewed/executed/written/readback/audit true; rollback_created=false; markdown_body_included=false; queue unchanged by execute; direct VPS/write automation lanes false; readback SHA-256 `797801a176f72f0b3329c89ba5d6766130bb85f478f6a12d680a294f1046fd6e`.
+- Replace run: queued/authorized/previewed/executed/written/readback/audit true; rollback_created=true with `rollback_write_20260521_temp_root_2`; markdown_body_included=false; queue unchanged by execute; final readback SHA-256 `51ef74788bf573c16a9d10900417b0dd86acb17e80168be96932592345aae32c`.
+- Final SHA-256 matched expected replacement body; raw leak=false; temporary smoke root removed after evidence capture.
+- Focused regression: `py_compile` passed; execution-from-preview/payload-preview/Mac relay write/NAS runtime write pytest set passed (`22 passed`); `git diff --check` passed; added-line docs safety scan passed.
+
+Handoff: `docs/ai-office/plans/2026-05-21-temp-root-execution-from-preview-handoff.md`.
+
+Next recommended rung: bounded real Mac-local NAS execution-from-preview smoke against an existing writable safe vault, still using a temporary queue and still no direct VPS NAS authority, durable production queue execution, watcher/cron, public exposure, relay daemon dispatch, authority-adapter binding, Kanban mutation, or gateway restart.
+
+Last updated: 2026-05-21 10:01 KST
+
 ## Current next — NAS Keeper authorized handoff + execution payload preview complete
 
 Current slice:
