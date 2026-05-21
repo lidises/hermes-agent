@@ -1,4 +1,68 @@
 
+## Current status — Fresh request ledger filtering/export deployed
+
+Updated: 2026-05-22 00:05 KST
+
+Completed slice:
+
+- Implemented/deployed safe filtering/export for the fresh request-builder ledger.
+- Existing protected API now accepts safe query filters: `outcome`, `queue_status`, `ref_prefix`, `since`, `until`, `limit`, `export_safe`.
+- Safe export returns only refs/checksums/status/timestamps/payload byte counts; no markdown body, write payload, raw root path, or credential value.
+- Added Office display-only export preview in `NasKeeperFreshRequestBuilderLedgerPanel`.
+- UI still has no form/button/input/select/textarea controls; filtering/export is readback-only from the dashboard.
+
+Verification:
+
+- Python focused filter/export + ledger tests: 6 passed.
+- Web focused RPG panel tests: 115 passed.
+- `npm run build`: passed with existing Vite large chunk warning only.
+- `git diff --check`: passed.
+- Added-line leak sentinel scan: passed.
+- VPS `/office` live smoke: ledger panel present, controls 0, export enabled true, repeat replay false, automation false, VPS NAS authority false, markdown body included false, API status 200.
+- Browser console JS errors: 0.
+
+Actual bounded Mac-local write for this rung:
+
+- `built=true`, `dry_reviewed=true`, `executed=true`, `written=true`, `approval_required=false`, errors none.
+- Safe display path: `Hermes / filter-export-actual-20260521150700-6afe3001.md`.
+- Payload bytes: 46.
+- Readback verified: true.
+- Readback SHA-256: `b6901012a944bf9235a3d13eea94cddc538d704c14089b604fd7d46ac53f2e80`.
+- Refs:
+  - `handoff_filter_export_actual_20260521150700_6afe3001`
+  - `authz_filter_export_actual_20260521150700_6afe3001`
+  - `relay_exec_filter_export_actual_20260521150700_6afe3001`
+  - `exec_record_filter_export_actual_20260521150700_6afe3001`
+- Filtered safe export found count 1 for outcome/status/ref-prefix/time-window and returned `fresh_request_builder_safe_export_v1`.
+
+Deploy:
+
+- Code commit: `9086b998 feat(office): filter and export fresh request ledger`.
+- VPS `/home/hermes/.hermes/ai-office-dashboard` and `/home/hermes/.hermes/hermes-agent` reset to `9086b998`.
+- `web_dist` rsync complete.
+- Restarted dashboard only; gateway stayed active and was not restarted.
+
+Recommended next rung:
+
+- `operator_request_ledger_export_selection_review`:
+  - add a display-only selected export summary/readback using one safe export filter profile;
+  - verify export item count/checksum set before any downstream use;
+  - keep actual execution manual/one-shot;
+  - keep watcher/cron/dispatcher/authority-adapter/VPS NAS authority off.
+
+Boundaries preserved:
+
+- No watcher/cron/daemon activation.
+- No dispatcher binding.
+- No authority-adapter binding.
+- No gateway restart.
+- No public exposure changes.
+- No VPS NAS mount/write/credential authority.
+- No prior successful write replay.
+- No raw root path / markdown body / write payload / credential value exposure.
+
+
+
 ## Current status — Fresh request-builder ledger/readback deployed
 
 Updated: 2026-05-21 23:42 KST
