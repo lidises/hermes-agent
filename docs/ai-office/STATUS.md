@@ -1,4 +1,33 @@
 
+## Current next — NAS Keeper durable queue guarded execution complete
+
+Current slice:
+
+- User approved continuing the recommended controlled-mutation path with bounded writes and slightly stronger authority.
+- Raised NAS Keeper/Mac relay from durable local-profile queue rehearsal/readback to one-shot guarded `/office` execution of exactly the existing durable queue item.
+- Kept safe execution-state recording enabled in the same guarded browser request.
+
+Safety boundary preserved:
+
+- One-shot guarded execution of the existing durable item only; no extra durable queue item, watcher/cron/daemon activation, relay daemon dispatch automation, authority-adapter binding, Kanban mutation, direct VPS NAS authority/mount/credentials, public exposure, or dashboard/gateway restart.
+- Raw NAS path, queued markdown body, credential/provider values, token-like strings, and executable command text were not projected.
+
+Verification:
+
+- Before execution: local git clean at `24674ecb`; Mac relay root availability true as boolean only; target existence false; durable filtered readback count=1, status=`authorized_for_mac_relay_execution`, markdown_body_included=false.
+- Local guarded `/office` browser run on `127.0.0.1:9136`: durable item visible, prefill button found, approval checkbox initially unchecked, record checkbox checked, guarded execute+record button disabled before approval, raw leak=false.
+- Action: clicked safe-ref prefill once, clicked one-shot approval checkbox once, clicked `NAS KEEPER → MAC RELAY 실행+기록` exactly once.
+- Post-click DOM: `mac_relay_execution_succeeded` visible, approval reset unchecked, record checkbox remained checked, guarded execute+record button disabled, raw leak=false, console JS errors=0.
+- Durable queue after execution: line count 4, filtered count=1, status=`mac_relay_execution_succeeded`, markdown_body_included=false, relay_execution_ref=`relay_exec_handoff_durablequeue_20260521012551`, execution_record_ref=`exec_record_office_ui_smoke`, raw leak=false.
+- NAS readback: target_exists_after=true; expected/readback SHA-256 both `c8ba5c72b30e82ab36f41f2167b9d6935c655fbb33b74830e7c601682a7b63a4`; sha_match=true.
+- Focused regression with Mac relay root env unset: `py_compile` passed; execution-from-preview/execution-state/queue-readback/NAS runtime/Mac relay write pytest set passed (`27 passed`); `git diff --check` passed.
+
+Handoff: `docs/ai-office/plans/2026-05-21-durable-queue-guarded-execution-handoff.md`.
+
+Next recommended rung: metadata-only runtime dispatch gate progression for the completed NAS Keeper execution: create local-profile approval draft → bounded approval record → dispatch-gate-open record with safe opaque refs only. This remains no runtime command materialization/execution, adapter dispatch, target/Kanban/NAS mutation, watcher/cron, or service restart.
+
+Last updated: 2026-05-21 10:37 KST
+
 ## Current next — NAS Keeper durable queue rehearsal/readback complete
 
 Current slice:
