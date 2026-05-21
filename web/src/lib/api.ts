@@ -1476,6 +1476,57 @@ export interface OfficeNasKeeperFreshOneShotRequestBuilderResult {
   };
 }
 
+export interface OfficeNasKeeperFreshRequestBuilderLedgerReadbackResult {
+  found: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: {
+    schema_version: number;
+    mode: "nas_keeper_fresh_request_builder_ledger_readback";
+    count: number;
+    items: Array<{
+      schema_version: number;
+      mode: "nas_keeper_fresh_request_builder_ledger_item";
+      operator_request_outcome: string;
+      handoff_ref: string;
+      authorization_ref: string;
+      relay_execution_ref: string;
+      execution_record_ref: string;
+      safe_slug: string;
+      safe_title: string;
+      safe_display_path?: string;
+      queue_ref?: string;
+      queue_status: string;
+      execution_status: string;
+      dry_reviewed_at: string;
+      authorized_at: string;
+      executed_at?: string | null;
+      dry_review_before_write_verified: boolean;
+      markdown_body_sha256: string;
+      readback_sha256: string;
+      readback_verified: boolean;
+      payload_bytes?: number;
+      markdown_body_included: false;
+      write_payload_included: false;
+      raw_root_path_included: false;
+      credential_value_included: false;
+      repeat_execution_replay_allowed: false;
+    }>;
+    dry_review_before_write_verified: boolean;
+    markdown_body_included: false;
+    write_payload_included: false;
+    raw_root_path_included: false;
+    credential_value_included: false;
+    repeat_execution_replay_allowed: false;
+    watcher_enabled: false;
+    cron_enabled: false;
+    dispatch_enabled: false;
+    authority_adapter_binding_enabled: false;
+    vps_nas_mount_enabled: false;
+    capabilities: Record<string, boolean>;
+    next_required_boundary: string;
+  };
+}
+
 export interface OfficeNasKeeperExecutionFromPreviewPayload {
   handoff_ref: string;
   relay_execution_ref: string;
@@ -1901,6 +1952,8 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     }),
+  getOfficeControlledMutationNasKeeperFreshRequestBuilderLedger: () =>
+    fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerReadbackResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger"),
   executeOfficeControlledMutationNasKeeperFreshOneShotOperatorWrite: (body: Record<string, unknown>) =>
     fetchJSON<OfficeNasKeeperFreshOneShotOperatorWriteResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-one-shot-operator-write", {
       method: "POST",

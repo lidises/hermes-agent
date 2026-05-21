@@ -8150,6 +8150,117 @@ def build_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_request(
         "dto": dto,
     }
 
+def _safe_request_builder_ledger_item(item: Mapping[str, object]) -> dict[str, object] | None:
+    summary = _safe_nas_keeper_queue_summary(item)
+    if summary is None:
+        return None
+    handoff_ref = str(summary.get("handoff_ref") or "")
+    authorization_ref = summary.get("authorization_ref")
+    relay_execution_ref = summary.get("relay_execution_ref")
+    execution_record_ref = summary.get("execution_record_ref")
+    if not handoff_ref.startswith("handoff_"):
+        return None
+    if not (_is_opaque_id(authorization_ref) and _is_opaque_id(relay_execution_ref) and _is_opaque_id(execution_record_ref)):
+        return None
+    dry_reviewed_at = str(summary.get("requested_at") or "")
+    authorized_at = str(summary.get("authorized_at") or dry_reviewed_at)
+    executed_at = str(summary.get("execution_recorded_at") or "")
+    queue_status = str(summary.get("queue_status") or "")
+    execution_status = str(summary.get("execution_status") or "")
+    markdown_sha = _extract_safe_execution_ref_sha(summary.get("execution_evidence_refs"), "markdown")
+    readback_sha = _extract_safe_execution_ref_sha(summary.get("execution_evidence_refs"), "readback")
+    written = queue_status == "mac_relay_execution_succeeded" and execution_status == "succeeded" and readback_sha is not None
+    dry_before_write = False
+    if written and executed_at:
+        dry_before_write = dry_reviewed_at <= authorized_at <= executed_at
+    elif queue_status == "authorized_for_mac_relay_execution":
+        dry_before_write = dry_reviewed_at <= authorized_at
+    outcome = "written" if written else ("authorized_not_written" if queue_status == "authorized_for_mac_relay_execution" else "queued_or_reviewed")
+    return {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_item",
+        "operator_request_outcome": outcome,
+        "handoff_ref": summary["handoff_ref"],
+        "authorization_ref": authorization_ref,
+        "relay_execution_ref": relay_execution_ref,
+        "execution_record_ref": execution_record_ref,
+        "safe_slug": summary["safe_slug"],
+        "safe_title": summary["safe_title"],
+        "safe_display_path": summary.get("safe_display_path"),
+        "queue_ref": summary.get("queue_ref"),
+        "queue_status": queue_status,
+        "execution_status": execution_status or "not_recorded",
+        "dry_reviewed_at": dry_reviewed_at,
+        "authorized_at": authorized_at,
+        "executed_at": executed_at or None,
+        "dry_review_before_write_verified": dry_before_write,
+        "markdown_body_sha256": markdown_sha or "",
+        "readback_sha256": readback_sha or "",
+        "readback_verified": bool(written and readback_sha),
+        "payload_bytes": summary.get("payload_bytes"),
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "repeat_execution_replay_allowed": False,
+    }
+
+
+def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_readback(
+    *, queue_dir: Path | str | None = None, limit: int = 20
+) -> dict[str, object]:
+    queue_file = _nas_keeper_handoff_queue_file(queue_dir)
+    items: list[dict[str, object]] = []
+    if queue_file.exists():
+        for line in queue_file.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            try:
+                raw = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if not isinstance(raw, Mapping):
+                continue
+            item = _safe_request_builder_ledger_item(raw)
+            if item is not None:
+                items.append(item)
+    items.sort(key=lambda item: (str(item.get("dry_reviewed_at") or ""), str(item.get("handoff_ref") or "")), reverse=True)
+    safe_limit = max(1, min(int(limit), 100)) if isinstance(limit, int) else 20
+    items = items[:safe_limit]
+    all_written = [item for item in items if item.get("operator_request_outcome") == "written"]
+    ordering_verified = bool(all_written) and all(bool(item.get("dry_review_before_write_verified")) for item in all_written)
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_readback",
+        "count": len(items),
+        "items": items,
+        "dry_review_before_write_verified": ordering_verified,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "repeat_execution_replay_allowed": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "capabilities": {
+            "request_builder_ledger_readback_enabled": True,
+            "actual_write_execution_enabled": False,
+            "repeat_execution_replay_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_credential_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+        },
+        "next_required_boundary": "fresh_request_builder_outcome_write" if not items else "fresh_request_builder_operator_review",
+    }
+    return {"found": bool(items), "errors": [], "dto": dto}
+
 
 
 def execute_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_write(

@@ -98,6 +98,7 @@ from hermes_cli.office_controlled_mutation import (
     review_office_controlled_mutation_nas_keeper_one_shot_write_payload_arm,
     get_office_controlled_mutation_nas_keeper_last_successful_mac_relay_write,
     build_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_request,
+    get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_readback,
     execute_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_write,
     execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_preview,
     record_office_controlled_mutation_nas_keeper_mac_relay_execution_state,
@@ -729,6 +730,12 @@ async def build_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_re
         payload,
         root_path=os.environ.get("HERMES_AI_OFFICE_MAC_RELAY_NAS_ROOT"),
     )
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger")
+async def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_route(limit: Optional[int] = None):
+    """Read recent fresh request-builder outcomes as sanitized refs/checksums only."""
+    return get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_readback(limit=limit or 20)
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-one-shot-operator-write")

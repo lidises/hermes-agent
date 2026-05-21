@@ -69,6 +69,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
     expect(source).toContain("<NasKeeperLastSuccessfulMacRelayWriteStatusPanel");
     expect(source).toContain("<NasKeeperFreshOneShotOperatorFlowPanel");
     expect(source).toContain("<NasKeeperFreshOneShotRequestBuilderPanel");
+    expect(source).toContain("<NasKeeperFreshRequestBuilderLedgerPanel");
 
     for (const panel of [
       "<NasKeeperLiveOperatorLanePanel",
@@ -123,6 +124,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
       "<NasKeeperLastSuccessfulMacRelayWriteStatusPanel",
       "<NasKeeperFreshOneShotOperatorFlowPanel",
       "<NasKeeperFreshOneShotRequestBuilderPanel",
+      "<NasKeeperFreshRequestBuilderLedgerPanel",
     ]) {
       const panelIndex = source.indexOf(panel);
       expect(panelIndex).toBeGreaterThan(0);
@@ -147,6 +149,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
       "<NasKeeperLastSuccessfulMacRelayWriteStatusPanel",
       "<NasKeeperFreshOneShotOperatorFlowPanel",
       "<NasKeeperFreshOneShotRequestBuilderPanel",
+      "<NasKeeperFreshRequestBuilderLedgerPanel",
       ].includes(panel)) {
         expect(source.indexOf(panel, panelIndex + 1)).toBe(-1);
       }
@@ -4218,6 +4221,88 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).toContain('data-office-nas-keeper-fresh-one-shot-request-builder-vps-nas-authority="false"');
     expect(html).toContain("safe intent → dry review → explicit one-shot write");
     expect(html).not.toContain("Fresh builder safe body");
+    expect(html).not.toContain("/Users/" + "lidises");
+    expect(html).not.toContain("/home/hermes");
+    expect(html).not.toContain("/vol" + "ume1");
+    expect(html).not.toContain("sk" + "-test");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("<form");
+    expect(html).not.toContain("<input");
+    expect(html).not.toContain("<select");
+    expect(html).not.toContain("<textarea");
+  });
+
+  it("renders fresh request-builder ledger as display-only safe refs/checksums", () => {
+    const NasKeeperFreshRequestBuilderLedgerPanel = (OfficePageModule as unknown as {
+      NasKeeperFreshRequestBuilderLedgerPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.NasKeeperFreshRequestBuilderLedgerPanel>>;
+    }).NasKeeperFreshRequestBuilderLedgerPanel;
+    expect(NasKeeperFreshRequestBuilderLedgerPanel).toBeTypeOf("function");
+
+    const html = renderToStaticMarkup(
+      <NasKeeperFreshRequestBuilderLedgerPanel
+        error={null}
+        ledger={{
+          found: true,
+          errors: [],
+          dto: {
+            schema_version: 1,
+            mode: "nas_keeper_fresh_request_builder_ledger_readback",
+            count: 1,
+            dry_review_before_write_verified: true,
+            markdown_body_included: false,
+            write_payload_included: false,
+            raw_root_path_included: false,
+            credential_value_included: false,
+            repeat_execution_replay_allowed: false,
+            watcher_enabled: false,
+            cron_enabled: false,
+            dispatch_enabled: false,
+            authority_adapter_binding_enabled: false,
+            vps_nas_mount_enabled: false,
+            capabilities: {},
+            next_required_boundary: "fresh_request_builder_operator_review",
+            items: [{
+              schema_version: 1,
+              mode: "nas_keeper_fresh_request_builder_ledger_item",
+              operator_request_outcome: "written",
+              handoff_ref: "handoff_ledger_readback_20260521143000_abc12345",
+              authorization_ref: "authz_ledger_readback_20260521143000_abc12345",
+              relay_execution_ref: "relay_exec_ledger_readback_20260521143000_abc12345",
+              execution_record_ref: "exec_record_ledger_readback_20260521143000_abc12345",
+              safe_slug: "ledger-readback-20260521143000-abc12345",
+              safe_title: "Ledger readback safe title",
+              safe_display_path: "Hermes / ledger-readback-20260521143000-abc12345.md",
+              queue_ref: "queue_abc12345",
+              queue_status: "mac_relay_execution_succeeded",
+              execution_status: "succeeded",
+              dry_reviewed_at: "2026-05-21T14:30:00Z",
+              authorized_at: "2026-05-21T14:30:00Z",
+              executed_at: "2026-05-21T14:30:00Z",
+              dry_review_before_write_verified: true,
+              markdown_body_sha256: "a".repeat(64),
+              readback_sha256: "b".repeat(64),
+              readback_verified: true,
+              payload_bytes: 47,
+              markdown_body_included: false,
+              write_payload_included: false,
+              raw_root_path_included: false,
+              credential_value_included: false,
+              repeat_execution_replay_allowed: false,
+            }],
+          },
+        }}
+      />,
+    );
+
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-dry-before-write="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-repeat-replay-enabled="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-automation-enabled="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-vps-nas-authority="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-markdown-body-included="false"');
+    expect(html).toContain("handoff_ledger_readback_20260521143000_abc12345");
+    expect(html).toContain("sanitized outcomes · dry-review-before-write proof");
+    expect(html).not.toContain("Ledger readback safe body");
     expect(html).not.toContain("/Users/" + "lidises");
     expect(html).not.toContain("/home/hermes");
     expect(html).not.toContain("/vol" + "ume1");
