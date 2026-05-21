@@ -1,4 +1,35 @@
 
+## Current next — NAS Keeper durable queue rehearsal/readback complete
+
+Current slice:
+
+- User approved continuing the recommended controlled-mutation path with bounded writes and slightly stronger authority.
+- Raised NAS Keeper/Mac relay from temporary-queue real-NAS execution smoke to durable local-profile production queue rehearsal/readback only.
+- Created exactly one new durable queue item and authorized it for Mac relay execution review, then previewed the execution payload only.
+
+Safety boundary preserved:
+
+- Durable queue append/authorization/preview/readback only; execution-from-preview, real NAS write from the durable queue item, watcher/cron/daemon activation, relay daemon dispatch, authority-adapter binding, direct VPS NAS authority/mount/credentials, Kanban mutation, public exposure, and dashboard/gateway restart remain blocked.
+- Raw NAS path, queued markdown body, credential/provider values, token-like strings, and executable command text were not projected.
+
+Verification:
+
+- Durable queue existed before rehearsal with line count 3; after rehearsal line count 4; line delta 1.
+- Safe logical target: `Hermes::ai-office-durable-queue-rehearsal-20260521012551.md`.
+- Safe refs: `handoff_durablequeue_20260521012551`, `relay_exec_durablequeue_20260521012551`.
+- queued=true, authorized=true, previewed=true; queue_status_after_authorize=`authorized_for_mac_relay_execution`.
+- Filtered readback count=1; readback status=`authorized_for_mac_relay_execution`; readback markdown_body_included=false; preview markdown_body_included=false.
+- markdown_body_sha256=`c8ba5c72b30e82ab36f41f2167b9d6935c655fbb33b74830e7c601682a7b63a4`; expected SHA matched preview SHA.
+- actual_nas_write_enabled=false; mac_relay_write_enabled=false; dispatch/watcher/cron false; target_exists_after_rehearsal=false; raw leak=false.
+- Local `/office` DOM smoke: item visible, authorized status visible, approval checkbox unchecked, guarded execute button disabled, raw leak=false, console errors=0.
+- Focused regression with Mac relay root env unset: `py_compile` passed; NAS Keeper queue/authorize/readback/payload-preview/claim-dry-run pytest set passed (`16 passed`); `git diff --check` passed.
+
+Handoff: `docs/ai-office/plans/2026-05-21-durable-queue-rehearsal-handoff.md`.
+
+Next recommended rung: one-shot guarded `/office` execution of exactly this existing durable item, then safe execution-state recording. This remains no watcher/cron/dispatch automation, authority-adapter binding, Kanban mutation, direct VPS NAS authority, public exposure, or service restart.
+
+Last updated: 2026-05-21 10:27 KST
+
 ## Current next — NAS Keeper real NAS execution-from-preview smoke complete
 
 Current slice:
