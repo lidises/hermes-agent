@@ -1,4 +1,54 @@
 
+## Current next — Mac-local relay root readiness probe contract complete
+
+Current slice:
+
+- User approved continuing from the Mac-local relay authority configuration contract through the next recommended rung, with bounded write authority.
+- This rung remained contract-first/read-only: it defines the exact sanitized payload shape that a future Mac-local readiness probe should return before any actual NAS write can be armed.
+- Added `MacLocalRelayRootReadinessProbeContractPanel`, visible near the Mac-local authority preflight/config contract surfaces while accumulated technical evidence stays collapsed behind the drawer.
+- Probe contract fields shown: `root_configured`, `root_readable`, `root_writable`, `safe_probe_ref`, `sanitized_root_label`, `redaction_policy_version`, `probe_errors`, `write_payload_included=false`.
+- Stable DOM hook: `data-office-mac-local-relay-root-readiness-probe-contract="true"`.
+- Explicit status: read-only, probe_executed=false, write_enabled=false, vps_nas_authority=false.
+- Kept Mac-local probe execution, Mac relay root configuration, Mac relay write execution, actual NAS file write, direct VPS NAS authority/mount/credentials/path/write, watcher/cron/daemon activation, public exposure, gateway restart, and real external dispatch closed.
+
+Code/test commit/deploy:
+
+- `181d8819 feat(office): define mac relay probe contract`.
+- Synced both VPS worktrees to `181d8819`.
+- Rsynced local built `hermes_cli/web_dist/` to both worktrees.
+- Restarted only `hermes-agent-dashboard.service`; did not restart gateway.
+- Final services: dashboard active, gateway active.
+
+Local verification:
+
+- RED: probe contract placement/render tests failed because the panel did not exist.
+- GREEN: focused probe contract tests passed.
+- `py_compile` passed for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py`.
+- Focused NAS Keeper execution-state/readback tests passed (`8 passed`).
+- Frontend `web/` combined tests passed: `src/lib/api.test.ts` + `src/pages/OfficePage.rpg.test.tsx` (`158 passed`).
+- `npm run build` passed with existing Vite large chunk warning.
+- `git diff --check` passed.
+- Added-line sentinel scan found no new raw path/token/provider sentinels.
+
+VPS live DOM smoke:
+
+- `/office?probe-contract=181d8819` returned HTTP 200 after dashboard restart readiness delay.
+- RPG-focused shell exists; visual map and SVG map exist; sprites=8.
+- Evidence drawer remains closed by default.
+- Probe contract exists with read_only=true, probe_executed=false, write_enabled=false, vps_nas_authority=false, fields=8.
+- `root_configured` and `root_writable` labels visible.
+- Raw leak sentinels absent from page body; browser console messages/errors after smoke: 0.
+
+Readiness estimate:
+
+- Actual NAS write readiness is now about 50% operationally. The proof-shape contract is complete, but Mac-local probe implementation/execution, Mac relay root configuration, sanitized read/write probe pass, one-shot write payload arm/review, and post-write verification contract are still missing.
+
+Handoff: `docs/ai-office/plans/2026-05-21-mac-local-relay-root-readiness-probe-contract-handoff.md`.
+
+Next recommended rung: `mac_local_relay_root_probe_implementation` / Mac-local relay root probe implementation. Implement a Mac-local read-only probe that returns the sanitized contract shape without executing a NAS write: configured/readable/writable booleans, safe probe ref, sanitized root label only, redaction policy version, safe enum errors only, no raw path, no credential, no write payload, no watcher/cron/daemon, no VPS NAS mount.
+
+Last updated: 2026-05-21 17:47 KST
+
 ## Current next — Mac-local relay authority config contract complete
 
 Current slice:
