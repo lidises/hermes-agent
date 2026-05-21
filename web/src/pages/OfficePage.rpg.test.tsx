@@ -59,6 +59,9 @@ describe("Office controlled-mutation runtime status panel placement", () => {
     expect(legacyIndex).toBeGreaterThan(0);
 
     for (const panel of [
+      "<RuntimeActivationReviewStatusPanel",
+      "<RuntimePreflightStatusPanel",
+      "<ManualOneShotRuntimeDryRunStatusPanel",
       "<ManualDispatchGateOpenRecordStatusPanel",
       "<ManualRuntimeCommandPreviewRecordStatusPanel",
       "<ManualRuntimeCommandInclusionRecordStatusPanel",

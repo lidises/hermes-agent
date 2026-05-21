@@ -8967,6 +8967,10 @@ export default function OfficePage() {
 
       <ControlledMutationApprovalBoundarySummaryPanel boundary={controlledMutationApprovalBoundarySummary} />
 
+      <RuntimeActivationReviewStatusPanel status={runtimeActivationReviewStatus} error={runtimeActivationReviewStatusError} />
+      <RuntimePreflightStatusPanel status={runtimePreflightStatus} error={runtimePreflightStatusError} />
+      <ManualOneShotRuntimeDryRunStatusPanel status={manualOneShotRuntimeDryRunStatus} error={manualOneShotRuntimeDryRunStatusError} />
+
       <ApprovalEventEnvelopeStatusPanel status={approvalEventEnvelopeStatus} error={approvalEventEnvelopeStatusError} />
       <ManualDispatchGateOpenRecordStatusPanel status={manualDispatchGateOpenRecordStatus} error={manualDispatchGateOpenRecordStatusError} />
       <ManualRuntimeCommandPreviewRecordStatusPanel status={manualRuntimeCommandPreviewRecordStatus} error={manualRuntimeCommandPreviewRecordStatusError} />
@@ -9064,9 +9068,6 @@ export default function OfficePage() {
       <DispatcherCompletionReviewStatusPanel status={dispatcherCompletionReviewStatus} error={dispatcherCompletionReviewStatusError} />
       <TargetDispatchContractStatusPanel status={targetDispatchContractStatus} error={targetDispatchContractStatusError} />
       <WatcherCronContractStatusPanel status={watcherCronContractStatus} error={watcherCronContractStatusError} />
-      <RuntimeActivationReviewStatusPanel status={runtimeActivationReviewStatus} error={runtimeActivationReviewStatusError} />
-      <RuntimePreflightStatusPanel status={runtimePreflightStatus} error={runtimePreflightStatusError} />
-      <ManualOneShotRuntimeDryRunStatusPanel status={manualOneShotRuntimeDryRunStatus} error={manualOneShotRuntimeDryRunStatusError} />
       <AdapterBindingDryRunStatusPanel status={adapterBindingDryRunStatus} error={adapterBindingDryRunStatusError} />
       <HumanReviewedSingleDispatchStatusPanel status={humanReviewedSingleDispatchStatus} error={humanReviewedSingleDispatchStatusError} />
       <ExplicitRuntimeDispatchApprovalStatusPanel status={explicitRuntimeDispatchApprovalStatus} error={explicitRuntimeDispatchApprovalStatusError} />
