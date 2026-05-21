@@ -6552,6 +6552,75 @@ export function NasKeeperGuardedFailureExecutionStateRecordStatusPanel({
   );
 }
 
+
+export function NasKeeperTerminalExecutionStateCompletionReviewPanel({
+  result,
+  error,
+}: {
+  result: OfficeNasKeeperExecutionStateResult | null;
+  error?: string | null;
+}) {
+  const dto = result?.dto ?? null;
+  const caps = dto?.capabilities ?? {};
+  const terminal = dto?.execution_status === "failed_guarded" && dto?.queue_status_after === "mac_relay_execution_failed_guarded";
+  const pathClosed = terminal && dto?.next_required_boundary === "none_terminal_execution_state_recorded";
+  const evidenceRefs = dto?.execution_evidence_refs ?? [];
+  return (
+    <section
+      className="border border-sky-300/20 bg-sky-950/10 p-4"
+      data-office-nas-keeper-terminal-completion-review-status="true"
+      data-office-nas-keeper-terminal-completion-review-complete={String(Boolean(result?.recorded && terminal))}
+      data-office-nas-keeper-terminal-completion-review-path-closed={String(Boolean(pathClosed))}
+      data-office-nas-keeper-terminal-completion-review-mac-relay-write={String(Boolean(caps.mac_relay_write_enabled))}
+      data-office-nas-keeper-terminal-completion-review-actual-write={String(Boolean(caps.actual_nas_write_enabled))}
+      data-office-nas-keeper-terminal-completion-review-vps-nas-mount={String(Boolean(caps.vps_nas_mount_enabled))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-200/70">Terminal execution-state completion review</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">terminal failed_guarded evidence complete · path intentionally closed</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Reviews the terminal NAS Keeper queue evidence and confirms this VPS path is complete as a guarded failure, not a write execution. Mac-local relay root branch required for actual NAS write; direct VPS NAS authority remains excluded.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "completion review failed" : pathClosed ? "path closed" : "review pending"}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-nas-keeper-terminal-completion-review-boundaries="true">
+        {[
+          ["terminal_failed_guarded", terminal],
+          ["path_intentionally_closed", pathClosed],
+          ["queue_mutation_enabled", Boolean(caps.queue_mutation_enabled)],
+          ["execution_state_recording_enabled", Boolean(caps.execution_state_recording_enabled)],
+          ["mac_relay_write_enabled", Boolean(caps.mac_relay_write_enabled)],
+          ["actual_nas_write_enabled", Boolean(caps.actual_nas_write_enabled)],
+          ["vps_nas_mount_enabled", Boolean(caps.vps_nas_mount_enabled)],
+          ["direct_vps_nas_write_enabled", Boolean(caps.direct_vps_nas_write_enabled)],
+          ["watcher_enabled", Boolean(caps.watcher_enabled)],
+          ["cron_enabled", Boolean(caps.cron_enabled)],
+          ["dispatch_enabled", Boolean(caps.dispatch_enabled)],
+        ].map(([key, value]) => (
+          <div key={String(key)} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-nas-keeper-terminal-completion-review-boundary={String(key)}>
+            {String(key)}: {String(Boolean(value))}
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-3">
+        <div className="border border-current/15 bg-black/20 p-3 text-xs text-midground/70">queue {dto?.queue_status_after ?? "pending"}</div>
+        <div className="border border-current/15 bg-black/20 p-3 text-xs text-midground/70">status {dto?.execution_status ?? "pending"}</div>
+        <div className="border border-current/15 bg-black/20 p-3 text-xs text-midground/70">next {dto?.next_required_boundary ?? "pending"}</div>
+      </div>
+      <div className="mt-3 border border-current/15 bg-black/20 p-3 text-xs text-midground/70">
+        evidence {evidenceRefs.join(" · ") || "pending"}
+      </div>
+      <div className="mt-3 border border-current/15 bg-black/20 p-3 text-xs text-midground/70">
+        next branch: Mac-local relay root branch required for actual NAS write; direct VPS NAS authority remains excluded.
+      </div>
+    </section>
+  );
+}
+
 export function ApprovedRealOneShotDispatchGateDesignPanel({
   status,
   error,
@@ -9557,6 +9626,7 @@ export default function OfficePage() {
       <NasKeeperMacRelayExecutionPayloadPreviewStatusPanel result={nasKeeperPayloadPreviewResult} error={nasKeeperPayloadPreviewError} />
       <NasKeeperExecutionFromPreviewGuardedFailureStatusPanel result={nasKeeperExecutionGuardResult} error={nasKeeperExecutionGuardError} />
       <NasKeeperGuardedFailureExecutionStateRecordStatusPanel result={nasKeeperGuardedFailureStateResult} error={nasKeeperGuardedFailureStateError} />
+      <NasKeeperTerminalExecutionStateCompletionReviewPanel result={nasKeeperGuardedFailureStateResult} error={nasKeeperGuardedFailureStateError} />
 
       {SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES ? (
         <>
