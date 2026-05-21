@@ -1,4 +1,48 @@
 
+## Current next — controlled-mutation ladder after durable NAS Keeper execution complete
+
+Current slice:
+
+- User approved continuing from the recommended post-durable-execution rung with bounded writes and slightly stronger authority.
+- Advanced the local-profile controlled-mutation ladder from approval draft through NAS Keeper handoff queue marker for the completed durable NAS Keeper execution chain.
+- Used only existing controlled-mutation helpers; no code/runtime service changes were made.
+
+Safety boundary preserved:
+
+- Metadata/marker/queue handoff writes only after the already completed durable NAS Keeper execution.
+- No watcher/cron/daemon activation, real adapter dispatch beyond marker metadata, real external Kanban transition, extra Mac relay NAS execution of the new handoff item, direct VPS NAS authority/mount/credentials, public exposure, or dashboard/gateway restart.
+- Raw command, provider, target path, card body, markdown body, NAS path, credential, and token sentinel values were not projected.
+
+New safe refs:
+
+- approval=`approval-durable-exec-20260521-014337`
+- gate=`gate-durable-exec-20260521-014337`
+- cmdpreview=`cmdpreview-durable-exec-20260521-014337`
+- cmd=`cmd-durable-exec-20260521-014337`
+- exec=`exec-durable-exec-20260521-014337`
+- targetready=`targetready-durable-exec-20260521-014337`
+- targetmut=`targetmut-durable-exec-20260521-014337`
+- adapterdispatch=`adapterdispatch-durable-exec-20260521-014337`
+- kanbanmut=`kanbanmut-durable-exec-20260521-014337`
+- nassave=`nassave-durable-exec-20260521-014337`
+- handoff=`handoff-durable-exec-20260521-014337`
+
+Verification:
+
+- Precheck: local HEAD/origin `597d8e1af27461b18ab6d0f73fd1dfa5d9980ace`, local clean; VPS dashboard/agent clean at same commit; dashboard/gateway active.
+- Store precheck found one existing record in each adjacent controlled-mutation store before this pass.
+- Appended/read back one new record for each rung: approval draft, approval record, dispatch gate, runtime preview, runtime inclusion, noop execution, target readiness, target mutation marker, adapter-dispatch marker, Kanban marker, NAS-save marker, NAS Keeper handoff queue marker.
+- Key flags: dispatch_gate_open=true; runtime_command_preview_created=true; runtime_command_included=true; runtime_command_executed=true; idempotency_replay_store_written=true; target_mutation_readiness_verified=true; target_mutation_created=true; adapter_dispatch_created=true; kanban_mutation_created=true; nas_save_created=true; nas_keeper_handoff_queued=true.
+- Closed flags: actual_nas_write_enabled=false for the new handoff; vps_direct_nas_authority_enabled=false; real_nas_execution_enabled=false; real_dispatch_execution_enabled=false.
+- Refined raw-value leak scan passed; no unsafe raw command/provider/target/card/markdown/NAS path/token sentinel values appeared in readback.
+- `py_compile` passed; focused controlled-mutation pytest passed (`31 passed`); `git diff --check` passed.
+
+Handoff: `docs/ai-office/plans/2026-05-21-controlled-mutation-ladder-after-durable-exec-handoff.md`.
+
+Next recommended rung: NAS Keeper authorization + execution payload preview for `handoff-durable-exec-20260521-014337`, with markdown body excluded. Stop before watcher/cron/daemon activation, direct VPS NAS authority, public exposure, and gateway restart.
+
+Last updated: 2026-05-21 10:48 KST
+
 ## Current next — NAS Keeper durable queue guarded execution complete
 
 Current slice:
