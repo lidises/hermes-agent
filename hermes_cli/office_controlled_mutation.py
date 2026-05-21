@@ -12,7 +12,9 @@ import hashlib
 import json
 import os
 import re
+import uuid
 from collections.abc import Mapping, Sequence
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, cast
 
@@ -341,6 +343,17 @@ _NAS_KEEPER_FRESH_ONE_SHOT_OPERATOR_WRITE_FIELDS = (
     | _NAS_KEEPER_HANDOFF_EXECUTION_PAYLOAD_PREVIEW_FIELDS
     | {"execution_record_ref", "recorded_by", "recorded_at"}
 ) - {"authorization_decision"}
+_NAS_KEEPER_FRESH_ONE_SHOT_OPERATOR_REQUEST_BUILDER_FIELDS = {
+    "operator_intent_ref",
+    "target_vault_ref",
+    "safe_slug_base",
+    "safe_title",
+    "markdown_body",
+    "requested_by",
+    "nas_keeper_ref",
+    "relay_node_ref",
+    "approve_actual_write",
+}
 _NAS_KEEPER_HANDOFF_EXECUTION_STATUSES = {
     "succeeded": "mac_relay_execution_succeeded",
     "failed": "mac_relay_execution_failed",
@@ -7933,6 +7946,210 @@ def _fresh_one_shot_existing_refs(queue_file: Path) -> dict[str, set[str]]:
             if isinstance(value, str):
                 refs[field].add(value)
     return refs
+
+
+def _fresh_one_shot_request_stamp(now_utc: str | None = None) -> tuple[str, str]:
+    if now_utc is None:
+        dt = datetime.now(timezone.utc).replace(microsecond=0)
+    else:
+        if not _ISO_UTC_RE.fullmatch(now_utc):
+            raise ValueError("invalid_now_utc")
+        dt = datetime.strptime(now_utc, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+    iso = dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+    compact = dt.strftime("%Y%m%d%H%M%S")
+    return iso, compact
+
+
+def _safe_ref_fragment(value: str) -> str:
+    fragment = re.sub(r"[^A-Za-z0-9]+", "_", value).strip("_").lower()
+    return fragment[:48] or "intent"
+
+
+def build_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_request(
+    payload: object,
+    *,
+    queue_dir: Path | str | None = None,
+    root_path: Path | str | None = None,
+    now_utc: str | None = None,
+    nonce: str | None = None,
+) -> dict[str, object]:
+    """Build, dry-review, and optionally execute one fresh one-shot write request.
+
+    The builder accepts a single safe operator intent, generates fresh refs, and
+    requires ``approve_actual_write`` to be exactly true before it delegates to
+    the already-guarded one-shot writer. Dry review never persists queue records
+    and never returns the raw markdown body.
+    """
+
+    if not isinstance(payload, Mapping):
+        return {
+            "built": False,
+            "dry_reviewed": False,
+            "executed": False,
+            "written": False,
+            "approval_required": True,
+            "errors": [_error("payload", "invalid_payload_type")],
+            "dto": None,
+        }
+    errors: list[dict[str, str]] = []
+    if set(payload) - _NAS_KEEPER_FRESH_ONE_SHOT_OPERATOR_REQUEST_BUILDER_FIELDS:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+    for field in sorted(_NAS_KEEPER_FRESH_ONE_SHOT_OPERATOR_REQUEST_BUILDER_FIELDS):
+        if field not in payload:
+            errors.append(_error(field, "missing_field"))
+    for field in ("operator_intent_ref", "target_vault_ref", "requested_by", "nas_keeper_ref", "relay_node_ref"):
+        if field in payload and not _is_opaque_id(payload.get(field)):
+            errors.append(_error(field, "invalid_opaque_id"))
+    if "safe_slug_base" in payload and not (
+        isinstance(payload.get("safe_slug_base"), str)
+        and _SAFE_SLUG_RE.fullmatch(payload["safe_slug_base"])
+        and not _has_raw_marker(payload["safe_slug_base"])
+    ):
+        errors.append(_error("safe_slug_base", "invalid_safe_slug"))
+    if "safe_title" in payload and not _is_safe_text(payload.get("safe_title")):
+        errors.append(_error("safe_title", "invalid_safe_text"))
+    if "markdown_body" in payload and not _is_safe_markdown_body(payload.get("markdown_body")):
+        errors.append(_error("markdown_body", "raw_marker_detected"))
+    if "approve_actual_write" in payload and not isinstance(payload.get("approve_actual_write"), bool):
+        errors.append(_error("approve_actual_write", "invalid_boolean"))
+    try:
+        issued_at, stamp = _fresh_one_shot_request_stamp(now_utc)
+    except ValueError:
+        errors.append(_error("now_utc", "invalid_timestamp"))
+        issued_at, stamp = "1970-01-01T00:00:00Z", "19700101000000"
+    if nonce is None:
+        nonce = uuid.uuid4().hex[:8]
+    if not re.fullmatch(r"[A-Za-z0-9]{6,16}", nonce):
+        errors.append(_error("nonce", "invalid_nonce"))
+    safe_nonce = nonce.lower()[:16]
+    if errors:
+        return {
+            "built": False,
+            "dry_reviewed": False,
+            "executed": False,
+            "written": False,
+            "approval_required": True,
+            "errors": sorted(errors, key=lambda item: (item["field"], item["code"])),
+            "dto": None,
+        }
+
+    intent_ref = str(payload["operator_intent_ref"])
+    fragment = _safe_ref_fragment(str(payload["safe_slug_base"]))
+    safe_slug = f"{payload['safe_slug_base']}-{stamp}-{safe_nonce}"
+    markdown_body = str(payload["markdown_body"])
+    markdown_sha = hashlib.sha256(markdown_body.encode("utf-8")).hexdigest()
+    request_payload = {
+        "handoff_ref": f"handoff_{fragment}_{stamp}_{safe_nonce}",
+        "queued_by": payload["requested_by"],
+        "queued_at": issued_at,
+        "relay_request_ref": f"relay_req_{fragment}_{stamp}_{safe_nonce}",
+        "write_ref": f"write_{fragment}_{stamp}_{safe_nonce}",
+        "package_ref": f"pkg_{fragment}_{stamp}_{safe_nonce}",
+        "target_vault_ref": payload["target_vault_ref"],
+        "safe_slug": safe_slug,
+        "safe_title": payload["safe_title"],
+        "markdown_body": markdown_body,
+        "requested_by": payload["requested_by"],
+        "requested_at": issued_at,
+        "nas_keeper_ref": payload["nas_keeper_ref"],
+        "relay_node_ref": payload["relay_node_ref"],
+        "authorization_ref": f"authz_{fragment}_{stamp}_{safe_nonce}",
+        "authorized_by": payload["nas_keeper_ref"],
+        "authorized_at": issued_at,
+        "relay_execution_ref": f"relay_exec_{fragment}_{stamp}_{safe_nonce}",
+        "relay_authorized_by": payload["nas_keeper_ref"],
+        "relay_authorized_at": issued_at,
+        "execution_record_ref": f"exec_record_{fragment}_{stamp}_{safe_nonce}",
+        "recorded_by": payload["nas_keeper_ref"],
+        "recorded_at": issued_at,
+    }
+    queue_file = _nas_keeper_handoff_queue_file(queue_dir)
+    existing_refs = _fresh_one_shot_existing_refs(queue_file)
+    reuse_errors = []
+    for field, code in (
+        ("handoff_ref", "reused_handoff_ref"),
+        ("authorization_ref", "reused_authorization_ref"),
+        ("relay_execution_ref", "reused_relay_execution_ref"),
+        ("execution_record_ref", "reused_execution_record_ref"),
+    ):
+        if request_payload[field] in existing_refs[field]:
+            reuse_errors.append(_error(field, code))
+    if reuse_errors:
+        return {
+            "built": False,
+            "dry_reviewed": True,
+            "executed": False,
+            "written": False,
+            "approval_required": True,
+            "errors": sorted(reuse_errors, key=lambda item: (item["field"], item["code"])),
+            "dto": None,
+        }
+
+    approve_actual_write = payload["approve_actual_write"] is True
+    safe_request_payload = {field: value for field, value in request_payload.items() if field != "markdown_body"}
+    dto: dict[str, object] = {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_one_shot_operator_request_builder_review",
+        "operator_intent_ref": intent_ref,
+        "issued_at": issued_at,
+        "approve_actual_write": approve_actual_write,
+        "request_payload_ready": True,
+        "fresh_refs_verified": True,
+        "handoff_ref": request_payload["handoff_ref"],
+        "authorization_ref": request_payload["authorization_ref"],
+        "relay_execution_ref": request_payload["relay_execution_ref"],
+        "execution_record_ref": request_payload["execution_record_ref"],
+        "safe_slug": safe_slug,
+        "safe_title": payload["safe_title"],
+        "safe_request_payload": safe_request_payload,
+        "markdown_body_sha256": markdown_sha,
+        "markdown_body_bytes": len(markdown_body.encode("utf-8")),
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "repeat_execution_replay_allowed": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "request_builder_path": [
+            "safe_operator_intent_received",
+            "unique_refs_generated",
+            "dry_payload_reviewed",
+            "explicit_actual_write_approval_required",
+        ],
+        "next_required_boundary": "explicit_operator_approval_for_actual_write"
+        if not approve_actual_write
+        else "fresh_one_shot_write_execution",
+    }
+    if not approve_actual_write:
+        return {
+            "built": True,
+            "dry_reviewed": True,
+            "executed": False,
+            "written": False,
+            "approval_required": True,
+            "errors": [],
+            "dto": dto,
+        }
+    executed = execute_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_write(
+        request_payload, queue_dir=queue_dir, root_path=root_path
+    )
+    dto["write_result"] = executed.get("dto")
+    dto["mode"] = "nas_keeper_fresh_one_shot_operator_request_builder_executed"
+    dto["next_required_boundary"] = "fresh_one_shot_operator_review_or_new_intent"
+    return {
+        "built": True,
+        "dry_reviewed": True,
+        "executed": executed.get("executed") is True,
+        "written": executed.get("written") is True,
+        "approval_required": False if executed.get("executed") else True,
+        "errors": cast(list[dict[str, str]], executed.get("errors") or []),
+        "dto": dto,
+    }
+
 
 
 def execute_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_write(

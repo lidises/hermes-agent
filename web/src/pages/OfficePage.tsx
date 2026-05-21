@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeManualApprovalRecordingDraftReviewStatus, type OfficeManualApprovalRecordStatus, type OfficeApprovalEventEnvelopeStatus, type OfficeManualApprovalDispatchGateReadinessStatus, type OfficeManualDispatchGateOpenRecordStatus, type OfficeManualRuntimeCommandPreviewRecordStatus, type OfficeManualRuntimeCommandInclusionRecordStatus, type OfficeManualRuntimeCommandExecutionRecordStatus, type OfficeManualTargetMutationReadinessRecordStatus, type OfficeManualTargetMutationRecordStatus, type OfficeManualAdapterDispatchRecordStatus, type OfficeManualKanbanMutationRecordStatus, type OfficeManualNasSaveRecordStatus, type OfficeManualNasKeeperHandoffRecordStatus, type OfficeNasKeeperHandoffClaimDryRunResult, type OfficeNasKeeperHandoffAuthorizationResult, type OfficeNasKeeperExecutionPayloadPreviewResult, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeMacRelayRootReadinessProbeResult, type OfficeNasKeeperLastSuccessfulMacRelayWriteResult, type OfficeNasKeeperFreshOneShotOperatorWriteResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeManualApprovalRecordingDraftReviewStatus, type OfficeManualApprovalRecordStatus, type OfficeApprovalEventEnvelopeStatus, type OfficeManualApprovalDispatchGateReadinessStatus, type OfficeManualDispatchGateOpenRecordStatus, type OfficeManualRuntimeCommandPreviewRecordStatus, type OfficeManualRuntimeCommandInclusionRecordStatus, type OfficeManualRuntimeCommandExecutionRecordStatus, type OfficeManualTargetMutationReadinessRecordStatus, type OfficeManualTargetMutationRecordStatus, type OfficeManualAdapterDispatchRecordStatus, type OfficeManualKanbanMutationRecordStatus, type OfficeManualNasSaveRecordStatus, type OfficeManualNasKeeperHandoffRecordStatus, type OfficeNasKeeperHandoffClaimDryRunResult, type OfficeNasKeeperHandoffAuthorizationResult, type OfficeNasKeeperExecutionPayloadPreviewResult, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeMacRelayRootReadinessProbeResult, type OfficeNasKeeperLastSuccessfulMacRelayWriteResult, type OfficeNasKeeperFreshOneShotOperatorWriteResult, type OfficeNasKeeperFreshOneShotRequestBuilderResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -6958,6 +6958,65 @@ export function NasKeeperFreshOneShotOperatorFlowPanel({
   );
 }
 
+export function NasKeeperFreshOneShotRequestBuilderPanel({
+  builder,
+  error,
+}: {
+  builder?: OfficeNasKeeperFreshOneShotRequestBuilderResult | null;
+  error?: string | null;
+}) {
+  const dto = builder?.dto ?? null;
+  const write = dto?.write_result ?? null;
+  const rows = [
+    ["operator_intent_ref", dto?.operator_intent_ref ?? "safe operator intent required"],
+    ["safe_slug", dto?.safe_slug ?? "generated during dry review"],
+    ["handoff_ref", dto?.handoff_ref ?? "generated fresh per intent"],
+    ["authorization_ref", dto?.authorization_ref ?? "generated fresh per intent"],
+    ["relay_execution_ref", dto?.relay_execution_ref ?? "generated fresh per intent"],
+    ["execution_record_ref", dto?.execution_record_ref ?? "generated fresh per intent"],
+    ["markdown_body_sha256", dto?.markdown_body_sha256 ?? "hash only after review"],
+    ["readback_sha256", write?.readback_sha256 ?? "available after explicit write approval"],
+    ["next_required_boundary", dto?.next_required_boundary ?? "dry_review_then_explicit_write_approval"],
+  ];
+  return (
+    <section
+      className="border border-sky-300/20 bg-sky-950/10 p-4"
+      data-office-nas-keeper-fresh-one-shot-request-builder="true"
+      data-office-nas-keeper-fresh-one-shot-request-builder-dry-review-required="true"
+      data-office-nas-keeper-fresh-one-shot-request-builder-explicit-approval-required={String(!dto?.approve_actual_write || Boolean(builder?.approval_required))}
+      data-office-nas-keeper-fresh-one-shot-request-builder-executed={String(Boolean(builder?.executed))}
+      data-office-nas-keeper-fresh-one-shot-request-builder-written={String(Boolean(builder?.written))}
+      data-office-nas-keeper-fresh-one-shot-request-builder-repeat-replay-enabled={String(Boolean(dto?.repeat_execution_replay_allowed))}
+      data-office-nas-keeper-fresh-one-shot-request-builder-automation-enabled={String(Boolean(dto?.watcher_enabled || dto?.cron_enabled || dto?.dispatch_enabled || dto?.authority_adapter_binding_enabled))}
+      data-office-nas-keeper-fresh-one-shot-request-builder-vps-nas-authority={String(Boolean(dto?.vps_nas_mount_enabled))}
+      data-office-nas-keeper-fresh-one-shot-request-builder-markdown-body-included={String(Boolean(dto?.markdown_body_included))}
+      data-office-nas-keeper-fresh-one-shot-request-builder-raw-root-path-included={String(Boolean(dto?.raw_root_path_included))}
+      data-office-nas-keeper-fresh-one-shot-request-builder-credential-value-included={String(Boolean(dto?.credential_value_included))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-200/70">Fresh write request builder</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">safe intent → dry review → explicit one-shot write</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Generates unique safe refs from one operator intent, dry-reviews the payload first, and only writes when explicit approval is true. This panel is display-only: no controls, no replay, no watcher/cron/dispatcher/authority-adapter binding, and no VPS NAS authority.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "builder status unavailable" : builder?.written ? "approved write completed" : dto ? "dry review ready" : "waiting for safe intent"}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-3" data-office-nas-keeper-fresh-one-shot-request-builder-fields="true">
+        {rows.map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-nas-keeper-fresh-one-shot-request-builder-field={key}>
+            <div className="font-semibold text-foreground">{key}</div>
+            <div className="mt-1 break-words leading-5 text-midground/70">{value}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function ApprovedRealOneShotDispatchGateDesignPanel({
   status,
   error,
@@ -9943,6 +10002,7 @@ export default function OfficePage() {
       <MacLocalRelayRootReadinessProbeContractPanel terminalResult={nasKeeperGuardedFailureStateResult} probeResult={macRelayRootReadinessProbeResult} error={nasKeeperGuardedFailureStateError ?? macRelayRootReadinessProbeError} />
       <NasKeeperLastSuccessfulMacRelayWriteStatusPanel result={nasKeeperLastSuccessfulMacRelayWriteResult} error={nasKeeperLastSuccessfulMacRelayWriteError} />
       <NasKeeperFreshOneShotOperatorFlowPanel lastWrite={nasKeeperLastSuccessfulMacRelayWriteResult} error={nasKeeperLastSuccessfulMacRelayWriteError} />
+      <NasKeeperFreshOneShotRequestBuilderPanel />
 
       <OfficeVisualizerEvidenceDrawer terminalResult={nasKeeperGuardedFailureStateResult}>
       <NasKeeperLiveOperatorLanePanel
