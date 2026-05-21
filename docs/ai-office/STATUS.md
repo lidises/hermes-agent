@@ -1,4 +1,53 @@
 
+## Current next — manual Kanban mutation record complete
+
+Current slice:
+
+- User's standing goal approved continuing from controlled adapter dispatch into the next bounded write rung.
+- Hardened the protected `ManualKanbanMutationRecordStatusPanel` placement regression: the panel was already live-visible and unique before this slice, so the added uniqueness regression passed immediately and no production source change was required for visibility.
+- Exercised the existing protected controlled Kanban-mutation safe-ref POST/GET routes on the private VPS.
+- Wrote a controlled Kanban mutation record and set `kanban_mutation_created=true` only inside that controlled Kanban mutation record lane.
+- Kept NAS save/write, rollback execution, watcher/cron/daemon, direct VPS NAS authority, public exposure, real external dispatch, and gateway restart closed.
+
+Code/test commit/deploy:
+
+- Commit: `2eda4ff3 test(office): harden kanban mutation panel placement`.
+- Synced both VPS worktrees to `2eda4ff3`.
+- Rsynced local built `hermes_cli/web_dist/` to both worktrees.
+- Restarted only `hermes-agent-dashboard.service`; did not restart gateway.
+- Final services: dashboard active, gateway active.
+
+Local verification:
+
+- `py_compile` passed for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py`.
+- Focused backend controlled-mutation tests passed (`31 passed`).
+- Frontend `web/` tests passed: placement focused test, `src/lib/api.test.ts`, and `src/pages/OfficePage.rpg.test.tsx` (`145 passed`).
+- `npm run build` passed with existing Vite large chunk warning.
+- `git diff --check` passed.
+- Added-line sentinel scan found no new raw path/token/provider sentinels.
+
+VPS protected API smoke:
+
+- `/office?kanban-mutation=2eda4ff3` returned HTTP 200 after dashboard restart readiness delay.
+- Session token extracted from SPA shell and protected APIs called with `X-Hermes-Session-Token`.
+- Existing adapter dispatch source: `adapterdispatch-0f5ab02d-live-smoke-1432`.
+- New Kanban mutation ref: `kanbanmut-2eda4ff3-live-smoke-1444`.
+- New Kanban card ref: `card-2eda4ff3-safe-marker-card`.
+- POST `/api/office/controlled-mutation/manual-kanban-mutation-record` returned unauth=401, stored=true, dto.mode=`stored_manual_kanban_mutation_record`, kanban_mutation_created=true, kanban_mutation_result=`safe_kanban_marker_written`, adapter_dispatch_created=true, nas_save_created=false, rollback_executed=false, real_dispatch_execution_enabled=false, and did not echo unsafe extras.
+- GET `/api/office/controlled-mutation/manual-kanban-mutation-record-status?kanban_mutation_ref=kanbanmut-2eda4ff3-live-smoke-1444` returned unauth=401, mode=`stored_manual_kanban_mutation_records_readback`, kanban_mutation_record_count=1 for the queried ref, latest mutated=true, kanban_mutation_enabled=true, false risky capabilities, and no raw leak.
+
+VPS live DOM smoke:
+
+- `data-office-manual-kanban-mutation-record-status="true"`: exists=true, controls=0, global profile count=5.
+- Page body includes the safe Kanban mutation smoke ref.
+- Raw leak sentinels absent from page body; browser console messages/errors after smoke: 0.
+
+Handoff: `docs/ai-office/plans/2026-05-21-kanban-mutation-record-handoff.md`.
+
+Next recommended rung: `manual_nas_save_record`, only if the next prompt keeps bounded write approval and accepts crossing from controlled Kanban mutation into controlled NAS-save metadata. This should still be constrained to a controlled safe-ref NAS save record; direct VPS NAS authority/mount/credentials, public exposure, service/git/credential authority, watcher/cron, gateway restart, and real external dispatch should remain closed unless specifically approved.
+
+Last updated: 2026-05-21 14:48 KST
+
 ## Current next — manual adapter dispatch record complete
 
 Current slice:
