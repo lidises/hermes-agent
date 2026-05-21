@@ -1,4 +1,38 @@
 
+## Current next — NAS Keeper authorized handoff payload preview complete
+
+Current slice:
+
+- User approved continuing from the recommended rung with bounded writes and slightly stronger authority.
+- Authorized exactly one existing NAS Keeper/Mac relay handoff queue item and previewed its Mac relay execution payload.
+- Did not execute the relay payload, write NAS, start automation, restart services, or grant VPS direct NAS authority.
+
+Refs:
+
+- handoff_ref=`handoff-durable-exec-20260521-014337`
+- authorization_ref=`auth-durable-exec-20260521-020144`
+- relay_execution_ref=`relayexec-durable-exec-20260521-020144`
+- nas_keeper_ref=`agent_nas_keeper`
+- relay_node_ref=`mac_relay_primary`
+
+Verification:
+
+- Precheck: local HEAD/origin `1c98439f933c87bd6ccf94d829e357bf43ca9067`, local clean; VPS dashboard/source clean at same commit; dashboard/gateway active.
+- Queue precheck for the handoff: count=1, queue_status=`pending_nas_keeper_authorization`, actual_nas_write_enabled=false.
+- Authorization result: authorized=true, queue_status_before=`pending_nas_keeper_authorization`, queue_status_after=`authorized_for_mac_relay_execution`.
+- Payload preview result: previewed=true, preview_queue_status=`authorized_for_mac_relay_execution`, markdown_body_included=false, execution_payload_has_markdown_body=false.
+- markdown_body_sha256=`b18ffa51d2a35f215c1c336efec875fc87b89a7917da4b1132ec4f9982930924` and is 64 hex chars.
+- Closed preview capability flags: queue_mutation_enabled=false; direct_vps_nas_write_enabled=false; mac_relay_write_enabled=false; actual_nas_write_enabled=false; watcher_enabled=false; cron_enabled=false; dispatch_enabled=false; authority_adapter_binding_enabled=false.
+- Queue readback after authorization: count=1, queue_status=`authorized_for_mac_relay_execution`.
+- Raw-value leak scan passed: queued markdown text, private paths, command/NAS/provider/card/markdown sentinels, and token/secret sentinels were absent from preview/readback repr.
+- Focused regression passed: `py_compile`; authorize-handoff + execution-payload-preview tests (`6 passed`); `git diff --check`.
+
+Handoff: `docs/ai-office/plans/2026-05-21-nas-keeper-authorized-preview-handoff.md`.
+
+Next recommended rung: authenticated Mac relay execution from the previewed payload using exactly the refs above, with safe execution-state recording and NAS hash readback. Stop before watcher/cron/daemon activation, direct VPS NAS authority, public exposure, and gateway restart.
+
+Last updated: 2026-05-21 11:01 KST
+
 ## Current next — controlled-mutation ladder after durable NAS Keeper execution complete
 
 Current slice:
