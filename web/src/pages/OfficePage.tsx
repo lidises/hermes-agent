@@ -8977,6 +8977,7 @@ export default function OfficePage() {
       <ManualAdapterDispatchRecordStatusPanel status={manualAdapterDispatchRecordStatus} error={manualAdapterDispatchRecordStatusError} />
       <ManualKanbanMutationRecordStatusPanel status={manualKanbanMutationRecordStatus} error={manualKanbanMutationRecordStatusError} />
       <ManualNasSaveRecordStatusPanel status={manualNasSaveRecordStatus} error={manualNasSaveRecordStatusError} />
+      <ManualNasKeeperHandoffRecordStatusPanel status={manualNasKeeperHandoffRecordStatus} error={manualNasKeeperHandoffRecordStatusError} />
 
       {SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES ? (
         <>
@@ -9081,7 +9082,6 @@ export default function OfficePage() {
       <ManualDispatchGateOpenRecordStatusPanel status={manualDispatchGateOpenRecordStatus} error={manualDispatchGateOpenRecordStatusError} />
       <ManualRuntimeCommandPreviewRecordStatusPanel status={manualRuntimeCommandPreviewRecordStatus} error={manualRuntimeCommandPreviewRecordStatusError} />
       <ManualRuntimeCommandInclusionRecordStatusPanel status={manualRuntimeCommandInclusionRecordStatus} error={manualRuntimeCommandInclusionRecordStatusError} />
-      <ManualNasKeeperHandoffRecordStatusPanel status={manualNasKeeperHandoffRecordStatus} error={manualNasKeeperHandoffRecordStatusError} />
 
       <DeskRpgReadOnlyChainCompletionReviewPanel review={deskRpgReadOnlyChainCompletionReview} />
 

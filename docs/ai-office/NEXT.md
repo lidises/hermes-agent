@@ -1,4 +1,27 @@
 
+## Current next — NAS Keeper handoff live surface in progress
+
+Current slice:
+
+- User approved continuing the recommended controlled-mutation path with bounded writes and slightly stronger authority.
+- Existing protected NAS Keeper/Mac relay handoff queue marker metadata store/API/readback implementation is being surfaced in the live `/office` page.
+- Added RED/GREEN placement regression so the NAS Keeper handoff panel stays outside `SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES` and appears in production/browser smoke.
+
+Safety boundary remains:
+
+- Bounded NAS Keeper handoff queue marker metadata readback/status only; smoke may write a handoff marker record backed by an existing verified NAS-save record.
+- Direct VPS NAS write/authority, Mac relay write, actual NAS write/real NAS execution, watcher/cron activation, rollback execution, real dispatch, credential access, public exposure, and gateway restart remain blocked.
+
+Verification so far:
+
+- RED placement test failed when NAS Keeper handoff panel was only inside legacy diagnostics.
+- GREEN focused placement test passed after live-visible placement.
+- Full local verification and local API/browser smoke passed; commit/push and VPS dashboard-only deploy/live smoke pending.
+
+Handoff: `docs/ai-office/plans/2026-05-21-nas-keeper-handoff-live-surface-handoff.md`.
+
+Last updated: 2026-05-21 09:35 KST
+
 ## Current next — NAS-save live surface in progress
 
 Current slice:
