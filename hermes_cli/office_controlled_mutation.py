@@ -8077,7 +8077,7 @@ def execute_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_write(
         "execution_status": state_dto.get("execution_status", "succeeded"),
         "safe_display_path": execution_dto.get("safe_display_path"),
         "safe_logical_path": execution_dto.get("safe_logical_path"),
-        "payload_bytes": execution_dto.get("payload_bytes"),
+        "payload_bytes": execution_dto.get("payload_bytes") or execution_dto.get("markdown_body_bytes"),
         "markdown_body_sha256": execution_dto.get("markdown_body_sha256"),
         "readback_sha256": execution_dto.get("readback_sha256"),
         "readback_verified": execution_dto.get("readback_verified") is True,
