@@ -87,6 +87,9 @@ describe("Office controlled-mutation runtime status panel placement", () => {
       const panelIndex = source.indexOf(panel);
       expect(panelIndex).toBeGreaterThan(0);
       expect(panelIndex).toBeLessThan(legacyIndex);
+      if (panel === "<ManualDispatchGateOpenRecordStatusPanel") {
+        expect(source.indexOf(panel, panelIndex + 1)).toBe(-1);
+      }
     }
   });
 });

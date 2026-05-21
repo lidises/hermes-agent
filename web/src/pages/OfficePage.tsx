@@ -9080,7 +9080,6 @@ export default function OfficePage() {
       <TargetDispatchContractStatusPanel status={targetDispatchContractStatus} error={targetDispatchContractStatusError} />
       <WatcherCronContractStatusPanel status={watcherCronContractStatus} error={watcherCronContractStatusError} />
       <ApprovalEventEnvelopeStatusPanel status={approvalEventEnvelopeStatus} error={approvalEventEnvelopeStatusError} />
-      <ManualDispatchGateOpenRecordStatusPanel status={manualDispatchGateOpenRecordStatus} error={manualDispatchGateOpenRecordStatusError} />
       <ManualRuntimeCommandPreviewRecordStatusPanel status={manualRuntimeCommandPreviewRecordStatus} error={manualRuntimeCommandPreviewRecordStatusError} />
       <ManualRuntimeCommandInclusionRecordStatusPanel status={manualRuntimeCommandInclusionRecordStatus} error={manualRuntimeCommandInclusionRecordStatusError} />
 
