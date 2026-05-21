@@ -1,4 +1,77 @@
 
+## Current status — Fresh one-shot request builder deployed
+
+Updated: 2026-05-21 23:20 KST
+
+Completed slice:
+
+- Implemented/deployed operator-side fresh one-shot write request builder.
+- Code commit: `aaa18a04 feat(office): build fresh one-shot write requests`.
+- Added protected API:
+  - `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-one-shot-request-builder`
+- Added helper:
+  - `build_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_request(...)`
+- Added Office UI display-only panel:
+  - `NasKeeperFreshOneShotRequestBuilderPanel`
+  - `data-office-nas-keeper-fresh-one-shot-request-builder="true"`
+- Builder flow:
+  - receives one safe operator intent
+  - generates unique refs with timestamp + nonce
+  - dry-reviews payload first
+  - requires `approve_actual_write=true` before actual write
+  - delegates the approved write to the fresh one-shot wrapper
+  - returns only safe refs/checksum/readback metadata
+
+Actual bounded Mac-local builder write completed:
+
+- safe display path: `Hermes / fresh-builder-actual-20260521141510-48be1301.md`
+- payload_bytes: 47
+- readback_verified: true
+- readback_sha256: `610a233065a312e9e55c7f25487e72daa74dfe116b90470099f42677786c3527`
+- safe_slug: `fresh-builder-actual-20260521141510-48be1301`
+- handoff_ref: `handoff_fresh_builder_actual_20260521141510_48be1301`
+- authorization_ref: `authz_fresh_builder_actual_20260521141510_48be1301`
+- relay_execution_ref: `relay_exec_fresh_builder_actual_20260521141510_48be1301`
+- execution_record_ref: `exec_record_fresh_builder_actual_20260521141510_48be1301`
+
+Verification:
+
+- Python focused tests: 6 passed.
+- Web focused tests: 162 passed.
+- `npm run build` passed with only the existing Vite large chunk warning.
+- `git diff --check` passed.
+- added-line leak sentinel scan passed.
+
+VPS:
+
+- `/home/hermes/.hermes/ai-office-dashboard` synced to `aaa18a04`, clean at deploy time.
+- `/home/hermes/.hermes/hermes-agent` synced to `aaa18a04c`, clean at deploy time.
+- `web_dist` rsync complete.
+- Restarted only user service `hermes-agent-dashboard.service`; did not restart gateway.
+- `hermes-agent-dashboard.service` active; `hermes-gateway.service` active.
+- private `/office` GET returned content.
+- Live DOM smoke: request builder panel present, controls 0, dry-review required true, explicit approval required true, repeat replay false, automation false, VPS NAS authority false, raw leak sentinels none, browser console JS errors 0.
+- Live API smoke on VPS safely returned `mac_relay_root_not_configured` with `built=true`, `dry_reviewed=true`, `executed=false`, `written=false`; expected because VPS has no Mac relay root authority.
+
+Boundaries preserved:
+
+- No watcher/cron/daemon activation.
+- No dispatcher or authority-adapter binding.
+- No gateway restart.
+- No public exposure change.
+- No VPS NAS mount/write/credential authority.
+- No replay of prior successful writes.
+- No raw root path, markdown body, write payload, or credential value returned in API/DOM/docs.
+
+Next recommended rung:
+
+- Add an operator request ledger/readback: list recent fresh request-builder outcomes as sanitized safe refs/checksums/status only, prove dry-review-before-write ordering, and keep actual execution manual/one-shot with no watcher/cron/dispatcher/authority-adapter binding.
+
+Handoff:
+
+- `docs/ai-office/plans/2026-05-21-fresh-one-shot-request-builder-handoff.md`
+
+
 ## Current status — Fresh one-shot operator write wrapper deployed
 
 Updated: 2026-05-21 20:27 KST
