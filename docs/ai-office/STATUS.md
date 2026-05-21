@@ -1,4 +1,52 @@
 
+## Current next — manual target mutation record complete
+
+Current slice:
+
+- User's standing goal approved continuing from target mutation readiness into the next bounded write rung.
+- Hardened the protected `ManualTargetMutationRecordStatusPanel` placement regression: the panel was already live-visible and unique before this slice, so the added uniqueness regression passed immediately and no production source change was required for visibility.
+- Exercised the existing protected controlled target-mutation safe-ref POST/GET routes on the private VPS.
+- Wrote a controlled target mutation record and set `target_mutation_created=true` only inside that controlled target mutation record lane.
+- Kept adapter binding/dispatch, rollback execution, Kanban/NAS mutation, watcher/cron/daemon, direct VPS NAS authority, public exposure, real external dispatch, and gateway restart closed.
+
+Code/test commit/deploy:
+
+- Commit: `416c45fb test(office): harden target mutation panel placement`.
+- Synced both VPS worktrees to `416c45fb`.
+- Rsynced local built `hermes_cli/web_dist/` to both worktrees.
+- Restarted only `hermes-agent-dashboard.service`; did not restart gateway.
+- Final services: dashboard active, gateway active.
+
+Local verification:
+
+- `py_compile` passed for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py`.
+- Focused backend controlled-mutation tests passed (`31 passed`).
+- Frontend `web/` tests passed: placement focused test, `src/lib/api.test.ts`, and `src/pages/OfficePage.rpg.test.tsx` (`145 passed`).
+- `npm run build` passed with existing Vite large chunk warning.
+- `git diff --check` passed.
+- Added-line sentinel scan found no new raw path/token/provider sentinels.
+
+VPS protected API smoke:
+
+- `/office?target-mutation=416c45fb` returned HTTP 200 after dashboard restart readiness delay.
+- Session token extracted from SPA shell and protected APIs called with `X-Hermes-Session-Token`.
+- Existing target readiness source: `targetready-53b14ee1-live-smoke-1415`.
+- New target mutation ref: `targetmut-416c45fb-live-smoke-1422`.
+- POST `/api/office/controlled-mutation/manual-target-mutation-record` returned unauth=401, stored=true, dto.mode=`stored_manual_target_mutation_record`, target_mutation_created=true, target_mutation_result=`safe_target_marker_written`, target_mutation_readiness_verified=true, adapter_dispatch_created=false, kanban_mutation_created=false, nas_save_created=false, real_dispatch_execution_enabled=false, and did not echo unsafe extras.
+- GET `/api/office/controlled-mutation/manual-target-mutation-record-status?target_mutation_ref=targetmut-416c45fb-live-smoke-1422` returned unauth=401, mode=`stored_manual_target_mutation_records_readback`, target_mutation_record_count=1 for the queried ref, latest mutated=true, target_mutation_enabled=true, false risky capabilities, and no raw leak.
+
+VPS live DOM smoke:
+
+- `data-office-manual-target-mutation-record-status="true"`: exists=true, controls=0, global profile count=7.
+- Page body includes the safe target mutation smoke ref.
+- Raw leak sentinels absent from page body; browser console messages/errors after smoke: 0.
+
+Handoff: `docs/ai-office/plans/2026-05-21-target-mutation-record-handoff.md`.
+
+Next recommended rung: `manual_adapter_dispatch_record`, only if the next prompt keeps bounded write approval and accepts crossing from controlled target mutation into adapter-dispatch metadata. This should still be constrained to a controlled safe-ref adapter dispatch record; Kanban/NAS/VPS mutation beyond the controlled record, service/git/credential/public authority, watcher/cron, gateway restart, direct VPS NAS authority, and public exposure should remain closed unless specifically approved.
+
+Last updated: 2026-05-21 14:25 KST
+
 ## Current next — manual target mutation readiness record complete
 
 Current slice:
