@@ -1,4 +1,50 @@
 
+## Current next — NAS Keeper replace/restore smoke complete
+
+Current slice:
+
+- User approved continuing with bounded write authority after successful previewed-payload Mac relay execution.
+- Exercised the existing NAS Keeper -> Mac relay execution-from-preview path against one known safe logical note by replacing it once, verifying readback/rollback/audit evidence, restoring the exact original body, and verifying the final hash returned to the original.
+- Used an isolated temporary local handoff queue, not the durable production queue.
+- No watcher/cron/daemon, relay dispatch loop, authority-adapter binding, direct VPS NAS authority, public exposure, or service restart was added.
+
+Safe target:
+
+- safe_logical_target=`Hermes::controlled-mutation-durable-exec-20260521-014337.md`
+- original/final SHA-256=`b18ffa51d2a35f215c1c336efec875fc87b89a7917da4b1132ec4f9982930924`
+- replacement SHA-256=`ea925b6f29be816956c3816e9b997b1b5ae37c8f79459a8b728e437b29f2bca7`
+- restored_matches_original=true
+
+Refs:
+
+- replace handoff=`handoff-replace-smoke-20260521-021531`
+- replace relay execution=`relayexec-replace-smoke-20260521-021531`
+- replace execution record=`exec-record-replace-smoke-20260521-021531`
+- replace rollback=`rollback_write-replace-smoke-20260521-021531`
+- replace audit=`audit_write-replace-smoke-20260521-021531`
+- restore handoff=`handoff-restore-smoke-20260521-021531`
+- restore relay execution=`relayexec-restore-smoke-20260521-021531`
+- restore execution record=`exec-record-restore-smoke-20260521-021531`
+- restore rollback=`rollback_write-restore-smoke-20260521-021531`
+- restore audit=`audit_write-restore-smoke-20260521-021531`
+
+Verification:
+
+- Precheck: local HEAD/origin `d7d8e27d5e42e8e36bdc49a747a9dffd680fbbb7`, local clean; target existed and matched prior expected hash.
+- Initial attempt with an incorrect safe vault ref failed closed with safe error `write_target_unavailable` before any replacement was committed; target remained/restored to original hash.
+- Successful temporary queue count=2; both statuses=`mac_relay_execution_succeeded`; queue readback markdown_body_included=false.
+- Replace: queued/authorized/previewed/executed/written/recorded all true; readback hash matched replacement hash; rollback_created=true; audit_written=true.
+- Restore: queued/authorized/previewed/executed/written/recorded all true; readback hash matched original hash; rollback_created=true; audit_written=true.
+- Final NAS readback: bytes=110, SHA-256 returned to `b18ffa51d2a35f215c1c336efec875fc87b89a7917da4b1132ec4f9982930924`.
+- Leak scan passed for safe DTO/readback surfaces: no raw local/VPS paths, token/secret sentinels, raw command sentinels, or markdown projection sentinels.
+- Focused regression passed: `py_compile`; execution-from-preview/state-record/mac-relay-write tests (`17 passed`); `git diff --check`.
+
+Handoff: `docs/ai-office/plans/2026-05-21-nas-keeper-replace-restore-smoke-handoff.md`.
+
+Completion note: this write-chain goal is complete through manual bounded NAS write, rollback/readback/audit, and restore verification. If continuing later, next separate gate should be a read-only operational readiness report before any watcher/cron/daemon or generalized dispatch activation.
+
+Last updated: 2026-05-21 11:15 KST
+
 ## Current next — NAS Keeper previewed payload execution complete
 
 Current slice:
