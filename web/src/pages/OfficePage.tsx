@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeManualApprovalRecordingDraftReviewStatus, type OfficeManualApprovalRecordStatus, type OfficeApprovalEventEnvelopeStatus, type OfficeManualApprovalDispatchGateReadinessStatus, type OfficeManualDispatchGateOpenRecordStatus, type OfficeManualRuntimeCommandPreviewRecordStatus, type OfficeManualRuntimeCommandInclusionRecordStatus, type OfficeManualRuntimeCommandExecutionRecordStatus, type OfficeManualTargetMutationReadinessRecordStatus, type OfficeManualTargetMutationRecordStatus, type OfficeManualAdapterDispatchRecordStatus, type OfficeManualKanbanMutationRecordStatus, type OfficeManualNasSaveRecordStatus, type OfficeManualNasKeeperHandoffRecordStatus, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeManualApprovalRecordingDraftReviewStatus, type OfficeManualApprovalRecordStatus, type OfficeApprovalEventEnvelopeStatus, type OfficeManualApprovalDispatchGateReadinessStatus, type OfficeManualDispatchGateOpenRecordStatus, type OfficeManualRuntimeCommandPreviewRecordStatus, type OfficeManualRuntimeCommandInclusionRecordStatus, type OfficeManualRuntimeCommandExecutionRecordStatus, type OfficeManualTargetMutationReadinessRecordStatus, type OfficeManualTargetMutationRecordStatus, type OfficeManualAdapterDispatchRecordStatus, type OfficeManualKanbanMutationRecordStatus, type OfficeManualNasSaveRecordStatus, type OfficeManualNasKeeperHandoffRecordStatus, type OfficeNasKeeperHandoffClaimDryRunResult, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -6227,6 +6227,63 @@ export function ManualNasKeeperHandoffRecordStatusPanel({
 }
 
 
+
+export function NasKeeperHandoffClaimDryRunStatusPanel({
+  result,
+  error,
+}: {
+  result: OfficeNasKeeperHandoffClaimDryRunResult | null;
+  error?: string | null;
+}) {
+  const dto = result?.dto ?? null;
+  const caps = dto?.capabilities ?? {};
+  return (
+    <section
+      className="border border-cyan-300/20 bg-cyan-950/10 p-4"
+      data-office-nas-keeper-handoff-claim-dry-run-status="true"
+      data-office-nas-keeper-handoff-claim-dry-run={String(Boolean(result?.dry_run ?? dto?.dry_run))}
+      data-office-nas-keeper-handoff-claim-claimed={String(Boolean(result?.claimed))}
+      data-office-nas-keeper-handoff-claim-queue-mutation={String(Boolean(caps.queue_mutation_enabled))}
+      data-office-nas-keeper-handoff-claim-authorization-recording={String(Boolean(caps.nas_keeper_authorization_recording_enabled))}
+      data-office-nas-keeper-handoff-claim-mac-relay-write={String(Boolean(caps.mac_relay_write_enabled))}
+      data-office-nas-keeper-handoff-claim-actual-write={String(Boolean(caps.actual_nas_write_enabled))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-200/70">NAS Keeper claim dry-run</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">would_claim · queue stays pending</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Reads the pending handoff queue and projects the Mac relay claim envelope without mutating queue state, recording authorization, executing the relay, writing NAS files, starting automation, or binding dispatch authority.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "claim dry-run request failed" : String(dto?.handoff_ref ?? "claim dry-run pending")}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-nas-keeper-handoff-claim-dry-run-boundaries="true">
+        {[
+          ["queue_read_enabled", Boolean(caps.queue_read_enabled)],
+          ["claim_dry_run_enabled", Boolean(caps.claim_dry_run_enabled)],
+          ["queue_mutation_enabled", Boolean(caps.queue_mutation_enabled)],
+          ["authorization_recording_enabled", Boolean(caps.nas_keeper_authorization_recording_enabled)],
+          ["direct_vps_nas_write_enabled", Boolean(caps.direct_vps_nas_write_enabled)],
+          ["mac_relay_write_enabled", Boolean(caps.mac_relay_write_enabled)],
+          ["actual_nas_write_enabled", Boolean(caps.actual_nas_write_enabled)],
+          ["watcher_enabled", Boolean(caps.watcher_enabled)],
+          ["cron_enabled", Boolean(caps.cron_enabled)],
+          ["dispatch_enabled", Boolean(caps.dispatch_enabled)],
+          ["authority_adapter_binding_enabled", Boolean(caps.authority_adapter_binding_enabled)],
+        ].map(([key, value]) => (
+          <div key={String(key)} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-nas-keeper-handoff-claim-dry-run-boundary={String(key)}>{String(key)}: {String(Boolean(value))}</div>
+        ))}
+      </div>
+      <div className="mt-3 border border-current/15 bg-black/20 p-3 text-xs text-midground/70">
+        claim {dto?.claim_ref ?? "pending"} · before {dto?.queue_status_before ?? "unknown"} · after {dto?.queue_status_after ?? "unknown"}
+      </div>
+    </section>
+  );
+}
+
 export function ApprovedRealOneShotDispatchGateDesignPanel({
   status,
   error,
@@ -7729,6 +7786,9 @@ export default function OfficePage() {
   const [manualNasSaveRecordStatusError, setManualNasSaveRecordStatusError] = useState<string | null>(null);
   const [manualNasKeeperHandoffRecordStatus, setManualNasKeeperHandoffRecordStatus] = useState<OfficeManualNasKeeperHandoffRecordStatus | null>(null);
   const [manualNasKeeperHandoffRecordStatusError, setManualNasKeeperHandoffRecordStatusError] = useState<string | null>(null);
+  const [nasKeeperClaimDryRunResult, setNasKeeperClaimDryRunResult] = useState<OfficeNasKeeperHandoffClaimDryRunResult | null>(null);
+  const [nasKeeperClaimDryRunError, setNasKeeperClaimDryRunError] = useState<string | null>(null);
+  const nasKeeperClaimDryRunKeyRef = useRef<string | null>(null);
   const [nasKeeperQueueReadbackLoading, setNasKeeperQueueReadbackLoading] = useState(false);
   const [nasKeeperQueueReadbackError, setNasKeeperQueueReadbackError] = useState<string | null>(null);
   const [nasKeeperExecutionDraft, setNasKeeperExecutionDraft] = useState<OfficeNasKeeperExecutionFromPreviewPayload>(DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT);
@@ -7805,6 +7865,32 @@ export default function OfficePage() {
       setNasKeeperQueueReadbackLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    const items = nasKeeperQueueReadback?.dto?.items ?? [];
+    const pending = [...items].reverse().find((item) => item.queue_status === "pending_nas_keeper_authorization");
+    if (!pending) return;
+    const key = `${pending.handoff_ref}:${pending.relay_node_ref}`;
+    if (nasKeeperClaimDryRunKeyRef.current === key) return;
+    nasKeeperClaimDryRunKeyRef.current = key;
+    const claimedAt = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+    const claimRef = `claim:${pending.handoff_ref}`;
+    api.dryRunOfficeControlledMutationNasKeeperHandoffClaim({
+      handoff_ref: pending.handoff_ref,
+      claim_ref: claimRef.length <= 120 ? claimRef : `claim:${pending.handoff_ref.slice(0, 110)}`,
+      relay_node_ref: pending.relay_node_ref,
+      claimed_by: "office_dashboard_claim_dry_run",
+      claimed_at: claimedAt,
+    })
+      .then((result) => {
+        setNasKeeperClaimDryRunResult(result);
+        setNasKeeperClaimDryRunError(null);
+      })
+      .catch(() => {
+        setNasKeeperClaimDryRunResult(null);
+        setNasKeeperClaimDryRunError("request failed");
+      });
+  }, [nasKeeperQueueReadback]);
 
   const executeNasSingleFileWrite = useCallback(async () => {
     if (!nasSingleWriteApproved) {
@@ -8993,6 +9079,7 @@ export default function OfficePage() {
       <ManualKanbanMutationRecordStatusPanel status={manualKanbanMutationRecordStatus} error={manualKanbanMutationRecordStatusError} />
       <ManualNasSaveRecordStatusPanel status={manualNasSaveRecordStatus} error={manualNasSaveRecordStatusError} />
       <ManualNasKeeperHandoffRecordStatusPanel status={manualNasKeeperHandoffRecordStatus} error={manualNasKeeperHandoffRecordStatusError} />
+      <NasKeeperHandoffClaimDryRunStatusPanel result={nasKeeperClaimDryRunResult} error={nasKeeperClaimDryRunError} />
 
       {SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES ? (
         <>

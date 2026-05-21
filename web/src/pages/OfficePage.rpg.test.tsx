@@ -83,6 +83,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
       "<ManualKanbanMutationRecordStatusPanel",
       "<ManualNasSaveRecordStatusPanel",
       "<ManualNasKeeperHandoffRecordStatusPanel",
+      "<NasKeeperHandoffClaimDryRunStatusPanel",
     ]) {
       const panelIndex = source.indexOf(panel);
       expect(panelIndex).toBeGreaterThan(0);
@@ -98,6 +99,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
         "<ManualKanbanMutationRecordStatusPanel",
         "<ManualNasSaveRecordStatusPanel",
         "<ManualNasKeeperHandoffRecordStatusPanel",
+      "<NasKeeperHandoffClaimDryRunStatusPanel",
       ].includes(panel)) {
         expect(source.indexOf(panel, panelIndex + 1)).toBe(-1);
       }
@@ -3409,6 +3411,62 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).toContain('data-office-manual-nas-keeper-handoff-actual-write="false"');
     expect(html).toContain('data-office-manual-nas-keeper-handoff-mac-relay-write="false"');
     expect(html).toContain("Mac relay handoff queued · real NAS execution closed");
+    expect(html).not.toContain("/Users/lidises");
+    expect(html).not.toContain("sk-test");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("<form");
+    expect(html).not.toContain("<input");
+    expect(html).not.toContain("<select");
+    expect(html).not.toContain("<textarea");
+  });
+
+  it("renders NAS Keeper handoff claim dry-run as read-only and non-mutating", () => {
+    const NasKeeperHandoffClaimDryRunStatusPanel = (OfficePageModule as unknown as {
+      NasKeeperHandoffClaimDryRunStatusPanel: React.ComponentType<{ result: unknown; error?: string | null }>;
+    }).NasKeeperHandoffClaimDryRunStatusPanel;
+    expect(NasKeeperHandoffClaimDryRunStatusPanel).toBeTypeOf("function");
+
+    const html = renderToStaticMarkup(
+      <NasKeeperHandoffClaimDryRunStatusPanel
+        error={null}
+        result={{
+          claimed: false,
+          dry_run: true,
+          errors: [],
+          dto: {
+            schema_version: 1,
+            mode: "nas_keeper_mac_relay_handoff_claim_dry_run",
+            dry_run: true,
+            claim_status: "would_claim",
+            handoff_ref: "handoff_manual_nas_keeper_1",
+            claim_ref: "claim_manual_nas_keeper_1",
+            queue_status_before: "pending_nas_keeper_authorization",
+            queue_status_after: "pending_nas_keeper_authorization",
+            relay_node_ref: "relay_mac_safe",
+            capabilities: {
+              queue_read_enabled: true,
+              claim_dry_run_enabled: true,
+              queue_mutation_enabled: false,
+              nas_keeper_authorization_recording_enabled: false,
+              direct_vps_nas_write_enabled: false,
+              mac_relay_write_enabled: false,
+              actual_nas_write_enabled: false,
+              watcher_enabled: false,
+              cron_enabled: false,
+              dispatch_enabled: false,
+              authority_adapter_binding_enabled: false,
+            },
+            next_required_boundary: "nas_keeper_authorizes_and_mac_relay_executes",
+          },
+        }}
+      />,
+    );
+
+    expect(html).toContain('data-office-nas-keeper-handoff-claim-dry-run-status="true"');
+    expect(html).toContain('data-office-nas-keeper-handoff-claim-dry-run="true"');
+    expect(html).toContain('data-office-nas-keeper-handoff-claim-queue-mutation="false"');
+    expect(html).toContain('data-office-nas-keeper-handoff-claim-mac-relay-write="false"');
+    expect(html).toContain("would_claim · queue stays pending");
     expect(html).not.toContain("/Users/lidises");
     expect(html).not.toContain("sk-test");
     expect(html).not.toContain("<button");
