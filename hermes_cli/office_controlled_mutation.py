@@ -7642,6 +7642,120 @@ def preview_office_controlled_mutation_nas_keeper_mac_relay_execution_payload(
     return {"previewed": True, "errors": [], "dto": dto}
 
 
+def review_office_controlled_mutation_nas_keeper_one_shot_write_payload_arm(
+    payload: object, *, queue_dir: Path | str | None = None, root_path: Path | str | None = None
+) -> dict[str, object]:
+    """Review and arm a one-shot Mac relay write payload without executing it.
+
+    This is the last non-executing boundary before a bounded Mac-local write. It
+    rereads the authorized queue item through the existing payload preview,
+    rechecks the sanitized Mac-local root readiness, and returns only safe refs
+    plus readiness booleans. It does not include the markdown body, expose the
+    raw root path, write NAS files, mutate queue state, or enable VPS NAS
+    authority.
+    """
+
+    previewed = preview_office_controlled_mutation_nas_keeper_mac_relay_execution_payload(payload, queue_dir=queue_dir)
+    if not previewed.get("previewed"):
+        return {
+            "armed": False,
+            "ready_for_one_shot_write": False,
+            "executed": False,
+            "written": False,
+            "errors": cast(list[dict[str, str]], previewed.get("errors") or []),
+            "dto": None,
+        }
+
+    preview_dto = cast(dict[str, object], previewed["dto"])
+    root_probe = probe_office_controlled_mutation_mac_relay_root_readiness(root_path=root_path)
+    root_dto = cast(dict[str, object], root_probe.get("dto") or {})
+    root_configured = root_dto.get("root_configured") is True
+    root_readable = root_dto.get("root_readable") is True
+    root_writable = root_dto.get("root_writable") is True
+    root_ready = root_configured and root_readable and root_writable
+    probe_errors_raw = root_dto.get("probe_errors", [])
+    root_errors = [str(error) for error in probe_errors_raw if isinstance(error, str)] if isinstance(probe_errors_raw, Sequence) else []
+    errors = [_error("mac_relay_root", code) for code in root_errors]
+    armed = root_ready and not errors
+
+    preview_payload = dict(cast(dict[str, object], preview_dto.get("execution_payload_preview") or {}))
+    safe_payload = {field: preview_payload[field] for field in sorted(preview_payload) if field != "markdown_body"}
+    capabilities = {
+        "queue_read_enabled": True,
+        "execution_payload_preview_enabled": True,
+        "mac_local_root_probe_enabled": True,
+        "one_shot_write_payload_arm_review_enabled": True,
+        "one_shot_write_execution_enabled": False,
+        "queue_mutation_enabled": False,
+        "nas_keeper_authorization_recording_enabled": False,
+        "mac_relay_write_enabled": False,
+        "actual_nas_write_enabled": False,
+        "write_payload_body_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "vps_credential_access_enabled": False,
+        "direct_vps_nas_write_enabled": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+    }
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_mac_relay_one_shot_write_payload_arm_review",
+        "one_shot_write_payload_armed": armed,
+        "ready_for_one_shot_write": armed,
+        "execution_payload_reviewed": True,
+        "previewed": True,
+        "handoff_ref": preview_dto.get("handoff_ref"),
+        "authorization_ref": preview_dto.get("authorization_ref"),
+        "relay_execution_ref": preview_dto.get("relay_execution_ref"),
+        "queue_ref": preview_dto.get("queue_ref"),
+        "queue_status": preview_dto.get("queue_status"),
+        "authorization_decision": preview_dto.get("authorization_decision"),
+        "authorized_by": preview_dto.get("authorized_by"),
+        "authorized_at": preview_dto.get("authorized_at"),
+        "relay_authorized_by": preview_dto.get("relay_authorized_by"),
+        "relay_authorized_at": preview_dto.get("relay_authorized_at"),
+        "execution_payload_preview": safe_payload,
+        "execution_payload_fields": preview_dto.get("execution_payload_fields"),
+        "markdown_body_ref": preview_dto.get("markdown_body_ref"),
+        "markdown_body_bytes": preview_dto.get("markdown_body_bytes"),
+        "markdown_body_sha256": preview_dto.get("markdown_body_sha256"),
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "root_configured": root_configured,
+        "root_readable": root_readable,
+        "root_writable": root_writable,
+        "safe_probe_ref": root_dto.get("safe_probe_ref"),
+        "sanitized_root_label": root_dto.get("sanitized_root_label"),
+        "redaction_policy_version": root_dto.get("redaction_policy_version"),
+        "probe_errors": root_errors,
+        "payload_arm_review_path": [
+            "authorized_queue_item_read",
+            "safe_execution_payload_previewed",
+            "mac_local_root_probe_reviewed",
+            "one_shot_write_payload_armed" if armed else "one_shot_write_payload_not_ready",
+            "no_real_nas_write",
+        ],
+        "safe_logical_path": preview_dto.get("safe_logical_path"),
+        "safe_display_path": preview_dto.get("safe_display_path"),
+        "payload_bytes": preview_dto.get("payload_bytes"),
+        "capabilities": capabilities,
+        "next_required_boundary": "mac_local_relay_one_shot_write_execution" if armed else "mac_local_relay_root_runtime_configuration",
+    }
+    return {
+        "armed": armed,
+        "ready_for_one_shot_write": armed,
+        "executed": False,
+        "written": False,
+        "errors": errors,
+        "dto": dto,
+    }
+
+
+
 def execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_preview(
     payload: object, *, queue_dir: Path | str | None = None, root_path: Path | str | None = None
 ) -> dict[str, object]:

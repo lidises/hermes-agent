@@ -95,6 +95,7 @@ from hermes_cli.office_controlled_mutation import (
     execute_office_controlled_mutation_nas_single_file_write,
     execute_office_controlled_mutation_nas_mac_relay_write,
     probe_office_controlled_mutation_mac_relay_root_readiness,
+    review_office_controlled_mutation_nas_keeper_one_shot_write_payload_arm,
     execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_preview,
     record_office_controlled_mutation_nas_keeper_mac_relay_execution_state,
     list_office_controlled_mutation_nas_keeper_mac_relay_handoff_queue,
@@ -700,6 +701,15 @@ async def probe_office_controlled_mutation_mac_relay_root_readiness_route():
     """Return sanitized Mac-local relay root readiness without raw path or write payload."""
     return probe_office_controlled_mutation_mac_relay_root_readiness(
         root_path=os.environ.get("HERMES_AI_OFFICE_MAC_RELAY_NAS_ROOT")
+    )
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-one-shot-write-payload-arm-review")
+async def review_office_controlled_mutation_nas_keeper_one_shot_write_payload_arm_route(payload: Any = Body(None)):
+    """Review/arm safe one-shot Mac relay payload without executing a NAS write."""
+    return review_office_controlled_mutation_nas_keeper_one_shot_write_payload_arm(
+        payload,
+        root_path=os.environ.get("HERMES_AI_OFFICE_MAC_RELAY_NAS_ROOT"),
     )
 
 
