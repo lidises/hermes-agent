@@ -1,4 +1,53 @@
 
+## Current next — manual NAS save record complete
+
+Current slice:
+
+- User's standing goal approved continuing from controlled Kanban mutation into the next bounded write rung.
+- Hardened the protected `ManualNasSaveRecordStatusPanel` placement regression: the panel was already live-visible and unique before this slice, so the added uniqueness regression passed immediately and no production source change was required for visibility.
+- Exercised the existing protected controlled NAS-save safe-ref POST/GET routes on the private VPS.
+- Wrote a controlled NAS save record and set `nas_save_created=true` only inside that controlled NAS save record lane.
+- Kept direct VPS NAS authority/mount/credentials/path/write, real NAS execution, rollback execution, watcher/cron/daemon, public exposure, real external dispatch, and gateway restart closed.
+
+Code/test commit/deploy:
+
+- Commit: `c40a2620 test(office): harden nas save panel placement`.
+- Synced both VPS worktrees to `c40a2620`.
+- Rsynced local built `hermes_cli/web_dist/` to both worktrees.
+- Restarted only `hermes-agent-dashboard.service`; did not restart gateway.
+- Final services: dashboard active, gateway active.
+
+Local verification:
+
+- `py_compile` passed for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py`.
+- Focused backend controlled-mutation tests passed (`31 passed`).
+- Frontend `web/` tests passed: placement focused test, `src/lib/api.test.ts`, and `src/pages/OfficePage.rpg.test.tsx` (`145 passed`).
+- `npm run build` passed with existing Vite large chunk warning.
+- `git diff --check` passed.
+- Added-line sentinel scan found no new raw path/token/provider sentinels.
+
+VPS protected API smoke:
+
+- `/office?nas-save=c40a2620` returned HTTP 200 after dashboard restart readiness delay.
+- Session token extracted from SPA shell and protected APIs called with `X-Hermes-Session-Token`.
+- Existing Kanban mutation source: `kanbanmut-2eda4ff3-live-smoke-1444`.
+- New NAS save ref: `nassave-c40a2620-live-smoke-1501`.
+- New NAS note ref: `nasnote-c40a2620-safe-note`.
+- POST `/api/office/controlled-mutation/manual-nas-save-record` returned unauth=401, stored=true, dto.mode=`stored_manual_nas_save_record`, nas_save_created=true, nas_save_result=`safe_nas_save_marker_written`, kanban_mutation_created=true, vps_direct_nas_authority_enabled=false, real_nas_execution_enabled=false, vps_file_change_created=false, service_restart_created=false, git_push_created=false, real_dispatch_execution_enabled=false, and did not echo unsafe extras.
+- GET `/api/office/controlled-mutation/manual-nas-save-record-status?nas_save_ref=nassave-c40a2620-live-smoke-1501` returned unauth=401, mode=`stored_manual_nas_save_records_readback`, nas_save_record_count=1 for the queried ref, latest saved=true, latest real_nas_execution_enabled=false, nas_save_enabled=true, false risky capabilities, and no raw leak.
+
+VPS live DOM smoke:
+
+- `data-office-manual-nas-save-record-status="true"`: exists=true, controls=0, global profile count=4.
+- Page body includes the safe NAS save smoke ref.
+- Raw leak sentinels absent from page body; browser console messages/errors after smoke: 0.
+
+Handoff: `docs/ai-office/plans/2026-05-21-nas-save-record-handoff.md`.
+
+Next recommended rung: `manual_nas_keeper_handoff_record`, only if the next prompt keeps bounded write approval and accepts crossing from controlled NAS save into NAS-keeper/Mac-relay handoff queue metadata. This should still be constrained to a controlled safe-ref handoff record and queue item. Direct VPS NAS mount/credentials, real NAS execution, public exposure, service/git/credential authority beyond the controlled record, watcher/cron, gateway restart, and real external dispatch should remain closed unless specifically approved.
+
+Last updated: 2026-05-21 15:04 KST
+
 ## Current next — manual Kanban mutation record complete
 
 Current slice:
