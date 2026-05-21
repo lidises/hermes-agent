@@ -1,4 +1,30 @@
 
+## Current next — NAS Keeper real NAS execution-from-preview smoke complete
+
+Current slice:
+
+- User approved continuing the recommended controlled-mutation path with bounded writes and slightly stronger authority.
+- Raised NAS Keeper/Mac relay from isolated temp-root execution to a bounded real Mac-local NAS execution-from-preview smoke against an existing writable safe vault.
+- Used a temporary handoff queue and the safe logical target `Hermes::ai-office-real-nas-exec-preview-smoke-20260521011553.md`.
+
+Safety boundary preserved:
+
+- Real Mac-local NAS write smoke only; durable production NAS Keeper queue mutation, direct VPS NAS authority/mount/credentials, watcher/cron/daemon activation, relay daemon dispatch, authority-adapter binding, Kanban mutation, public exposure, dashboard/gateway restart remain blocked.
+- Raw NAS root/path, temporary queue path, markdown bodies, credential/provider values, token-like strings, and executable command text were not projected.
+
+Verification:
+
+- Create run: queued/authorized/previewed/executed/written/readback/audit true; rollback_created=false; markdown_body_included=false; queue unchanged by execute; direct VPS/write automation lanes false; readback SHA-256 `9b3154071dd6facf2272b70f4f9c4a021e1dc9a96c8e843942de7a8fb33b550b`.
+- Replace run: queued/authorized/previewed/executed/written/readback/audit true; rollback_created=true with `rollback_write_realnas_20260521011553_2`; rollback_verified=true; rollback SHA-256 matched create SHA; markdown_body_included=false; queue unchanged by execute; final readback SHA-256 `d6033cd13e7efca67fa9c95ff01b5e5a23b3e6ff620d2dc6b5e1aaf068bdf7e5`.
+- Final SHA-256 matched expected replacement body; raw leak=false; temporary handoff queue removed after evidence capture.
+- Focused regression: `py_compile` passed; execution-from-preview/payload-preview/Mac relay write/NAS runtime write pytest set passed (`22 passed`); `git diff --check` passed; added-line docs safety scan passed.
+
+Handoff: `docs/ai-office/plans/2026-05-21-real-nas-execution-from-preview-handoff.md`.
+
+Next recommended rung: durable-production-queue rehearsal/readback design only: create/authorize/read back one durable local-profile queue item without execution/write automation, then prove execution lanes remain closed. This remains no watcher/cron/dispatch automation, authority-adapter binding, Kanban mutation, direct VPS NAS authority, public exposure, or service restart.
+
+Last updated: 2026-05-21 10:16 KST
+
 ## Current next — NAS Keeper temp-root execution-from-preview complete
 
 Current slice:
