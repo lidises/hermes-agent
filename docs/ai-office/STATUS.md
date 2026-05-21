@@ -1,4 +1,51 @@
 
+## Current next — manual runtime command inclusion record complete
+
+Current slice:
+
+- User's standing goal approved continuing from runtime-command preview metadata into the next bounded write rung.
+- Hardened the protected `ManualRuntimeCommandInclusionRecordStatusPanel` placement: it remains visible in live `/office` before the legacy diagnostic gate, and the duplicate legacy-only instance was removed.
+- Exercised the existing protected runtime-command-inclusion safe body-ref/checksum-only POST/GET routes on the private VPS.
+- Wrote `runtime_command_included=true` and a SHA-256 checksum over safe command body refs only. No runtime command execution, adapter binding/dispatch, replay-store write, rollback execution, target/Kanban/NAS mutation, watcher/cron/daemon, direct VPS NAS authority, public exposure, or gateway restart was added.
+
+Code commit/deploy:
+
+- Code commit: `2cedb274 feat(office): harden runtime command inclusion panel placement`.
+- Synced both VPS worktrees to `2cedb274`.
+- Rsynced local built `hermes_cli/web_dist/` to both worktrees.
+- Restarted only `hermes-agent-dashboard.service`; did not restart gateway.
+- Final services: dashboard active, gateway active.
+
+Local verification:
+
+- `py_compile` passed for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py`.
+- Focused backend manual approval/runtime inclusion tests passed (`31 passed`).
+- Frontend `web/` tests passed: `src/lib/api.test.ts` + `src/pages/OfficePage.rpg.test.tsx` (`145 passed`).
+- `npm run build` passed with existing Vite large chunk warning.
+- `git diff --check` passed.
+- Added-line sentinel scan found no new raw path/token/provider sentinels.
+
+VPS protected API smoke:
+
+- `/office?runtime-inclusion=2cedb274` returned HTTP 200 after dashboard restart readiness delay.
+- Session token extracted from SPA shell and protected APIs called with `X-Hermes-Session-Token`.
+- Existing preview source: `cmdpreview-81a6215b-live-smoke-1305`.
+- New inclusion ref: `cmd-2cedb274-live-smoke-1320`.
+- POST `/api/office/controlled-mutation/manual-runtime-command-inclusion-record` returned unauth=401, stored=true, dto.mode=`stored_manual_runtime_command_inclusion_record`, runtime_command_preview_ref=`cmdpreview-81a6215b-live-smoke-1305`, runtime_command_ref=`cmd-2cedb274-live-smoke-1320`, runtime_command_included=true, checksum length=64, runtime_command_executed=false, target_mutation_created=false, kanban_mutation_created=false, nas_save_created=false, real_dispatch_execution_enabled=false, and did not echo unsafe extras.
+- GET `/api/office/controlled-mutation/manual-runtime-command-inclusion-record-status?runtime_command_ref=cmd-2cedb274-live-smoke-1320` returned unauth=401, mode=`stored_manual_runtime_command_inclusion_records_readback`, runtime_command_inclusion_record_count=1 for the queried ref, capabilities.runtime_command_included=true, false risky capabilities, and no raw leak.
+
+VPS live DOM smoke:
+
+- `data-office-manual-runtime-command-inclusion-record-status="true"`: exists=true, controls=0, global profile count=10.
+- Page body includes the safe inclusion smoke ref.
+- Raw leak sentinels absent from page body; browser console messages/errors after smoke: 0.
+
+Handoff: `docs/ai-office/plans/2026-05-21-runtime-command-inclusion-record-handoff.md`.
+
+Next recommended rung: `manual_runtime_command_execution_record`, only if the next prompt keeps bounded write approval. This may set `runtime_command_executed=true` only for the approved noop probe lane and may write idempotency replay metadata for that noop probe; adapter binding/dispatch, rollback execution, target/Kanban/NAS/VPS mutation, service/git/credential/public authority, watcher/cron, gateway restart, and direct VPS NAS authority must remain closed.
+
+Last updated: 2026-05-21 13:22 KST
+
 ## Current next — manual runtime command preview metadata record complete
 
 Current slice:
