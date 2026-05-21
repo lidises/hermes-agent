@@ -1,4 +1,44 @@
 
+## Current next — Mac-local relay root runtime configuration complete
+
+Updated: 2026-05-21 18:26 KST
+
+Current slice:
+
+- Completed `mac_local_relay_root_runtime_configuration` on the Mac-local runtime.
+- Runtime root is now configured privately in the Mac user launch environment.
+- Raw root value was not printed, committed, or rendered.
+- Sanitized probe evidence:
+  - `root_configured=true`
+  - `root_readable=true`
+  - `root_writable=true`
+  - `write_payload_included=false`
+  - `raw_root_path_included=false`
+  - `credential_value_included=false`
+  - `actual_nas_write_enabled=false`
+  - `probe_errors=[]`
+
+Boundary:
+
+- No actual NAS write in this slice.
+- No one-shot write payload armed yet.
+- No VPS NAS mount/direct authority.
+- No watcher/cron/daemon activation.
+- Gateway not restarted.
+
+Readiness estimate:
+
+- Actual NAS write readiness is now about 72%.
+- Remaining blockers: one-shot write payload arm/review, exact safe queue/ref selection, final dry-run/readback summary, actual execution, post-write SHA/readback/audit verification, and rollback/restore confirmation if replacing.
+
+Next recommended rung:
+
+- `mac_local_relay_one_shot_write_payload_arm_review`
+
+Handoff:
+
+- `docs/ai-office/plans/2026-05-21-mac-local-relay-root-runtime-configuration-handoff.md`
+
 ## Current next — Mac-local relay root probe implementation complete
 
 Updated: 2026-05-21 18:13 KST
