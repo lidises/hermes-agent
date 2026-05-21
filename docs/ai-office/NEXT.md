@@ -1,4 +1,40 @@
 
+## Current next — runtime readiness protected API evidence complete
+
+Current slice:
+
+- User approved continuing from the recommended post replace/restore step with bounded write authority.
+- The recommended next step was a read-only operational/runtime readiness evidence pass before any watcher/cron/daemon/generalized dispatch activation.
+- Existing protected runtime-readiness lanes were revalidated locally and on the VPS.
+- No watcher/cron/daemon, systemd/cron file creation, adapter dispatch, authority-adapter binding, target mutation, Kanban mutation, NAS save/write, direct VPS NAS authority, public exposure, or gateway restart was added.
+
+Protected VPS API evidence:
+
+- `/api/office/controlled-mutation/runtime-activation-review-status`: unauth=401, auth mode=`runtime_activation_review_status`, complete=true, raw_excluded=true, errors=[], risky capabilities all false.
+- `/api/office/controlled-mutation/runtime-preflight-status`: unauth=401, auth mode=`runtime_preflight_status`, complete=true, runtime_activation_ready=false, raw_excluded=true, errors=[], risky capabilities all false.
+- `/api/office/controlled-mutation/manual-one-shot-runtime-dry-run-status`: unauth=401, auth mode=`manual_one_shot_runtime_dry_run_status`, complete=true, raw_excluded=true, errors=[], risky capabilities all false.
+
+VPS smoke:
+
+- `/office?runtime-readiness=2efba2b9` returned HTTP 200.
+- Session token was extracted from the SPA shell and protected APIs were called with `X-Hermes-Session-Token`.
+- Raw leak sentinels were absent from the page body.
+- Browser DOM smoke did not find the specific runtime-readiness panel hooks, so evidence is API-only for this pass; do not claim visible panel rendering.
+
+Local verification:
+
+- `py_compile` passed for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py`.
+- Focused backend runtime/status tests passed (`21 passed`).
+- Frontend `web/` tests passed: `src/lib/api.test.ts` + `src/pages/OfficePage.rpg.test.tsx` (`145 passed`).
+- `npm run build` passed with existing Vite large chunk warning.
+- `git diff --check` passed.
+
+Handoff: `docs/ai-office/plans/2026-05-21-runtime-readiness-api-evidence-handoff.md`.
+
+Next recommended rung: either expose runtime-readiness evidence in `/office` DOM with stable display-only hooks and zero controls, or continue to the next protected readback/status rung already in the ladder. Real watcher/cron/daemon activation, adapter dispatch, target/Kanban/NAS mutation, credential/public expansion, and gateway restart remain separate security-sensitive phases.
+
+Last updated: 2026-05-21 11:24 KST
+
 ## Current next — NAS Keeper replace/restore smoke complete
 
 Current slice:
