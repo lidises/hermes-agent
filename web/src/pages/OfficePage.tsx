@@ -8976,6 +8976,7 @@ export default function OfficePage() {
       <ConcreteRuntimeSingleDispatchSliceDesignPanel status={concreteRuntimeSingleDispatchSliceDesign} error={concreteRuntimeSingleDispatchSliceDesignError} />
       <DisabledOneShotRuntimeDispatchExecutorSkeletonPanel status={disabledOneShotRuntimeDispatchExecutorSkeleton} error={disabledOneShotRuntimeDispatchExecutorSkeletonError} />
       <ApprovedRealOneShotDispatchGateDesignPanel status={approvedRealOneShotDispatchGateDesign} error={approvedRealOneShotDispatchGateDesignError} />
+      <ManualApprovalRecordingPreflightStatusPanel status={manualApprovalRecordingPreflightStatus} error={manualApprovalRecordingPreflightStatusError} />
 
       <ApprovalEventEnvelopeStatusPanel status={approvalEventEnvelopeStatus} error={approvalEventEnvelopeStatusError} />
       <ManualDispatchGateOpenRecordStatusPanel status={manualDispatchGateOpenRecordStatus} error={manualDispatchGateOpenRecordStatusError} />
@@ -9074,7 +9075,6 @@ export default function OfficePage() {
       <DispatcherCompletionReviewStatusPanel status={dispatcherCompletionReviewStatus} error={dispatcherCompletionReviewStatusError} />
       <TargetDispatchContractStatusPanel status={targetDispatchContractStatus} error={targetDispatchContractStatusError} />
       <WatcherCronContractStatusPanel status={watcherCronContractStatus} error={watcherCronContractStatusError} />
-      <ManualApprovalRecordingPreflightStatusPanel status={manualApprovalRecordingPreflightStatus} error={manualApprovalRecordingPreflightStatusError} />
       <ManualApprovalRecordingDraftStatusPanel status={manualApprovalRecordingDraftStatus} error={manualApprovalRecordingDraftStatusError} />
       <ManualApprovalRecordingDraftReviewStatusPanel status={manualApprovalRecordingDraftReviewStatus} error={manualApprovalRecordingDraftReviewStatusError} />
       <ManualApprovalRecordStatusPanel status={manualApprovalRecordStatus} error={manualApprovalRecordStatusError} />
