@@ -72,6 +72,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
       "<ManualApprovalRecordingDraftStatusPanel",
       "<ManualApprovalRecordingDraftReviewStatusPanel",
       "<ManualApprovalRecordStatusPanel",
+      "<ManualApprovalDispatchGateReadinessPanel",
       "<ManualDispatchGateOpenRecordStatusPanel",
       "<ManualRuntimeCommandPreviewRecordStatusPanel",
       "<ManualRuntimeCommandInclusionRecordStatusPanel",
