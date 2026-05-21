@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 from collections.abc import Mapping, Sequence
 from pathlib import Path
@@ -8005,6 +8006,107 @@ def record_office_controlled_mutation_nas_keeper_mac_relay_execution_state(
         "next_required_boundary": next_required_boundary,
     }
     return {"recorded": True, "errors": [], "dto": dto}
+
+
+
+def probe_office_controlled_mutation_mac_relay_root_readiness(
+    *, root_path: Path | str | None = None
+) -> dict[str, object]:
+    """Return a sanitized, read-only Mac-local relay root readiness probe.
+
+    The probe may inspect whether the Mac-local configured root exists and is
+    readable/writable, but it never returns the raw root path, credentials,
+    directory listings, or a write payload, and it does not write files.
+    """
+
+    if root_path is None:
+        dto = {
+            "schema_version": 1,
+            "mode": "mac_local_relay_root_readiness_probe",
+            "probed": True,
+            "root_configured": False,
+            "root_readable": False,
+            "root_writable": False,
+            "safe_probe_ref": "mac_relay_root_probe::unconfigured",
+            "sanitized_root_label": "unconfigured",
+            "redaction_policy_version": 1,
+            "probe_errors": ["mac_relay_root_not_configured"],
+            "write_payload_included": False,
+            "raw_root_path_included": False,
+            "credential_value_included": False,
+            "capabilities": {
+                "probe_read_only": True,
+                "filesystem_read_probe_enabled": False,
+                "filesystem_writable_probe_enabled": False,
+                "write_payload_enabled": False,
+                "actual_nas_write_enabled": False,
+                "vps_nas_mount_enabled": False,
+                "vps_credential_access_enabled": False,
+                "direct_vps_nas_write_enabled": False,
+                "watcher_enabled": False,
+                "cron_enabled": False,
+                "dispatch_enabled": False,
+            },
+            "next_required_boundary": "mac_local_relay_root_probe_runtime_configuration",
+        }
+        return {"probed": True, "errors": [], "dto": dto}
+
+    raw_ref = str(root_path)
+    root = Path(root_path).expanduser()
+    probe_hash = hashlib.sha256(raw_ref.encode("utf-8")).hexdigest()[:16]
+    probe_errors: list[str] = []
+    root_is_dir = False
+    root_readable = False
+    root_writable = False
+    try:
+        root_is_dir = root.is_dir()
+    except OSError:
+        root_is_dir = False
+    if not root_is_dir:
+        probe_errors.append("root_not_directory")
+    else:
+        try:
+            next(root.iterdir(), None)
+            root_readable = True
+        except OSError:
+            probe_errors.append("root_not_readable")
+        try:
+            root_writable = bool(os.access(root, os.W_OK))
+        except OSError:
+            root_writable = False
+        if not root_writable:
+            probe_errors.append("root_not_writable")
+
+    dto = {
+        "schema_version": 1,
+        "mode": "mac_local_relay_root_readiness_probe",
+        "probed": True,
+        "root_configured": True,
+        "root_readable": root_readable,
+        "root_writable": root_writable,
+        "safe_probe_ref": f"mac_relay_root_probe::{probe_hash}",
+        "sanitized_root_label": "configured_local_root",
+        "redaction_policy_version": 1,
+        "probe_errors": probe_errors,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "capabilities": {
+            "probe_read_only": True,
+            "filesystem_read_probe_enabled": True,
+            "filesystem_writable_probe_enabled": True,
+            "write_payload_enabled": False,
+            "actual_nas_write_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_credential_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+        },
+        "next_required_boundary": "sanitized_probe_evidence_review",
+    }
+    return {"probed": True, "errors": [], "dto": dto}
 
 
 

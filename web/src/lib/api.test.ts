@@ -2486,6 +2486,51 @@ describe("fetchJSON", () => {
     expect(JSON.stringify(fetchMock.mock.calls[0]?.[1]?.body)).not.toMatch(/markdown_body|\/Users\/|\/home\/|token=|sk-|provider/i);
   });
 
+  it("gets sanitized Mac relay root readiness probe without request body or raw-path payload", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        __HERMES_SESSION_TOKEN__: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        probed: true,
+        errors: [],
+        dto: {
+          mode: "mac_local_relay_root_readiness_probe",
+          root_configured: false,
+          root_readable: false,
+          root_writable: false,
+          safe_probe_ref: "mac_relay_root_probe::unconfigured",
+          sanitized_root_label: "unconfigured",
+          redaction_policy_version: 1,
+          probe_errors: ["mac_relay_root_not_configured"],
+          write_payload_included: false,
+          raw_root_path_included: false,
+          credential_value_included: false,
+          capabilities: { probe_read_only: true, actual_nas_write_enabled: false },
+        },
+      }),
+    } as Response);
+
+    const result = await api.probeOfficeControlledMutationMacRelayRootReadiness();
+
+    expect(result.probed).toBe(true);
+    expect(result.dto?.write_payload_included).toBe(false);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/office/controlled-mutation/nas-runtime/mac-relay-root-readiness-probe",
+      expect.objectContaining({ headers: expect.any(Headers) }),
+    );
+    expect(fetchMock.mock.calls[0]?.[1]?.method).toBeUndefined();
+    expect(fetchMock.mock.calls[0]?.[1]?.body).toBeUndefined();
+    const headers = fetchMock.mock.calls[0]?.[1]?.headers as Headers;
+    expect(headers.get("X-Hermes-Session-Token")).toBe("session-token-for-header-only");
+    expect(JSON.stringify(fetchMock.mock.calls[0])).not.toMatch(/\/Users\/|\/home\/|token=|sk-|provider|markdown_body/i);
+  });
+
   it("posts optional inline execution-state recording refs without markdown or raw paths", async () => {
     Object.defineProperty(globalThis, "window", {
       configurable: true,

@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeManualApprovalRecordingDraftReviewStatus, type OfficeManualApprovalRecordStatus, type OfficeApprovalEventEnvelopeStatus, type OfficeManualApprovalDispatchGateReadinessStatus, type OfficeManualDispatchGateOpenRecordStatus, type OfficeManualRuntimeCommandPreviewRecordStatus, type OfficeManualRuntimeCommandInclusionRecordStatus, type OfficeManualRuntimeCommandExecutionRecordStatus, type OfficeManualTargetMutationReadinessRecordStatus, type OfficeManualTargetMutationRecordStatus, type OfficeManualAdapterDispatchRecordStatus, type OfficeManualKanbanMutationRecordStatus, type OfficeManualNasSaveRecordStatus, type OfficeManualNasKeeperHandoffRecordStatus, type OfficeNasKeeperHandoffClaimDryRunResult, type OfficeNasKeeperHandoffAuthorizationResult, type OfficeNasKeeperExecutionPayloadPreviewResult, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeManualApprovalRecordingDraftReviewStatus, type OfficeManualApprovalRecordStatus, type OfficeApprovalEventEnvelopeStatus, type OfficeManualApprovalDispatchGateReadinessStatus, type OfficeManualDispatchGateOpenRecordStatus, type OfficeManualRuntimeCommandPreviewRecordStatus, type OfficeManualRuntimeCommandInclusionRecordStatus, type OfficeManualRuntimeCommandExecutionRecordStatus, type OfficeManualTargetMutationReadinessRecordStatus, type OfficeManualTargetMutationRecordStatus, type OfficeManualAdapterDispatchRecordStatus, type OfficeManualKanbanMutationRecordStatus, type OfficeManualNasSaveRecordStatus, type OfficeManualNasKeeperHandoffRecordStatus, type OfficeNasKeeperHandoffClaimDryRunResult, type OfficeNasKeeperHandoffAuthorizationResult, type OfficeNasKeeperExecutionPayloadPreviewResult, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeMacRelayRootReadinessProbeResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -6771,44 +6771,52 @@ export function MacLocalRelayRootAuthorityConfigContractPanel({
 
 export function MacLocalRelayRootReadinessProbeContractPanel({
   terminalResult,
+  probeResult,
   error,
 }: {
   terminalResult: OfficeNasKeeperExecutionStateResult | null;
+  probeResult?: OfficeMacRelayRootReadinessProbeResult | null;
   error?: string | null;
 }) {
-  const dto = terminalResult?.dto ?? null;
-  const terminalClosed = dto?.execution_status === "failed_guarded" && dto?.queue_status_after === "mac_relay_execution_failed_guarded";
-  const caps = dto?.capabilities ?? {};
+  const terminalDto = terminalResult?.dto ?? null;
+  const probeDto = probeResult?.dto ?? null;
+  const terminalClosed = terminalDto?.execution_status === "failed_guarded" && terminalDto?.queue_status_after === "mac_relay_execution_failed_guarded";
+  const caps = probeDto?.capabilities ?? terminalDto?.capabilities ?? {};
   const proofFields = [
-    ["root_configured", "boolean placeholder; true only after a Mac-local runtime check."],
-    ["root_readable", "boolean placeholder; directory readability proof without path echo."],
-    ["root_writable", "boolean placeholder; writable readiness proof without creating final NAS content."],
-    ["safe_probe_ref", "opaque safe ref such as probe-macrelay-<hash>; no filesystem value."],
-    ["sanitized_root_label", "coarse label only, for example mac_local_relay_root."],
-    ["redaction_policy_version", "versioned rule proving root values and credentials were suppressed."],
-    ["probe_errors", "safe enum list only; never raw exception text with paths."],
-    ["write_payload_included", "false until the separate one-shot write arm/review rung."],
+    ["root_configured", probeDto ? String(probeDto.root_configured) : "boolean placeholder; true only after a Mac-local runtime check."],
+    ["root_readable", probeDto ? String(probeDto.root_readable) : "boolean placeholder; directory readability proof without path echo."],
+    ["root_writable", probeDto ? String(probeDto.root_writable) : "boolean placeholder; writable readiness proof without creating final NAS content."],
+    ["safe_probe_ref", probeDto?.safe_probe_ref ?? "opaque safe ref such as mac_relay_root_probe::<hash>; no filesystem value."],
+    ["sanitized_root_label", probeDto?.sanitized_root_label ?? "coarse label only, for example configured_local_root."],
+    ["redaction_policy_version", probeDto ? String(probeDto.redaction_policy_version) : "versioned rule proving root values and credentials were suppressed."],
+    ["probe_errors", probeDto ? (probeDto.probe_errors.join(" · ") || "none") : "safe enum list only; never raw exception text with paths."],
+    ["write_payload_included", String(Boolean(probeDto?.write_payload_included))],
   ];
   return (
     <section
       className="border border-emerald-300/20 bg-emerald-950/10 p-4"
       data-office-mac-local-relay-root-readiness-probe-contract="true"
       data-office-mac-local-relay-root-readiness-probe-contract-read-only="true"
-      data-office-mac-local-relay-root-readiness-probe-contract-probe-executed="false"
-      data-office-mac-local-relay-root-readiness-probe-contract-write-enabled={String(Boolean(caps.mac_relay_write_enabled || caps.actual_nas_write_enabled))}
+      data-office-mac-local-relay-root-readiness-probe-contract-probe-executed={String(Boolean(probeResult?.probed))}
+      data-office-mac-local-relay-root-readiness-probe-contract-root-configured={String(Boolean(probeDto?.root_configured))}
+      data-office-mac-local-relay-root-readiness-probe-contract-root-readable={String(Boolean(probeDto?.root_readable))}
+      data-office-mac-local-relay-root-readiness-probe-contract-root-writable={String(Boolean(probeDto?.root_writable))}
+      data-office-mac-local-relay-root-readiness-probe-contract-write-enabled={String(Boolean(caps.mac_relay_write_enabled || caps.actual_nas_write_enabled || caps.write_payload_enabled))}
       data-office-mac-local-relay-root-readiness-probe-contract-vps-nas-authority={String(Boolean(caps.vps_nas_mount_enabled || caps.direct_vps_nas_write_enabled))}
       data-office-mac-local-relay-root-readiness-probe-contract-terminal-closed={String(Boolean(terminalClosed))}
+      data-office-mac-local-relay-root-readiness-probe-contract-raw-root-path-included={String(Boolean(probeDto?.raw_root_path_included))}
+      data-office-mac-local-relay-root-readiness-probe-contract-credential-value-included={String(Boolean(probeDto?.credential_value_included))}
     >
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
-          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">Mac-local relay root readiness probe contract</div>
-          <h2 className="mt-1 text-lg font-semibold text-foreground">sanitized proof payload shape · no probe execution yet</h2>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">Mac-local relay root readiness probe</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">sanitized read-only probe · no write payload</h2>
           <p className="mt-2 text-xs leading-5 text-midground/70">
-            This rung defines the future Mac-local readiness probe DTO. It may report configured/readable/writable booleans, a safe probe ref, a sanitized root label, and redaction policy version; it must not include raw paths, credentials, write payloads, watcher/cron/daemon state, VPS NAS mount authority, or final NAS writes.
+            This rung executes only a sanitized root-readiness probe through the Mac-local contract surface. It may report configured/readable/writable booleans, a safe probe ref, a sanitized root label, and redaction policy version; it must not include raw paths, credentials, write payloads, watcher/cron/daemon state, VPS NAS mount authority, or final NAS writes.
           </p>
         </div>
         <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
-          {error ? "probe contract unavailable" : terminalClosed ? "ready for probe contract review" : "waiting for terminal guard evidence"}
+          {error ? "probe unavailable" : probeDto ? `probe ${probeDto.sanitized_root_label}` : terminalClosed ? "waiting for probe readback" : "waiting for terminal guard evidence"}
         </div>
       </div>
       <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-mac-local-relay-root-readiness-probe-contract-fields="true">
@@ -6820,7 +6828,7 @@ export function MacLocalRelayRootReadinessProbeContractPanel({
         ))}
       </div>
       <div className="mt-3 border border-current/15 bg-black/20 p-3 text-xs leading-5 text-midground/70" data-office-mac-local-relay-root-readiness-probe-contract-boundary="true">
-        Completion of this contract should raise actual write readiness only by clarifying proof shape. It does not configure the Mac relay root, run a probe, create write payloads, mount NAS on the VPS, or authorize actual NAS writes.
+        This probe raises readiness only by producing sanitized evidence. It does not configure the Mac relay root, create write payloads, mount NAS on the VPS, or authorize actual NAS writes.
       </div>
     </section>
   );
@@ -8338,6 +8346,8 @@ export default function OfficePage() {
   const [nasKeeperExecutionGuardError, setNasKeeperExecutionGuardError] = useState<string | null>(null);
   const [nasKeeperGuardedFailureStateResult, setNasKeeperGuardedFailureStateResult] = useState<OfficeNasKeeperExecutionStateResult | null>(null);
   const [nasKeeperGuardedFailureStateError, setNasKeeperGuardedFailureStateError] = useState<string | null>(null);
+  const [macRelayRootReadinessProbeResult, setMacRelayRootReadinessProbeResult] = useState<OfficeMacRelayRootReadinessProbeResult | null>(null);
+  const [macRelayRootReadinessProbeError, setMacRelayRootReadinessProbeError] = useState<string | null>(null);
   const nasKeeperClaimDryRunKeyRef = useRef<string | null>(null);
   const nasKeeperAuthorizationKeyRef = useRef<string | null>(null);
   const nasKeeperPayloadPreviewKeyRef = useRef<string | null>(null);
@@ -8638,6 +8648,21 @@ export default function OfficePage() {
         setNasKeeperGuardedFailureStateError("request failed");
       });
   }, [loadNasKeeperQueueReadback, nasKeeperExecutionGuardResult, nasKeeperPayloadPreviewResult]);
+
+  useEffect(() => {
+    if (macRelayRootReadinessProbeResult?.dto) return;
+    const terminalDto = nasKeeperGuardedFailureStateResult?.dto;
+    if (!terminalDto || terminalDto.execution_status !== "failed_guarded") return;
+    api.probeOfficeControlledMutationMacRelayRootReadiness()
+      .then((result) => {
+        setMacRelayRootReadinessProbeResult(result);
+        setMacRelayRootReadinessProbeError(null);
+      })
+      .catch(() => {
+        setMacRelayRootReadinessProbeResult(null);
+        setMacRelayRootReadinessProbeError("request failed");
+      });
+  }, [macRelayRootReadinessProbeResult, nasKeeperGuardedFailureStateResult]);
 
   const executeNasSingleFileWrite = useCallback(async () => {
     if (!nasSingleWriteApproved) {
@@ -9776,7 +9801,7 @@ export default function OfficePage() {
 
       <MacLocalRelayRootAuthorityPreflightPanel terminalResult={nasKeeperGuardedFailureStateResult} error={nasKeeperGuardedFailureStateError} />
       <MacLocalRelayRootAuthorityConfigContractPanel terminalResult={nasKeeperGuardedFailureStateResult} error={nasKeeperGuardedFailureStateError} />
-      <MacLocalRelayRootReadinessProbeContractPanel terminalResult={nasKeeperGuardedFailureStateResult} error={nasKeeperGuardedFailureStateError} />
+      <MacLocalRelayRootReadinessProbeContractPanel terminalResult={nasKeeperGuardedFailureStateResult} probeResult={macRelayRootReadinessProbeResult} error={nasKeeperGuardedFailureStateError ?? macRelayRootReadinessProbeError} />
 
       <OfficeVisualizerEvidenceDrawer terminalResult={nasKeeperGuardedFailureStateResult}>
       <NasKeeperLiveOperatorLanePanel

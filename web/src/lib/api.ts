@@ -1342,6 +1342,28 @@ export interface OfficeNasKeeperExecutionPayloadPreviewResult {
   };
 }
 
+export interface OfficeMacRelayRootReadinessProbeResult {
+  probed: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: null | {
+    schema_version: number;
+    mode: "mac_local_relay_root_readiness_probe";
+    probed: true;
+    root_configured: boolean;
+    root_readable: boolean;
+    root_writable: boolean;
+    safe_probe_ref: string;
+    sanitized_root_label: string;
+    redaction_policy_version: number;
+    probe_errors: string[];
+    write_payload_included: false;
+    raw_root_path_included: false;
+    credential_value_included: false;
+    capabilities: Record<string, boolean>;
+    next_required_boundary: string;
+  };
+}
+
 export interface OfficeNasKeeperExecutionFromPreviewPayload {
   handoff_ref: string;
   relay_execution_ref: string;
@@ -1757,6 +1779,8 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     }),
+  probeOfficeControlledMutationMacRelayRootReadiness: () =>
+    fetchJSON<OfficeMacRelayRootReadinessProbeResult>("/api/office/controlled-mutation/nas-runtime/mac-relay-root-readiness-probe"),
   executeOfficeControlledMutationNasKeeperExecutionFromPreview: (body: OfficeNasKeeperExecutionFromPreviewPayload) =>
     fetchJSON<OfficeNasKeeperExecutionFromPreviewResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-execution-from-preview", {
       method: "POST",

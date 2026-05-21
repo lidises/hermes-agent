@@ -3924,7 +3924,7 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
 
   it("renders Mac-local relay root readiness probe contract as sanitized proof shape only", () => {
     const MacLocalRelayRootReadinessProbeContractPanel = (OfficePageModule as unknown as {
-      MacLocalRelayRootReadinessProbeContractPanel: React.ComponentType<{ terminalResult: unknown; error?: string | null }>;
+      MacLocalRelayRootReadinessProbeContractPanel: React.ComponentType<{ terminalResult: unknown; probeResult?: unknown; error?: string | null }>;
     }).MacLocalRelayRootReadinessProbeContractPanel;
     expect(MacLocalRelayRootReadinessProbeContractPanel).toBeTypeOf("function");
 
@@ -3951,16 +3951,46 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
             },
           },
         }}
+        probeResult={{
+          probed: true,
+          errors: [],
+          dto: {
+            mode: "mac_local_relay_root_readiness_probe",
+            probed: true,
+            root_configured: false,
+            root_readable: false,
+            root_writable: false,
+            safe_probe_ref: "mac_relay_root_probe::unconfigured",
+            sanitized_root_label: "unconfigured",
+            redaction_policy_version: 1,
+            probe_errors: ["mac_relay_root_not_configured"],
+            write_payload_included: false,
+            raw_root_path_included: false,
+            credential_value_included: false,
+            capabilities: {
+              probe_read_only: true,
+              write_payload_enabled: false,
+              actual_nas_write_enabled: false,
+              vps_nas_mount_enabled: false,
+              direct_vps_nas_write_enabled: false,
+            },
+          },
+        }}
       />,
     );
 
     expect(html).toContain('data-office-mac-local-relay-root-readiness-probe-contract="true"');
     expect(html).toContain('data-office-mac-local-relay-root-readiness-probe-contract-read-only="true"');
-    expect(html).toContain('data-office-mac-local-relay-root-readiness-probe-contract-probe-executed="false"');
+    expect(html).toContain('data-office-mac-local-relay-root-readiness-probe-contract-probe-executed="true"');
+    expect(html).toContain('data-office-mac-local-relay-root-readiness-probe-contract-root-configured="false"');
+    expect(html).toContain('data-office-mac-local-relay-root-readiness-probe-contract-root-readable="false"');
+    expect(html).toContain('data-office-mac-local-relay-root-readiness-probe-contract-root-writable="false"');
     expect(html).toContain('data-office-mac-local-relay-root-readiness-probe-contract-write-enabled="false"');
     expect(html).toContain('data-office-mac-local-relay-root-readiness-probe-contract-vps-nas-authority="false"');
-    expect(html).toContain("Mac-local relay root readiness probe contract");
-    expect(html).toContain("sanitized proof payload shape");
+    expect(html).toContain('data-office-mac-local-relay-root-readiness-probe-contract-raw-root-path-included="false"');
+    expect(html).toContain('data-office-mac-local-relay-root-readiness-probe-contract-credential-value-included="false"');
+    expect(html).toContain("Mac-local relay root readiness probe");
+    expect(html).toContain("sanitized read-only probe");
     expect(html).toContain("root_configured");
     expect(html).toContain("root_readable");
     expect(html).toContain("root_writable");
