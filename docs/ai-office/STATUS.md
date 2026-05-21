@@ -1,4 +1,34 @@
 
+## Current next — NAS Keeper authorized handoff + execution payload preview complete
+
+Current slice:
+
+- User approved continuing the recommended controlled-mutation path with bounded writes and slightly stronger authority.
+- Existing protected NAS Keeper handoff authorization and execution payload preview contracts were reverified, then smoke-tested locally and on the private VPS dashboard.
+- This slice authorized one safe queued handoff metadata record and previewed the Mac relay execution payload with `markdown_body_included=false`.
+
+Safety boundary preserved:
+
+- Authorization metadata write/readback and payload preview only.
+- Mac relay write, actual NAS write/real NAS execution, direct VPS NAS authority/mount/credentials, queue execution-state mutation, watcher/cron activation, rollback execution, real dispatch, public exposure, and gateway restart remain blocked.
+- Raw markdown body, private NAS paths, provider IDs, filesystem paths, credentials, and executable command text did not appear in API/browser readbacks.
+
+Verification:
+
+- Focused backend tests: 6 passed.
+- Frontend API wrapper tests: 44 passed.
+- `py_compile`: passed.
+- Local protected API smoke: authorize 401/200, preview 401/200, `previewed=true`, `markdown_body_sha256` length 64, all execution/write lanes false, raw leak=false.
+- Local browser smoke: `/office` rendered, scoped controls=0, raw leak=false, console errors=0.
+- VPS protected API smoke: authorize 401/200, preview 401/200, `previewed=true`, markdown body excluded, Mac relay/actual NAS/watchers/cron/dispatch false, raw leak=false.
+- VPS HTTP/browser smoke: private `/office` 200/rendered, raw leak=false, console errors=0; dashboard active; gateway active/untouched.
+
+Handoff: `docs/ai-office/plans/2026-05-21-authorized-handoff-preview-handoff.md`.
+
+Next recommended rung: Mac-local authenticated execution-from-preview temp-root smoke, still no direct VPS NAS authority, watcher/cron, public exposure, real dispatch, or gateway restart.
+
+Last updated: 2026-05-21 09:48 KST
+
 ## 2026-05-21 — NAS Keeper handoff live surface slice
 
 Status: complete; local verification and VPS dashboard-only deploy/live smoke passed.
