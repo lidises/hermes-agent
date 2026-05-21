@@ -36,46 +36,30 @@ Handoff doc:
 - `docs/ai-office/plans/2026-05-21-one-shot-mac-relay-write-handoff.md`
 
 
-## Current next — Mac-local relay root runtime configuration complete
+## Current next — Fresh one-shot operator flow wrapper
 
-Updated: 2026-05-21 18:26 KST
+Updated: 2026-05-21 20:08 KST
 
-Current slice:
+Completed slice:
 
-- Completed `mac_local_relay_root_runtime_configuration` on the Mac-local runtime.
-- Runtime root is now configured privately in the Mac user launch environment.
-- Raw root value was not printed, committed, or rendered.
-- Sanitized probe evidence:
-  - `root_configured=true`
-  - `root_readable=true`
-  - `root_writable=true`
-  - `write_payload_included=false`
-  - `raw_root_path_included=false`
-  - `credential_value_included=false`
-  - `actual_nas_write_enabled=false`
-  - `probe_errors=[]`
+- Implemented/deployed last successful bounded Mac-local relay write readback.
+- Code commit: `056b8fa3 feat(office): surface repeat-safe mac relay readback`.
+- Live readback panel: `data-office-nas-keeper-last-successful-mac-relay-write="true"`.
+- API: `/api/office/controlled-mutation/nas-runtime/nas-keeper-last-successful-mac-relay-write`.
+- Live smoke: `found=true`, `readback_verified=true`, `repeat_execution_replay_allowed=false`, `fresh_handoff_required_per_write=true`, no raw leak, zero panel controls, browser console JS errors 0.
+- VPS dashboard and hermes-agent worktrees are clean at code commit `056b8fa3`; dashboard active; gateway active and was not restarted.
 
-Boundary:
+Preserved boundaries:
 
-- No actual NAS write in this slice.
-- No one-shot write payload armed yet.
-- No VPS NAS mount/direct authority.
-- No watcher/cron/daemon activation.
-- Gateway not restarted.
-
-Readiness estimate:
-
-- Actual NAS write readiness is now about 72%.
-- Remaining blockers: one-shot write payload arm/review, exact safe queue/ref selection, final dry-run/readback summary, actual execution, post-write SHA/readback/audit verification, and rollback/restore confirmation if replacing.
+- No daemonization, watcher/cron, dispatcher, authority-adapter binding, gateway restart, public exposure, direct VPS NAS mount/write/credential authority, or replay of the successful Mac-local write.
 
 Next recommended rung:
 
-- `mac_local_relay_one_shot_write_payload_arm_review`
+- Fresh one-shot operator flow wrapper: require a new handoff ref, authorization ref, and execution ref per write; fail closed on ref reuse; expose safe refs/checksums/readback only; keep watcher/cron/dispatcher/authority-adapter binding off.
 
 Handoff:
 
-- `docs/ai-office/plans/2026-05-21-mac-local-relay-root-runtime-configuration-handoff.md`
-
+- `docs/ai-office/plans/2026-05-21-repeat-safe-mac-relay-readback-handoff.md`
 ## Current next — Mac-local relay root probe implementation complete
 
 Updated: 2026-05-21 18:13 KST
