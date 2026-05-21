@@ -8979,6 +8979,7 @@ export default function OfficePage() {
       <ManualApprovalRecordingPreflightStatusPanel status={manualApprovalRecordingPreflightStatus} error={manualApprovalRecordingPreflightStatusError} />
       <ManualApprovalRecordingDraftStatusPanel status={manualApprovalRecordingDraftStatus} error={manualApprovalRecordingDraftStatusError} />
       <ManualApprovalRecordingDraftReviewStatusPanel status={manualApprovalRecordingDraftReviewStatus} error={manualApprovalRecordingDraftReviewStatusError} />
+      <ManualApprovalRecordStatusPanel status={manualApprovalRecordStatus} error={manualApprovalRecordStatusError} />
 
       <ApprovalEventEnvelopeStatusPanel status={approvalEventEnvelopeStatus} error={approvalEventEnvelopeStatusError} />
       <ManualDispatchGateOpenRecordStatusPanel status={manualDispatchGateOpenRecordStatus} error={manualDispatchGateOpenRecordStatusError} />
@@ -9077,7 +9078,6 @@ export default function OfficePage() {
       <DispatcherCompletionReviewStatusPanel status={dispatcherCompletionReviewStatus} error={dispatcherCompletionReviewStatusError} />
       <TargetDispatchContractStatusPanel status={targetDispatchContractStatus} error={targetDispatchContractStatusError} />
       <WatcherCronContractStatusPanel status={watcherCronContractStatus} error={watcherCronContractStatusError} />
-      <ManualApprovalRecordStatusPanel status={manualApprovalRecordStatus} error={manualApprovalRecordStatusError} />
       <ApprovalEventEnvelopeStatusPanel status={approvalEventEnvelopeStatus} error={approvalEventEnvelopeStatusError} />
       <ManualApprovalDispatchGateReadinessPanel status={manualApprovalDispatchGateReadinessStatus} error={manualApprovalDispatchGateReadinessStatusError} />
       <ManualDispatchGateOpenRecordStatusPanel status={manualDispatchGateOpenRecordStatus} error={manualDispatchGateOpenRecordStatusError} />
