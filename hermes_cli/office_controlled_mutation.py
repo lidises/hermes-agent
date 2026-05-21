@@ -8373,6 +8373,107 @@ def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_readb
 
 
 
+def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_export_selection_review(
+    *,
+    queue_dir: Path | str | None = None,
+    profile: object = "latest_written",
+    limit: int = 20,
+) -> dict[str, object]:
+    if profile != "latest_written":
+        return {
+            "found": False,
+            "errors": [_error("profile", "unsupported_selection_profile")],
+            "dto": None,
+        }
+    ledger = get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_readback(
+        queue_dir=queue_dir,
+        limit=limit,
+        outcome="written",
+        queue_status="mac_relay_execution_succeeded",
+        export_safe=True,
+    )
+    if ledger.get("errors"):
+        return {"found": False, "errors": ledger.get("errors", []), "dto": None}
+    ledger_dto = ledger.get("dto") if isinstance(ledger.get("dto"), Mapping) else None
+    safe_export = ledger_dto.get("safe_export") if isinstance(ledger_dto, Mapping) else None
+    export_items = safe_export.get("items") if isinstance(safe_export, Mapping) else []
+    if not isinstance(export_items, list):
+        export_items = []
+    checksum_set: list[dict[str, object]] = []
+    for item in export_items:
+        if not isinstance(item, Mapping):
+            continue
+        readback_sha = item.get("readback_sha256")
+        markdown_sha = item.get("markdown_body_sha256")
+        handoff_ref = item.get("handoff_ref")
+        if not (
+            isinstance(readback_sha, str)
+            and re.fullmatch(r"[0-9a-f]{64}", readback_sha)
+            and isinstance(markdown_sha, str)
+            and re.fullmatch(r"[0-9a-f]{64}", markdown_sha)
+            and _is_opaque_id(handoff_ref)
+        ):
+            continue
+        checksum_set.append(
+            {
+                "handoff_ref": handoff_ref,
+                "markdown_body_sha256": markdown_sha,
+                "readback_sha256": readback_sha,
+                "readback_verified": bool(item.get("readback_verified")),
+            }
+        )
+    checksum_material = json.dumps(checksum_set, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    checksum_set_sha256 = hashlib.sha256(checksum_material).hexdigest()
+    item_count = len(export_items)
+    export_item_count = safe_export.get("count") if isinstance(safe_export, Mapping) else None
+    export_item_count_verified = export_item_count == item_count
+    checksum_set_verified = item_count == len(checksum_set) and all(bool(item.get("readback_verified")) for item in checksum_set)
+    selected_safe_export = dict(safe_export) if isinstance(safe_export, Mapping) else None
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_export_selection_review",
+        "selection_profile": "latest_written",
+        "source_mode": "nas_keeper_fresh_request_builder_ledger_readback",
+        "filters_applied": dict(ledger_dto.get("filters_applied") or {}) if isinstance(ledger_dto, Mapping) else {},
+        "selected_item_count": item_count,
+        "selected_safe_export": selected_safe_export,
+        "selected_checksum_set": checksum_set,
+        "checksum_set_sha256": checksum_set_sha256,
+        "export_item_count_verified": export_item_count_verified,
+        "checksum_set_verified": checksum_set_verified,
+        "downstream_use_enabled": False,
+        "downstream_use_ready": bool(item_count and export_item_count_verified and checksum_set_verified),
+        "manual_operator_review_required": True,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "repeat_execution_replay_allowed": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "capabilities": {
+            "selected_export_review_enabled": True,
+            "safe_export_enabled": True,
+            "checksum_set_verification_enabled": True,
+            "downstream_use_enabled": False,
+            "actual_write_execution_enabled": False,
+            "repeat_execution_replay_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_credential_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+        },
+        "next_required_boundary": "fresh_request_builder_operator_review",
+    }
+    return {"found": bool(item_count), "errors": [], "dto": dto}
+
+
 def execute_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_write(
     payload: object, *, queue_dir: Path | str | None = None, root_path: Path | str | None = None
 ) -> dict[str, object]:

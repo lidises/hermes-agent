@@ -1538,6 +1538,44 @@ export interface OfficeNasKeeperFreshRequestBuilderLedgerReadbackResult {
   };
 }
 
+export interface OfficeNasKeeperFreshRequestBuilderLedgerExportSelectionReviewResult {
+  found: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: null | {
+    schema_version: number;
+    mode: "nas_keeper_fresh_request_builder_ledger_export_selection_review";
+    selection_profile: "latest_written";
+    source_mode: "nas_keeper_fresh_request_builder_ledger_readback";
+    filters_applied: Record<string, string>;
+    selected_item_count: number;
+    selected_safe_export: OfficeNasKeeperFreshRequestBuilderLedgerReadbackResult["dto"]["safe_export"];
+    selected_checksum_set: Array<{
+      handoff_ref: string;
+      markdown_body_sha256: string;
+      readback_sha256: string;
+      readback_verified: boolean;
+    }>;
+    checksum_set_sha256: string;
+    export_item_count_verified: boolean;
+    checksum_set_verified: boolean;
+    downstream_use_enabled: false;
+    downstream_use_ready: boolean;
+    manual_operator_review_required: boolean;
+    markdown_body_included: false;
+    write_payload_included: false;
+    raw_root_path_included: false;
+    credential_value_included: false;
+    repeat_execution_replay_allowed: false;
+    watcher_enabled: false;
+    cron_enabled: false;
+    dispatch_enabled: false;
+    authority_adapter_binding_enabled: false;
+    vps_nas_mount_enabled: false;
+    capabilities: Record<string, boolean>;
+    next_required_boundary: string;
+  };
+}
+
 export interface OfficeNasKeeperExecutionFromPreviewPayload {
   handoff_ref: string;
   relay_execution_ref: string;
@@ -1965,6 +2003,8 @@ export const api = {
     }),
   getOfficeControlledMutationNasKeeperFreshRequestBuilderLedger: () =>
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerReadbackResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger?export_safe=true&limit=20"),
+  getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerExportSelectionReview: () =>
+    fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerExportSelectionReviewResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-export-selection-review?profile=latest_written&limit=20"),
   executeOfficeControlledMutationNasKeeperFreshOneShotOperatorWrite: (body: Record<string, unknown>) =>
     fetchJSON<OfficeNasKeeperFreshOneShotOperatorWriteResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-one-shot-operator-write", {
       method: "POST",

@@ -70,6 +70,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
     expect(source).toContain("<NasKeeperFreshOneShotOperatorFlowPanel");
     expect(source).toContain("<NasKeeperFreshOneShotRequestBuilderPanel");
     expect(source).toContain("<NasKeeperFreshRequestBuilderLedgerPanel");
+    expect(source).toContain("<NasKeeperFreshRequestBuilderLedgerExportSelectionReviewPanel");
 
     for (const panel of [
       "<NasKeeperLiveOperatorLanePanel",
@@ -125,6 +126,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
       "<NasKeeperFreshOneShotOperatorFlowPanel",
       "<NasKeeperFreshOneShotRequestBuilderPanel",
       "<NasKeeperFreshRequestBuilderLedgerPanel",
+      "<NasKeeperFreshRequestBuilderLedgerExportSelectionReviewPanel",
     ]) {
       const panelIndex = source.indexOf(panel);
       expect(panelIndex).toBeGreaterThan(0);
@@ -150,6 +152,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
       "<NasKeeperFreshOneShotOperatorFlowPanel",
       "<NasKeeperFreshOneShotRequestBuilderPanel",
       "<NasKeeperFreshRequestBuilderLedgerPanel",
+      "<NasKeeperFreshRequestBuilderLedgerExportSelectionReviewPanel",
       ].includes(panel)) {
         expect(source.indexOf(panel, panelIndex + 1)).toBe(-1);
       }
@@ -4330,6 +4333,92 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).toContain("handoff_ledger_readback_20260521143000_abc12345");
     expect(html).toContain("sanitized outcomes · dry-review-before-write proof");
     expect(html).not.toContain("Ledger readback safe body");
+    expect(html).not.toContain("/Users/" + "lidises");
+    expect(html).not.toContain("/home/hermes");
+    expect(html).not.toContain("/vol" + "ume1");
+    expect(html).not.toContain("sk" + "-test");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("<form");
+    expect(html).not.toContain("<input");
+    expect(html).not.toContain("<select");
+    expect(html).not.toContain("<textarea");
+  });
+
+  it("renders selected export review as display-only item-count/checksum proof", () => {
+    const NasKeeperFreshRequestBuilderLedgerExportSelectionReviewPanel = (OfficePageModule as unknown as {
+      NasKeeperFreshRequestBuilderLedgerExportSelectionReviewPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.NasKeeperFreshRequestBuilderLedgerExportSelectionReviewPanel>>;
+    }).NasKeeperFreshRequestBuilderLedgerExportSelectionReviewPanel;
+    expect(NasKeeperFreshRequestBuilderLedgerExportSelectionReviewPanel).toBeTypeOf("function");
+
+    const html = renderToStaticMarkup(
+      <NasKeeperFreshRequestBuilderLedgerExportSelectionReviewPanel
+        error={null}
+        review={{
+          found: true,
+          errors: [],
+          dto: {
+            schema_version: 1,
+            mode: "nas_keeper_fresh_request_builder_ledger_export_selection_review",
+            selection_profile: "latest_written",
+            source_mode: "nas_keeper_fresh_request_builder_ledger_readback",
+            filters_applied: { outcome: "written", queue_status: "mac_relay_execution_succeeded" },
+            selected_item_count: 1,
+            selected_safe_export: {
+              format: "fresh_request_builder_safe_export_v1",
+              count: 1,
+              markdown_body_included: false,
+              write_payload_included: false,
+              raw_root_path_included: false,
+              credential_value_included: false,
+              items: [{
+                handoff_ref: "handoff_select_written_20260521150900_7afe4001",
+                markdown_body_sha256: "c".repeat(64),
+                readback_sha256: "c".repeat(64),
+                readback_verified: true,
+              }],
+            },
+            selected_checksum_set: [{
+              handoff_ref: "handoff_select_written_20260521150900_7afe4001",
+              markdown_body_sha256: "c".repeat(64),
+              readback_sha256: "c".repeat(64),
+              readback_verified: true,
+            }],
+            checksum_set_sha256: "d".repeat(64),
+            export_item_count_verified: true,
+            checksum_set_verified: true,
+            downstream_use_enabled: false,
+            downstream_use_ready: true,
+            manual_operator_review_required: true,
+            markdown_body_included: false,
+            write_payload_included: false,
+            raw_root_path_included: false,
+            credential_value_included: false,
+            repeat_execution_replay_allowed: false,
+            watcher_enabled: false,
+            cron_enabled: false,
+            dispatch_enabled: false,
+            authority_adapter_binding_enabled: false,
+            vps_nas_mount_enabled: false,
+            capabilities: {},
+            next_required_boundary: "fresh_request_builder_operator_review",
+          },
+        }}
+      />,
+    );
+
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-export-selection-review="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-export-selection-review-item-count-verified="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-export-selection-review-checksum-set-verified="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-export-selection-review-downstream-use-enabled="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-export-selection-review-repeat-replay-enabled="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-export-selection-review-automation-enabled="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-export-selection-review-vps-nas-authority="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-export-selection-review-markdown-body-included="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-export-selection-review-checksum-preview="true"');
+    expect(html).toContain("one profile · item-count and checksum-set proof");
+    expect(html).toContain("handoff_select_written_20260521150900_7afe4001");
+    expect(html).toContain("selected_export_review_v1");
+    expect(html).not.toContain("Safe body");
     expect(html).not.toContain("/Users/" + "lidises");
     expect(html).not.toContain("/home/hermes");
     expect(html).not.toContain("/vol" + "ume1");
