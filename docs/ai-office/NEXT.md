@@ -1,4 +1,80 @@
 
+## Current status — Fresh request ledger downstream-use preflight deployed
+
+Updated: 2026-05-22 00:55 KST
+
+Completed slice:
+
+- Implemented/deployed display-only downstream-use preflight for selected fresh request-builder ledger exports.
+- Added protected API `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-use-preflight`.
+- The first supported profile is `latest_written`, consuming the selected export review and proving downstream use remains blocked until a manual operator review record exists.
+- Downstream use remains disabled; manual operator review record writing remains a separate next boundary.
+- Added Office display-only `NasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightPanel` with no controls.
+
+Verification:
+
+- Python focused downstream/selection/filter/readback tests: 12 passed.
+- Web focused RPG panel tests: 117 passed.
+- `npm run build`: passed with existing Vite large chunk warning only.
+- `git diff --check`: passed.
+- Added-line leak sentinel scan: passed.
+- VPS `/office` live smoke: downstream preflight panel present, controls 0, review passed true, manual review required true, manual review record present false, downstream use false, repeat replay false, automation false, VPS NAS authority false, markdown body included false, API status 200.
+- Browser console JS errors: 0.
+
+Actual bounded Mac-local write for this rung:
+
+- `built=true`, `dry_reviewed=true`, `executed=true`, `written=true`, `approval_required=false`, errors none.
+- Safe display path: `Hermes / downstream-preflight-actual-20260521155500-8afe5201.md`.
+- Payload bytes: 53.
+- Readback verified: true.
+- Readback SHA-256: `8df38b0777b55d987ba3574a0b928490e3ddacbecb6f5d1aedd81c2d43f229a8`.
+- Refs:
+  - `handoff_downstream_preflight_actual_20260521155500_8afe5201`
+  - `authz_downstream_preflight_actual_20260521155500_8afe5201`
+  - `relay_exec_downstream_preflight_actual_20260521155500_8afe5201`
+  - `exec_record_downstream_preflight_actual_20260521155500_8afe5201`
+- Local downstream preflight then reported:
+  - selected item count 5
+  - selected export review passed true
+  - manual operator review required true
+  - manual operator review record present false
+  - downstream use allowed after manual review true
+  - downstream use enabled false
+  - blocked reason `manual_operator_review_not_recorded`
+  - checksum set SHA-256 `4e0a5fb92cb71538e661c4e2ffe05f2acc038c7b3321afd75d4e28c0629594b9`
+  - preflight decision SHA-256 `2ddf09a4a34c90cf5a8c7f6a0d5d07c816c7f2315f20398c6159da79f5148ed5`
+
+Deploy:
+
+- Code commit: `75478b3d feat(office): preflight ledger downstream use`.
+- VPS `/home/hermes/.hermes/ai-office-dashboard` and `/home/hermes/.hermes/hermes-agent` reset to `75478b3d`.
+- `web_dist` rsync complete.
+- Restarted dashboard only; gateway stayed active and was not restarted.
+
+Recommended next rung:
+
+- `operator_request_ledger_manual_review_record`:
+  - bounded safe-ref manual operator review record write/readback for one selected export preflight;
+  - no downstream consumption yet;
+  - keep downstream use disabled until the later separate downstream-use enablement boundary;
+  - keep actual execution manual/one-shot;
+  - keep watcher/cron/dispatcher/authority-adapter/VPS NAS authority off.
+
+Boundaries preserved:
+
+- No watcher/cron/daemon activation.
+- No dispatcher binding.
+- No authority-adapter binding.
+- No gateway restart.
+- No public exposure changes.
+- No VPS NAS mount/write/credential authority.
+- No prior successful write replay.
+- No raw root path / markdown body / write payload / credential value exposure.
+- No downstream-use enablement.
+- No manual operator review record write yet.
+
+
+
 ## Current status — Fresh request ledger selected export review deployed
 
 Updated: 2026-05-22 00:37 KST
