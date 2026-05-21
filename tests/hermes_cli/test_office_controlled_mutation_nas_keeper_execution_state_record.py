@@ -103,6 +103,24 @@ def test_execution_state_recording_supports_failed_and_manual_evidence_without_w
     assert failed["dto"]["queue_status_after"] == "mac_relay_execution_failed"
     assert failed["dto"]["capabilities"]["actual_nas_write_enabled"] is False
 
+    guarded_dir = tmp_path / "guarded"
+    prepare_authorized_handoff(guarded_dir)
+    guarded = record_office_controlled_mutation_nas_keeper_mac_relay_execution_state(
+        safe_execution_state_payload(
+            execution_record_ref="exec_record_20260518_failed_guarded_demo",
+            execution_status="failed_guarded",
+            safe_summary="Mac relay execution guard failed safely before write because relay root was not configured.",
+            evidence_refs=["guard:mac_relay_root_not_configured", "relayexec:guarded_failure_smoke"],
+        ),
+        queue_dir=guarded_dir,
+    )
+    assert guarded["recorded"] is True
+    assert guarded["dto"]["execution_status"] == "failed_guarded"
+    assert guarded["dto"]["queue_status_after"] == "mac_relay_execution_failed_guarded"
+    assert guarded["dto"]["capabilities"]["mac_relay_write_enabled"] is False
+    assert guarded["dto"]["capabilities"]["actual_nas_write_enabled"] is False
+    assert guarded["dto"]["next_required_boundary"] == "none_terminal_execution_state_recorded"
+
     manual_dir = tmp_path / "manual"
     enqueue_office_controlled_mutation_nas_keeper_mac_relay_handoff(
         safe_handoff_payload(handoff_ref="handoff_20260518_manual_demo", relay_request_ref="relay_req_20260518_manual_demo"),

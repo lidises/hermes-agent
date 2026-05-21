@@ -1385,7 +1385,7 @@ export interface OfficeNasKeeperExecutionStatePayload {
   relay_node_ref: string;
   recorded_by: string;
   recorded_at: string;
-  execution_status: "succeeded" | "failed" | "manual_review_required";
+  execution_status: "succeeded" | "failed" | "failed_guarded" | "manual_review_required";
   safe_summary: string;
   evidence_refs: string[];
 }

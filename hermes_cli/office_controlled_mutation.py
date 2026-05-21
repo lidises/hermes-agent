@@ -337,6 +337,7 @@ _NAS_KEEPER_HANDOFF_EXECUTION_STATE_FIELDS = {
 _NAS_KEEPER_HANDOFF_EXECUTION_STATUSES = {
     "succeeded": "mac_relay_execution_succeeded",
     "failed": "mac_relay_execution_failed",
+    "failed_guarded": "mac_relay_execution_failed_guarded",
     "manual_review_required": "mac_relay_execution_manual_review_required",
 }
 _NAS_KEEPER_HANDOFF_QUEUE_STATUSES = {
@@ -344,6 +345,7 @@ _NAS_KEEPER_HANDOFF_QUEUE_STATUSES = {
     "authorized_for_mac_relay_execution",
     "mac_relay_execution_succeeded",
     "mac_relay_execution_failed",
+    "mac_relay_execution_failed_guarded",
     "mac_relay_execution_manual_review_required",
 }
 _NAS_KEEPER_HANDOFF_QUEUE_READBACK_FIELDS = {"handoff_ref", "queue_status", "relay_node_ref", "nas_keeper_ref", "limit"}

@@ -324,6 +324,29 @@ export function buildNasKeeperExecutionStateDraftFromResult(
   };
 }
 
+export function buildNasKeeperGuardedFailureExecutionStatePayload(
+  preview: OfficeNasKeeperExecutionPayloadPreviewResult,
+  guard: OfficeNasKeeperExecutionFromPreviewResult,
+  recordedAt: string = new Date().toISOString(),
+): OfficeNasKeeperExecutionStatePayload | null {
+  const dto = preview.dto;
+  if (!preview.previewed || !dto || guard.executed || guard.written) return null;
+  const rootGuarded = guard.errors.some((item) => item.field === "mac_relay_root" && item.code === "mac_relay_root_not_configured");
+  if (!rootGuarded) return null;
+  return {
+    handoff_ref: dto.handoff_ref,
+    execution_record_ref: `execrecord_${safeRefPart(dto.relay_execution_ref)}_failed_guarded`,
+    relay_execution_ref: dto.relay_execution_ref,
+    nas_keeper_ref: dto.execution_payload_preview?.nas_keeper_ref ?? "keeper:manual_review",
+    relay_node_ref: dto.execution_payload_preview?.relay_node_ref ?? "relay:mac_relay_safe",
+    recorded_by: dto.execution_payload_preview?.nas_keeper_ref ?? "keeper:manual_review",
+    recorded_at: recordedAt.replace(/\.\d{3}Z$/, "Z"),
+    execution_status: "failed_guarded",
+    safe_summary: "Mac relay execution guard failed safely before write because relay root was not configured.",
+    evidence_refs: [`guard:${safeRefPart(dto.relay_execution_ref)}`, "guard:mac_relay_root_not_configured"],
+  };
+}
+
 export function buildNasKeeperExecutionFromPreviewRequest(
   draft: OfficeNasKeeperExecutionFromPreviewPayload,
   stateDraft: NasKeeperExecutionStateDraft,
@@ -6466,6 +6489,69 @@ export function NasKeeperExecutionFromPreviewGuardedFailureStatusPanel({
   );
 }
 
+
+export function NasKeeperGuardedFailureExecutionStateRecordStatusPanel({
+  result,
+  error,
+}: {
+  result: OfficeNasKeeperExecutionStateResult | null;
+  error?: string | null;
+}) {
+  const dto = result?.dto ?? null;
+  const caps = dto?.capabilities ?? {};
+  return (
+    <section
+      className="border border-rose-300/20 bg-rose-950/10 p-4"
+      data-office-nas-keeper-guarded-failure-execution-state-record-status="true"
+      data-office-nas-keeper-guarded-failure-execution-state-recorded={String(Boolean(result?.recorded ?? dto?.recorded))}
+      data-office-nas-keeper-guarded-failure-execution-state-queue-mutation={String(Boolean(caps.queue_mutation_enabled))}
+      data-office-nas-keeper-guarded-failure-execution-state-mac-relay-write={String(Boolean(caps.mac_relay_write_enabled))}
+      data-office-nas-keeper-guarded-failure-execution-state-actual-write={String(Boolean(caps.actual_nas_write_enabled))}
+      data-office-nas-keeper-guarded-failure-execution-state-vps-nas-mount={String(Boolean(caps.vps_nas_mount_enabled))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-rose-200/70">Guarded failure execution-state record</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">failed_guarded recorded · execution remains closed</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Records the Mac relay root guard failure as a safe queue execution-state/evidence record. This is metadata-only: no Mac relay write, no actual NAS write, no VPS NAS mount, no watcher/cron, no gateway restart, and no external dispatch.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "record request failed" : String(dto?.execution_record_ref ?? "record pending")}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-nas-keeper-guarded-failure-execution-state-boundaries="true">
+        {[
+          ["queue_mutation_enabled", Boolean(caps.queue_mutation_enabled)],
+          ["execution_state_recording_enabled", Boolean(caps.execution_state_recording_enabled)],
+          ["execution_payload_preview_enabled", Boolean(caps.execution_payload_preview_enabled)],
+          ["mac_relay_write_enabled", Boolean(caps.mac_relay_write_enabled)],
+          ["actual_nas_write_enabled", Boolean(caps.actual_nas_write_enabled)],
+          ["vps_nas_mount_enabled", Boolean(caps.vps_nas_mount_enabled)],
+          ["direct_vps_nas_write_enabled", Boolean(caps.direct_vps_nas_write_enabled)],
+          ["watcher_enabled", Boolean(caps.watcher_enabled)],
+          ["cron_enabled", Boolean(caps.cron_enabled)],
+          ["dispatch_enabled", Boolean(caps.dispatch_enabled)],
+          ["authority_adapter_binding_enabled", Boolean(caps.authority_adapter_binding_enabled)],
+        ].map(([key, value]) => (
+          <div key={String(key)} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-nas-keeper-guarded-failure-execution-state-boundary={String(key)}>
+            {String(key)}: {String(Boolean(value))}
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-3">
+        <div className="border border-current/15 bg-black/20 p-3 text-xs text-midground/70">handoff {dto?.handoff_ref ?? "pending"}</div>
+        <div className="border border-current/15 bg-black/20 p-3 text-xs text-midground/70">status {dto?.execution_status ?? "pending"}</div>
+        <div className="border border-current/15 bg-black/20 p-3 text-xs text-midground/70">queue {dto?.queue_status_after ?? "pending"}</div>
+      </div>
+      <div className="mt-3 border border-current/15 bg-black/20 p-3 text-xs text-midground/70">
+        evidence {(dto?.execution_evidence_refs ?? []).join(" · ") || "pending"}
+      </div>
+    </section>
+  );
+}
+
 export function ApprovedRealOneShotDispatchGateDesignPanel({
   status,
   error,
@@ -7976,10 +8062,13 @@ export default function OfficePage() {
   const [nasKeeperPayloadPreviewError, setNasKeeperPayloadPreviewError] = useState<string | null>(null);
   const [nasKeeperExecutionGuardResult, setNasKeeperExecutionGuardResult] = useState<OfficeNasKeeperExecutionFromPreviewResult | null>(null);
   const [nasKeeperExecutionGuardError, setNasKeeperExecutionGuardError] = useState<string | null>(null);
+  const [nasKeeperGuardedFailureStateResult, setNasKeeperGuardedFailureStateResult] = useState<OfficeNasKeeperExecutionStateResult | null>(null);
+  const [nasKeeperGuardedFailureStateError, setNasKeeperGuardedFailureStateError] = useState<string | null>(null);
   const nasKeeperClaimDryRunKeyRef = useRef<string | null>(null);
   const nasKeeperAuthorizationKeyRef = useRef<string | null>(null);
   const nasKeeperPayloadPreviewKeyRef = useRef<string | null>(null);
   const nasKeeperExecutionGuardKeyRef = useRef<string | null>(null);
+  const nasKeeperGuardedFailureStateKeyRef = useRef<string | null>(null);
   const [nasKeeperQueueReadbackLoading, setNasKeeperQueueReadbackLoading] = useState(false);
   const [nasKeeperQueueReadbackError, setNasKeeperQueueReadbackError] = useState<string | null>(null);
   const [nasKeeperExecutionDraft, setNasKeeperExecutionDraft] = useState<OfficeNasKeeperExecutionFromPreviewPayload>(DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT);
@@ -8216,6 +8305,65 @@ export default function OfficePage() {
         setNasKeeperExecutionGuardError("request failed");
       });
   }, [nasKeeperPayloadPreviewResult]);
+
+  useEffect(() => {
+    if (nasKeeperGuardedFailureStateResult?.dto) return;
+    const items = nasKeeperQueueReadback?.dto?.items ?? [];
+    const recorded = [...items].reverse().find((item) => item.queue_status === "mac_relay_execution_failed_guarded");
+    if (!recorded) return;
+    setNasKeeperGuardedFailureStateResult({
+      recorded: true,
+      errors: [],
+      dto: {
+        schema_version: 1,
+        mode: "nas_keeper_mac_relay_execution_state_recorded",
+        recorded: true,
+        handoff_ref: recorded.handoff_ref,
+        execution_record_ref: recorded.execution_record_ref ?? "execrecord_failed_guarded_readback",
+        relay_execution_ref: recorded.relay_execution_ref ?? "relayexec_failed_guarded_readback",
+        queue_ref: recorded.queue_ref,
+        queue_status_before: "authorized_for_mac_relay_execution",
+        queue_status_after: recorded.queue_status,
+        execution_status: recorded.execution_status ?? "failed_guarded",
+        execution_safe_summary: recorded.execution_safe_summary ?? "Mac relay execution guard failed safely before write because relay root was not configured.",
+        execution_evidence_refs: recorded.execution_evidence_refs ?? ["guard:mac_relay_root_not_configured"],
+        markdown_body_included: false,
+        capabilities: {
+          queue_mutation_enabled: true,
+          execution_state_recording_enabled: true,
+          execution_payload_preview_enabled: true,
+          mac_relay_write_enabled: false,
+          actual_nas_write_enabled: false,
+          vps_nas_mount_enabled: false,
+          direct_vps_nas_write_enabled: false,
+          watcher_enabled: false,
+          cron_enabled: false,
+          dispatch_enabled: false,
+          authority_adapter_binding_enabled: false,
+        },
+        next_required_boundary: recorded.next_required_boundary ?? "none_terminal_execution_state_recorded",
+      },
+    });
+  }, [nasKeeperGuardedFailureStateResult, nasKeeperQueueReadback]);
+
+  useEffect(() => {
+    if (!nasKeeperPayloadPreviewResult || !nasKeeperExecutionGuardResult) return;
+    const payload = buildNasKeeperGuardedFailureExecutionStatePayload(nasKeeperPayloadPreviewResult, nasKeeperExecutionGuardResult);
+    if (!payload) return;
+    const key = `${payload.handoff_ref}:${payload.execution_record_ref}`;
+    if (nasKeeperGuardedFailureStateKeyRef.current === key) return;
+    nasKeeperGuardedFailureStateKeyRef.current = key;
+    api.recordOfficeControlledMutationNasKeeperExecutionState(payload)
+      .then((result) => {
+        setNasKeeperGuardedFailureStateResult(result);
+        setNasKeeperGuardedFailureStateError(null);
+        void loadNasKeeperQueueReadback();
+      })
+      .catch(() => {
+        setNasKeeperGuardedFailureStateResult(null);
+        setNasKeeperGuardedFailureStateError("request failed");
+      });
+  }, [loadNasKeeperQueueReadback, nasKeeperExecutionGuardResult, nasKeeperPayloadPreviewResult]);
 
   const executeNasSingleFileWrite = useCallback(async () => {
     if (!nasSingleWriteApproved) {
@@ -9408,6 +9556,7 @@ export default function OfficePage() {
       <NasKeeperHandoffAuthorizationRecordStatusPanel result={nasKeeperAuthorizationResult} error={nasKeeperAuthorizationError} />
       <NasKeeperMacRelayExecutionPayloadPreviewStatusPanel result={nasKeeperPayloadPreviewResult} error={nasKeeperPayloadPreviewError} />
       <NasKeeperExecutionFromPreviewGuardedFailureStatusPanel result={nasKeeperExecutionGuardResult} error={nasKeeperExecutionGuardError} />
+      <NasKeeperGuardedFailureExecutionStateRecordStatusPanel result={nasKeeperGuardedFailureStateResult} error={nasKeeperGuardedFailureStateError} />
 
       {SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES ? (
         <>
