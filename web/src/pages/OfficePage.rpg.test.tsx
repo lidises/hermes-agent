@@ -86,6 +86,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
       "<NasKeeperHandoffClaimDryRunStatusPanel",
       "<NasKeeperHandoffAuthorizationRecordStatusPanel",
       "<NasKeeperMacRelayExecutionPayloadPreviewStatusPanel",
+      "<NasKeeperExecutionFromPreviewGuardedFailureStatusPanel",
     ]) {
       const panelIndex = source.indexOf(panel);
       expect(panelIndex).toBeGreaterThan(0);
@@ -104,6 +105,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
       "<NasKeeperHandoffClaimDryRunStatusPanel",
       "<NasKeeperHandoffAuthorizationRecordStatusPanel",
       "<NasKeeperMacRelayExecutionPayloadPreviewStatusPanel",
+      "<NasKeeperExecutionFromPreviewGuardedFailureStatusPanel",
       ].includes(panel)) {
         expect(source.indexOf(panel, panelIndex + 1)).toBe(-1);
       }
@@ -3634,6 +3636,40 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).toContain("payload previewed · Mac relay execution still closed");
     expect(html).toContain("queued_handoff_markdown_body::handoff_manual_nas_keeper_1");
     expect(html).not.toContain("/Users/lidises");
+    expect(html).not.toContain("sk-test");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("<form");
+    expect(html).not.toContain("<input");
+    expect(html).not.toContain("<select");
+    expect(html).not.toContain("<textarea");
+  });
+
+  it("renders NAS Keeper execution-from-preview guarded failure without writing", () => {
+    const NasKeeperExecutionFromPreviewGuardedFailureStatusPanel = (OfficePageModule as unknown as {
+      NasKeeperExecutionFromPreviewGuardedFailureStatusPanel: React.ComponentType<{ result: unknown; error?: string | null }>;
+    }).NasKeeperExecutionFromPreviewGuardedFailureStatusPanel;
+    expect(NasKeeperExecutionFromPreviewGuardedFailureStatusPanel).toBeTypeOf("function");
+
+    const html = renderToStaticMarkup(
+      <NasKeeperExecutionFromPreviewGuardedFailureStatusPanel
+        error={null}
+        result={{
+          executed: false,
+          written: false,
+          errors: [{ field: "mac_relay_root", code: "mac_relay_root_not_configured" }],
+          dto: null,
+        }}
+      />,
+    );
+
+    expect(html).toContain('data-office-nas-keeper-execution-from-preview-guard-status="true"');
+    expect(html).toContain('data-office-nas-keeper-execution-from-preview-guard-executed="false"');
+    expect(html).toContain('data-office-nas-keeper-execution-from-preview-guard-written="false"');
+    expect(html).toContain('data-office-nas-keeper-execution-from-preview-guard-root-configured="false"');
+    expect(html).toContain("guarded failure · Mac relay root not configured");
+    expect(html).toContain("mac_relay_root_not_configured");
+    expect(html).not.toContain("/Users/lidises");
+    expect(html).not.toContain("/home/hermes");
     expect(html).not.toContain("sk-test");
     expect(html).not.toContain("<button");
     expect(html).not.toContain("<form");

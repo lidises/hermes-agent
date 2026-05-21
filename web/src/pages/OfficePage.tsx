@@ -6410,6 +6410,62 @@ export function NasKeeperMacRelayExecutionPayloadPreviewStatusPanel({
   );
 }
 
+
+export function NasKeeperExecutionFromPreviewGuardedFailureStatusPanel({
+  result,
+  error,
+}: {
+  result: OfficeNasKeeperExecutionFromPreviewResult | null;
+  error?: string | null;
+}) {
+  const errors = result?.errors ?? [];
+  const rootNotConfigured = errors.some((item) => item.field === "mac_relay_root" && item.code === "mac_relay_root_not_configured");
+  return (
+    <section
+      className="border border-amber-300/20 bg-amber-950/10 p-4"
+      data-office-nas-keeper-execution-from-preview-guard-status="true"
+      data-office-nas-keeper-execution-from-preview-guard-executed={String(Boolean(result?.executed))}
+      data-office-nas-keeper-execution-from-preview-guard-written={String(Boolean(result?.written))}
+      data-office-nas-keeper-execution-from-preview-guard-root-configured={String(!rootNotConfigured && Boolean(result?.dto))}
+      data-office-nas-keeper-execution-from-preview-guard-dto-present={String(Boolean(result?.dto))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-200/70">Execution-from-preview guard smoke</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">guarded failure · Mac relay root not configured</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Calls the protected execution-from-preview bridge with safe refs only and expects a closed-root failure. This proves the route stays guarded on the VPS: no Mac relay write, no NAS write, no queue-state recording, no watcher, no cron, and no public/dispatch authority are opened.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "guard request failed" : rootNotConfigured ? "root not configured" : result ? "guard result present" : "guard pending"}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-nas-keeper-execution-from-preview-guard-boundaries="true">
+        {[
+          ["executed", Boolean(result?.executed)],
+          ["written", Boolean(result?.written)],
+          ["dto_present", Boolean(result?.dto)],
+          ["mac_relay_root_configured", !rootNotConfigured && Boolean(result?.dto)],
+          ["actual_nas_write_enabled", false],
+          ["vps_nas_mount_enabled", false],
+          ["watcher_enabled", false],
+          ["cron_enabled", false],
+          ["dispatch_enabled", false],
+          ["authority_adapter_binding_enabled", false],
+        ].map(([key, value]) => (
+          <div key={String(key)} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-nas-keeper-execution-from-preview-guard-boundary={String(key)}>
+            {String(key)}: {String(Boolean(value))}
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 border border-current/15 bg-black/20 p-3 text-xs text-midground/70">
+        errors {errors.map((item) => `${item.field}:${item.code}`).join(" · ") || "pending"}
+      </div>
+    </section>
+  );
+}
+
 export function ApprovedRealOneShotDispatchGateDesignPanel({
   status,
   error,
@@ -7918,9 +7974,12 @@ export default function OfficePage() {
   const [nasKeeperAuthorizationError, setNasKeeperAuthorizationError] = useState<string | null>(null);
   const [nasKeeperPayloadPreviewResult, setNasKeeperPayloadPreviewResult] = useState<OfficeNasKeeperExecutionPayloadPreviewResult | null>(null);
   const [nasKeeperPayloadPreviewError, setNasKeeperPayloadPreviewError] = useState<string | null>(null);
+  const [nasKeeperExecutionGuardResult, setNasKeeperExecutionGuardResult] = useState<OfficeNasKeeperExecutionFromPreviewResult | null>(null);
+  const [nasKeeperExecutionGuardError, setNasKeeperExecutionGuardError] = useState<string | null>(null);
   const nasKeeperClaimDryRunKeyRef = useRef<string | null>(null);
   const nasKeeperAuthorizationKeyRef = useRef<string | null>(null);
   const nasKeeperPayloadPreviewKeyRef = useRef<string | null>(null);
+  const nasKeeperExecutionGuardKeyRef = useRef<string | null>(null);
   const [nasKeeperQueueReadbackLoading, setNasKeeperQueueReadbackLoading] = useState(false);
   const [nasKeeperQueueReadbackError, setNasKeeperQueueReadbackError] = useState<string | null>(null);
   const [nasKeeperExecutionDraft, setNasKeeperExecutionDraft] = useState<OfficeNasKeeperExecutionFromPreviewPayload>(DEFAULT_NAS_KEEPER_EXECUTION_FROM_PREVIEW_DRAFT);
@@ -8133,6 +8192,30 @@ export default function OfficePage() {
         setNasKeeperPayloadPreviewError("request failed");
       });
   }, [nasKeeperAuthorizationResult]);
+
+  useEffect(() => {
+    const dto = nasKeeperPayloadPreviewResult?.dto;
+    if (!dto || !nasKeeperPayloadPreviewResult.previewed) return;
+    const key = `${dto.handoff_ref}:${dto.relay_execution_ref}:${dto.markdown_body_sha256}`;
+    if (nasKeeperExecutionGuardKeyRef.current === key) return;
+    nasKeeperExecutionGuardKeyRef.current = key;
+    api.executeOfficeControlledMutationNasKeeperExecutionFromPreview({
+      handoff_ref: dto.handoff_ref,
+      relay_execution_ref: dto.relay_execution_ref,
+      nas_keeper_ref: dto.execution_payload_preview?.nas_keeper_ref ?? "keeper:manual_review",
+      relay_node_ref: dto.execution_payload_preview?.relay_node_ref ?? "relay:mac_relay_safe",
+      relay_authorized_by: dto.relay_authorized_by,
+      relay_authorized_at: dto.relay_authorized_at,
+    })
+      .then((result) => {
+        setNasKeeperExecutionGuardResult(result);
+        setNasKeeperExecutionGuardError(null);
+      })
+      .catch(() => {
+        setNasKeeperExecutionGuardResult(null);
+        setNasKeeperExecutionGuardError("request failed");
+      });
+  }, [nasKeeperPayloadPreviewResult]);
 
   const executeNasSingleFileWrite = useCallback(async () => {
     if (!nasSingleWriteApproved) {
@@ -9324,6 +9407,7 @@ export default function OfficePage() {
       <NasKeeperHandoffClaimDryRunStatusPanel result={nasKeeperClaimDryRunResult} error={nasKeeperClaimDryRunError} />
       <NasKeeperHandoffAuthorizationRecordStatusPanel result={nasKeeperAuthorizationResult} error={nasKeeperAuthorizationError} />
       <NasKeeperMacRelayExecutionPayloadPreviewStatusPanel result={nasKeeperPayloadPreviewResult} error={nasKeeperPayloadPreviewError} />
+      <NasKeeperExecutionFromPreviewGuardedFailureStatusPanel result={nasKeeperExecutionGuardResult} error={nasKeeperExecutionGuardError} />
 
       {SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES ? (
         <>
