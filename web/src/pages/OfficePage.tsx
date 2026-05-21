@@ -7955,6 +7955,63 @@ export default function OfficePage() {
   }, [nasKeeperQueueReadback]);
 
   useEffect(() => {
+    if (nasKeeperAuthorizationResult?.dto) return;
+    const items = nasKeeperQueueReadback?.dto?.items ?? [];
+    const authorized = [...items].reverse().find((item) => item.queue_status === "authorized_for_mac_relay_execution" && item.authorization_ref);
+    if (!authorized || !authorized.authorization_ref || !authorized.authorization_decision || !authorized.authorized_by || !authorized.authorized_at) return;
+    setNasKeeperAuthorizationResult({
+      authorized: true,
+      errors: [],
+      dto: {
+        schema_version: 1,
+        mode: "nas_keeper_mac_relay_handoff_authorized",
+        authorized: true,
+        handoff_ref: authorized.handoff_ref,
+        authorization_ref: authorized.authorization_ref,
+        authorization_decision: authorized.authorization_decision,
+        queue_ref: authorized.queue_ref,
+        queue_status_before: "pending_nas_keeper_authorization",
+        queue_status_after: "authorized_for_mac_relay_execution",
+        authorized_by: authorized.authorized_by,
+        authorized_at: authorized.authorized_at,
+        relay_request_ref: authorized.relay_request_ref,
+        write_ref: authorized.write_ref,
+        package_ref: authorized.package_ref,
+        target_vault_ref: authorized.target_vault_ref,
+        safe_slug: authorized.safe_slug,
+        safe_title: authorized.safe_title,
+        requested_by: authorized.requested_by,
+        requested_at: authorized.requested_at,
+        nas_keeper_ref: authorized.nas_keeper_ref,
+        relay_node_ref: authorized.relay_node_ref,
+        execution_path: ["authorized_queue_item_read", "safe_refs_only", "no_real_nas_write"],
+        authorization_path: ["nas_keeper_review", "authorization_recorded", "mac_relay_execution_pending", "no_real_nas_write"],
+        safe_logical_path: authorized.safe_logical_path,
+        safe_display_path: authorized.safe_display_path,
+        payload_bytes: authorized.payload_bytes,
+        execution_payload_preview_fields: ["relay_request_ref", "write_ref", "package_ref", "target_vault_ref", "safe_slug", "safe_title", "relay_execution_ref", "relay_authorized_by", "relay_authorized_at"],
+        capabilities: {
+          queue_read_enabled: true,
+          queue_mutation_enabled: true,
+          nas_keeper_authorization_recording_enabled: true,
+          execution_payload_preparation_enabled: true,
+          vps_nas_mount_enabled: false,
+          vps_credential_access_enabled: false,
+          direct_vps_nas_write_enabled: false,
+          mac_relay_write_enabled: false,
+          actual_nas_write_enabled: false,
+          watcher_enabled: false,
+          cron_enabled: false,
+          dispatch_enabled: false,
+          authority_adapter_binding_enabled: false,
+        },
+        next_required_boundary: authorized.next_required_boundary,
+      },
+    });
+    setNasKeeperAuthorizationError(null);
+  }, [nasKeeperAuthorizationResult, nasKeeperQueueReadback]);
+
+  useEffect(() => {
     const dto = nasKeeperClaimDryRunResult?.dto;
     if (!dto || !nasKeeperClaimDryRunResult?.dry_run || dto.claim_status !== "would_claim") return;
     const key = `${dto.handoff_ref}:${dto.nas_keeper_ref}:${dto.relay_node_ref}`;
