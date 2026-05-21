@@ -6710,6 +6710,64 @@ export function MacLocalRelayRootAuthorityPreflightPanel({
   );
 }
 
+
+export function MacLocalRelayRootAuthorityConfigContractPanel({
+  terminalResult,
+  error,
+}: {
+  terminalResult: OfficeNasKeeperExecutionStateResult | null;
+  error?: string | null;
+}) {
+  const dto = terminalResult?.dto ?? null;
+  const terminalClosed = dto?.execution_status === "failed_guarded" && dto?.queue_status_after === "mac_relay_execution_failed_guarded";
+  const caps = dto?.capabilities ?? {};
+  const contractRows = [
+    ["masked_root_present", "Mac-local runtime reports only a boolean, never the value."],
+    ["root_kind", "directory authority; sanitized label only."],
+    ["read_probe_required", "readiness proof may confirm directory existence without echoing path."],
+    ["writable_probe_required", "write execution remains a later rung; contract names the future proof only."],
+    ["credential_value_visible", "false"],
+    ["raw_nas_path_visible", "false"],
+    ["vps_nas_mount_enabled", String(Boolean(caps.vps_nas_mount_enabled))],
+    ["direct_vps_nas_write_enabled", String(Boolean(caps.direct_vps_nas_write_enabled))],
+  ];
+  return (
+    <section
+      className="border border-cyan-300/20 bg-cyan-950/10 p-4"
+      data-office-mac-local-relay-root-config-contract="true"
+      data-office-mac-local-relay-root-config-contract-read-only="true"
+      data-office-mac-local-relay-root-config-contract-root-value-visible="false"
+      data-office-mac-local-relay-root-config-contract-write-enabled={String(Boolean(caps.mac_relay_write_enabled || caps.actual_nas_write_enabled))}
+      data-office-mac-local-relay-root-config-contract-vps-nas-authority={String(Boolean(caps.vps_nas_mount_enabled || caps.direct_vps_nas_write_enabled))}
+      data-office-mac-local-relay-root-config-contract-terminal-closed={String(Boolean(terminalClosed))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-200/70">Mac-local relay authority configuration contract</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">prove readiness without exposing the root value</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            This contract defines the next Mac-local proof shape: report sanitized booleans and safe refs only. The environment variable name may be referenced, but the configured value, credentials, and raw NAS path must never be projected into Office.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "contract evidence unavailable" : terminalClosed ? "ready for Mac-local config contract" : "waiting for terminal guard evidence"}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-mac-local-relay-root-config-contract-rows="true">
+        {contractRows.map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-mac-local-relay-root-config-contract-row={key}>
+            <div className="font-semibold text-foreground">{key}</div>
+            <div className="mt-1 leading-5 text-midground/70">{value}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 border border-current/15 bg-black/20 p-3 text-xs leading-5 text-midground/70" data-office-mac-local-relay-root-config-contract-boundary="true">
+        Allowed next proof fields: configured boolean, safe root label, safe probe ref, read probe status, writable probe status placeholder, and redaction policy version. Blocked fields: root value, credential material, raw filesystem path, write payload, watcher/cron/daemon activation, VPS NAS authority, and public exposure.
+      </div>
+    </section>
+  );
+}
+
 export function ApprovedRealOneShotDispatchGateDesignPanel({
   status,
   error,
@@ -9659,6 +9717,7 @@ export default function OfficePage() {
       ) : null}
 
       <MacLocalRelayRootAuthorityPreflightPanel terminalResult={nasKeeperGuardedFailureStateResult} error={nasKeeperGuardedFailureStateError} />
+      <MacLocalRelayRootAuthorityConfigContractPanel terminalResult={nasKeeperGuardedFailureStateResult} error={nasKeeperGuardedFailureStateError} />
 
       <OfficeVisualizerEvidenceDrawer terminalResult={nasKeeperGuardedFailureStateResult}>
       <NasKeeperLiveOperatorLanePanel
