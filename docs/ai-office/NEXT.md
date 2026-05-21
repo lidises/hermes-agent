@@ -1,4 +1,48 @@
 
+## Current next — approval draft review visible panel complete
+
+Current slice:
+
+- User approved continuing from approval-draft visible panel with bounded write authority.
+- Moved the protected `ManualApprovalRecordingDraftReviewStatusPanel` out of legacy diagnostic-only gating so it is visible in live `/office` with stable display-only hooks and zero controls.
+- Exercised the existing protected draft-review GET route on the private VPS against the previously stored draft-only safe smoke record.
+- No real approval record write, dispatch gate open, runtime command materialization/inclusion/execution, adapter binding/dispatch, replay-store write, rollback execution, target/Kanban/NAS mutation, watcher/cron/daemon, direct VPS NAS authority, public exposure, or gateway restart was added.
+
+Code commit/deploy:
+
+- Code commit: `e9564d9f feat(office): surface approval draft review panel`.
+- Synced both VPS worktrees to `e9564d9f`.
+- Rsynced local built `hermes_cli/web_dist/` to both worktrees.
+- Restarted only `hermes-agent-dashboard.service`; did not restart gateway.
+- Final services: dashboard active, gateway active.
+
+Local verification:
+
+- `py_compile` passed for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py`.
+- Focused backend manual approval-recording draft tests passed (`31 passed`).
+- Frontend `web/` tests passed: `src/lib/api.test.ts` + `src/pages/OfficePage.rpg.test.tsx` (`145 passed`).
+- `npm run build` passed with existing Vite large chunk warning.
+- `git diff --check` passed.
+- Added-line sentinel scan found no new raw path/token/provider sentinels.
+
+VPS protected API smoke:
+
+- `/office?approval-draft-review=e9564d9f` returned HTTP 200 after dashboard restart readiness delay.
+- Session token extracted from SPA shell and protected APIs called with `X-Hermes-Session-Token`.
+- GET `/api/office/controlled-mutation/manual-approval-recording-draft-review-status?approval_record_ref=approval-b81c79ee-live-smoke-1224` returned unauth=401, mode=`manual_approval_recording_draft_review_status`, complete=true, errors=[], draft_present=true, draft_status=`draft_only`, ready_for_manual_operator_review=true, ready_for_real_approval_record_write=false, boundary approval_record_written=false, dispatch_gate_open=false, runtime_command_executed=false, target_mutation_created=false, and risky capabilities false.
+
+VPS live DOM smoke:
+
+- `data-office-manual-approval-recording-draft-review-status="true"`: exists=true, controls=0, complete=true, draft-present=true, manual-review-ready=true, real-write-ready=false, approval-recording=false, dispatch-gate-open=false, real-dispatch=false, target-mutation=false.
+- Page body includes the safe smoke ref.
+- Raw leak sentinels absent from page body; browser console messages/errors after smoke: 0.
+
+Handoff: `docs/ai-office/plans/2026-05-21-approval-draft-review-visible-panel-handoff.md`.
+
+Next recommended rung: `manual_approval_record_write_gate`, but this crosses the next stronger write boundary. It may write a real approval record from an existing draft only with exact approval wording, and must still keep dispatch gate open, runtime command inclusion/execution, adapter binding/dispatch, replay-store write, rollback execution, target/Kanban/NAS/VPS mutation, service/git/credential/public authority, watcher/cron, gateway restart, and direct VPS NAS authority false.
+
+Last updated: 2026-05-21 12:31 KST
+
 ## Current next — approval draft visible panel + draft-only VPS write complete
 
 Current slice:
