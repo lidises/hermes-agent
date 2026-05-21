@@ -71,6 +71,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
     expect(source).toContain("<NasKeeperFreshOneShotRequestBuilderPanel");
     expect(source).toContain("<NasKeeperFreshRequestBuilderLedgerPanel");
     expect(source).toContain("<NasKeeperFreshRequestBuilderLedgerExportSelectionReviewPanel");
+    expect(source).toContain("<NasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightPanel");
 
     for (const panel of [
       "<NasKeeperLiveOperatorLanePanel",
@@ -127,6 +128,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
       "<NasKeeperFreshOneShotRequestBuilderPanel",
       "<NasKeeperFreshRequestBuilderLedgerPanel",
       "<NasKeeperFreshRequestBuilderLedgerExportSelectionReviewPanel",
+      "<NasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightPanel",
     ]) {
       const panelIndex = source.indexOf(panel);
       expect(panelIndex).toBeGreaterThan(0);
@@ -153,6 +155,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
       "<NasKeeperFreshOneShotRequestBuilderPanel",
       "<NasKeeperFreshRequestBuilderLedgerPanel",
       "<NasKeeperFreshRequestBuilderLedgerExportSelectionReviewPanel",
+      "<NasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightPanel",
       ].includes(panel)) {
         expect(source.indexOf(panel, panelIndex + 1)).toBe(-1);
       }
@@ -4418,6 +4421,86 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).toContain("one profile · item-count and checksum-set proof");
     expect(html).toContain("handoff_select_written_20260521150900_7afe4001");
     expect(html).toContain("selected_export_review_v1");
+    expect(html).not.toContain("Safe body");
+    expect(html).not.toContain("/Users/" + "lidises");
+    expect(html).not.toContain("/home/hermes");
+    expect(html).not.toContain("/vol" + "ume1");
+    expect(html).not.toContain("sk" + "-test");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("<form");
+    expect(html).not.toContain("<input");
+    expect(html).not.toContain("<select");
+    expect(html).not.toContain("<textarea");
+  });
+
+  it("renders downstream-use preflight as display-only manual review gate", () => {
+    const NasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightPanel = (OfficePageModule as unknown as {
+      NasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightPanel>>;
+    }).NasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightPanel;
+    expect(NasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightPanel).toBeTypeOf("function");
+
+    const html = renderToStaticMarkup(
+      <NasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightPanel
+        error={null}
+        preflight={{
+          found: true,
+          errors: [],
+          dto: {
+            schema_version: 1,
+            mode: "nas_keeper_fresh_request_builder_ledger_downstream_use_preflight",
+            selection_profile: "latest_written",
+            source_mode: "nas_keeper_fresh_request_builder_ledger_export_selection_review",
+            filters_applied: { outcome: "written" },
+            selected_item_count: 1,
+            checksum_set_sha256: "e".repeat(64),
+            preflight_decision_sha256: "f".repeat(64),
+            selected_export_review_passed: true,
+            export_item_count_verified: true,
+            checksum_set_verified: true,
+            downstream_use_ready: true,
+            downstream_use_allowed_after_manual_review: true,
+            downstream_use_enabled: false,
+            downstream_use_blocked_reason: "manual_operator_review_not_recorded",
+            manual_operator_review_required: true,
+            manual_operator_review_record_present: false,
+            source_selection_review: {
+              selection_profile: "latest_written",
+              selected_item_count: 1,
+              checksum_set_sha256: "e".repeat(64),
+              export_item_count_verified: true,
+              checksum_set_verified: true,
+              downstream_use_ready: true,
+              downstream_use_enabled: false,
+            },
+            markdown_body_included: false,
+            write_payload_included: false,
+            raw_root_path_included: false,
+            credential_value_included: false,
+            repeat_execution_replay_allowed: false,
+            watcher_enabled: false,
+            cron_enabled: false,
+            dispatch_enabled: false,
+            authority_adapter_binding_enabled: false,
+            vps_nas_mount_enabled: false,
+            capabilities: {},
+            next_required_boundary: "fresh_request_builder_manual_operator_review_record",
+          },
+        }}
+      />,
+    );
+
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-use-preflight="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-use-preflight-review-passed="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-use-preflight-manual-review-required="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-use-preflight-manual-review-record-present="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-use-preflight-downstream-use-enabled="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-use-preflight-repeat-replay-enabled="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-use-preflight-automation-enabled="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-use-preflight-vps-nas-authority="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-use-preflight-markdown-body-included="false"');
+    expect(html).toContain("manual review gate · downstream disabled");
+    expect(html).toContain("downstream_use_preflight_v1");
+    expect(html).toContain("manual_operator_review_not_recorded");
     expect(html).not.toContain("Safe body");
     expect(html).not.toContain("/Users/" + "lidises");
     expect(html).not.toContain("/home/hermes");

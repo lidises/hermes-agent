@@ -100,6 +100,7 @@ from hermes_cli.office_controlled_mutation import (
     build_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_request,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_readback,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_export_selection_review,
+    get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_use_preflight,
     execute_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_write,
     execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_preview,
     record_office_controlled_mutation_nas_keeper_mac_relay_execution_state,
@@ -762,6 +763,18 @@ async def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger
 ):
     """Review one selected safe export profile before any downstream use."""
     return get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_export_selection_review(
+        profile=profile or "latest_written",
+        limit=limit or 20,
+    )
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-use-preflight")
+async def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_use_preflight_route(
+    profile: Optional[str] = None,
+    limit: Optional[int] = None,
+):
+    """Preflight downstream use of a selected export behind manual operator review."""
+    return get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_use_preflight(
         profile=profile or "latest_written",
         limit=limit or 20,
     )

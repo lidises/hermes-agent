@@ -8474,6 +8474,109 @@ def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_expor
     return {"found": bool(item_count), "errors": [], "dto": dto}
 
 
+def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_use_preflight(
+    *,
+    queue_dir: Path | str | None = None,
+    profile: object = "latest_written",
+    limit: int = 20,
+) -> dict[str, object]:
+    selection = get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_export_selection_review(
+        queue_dir=queue_dir,
+        profile=profile,
+        limit=limit,
+    )
+    if selection.get("errors"):
+        return {"found": False, "errors": selection.get("errors", []), "dto": None}
+    source = selection.get("dto") if isinstance(selection.get("dto"), Mapping) else None
+    if not isinstance(source, Mapping):
+        return {"found": False, "errors": [], "dto": None}
+
+    raw_selected_item_count = source.get("selected_item_count")
+    selected_item_count = raw_selected_item_count if isinstance(raw_selected_item_count, int) else 0
+    raw_checksum_set_sha256 = source.get("checksum_set_sha256")
+    checksum_set_sha256 = raw_checksum_set_sha256 if isinstance(raw_checksum_set_sha256, str) else ""
+    selected_export_review_passed = bool(
+        source.get("downstream_use_ready")
+        and source.get("export_item_count_verified")
+        and source.get("checksum_set_verified")
+        and selected_item_count > 0
+        and re.fullmatch(r"[0-9a-f]{64}", checksum_set_sha256)
+    )
+    manual_operator_review_record_present = False
+    downstream_use_allowed_after_manual_review = bool(selected_export_review_passed)
+    downstream_use_enabled = False
+    blocked_reason = "manual_operator_review_not_recorded" if selected_export_review_passed else "selected_export_review_not_ready"
+    decision_material = {
+        "selection_profile": "latest_written",
+        "selected_item_count": selected_item_count,
+        "checksum_set_sha256": checksum_set_sha256,
+        "selected_export_review_passed": selected_export_review_passed,
+        "manual_operator_review_required": True,
+        "manual_operator_review_record_present": manual_operator_review_record_present,
+        "downstream_use_allowed_after_manual_review": downstream_use_allowed_after_manual_review,
+        "downstream_use_enabled": downstream_use_enabled,
+        "downstream_use_blocked_reason": blocked_reason,
+    }
+    preflight_decision_sha256 = hashlib.sha256(
+        json.dumps(decision_material, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_downstream_use_preflight",
+        "selection_profile": "latest_written",
+        "source_mode": "nas_keeper_fresh_request_builder_ledger_export_selection_review",
+        "filters_applied": dict(source.get("filters_applied") or {}),
+        "selected_item_count": selected_item_count,
+        "checksum_set_sha256": checksum_set_sha256,
+        "preflight_decision_sha256": preflight_decision_sha256,
+        "selected_export_review_passed": selected_export_review_passed,
+        "export_item_count_verified": bool(source.get("export_item_count_verified")),
+        "checksum_set_verified": bool(source.get("checksum_set_verified")),
+        "downstream_use_ready": bool(source.get("downstream_use_ready")),
+        "downstream_use_allowed_after_manual_review": downstream_use_allowed_after_manual_review,
+        "downstream_use_enabled": downstream_use_enabled,
+        "downstream_use_blocked_reason": blocked_reason,
+        "manual_operator_review_required": True,
+        "manual_operator_review_record_present": manual_operator_review_record_present,
+        "source_selection_review": {
+            "selection_profile": source.get("selection_profile"),
+            "selected_item_count": selected_item_count,
+            "checksum_set_sha256": checksum_set_sha256,
+            "export_item_count_verified": bool(source.get("export_item_count_verified")),
+            "checksum_set_verified": bool(source.get("checksum_set_verified")),
+            "downstream_use_ready": bool(source.get("downstream_use_ready")),
+            "downstream_use_enabled": bool(source.get("downstream_use_enabled")),
+        },
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "repeat_execution_replay_allowed": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "capabilities": {
+            "downstream_use_preflight_enabled": True,
+            "selected_export_review_enabled": True,
+            "manual_operator_review_recording_enabled": False,
+            "downstream_use_enabled": False,
+            "actual_write_execution_enabled": False,
+            "repeat_execution_replay_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_credential_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+        },
+        "next_required_boundary": "fresh_request_builder_manual_operator_review_record",
+    }
+    return {"found": bool(selected_export_review_passed), "errors": [], "dto": dto}
+
+
 def execute_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_write(
     payload: object, *, queue_dir: Path | str | None = None, root_path: Path | str | None = None
 ) -> dict[str, object]:
