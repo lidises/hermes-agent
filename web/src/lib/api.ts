@@ -1621,6 +1621,63 @@ export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightR
   };
 }
 
+export interface OfficeNasKeeperFreshRequestBuilderLedgerManualReviewRecordReadbackResult {
+  found: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: null | {
+    schema_version: number;
+    mode: "nas_keeper_fresh_request_builder_ledger_manual_review_records_readback";
+    record_count: number;
+    limit: number;
+    skipped_count: number;
+    records: Array<{
+      schema_version: number;
+      mode: "nas_keeper_fresh_request_builder_ledger_manual_review_record";
+      manual_operator_review_record_written: true;
+      manual_review_ref: string;
+      selection_profile: "latest_written";
+      source_preflight_decision_sha256: string;
+      checksum_set_sha256: string;
+      selected_item_count: number;
+      reviewed_by: string;
+      reviewed_at: string;
+      operator_confirmation: string;
+      safe_summary: string;
+      evidence_refs: string[];
+      manual_review_record_sha256: string;
+      downstream_use_enabled: false;
+      downstream_consumed: false;
+      markdown_body_included: false;
+      write_payload_included: false;
+      raw_root_path_included: false;
+      credential_value_included: false;
+      repeat_execution_replay_allowed: false;
+      watcher_enabled: false;
+      cron_enabled: false;
+      dispatch_enabled: false;
+      authority_adapter_binding_enabled: false;
+      vps_nas_mount_enabled: false;
+      capabilities: Record<string, boolean>;
+      next_required_boundary: string;
+    }>;
+    latest_record: null | Record<string, unknown>;
+    downstream_use_enabled: false;
+    downstream_consumption_enabled: false;
+    markdown_body_included: false;
+    write_payload_included: false;
+    raw_root_path_included: false;
+    credential_value_included: false;
+    repeat_execution_replay_allowed: false;
+    watcher_enabled: false;
+    cron_enabled: false;
+    dispatch_enabled: false;
+    authority_adapter_binding_enabled: false;
+    vps_nas_mount_enabled: false;
+    capabilities: Record<string, boolean>;
+    next_required_boundary: string;
+  };
+}
+
 export interface OfficeNasKeeperExecutionFromPreviewPayload {
   handoff_ref: string;
   relay_execution_ref: string;
@@ -2052,6 +2109,8 @@ export const api = {
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerExportSelectionReviewResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-export-selection-review?profile=latest_written&limit=20"),
   getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamUsePreflight: () =>
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-use-preflight?profile=latest_written&limit=20"),
+  getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerManualReviewRecord: () =>
+    fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerManualReviewRecordReadbackResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-manual-review-record?limit=20"),
   executeOfficeControlledMutationNasKeeperFreshOneShotOperatorWrite: (body: Record<string, unknown>) =>
     fetchJSON<OfficeNasKeeperFreshOneShotOperatorWriteResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-one-shot-operator-write", {
       method: "POST",

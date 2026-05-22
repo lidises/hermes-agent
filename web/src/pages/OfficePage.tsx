@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeManualApprovalRecordingDraftReviewStatus, type OfficeManualApprovalRecordStatus, type OfficeApprovalEventEnvelopeStatus, type OfficeManualApprovalDispatchGateReadinessStatus, type OfficeManualDispatchGateOpenRecordStatus, type OfficeManualRuntimeCommandPreviewRecordStatus, type OfficeManualRuntimeCommandInclusionRecordStatus, type OfficeManualRuntimeCommandExecutionRecordStatus, type OfficeManualTargetMutationReadinessRecordStatus, type OfficeManualTargetMutationRecordStatus, type OfficeManualAdapterDispatchRecordStatus, type OfficeManualKanbanMutationRecordStatus, type OfficeManualNasSaveRecordStatus, type OfficeManualNasKeeperHandoffRecordStatus, type OfficeNasKeeperHandoffClaimDryRunResult, type OfficeNasKeeperHandoffAuthorizationResult, type OfficeNasKeeperExecutionPayloadPreviewResult, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeMacRelayRootReadinessProbeResult, type OfficeNasKeeperLastSuccessfulMacRelayWriteResult, type OfficeNasKeeperFreshOneShotOperatorWriteResult, type OfficeNasKeeperFreshOneShotRequestBuilderResult, type OfficeNasKeeperFreshRequestBuilderLedgerReadbackResult, type OfficeNasKeeperFreshRequestBuilderLedgerExportSelectionReviewResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeManualApprovalRecordingDraftReviewStatus, type OfficeManualApprovalRecordStatus, type OfficeApprovalEventEnvelopeStatus, type OfficeManualApprovalDispatchGateReadinessStatus, type OfficeManualDispatchGateOpenRecordStatus, type OfficeManualRuntimeCommandPreviewRecordStatus, type OfficeManualRuntimeCommandInclusionRecordStatus, type OfficeManualRuntimeCommandExecutionRecordStatus, type OfficeManualTargetMutationReadinessRecordStatus, type OfficeManualTargetMutationRecordStatus, type OfficeManualAdapterDispatchRecordStatus, type OfficeManualKanbanMutationRecordStatus, type OfficeManualNasSaveRecordStatus, type OfficeManualNasKeeperHandoffRecordStatus, type OfficeNasKeeperHandoffClaimDryRunResult, type OfficeNasKeeperHandoffAuthorizationResult, type OfficeNasKeeperExecutionPayloadPreviewResult, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeMacRelayRootReadinessProbeResult, type OfficeNasKeeperLastSuccessfulMacRelayWriteResult, type OfficeNasKeeperFreshOneShotOperatorWriteResult, type OfficeNasKeeperFreshOneShotRequestBuilderResult, type OfficeNasKeeperFreshRequestBuilderLedgerReadbackResult, type OfficeNasKeeperFreshRequestBuilderLedgerExportSelectionReviewResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightResult, type OfficeNasKeeperFreshRequestBuilderLedgerManualReviewRecordReadbackResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -7227,6 +7227,78 @@ export function NasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightPanel({
 }
 
 
+export function NasKeeperFreshRequestBuilderLedgerManualReviewRecordPanel({
+  record,
+  error,
+}: {
+  record?: OfficeNasKeeperFreshRequestBuilderLedgerManualReviewRecordReadbackResult | null;
+  error?: string | null;
+}) {
+  const dto = record?.dto ?? null;
+  const latest = dto?.latest_record ?? null;
+  const rows = [
+    ["record_count", String(dto?.record_count ?? 0)],
+    ["manual_review_ref", String(latest?.manual_review_ref ?? "waiting for manual review record")],
+    ["manual_operator_review_record_written", String(Boolean(latest?.manual_operator_review_record_written))],
+    ["selected_item_count", String(latest?.selected_item_count ?? 0)],
+    ["source_preflight_decision_sha256", String(latest?.source_preflight_decision_sha256 ?? "available after record")],
+    ["manual_review_record_sha256", String(latest?.manual_review_record_sha256 ?? "available after record")],
+    ["downstream_use_enabled", String(Boolean(dto?.downstream_use_enabled || latest?.downstream_use_enabled))],
+    ["downstream_consumed", String(Boolean(latest?.downstream_consumed))],
+  ];
+  const preview = latest
+    ? JSON.stringify({
+        format: "manual_review_record_safe_ref_v1",
+        manual_review_ref: latest.manual_review_ref,
+        selected_item_count: latest.selected_item_count,
+        source_preflight_decision_sha256: latest.source_preflight_decision_sha256,
+        checksum_set_sha256: latest.checksum_set_sha256,
+        manual_review_record_sha256: latest.manual_review_record_sha256,
+        downstream_use_enabled: latest.downstream_use_enabled,
+        downstream_consumed: latest.downstream_consumed,
+      }, null, 2)
+    : "manual operator review record not written yet";
+  return (
+    <section
+      className="rounded-2xl border border-cyan-400/20 bg-cyan-500/5 p-4 shadow-[0_0_36px_rgba(34,211,238,0.08)]"
+      data-office-nas-keeper-fresh-request-builder-ledger-manual-review-record="true"
+      data-office-nas-keeper-fresh-request-builder-ledger-manual-review-record-written={String(Boolean(latest?.manual_operator_review_record_written))}
+      data-office-nas-keeper-fresh-request-builder-ledger-manual-review-record-downstream-use-enabled={String(Boolean(dto?.downstream_use_enabled || latest?.downstream_use_enabled))}
+      data-office-nas-keeper-fresh-request-builder-ledger-manual-review-record-downstream-consumed={String(Boolean(latest?.downstream_consumed))}
+      data-office-nas-keeper-fresh-request-builder-ledger-manual-review-record-repeat-replay-enabled={String(Boolean(dto?.repeat_execution_replay_allowed || latest?.repeat_execution_replay_allowed))}
+      data-office-nas-keeper-fresh-request-builder-ledger-manual-review-record-automation-enabled={String(Boolean(dto?.watcher_enabled || dto?.cron_enabled || dto?.dispatch_enabled || dto?.authority_adapter_binding_enabled))}
+      data-office-nas-keeper-fresh-request-builder-ledger-manual-review-record-vps-nas-authority={String(Boolean(dto?.vps_nas_mount_enabled || latest?.vps_nas_mount_enabled))}
+      data-office-nas-keeper-fresh-request-builder-ledger-manual-review-record-markdown-body-included={String(Boolean(dto?.markdown_body_included || latest?.markdown_body_included))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-200/70">Manual review record</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">safe-ref review record · downstream still disabled</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Readback of bounded manual operator review records for selected ledger exports. It is display-only and does not enable downstream consumption, replay, automation, raw bodies, credentials, or VPS NAS authority.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? `error: ${error}` : record?.found ? "recorded; waiting for enablement boundary" : "waiting for record"}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-nas-keeper-fresh-request-builder-ledger-manual-review-record-fields="true">
+        {rows.map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-nas-keeper-fresh-request-builder-ledger-manual-review-record-field={key}>
+            <div className="font-semibold text-foreground">{key}</div>
+            <div className="mt-1 break-words leading-5 text-midground/70">{value}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 rounded border border-current/15 bg-black/30 p-3 text-[11px] leading-5 text-midground/70" data-office-nas-keeper-fresh-request-builder-ledger-manual-review-record-preview="true">
+        <div className="mb-2 font-semibold text-foreground">safe record preview</div>
+        <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words">{preview}</pre>
+      </div>
+    </section>
+  );
+}
+
+
 export function ApprovedRealOneShotDispatchGateDesignPanel({
   status,
   error,
@@ -8749,6 +8821,8 @@ export default function OfficePage() {
   const [nasKeeperFreshRequestBuilderLedgerExportSelectionReviewError, setNasKeeperFreshRequestBuilderLedgerExportSelectionReviewError] = useState<string | null>(null);
   const [nasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightResult, setNasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightResult] = useState<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightResult | null>(null);
   const [nasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightError, setNasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightError] = useState<string | null>(null);
+  const [nasKeeperFreshRequestBuilderLedgerManualReviewRecordResult, setNasKeeperFreshRequestBuilderLedgerManualReviewRecordResult] = useState<OfficeNasKeeperFreshRequestBuilderLedgerManualReviewRecordReadbackResult | null>(null);
+  const [nasKeeperFreshRequestBuilderLedgerManualReviewRecordError, setNasKeeperFreshRequestBuilderLedgerManualReviewRecordError] = useState<string | null>(null);
   const nasKeeperClaimDryRunKeyRef = useRef<string | null>(null);
   const nasKeeperAuthorizationKeyRef = useRef<string | null>(null);
   const nasKeeperPayloadPreviewKeyRef = useRef<string | null>(null);
@@ -9116,6 +9190,19 @@ export default function OfficePage() {
         setNasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightError("request failed");
       });
   }, [nasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightResult]);
+
+  useEffect(() => {
+    if (nasKeeperFreshRequestBuilderLedgerManualReviewRecordResult?.dto) return;
+    api.getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerManualReviewRecord()
+      .then((result) => {
+        setNasKeeperFreshRequestBuilderLedgerManualReviewRecordResult(result);
+        setNasKeeperFreshRequestBuilderLedgerManualReviewRecordError(null);
+      })
+      .catch(() => {
+        setNasKeeperFreshRequestBuilderLedgerManualReviewRecordResult(null);
+        setNasKeeperFreshRequestBuilderLedgerManualReviewRecordError("request failed");
+      });
+  }, [nasKeeperFreshRequestBuilderLedgerManualReviewRecordResult]);
 
   const executeNasSingleFileWrite = useCallback(async () => {
     if (!nasSingleWriteApproved) {
@@ -10261,6 +10348,7 @@ export default function OfficePage() {
       <NasKeeperFreshRequestBuilderLedgerPanel ledger={nasKeeperFreshRequestBuilderLedgerResult} error={nasKeeperFreshRequestBuilderLedgerError} />
       <NasKeeperFreshRequestBuilderLedgerExportSelectionReviewPanel review={nasKeeperFreshRequestBuilderLedgerExportSelectionReviewResult} error={nasKeeperFreshRequestBuilderLedgerExportSelectionReviewError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightPanel preflight={nasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightError} />
+      <NasKeeperFreshRequestBuilderLedgerManualReviewRecordPanel record={nasKeeperFreshRequestBuilderLedgerManualReviewRecordResult} error={nasKeeperFreshRequestBuilderLedgerManualReviewRecordError} />
 
       <OfficeVisualizerEvidenceDrawer terminalResult={nasKeeperGuardedFailureStateResult}>
       <NasKeeperLiveOperatorLanePanel

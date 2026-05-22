@@ -101,6 +101,8 @@ from hermes_cli.office_controlled_mutation import (
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_readback,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_export_selection_review,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_use_preflight,
+    append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_manual_review_record,
+    list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_manual_review_records,
     execute_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_write,
     execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_preview,
     record_office_controlled_mutation_nas_keeper_mac_relay_execution_state,
@@ -778,6 +780,24 @@ async def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger
         profile=profile or "latest_written",
         limit=limit or 20,
     )
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-manual-review-record")
+async def list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_manual_review_records_route(
+    manual_review_ref: Optional[str] = None,
+    limit: Optional[int] = None,
+):
+    """Read safe manual operator review records for selected ledger exports."""
+    return list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_manual_review_records(
+        manual_review_ref=manual_review_ref,
+        limit=limit or 50,
+    )
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-manual-review-record")
+async def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_manual_review_record_route(payload: Any = Body(None)):
+    """Append one bounded safe-ref manual operator review record for a selected ledger export."""
+    return append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_manual_review_record(payload)
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-one-shot-operator-write")

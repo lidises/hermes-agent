@@ -3205,6 +3205,10 @@ def _default_manual_nas_keeper_handoff_record_store_path() -> Path:
     return get_hermes_home() / "office" / "controlled-mutation" / "manual_nas_keeper_handoff_records.jsonl"
 
 
+def _default_fresh_request_builder_manual_review_record_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "fresh_request_builder_manual_review_records.jsonl"
+
+
 
 
 def _approval_event_envelope_capabilities() -> dict[str, bool]:
@@ -8479,6 +8483,7 @@ def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downs
     queue_dir: Path | str | None = None,
     profile: object = "latest_written",
     limit: int = 20,
+    review_store_path: Path | None = None,
 ) -> dict[str, object]:
     selection = get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_export_selection_review(
         queue_dir=queue_dir,
@@ -8502,10 +8507,30 @@ def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downs
         and selected_item_count > 0
         and re.fullmatch(r"[0-9a-f]{64}", checksum_set_sha256)
     )
+    manual_review_readback = list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_manual_review_records(
+        store_path=review_store_path,
+    )
     manual_operator_review_record_present = False
+    if manual_review_readback.get("found") and isinstance(manual_review_readback.get("dto"), Mapping):
+        review_dto = cast(Mapping[str, object], manual_review_readback["dto"])
+        raw_records = review_dto.get("records")
+        records = raw_records if isinstance(raw_records, list) else []
+        for record in records:
+            if (
+                isinstance(record, Mapping)
+                and record.get("checksum_set_sha256") == checksum_set_sha256
+                and record.get("selected_item_count") == selected_item_count
+            ):
+                manual_operator_review_record_present = True
+                break
     downstream_use_allowed_after_manual_review = bool(selected_export_review_passed)
     downstream_use_enabled = False
-    blocked_reason = "manual_operator_review_not_recorded" if selected_export_review_passed else "selected_export_review_not_ready"
+    if not selected_export_review_passed:
+        blocked_reason = "selected_export_review_not_ready"
+    elif manual_operator_review_record_present:
+        blocked_reason = "downstream_use_disabled_pending_enablement_boundary"
+    else:
+        blocked_reason = "manual_operator_review_not_recorded"
     decision_material = {
         "selection_profile": "latest_written",
         "selected_item_count": selected_item_count,
@@ -8575,6 +8600,262 @@ def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downs
         "next_required_boundary": "fresh_request_builder_manual_operator_review_record",
     }
     return {"found": bool(selected_export_review_passed), "errors": [], "dto": dto}
+
+
+def _normalize_fresh_request_builder_manual_review_record(item: object) -> dict[str, object] | None:
+    if not isinstance(item, Mapping):
+        return None
+    required = (
+        "manual_review_ref",
+        "selection_profile",
+        "source_preflight_decision_sha256",
+        "checksum_set_sha256",
+        "selected_item_count",
+        "reviewed_by",
+        "reviewed_at",
+        "operator_confirmation",
+        "safe_summary",
+        "evidence_refs",
+        "manual_review_record_sha256",
+    )
+    if any(field not in item for field in required):
+        return None
+    manual_review_ref = item.get("manual_review_ref")
+    source_preflight_sha = item.get("source_preflight_decision_sha256")
+    checksum_sha = item.get("checksum_set_sha256")
+    record_sha = item.get("manual_review_record_sha256")
+    selected_item_count = item.get("selected_item_count")
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(manual_review_ref, "manualreview-"):
+        return None
+    if not (isinstance(source_preflight_sha, str) and re.fullmatch(r"[0-9a-f]{64}", source_preflight_sha)):
+        return None
+    if not (isinstance(checksum_sha, str) and re.fullmatch(r"[0-9a-f]{64}", checksum_sha)):
+        return None
+    if not (isinstance(record_sha, str) and re.fullmatch(r"[0-9a-f]{64}", record_sha)):
+        return None
+    if not (isinstance(selected_item_count, int) and selected_item_count > 0):
+        return None
+    if item.get("selection_profile") != "latest_written":
+        return None
+    if item.get("operator_confirmation") != "confirmed-selected-export-safe-ref-review-only":
+        return None
+    if not _is_opaque_id(item.get("reviewed_by")):
+        return None
+    if not (isinstance(item.get("reviewed_at"), str) and _ISO_UTC_RE.fullmatch(str(item.get("reviewed_at")))):
+        return None
+    if not _is_safe_text(item.get("safe_summary")):
+        return None
+    if not _validate_evidence_refs(item.get("evidence_refs")):
+        return None
+    return {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_manual_review_record",
+        "manual_operator_review_record_written": True,
+        "manual_review_ref": manual_review_ref,
+        "selection_profile": "latest_written",
+        "source_preflight_decision_sha256": source_preflight_sha,
+        "checksum_set_sha256": checksum_sha,
+        "selected_item_count": selected_item_count,
+        "reviewed_by": item.get("reviewed_by"),
+        "reviewed_at": item.get("reviewed_at"),
+        "operator_confirmation": "confirmed-selected-export-safe-ref-review-only",
+        "safe_summary": item.get("safe_summary"),
+        "evidence_refs": list(cast(list[object], item.get("evidence_refs"))),
+        "manual_review_record_sha256": record_sha,
+        "downstream_use_enabled": False,
+        "downstream_consumed": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "repeat_execution_replay_allowed": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "capabilities": {
+            "manual_operator_review_recording_enabled": True,
+            "manual_operator_review_record_readback_enabled": True,
+            "downstream_use_enabled": False,
+            "downstream_consumption_enabled": False,
+            "actual_write_execution_enabled": False,
+            "repeat_execution_replay_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_credential_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+        },
+        "next_required_boundary": "fresh_request_builder_downstream_use_enablement",
+    }
+
+
+def _read_fresh_request_builder_manual_review_records(path: Path) -> tuple[list[dict[str, object]], int]:
+    records: list[dict[str, object]] = []
+    skipped_count = 0
+    if not path.exists():
+        return records, skipped_count
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            if not line.strip():
+                continue
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped_count += 1
+                continue
+            normalized = _normalize_fresh_request_builder_manual_review_record(item)
+            if normalized is None:
+                skipped_count += 1
+                continue
+            records.append(normalized)
+    return records, skipped_count
+
+
+def list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_manual_review_records(
+    *,
+    store_path: Path | None = None,
+    limit: int = 50,
+    manual_review_ref: object = None,
+) -> dict[str, object]:
+    safe_manual_review_ref = None
+    errors: list[dict[str, str]] = []
+    if manual_review_ref is not None:
+        if _office_disabled_runtime_dispatch_valid_prefixed_ref(manual_review_ref, "manualreview-"):
+            safe_manual_review_ref = str(manual_review_ref)
+        else:
+            errors.append(_error("manual_review_ref", "unsupported_ref_shape"))
+    path = store_path or _default_fresh_request_builder_manual_review_record_store_path()
+    records, skipped_count = _read_fresh_request_builder_manual_review_records(path)
+    if safe_manual_review_ref:
+        records = [record for record in records if record.get("manual_review_ref") == safe_manual_review_ref]
+    if errors:
+        records = []
+    max_items = max(0, min(limit, 200)) if isinstance(limit, int) else 50
+    records = records[-max_items:] if max_items else []
+    latest_record = records[-1] if records else None
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_manual_review_records_readback",
+        "record_count": len(records),
+        "limit": max_items,
+        "skipped_count": skipped_count,
+        "records": records,
+        "latest_record": latest_record,
+        "downstream_use_enabled": False,
+        "downstream_consumption_enabled": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "repeat_execution_replay_allowed": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "capabilities": {
+            "manual_operator_review_recording_enabled": True,
+            "manual_operator_review_record_readback_enabled": True,
+            "downstream_use_enabled": False,
+            "downstream_consumption_enabled": False,
+            "actual_write_execution_enabled": False,
+            "repeat_execution_replay_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_credential_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+        },
+        "next_required_boundary": "fresh_request_builder_downstream_use_enablement" if records else "fresh_request_builder_manual_operator_review_record",
+    }
+    return {"found": bool(records), "errors": errors, "dto": dto}
+
+
+def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_manual_review_record(
+    payload: object,
+    *,
+    queue_dir: Path | str | None = None,
+    store_path: Path | None = None,
+) -> dict[str, object]:
+    if not isinstance(payload, Mapping):
+        return {"stored": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    preflight = get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_use_preflight(
+        queue_dir=queue_dir,
+        profile=payload.get("selection_profile") or "latest_written",
+        limit=20,
+        review_store_path=store_path,
+    )
+    source = preflight.get("dto") if isinstance(preflight.get("dto"), Mapping) else None
+    errors: list[dict[str, str]] = []
+    if not source or not preflight.get("found"):
+        errors.append(_error("preflight", "selected_export_preflight_not_ready"))
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("manual_review_ref"), "manualreview-"):
+        errors.append(_error("manual_review_ref", "unsupported_ref_shape"))
+    if payload.get("selection_profile") != "latest_written":
+        errors.append(_error("selection_profile", "unsupported_selection_profile"))
+    expected_preflight_sha = source.get("preflight_decision_sha256") if isinstance(source, Mapping) else None
+    if not (isinstance(payload.get("preflight_decision_sha256"), str) and re.fullmatch(r"[0-9a-f]{64}", str(payload.get("preflight_decision_sha256")))):
+        errors.append(_error("preflight_decision_sha256", "invalid_sha256"))
+    elif payload.get("preflight_decision_sha256") != expected_preflight_sha:
+        errors.append(_error("preflight_decision_sha256", "preflight_decision_mismatch"))
+    expected_checksum_sha = source.get("checksum_set_sha256") if isinstance(source, Mapping) else None
+    if not (isinstance(payload.get("checksum_set_sha256"), str) and re.fullmatch(r"[0-9a-f]{64}", str(payload.get("checksum_set_sha256")))):
+        errors.append(_error("checksum_set_sha256", "invalid_sha256"))
+    elif payload.get("checksum_set_sha256") != expected_checksum_sha:
+        errors.append(_error("checksum_set_sha256", "preflight_checksum_mismatch"))
+    expected_count = source.get("selected_item_count") if isinstance(source, Mapping) else None
+    if not (isinstance(payload.get("selected_item_count"), int) and payload.get("selected_item_count") == expected_count):
+        errors.append(_error("selected_item_count", "preflight_count_mismatch"))
+    if not _is_opaque_id(payload.get("reviewed_by")):
+        errors.append(_error("reviewed_by", "invalid_opaque_ref"))
+    if not (isinstance(payload.get("reviewed_at"), str) and _ISO_UTC_RE.fullmatch(str(payload.get("reviewed_at")))):
+        errors.append(_error("reviewed_at", "invalid_timestamp"))
+    if payload.get("operator_confirmation") != "confirmed-selected-export-safe-ref-review-only":
+        errors.append(_error("operator_confirmation", "unsupported_confirmation"))
+    if not _is_safe_text(payload.get("safe_summary")):
+        errors.append(_error("safe_summary", "invalid_safe_text"))
+    if not _validate_evidence_refs(payload.get("evidence_refs")):
+        errors.append(_error("evidence_refs", "invalid_opaque_ref"))
+    path = store_path or _default_fresh_request_builder_manual_review_record_store_path()
+    existing, _ = _read_fresh_request_builder_manual_review_records(path)
+    if any(record.get("manual_review_ref") == payload.get("manual_review_ref") for record in existing):
+        errors.append(_error("manual_review_ref", "duplicate_manual_review_ref"))
+    if any(record.get("source_preflight_decision_sha256") == payload.get("preflight_decision_sha256") for record in existing):
+        errors.append(_error("preflight_decision_sha256", "duplicate_preflight_decision"))
+    errors = sorted(errors, key=lambda item: (item["field"], item["code"]))
+    if errors:
+        return {"stored": False, "errors": errors, "dto": None}
+    record_material = {
+        "manual_review_ref": payload.get("manual_review_ref"),
+        "selection_profile": "latest_written",
+        "source_preflight_decision_sha256": payload.get("preflight_decision_sha256"),
+        "checksum_set_sha256": payload.get("checksum_set_sha256"),
+        "selected_item_count": payload.get("selected_item_count"),
+        "reviewed_by": payload.get("reviewed_by"),
+        "reviewed_at": payload.get("reviewed_at"),
+        "operator_confirmation": "confirmed-selected-export-safe-ref-review-only",
+        "safe_summary": payload.get("safe_summary"),
+        "evidence_refs": list(cast(list[object], payload.get("evidence_refs"))),
+    }
+    record_sha = hashlib.sha256(
+        json.dumps(record_material, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    stored_payload = dict(record_material)
+    stored_payload["manual_review_record_sha256"] = record_sha
+    dto = _normalize_fresh_request_builder_manual_review_record(stored_payload)
+    if dto is None:
+        return {"stored": False, "errors": [_error("payload", "invalid_normalized_record")], "dto": None}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(dto, sort_keys=True, separators=(",", ":")) + "\n")
+    return {"stored": True, "errors": [], "dto": dto}
+
 
 
 def execute_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_write(
