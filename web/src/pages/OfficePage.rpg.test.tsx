@@ -76,6 +76,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
     expect(source).toContain("<NasKeeperFreshRequestBuilderLedgerDownstreamUseEnablementPanel");
     expect(source).toContain("<NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightPanel");
     expect(source).toContain("<NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementPanel");
+    expect(source).toContain("<NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionOneShotBoundaryDesignPanel");
 
     for (const panel of [
       "<NasKeeperLiveOperatorLanePanel",
@@ -4851,6 +4852,71 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).toContain("consumption enablement · actual consumption still disabled");
     expect(html).toContain("downstream_consumption_enablement_safe_ref_v1");
     expect(html).toContain("consumptionenable-20260521170000-bafe8001");
+    expect(html).not.toContain("Safe body");
+    expect(html).not.toContain("/Users/" + "lidises");
+    expect(html).not.toContain("/home/hermes");
+    expect(html).not.toContain("/vol" + "ume1");
+    expect(html).not.toContain("sk" + "-test");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("<form");
+    expect(html).not.toContain("<input");
+    expect(html).not.toContain("<select");
+    expect(html).not.toContain("<textarea");
+  });
+
+
+  it("renders downstream consumption one-shot boundary design without execution controls", () => {
+    const Panel = (OfficePageModule as unknown as {
+      NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionOneShotBoundaryDesignPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionOneShotBoundaryDesignPanel>>;
+    }).NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionOneShotBoundaryDesignPanel;
+    expect(Panel).toBeTypeOf("function");
+
+    const html = renderToStaticMarkup(
+      <Panel
+        design={{
+          found: true,
+          errors: [],
+          dto: {
+            schema_version: 1,
+            mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_boundary_design",
+            boundary_design_ready: true,
+            source_consumption_enablement_ref: "consumptionenable-20260521170000-bafe8001",
+            source_consumption_enablement_record_sha256: "f".repeat(64),
+            safe_ref_chain_verified: true,
+            target_allowlist_shape: { safe_ref_only: true },
+            idempotency_replay_guard_design: { required: true },
+            rollback_disable_posture: { required: true },
+            approval_boundary: { explicit_human_approval_required: true },
+            boundary_design_sha256: "a".repeat(64),
+            downstream_use_enabled: true,
+            downstream_consumption_enabled: false,
+            downstream_consumed: false,
+            actual_downstream_consumption_allowed: false,
+            markdown_body_included: false,
+            write_payload_included: false,
+            raw_root_path_included: false,
+            credential_value_included: false,
+            watcher_enabled: false,
+            cron_enabled: false,
+            dispatch_enabled: false,
+            authority_adapter_binding_enabled: false,
+            vps_nas_mount_enabled: false,
+            capabilities: {},
+            next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_exact_approval",
+          },
+        }}
+        error={null}
+      />,
+    );
+
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-boundary-design="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-boundary-design-ready="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-boundary-design-safe-ref-chain="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-boundary-design-downstream-consumption-enabled="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-boundary-design-automation-enabled="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-boundary-design-vps-nas-authority="false"');
+    expect(html).toContain("one-shot boundary design · still no consumption");
+    expect(html).toContain("downstream_consumption_one_shot_boundary_design_v1");
     expect(html).not.toContain("Safe body");
     expect(html).not.toContain("/Users/" + "lidises");
     expect(html).not.toContain("/home/hermes");

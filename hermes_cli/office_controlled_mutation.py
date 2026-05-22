@@ -9574,6 +9574,93 @@ def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_do
     return {"stored": True, "errors": [], "dto": dto}
 
 
+def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_boundary_design(
+    *,
+    consumption_enablement_store_path: Path | None = None,
+) -> dict[str, object]:
+    readback = list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_enablement_records(
+        store_path=consumption_enablement_store_path,
+        limit=1,
+    )
+    latest = None
+    dto_readback = readback.get("dto")
+    if isinstance(dto_readback, Mapping):
+        maybe_latest = dto_readback.get("latest_record")
+        latest = maybe_latest if isinstance(maybe_latest, Mapping) else None
+    ready = bool(readback.get("found") and latest)
+    base = {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_boundary_design",
+        "boundary_design_ready": ready,
+        "source_consumption_enablement_ref": latest.get("consumption_enablement_ref") if latest else None,
+        "source_consumption_enablement_record_sha256": latest.get("consumption_enablement_record_sha256") if latest else None,
+        "safe_ref_chain_verified": ready,
+        "target_allowlist_shape": {
+            "safe_ref_only": True,
+            "requires_consumption_target_ref": True,
+            "requires_selected_export_checksum": True,
+            "raw_path_allowed": False,
+            "raw_markdown_allowed": False,
+            "credential_allowed": False,
+        },
+        "idempotency_replay_guard_design": {
+            "required": True,
+            "requires_one_shot_execution_ref": True,
+            "requires_replay_store_lookup_before_execution": True,
+            "reuse_blocks_execution": True,
+            "store_write_enabled_now": False,
+        },
+        "rollback_disable_posture": {
+            "required": True,
+            "requires_disable_switch_ref": True,
+            "requires_human_rollback_note_ref": True,
+            "rollback_execution_enabled_now": False,
+        },
+        "approval_boundary": {
+            "explicit_human_approval_required": True,
+            "approval_record_write_enabled_now": False,
+            "execution_enabled_after_design": False,
+            "next_exact_confirmation": "fresh_request_builder_downstream_consumption_one_shot_exact_approval",
+        },
+        "downstream_use_enabled": ready,
+        "downstream_consumption_enabled": False,
+        "downstream_consumed": False,
+        "actual_downstream_consumption_allowed": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "capabilities": {
+            "one_shot_boundary_design_readback_enabled": True,
+            "actual_downstream_consumption_enabled": False,
+            "approval_record_write_enabled": False,
+            "replay_store_write_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_credential_access_enabled": False,
+        },
+        "next_required_boundary": "fresh_request_builder_downstream_consumption_one_shot_exact_approval" if ready else "fresh_request_builder_downstream_consumption_enablement",
+    }
+    design_material = {
+        "source_consumption_enablement_ref": base["source_consumption_enablement_ref"],
+        "source_consumption_enablement_record_sha256": base["source_consumption_enablement_record_sha256"],
+        "target_allowlist_shape": base["target_allowlist_shape"],
+        "idempotency_replay_guard_design": base["idempotency_replay_guard_design"],
+        "rollback_disable_posture": base["rollback_disable_posture"],
+        "approval_boundary": base["approval_boundary"],
+    }
+    base["boundary_design_sha256"] = hashlib.sha256(json.dumps(design_material, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+    return {"found": ready, "errors": [], "dto": base}
+
+
 
 def execute_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_write(
     payload: object, *, queue_dir: Path | str | None = None, root_path: Path | str | None = None
