@@ -1,3 +1,73 @@
+## Current status — Fresh request ledger actual execution record stored
+
+Updated: 2026-05-22T10:21:43Z
+
+Latest code commit: d76b652496890248c0f03f86186d975fc9e26f37 (`feat(office): record downstream actual execution boundary`).
+
+Completed rung: `fresh_request_builder_downstream_consumption_one_shot_actual_execution_record_after_contract`.
+
+What changed:
+- Added protected API read/write for metadata-only actual execution records:
+  - `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-actual-execution-records`
+  - `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-actual-execution-records`
+- Added UI panel `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualExecutionRecordPanel`.
+- Added DOM hook `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-execution-record="true"`.
+- Actual write performed: one safe-ref metadata-only actual execution record stored and read back.
+- This is still a non-consuming record: no markdown body materialization, no real replay-store write, no dispatcher/authority-adapter binding, no watcher/cron, no public exposure, no VPS NAS authority, no gateway restart.
+
+Live smoke after VPS dashboard-only deploy:
+- protected API unauthenticated POST: `401`
+- protected API authenticated contract GET: `200`
+- protected API authenticated actual-execution-record POST: `200`, `stored=true`
+- protected API authenticated actual-execution-record GET: `200`, `found=true`, `record_count=1`
+- `actual_execution_recorded=true`
+- `actual_execution_record_ready=true`
+- `noop_execution_probe_record_verified=true`
+- `execution_contract_verified=true`
+- `safe_ref_chain_verified=true`
+- `actual_execution_record_sha256` length 64
+- `downstream_consumption_enabled=false`
+- `downstream_consumed=false`
+- `actual_downstream_consumption_allowed=false`
+- `actual_downstream_consumption_executed=false`
+- `replay_store_write_enabled=false`
+- `real_replay_store_written=false`
+- `markdown_body_included=false`
+- `write_payload_included=false`
+- `raw_root_path_included=false`
+- `secret_value_included=false`
+- DOM panel `found=true`, `ready=true`, `executed=false`, `replay-store-write=false`, `vps-nas-authority=false`, `controls=0`, forbidden leak=false
+- browser console JS errors: 0
+
+Verification:
+- `py_compile` passed for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py`
+- focused Python chain tests: 6 passed
+- focused Office web tests: 2 passed
+- `npm run lint` passed with pre-existing warnings only
+- `npm run build` passed with existing Vite chunk-size warning only
+- `git diff --check` passed
+- added-line leak sentinel passed
+
+Deploy state:
+- VPS core/dashboard worktrees synced to code commit `d76b652496890248c0f03f86186d975fc9e26f37`
+- `web_dist` rsynced to both VPS worktrees
+- dashboard restarted only: `hermes-agent-dashboard.service` active, MainPID 808944, active since 2026-05-22T10:19:01Z
+- gateway not restarted: `hermes-gateway.service` active, MainPID 519592, active since 2026-05-18T13:34:14Z
+
+Next recommended rung:
+`fresh_request_builder_downstream_consumption_one_shot_post_execution_record_readback`
+
+Keep closed unless separately approved in a future rung:
+- real markdown/body materialization
+- real replay-store write
+- dispatcher or authority-adapter binding
+- watcher/cron
+- public exposure
+- VPS NAS authority
+- gateway restart
+
+---
+
 ## Current status — Fresh request ledger actual execution contract ready
 
 Updated: 2026-05-22T09:45:07Z
