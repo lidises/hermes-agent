@@ -1,4 +1,95 @@
 
+
+## Current status — Fresh request ledger downstream consumption one-shot exact approval deployed
+
+Updated: 2026-05-22 12:15 KST
+
+Completed slice:
+
+- Implemented/deployed `fresh_request_builder_downstream_consumption_one_shot_exact_approval` as a bounded metadata-only approval record for the verified one-shot boundary design.
+- Code commit: `d0737608 feat(office): record downstream consumption exact approval`.
+- Added protected API:
+  - `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-exact-approvals?limit=20`
+  - `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-exact-approvals`
+- Added helpers:
+  - `append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_exact_approval_record(...)`
+  - `list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_exact_approval_records(...)`
+- Added Office UI display-only panel: `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExactApprovalPanel`.
+- DOM hook:
+  - `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-exact-approval="true"`
+- The approval record verifies the latest boundary design SHA and safe-ref chain from the downstream-consumption enablement record. It remains metadata-only and does not execute downstream consumption.
+
+Actual VPS record:
+
+- `exact_approval_ref=exactapproval-20260522121330-d0737608`
+- `stored=true`, readback found true, record count 1.
+- exact approval record SHA length 64.
+- boundary design ready true; safe ref chain verified true.
+- downstream consumption enabled false; downstream consumed false; actual downstream consumption allowed false.
+- replay-store write enabled false.
+- automation enabled false; VPS NAS mount/authority false.
+
+Verification:
+
+- RED observed before implementation:
+  - Backend/API tests failed before helper/route implementation.
+  - Web test failed on missing panel/export/API client placement.
+- `python3 -m py_compile hermes_cli/office_controlled_mutation.py hermes_cli/web_server.py` passed locally.
+- Focused Python tests: 6 passed (`boundary_design` + `exact_approval`).
+- Full focused Office web test file: 123 passed.
+- `npm run lint` passed with existing warnings only.
+- `npm run build` passed with existing Vite large chunk warning only.
+- `git diff --check` passed.
+- added-line leak sentinel passed.
+- `web_dist` relative content hash after local build: `08aae54197c8afb76c248a288572a5cb0dcef24349a3dcc01e8f54266a5a0f0f`.
+
+Live smoke:
+
+- Dashboard/core VPS worktrees synced to code commit `d0737608`.
+- `web_dist` rsynced to both VPS worktrees.
+- Dashboard restarted only; gateway active and not restarted (`MainPID=519592`, active since 2026-05-18 13:34:14 UTC).
+- Protected API actual POST/readback:
+  - design found true
+  - design ready true
+  - safe ref chain verified true
+  - stored true
+  - readback found true
+  - record count 1
+  - downstream consumption enabled false
+  - downstream consumed false
+  - actual downstream consumption allowed false
+  - replay-store write enabled false
+  - automation enabled false
+  - VPS NAS mount false
+  - secret leak false
+- DOM:
+  - panel present true
+  - recorded true
+  - boundary design verified true
+  - downstream consumption enabled false
+  - replay-store write false
+  - automation enabled false
+  - VPS NAS authority false
+  - controls 0
+  - secret leak false
+  - console JS errors 0
+
+Boundaries preserved:
+
+- No actual downstream consumption.
+- No replay-store write for consumption execution.
+- No watcher/cron/daemon activation.
+- No dispatcher binding.
+- No authority-adapter binding.
+- No gateway restart.
+- No public exposure change.
+- No VPS NAS mount/write/credential authority.
+- No markdown body/write payload/raw root path/credential value exposure.
+
+Recommended next rung:
+
+- `fresh_request_builder_downstream_consumption_one_shot_actual_consumption_preflight`: display-only/readiness preflight for the approved exact boundary. Do not execute actual consumption yet; keep replay-store write, watcher/cron/dispatcher/authority-adapter/VPS NAS authority off until separately approved boundaries.
+
 ## Current status — Fresh request ledger downstream consumption one-shot boundary design deployed
 
 Updated: 2026-05-22 11:46 KST
