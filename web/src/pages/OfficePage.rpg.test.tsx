@@ -6996,4 +6996,97 @@ describe("ControlledMutationApprovalBoundarySummaryPanel", () => {
     expect(markup).not.toMatch(/<button|<form|<input|<select|<textarea/i);
     expect(markup).not.toMatch(/\/Users\/lidises|paperclip:\/Users|raw approval boundary render|private-approval-boundary-render-provider|token-shaped-value/i);
   });
+
+  it("renders downstream consumption noop replay probe record without enabling execution", () => {
+    const latestRecord = {
+      schema_version: 1,
+      mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_noop_replay_probe_record",
+      noop_replay_probe_recorded: true,
+      noop_replay_probe_ref: "noopreplay-20260522133000-cafe2002",
+      execution_gate_ref: "executiongate-20260522125000-cafe1001",
+      execution_gate_record_sha256: "a".repeat(64),
+      selection_profile: "latest_written",
+      idempotency_probe_key_ref: "probe-key-20260522133000-cafe2002",
+      probe_mode: "noop_replay_probe_only",
+      execution_gate_record_verified: true,
+      safe_ref_chain_verified: true,
+      idempotency_probe_key_verified: true,
+      noop_probe_result: "noop_probe_succeeded",
+      approved_by: "operator-ai-office",
+      approved_at: "2026-05-22T04:30:00Z",
+      operator_confirmation: "confirmed-noop-replay-probe-boundary-only",
+      safe_summary: "Safe noop replay probe metadata only; actual consumption remains disabled.",
+      evidence_refs: ["evidence:execution-gate"],
+      noop_replay_probe_record_sha256: "b".repeat(64),
+      downstream_use_enabled: true,
+      downstream_consumption_enabled: false,
+      downstream_consumed: false,
+      actual_downstream_consumption_allowed: false,
+      replay_store_write_enabled: false,
+      real_replay_store_written: false,
+      markdown_body_included: false,
+      write_payload_included: false,
+      raw_root_path_included: false,
+      credential_value_included: false,
+      repeat_execution_replay_allowed: false,
+      watcher_enabled: false,
+      cron_enabled: false,
+      dispatch_enabled: false,
+      authority_adapter_binding_enabled: false,
+      vps_nas_mount_enabled: false,
+      capabilities: {
+        noop_replay_probe_recording_enabled: true,
+        noop_replay_probe_readback_enabled: true,
+        actual_downstream_consumption_enabled: false,
+        replay_store_write_enabled: false,
+      },
+      next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_replay_store_write_contract",
+    } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionNoopReplayProbeRecord;
+    const record = {
+      found: true,
+      errors: [],
+      dto: {
+        schema_version: 1,
+        mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_noop_replay_probe_records_readback",
+        record_count: 1,
+        limit: 50,
+        skipped_count: 0,
+        records: [latestRecord],
+        latest_record: latestRecord,
+        downstream_consumption_enabled: false,
+        downstream_consumed: false,
+        actual_downstream_consumption_allowed: false,
+        replay_store_write_enabled: false,
+        real_replay_store_written: false,
+        markdown_body_included: false,
+        write_payload_included: false,
+        raw_root_path_included: false,
+        credential_value_included: false,
+        watcher_enabled: false,
+        cron_enabled: false,
+        dispatch_enabled: false,
+        authority_adapter_binding_enabled: false,
+        vps_nas_mount_enabled: false,
+        capabilities: {
+          noop_replay_probe_recording_enabled: true,
+          noop_replay_probe_readback_enabled: true,
+          actual_downstream_consumption_enabled: false,
+          replay_store_write_enabled: false,
+        },
+        next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_replay_store_write_contract",
+      },
+    } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionNoopReplayProbeReadbackResult;
+    const html = renderToStaticMarkup(
+      <OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionNoopReplayProbePanel record={record} />,
+    );
+
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-noop-replay-probe="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-noop-replay-probe-recorded="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-noop-replay-probe-downstream-consumption-enabled="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-noop-replay-probe-replay-store-write="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-noop-replay-probe-automation-enabled="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-noop-replay-probe-vps-nas-authority="false"');
+    expect(html).not.toMatch(/<button|<form|<input|<select|<textarea/);
+  });
+
 });
