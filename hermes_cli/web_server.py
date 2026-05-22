@@ -120,6 +120,7 @@ from hermes_cli.office_controlled_mutation import (
     append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_replay_store_metadata_record,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_replay_store_metadata_records,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_actual_consumption_disabled_readback,
+    get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_actual_consumption_execution_design,
     execute_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_write,
     execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_preview,
     record_office_controlled_mutation_nas_keeper_mac_relay_execution_state,
@@ -961,6 +962,16 @@ async def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger
 ):
     """Read proof that actual downstream consumption remains disabled after metadata write."""
     return get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_actual_consumption_disabled_readback(
+        replay_store_entry_ref=replay_store_entry_ref,
+    )
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-actual-consumption-execution-design")
+async def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_consumption_execution_design_route(
+    replay_store_entry_ref: Optional[str] = None,
+):
+    """Read the exact future actual-consumption execution design while execution stays closed."""
+    return get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_actual_consumption_execution_design(
         replay_store_entry_ref=replay_store_entry_ref,
     )
 

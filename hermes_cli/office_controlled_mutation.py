@@ -10937,6 +10937,97 @@ def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downs
     return {"found": True, "errors": errors, "dto": dto}
 
 
+def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_actual_consumption_execution_design(
+    *,
+    replay_store_metadata_store_path: Path | None = None,
+    replay_store_entry_ref: object = None,
+) -> dict[str, object]:
+    """Design the exact future execution boundary without executing consumption."""
+
+    disabled = get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_actual_consumption_disabled_readback(
+        replay_store_metadata_store_path=replay_store_metadata_store_path,
+        replay_store_entry_ref=replay_store_entry_ref,
+    )
+    errors = list(cast(list[dict[str, str]], disabled.get("errors") or []))
+    disabled_dto = disabled.get("dto") if isinstance(disabled.get("dto"), Mapping) else {}
+    verified = bool(disabled.get("found") is True and isinstance(disabled_dto, Mapping) and disabled_dto.get("actual_consumption_disabled_readback_ready") is True)
+    capabilities = {
+        "execution_design_enabled": True,
+        "actual_downstream_consumption_enabled": False,
+        "replay_store_write_enabled": False,
+        "real_replay_store_write_enabled": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "vps_secret_access_enabled": False,
+        "direct_vps_nas_write_enabled": False,
+    }
+    base_closed = {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_actual_consumption_execution_design",
+        "allowed_execution_input_refs": [
+            "replay_store_entry_ref",
+            "noop_replay_probe_ref",
+            "replay_store_key_ref",
+            "replay_store_metadata_record_sha256",
+            "operator_exact_execution_approval_ref",
+        ],
+        "required_pre_execution_gates": [
+            "operator_exact_execution_approval_record",
+            "idempotency_replay_guard",
+            "rollback_disable_ref",
+            "post_execution_proof_contract",
+        ],
+        "rollback_disable_required": True,
+        "post_execution_proof_required": True,
+        "operator_exact_execution_approval_required": True,
+        "downstream_consumption_enabled": False,
+        "downstream_consumed": False,
+        "actual_downstream_consumption_allowed": False,
+        "actual_downstream_consumption_executed": False,
+        "replay_store_write_enabled": False,
+        "real_replay_store_written": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "secret_value_included": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "capabilities": capabilities,
+    }
+    if not verified:
+        dto = {
+            **base_closed,
+            "execution_design_ready": False,
+            "disabled_readback_verified": False,
+            "replay_store_metadata_record_verified": False,
+            "safe_ref_chain_verified": False,
+            "next_required_boundary": "fresh_request_builder_downstream_consumption_one_shot_actual_consumption_disabled_readback",
+        }
+        return {"found": False, "errors": errors, "dto": dto}
+    dto = {
+        **base_closed,
+        "execution_design_ready": True,
+        "disabled_readback_verified": True,
+        "replay_store_metadata_record_verified": bool(disabled_dto.get("replay_store_metadata_record_verified") is True),
+        "safe_ref_chain_verified": bool(disabled_dto.get("safe_ref_chain_verified") is True),
+        "replay_store_entry_ref": disabled_dto.get("replay_store_entry_ref"),
+        "noop_replay_probe_ref": disabled_dto.get("noop_replay_probe_ref"),
+        "replay_store_key_ref": disabled_dto.get("replay_store_key_ref"),
+        "replay_store_metadata_record_sha256": disabled_dto.get("replay_store_metadata_record_sha256"),
+        "metadata_result_status": disabled_dto.get("metadata_result_status"),
+        "downstream_use_enabled": bool(disabled_dto.get("downstream_use_enabled") is True),
+        "next_required_boundary": "fresh_request_builder_downstream_consumption_one_shot_operator_exact_execution_approval",
+    }
+    return {"found": True, "errors": errors, "dto": dto}
+
+
+
 def execute_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_write(
     payload: object, *, queue_dir: Path | str | None = None, root_path: Path | str | None = None
 ) -> dict[str, object]:

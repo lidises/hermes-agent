@@ -7214,6 +7214,68 @@ describe("ControlledMutationApprovalBoundarySummaryPanel", () => {
     expect(html).not.toMatch(rawPathLeakPattern);
   });
 
+  it("renders actual consumption execution design as a read-only exact boundary", () => {
+    const record = {
+      found: true,
+      errors: [],
+      dto: {
+        schema_version: 1,
+        mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_actual_consumption_execution_design" as const,
+        execution_design_ready: true,
+        disabled_readback_verified: true,
+        replay_store_metadata_record_verified: true,
+        safe_ref_chain_verified: true,
+        replay_store_entry_ref: "replaystore-entry-safe-ref",
+        replay_store_metadata_record_sha256: "c".repeat(64),
+        allowed_execution_input_refs: [
+          "replay_store_entry_ref",
+          "noop_replay_probe_ref",
+          "replay_store_key_ref",
+          "replay_store_metadata_record_sha256",
+          "operator_exact_execution_approval_ref",
+        ],
+        required_pre_execution_gates: [
+          "operator_exact_execution_approval_record",
+          "idempotency_replay_guard",
+          "rollback_disable_ref",
+          "post_execution_proof_contract",
+        ],
+        rollback_disable_required: true,
+        post_execution_proof_required: true,
+        operator_exact_execution_approval_required: true,
+        downstream_consumption_enabled: false,
+        downstream_consumed: false,
+        actual_downstream_consumption_allowed: false,
+        actual_downstream_consumption_executed: false,
+        replay_store_write_enabled: false,
+        real_replay_store_written: false,
+        markdown_body_included: false,
+        write_payload_included: false,
+        raw_root_path_included: false,
+        watcher_enabled: false,
+        cron_enabled: false,
+        dispatch_enabled: false,
+        authority_adapter_binding_enabled: false,
+        vps_nas_mount_enabled: false,
+        capabilities: { actual_downstream_consumption_enabled: false, real_replay_store_write_enabled: false, vps_nas_mount_enabled: false },
+        next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_operator_exact_execution_approval",
+      },
+    } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualConsumptionExecutionDesignResult;
+    const html = renderToStaticMarkup(
+      <OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualConsumptionExecutionDesignPanel record={record} />,
+    );
+
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-consumption-execution-design="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-consumption-execution-design-ready="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-consumption-execution-design-allowed="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-consumption-execution-design-executed="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-consumption-execution-design-replay-store-write="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-consumption-execution-design-vps-nas-authority="false"');
+    expect(html).toContain("operator_exact_execution_approval_record");
+    expect(html).toContain("replaystore-entry-safe-ref");
+    expect(html).not.toMatch(/<button|<form|<input|<select|<textarea/);
+  });
+
   it("renders downstream consumption replay-store metadata record without actual consumption", () => {
     const record = {
       found: true,
