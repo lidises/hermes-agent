@@ -3229,6 +3229,10 @@ def _default_fresh_request_builder_downstream_consumption_noop_replay_probe_reco
     return get_hermes_home() / "office" / "controlled-mutation" / "fresh_request_builder_downstream_consumption_noop_replay_probe_records.jsonl"
 
 
+def _default_fresh_request_builder_downstream_consumption_replay_store_metadata_record_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "fresh_request_builder_downstream_consumption_replay_store_metadata_records.jsonl"
+
+
 
 def _approval_event_envelope_capabilities() -> dict[str, bool]:
     capabilities = _approval_record_capabilities()
@@ -10585,6 +10589,278 @@ def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downs
         "next_required_boundary": "fresh_request_builder_downstream_consumption_one_shot_replay_store_metadata_write",
     }
     return {"found": True, "errors": [], "dto": dto}
+
+
+_FRESH_REQUEST_BUILDER_DOWNSTREAM_CONSUMPTION_REPLAY_STORE_METADATA_FIELDS = {
+    "replay_store_entry_ref",
+    "noop_replay_probe_ref",
+    "noop_replay_probe_record_sha256",
+    "replay_store_key_ref",
+    "source_record_sha256",
+    "contract_write_shape_version",
+    "result_status",
+    "recorded_by",
+    "recorded_at",
+    "operator_confirmation",
+    "safe_summary",
+    "evidence_refs",
+}
+
+
+def _normalize_fresh_request_builder_downstream_consumption_replay_store_metadata_record(item: Mapping[str, object]) -> dict[str, object] | None:
+    required = tuple(sorted(_FRESH_REQUEST_BUILDER_DOWNSTREAM_CONSUMPTION_REPLAY_STORE_METADATA_FIELDS)) + (
+        "replay_store_metadata_record_sha256",
+    )
+    if any(field not in item for field in required):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(item.get("replay_store_entry_ref"), "replaystore-"):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(item.get("noop_replay_probe_ref"), "noopreplay-"):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(item.get("replay_store_key_ref"), "probe-key-"):
+        return None
+    for field in ("noop_replay_probe_record_sha256", "source_record_sha256", "replay_store_metadata_record_sha256"):
+        value = item.get(field)
+        if not (isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value)):
+            return None
+    if item.get("source_record_sha256") != item.get("noop_replay_probe_record_sha256"):
+        return None
+    if item.get("contract_write_shape_version") != "safe_replay_store_contract_v1":
+        return None
+    if item.get("result_status") != "metadata_recorded_only":
+        return None
+    if not _is_opaque_id(item.get("recorded_by")):
+        return None
+    if not (isinstance(item.get("recorded_at"), str) and _ISO_UTC_RE.fullmatch(str(item.get("recorded_at")))):
+        return None
+    if item.get("operator_confirmation") != "confirmed-replay-store-metadata-only":
+        return None
+    if not _is_safe_text(item.get("safe_summary")):
+        return None
+    if not _validate_evidence_refs(item.get("evidence_refs")):
+        return None
+    return {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_replay_store_metadata_record",
+        "replay_store_metadata_recorded": True,
+        "replay_store_entry_ref": item.get("replay_store_entry_ref"),
+        "noop_replay_probe_ref": item.get("noop_replay_probe_ref"),
+        "noop_replay_probe_record_sha256": item.get("noop_replay_probe_record_sha256"),
+        "replay_store_key_ref": item.get("replay_store_key_ref"),
+        "source_record_sha256": item.get("source_record_sha256"),
+        "contract_write_shape_version": "safe_replay_store_contract_v1",
+        "contract_write_shape_version_verified": True,
+        "noop_replay_probe_record_verified": True,
+        "safe_ref_chain_verified": True,
+        "source_record_sha256_verified": True,
+        "result_status": "metadata_recorded_only",
+        "recorded_by": item.get("recorded_by"),
+        "recorded_at": item.get("recorded_at"),
+        "operator_confirmation": "confirmed-replay-store-metadata-only",
+        "safe_summary": item.get("safe_summary"),
+        "evidence_refs": list(cast(list[object], item.get("evidence_refs"))),
+        "replay_store_metadata_record_sha256": item.get("replay_store_metadata_record_sha256"),
+        "downstream_use_enabled": True,
+        "downstream_consumption_enabled": False,
+        "downstream_consumed": False,
+        "actual_downstream_consumption_allowed": False,
+        "replay_store_write_enabled": True,
+        "real_replay_store_written": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "capabilities": {
+            "replay_store_metadata_write_enabled": True,
+            "real_replay_store_write_enabled": False,
+            "actual_downstream_consumption_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_credential_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+        },
+        "next_required_boundary": "fresh_request_builder_downstream_consumption_one_shot_actual_consumption_disabled_readback",
+    }
+
+
+def _read_fresh_request_builder_downstream_consumption_replay_store_metadata_records(path: Path) -> tuple[list[dict[str, object]], int]:
+    records: list[dict[str, object]] = []
+    skipped_count = 0
+    if not path.exists():
+        return records, skipped_count
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            if not line.strip():
+                continue
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped_count += 1
+                continue
+            normalized = _normalize_fresh_request_builder_downstream_consumption_replay_store_metadata_record(item)
+            if normalized is None:
+                skipped_count += 1
+                continue
+            records.append(normalized)
+    return records, skipped_count
+
+
+def list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_replay_store_metadata_records(
+    *,
+    store_path: Path | None = None,
+    limit: int = 50,
+    replay_store_entry_ref: object = None,
+) -> dict[str, object]:
+    safe_ref = None
+    errors: list[dict[str, str]] = []
+    if replay_store_entry_ref is not None:
+        if _office_disabled_runtime_dispatch_valid_prefixed_ref(replay_store_entry_ref, "replaystore-"):
+            safe_ref = str(replay_store_entry_ref)
+        else:
+            errors.append(_error("replay_store_entry_ref", "unsupported_ref_shape"))
+    path = store_path or _default_fresh_request_builder_downstream_consumption_replay_store_metadata_record_store_path()
+    records, skipped_count = _read_fresh_request_builder_downstream_consumption_replay_store_metadata_records(path)
+    if safe_ref:
+        records = [record for record in records if record.get("replay_store_entry_ref") == safe_ref]
+    if errors:
+        records = []
+    max_items = max(0, min(limit, 200)) if isinstance(limit, int) else 50
+    records = records[-max_items:] if max_items else []
+    latest_record = records[-1] if records else None
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_replay_store_metadata_records_readback",
+        "record_count": len(records),
+        "limit": max_items,
+        "skipped_count": skipped_count,
+        "records": records,
+        "latest_record": latest_record,
+        "downstream_consumption_enabled": False,
+        "downstream_consumed": False,
+        "actual_downstream_consumption_allowed": False,
+        "replay_store_write_enabled": bool(records),
+        "real_replay_store_written": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "capabilities": {
+            "replay_store_metadata_write_enabled": True,
+            "real_replay_store_write_enabled": False,
+            "actual_downstream_consumption_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_credential_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+        },
+        "next_required_boundary": "fresh_request_builder_downstream_consumption_one_shot_actual_consumption_disabled_readback" if records else "fresh_request_builder_downstream_consumption_one_shot_replay_store_metadata_write",
+    }
+    return {"found": bool(records), "errors": errors, "dto": dto}
+
+
+def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_replay_store_metadata_record(
+    payload: object,
+    *,
+    noop_replay_probe_store_path: Path | None = None,
+    store_path: Path | None = None,
+) -> dict[str, object]:
+    if not isinstance(payload, Mapping):
+        return {"stored": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    errors: list[dict[str, str]] = []
+    if set(payload) - _FRESH_REQUEST_BUILDER_DOWNSTREAM_CONSUMPTION_REPLAY_STORE_METADATA_FIELDS:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+    contract = get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_replay_store_write_contract(
+        noop_replay_probe_store_path=noop_replay_probe_store_path,
+        noop_replay_probe_ref=payload.get("noop_replay_probe_ref"),
+    )
+    contract_dto = contract.get("dto") if isinstance(contract.get("dto"), Mapping) else None
+    if not contract.get("found") or not isinstance(contract_dto, Mapping) or contract_dto.get("replay_store_contract_ready") is not True:
+        errors.append(_error("replay_store_contract", "replay_store_contract_not_ready"))
+        contract_dto = {}
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("replay_store_entry_ref"), "replaystore-"):
+        errors.append(_error("replay_store_entry_ref", "unsupported_ref_shape"))
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("noop_replay_probe_ref"), "noopreplay-"):
+        errors.append(_error("noop_replay_probe_ref", "unsupported_ref_shape"))
+    elif payload.get("noop_replay_probe_ref") != contract_dto.get("noop_replay_probe_ref"):
+        errors.append(_error("noop_replay_probe_ref", "noop_replay_probe_mismatch"))
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("replay_store_key_ref"), "probe-key-"):
+        errors.append(_error("replay_store_key_ref", "unsupported_ref_shape"))
+    elif payload.get("replay_store_key_ref") != contract_dto.get("replay_store_key_ref"):
+        errors.append(_error("replay_store_key_ref", "replay_store_key_mismatch"))
+    for field in ("noop_replay_probe_record_sha256", "source_record_sha256"):
+        value = payload.get(field)
+        if not (isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value)):
+            errors.append(_error(field, "invalid_sha256"))
+    if payload.get("noop_replay_probe_record_sha256") != contract_dto.get("noop_replay_probe_record_sha256"):
+        errors.append(_error("noop_replay_probe_record_sha256", "noop_replay_probe_mismatch"))
+    if payload.get("source_record_sha256") != contract_dto.get("noop_replay_probe_record_sha256"):
+        errors.append(_error("source_record_sha256", "source_record_mismatch"))
+    if payload.get("contract_write_shape_version") != "safe_replay_store_contract_v1":
+        errors.append(_error("contract_write_shape_version", "unsupported_contract_write_shape_version"))
+    if payload.get("result_status") != "metadata_recorded_only":
+        errors.append(_error("result_status", "unsupported_result_status"))
+    if not _is_opaque_id(payload.get("recorded_by")):
+        errors.append(_error("recorded_by", "invalid_opaque_ref"))
+    if not (isinstance(payload.get("recorded_at"), str) and _ISO_UTC_RE.fullmatch(str(payload.get("recorded_at")))):
+        errors.append(_error("recorded_at", "invalid_timestamp"))
+    if payload.get("operator_confirmation") != "confirmed-replay-store-metadata-only":
+        errors.append(_error("operator_confirmation", "unsupported_confirmation"))
+    if not _is_safe_text(payload.get("safe_summary")):
+        errors.append(_error("safe_summary", "invalid_safe_text"))
+    if not _validate_evidence_refs(payload.get("evidence_refs")):
+        errors.append(_error("evidence_refs", "invalid_opaque_ref"))
+    path = store_path or _default_fresh_request_builder_downstream_consumption_replay_store_metadata_record_store_path()
+    existing, _ = _read_fresh_request_builder_downstream_consumption_replay_store_metadata_records(path)
+    if any(record.get("replay_store_entry_ref") == payload.get("replay_store_entry_ref") for record in existing):
+        errors.append(_error("replay_store_entry_ref", "duplicate_replay_store_entry_ref"))
+    if any(record.get("noop_replay_probe_record_sha256") == payload.get("noop_replay_probe_record_sha256") for record in existing):
+        errors.append(_error("noop_replay_probe_record_sha256", "duplicate_noop_probe_replay_store_metadata"))
+    errors = sorted(errors, key=lambda item: (item["field"], item["code"]))
+    if errors:
+        deduped: list[dict[str, str]] = []
+        seen: set[tuple[str, str]] = set()
+        for error in errors:
+            key = (error["field"], error["code"])
+            if key not in seen:
+                seen.add(key)
+                deduped.append(error)
+        return {"stored": False, "errors": deduped, "dto": None}
+    record_material = {
+        "replay_store_entry_ref": payload.get("replay_store_entry_ref"),
+        "noop_replay_probe_ref": payload.get("noop_replay_probe_ref"),
+        "noop_replay_probe_record_sha256": payload.get("noop_replay_probe_record_sha256"),
+        "replay_store_key_ref": payload.get("replay_store_key_ref"),
+        "source_record_sha256": payload.get("source_record_sha256"),
+        "contract_write_shape_version": "safe_replay_store_contract_v1",
+        "result_status": "metadata_recorded_only",
+        "recorded_by": payload.get("recorded_by"),
+        "recorded_at": payload.get("recorded_at"),
+        "operator_confirmation": "confirmed-replay-store-metadata-only",
+        "safe_summary": payload.get("safe_summary"),
+        "evidence_refs": list(cast(list[object], payload.get("evidence_refs"))),
+    }
+    record_sha = hashlib.sha256(json.dumps(record_material, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+    stored_payload = dict(record_material)
+    stored_payload["replay_store_metadata_record_sha256"] = record_sha
+    dto = _normalize_fresh_request_builder_downstream_consumption_replay_store_metadata_record(stored_payload)
+    if dto is None:
+        return {"stored": False, "errors": [_error("payload", "invalid_normalized_record")], "dto": None}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(dto, sort_keys=True, separators=(",", ":")) + "\n")
+    return {"stored": True, "errors": [], "dto": dto}
 
 
 def execute_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_write(
