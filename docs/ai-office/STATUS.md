@@ -1,5 +1,98 @@
 
 
+## Current status — Fresh request ledger actual consumption disabled readback deployed
+
+Updated: 2026-05-22 15:12 KST
+
+Completed slice:
+
+- Implemented/deployed `fresh_request_builder_downstream_consumption_one_shot_actual_consumption_disabled_readback` as a read-only safe-ref proof that actual downstream consumption remains disabled after replay-store metadata write/readback.
+- Code commit: `82f77c8d feat(office): prove downstream consumption stays disabled`.
+- Added protected API:
+  - `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-actual-consumption-disabled-readback`
+- Added helper:
+  - `get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_actual_consumption_disabled_readback(...)`
+- Added Office UI display-only panel: `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualConsumptionDisabledReadbackPanel`.
+- DOM hook:
+  - `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-consumption-disabled-readback="true"`
+
+Live disabled-readback evidence:
+
+- `found=true`.
+- `actual_consumption_disabled_readback_ready=true`.
+- `replay_store_metadata_record_verified=true`.
+- `safe_ref_chain_verified=true`.
+- downstream consumption enabled false.
+- downstream consumed false.
+- actual downstream consumption allowed false.
+- actual downstream consumption executed false.
+- replay-store write enabled false for this terminal readback rung.
+- real replay store written false.
+- watcher/cron/dispatch/authority-adapter false.
+- VPS NAS mount/authority false.
+
+Verification:
+
+- RED observed before implementation: helper import/API route failed before backend implementation; web test failed before panel/export/API client wiring.
+- `py_compile` for touched backend modules passed.
+- Focused Python downstream-consumption chain tests: 20 passed (`exact_approval`, `actual_preflight`, `execution_gate`, `noop_replay_probe`, `replay_store_contract`, `replay_store_metadata`, `disabled_readback`).
+- Focused Office web downstream-consumption subset: 8 passed.
+- `npm run lint` passed with existing warnings only.
+- `npm run build` passed with existing Vite large chunk warning only.
+- `git diff --check` passed.
+- added-line leak sentinel passed.
+- `web_dist` relative content hash after local build/deploy: `4babc5f2d6d009f580a92cdf14f004fe8e86e0bf554e0ae4acd6e7a363b16b9f`.
+
+Live smoke:
+
+- Dashboard/core VPS worktrees synced to code commit `82f77c8d`.
+- `web_dist` rsynced to both VPS dashboard/core worktrees.
+- Dashboard restarted only. Gateway was not restarted and `hermes-gateway.service` remained active with unchanged `MainPID=519592` and `ActiveEnterTimestamp=Mon 2026-05-18 13:34:14 UTC`.
+- Protected API:
+  - unauthenticated GET returned 401.
+  - authenticated GET returned 200.
+  - `found=true`.
+  - `actual_consumption_disabled_readback_ready=true`.
+  - `replay_store_metadata_record_verified=true`.
+  - `safe_ref_chain_verified=true`.
+  - `downstream_consumption_enabled=false`.
+  - `downstream_consumed=false`.
+  - `actual_downstream_consumption_allowed=false`.
+  - `actual_downstream_consumption_executed=false`.
+  - `replay_store_write_enabled=false`.
+  - `real_replay_store_written=false`.
+  - watcher/cron/dispatch/authority-adapter false.
+  - VPS NAS mount false.
+  - secret/raw path leak false.
+- DOM/browser:
+  - panel present true.
+  - ready true.
+  - downstream consumption enabled false.
+  - executed false.
+  - replay-store write false.
+  - VPS NAS authority false.
+  - controls 0.
+  - raw/body/secret leak false.
+  - console JS errors 0.
+
+Boundaries preserved:
+
+- No actual downstream consumption.
+- No real replay-store write in this rung.
+- No markdown body/write payload/raw root path/secret value exposure.
+- No watcher/cron/daemon activation.
+- No dispatcher binding.
+- No authority-adapter binding.
+- No gateway restart.
+- No public exposure change.
+- No VPS NAS mount/write/secret authority.
+
+Recommended next rung:
+
+- `fresh_request_builder_downstream_consumption_one_shot_actual_consumption_execution_design_if_approved`.
+- Suggested scope: design-only/read-only exact execution boundary for a future one-shot consumption, including exact allowed refs, rollback/disable switch, idempotency/replay requirements, and approval preconditions. Continue to avoid actual consumption, markdown/body payload writes, dispatcher/authority binding, watcher/cron, gateway restart, public exposure changes, and VPS NAS authority until a separate execution gate is explicitly implemented and smoked.
+
+
 ## Current status — Fresh request ledger downstream consumption replay-store metadata write deployed
 
 Updated: 2026-05-22 14:36 KST
