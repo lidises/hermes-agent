@@ -1,3 +1,78 @@
+## Current status — Fresh request ledger consumption payload materialization write gate verified
+
+Updated: 2026-05-22T15:29:19Z
+
+Completed rung: `fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_write_gate_after_request`.
+
+Code commit: `aaf173c3d feat(office): gate payload materialization writes`.
+
+Added protected API:
+
+`GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-consumption-payload-materialization-write-gate`
+
+Added UI panel:
+
+`NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationWriteGatePanel`
+
+DOM hook:
+
+`data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-write-gate="true"`
+
+Live smoke:
+
+- unauthenticated GET: 401
+- authenticated GET: 200
+- `found=true`
+- `consumption_payload_materialization_write_gate_ready=true`
+- `payload_materialization_request_verified=true`
+- `payload_materialization_contract_verified=true`
+- `payload_readiness_verified=true`
+- `payload_body_materialization_write_gate_open=true`
+- `payload_body_materialization_enabled=false`
+- `payload_materialization_write_gate_sha256` length = 64
+- `actual_execution_ref=actualexec-20260522102000-smoke0001`
+- `downstream_consumption_enabled=false`
+- `actual_downstream_consumption_executed=false`
+- `replay_store_write_enabled=false`
+- `real_replay_store_written=false`
+- `markdown_body_included=false`
+- `write_payload_included=false`
+- `raw_root_path_included=false`
+- `secret_value_included=false`
+- `vps_nas_mount_enabled=false`
+- DOM found=true, ready=true, open=true, controls=0, raw leak=false, browser console JS errors=0
+
+Verification:
+
+- py_compile passed
+- focused Python chain tests: 23 passed
+- full Office web tests: 141 passed
+- eslint passed with existing warnings only
+- npm run build passed with existing Vite chunk-size warning only
+- git diff --check passed
+- added-line leak sentinel passed
+- docs leak sentinel passed
+
+VPS:
+
+- core/dashboard worktrees reset to `aaf173c3d45bd9c0b04a34c3320096b0dddfc35c`
+- `web_dist` rsynced to both worktrees
+- dashboard restarted only: `hermes-agent-dashboard.service`, MainPID `825876`, ActiveEnterTimestamp `Fri 2026-05-22 15:23:12 UTC`
+- gateway untouched: MainPID `812845`, ActiveEnterTimestamp `Fri 2026-05-22 11:14:49 UTC`
+
+Boundaries still closed:
+
+- actual downstream consumption disabled
+- markdown/body payload materialization disabled; this rung only opens a metadata-only write-gate projection
+- real replay-store execution write disabled
+- watcher/cron/dispatcher/authority-adapter disabled
+- VPS NAS authority/public exposure disabled
+- gateway restart not performed
+
+Next recommended rung:
+
+`fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_record_after_write_gate`
+
 ## Current status — Fresh request ledger consumption payload materialization request verified
 
 Updated: 2026-05-22T13:21:07Z
