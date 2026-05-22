@@ -1,3 +1,19 @@
+## Current status — Fresh request ledger idempotency replay guard recorded
+
+Updated: 2026-05-22T08:16:58Z
+
+Latest code commit: `d799dea650d82a29b30e3d32a9fb2d91b230f530` (`feat(office): guard downstream consumption replay`).
+
+Completed rung: `fresh_request_builder_downstream_consumption_one_shot_idempotency_replay_guard`.
+
+Key result: one metadata-only VPS guard record was written/read back (`idempotencyguard-20260522081556-d799dea65`). It verifies operator execution approval, execution-design SHA, replay-store metadata SHA, and safe-ref chain, while blocking duplicate execution-design SHA, replay-store entry ref, and operator approval ref reuse.
+
+Safety boundary: downstream consumption, actual execution, real replay-store write, watcher/cron/dispatch/authority-adapter, gateway restart, public exposure, and VPS NAS authority remain disabled. Raw root path, markdown/write payload, and credential-like payloads are not stored or echoed.
+
+Verification: py_compile passed; focused Python guard/approval tests 6 passed; focused Office web tests 10 passed; eslint passed with existing warnings only; npm build passed with existing chunk-size warning only; git diff --check and added-line leak sentinel passed. Live protected API and DOM smoke passed with controls=0 and console JS errors=0.
+
+Next recommended rung: `fresh_request_builder_downstream_consumption_one_shot_execution_opening_after_idempotency_guard`. Open only the next explicit execution-opening/readiness boundary over the guard record; do not yet execute downstream consumption or enable stronger authorities.
+
 ## Current status — Fresh request ledger operator execution approval recorded
 
 Updated: 2026-05-22
