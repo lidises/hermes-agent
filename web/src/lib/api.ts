@@ -1952,6 +1952,73 @@ export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionAc
   };
 }
 
+export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExecutionGateReadbackResult {
+  found: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: null | {
+    schema_version: number;
+    mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_execution_gate_records_readback";
+    record_count: number;
+    limit: number;
+    skipped_count: number;
+    records: OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExecutionGateRecord[];
+    latest_record: OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExecutionGateRecord | null;
+    downstream_consumption_enabled: false;
+    downstream_consumed: false;
+    actual_downstream_consumption_allowed: false;
+    execution_gate_record_write_enabled: boolean;
+    replay_store_write_enabled: false;
+    markdown_body_included: false;
+    write_payload_included: false;
+    raw_root_path_included: false;
+    credential_value_included: false;
+    watcher_enabled: false;
+    cron_enabled: false;
+    dispatch_enabled: false;
+    authority_adapter_binding_enabled: false;
+    vps_nas_mount_enabled: false;
+    capabilities: Record<string, boolean>;
+    next_required_boundary: string;
+  };
+}
+
+export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExecutionGateRecord {
+  schema_version: number;
+  mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_execution_gate_record";
+  execution_gate_opened: boolean;
+  execution_gate_ref: string;
+  selection_profile: "latest_written";
+  exact_approval_ref: string;
+  exact_approval_record_sha256: string;
+  boundary_design_sha256: string;
+  actual_consumption_preflight_verified: boolean;
+  exact_approval_record_verified: boolean;
+  safe_ref_chain_verified: boolean;
+  approved_by: string;
+  approved_at: string;
+  operator_confirmation: string;
+  safe_summary: string;
+  evidence_refs: string[];
+  execution_gate_record_sha256: string;
+  downstream_use_enabled: boolean;
+  downstream_consumption_enabled: false;
+  downstream_consumed: false;
+  actual_downstream_consumption_allowed: false;
+  execution_gate_record_write_enabled: boolean;
+  replay_store_write_enabled: false;
+  markdown_body_included: false;
+  write_payload_included: false;
+  raw_root_path_included: false;
+  credential_value_included: false;
+  watcher_enabled: false;
+  cron_enabled: false;
+  dispatch_enabled: false;
+  authority_adapter_binding_enabled: false;
+  vps_nas_mount_enabled: false;
+  capabilities: Record<string, boolean>;
+  next_required_boundary: string;
+}
+
 export interface OfficeNasKeeperExecutionFromPreviewPayload {
   handoff_ref: string;
   relay_execution_ref: string;
@@ -2397,6 +2464,8 @@ export const api = {
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExactApprovalReadbackResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-exact-approvals?limit=20"),
   getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualPreflight: () =>
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualPreflightResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-actual-consumption-preflight"),
+  getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExecutionGate: () =>
+    fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExecutionGateReadbackResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-execution-gates"),
   appendOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExactApproval: (body: Record<string, unknown>) =>
     fetchJSON<Record<string, unknown>>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-exact-approvals", {
       method: "POST",
