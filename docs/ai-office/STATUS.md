@@ -1,4 +1,81 @@
 
+## Current status — Fresh request ledger downstream consumption preflight deployed
+
+Updated: 2026-05-22 11:19 KST
+
+Completed slice:
+
+- Implemented/deployed `fresh_request_builder_downstream_consumption_preflight` as a display-only/readiness-gated proof.
+- Code commit: `3cbaee4d feat(office): preflight downstream consumption readiness`.
+- Added protected API:
+  - `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-preflight?profile=latest_written&limit=20`
+- Added helper:
+  - `get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_preflight(...)`
+- Added Office UI display-only panel: `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightPanel`.
+- DOM hook:
+  - `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-preflight="true"`
+- VPS live API recognized the existing enablement record `enablement-20260522015130-112d9ecb`, projected `consumption_preflight_passed=true`, and kept actual consumption disabled.
+- Dashboard restarted; gateway not restarted.
+
+Verification:
+
+- RED observed before implementation:
+  - Python import/API route tests failed for missing consumption-preflight helper/route.
+  - Web placement/component tests failed for missing panel.
+- `PYTHONPATH=. .venv/bin/python -m py_compile hermes_cli/office_controlled_mutation.py hermes_cli/web_server.py` passed.
+- Focused Python tests: 6 passed.
+- Focused web tests: 277 passed.
+- `npx eslint src/pages/OfficePage.tsx src/pages/OfficePage.rpg.test.tsx src/lib/api.ts` passed with existing warnings only.
+- `npm run build` passed with existing Vite large chunk warning only.
+- `git diff --check` passed.
+- added-line leak sentinel passed.
+- `web_dist` relative content hash matched on both VPS worktrees:
+  - `0e40f27a5b0898407ae227fcc9b382536522d20c6e6cbeb0bf8d86728a569671`
+
+Live smoke:
+
+- URL: `http://100.122.57.85:8765/office?dom-smoke=3cbaee4d`
+- private `/office` HTTP: 200, raw leak false.
+- Protected API:
+  - `selected_export_review_passed=true`
+  - `manual_operator_review_record_present=true`
+  - `downstream_use_enablement_record_present=true`
+  - `consumption_preflight_passed=true`
+  - `downstream_use_enabled=true`
+  - `downstream_consumption_enabled=false`
+  - `downstream_consumed=false`
+  - `blocked_reason=actual_downstream_consumption_boundary_not_approved`
+  - decision SHA length 64
+  - raw leak false
+- DOM:
+  - panel present true
+  - preflight passed true
+  - enablement record present true
+  - downstream use enabled true
+  - downstream consumption enabled false
+  - downstream consumed false
+  - automation enabled false
+  - VPS NAS authority false
+  - markdown body included false
+  - controls 0
+  - raw leak false
+  - console JS errors 0
+
+Boundaries preserved:
+
+- No actual downstream consumption.
+- No watcher/cron/daemon activation.
+- No dispatcher binding.
+- No authority-adapter binding.
+- No gateway restart.
+- No public exposure change.
+- No VPS NAS mount/write/credential authority.
+- No markdown body/write payload/raw root path/credential value exposure.
+
+Recommended next rung:
+
+- `fresh_request_builder_downstream_consumption_enablement`: bounded safe-ref consumption enablement record that records operator approval to allow a later one-shot downstream consumption boundary. Keep actual consumption, watcher/cron/dispatcher/authority-adapter/VPS NAS authority off until a later explicit boundary.
+
 ## Current status — Fresh request ledger downstream-use enablement record deployed
 
 Updated: 2026-05-22 10:53 KST
