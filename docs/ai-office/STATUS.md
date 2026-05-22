@@ -1,3 +1,64 @@
+## Current status — Fresh request ledger consumption payload materialization contract verified
+
+Updated: 2026-05-22T12:58:49Z
+
+Completed rung: `fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_contract_after_readiness`.
+
+Latest code commit: `b8ac7225b feat(office): contract payload materialization`.
+
+Latest protected API:
+
+- `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-consumption-payload-materialization-contract`
+
+Latest UI panel:
+
+- `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationContractPanel`
+
+Latest DOM hook:
+
+- `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-contract="true"`
+
+Live smoke highlights:
+
+- unauthenticated GET: `401`
+- authenticated GET: `200`
+- `found=true`, `consumption_payload_materialization_contract_ready=true`, `payload_readiness_verified=true`, `payload_contract_verified=true`
+- `materialization_contract_shape_version=safe_consumption_payload_materialization_contract_v1`
+- `payload_materialization_contract_sha256` length: `64`
+- `payload_materialization_status=contract_only_no_body_materialized`
+- `materialization_contract_decision=ready_for_bounded_manual_body_materialization_request_contract`
+- `body_ref_placeholder=future_safe_body_ref_required`, `body_sha256_placeholder=future_body_sha256_required`, `body_bytes_placeholder=0`
+- downstream consumption, replay-store write, markdown/body payload, raw root path, secret value, VPS NAS mount all remain disabled/absent.
+- DOM panel found with `controls=0`, raw leak `false`, browser console JS errors `0`.
+
+Verification:
+
+- `py_compile` passed.
+- Focused Python chain tests: `14 passed`.
+- Focused Office web tests: materialization-contract focused test passed; full `OfficePage.rpg.test.tsx` `139 passed`.
+- `npm run lint -- src/pages/OfficePage.tsx src/lib/api.ts` passed with existing warnings only.
+- `npm run build` passed with existing Vite chunk-size warning only.
+- `git diff --check` passed.
+- added-line leak sentinel passed.
+
+VPS:
+
+- dashboard/core worktrees synced to `b8ac7225b1b820251d2789431150b1b8d6168de6`.
+- dashboard active: MainPID `819107`, ActiveEnterTimestamp `Fri 2026-05-22 12:57:33 UTC`.
+- gateway active and not restarted: MainPID `812845`, ActiveEnterTimestamp `Fri 2026-05-22 11:14:49 UTC`.
+
+Latest handoff:
+
+- `docs/ai-office/plans/2026-05-22-fresh-request-ledger-downstream-consumption-payload-materialization-contract-handoff.md`
+
+Next recommended rung: `fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_request_after_contract`.
+
+Boundary reminder for next rung:
+
+- Keep actual downstream consumption disabled unless a later explicit rung opens it.
+- Do not materialize markdown/body payloads or expose raw roots, secrets, writable payload bodies, public NAS authority, or replay-store writes in API/UI/docs/logs.
+- watcher/cron/dispatcher/authority-adapter, VPS NAS authority/public exposure, and gateway restart remain closed.
+
 ## Current status — Fresh request ledger consumption payload readiness verified
 
 Updated: 2026-05-22T12:25:10Z
