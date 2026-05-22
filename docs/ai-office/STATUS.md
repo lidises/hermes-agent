@@ -1,3 +1,78 @@
+## Current status — Fresh request ledger consumption payload materialization request verified
+
+Updated: 2026-05-22T13:21:07Z
+
+Completed rung: `fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_request_after_contract`.
+
+Code commit: `030fb4620 feat(office): request payload materialization`.
+
+Added protected API:
+
+`GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-consumption-payload-materialization-request`
+
+Added UI panel:
+
+`NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationRequestPanel`
+
+DOM hook:
+
+`data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-request="true"`
+
+Live smoke:
+
+- unauthenticated GET: 401
+- authenticated GET: 200
+- `found=true`
+- `consumption_payload_materialization_request_ready=true`
+- `payload_materialization_contract_verified=true`
+- `payload_readiness_verified=true`
+- `materialization_request_shape_version=safe_consumption_payload_materialization_request_v1`
+- `payload_materialization_request_sha256` length = 64
+- `payload_materialization_request_status=request_only_no_body_materialized`
+- `materialization_request_decision=ready_for_bounded_manual_body_materialization_write_gate`
+- `body_ref_placeholder=future_safe_body_ref_required`
+- `manual_body_materialization_required=true`
+- `payload_body_materialization_enabled=false`
+- `downstream_consumption_enabled=false`
+- `actual_downstream_consumption_executed=false`
+- `replay_store_write_enabled=false`
+- `real_replay_store_written=false`
+- `markdown_body_included=false`
+- `write_payload_included=false`
+- `raw_root_path_included=false`
+- `secret_value_included=false`
+- `vps_nas_mount_enabled=false`
+- DOM found=true, controls=0, raw leak=false, browser console JS errors=0
+
+Verification:
+
+- py_compile passed
+- focused Python chain tests: 17 passed
+- full Office web tests: 140 passed
+- eslint passed with existing warnings only
+- npm run build passed with existing Vite chunk-size warning only
+- git diff --check passed
+- added-line leak sentinel passed
+
+VPS:
+
+- core/dashboard worktrees reset to `030fb46206cf86e06ac216d614c8cfae15e7e74c`
+- dashboard restarted only: `hermes-agent-dashboard.service`, MainPID `820931`, ActiveEnterTimestamp `Fri 2026-05-22 13:19:06 UTC`
+- gateway untouched: MainPID `812845`, ActiveEnterTimestamp `Fri 2026-05-22 11:14:49 UTC`
+
+Boundaries still closed:
+
+- actual downstream consumption disabled
+- markdown/body payload materialization disabled
+- real replay-store execution write disabled
+- watcher/cron/dispatcher/authority-adapter disabled
+- VPS NAS authority/public exposure disabled
+- gateway restart not performed
+
+Next recommended rung:
+
+`fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_write_gate_after_request`
+
 ## Current status — Fresh request ledger consumption payload materialization contract verified
 
 Updated: 2026-05-22T12:58:49Z
