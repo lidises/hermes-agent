@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeManualApprovalRecordingDraftReviewStatus, type OfficeManualApprovalRecordStatus, type OfficeApprovalEventEnvelopeStatus, type OfficeManualApprovalDispatchGateReadinessStatus, type OfficeManualDispatchGateOpenRecordStatus, type OfficeManualRuntimeCommandPreviewRecordStatus, type OfficeManualRuntimeCommandInclusionRecordStatus, type OfficeManualRuntimeCommandExecutionRecordStatus, type OfficeManualTargetMutationReadinessRecordStatus, type OfficeManualTargetMutationRecordStatus, type OfficeManualAdapterDispatchRecordStatus, type OfficeManualKanbanMutationRecordStatus, type OfficeManualNasSaveRecordStatus, type OfficeManualNasKeeperHandoffRecordStatus, type OfficeNasKeeperHandoffClaimDryRunResult, type OfficeNasKeeperHandoffAuthorizationResult, type OfficeNasKeeperExecutionPayloadPreviewResult, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeMacRelayRootReadinessProbeResult, type OfficeNasKeeperLastSuccessfulMacRelayWriteResult, type OfficeNasKeeperFreshOneShotOperatorWriteResult, type OfficeNasKeeperFreshOneShotRequestBuilderResult, type OfficeNasKeeperFreshRequestBuilderLedgerReadbackResult, type OfficeNasKeeperFreshRequestBuilderLedgerExportSelectionReviewResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightResult, type OfficeNasKeeperFreshRequestBuilderLedgerManualReviewRecordReadbackResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamUseEnablementReadbackResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementReadbackResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionOneShotBoundaryDesignResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExactApprovalReadbackResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualPreflightResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExecutionGateReadbackResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionNoopReplayProbeReadbackResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeManualApprovalRecordingDraftReviewStatus, type OfficeManualApprovalRecordStatus, type OfficeApprovalEventEnvelopeStatus, type OfficeManualApprovalDispatchGateReadinessStatus, type OfficeManualDispatchGateOpenRecordStatus, type OfficeManualRuntimeCommandPreviewRecordStatus, type OfficeManualRuntimeCommandInclusionRecordStatus, type OfficeManualRuntimeCommandExecutionRecordStatus, type OfficeManualTargetMutationReadinessRecordStatus, type OfficeManualTargetMutationRecordStatus, type OfficeManualAdapterDispatchRecordStatus, type OfficeManualKanbanMutationRecordStatus, type OfficeManualNasSaveRecordStatus, type OfficeManualNasKeeperHandoffRecordStatus, type OfficeNasKeeperHandoffClaimDryRunResult, type OfficeNasKeeperHandoffAuthorizationResult, type OfficeNasKeeperExecutionPayloadPreviewResult, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeMacRelayRootReadinessProbeResult, type OfficeNasKeeperLastSuccessfulMacRelayWriteResult, type OfficeNasKeeperFreshOneShotOperatorWriteResult, type OfficeNasKeeperFreshOneShotRequestBuilderResult, type OfficeNasKeeperFreshRequestBuilderLedgerReadbackResult, type OfficeNasKeeperFreshRequestBuilderLedgerExportSelectionReviewResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightResult, type OfficeNasKeeperFreshRequestBuilderLedgerManualReviewRecordReadbackResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamUseEnablementReadbackResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementReadbackResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionOneShotBoundaryDesignResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExactApprovalReadbackResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualPreflightResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExecutionGateReadbackResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionNoopReplayProbeReadbackResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayStoreWriteContractResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -7931,6 +7931,87 @@ export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionNoopRepla
 }
 
 
+export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayStoreWriteContractPanel({
+  contract,
+  error,
+}: {
+  contract?: OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayStoreWriteContractResult | null;
+  error?: string | null;
+}) {
+  const dto = contract?.dto ?? null;
+  const rows = [
+    ["replay_store_contract_ready", String(Boolean(dto?.replay_store_contract_ready))],
+    ["noop_replay_probe_record_verified", String(Boolean(dto?.noop_replay_probe_record_verified))],
+    ["noop_replay_probe_ref", String(dto?.noop_replay_probe_ref ?? "waiting")],
+    ["safe_ref_chain_verified", String(Boolean(dto?.safe_ref_chain_verified))],
+    ["idempotency_probe_key_verified", String(Boolean(dto?.idempotency_probe_key_verified))],
+    ["replay_store_key_ref", String(dto?.replay_store_key_ref ?? "available after contract")],
+    ["contract_write_shape_version", String(dto?.contract_write_shape_version ?? "safe_replay_store_contract_v1")],
+    ["replay_store_write_enabled", String(Boolean(dto?.replay_store_write_enabled))],
+    ["real_replay_store_written", String(Boolean(dto?.real_replay_store_written))],
+    ["actual_downstream_consumption_allowed", String(Boolean(dto?.actual_downstream_consumption_allowed))],
+    ["next_required_boundary", String(dto?.next_required_boundary ?? "fresh_request_builder_downstream_consumption_one_shot_replay_store_write_contract")],
+  ];
+  const automation = Boolean(dto?.watcher_enabled || dto?.cron_enabled || dto?.dispatch_enabled || dto?.authority_adapter_binding_enabled);
+  const vpsAuthority = Boolean(dto?.vps_nas_mount_enabled);
+  const preview = dto
+    ? JSON.stringify({
+        format: "downstream_consumption_replay_store_write_contract_v1",
+        replay_store_contract_ready: dto.replay_store_contract_ready,
+        noop_replay_probe_ref: dto.noop_replay_probe_ref,
+        noop_replay_probe_record_sha256: dto.noop_replay_probe_record_sha256,
+        replay_store_key_ref: dto.replay_store_key_ref,
+        contract_write_shape_version: dto.contract_write_shape_version,
+        allowed_replay_store_fields: dto.allowed_replay_store_fields,
+        replay_store_write_enabled: dto.replay_store_write_enabled,
+        real_replay_store_written: dto.real_replay_store_written,
+        downstream_consumption_enabled: dto.downstream_consumption_enabled,
+        downstream_consumed: dto.downstream_consumed,
+        actual_downstream_consumption_allowed: dto.actual_downstream_consumption_allowed,
+        automation_enabled: automation,
+        vps_nas_mount_enabled: dto.vps_nas_mount_enabled,
+      }, null, 2)
+    : "replay-store write contract not ready";
+  return (
+    <section
+      className="rounded-2xl border border-sky-400/20 bg-sky-500/5 p-4 shadow-[0_0_36px_rgba(56,189,248,0.08)]"
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-store-write-contract="true"
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-store-write-contract-ready={String(Boolean(dto?.replay_store_contract_ready))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-store-write-contract-downstream-consumption-enabled={String(Boolean(dto?.downstream_consumption_enabled))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-store-write-contract-replay-store-write={String(Boolean(dto?.replay_store_write_enabled))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-store-write-contract-real-replay-store-written={String(Boolean(dto?.real_replay_store_written))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-store-write-contract-automation-enabled={String(automation)}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-store-write-contract-vps-nas-authority={String(vpsAuthority)}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-200/70">Downstream consumption replay-store contract</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">replay-store write contract · still no replay write</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Defines the safe future replay-store record shape from the verified noop probe. This remains display-only and does not write replay state, consume downstream data, bind adapters, start automation, or grant VPS NAS authority.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? "readback request failed" : dto?.replay_store_contract_ready ? "contract ready; replay write closed" : "waiting for noop probe"}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-4" data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-store-write-contract-fields="true">
+        {rows.map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-store-write-contract-field={key}>
+            <div className="font-semibold text-foreground">{key}</div>
+            <div className="mt-1 break-words leading-5 text-midground/70">{value}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 rounded border border-current/15 bg-black/30 p-3 text-[11px] leading-5 text-midground/70" data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-store-write-contract-preview="true">
+        <div className="mb-2 font-semibold text-foreground">safe replay-store contract readback</div>
+        <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words">{preview}</pre>
+      </div>
+    </section>
+  );
+}
+
+
 export function ApprovedRealOneShotDispatchGateDesignPanel({
   status,
   error,
@@ -9471,6 +9552,8 @@ export default function OfficePage() {
   const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExecutionGateError, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExecutionGateError] = useState<string | null>(null);
   const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionNoopReplayProbeResult, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionNoopReplayProbeResult] = useState<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionNoopReplayProbeReadbackResult | null>(null);
   const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionNoopReplayProbeError, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionNoopReplayProbeError] = useState<string | null>(null);
+  const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayStoreWriteContractResult, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayStoreWriteContractResult] = useState<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayStoreWriteContractResult | null>(null);
+  const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayStoreWriteContractError, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayStoreWriteContractError] = useState<string | null>(null);
   const nasKeeperClaimDryRunKeyRef = useRef<string | null>(null);
   const nasKeeperAuthorizationKeyRef = useRef<string | null>(null);
   const nasKeeperPayloadPreviewKeyRef = useRef<string | null>(null);
@@ -9956,6 +10039,19 @@ export default function OfficePage() {
         setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionNoopReplayProbeError("request failed");
       });
   }, [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionNoopReplayProbeResult]);
+
+  useEffect(() => {
+    if (nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayStoreWriteContractResult?.dto) return;
+    api.getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayStoreWriteContract()
+      .then((result) => {
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayStoreWriteContractResult(result);
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayStoreWriteContractError(null);
+      })
+      .catch(() => {
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayStoreWriteContractResult(null);
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayStoreWriteContractError("request failed");
+      });
+  }, [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayStoreWriteContractResult]);
 
 
   const executeNasSingleFileWrite = useCallback(async () => {
@@ -11111,6 +11207,7 @@ export default function OfficePage() {
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualPreflightPanel result={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualPreflightResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualPreflightError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExecutionGatePanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExecutionGateResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExecutionGateError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionNoopReplayProbePanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionNoopReplayProbeResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionNoopReplayProbeError} />
+      <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayStoreWriteContractPanel contract={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayStoreWriteContractResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayStoreWriteContractError} />
 
       <OfficeVisualizerEvidenceDrawer terminalResult={nasKeeperGuardedFailureStateResult}>
       <NasKeeperLiveOperatorLanePanel

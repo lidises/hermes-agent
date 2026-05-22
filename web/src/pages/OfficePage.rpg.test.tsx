@@ -7089,4 +7089,70 @@ describe("ControlledMutationApprovalBoundarySummaryPanel", () => {
     expect(html).not.toMatch(/<button|<form|<input|<select|<textarea/);
   });
 
+  it("renders downstream consumption replay-store write contract without writing replay state", () => {
+    const contract = {
+      found: true,
+      errors: [],
+      dto: {
+        schema_version: 1,
+        mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_replay_store_write_contract",
+        replay_store_contract_ready: true,
+        noop_replay_probe_record_verified: true,
+        noop_replay_probe_ref: "noopreplay-20260522133000-cafe2002",
+        noop_replay_probe_record_sha256: "b".repeat(64),
+        execution_gate_ref: "executiongate-20260522125000-cafe1001",
+        execution_gate_record_sha256: "a".repeat(64),
+        safe_ref_chain_verified: true,
+        idempotency_probe_key_ref: "probe-key-20260522133000-cafe2002",
+        idempotency_probe_key_verified: true,
+        replay_store_key_ref: "probe-key-20260522133000-cafe2002",
+        contract_write_shape_version: "safe_replay_store_contract_v1",
+        allowed_replay_store_fields: ["replay_store_entry_ref", "noop_replay_probe_ref", "replay_store_key_ref", "source_record_sha256", "result_status"],
+        downstream_use_enabled: true,
+        downstream_consumption_enabled: false,
+        downstream_consumed: false,
+        actual_downstream_consumption_allowed: false,
+        replay_store_write_enabled: false,
+        real_replay_store_written: false,
+        markdown_body_included: false,
+        write_payload_included: false,
+        raw_root_path_included: false,
+        credential_value_included: false,
+        watcher_enabled: false,
+        cron_enabled: false,
+        dispatch_enabled: false,
+        authority_adapter_binding_enabled: false,
+        vps_nas_mount_enabled: false,
+        capabilities: {
+          replay_store_contract_readback_enabled: true,
+          replay_store_metadata_write_enabled: false,
+          real_replay_store_write_enabled: false,
+          actual_downstream_consumption_enabled: false,
+          watcher_enabled: false,
+          cron_enabled: false,
+          dispatch_enabled: false,
+          authority_adapter_binding_enabled: false,
+          vps_nas_mount_enabled: false,
+        },
+        next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_replay_store_metadata_write",
+      },
+    } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayStoreWriteContractResult;
+    const html = renderToStaticMarkup(
+      <OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayStoreWriteContractPanel contract={contract} />,
+    );
+
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-store-write-contract="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-store-write-contract-ready="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-store-write-contract-downstream-consumption-enabled="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-store-write-contract-replay-store-write="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-store-write-contract-real-replay-store-written="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-store-write-contract-automation-enabled="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-store-write-contract-vps-nas-authority="false"');
+    expect(html).toContain("safe_replay_store_contract_v1");
+    expect(html).toContain("fresh_request_builder_downstream_consumption_one_shot_replay_store_metadata_write");
+    expect(html).not.toMatch(/<button|<form|<input|<select|<textarea/);
+    const rawPathLeakPattern = new RegExp(["/Users/lidises", "/home/hermes", "/vol" + "ume1", "sk-test", "markdown_body", "write payload"].join("|"), "i");
+    expect(html).not.toMatch(rawPathLeakPattern);
+  });
+
 });

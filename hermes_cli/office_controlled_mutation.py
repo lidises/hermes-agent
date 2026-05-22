@@ -10512,6 +10512,81 @@ def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_do
         handle.write(json.dumps(dto, sort_keys=True, separators=(",", ":")) + "\n")
     return {"stored": True, "errors": [], "dto": dto}
 
+
+def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_replay_store_write_contract(
+    *,
+    noop_replay_probe_store_path: Path | None = None,
+    noop_replay_probe_ref: object = None,
+) -> dict[str, object]:
+    """Return the safe replay-store write contract without writing replay state."""
+    readback = list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_noop_replay_probe_records(
+        store_path=noop_replay_probe_store_path,
+        noop_replay_probe_ref=noop_replay_probe_ref,
+    )
+    if readback.get("errors"):
+        return {"found": False, "errors": readback.get("errors", []), "dto": None}
+    readback_dto = readback.get("dto") if isinstance(readback.get("dto"), Mapping) else None
+    latest = readback_dto.get("latest_record") if isinstance(readback_dto, Mapping) else None
+    if not isinstance(latest, Mapping) or latest.get("noop_replay_probe_recorded") is not True:
+        return {
+            "found": False,
+            "errors": [_error("noop_replay_probe_record", "noop_replay_probe_record_not_ready")],
+            "dto": None,
+        }
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_replay_store_write_contract",
+        "replay_store_contract_ready": True,
+        "noop_replay_probe_record_verified": True,
+        "noop_replay_probe_ref": latest.get("noop_replay_probe_ref"),
+        "noop_replay_probe_record_sha256": latest.get("noop_replay_probe_record_sha256"),
+        "execution_gate_ref": latest.get("execution_gate_ref"),
+        "execution_gate_record_sha256": latest.get("execution_gate_record_sha256"),
+        "safe_ref_chain_verified": bool(latest.get("safe_ref_chain_verified")),
+        "idempotency_probe_key_ref": latest.get("idempotency_probe_key_ref"),
+        "idempotency_probe_key_verified": bool(latest.get("idempotency_probe_key_verified")),
+        "replay_store_key_ref": latest.get("idempotency_probe_key_ref"),
+        "contract_write_shape_version": "safe_replay_store_contract_v1",
+        "allowed_replay_store_fields": [
+            "replay_store_entry_ref",
+            "noop_replay_probe_ref",
+            "replay_store_key_ref",
+            "source_record_sha256",
+            "result_status",
+        ],
+        "downstream_use_enabled": bool(latest.get("downstream_use_enabled")),
+        "downstream_consumption_enabled": False,
+        "downstream_consumed": False,
+        "actual_downstream_consumption_allowed": False,
+        "replay_store_write_enabled": False,
+        "real_replay_store_written": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "capabilities": {
+            "replay_store_contract_readback_enabled": True,
+            "replay_store_metadata_write_enabled": False,
+            "real_replay_store_write_enabled": False,
+            "actual_downstream_consumption_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_credential_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+        },
+        "next_required_boundary": "fresh_request_builder_downstream_consumption_one_shot_replay_store_metadata_write",
+    }
+    return {"found": True, "errors": [], "dto": dto}
+
+
 def execute_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_write(
     payload: object, *, queue_dir: Path | str | None = None, root_path: Path | str | None = None
 ) -> dict[str, object]:
