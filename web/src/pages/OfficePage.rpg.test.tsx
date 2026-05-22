@@ -7214,6 +7214,70 @@ describe("ControlledMutationApprovalBoundarySummaryPanel", () => {
     expect(html).not.toMatch(rawPathLeakPattern);
   });
 
+  it("renders idempotency replay guard as metadata-only and non-executing", () => {
+    const record = {
+      found: true,
+      errors: [],
+      dto: {
+        schema_version: 1,
+        mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_idempotency_replay_guard_records_readback",
+        record_count: 1,
+        latest_record: {
+          schema_version: 1,
+          mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_idempotency_replay_guard_record",
+          idempotency_replay_guard_recorded: true,
+          idempotency_replay_guard_ref: "idempotencyguard-20260522173000-test",
+          operator_execution_approval_ref: "operatorexecapproval-20260522161000-test",
+          operator_execution_approval_record_sha256: "a".repeat(64),
+          replay_store_entry_ref: "replaystore-20260522161000-test",
+          replay_store_metadata_record_sha256: "b".repeat(64),
+          execution_design_sha256: "c".repeat(64),
+          idempotency_replay_guard_record_sha256: "d".repeat(64),
+          operator_execution_approval_record_verified: true,
+          execution_design_verified: true,
+          replay_store_metadata_record_verified: true,
+          safe_ref_chain_verified: true,
+          duplicate_execution_design_blocked: true,
+          duplicate_replay_store_entry_blocked: true,
+          duplicate_operator_execution_approval_blocked: true,
+          downstream_use_enabled: true,
+          downstream_consumption_enabled: false,
+          downstream_consumed: false,
+          actual_downstream_consumption_allowed: false,
+          actual_downstream_consumption_executed: false,
+          replay_store_write_enabled: false,
+          real_replay_store_written: false,
+          markdown_body_included: false,
+          write_payload_included: false,
+          raw_root_path_included: false,
+          secret_value_included: false,
+          watcher_enabled: false,
+          cron_enabled: false,
+          dispatch_enabled: false,
+          authority_adapter_binding_enabled: false,
+          vps_nas_mount_enabled: false,
+          next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_execution_opening_after_idempotency_guard",
+        },
+        next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_execution_opening_after_idempotency_guard",
+      },
+    } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionIdempotencyReplayGuardResult;
+    const html = renderToStaticMarkup(
+      <OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionIdempotencyReplayGuardPanel record={record} />,
+    );
+
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-idempotency-replay-guard="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-idempotency-replay-guard-recorded="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-idempotency-replay-guard-executed="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-idempotency-replay-guard-replay-store-write="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-idempotency-replay-guard-vps-nas-authority="false"');
+    expect(html).toContain("duplicate_execution_design_blocked</dt><dd>true");
+    expect(html).toContain("duplicate_replay_store_entry_blocked</dt><dd>true");
+    expect(html).not.toContain("/volume1");
+    expect(html).not.toContain("write payload");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("<input");
+  });
+
   it("renders operator execution approval as metadata-only and non-executing", () => {
     const record = {
       found: true,

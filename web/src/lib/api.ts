@@ -2334,6 +2334,73 @@ export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionOp
   };
 }
 
+
+export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionIdempotencyReplayGuardResult {
+  found: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: null | {
+    schema_version: number;
+    mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_idempotency_replay_guard_records_readback";
+    record_count: number;
+    limit?: number;
+    skipped_count?: number;
+    records?: Array<Record<string, unknown>>;
+    latest_record: null | {
+      schema_version: number;
+      mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_idempotency_replay_guard_record";
+      idempotency_replay_guard_recorded: boolean;
+      idempotency_replay_guard_ref: string;
+      operator_execution_approval_ref: string;
+      operator_execution_approval_record_sha256: string;
+      replay_store_entry_ref: string;
+      replay_store_metadata_record_sha256: string;
+      execution_design_sha256: string;
+      idempotency_replay_guard_record_sha256: string;
+      operator_execution_approval_record_verified: boolean;
+      execution_design_verified: boolean;
+      replay_store_metadata_record_verified: boolean;
+      safe_ref_chain_verified: boolean;
+      duplicate_execution_design_blocked: boolean;
+      duplicate_replay_store_entry_blocked: boolean;
+      duplicate_operator_execution_approval_blocked: boolean;
+      downstream_use_enabled: boolean;
+      downstream_consumption_enabled: false;
+      downstream_consumed: false;
+      actual_downstream_consumption_allowed: false;
+      actual_downstream_consumption_executed: false;
+      replay_store_write_enabled: false;
+      real_replay_store_written: false;
+      markdown_body_included: false;
+      write_payload_included: false;
+      raw_root_path_included: false;
+      secret_value_included?: false;
+      watcher_enabled: false;
+      cron_enabled: false;
+      dispatch_enabled: false;
+      authority_adapter_binding_enabled: false;
+      vps_nas_mount_enabled: false;
+      next_required_boundary: string;
+    };
+    downstream_use_enabled?: boolean;
+    downstream_consumption_enabled?: false;
+    downstream_consumed?: false;
+    actual_downstream_consumption_allowed?: false;
+    actual_downstream_consumption_executed?: false;
+    replay_store_write_enabled?: false;
+    real_replay_store_written?: false;
+    markdown_body_included?: false;
+    write_payload_included?: false;
+    raw_root_path_included?: false;
+    watcher_enabled?: false;
+    cron_enabled?: false;
+    dispatch_enabled?: false;
+    authority_adapter_binding_enabled?: false;
+    vps_nas_mount_enabled?: false;
+    capabilities?: Record<string, boolean>;
+    next_required_boundary: string;
+  };
+}
+
 export interface OfficeNasKeeperExecutionFromPreviewPayload {
   handoff_ref: string;
   relay_execution_ref: string;
@@ -2793,6 +2860,8 @@ export const api = {
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualConsumptionExecutionDesignResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-actual-consumption-execution-design"),
   getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionOperatorExecutionApproval: () =>
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionOperatorExecutionApprovalResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-operator-execution-approvals"),
+  getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionIdempotencyReplayGuard: () =>
+    fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionIdempotencyReplayGuardResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-idempotency-replay-guards"),
   appendOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExactApproval: (body: Record<string, unknown>) =>
     fetchJSON<Record<string, unknown>>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-exact-approvals", {
       method: "POST",

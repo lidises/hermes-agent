@@ -123,6 +123,8 @@ from hermes_cli.office_controlled_mutation import (
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_actual_consumption_execution_design,
     append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_operator_execution_approval_record,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_operator_execution_approval_records,
+    append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_idempotency_replay_guard_record,
+    list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_idempotency_replay_guard_records,
     execute_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_write,
     execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_preview,
     record_office_controlled_mutation_nas_keeper_mac_relay_execution_state,
@@ -992,6 +994,22 @@ async def list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledge
 async def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_operator_execution_approval_record_route(payload: Any = Body(None)):
     """Append one bounded operator execution approval record; actual consumption stays disabled."""
     return append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_operator_execution_approval_record(payload)
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-idempotency-replay-guards")
+async def list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_idempotency_replay_guard_records_route(
+    idempotency_replay_guard_ref: Optional[str] = None,
+):
+    """Read bounded idempotency replay guard records; actual consumption stays disabled."""
+    return list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_idempotency_replay_guard_records(
+        idempotency_replay_guard_ref=idempotency_replay_guard_ref,
+    )
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-idempotency-replay-guards")
+async def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_idempotency_replay_guard_record_route(payload: Any = Body(None)):
+    """Append one bounded idempotency replay guard record; actual consumption stays disabled."""
+    return append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_idempotency_replay_guard_record(payload)
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablements")
