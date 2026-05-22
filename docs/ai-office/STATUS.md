@@ -1,5 +1,97 @@
 
 
+## Current status — Fresh request ledger downstream consumption replay-store metadata write deployed
+
+Updated: 2026-05-22 14:36 KST
+
+Completed slice:
+
+- Implemented/deployed `fresh_request_builder_downstream_consumption_one_shot_replay_store_metadata_write` as a bounded safe-ref metadata-only replay-store record write/readback.
+- Code commit: `c94608e1 feat(office): record replay-store metadata boundary`.
+- Added protected API:
+  - `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-replay-store-metadata-records`
+  - `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-replay-store-metadata-records`
+- Added helpers:
+  - `append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_replay_store_metadata_record(...)`
+  - `list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_replay_store_metadata_records(...)`
+- Added Office UI display-only panel: `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayStoreMetadataPanel`.
+- DOM hook:
+  - `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-store-metadata="true"`
+
+Live replay-store metadata evidence:
+
+- `replay_store_metadata_recorded=true`.
+- `safe_ref_chain_verified=true`.
+- `noop_replay_probe_record_verified=true`.
+- `source_record_sha256_verified=true`.
+- `contract_write_shape_version=safe_replay_store_contract_v1`.
+- `result_status=metadata_recorded_only`.
+- downstream consumption enabled false; downstream consumed false; actual downstream consumption allowed false.
+- replay-store write enabled true for the bounded metadata-only record boundary.
+- real replay store written false.
+- dispatch/authority-adapter/watcher/cron false.
+- VPS NAS mount/authority false.
+
+Verification:
+
+- RED observed before implementation: backend/API tests failed before helper/route implementation; web test failed before panel/export/API client wiring.
+- `py_compile` for touched backend modules passed.
+- Focused Python chain tests: 18 passed (`boundary_design`, `exact_approval`, `execution_gate`, `noop_replay_probe`, `replay_store_contract`, `replay_store_metadata`).
+- Focused Office web test subset: 8 passed.
+- `npm run lint` passed with existing warnings only.
+- `npm run build` passed with existing Vite large chunk warning only.
+- `git diff --check` passed.
+- added-line leak sentinel passed.
+- `web_dist` relative content hash after local build/deploy: `8627bcde1ea0c390337c4ddad4aa3e3225d4b053ec70ea748ba7fb1b0912710b`.
+
+Live smoke:
+
+- Dashboard/core VPS worktrees synced to code commit `c94608e1`.
+- `web_dist` rsynced to the VPS dashboard worktree.
+- Dashboard restarted only. Gateway was not restarted and `hermes-gateway.service` remained active.
+- Protected API:
+  - unauthenticated GET returned 401.
+  - authenticated GET returned status 200.
+  - `found=true`.
+  - `record_count=1` for live safe metadata record smoke.
+  - `replay_store_metadata_recorded=true`.
+  - `downstream_consumption_enabled=false`.
+  - `downstream_consumed=false`.
+  - `actual_downstream_consumption_allowed=false`.
+  - `replay_store_write_enabled=true` for metadata-only boundary.
+  - `real_replay_store_written=false`.
+  - watcher/cron/dispatch/authority-adapter false.
+  - VPS NAS authority false.
+- DOM/browser:
+  - panel present true
+  - recorded true
+  - downstream consumption enabled false
+  - replay-store write true for metadata-only boundary
+  - real replay store written false
+  - automation enabled false
+  - VPS NAS authority false
+  - controls 0
+  - raw/secret leak false
+  - console JS errors 0
+
+Boundaries preserved:
+
+- No actual downstream consumption.
+- No real replay-store write for consumption execution; only bounded safe metadata record append.
+- No markdown body/write payload/raw root path/credential value exposure.
+- No watcher/cron/daemon activation.
+- No dispatcher binding.
+- No authority-adapter binding.
+- No gateway restart.
+- No public exposure change.
+- No VPS NAS mount/write/credential authority.
+
+Recommended next rung:
+
+- `fresh_request_builder_downstream_consumption_one_shot_actual_consumption_disabled_readback`.
+- Suggested scope: read-only safe-ref proof that actual downstream consumption remains disabled after the replay-store metadata record. Do not execute downstream consumption, write markdown/body payloads, bind dispatcher/authority adapter, start watcher/cron, restart gateway, expose public routes, or grant VPS NAS authority.
+
+
 ## Current status — Fresh request ledger downstream consumption replay-store write contract deployed
 
 Updated: 2026-05-22 14:08 KST
