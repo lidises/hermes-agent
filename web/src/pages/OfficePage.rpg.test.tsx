@@ -7334,6 +7334,56 @@ describe("ControlledMutationApprovalBoundarySummaryPanel", () => {
     expect(html).not.toMatch(new RegExp(["/Us" + "ers/lidises", "/ho" + "me/hermes", "/vol" + "ume1", "sk" + "-test"].join("|"), "i"));
   });
 
+  it("renders the downstream consumption payload contract as contract-only and display-only", () => {
+    const record = {
+      found: true,
+      errors: [],
+      dto: {
+        schema_version: 1,
+        mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_contract",
+        consumption_payload_contract_ready: true,
+        post_execution_record_readback_verified: true,
+        actual_execution_record_verified: true,
+        safe_ref_chain_verified: true,
+        actual_execution_ref: "actualexec-20260522100100-test0001",
+        actual_execution_record_sha256: "a".repeat(64),
+        source_actual_execution_record_sha256: "a".repeat(64),
+        payload_contract_shape_version: "safe_consumption_payload_contract_v1",
+        payload_contract_sha256: "b".repeat(64),
+        allowed_payload_fields: ["actual_execution_ref", "payload_contract_sha256"],
+        payload_materialization_status: "contract_only_no_body_materialized",
+        downstream_use_enabled: true,
+        downstream_consumption_enabled: false,
+        downstream_consumed: false,
+        actual_downstream_consumption_allowed: false,
+        actual_downstream_consumption_executed: false,
+        replay_store_write_enabled: false,
+        real_replay_store_written: false,
+        markdown_body_included: false,
+        write_payload_included: false,
+        raw_root_path_included: false,
+        secret_value_included: false,
+        watcher_enabled: false,
+        cron_enabled: false,
+        dispatch_enabled: false,
+        authority_adapter_binding_enabled: false,
+        vps_nas_mount_enabled: false,
+        capabilities: { consumption_payload_contract_enabled: true },
+        next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_consumption_payload_readiness_after_contract",
+      },
+    } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadContractResult;
+
+    const html = renderToStaticMarkup(<OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadContractPanel record={record} error={null} />);
+
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-contract="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-contract-ready="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-contract-executed="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-contract-replay-store-write="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-contract-vps-nas-authority="false"');
+    expect(html).toContain("contract_only_no_body_materialized");
+    expect(html).not.toMatch(new RegExp(["must" + "-not-echo", "/vol" + "ume1", "sk" + "-test"].join("|"), "i"));
+  });
+
   it("renders actual execution record after contract as metadata-only and non-consuming", () => {
     const record = {
       found: true,
