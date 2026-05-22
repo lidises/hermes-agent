@@ -7214,6 +7214,62 @@ describe("ControlledMutationApprovalBoundarySummaryPanel", () => {
     expect(html).not.toMatch(rawPathLeakPattern);
   });
 
+  it("renders execution opening as metadata-only and non-executing", () => {
+    const record = {
+      found: true,
+      errors: [],
+      dto: {
+        schema_version: 1,
+        mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_execution_opening_records_readback",
+        record_count: 1,
+        records: [],
+        next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_noop_execution_probe_after_opening",
+        latest_record: {
+          schema_version: 1,
+          mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_execution_opening_record",
+          execution_opening_recorded: true,
+          execution_opening_ready: true,
+          execution_opening_ref: "executionopen-20260522083000-test0001",
+          idempotency_replay_guard_ref: "idempotencyguard-20260522081556-test0001",
+          idempotency_replay_guard_record_verified: true,
+          safe_ref_chain_verified: true,
+          downstream_use_enabled: true,
+          downstream_consumption_enabled: false,
+          actual_downstream_consumption_allowed: false,
+          actual_downstream_consumption_executed: false,
+          replay_store_write_enabled: false,
+          real_replay_store_written: false,
+          watcher_enabled: false,
+          cron_enabled: false,
+          dispatch_enabled: false,
+          authority_adapter_binding_enabled: false,
+          vps_nas_mount_enabled: false,
+          markdown_body_included: false,
+          write_payload_included: false,
+          raw_root_path_included: false,
+          secret_value_included: false,
+          execution_opening_record_sha256: "f".repeat(64),
+          next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_noop_execution_probe_after_opening",
+        },
+      },
+    } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExecutionOpeningResult;
+    const html = renderToStaticMarkup(
+      <OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExecutionOpeningPanel record={record} />,
+    );
+
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-execution-opening="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-execution-opening-ready="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-execution-opening-executed="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-execution-opening-replay-store-write="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-execution-opening-vps-nas-authority="false"');
+    expect(html).toContain("execution_opening_ready</dt><dd>true");
+    expect(html).toContain("next_required_boundary</dt><dd>fresh_request_builder_downstream_consumption_one_shot_noop_execution_probe_after_opening");
+    expect(html).not.toContain("/volume1");
+    expect(html).not.toContain("write payload");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("<input");
+  });
+
   it("renders idempotency replay guard as metadata-only and non-executing", () => {
     const record = {
       found: true,

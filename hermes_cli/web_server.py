@@ -125,6 +125,8 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_operator_execution_approval_records,
     append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_idempotency_replay_guard_record,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_idempotency_replay_guard_records,
+    append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_execution_opening_record,
+    list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_execution_opening_records,
     execute_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_write,
     execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_preview,
     record_office_controlled_mutation_nas_keeper_mac_relay_execution_state,
@@ -1010,6 +1012,22 @@ async def list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledge
 async def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_idempotency_replay_guard_record_route(payload: Any = Body(None)):
     """Append one bounded idempotency replay guard record; actual consumption stays disabled."""
     return append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_idempotency_replay_guard_record(payload)
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-execution-openings")
+async def list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_execution_opening_records_route(
+    execution_opening_ref: Optional[str] = None,
+):
+    """Read bounded execution-opening records; actual consumption stays disabled."""
+    return list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_execution_opening_records(
+        execution_opening_ref=execution_opening_ref,
+    )
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-execution-openings")
+async def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_execution_opening_record_route(payload: Any = Body(None)):
+    """Append one bounded execution-opening metadata record; actual consumption stays disabled."""
+    return append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_execution_opening_record(payload)
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablements")
