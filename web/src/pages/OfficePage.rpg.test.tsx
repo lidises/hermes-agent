@@ -5015,6 +5015,75 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).not.toContain("<textarea");
   });
 
+  it("renders downstream consumption actual preflight over exact approval without consuming", () => {
+    const Panel = (OfficePageModule as unknown as {
+      NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualPreflightPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualPreflightPanel>>;
+    }).NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualPreflightPanel;
+    expect(Panel).toBeTypeOf("function");
+
+    const html = renderToStaticMarkup(
+      <Panel
+        result={{
+          found: true,
+          errors: [],
+          dto: {
+            schema_version: 1,
+            mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_actual_consumption_preflight",
+            actual_consumption_preflight_ready: true,
+            exact_approval_record_verified: true,
+            safe_ref_chain_verified: true,
+            exact_approval_ref: "exactapproval-20260522120000-cafe9001",
+            exact_approval_record_sha256: "b".repeat(64),
+            boundary_design_sha256: "a".repeat(64),
+            source_consumption_enablement_ref: "consumptionenable-20260521170000-bafe8001",
+            source_consumption_enablement_record_sha256: "f".repeat(64),
+            target_allowlist_verified: true,
+            idempotency_replay_lookup_required: true,
+            disable_switch_required: true,
+            downstream_use_enabled: true,
+            downstream_consumption_enabled: false,
+            downstream_consumed: false,
+            actual_downstream_consumption_allowed: false,
+            approval_record_write_enabled: true,
+            replay_store_write_enabled: false,
+            markdown_body_included: false,
+            write_payload_included: false,
+            raw_root_path_included: false,
+            credential_value_included: false,
+            watcher_enabled: false,
+            cron_enabled: false,
+            dispatch_enabled: false,
+            authority_adapter_binding_enabled: false,
+            vps_nas_mount_enabled: false,
+            capabilities: {},
+            next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_actual_consumption_execution_gate",
+          },
+        }}
+        error={null}
+      />,
+    );
+
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-preflight="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-preflight-ready="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-preflight-exact-approval-verified="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-preflight-downstream-consumption-enabled="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-preflight-replay-store-write="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-preflight-automation-enabled="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-preflight-vps-nas-authority="false"');
+    expect(html).toContain("actual consumption preflight · still no execution");
+    expect(html).toContain("downstream_consumption_actual_preflight_v1");
+    expect(html).not.toContain("Safe body");
+    expect(html).not.toContain("/Users/" + "lidises");
+    expect(html).not.toContain("/home/hermes");
+    expect(html).not.toContain("/vol" + "ume1");
+    expect(html).not.toContain("sk" + "-test");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("<form");
+    expect(html).not.toContain("<input");
+    expect(html).not.toContain("<select");
+    expect(html).not.toContain("<textarea");
+  });
+
   it("renders approved real one-shot dispatch gate design without executable controls", () => {
     const ApprovedRealOneShotDispatchGateDesignPanel = (OfficePageModule as unknown as {
       ApprovedRealOneShotDispatchGateDesignPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.ApprovedRealOneShotDispatchGateDesignPanel>>;

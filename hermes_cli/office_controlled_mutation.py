@@ -9916,6 +9916,71 @@ def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_do
     return {"stored": True, "errors": [], "dto": dto}
 
 
+def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_actual_consumption_preflight(
+    *,
+    exact_approval_store_path: Path | None = None,
+    exact_approval_ref: object = None,
+) -> dict[str, object]:
+    readback = list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_exact_approval_records(
+        store_path=exact_approval_store_path,
+        limit=1,
+        exact_approval_ref=exact_approval_ref,
+    )
+    dto_readback = readback.get("dto")
+    latest = None
+    if isinstance(dto_readback, Mapping):
+        maybe_latest = dto_readback.get("latest_record")
+        latest = maybe_latest if isinstance(maybe_latest, Mapping) else None
+    ready = bool(readback.get("found") and latest)
+    errors = readback.get("errors") if isinstance(readback.get("errors"), list) else []
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_actual_consumption_preflight",
+        "actual_consumption_preflight_ready": ready,
+        "exact_approval_record_verified": ready,
+        "safe_ref_chain_verified": bool(ready and latest and latest.get("safe_ref_chain_verified") is True),
+        "exact_approval_ref": latest.get("exact_approval_ref") if latest else None,
+        "exact_approval_record_sha256": latest.get("exact_approval_record_sha256") if latest else None,
+        "boundary_design_sha256": latest.get("boundary_design_sha256") if latest else None,
+        "source_consumption_enablement_ref": latest.get("source_consumption_enablement_ref") if latest else None,
+        "source_consumption_enablement_record_sha256": latest.get("source_consumption_enablement_record_sha256") if latest else None,
+        "target_allowlist_verified": ready,
+        "idempotency_replay_lookup_required": True,
+        "disable_switch_required": True,
+        "downstream_use_enabled": ready,
+        "downstream_consumption_enabled": False,
+        "downstream_consumed": False,
+        "actual_downstream_consumption_allowed": False,
+        "approval_record_write_enabled": bool(ready),
+        "replay_store_write_enabled": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "repeat_execution_replay_allowed": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "capabilities": {
+            "actual_consumption_preflight_readback_enabled": True,
+            "one_shot_exact_approval_readback_enabled": True,
+            "actual_downstream_consumption_enabled": False,
+            "downstream_consumption_execution_enabled": False,
+            "replay_store_write_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_credential_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+        },
+        "next_required_boundary": "fresh_request_builder_downstream_consumption_one_shot_actual_consumption_execution_gate" if ready else "fresh_request_builder_downstream_consumption_one_shot_exact_approval",
+    }
+    return {"found": ready, "errors": errors, "dto": dto}
+
 
 def execute_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_write(
     payload: object, *, queue_dir: Path | str | None = None, root_path: Path | str | None = None
