@@ -3209,6 +3209,10 @@ def _default_fresh_request_builder_manual_review_record_store_path() -> Path:
     return get_hermes_home() / "office" / "controlled-mutation" / "fresh_request_builder_manual_review_records.jsonl"
 
 
+def _default_fresh_request_builder_downstream_use_enablement_record_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "fresh_request_builder_downstream_use_enablement_records.jsonl"
+
+
 
 
 def _approval_event_envelope_capabilities() -> dict[str, bool]:
@@ -8495,15 +8499,16 @@ def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downs
     source = selection.get("dto") if isinstance(selection.get("dto"), Mapping) else None
     if not isinstance(source, Mapping):
         return {"found": False, "errors": [], "dto": None}
+    source_map = cast(Mapping[str, object], source)
 
-    raw_selected_item_count = source.get("selected_item_count")
+    raw_selected_item_count = source_map.get("selected_item_count")
     selected_item_count = raw_selected_item_count if isinstance(raw_selected_item_count, int) else 0
-    raw_checksum_set_sha256 = source.get("checksum_set_sha256")
+    raw_checksum_set_sha256 = source_map.get("checksum_set_sha256")
     checksum_set_sha256 = raw_checksum_set_sha256 if isinstance(raw_checksum_set_sha256, str) else ""
     selected_export_review_passed = bool(
-        source.get("downstream_use_ready")
-        and source.get("export_item_count_verified")
-        and source.get("checksum_set_verified")
+        source_map.get("downstream_use_ready")
+        and source_map.get("export_item_count_verified")
+        and source_map.get("checksum_set_verified")
         and selected_item_count > 0
         and re.fullmatch(r"[0-9a-f]{64}", checksum_set_sha256)
     )
@@ -8550,27 +8555,27 @@ def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downs
         "mode": "nas_keeper_fresh_request_builder_ledger_downstream_use_preflight",
         "selection_profile": "latest_written",
         "source_mode": "nas_keeper_fresh_request_builder_ledger_export_selection_review",
-        "filters_applied": dict(source.get("filters_applied") or {}),
+        "filters_applied": source_map.get("filters_applied") if isinstance(source_map.get("filters_applied"), dict) else {},
         "selected_item_count": selected_item_count,
         "checksum_set_sha256": checksum_set_sha256,
         "preflight_decision_sha256": preflight_decision_sha256,
         "selected_export_review_passed": selected_export_review_passed,
-        "export_item_count_verified": bool(source.get("export_item_count_verified")),
-        "checksum_set_verified": bool(source.get("checksum_set_verified")),
-        "downstream_use_ready": bool(source.get("downstream_use_ready")),
+        "export_item_count_verified": bool(source_map.get("export_item_count_verified")),
+        "checksum_set_verified": bool(source_map.get("checksum_set_verified")),
+        "downstream_use_ready": bool(source_map.get("downstream_use_ready")),
         "downstream_use_allowed_after_manual_review": downstream_use_allowed_after_manual_review,
         "downstream_use_enabled": downstream_use_enabled,
         "downstream_use_blocked_reason": blocked_reason,
         "manual_operator_review_required": True,
         "manual_operator_review_record_present": manual_operator_review_record_present,
         "source_selection_review": {
-            "selection_profile": source.get("selection_profile"),
+            "selection_profile": source_map.get("selection_profile"),
             "selected_item_count": selected_item_count,
             "checksum_set_sha256": checksum_set_sha256,
-            "export_item_count_verified": bool(source.get("export_item_count_verified")),
-            "checksum_set_verified": bool(source.get("checksum_set_verified")),
-            "downstream_use_ready": bool(source.get("downstream_use_ready")),
-            "downstream_use_enabled": bool(source.get("downstream_use_enabled")),
+            "export_item_count_verified": bool(source_map.get("export_item_count_verified")),
+            "checksum_set_verified": bool(source_map.get("checksum_set_verified")),
+            "downstream_use_ready": bool(source_map.get("downstream_use_ready")),
+            "downstream_use_enabled": bool(source_map.get("downstream_use_enabled")),
         },
         "markdown_body_included": False,
         "write_payload_included": False,
@@ -8792,6 +8797,7 @@ def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_ma
         review_store_path=store_path,
     )
     source = preflight.get("dto") if isinstance(preflight.get("dto"), Mapping) else None
+    source_map = cast(Mapping[str, object], source) if isinstance(source, Mapping) else {}
     errors: list[dict[str, str]] = []
     if not source or not preflight.get("found"):
         errors.append(_error("preflight", "selected_export_preflight_not_ready"))
@@ -8799,17 +8805,17 @@ def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_ma
         errors.append(_error("manual_review_ref", "unsupported_ref_shape"))
     if payload.get("selection_profile") != "latest_written":
         errors.append(_error("selection_profile", "unsupported_selection_profile"))
-    expected_preflight_sha = source.get("preflight_decision_sha256") if isinstance(source, Mapping) else None
+    expected_preflight_sha = source_map.get("preflight_decision_sha256") if isinstance(source, Mapping) else None
     if not (isinstance(payload.get("preflight_decision_sha256"), str) and re.fullmatch(r"[0-9a-f]{64}", str(payload.get("preflight_decision_sha256")))):
         errors.append(_error("preflight_decision_sha256", "invalid_sha256"))
     elif payload.get("preflight_decision_sha256") != expected_preflight_sha:
         errors.append(_error("preflight_decision_sha256", "preflight_decision_mismatch"))
-    expected_checksum_sha = source.get("checksum_set_sha256") if isinstance(source, Mapping) else None
+    expected_checksum_sha = source_map.get("checksum_set_sha256") if isinstance(source, Mapping) else None
     if not (isinstance(payload.get("checksum_set_sha256"), str) and re.fullmatch(r"[0-9a-f]{64}", str(payload.get("checksum_set_sha256")))):
         errors.append(_error("checksum_set_sha256", "invalid_sha256"))
     elif payload.get("checksum_set_sha256") != expected_checksum_sha:
         errors.append(_error("checksum_set_sha256", "preflight_checksum_mismatch"))
-    expected_count = source.get("selected_item_count") if isinstance(source, Mapping) else None
+    expected_count = source_map.get("selected_item_count") if isinstance(source, Mapping) else None
     if not (isinstance(payload.get("selected_item_count"), int) and payload.get("selected_item_count") == expected_count):
         errors.append(_error("selected_item_count", "preflight_count_mismatch"))
     if not _is_opaque_id(payload.get("reviewed_by")):
@@ -8849,6 +8855,298 @@ def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_ma
     stored_payload = dict(record_material)
     stored_payload["manual_review_record_sha256"] = record_sha
     dto = _normalize_fresh_request_builder_manual_review_record(stored_payload)
+    if dto is None:
+        return {"stored": False, "errors": [_error("payload", "invalid_normalized_record")], "dto": None}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(dto, sort_keys=True, separators=(",", ":")) + "\n")
+    return {"stored": True, "errors": [], "dto": dto}
+
+
+def _normalize_fresh_request_builder_downstream_use_enablement_record(item: object) -> dict[str, object] | None:
+    if not isinstance(item, Mapping):
+        return None
+    required = (
+        "enablement_ref",
+        "selection_profile",
+        "source_preflight_decision_sha256",
+        "manual_review_ref",
+        "manual_review_record_sha256",
+        "checksum_set_sha256",
+        "selected_item_count",
+        "enabled_by",
+        "enabled_at",
+        "operator_confirmation",
+        "safe_summary",
+        "evidence_refs",
+        "enablement_record_sha256",
+    )
+    if any(field not in item for field in required):
+        return None
+    enablement_ref = item.get("enablement_ref")
+    preflight_sha = item.get("source_preflight_decision_sha256")
+    manual_review_ref = item.get("manual_review_ref")
+    manual_sha = item.get("manual_review_record_sha256")
+    checksum_sha = item.get("checksum_set_sha256")
+    record_sha = item.get("enablement_record_sha256")
+    selected_item_count = item.get("selected_item_count")
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(enablement_ref, "enablement-"):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(manual_review_ref, "manualreview-"):
+        return None
+    for value in (preflight_sha, manual_sha, checksum_sha, record_sha):
+        if not (isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value)):
+            return None
+    if not (isinstance(selected_item_count, int) and selected_item_count > 0):
+        return None
+    if item.get("selection_profile") != "latest_written":
+        return None
+    if item.get("operator_confirmation") != "confirmed-enable-downstream-use-readiness-only":
+        return None
+    if not _is_opaque_id(item.get("enabled_by")):
+        return None
+    if not (isinstance(item.get("enabled_at"), str) and _ISO_UTC_RE.fullmatch(str(item.get("enabled_at")))):
+        return None
+    if not _is_safe_text(item.get("safe_summary")):
+        return None
+    if not _validate_evidence_refs(item.get("evidence_refs")):
+        return None
+    return {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_downstream_use_enablement_record",
+        "downstream_use_enablement_recorded": True,
+        "enablement_ref": enablement_ref,
+        "selection_profile": "latest_written",
+        "source_preflight_decision_sha256": preflight_sha,
+        "manual_review_ref": manual_review_ref,
+        "manual_review_record_sha256": manual_sha,
+        "manual_review_record_verified": True,
+        "checksum_set_sha256": checksum_sha,
+        "selected_item_count": selected_item_count,
+        "enabled_by": item.get("enabled_by"),
+        "enabled_at": item.get("enabled_at"),
+        "operator_confirmation": "confirmed-enable-downstream-use-readiness-only",
+        "safe_summary": item.get("safe_summary"),
+        "evidence_refs": list(cast(list[object], item.get("evidence_refs"))),
+        "enablement_record_sha256": record_sha,
+        "downstream_use_enabled": False,
+        "downstream_consumption_enabled": False,
+        "downstream_consumed": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "repeat_execution_replay_allowed": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "capabilities": {
+            "downstream_use_enablement_recording_enabled": True,
+            "downstream_use_enablement_readback_enabled": True,
+            "manual_operator_review_record_readback_enabled": True,
+            "downstream_use_enabled": False,
+            "downstream_consumption_enabled": False,
+            "actual_write_execution_enabled": False,
+            "repeat_execution_replay_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_credential_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+        },
+        "next_required_boundary": "fresh_request_builder_downstream_consumption_preflight",
+    }
+
+
+def _read_fresh_request_builder_downstream_use_enablement_records(path: Path) -> tuple[list[dict[str, object]], int]:
+    records: list[dict[str, object]] = []
+    skipped_count = 0
+    if not path.exists():
+        return records, skipped_count
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            if not line.strip():
+                continue
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped_count += 1
+                continue
+            normalized = _normalize_fresh_request_builder_downstream_use_enablement_record(item)
+            if normalized is None:
+                skipped_count += 1
+                continue
+            records.append(normalized)
+    return records, skipped_count
+
+
+def list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_use_enablement_records(
+    *,
+    store_path: Path | None = None,
+    limit: int = 50,
+    enablement_ref: object = None,
+) -> dict[str, object]:
+    safe_enablement_ref = None
+    errors: list[dict[str, str]] = []
+    if enablement_ref is not None:
+        if _office_disabled_runtime_dispatch_valid_prefixed_ref(enablement_ref, "enablement-"):
+            safe_enablement_ref = str(enablement_ref)
+        else:
+            errors.append(_error("enablement_ref", "unsupported_ref_shape"))
+    path = store_path or _default_fresh_request_builder_downstream_use_enablement_record_store_path()
+    records, skipped_count = _read_fresh_request_builder_downstream_use_enablement_records(path)
+    if safe_enablement_ref:
+        records = [record for record in records if record.get("enablement_ref") == safe_enablement_ref]
+    if errors:
+        records = []
+    max_items = max(0, min(limit, 200)) if isinstance(limit, int) else 50
+    records = records[-max_items:] if max_items else []
+    latest_record = records[-1] if records else None
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_downstream_use_enablement_records_readback",
+        "record_count": len(records),
+        "limit": max_items,
+        "skipped_count": skipped_count,
+        "records": records,
+        "latest_record": latest_record,
+        "downstream_use_enabled": False,
+        "downstream_consumption_enabled": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "repeat_execution_replay_allowed": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "capabilities": {
+            "downstream_use_enablement_recording_enabled": True,
+            "downstream_use_enablement_readback_enabled": True,
+            "downstream_use_enabled": False,
+            "downstream_consumption_enabled": False,
+            "actual_write_execution_enabled": False,
+            "repeat_execution_replay_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_credential_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+        },
+        "next_required_boundary": "fresh_request_builder_downstream_consumption_preflight" if records else "fresh_request_builder_downstream_use_enablement",
+    }
+    return {"found": bool(records), "errors": errors, "dto": dto}
+
+
+def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_use_enablement_record(
+    payload: object,
+    *,
+    queue_dir: Path | str | None = None,
+    review_store_path: Path | None = None,
+    store_path: Path | None = None,
+) -> dict[str, object]:
+    if not isinstance(payload, Mapping):
+        return {"stored": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    preflight = get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_use_preflight(
+        queue_dir=queue_dir,
+        profile=payload.get("selection_profile") or "latest_written",
+        limit=20,
+        review_store_path=review_store_path,
+    )
+    source = preflight.get("dto") if isinstance(preflight.get("dto"), Mapping) else None
+    source_map = cast(Mapping[str, object], source) if isinstance(source, Mapping) else {}
+    review_readback = list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_manual_review_records(
+        store_path=review_store_path,
+        manual_review_ref=payload.get("manual_review_ref"),
+    )
+    review_dto = review_readback.get("dto") if isinstance(review_readback.get("dto"), Mapping) else None
+    latest_review = review_dto.get("latest_record") if isinstance(review_dto, Mapping) else None
+    errors: list[dict[str, str]] = []
+    if not source or not preflight.get("found"):
+        errors.append(_error("preflight", "selected_export_preflight_not_ready"))
+    if not source or source_map.get("manual_operator_review_record_present") is not True:
+        errors.append(_error("manual_review", "manual_review_record_not_found"))
+    if not isinstance(latest_review, Mapping):
+        errors.append(_error("manual_review", "manual_review_record_not_found"))
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("enablement_ref"), "enablement-"):
+        errors.append(_error("enablement_ref", "unsupported_ref_shape"))
+    if payload.get("selection_profile") != "latest_written":
+        errors.append(_error("selection_profile", "unsupported_selection_profile"))
+    expected_preflight_sha = source_map.get("preflight_decision_sha256") if isinstance(source, Mapping) else None
+    if not (isinstance(payload.get("source_preflight_decision_sha256"), str) and re.fullmatch(r"[0-9a-f]{64}", str(payload.get("source_preflight_decision_sha256")))):
+        errors.append(_error("source_preflight_decision_sha256", "invalid_sha256"))
+    elif payload.get("source_preflight_decision_sha256") != expected_preflight_sha:
+        errors.append(_error("source_preflight_decision_sha256", "preflight_decision_mismatch"))
+    expected_checksum_sha = source_map.get("checksum_set_sha256") if isinstance(source, Mapping) else None
+    if not (isinstance(payload.get("checksum_set_sha256"), str) and re.fullmatch(r"[0-9a-f]{64}", str(payload.get("checksum_set_sha256")))):
+        errors.append(_error("checksum_set_sha256", "invalid_sha256"))
+    elif payload.get("checksum_set_sha256") != expected_checksum_sha:
+        errors.append(_error("checksum_set_sha256", "preflight_checksum_mismatch"))
+    expected_count = source_map.get("selected_item_count") if isinstance(source, Mapping) else None
+    if not (isinstance(payload.get("selected_item_count"), int) and payload.get("selected_item_count") == expected_count):
+        errors.append(_error("selected_item_count", "preflight_count_mismatch"))
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("manual_review_ref"), "manualreview-"):
+        errors.append(_error("manual_review_ref", "unsupported_ref_shape"))
+    elif isinstance(latest_review, Mapping) and payload.get("manual_review_ref") != latest_review.get("manual_review_ref"):
+        errors.append(_error("manual_review_ref", "manual_review_ref_mismatch"))
+    if not (isinstance(payload.get("manual_review_record_sha256"), str) and re.fullmatch(r"[0-9a-f]{64}", str(payload.get("manual_review_record_sha256")))):
+        errors.append(_error("manual_review_record_sha256", "invalid_sha256"))
+    elif isinstance(latest_review, Mapping) and payload.get("manual_review_record_sha256") != latest_review.get("manual_review_record_sha256"):
+        errors.append(_error("manual_review_record_sha256", "manual_review_record_mismatch"))
+    if not _is_opaque_id(payload.get("enabled_by")):
+        errors.append(_error("enabled_by", "invalid_opaque_ref"))
+    if not (isinstance(payload.get("enabled_at"), str) and _ISO_UTC_RE.fullmatch(str(payload.get("enabled_at")))):
+        errors.append(_error("enabled_at", "invalid_timestamp"))
+    if payload.get("operator_confirmation") != "confirmed-enable-downstream-use-readiness-only":
+        errors.append(_error("operator_confirmation", "unsupported_confirmation"))
+    if not _is_safe_text(payload.get("safe_summary")):
+        errors.append(_error("safe_summary", "invalid_safe_text"))
+    if not _validate_evidence_refs(payload.get("evidence_refs")):
+        errors.append(_error("evidence_refs", "invalid_opaque_ref"))
+    path = store_path or _default_fresh_request_builder_downstream_use_enablement_record_store_path()
+    existing, _ = _read_fresh_request_builder_downstream_use_enablement_records(path)
+    if any(record.get("enablement_ref") == payload.get("enablement_ref") for record in existing):
+        errors.append(_error("enablement_ref", "duplicate_enablement_ref"))
+    if any(record.get("manual_review_record_sha256") == payload.get("manual_review_record_sha256") for record in existing):
+        errors.append(_error("manual_review_record_sha256", "duplicate_manual_review_record"))
+    errors = sorted(errors, key=lambda item: (item["field"], item["code"]))
+    if errors:
+        deduped: list[dict[str, str]] = []
+        seen: set[tuple[str, str]] = set()
+        for error in errors:
+            key = (error["field"], error["code"])
+            if key not in seen:
+                seen.add(key)
+                deduped.append(error)
+        return {"stored": False, "errors": deduped, "dto": None}
+    record_material = {
+        "enablement_ref": payload.get("enablement_ref"),
+        "selection_profile": "latest_written",
+        "source_preflight_decision_sha256": payload.get("source_preflight_decision_sha256"),
+        "manual_review_ref": payload.get("manual_review_ref"),
+        "manual_review_record_sha256": payload.get("manual_review_record_sha256"),
+        "checksum_set_sha256": payload.get("checksum_set_sha256"),
+        "selected_item_count": payload.get("selected_item_count"),
+        "enabled_by": payload.get("enabled_by"),
+        "enabled_at": payload.get("enabled_at"),
+        "operator_confirmation": "confirmed-enable-downstream-use-readiness-only",
+        "safe_summary": payload.get("safe_summary"),
+        "evidence_refs": list(cast(list[object], payload.get("evidence_refs"))),
+    }
+    record_sha = hashlib.sha256(
+        json.dumps(record_material, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    stored_payload = dict(record_material)
+    stored_payload["enablement_record_sha256"] = record_sha
+    dto = _normalize_fresh_request_builder_downstream_use_enablement_record(stored_payload)
     if dto is None:
         return {"stored": False, "errors": [_error("payload", "invalid_normalized_record")], "dto": None}
     path.parent.mkdir(parents=True, exist_ok=True)
