@@ -12846,6 +12846,105 @@ def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downs
 
 
 
+def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_consumption_payload_materialization_request(
+    *,
+    actual_execution_record_store_path: Path | None = None,
+) -> dict[str, object]:
+    """Project a future manual body-materialization request without materializing a body."""
+
+    contract = get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_consumption_payload_materialization_contract(
+        actual_execution_record_store_path=actual_execution_record_store_path,
+    )
+    source = contract.get("dto") if isinstance(contract.get("dto"), Mapping) else None
+    source_map = cast(Mapping[str, object], source) if isinstance(source, Mapping) else {}
+    materialization_contract_sha = source_map.get("payload_materialization_contract_sha256")
+    payload_readiness_sha = source_map.get("payload_readiness_sha256")
+    verified = bool(
+        contract.get("found")
+        and source_map.get("consumption_payload_materialization_contract_ready") is True
+        and source_map.get("payload_readiness_verified") is True
+        and isinstance(materialization_contract_sha, str)
+        and re.fullmatch(r"[0-9a-f]{64}", materialization_contract_sha)
+        and isinstance(payload_readiness_sha, str)
+        and re.fullmatch(r"[0-9a-f]{64}", payload_readiness_sha)
+    )
+    requested_materialization_fields = [
+        "actual_execution_ref",
+        "payload_materialization_contract_sha256",
+        "payload_materialization_request_sha256",
+        "body_ref_placeholder",
+        "body_sha256_placeholder",
+        "body_bytes_placeholder",
+    ]
+    request_material = {
+        "shape_version": "safe_consumption_payload_materialization_request_v1",
+        "actual_execution_ref": source_map.get("actual_execution_ref") if verified else None,
+        "payload_materialization_contract_sha256": materialization_contract_sha if verified else None,
+        "payload_readiness_sha256": payload_readiness_sha if verified else None,
+        "payload_materialization_request_status": "request_only_no_body_materialized",
+        "materialization_request_decision": "ready_for_bounded_manual_body_materialization_write_gate",
+        "requested_materialization_fields": requested_materialization_fields,
+        "body_ref_placeholder": "future_safe_body_ref_required",
+        "body_sha256_placeholder": "future_body_sha256_required",
+        "body_bytes_placeholder": 0,
+        "manual_body_materialization_required": True,
+    }
+    payload_materialization_request_sha256 = hashlib.sha256(json.dumps(request_material, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest() if verified else None
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_request",
+        "consumption_payload_materialization_request_ready": verified,
+        "payload_materialization_contract_verified": verified,
+        "payload_readiness_verified": bool(source_map.get("payload_readiness_verified")) if source_map else False,
+        "actual_execution_ref": source_map.get("actual_execution_ref") if verified else None,
+        "payload_materialization_contract_sha256": materialization_contract_sha if verified else None,
+        "payload_readiness_sha256": payload_readiness_sha if verified else None,
+        "materialization_request_shape_version": "safe_consumption_payload_materialization_request_v1",
+        "payload_materialization_request_sha256": payload_materialization_request_sha256,
+        "payload_materialization_request_status": "request_only_no_body_materialized",
+        "materialization_request_decision": "ready_for_bounded_manual_body_materialization_write_gate",
+        "requested_materialization_fields": requested_materialization_fields,
+        "body_ref_placeholder": "future_safe_body_ref_required",
+        "body_sha256_placeholder": "future_body_sha256_required",
+        "body_bytes_placeholder": 0,
+        "manual_body_materialization_required": True,
+        "payload_body_materialization_enabled": False,
+        "downstream_use_enabled": verified,
+        "downstream_consumption_enabled": False,
+        "downstream_consumed": False,
+        "actual_downstream_consumption_allowed": False,
+        "actual_downstream_consumption_executed": False,
+        "replay_store_write_enabled": False,
+        "real_replay_store_written": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "secret_value_included": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "capabilities": {
+            "consumption_payload_materialization_request_enabled": True,
+            "payload_body_materialization_enabled": False,
+            "actual_downstream_consumption_enabled": False,
+            "replay_store_write_enabled": False,
+            "real_replay_store_write_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_secret_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+        },
+        "next_required_boundary": "fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_write_gate_after_request" if verified else "fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_contract_after_readiness",
+    }
+    contract_errors = contract.get("errors") if isinstance(contract.get("errors"), list) else []
+    return {"found": verified, "errors": contract_errors, "dto": dto}
+
+
 def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_record(
     payload: object,
     *,

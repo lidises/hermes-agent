@@ -7384,6 +7384,59 @@ describe("ControlledMutationApprovalBoundarySummaryPanel", () => {
     expect(html).not.toMatch(new RegExp(["must" + "-not-echo", "/vol" + "ume1", "sk" + "-test"].join("|"), "i"));
   });
 
+  it("renders downstream consumption payload materialization request as request-only", () => {
+    const html = renderToStaticMarkup(
+      <OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationRequestPanel
+        record={{
+          found: true,
+          errors: [],
+          dto: {
+            schema_version: 1,
+            mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_request",
+            consumption_payload_materialization_request_ready: true,
+            payload_materialization_contract_verified: true,
+            payload_readiness_verified: true,
+            materialization_request_shape_version: "safe_consumption_payload_materialization_request_v1",
+            payload_materialization_request_sha256: "c".repeat(64),
+            payload_materialization_request_status: "request_only_no_body_materialized",
+            materialization_request_decision: "ready_for_bounded_manual_body_materialization_write_gate",
+            requested_materialization_fields: ["actual_execution_ref", "body_ref_placeholder"],
+            body_ref_placeholder: "future_safe_body_ref_required",
+            body_sha256_placeholder: "future_body_sha256_required",
+            body_bytes_placeholder: 0,
+            manual_body_materialization_required: true,
+            payload_body_materialization_enabled: false,
+            downstream_consumption_enabled: false,
+            downstream_consumed: false,
+            actual_downstream_consumption_allowed: false,
+            actual_downstream_consumption_executed: false,
+            replay_store_write_enabled: false,
+            real_replay_store_written: false,
+            markdown_body_included: false,
+            write_payload_included: false,
+            raw_root_path_included: false,
+            secret_value_included: false,
+            watcher_enabled: false,
+            cron_enabled: false,
+            dispatch_enabled: false,
+            authority_adapter_binding_enabled: false,
+            vps_nas_mount_enabled: false,
+            next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_write_gate_after_request",
+          },
+        }}
+      />,
+    );
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-request="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-request-ready="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-request-executed="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-request-replay-store-write="false"');
+    expect(html).toContain('request_only_no_body_materialized');
+    expect(html).toContain('future_safe_body_ref_required');
+    expect(html).not.toContain("must" + "-not-echo");
+    expect(html).not.toContain("/vol" + "ume1/private");
+    expect(html).not.toContain("sk" + "-test-secret");
+  });
+
   it("renders the downstream consumption materialization contract as contract-only and display-only", () => {
     const record = {
       found: true,
