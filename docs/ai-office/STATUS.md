@@ -1,5 +1,89 @@
 
 
+## Current status — Fresh request ledger downstream consumption noop replay probe deployed
+
+Updated: 2026-05-22 13:23 KST
+
+Completed slice:
+
+- Implemented/deployed `fresh_request_builder_downstream_consumption_one_shot_noop_replay_probe` as a bounded metadata-only noop/idempotency replay probe record/readback.
+- Code commit: `dbf08454 feat(office): record downstream noop replay probe`.
+- Added protected API:
+  - `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-noop-replay-probes`
+  - `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-noop-replay-probes`
+- Added helpers:
+  - `append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_noop_replay_probe_record(...)`
+  - `list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_noop_replay_probe_records(...)`
+- Added Office UI display-only panel: `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionNoopReplayProbePanel`.
+- DOM hook:
+  - `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-noop-replay-probe="true"`
+
+Live noop replay probe evidence:
+
+- `noop_replay_probe_ref=noopreplay-20260522132300-dbf08454`.
+- `execution_gate_ref=executiongate-20260522130500-ba15f7a4`.
+- `noop_replay_probe_recorded=true`.
+- `execution_gate_record_verified=true`.
+- `safe_ref_chain_verified=true`.
+- `idempotency_probe_key_verified=true`.
+- `noop_probe_result=noop_probe_succeeded`.
+- noop replay probe record SHA length 64.
+- downstream consumption enabled false; downstream consumed false; actual downstream consumption allowed false.
+- replay-store write enabled false; real replay store written false.
+- dispatch/authority-adapter/watcher/cron false.
+- VPS NAS mount/authority false.
+
+Verification:
+
+- RED observed before implementation: backend/API tests failed before helper/route implementation; web test failed before panel/export/API client wiring.
+- `python3 -m py_compile hermes_cli/office_controlled_mutation.py hermes_cli/web_server.py` passed locally.
+- Focused Python tests: 6 passed (`execution_gate` + `noop_replay_probe`).
+- Focused Office web test file: 125 passed.
+- `npm run lint` passed with existing warnings only.
+- `npm run build` passed with existing Vite large chunk warning only.
+- `git diff --check` passed.
+- added-line leak sentinel passed.
+- `web_dist` relative content hash after local build/deploy: `df6c66bfc1e2e3e293bb2a0c2367cfe8af27a5daf8d8bf62fc3c8222a0fe3b81`.
+
+Live smoke:
+
+- Dashboard/core VPS worktrees synced to code commit `dbf08454`.
+- `web_dist` rsynced to both VPS worktrees.
+- Dashboard restarted only. Gateway process was not restarted and remains present as PID `519592`; the user systemd unit name is absent/inactive on this VPS runtime.
+- Protected API:
+  - unauthenticated GET/POST returned 401.
+  - authenticated POST stored the noop replay probe record.
+  - authenticated GET read back the exact ref.
+  - raw/unsupported path/secret extras were not echoed.
+- DOM:
+  - panel present true
+  - recorded true
+  - downstream consumption enabled false
+  - replay-store write false
+  - automation enabled false
+  - VPS NAS authority false
+  - controls 0
+  - raw/secret leak false
+  - console JS errors 0
+
+Boundaries preserved:
+
+- No actual downstream consumption.
+- No real replay-store write for consumption execution.
+- No watcher/cron/daemon activation.
+- No dispatcher binding.
+- No authority-adapter binding.
+- No gateway restart.
+- No public exposure change.
+- No VPS NAS mount/write/credential authority.
+- No markdown body/write payload/raw root path/credential value exposure.
+
+Recommended next rung:
+
+- `fresh_request_builder_downstream_consumption_one_shot_replay_store_write_contract`.
+- Suggested scope: display-only or bounded metadata contract for the future replay-store write shape, keyed by the verified noop replay probe record. Do not write real replay-store state, execute downstream consumption, bind dispatcher/authority adapter, start watcher/cron, restart gateway, expose public routes, or grant VPS NAS authority.
+
+
 ## Current status — Fresh request ledger downstream consumption execution gate deployed
 
 Updated: 2026-05-22 13:01 KST
