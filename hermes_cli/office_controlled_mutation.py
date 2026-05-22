@@ -10863,6 +10863,80 @@ def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_do
     return {"stored": True, "errors": [], "dto": dto}
 
 
+
+def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_actual_consumption_disabled_readback(
+    *,
+    replay_store_metadata_store_path: Path | None = None,
+    replay_store_entry_ref: object = None,
+) -> dict[str, object]:
+    """Read safe proof that actual downstream consumption remains disabled."""
+
+    metadata = list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_replay_store_metadata_records(
+        store_path=replay_store_metadata_store_path,
+        replay_store_entry_ref=replay_store_entry_ref,
+        limit=50,
+    )
+    errors = list(cast(list[dict[str, str]], metadata.get("errors") or []))
+    metadata_dto = metadata.get("dto") if isinstance(metadata.get("dto"), Mapping) else {}
+    latest = metadata_dto.get("latest_record") if isinstance(metadata_dto, Mapping) else None
+    capabilities = {
+        "disabled_readback_enabled": True,
+        "actual_downstream_consumption_enabled": False,
+        "replay_store_write_enabled": False,
+        "real_replay_store_write_enabled": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "vps_secret_access_enabled": False,
+        "direct_vps_nas_write_enabled": False,
+    }
+    base_closed = {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_actual_consumption_disabled_readback",
+        "downstream_consumption_enabled": False,
+        "downstream_consumed": False,
+        "actual_downstream_consumption_allowed": False,
+        "actual_downstream_consumption_executed": False,
+        "replay_store_write_enabled": False,
+        "real_replay_store_written": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "secret_value_included": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "capabilities": capabilities,
+    }
+    if not metadata.get("found") or not isinstance(latest, Mapping):
+        dto = {
+            **base_closed,
+            "actual_consumption_disabled_readback_ready": False,
+            "replay_store_metadata_record_verified": False,
+            "safe_ref_chain_verified": False,
+            "next_required_boundary": "fresh_request_builder_downstream_consumption_one_shot_replay_store_metadata_write",
+        }
+        return {"found": False, "errors": errors, "dto": dto}
+    dto = {
+        **base_closed,
+        "actual_consumption_disabled_readback_ready": True,
+        "replay_store_metadata_record_verified": True,
+        "safe_ref_chain_verified": bool(latest.get("safe_ref_chain_verified") is True),
+        "replay_store_entry_ref": latest.get("replay_store_entry_ref"),
+        "noop_replay_probe_ref": latest.get("noop_replay_probe_ref"),
+        "replay_store_key_ref": latest.get("replay_store_key_ref"),
+        "replay_store_metadata_record_sha256": latest.get("replay_store_metadata_record_sha256"),
+        "metadata_result_status": latest.get("result_status"),
+        "downstream_use_enabled": bool(latest.get("downstream_use_enabled") is True),
+        "next_required_boundary": "fresh_request_builder_downstream_consumption_one_shot_actual_consumption_execution_design_if_approved",
+    }
+    return {"found": True, "errors": errors, "dto": dto}
+
+
 def execute_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_write(
     payload: object, *, queue_dir: Path | str | None = None, root_path: Path | str | None = None
 ) -> dict[str, object]:

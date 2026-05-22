@@ -7155,6 +7155,65 @@ describe("ControlledMutationApprovalBoundarySummaryPanel", () => {
     expect(html).not.toMatch(rawPathLeakPattern);
   });
 
+  it("renders actual consumption disabled readback as a read-only terminal proof", () => {
+    const record = {
+      found: true,
+      errors: [],
+      dto: {
+        schema_version: 1,
+        mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_actual_consumption_disabled_readback",
+        actual_consumption_disabled_readback_ready: true,
+        replay_store_metadata_record_verified: true,
+        safe_ref_chain_verified: true,
+        replay_store_entry_ref: "replaystore-20260522142000-cafe3003",
+        noop_replay_probe_ref: "noopreplay-20260522133000-cafe2002",
+        replay_store_key_ref: "probe-key-20260522133000-cafe2002",
+        replay_store_metadata_record_sha256: "c".repeat(64),
+        downstream_use_enabled: true,
+        downstream_consumption_enabled: false,
+        downstream_consumed: false,
+        actual_downstream_consumption_allowed: false,
+        actual_downstream_consumption_executed: false,
+        replay_store_write_enabled: false,
+        real_replay_store_written: false,
+        markdown_body_included: false,
+        write_payload_included: false,
+        raw_root_path_included: false,
+        watcher_enabled: false,
+        cron_enabled: false,
+        dispatch_enabled: false,
+        authority_adapter_binding_enabled: false,
+        vps_nas_mount_enabled: false,
+        capabilities: {
+          disabled_readback_enabled: true,
+          actual_downstream_consumption_enabled: false,
+          replay_store_write_enabled: false,
+          real_replay_store_write_enabled: false,
+          watcher_enabled: false,
+          cron_enabled: false,
+          dispatch_enabled: false,
+          authority_adapter_binding_enabled: false,
+          vps_nas_mount_enabled: false,
+        },
+        next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_actual_consumption_execution_design_if_approved",
+      },
+    } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualConsumptionDisabledReadbackResult;
+    const html = renderToStaticMarkup(
+      <OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualConsumptionDisabledReadbackPanel record={record} />,
+    );
+
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-consumption-disabled-readback="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-consumption-disabled-readback-ready="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-consumption-disabled-readback-downstream-consumption-enabled="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-consumption-disabled-readback-executed="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-consumption-disabled-readback-replay-store-write="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-consumption-disabled-readback-vps-nas-authority="false"');
+    expect(html).toContain("fresh_request_builder_downstream_consumption_one_shot_actual_consumption_execution_design_if_approved");
+    expect(html).not.toMatch(/<button|<form|<input|<select|<textarea/);
+    const rawPathLeakPattern = new RegExp(["/Us" + "ers/lidises", "/ho" + "me/hermes", "/vol" + "ume1", "sk" + "-test", "markdown_body", "write payload"].join("|"), "i");
+    expect(html).not.toMatch(rawPathLeakPattern);
+  });
+
   it("renders downstream consumption replay-store metadata record without actual consumption", () => {
     const record = {
       found: true,
