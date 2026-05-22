@@ -2520,6 +2520,51 @@ export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionNo
   };
 }
 
+export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualExecutionContractResult {
+  found: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: null | {
+    schema_version: number;
+    mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_contract";
+    actual_execution_contract_ready: boolean;
+    noop_execution_probe_record_verified: boolean;
+    noop_execution_probe_ref?: string;
+    noop_execution_probe_record_sha256?: string;
+    execution_opening_ref?: string;
+    execution_opening_record_sha256?: string;
+    idempotency_replay_guard_ref?: string;
+    idempotency_replay_guard_record_sha256?: string;
+    operator_execution_approval_ref?: string;
+    operator_execution_approval_record_sha256?: string;
+    replay_store_entry_ref?: string;
+    replay_store_metadata_record_sha256?: string;
+    execution_design_sha256?: string;
+    safe_ref_chain_verified: boolean;
+    execution_contract_shape_version: "safe_actual_execution_contract_v1";
+    execution_contract_sha256?: string | null;
+    allowed_execution_fields: string[];
+    downstream_use_enabled: boolean;
+    downstream_consumption_enabled: false;
+    downstream_consumed: false;
+    actual_downstream_consumption_allowed: false;
+    actual_downstream_consumption_executed: false;
+    replay_store_write_enabled: false;
+    real_replay_store_written: false;
+    markdown_body_included: false;
+    write_payload_included: false;
+    raw_root_path_included: false;
+    secret_value_included?: false;
+    watcher_enabled: false;
+    cron_enabled: false;
+    dispatch_enabled: false;
+    authority_adapter_binding_enabled: false;
+    vps_nas_mount_enabled: false;
+    capabilities?: Record<string, boolean>;
+    next_required_boundary: string;
+    [key: string]: unknown;
+  };
+}
+
 export interface OfficeNasKeeperExecutionFromPreviewPayload {
   handoff_ref: string;
   relay_execution_ref: string;
@@ -2985,6 +3030,8 @@ export const api = {
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExecutionOpeningResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-execution-openings"),
   getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionNoopExecutionProbe: () =>
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionNoopExecutionProbeResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-noop-execution-probes"),
+  getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualExecutionContract: () =>
+    fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualExecutionContractResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-actual-execution-contract"),
   appendOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExactApproval: (body: Record<string, unknown>) =>
     fetchJSON<Record<string, unknown>>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-exact-approvals", {
       method: "POST",

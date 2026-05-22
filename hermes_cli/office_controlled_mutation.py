@@ -12212,6 +12212,98 @@ def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_do
         handle.write(json.dumps(dto, sort_keys=True, separators=(",", ":")) + "\n")
     return {"stored": True, "errors": [], "dto": dto}
 
+
+
+def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_actual_execution_contract(
+    *,
+    noop_execution_probe_store_path: Path | None = None,
+) -> dict[str, object]:
+    probe_readback = list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_noop_execution_probe_records(
+        store_path=noop_execution_probe_store_path,
+        limit=1,
+    )
+    latest = cast(Mapping[str, object], cast(Mapping[str, object], probe_readback.get("dto", {})).get("latest_record")) if isinstance(probe_readback.get("dto"), Mapping) and isinstance(cast(Mapping[str, object], probe_readback.get("dto", {})).get("latest_record"), Mapping) else {}
+    errors: list[dict[str, str]] = []
+    if not probe_readback.get("found") or not latest:
+        errors.append(_error("noop_execution_probe_ref", "noop_execution_probe_not_found"))
+    ready = not errors
+    contract_material = {
+        "noop_execution_probe_ref": latest.get("noop_execution_probe_ref"),
+        "noop_execution_probe_record_sha256": latest.get("noop_execution_probe_record_sha256"),
+        "execution_opening_ref": latest.get("execution_opening_ref"),
+        "execution_opening_record_sha256": latest.get("execution_opening_record_sha256"),
+        "idempotency_replay_guard_ref": latest.get("idempotency_replay_guard_ref"),
+        "idempotency_replay_guard_record_sha256": latest.get("idempotency_replay_guard_record_sha256"),
+        "operator_execution_approval_ref": latest.get("operator_execution_approval_ref"),
+        "operator_execution_approval_record_sha256": latest.get("operator_execution_approval_record_sha256"),
+        "replay_store_entry_ref": latest.get("replay_store_entry_ref"),
+        "replay_store_metadata_record_sha256": latest.get("replay_store_metadata_record_sha256"),
+        "execution_design_sha256": latest.get("execution_design_sha256"),
+        "execution_contract_shape_version": "safe_actual_execution_contract_v1",
+    }
+    contract_sha = hashlib.sha256(json.dumps(contract_material, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest() if ready else None
+    dto: dict[str, object] = {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_contract",
+        "actual_execution_contract_ready": ready,
+        "noop_execution_probe_record_verified": ready,
+        "noop_execution_probe_ref": latest.get("noop_execution_probe_ref"),
+        "noop_execution_probe_record_sha256": latest.get("noop_execution_probe_record_sha256"),
+        "execution_opening_ref": latest.get("execution_opening_ref"),
+        "execution_opening_record_sha256": latest.get("execution_opening_record_sha256"),
+        "idempotency_replay_guard_ref": latest.get("idempotency_replay_guard_ref"),
+        "idempotency_replay_guard_record_sha256": latest.get("idempotency_replay_guard_record_sha256"),
+        "operator_execution_approval_ref": latest.get("operator_execution_approval_ref"),
+        "operator_execution_approval_record_sha256": latest.get("operator_execution_approval_record_sha256"),
+        "replay_store_entry_ref": latest.get("replay_store_entry_ref"),
+        "replay_store_metadata_record_sha256": latest.get("replay_store_metadata_record_sha256"),
+        "execution_design_sha256": latest.get("execution_design_sha256"),
+        "safe_ref_chain_verified": ready,
+        "execution_contract_shape_version": "safe_actual_execution_contract_v1",
+        "execution_contract_sha256": contract_sha,
+        "allowed_execution_fields": [
+            "actual_execution_ref",
+            "noop_execution_probe_ref",
+            "noop_execution_probe_record_sha256",
+            "execution_contract_sha256",
+            "operator_confirmation_ref",
+            "execution_result_status",
+            "evidence_refs",
+        ],
+        "downstream_use_enabled": ready,
+        "downstream_consumption_enabled": False,
+        "downstream_consumed": False,
+        "actual_downstream_consumption_allowed": False,
+        "actual_downstream_consumption_executed": False,
+        "replay_store_write_enabled": False,
+        "real_replay_store_written": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "secret_value_included": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "capabilities": {
+            "actual_execution_contract_readback_enabled": True,
+            "actual_downstream_consumption_enabled": False,
+            "actual_downstream_consumption_write_enabled": False,
+            "replay_store_write_enabled": False,
+            "real_replay_store_write_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_secret_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+        },
+        "next_required_boundary": "fresh_request_builder_downstream_consumption_one_shot_actual_execution_record_after_contract" if ready else "fresh_request_builder_downstream_consumption_one_shot_noop_execution_probe_after_opening",
+    }
+    return {"found": ready, "errors": errors, "dto": dto}
+
 def execute_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_write(
     payload: object, *, queue_dir: Path | str | None = None, root_path: Path | str | None = None
 ) -> dict[str, object]:

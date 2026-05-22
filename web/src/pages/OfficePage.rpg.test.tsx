@@ -7284,6 +7284,74 @@ describe("ControlledMutationApprovalBoundarySummaryPanel", () => {
     expect(html).not.toMatch(new RegExp(["/Us" + "ers/lidises", "/ho" + "me/hermes", "/vol" + "ume1", "sk" + "-test"].join("|"), "i"));
   });
 
+  it("renders actual execution contract after noop probe as contract-only and non-executing", () => {
+    const record = {
+      found: true,
+      errors: [],
+      dto: {
+        schema_version: 1,
+        mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_contract",
+        actual_execution_contract_ready: true,
+        noop_execution_probe_record_verified: true,
+        noop_execution_probe_ref: "noopexec-20260522090000-test0001",
+        noop_execution_probe_record_sha256: "f".repeat(64),
+        execution_opening_ref: "executionopen-20260522083000-test0001",
+        execution_opening_record_sha256: "e".repeat(64),
+        idempotency_replay_guard_ref: "idempotencyguard-20260522081500-test0001",
+        idempotency_replay_guard_record_sha256: "a".repeat(64),
+        operator_execution_approval_ref: "operatorexecapproval-20260522080000-test0001",
+        operator_execution_approval_record_sha256: "b".repeat(64),
+        replay_store_entry_ref: "replaystore-20260522075900-test0001",
+        replay_store_metadata_record_sha256: "c".repeat(64),
+        execution_design_sha256: "d".repeat(64),
+        safe_ref_chain_verified: true,
+        execution_contract_shape_version: "safe_actual_execution_contract_v1",
+        execution_contract_sha256: "1".repeat(64),
+        allowed_execution_fields: [
+          "actual_execution_ref",
+          "noop_execution_probe_ref",
+          "noop_execution_probe_record_sha256",
+          "execution_contract_sha256",
+          "operator_confirmation_ref",
+          "execution_result_status",
+          "evidence_refs",
+        ],
+        downstream_use_enabled: true,
+        downstream_consumption_enabled: false,
+        downstream_consumed: false,
+        actual_downstream_consumption_allowed: false,
+        actual_downstream_consumption_executed: false,
+        replay_store_write_enabled: false,
+        real_replay_store_written: false,
+        markdown_body_included: false,
+        write_payload_included: false,
+        raw_root_path_included: false,
+        secret_value_included: false,
+        watcher_enabled: false,
+        cron_enabled: false,
+        dispatch_enabled: false,
+        authority_adapter_binding_enabled: false,
+        vps_nas_mount_enabled: false,
+        capabilities: {},
+        next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_actual_execution_record_after_contract",
+      },
+    } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualExecutionContractResult;
+    const html = renderToStaticMarkup(
+      <OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualExecutionContractPanel record={record} />,
+    );
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-execution-contract="true"');
+    expect(html).toContain("noopexec-20260522090000-test0001");
+    expect(html).toContain("actual_execution_contract_ready</dt><dd>true");
+    expect(html).toContain("actual_downstream_consumption_executed</dt><dd>false");
+    expect(html).toContain("real_replay_store_written</dt><dd>false");
+    expect(html).toContain("vps_nas_mount_enabled</dt><dd>false");
+    expect(html).toContain("safe_actual_execution_contract_v1");
+    expect(html).toContain("fresh_request_builder_downstream_consumption_one_shot_actual_execution_record_after_contract");
+    expect(html).not.toContain("/vol" + "ume1");
+    expect(html).not.toContain("must-not-echo");
+    expect(html).not.toMatch(new RegExp(["/Us" + "ers/lidises", "/ho" + "me/hermes", "/vol" + "ume1", "sk" + "-test"].join("|"), "i"));
+  });
+
   it("renders execution opening as metadata-only and non-executing", () => {
     const record = {
       found: true,
