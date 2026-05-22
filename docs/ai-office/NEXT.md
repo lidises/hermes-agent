@@ -1,3 +1,64 @@
+## Current status — Fresh request ledger consumption payload readiness verified
+
+Updated: 2026-05-22T12:25:10Z
+
+Completed rung: `fresh_request_builder_downstream_consumption_one_shot_consumption_payload_readiness_after_contract`.
+
+Latest code commit: `48ec06af9 feat(office): add payload readiness gate`.
+
+Latest protected API:
+
+- `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-consumption-payload-readiness`
+
+Latest UI panel:
+
+- `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadReadinessPanel`
+
+Latest DOM hook:
+
+- `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-readiness="true"`
+
+Live smoke highlights:
+
+- unauthenticated GET: `401`
+- authenticated GET: `200`
+- `found=true`, `consumption_payload_readiness_ready=true`, `payload_contract_verified=true`
+- `readiness_shape_version=safe_consumption_payload_readiness_v1`
+- `payload_readiness_sha256` length: `64`
+- `payload_materialization_status=readiness_only_no_body_materialized`
+- `readiness_decision=ready_for_bounded_manual_payload_materialization_review`
+- downstream consumption, replay-store write, markdown/body payload, raw root path, secret value, VPS NAS mount all remain disabled/absent.
+- DOM panel found with `controls=0`, raw leak `false`, browser console JS errors `0`.
+
+Verification:
+
+- `py_compile` passed.
+- Focused Python chain tests: `11 passed`.
+- Focused Office web tests: payload-readiness focused test passed; full `OfficePage.rpg.test.tsx` `138 passed`.
+- `npm run lint -- src/pages/OfficePage.tsx src/lib/api.ts` passed with existing warnings only.
+- `npm run build` passed with existing Vite chunk-size warning only.
+- `git diff --check` passed.
+- added-line leak sentinel passed.
+
+VPS:
+
+- `/home/hermes/.hermes/hermes-agent` = `48ec06af9691c4187be174ef576d9785929b3d5a`
+- `/home/hermes/.hermes/ai-office-dashboard` = `48ec06af9691c4187be174ef576d9785929b3d5a`
+- dashboard active: MainPID `817052`, ActiveEnterTimestamp `Fri 2026-05-22 12:22:14 UTC`
+- gateway active and not restarted: MainPID `812845`, ActiveEnterTimestamp `Fri 2026-05-22 11:14:49 UTC`
+
+Latest handoff:
+
+- `docs/ai-office/plans/2026-05-22-fresh-request-ledger-downstream-consumption-payload-readiness-handoff.md`
+
+Next recommended rung: `fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_contract_after_readiness`.
+
+Boundary reminder for next rung:
+
+- Keep actual downstream consumption disabled unless a later explicit rung opens it.
+- Do not expose raw roots, secrets, markdown bodies, or writable payload bodies in API/UI/docs/logs.
+- Real replay-store execution write, watcher/cron/dispatcher/authority-adapter, VPS NAS authority/public exposure, and gateway restart remain closed.
+
 ## Current status — Fresh request ledger consumption payload contract verified
 
 Updated: 2026-05-22T12:08:00Z
