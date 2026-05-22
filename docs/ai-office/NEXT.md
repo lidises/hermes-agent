@@ -1,4 +1,96 @@
 
+## Current status — Fresh request ledger downstream consumption enablement deployed
+
+Updated: 2026-05-22 11:33 KST
+
+Completed slice:
+
+- Implemented/deployed `fresh_request_builder_downstream_consumption_enablement` as a bounded safe-ref enablement record after consumption preflight.
+- Code commit: `34ab1b1b feat(office): record downstream consumption enablement`.
+- Added protected API:
+  - `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablements?limit=20`
+  - `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablements`
+- Added helpers:
+  - `append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_enablement_record(...)`
+  - `list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_enablement_records(...)`
+- Added Office UI display-only panel: `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementPanel`.
+- DOM hook:
+  - `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablement="true"`
+- VPS protected API actual write recorded a safe-ref consumption enablement record. Actual downstream consumption remains disabled.
+
+Actual VPS record:
+
+- `consumption_enablement_ref=consumptionenable-20260522113200-34ab1b1b`
+- `record_sha256=ecd9c9ad32abfde84dec38767f65c3542f6aa1872414b1c59c4db8efa0faea98`
+- `stored=true`, readback found true, record count 1.
+- `downstream_use_enabled=true`
+- `downstream_consumption_enabled=false`
+- `downstream_consumed=false`
+- automation enabled false
+- VPS NAS mount/authority false
+
+Verification:
+
+- RED observed before implementation:
+  - Python tests failed on missing helper/API route.
+  - Web tests failed on missing panel.
+- `PYTHONPATH=. .venv/bin/python -m py_compile hermes_cli/office_controlled_mutation.py hermes_cli/web_server.py` passed.
+- Focused Python tests: 6 passed.
+- Focused web tests: 278 passed.
+- `npx eslint src/pages/OfficePage.tsx src/pages/OfficePage.rpg.test.tsx src/lib/api.ts` passed with existing warnings only.
+- `npm run build` passed with existing Vite large chunk warning only.
+- `git diff --check` passed.
+- added-line leak sentinel passed.
+- `web_dist` relative content hash matched on local + both VPS worktrees:
+  - `bddc464d6603f62aaa6f1b106b73b9ab387643ade66ebc896452a37091d8e3f6`
+
+Live smoke:
+
+- URL: `http://100.122.57.85:8765/office?dom-consumption-enable=34ab1b1b`
+- private `/office` HTTP content returned; secret leak false.
+- Protected API actual POST/readback:
+  - preflight found true
+  - preflight passed true
+  - posted stored true
+  - post errors []
+  - readback found true
+  - record count 1
+  - downstream use enabled true
+  - downstream consumption enabled false
+  - downstream consumed false
+  - automation enabled false
+  - VPS NAS mount false
+  - raw leak false
+- DOM:
+  - panel present true
+  - recorded true
+  - preflight verified true
+  - downstream use enabled true
+  - downstream consumption enabled false
+  - downstream consumed false
+  - automation enabled false
+  - VPS NAS authority false
+  - markdown body included false
+  - controls 0
+  - secret leak false
+  - console JS errors 0
+
+Boundaries preserved:
+
+- No actual downstream consumption.
+- No watcher/cron/daemon activation.
+- No dispatcher binding.
+- No authority-adapter binding.
+- No gateway restart.
+- No public exposure change.
+- No VPS NAS mount/write/credential authority.
+- No markdown body/write payload/raw root path/credential value exposure.
+
+Recommended next rung:
+
+- `fresh_request_builder_downstream_consumption_one_shot_boundary_design`: define the exact later one-shot consumption boundary contract/readiness display, including safe refs, idempotency/replay guard design, rollback/disable posture, and target allowlist shape. Do not execute actual consumption yet; keep watcher/cron/dispatcher/authority-adapter/VPS NAS authority off.
+
+
 ## Current status — Fresh request ledger downstream consumption preflight deployed
 
 Updated: 2026-05-22 11:19 KST
