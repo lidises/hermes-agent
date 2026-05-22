@@ -1,3 +1,56 @@
+## Current status — Fresh request ledger consumption payload contract verified
+
+Updated: 2026-05-22T12:08:00Z
+
+Completed rung: `fresh_request_builder_downstream_consumption_one_shot_consumption_payload_contract_after_readback`.
+
+Code commit: `20786d4bbe8cab2e8af595040467bf3a70ae98d5` (`feat(office): contract downstream consumption payload`).
+
+What changed:
+- Added protected payload-contract API: `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-consumption-payload-contract`.
+- Added UI panel: `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadContractPanel`.
+- Added DOM hook: `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-contract="true"`.
+- Derived a metadata-only safe-ref payload contract from the verified post-execution record readback.
+- Contract shape version: `safe_consumption_payload_contract_v1`; materialization status: `contract_only_no_body_materialized`.
+
+Live smoke:
+- unauthenticated GET returned 401.
+- authenticated GET returned 200.
+- `found=true`, `consumption_payload_contract_ready=true`, `post_execution_record_readback_verified=true`.
+- `actual_execution_record_verified=true`, `safe_ref_chain_verified=true`.
+- `payload_contract_sha256` length was 64.
+- Safety flags stayed closed: downstream consumption disabled/not consumed, actual downstream consumption not allowed/executed, replay-store write disabled, real replay-store write false, markdown/body/write payload/raw path/secret excluded, VPS NAS mount false.
+- DOM smoke found the panel with ready=true, executed=false, replay-store-write=false, VPS NAS authority=false, controls=0, payload materialization label present, raw leak false.
+- Browser console JS errors: 0.
+
+Verification:
+- `py_compile` passed.
+- Focused Python chain tests passed: 8.
+- Focused Office web tests passed: 137 for `OfficePage.rpg.test.tsx`; payload-contract focused test passed.
+- `npm run lint` passed with existing warnings only.
+- `npm run build` passed with existing chunk-size warning only.
+- `git diff --check` passed.
+- Added-line leak sentinel passed.
+- Docs leak sentinel passed.
+
+Deployment:
+- VPS core and dashboard worktrees synced to code commit `20786d4bbe8cab2e8af595040467bf3a70ae98d5`.
+- `web_dist` rsynced to both VPS worktrees.
+- Dashboard-only restart completed: `hermes-agent-dashboard.service` active, MainPID `815625`, active since `2026-05-22T12:03:46Z`.
+- Gateway was not restarted: `hermes-gateway.service` active, MainPID `812845`, active since `2026-05-22T11:14:49Z`.
+- Private `/office` DOM/API smoke passed with no raw leak.
+
+Handoff:
+- `docs/ai-office/plans/2026-05-22-fresh-request-ledger-downstream-consumption-payload-contract-handoff.md`
+
+Next recommended rung: `fresh_request_builder_downstream_consumption_one_shot_consumption_payload_readiness_after_contract`.
+
+Guardrails for next rung:
+- Keep actual downstream consumption disabled.
+- Do not materialize markdown/body payload.
+- Do not write real replay-store execution state.
+- Do not enable watcher/cron/dispatcher/authority-adapter, VPS NAS authority, public exposure, or gateway restart.
+
 ## Current status — Fresh request ledger post-execution record readback verified
 
 Updated: 2026-05-22T11:01:11Z
