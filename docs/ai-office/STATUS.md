@@ -1,5 +1,82 @@
 
 
+## Current status — Fresh request ledger downstream consumption execution gate deployed
+
+Updated: 2026-05-22 13:01 KST
+
+Completed slice:
+
+- Implemented/deployed `fresh_request_builder_downstream_consumption_one_shot_actual_consumption_execution_gate` as a bounded metadata-only execution-gate record/readback.
+- Code commit: `ba15f7a4 feat(office): gate downstream consumption execution`.
+- Added protected API:
+  - `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-execution-gates`
+  - `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-execution-gates`
+- Added helpers:
+  - `append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_execution_gate_record(...)`
+  - `list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_execution_gate_records(...)`
+- Added Office UI display-only panel: `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExecutionGatePanel`.
+- DOM hook:
+  - `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-execution-gate="true"`
+
+Live execution-gate evidence:
+
+- `execution_gate_ref=executiongate-20260522130500-ba15f7a4`.
+- `execution_gate_opened=true` for this metadata-only boundary.
+- `actual_consumption_preflight_verified=true`.
+- `exact_approval_record_verified=true`.
+- `safe_ref_chain_verified=true`.
+- execution gate record SHA length 64.
+- downstream consumption enabled false; downstream consumed false; actual downstream consumption allowed false.
+- replay-store write enabled false.
+- dispatch/authority-adapter/watcher/cron false.
+- VPS NAS mount/authority false.
+
+Verification:
+
+- RED observed before implementation: execution-gate backend/API tests failed before helper/route implementation.
+- `python3 -m py_compile hermes_cli/office_controlled_mutation.py hermes_cli/web_server.py` passed locally.
+- Focused Python tests: 6 passed (`actual_preflight` + `execution_gate`).
+- Focused Office web test file: 124 passed.
+- `npm run lint` passed with existing warnings only.
+- `npm run build` passed with existing Vite large chunk warning only.
+- `git diff --check` passed.
+- added-line leak sentinel passed.
+- `web_dist` relative content hash after local build/deploy: `64fb453310885cc4df1880e2c50ae66b16fed2a29baa22cadaf3bcd0ae3a939b`.
+
+Live smoke:
+
+- Dashboard/core VPS worktrees synced to code commit `ba15f7a4`.
+- `web_dist` rsynced to both VPS worktrees.
+- Dashboard restarted only. Gateway process was not restarted and remains present as PID `519592`; the user systemd unit name is not present on this VPS runtime.
+- Protected POST stored the execution-gate record and protected GET read it back.
+- DOM:
+  - panel present true
+  - gate opened true
+  - downstream consumption enabled false
+  - replay-store write false
+  - automation enabled false
+  - VPS NAS authority false
+  - controls 0
+  - raw/secret leak false
+  - console JS errors 0
+
+Boundaries preserved:
+
+- No actual downstream consumption.
+- No replay-store write for consumption execution.
+- No watcher/cron/daemon activation.
+- No dispatcher binding.
+- No authority-adapter binding.
+- No gateway restart.
+- No public exposure change.
+- No VPS NAS mount/write/credential authority.
+- No markdown body/write payload/raw root path/credential value exposure.
+
+Recommended next rung:
+
+- `fresh_request_builder_downstream_consumption_one_shot_noop_replay_probe`.
+- Suggested scope: bounded noop/idempotency replay probe record/readback only. It may verify replay-key shape and idempotency guard metadata, but must still not perform actual downstream consumption, write real replay-store state, bind dispatcher/authority adapter, start watcher/cron, restart gateway, expose public routes, or grant VPS NAS authority.
+
 ## Current status — Fresh request ledger downstream consumption actual preflight deployed
 
 Updated: 2026-05-22 12:35 KST
