@@ -7384,6 +7384,55 @@ describe("ControlledMutationApprovalBoundarySummaryPanel", () => {
     expect(html).not.toMatch(new RegExp(["must" + "-not-echo", "/vol" + "ume1", "sk" + "-test"].join("|"), "i"));
   });
 
+  it("renders downstream consumption payload readiness as readiness-only and display-only", () => {
+    const record = {
+      found: true,
+      errors: [],
+      dto: {
+        schema_version: 1,
+        mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_readiness",
+        consumption_payload_readiness_ready: true,
+        payload_contract_verified: true,
+        consumption_payload_contract_ready: true,
+        actual_execution_ref: "actualexec-20260522100100-test0001",
+        payload_contract_shape_version: "safe_consumption_payload_contract_v1",
+        payload_contract_sha256: "b".repeat(64),
+        readiness_shape_version: "safe_consumption_payload_readiness_v1",
+        payload_readiness_sha256: "c".repeat(64),
+        payload_materialization_status: "readiness_only_no_body_materialized",
+        readiness_decision: "ready_for_bounded_manual_payload_materialization_review",
+        downstream_use_enabled: true,
+        downstream_consumption_enabled: false,
+        downstream_consumed: false,
+        actual_downstream_consumption_allowed: false,
+        actual_downstream_consumption_executed: false,
+        replay_store_write_enabled: false,
+        real_replay_store_written: false,
+        markdown_body_included: false,
+        write_payload_included: false,
+        raw_root_path_included: false,
+        secret_value_included: false,
+        watcher_enabled: false,
+        cron_enabled: false,
+        dispatch_enabled: false,
+        authority_adapter_binding_enabled: false,
+        vps_nas_mount_enabled: false,
+        next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_contract_after_readiness",
+      },
+    } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadReadinessResult;
+
+    const html = renderToStaticMarkup(<OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadReadinessPanel record={record} error={null} />);
+
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-readiness="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-readiness-ready="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-readiness-executed="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-readiness-replay-store-write="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-readiness-vps-nas-authority="false"');
+    expect(html).toContain("readiness_only_no_body_materialized");
+    expect(html).toContain("ready_for_bounded_manual_payload_materialization_review");
+    expect(html).not.toMatch(new RegExp(["must" + "-not-echo", "/vol" + "ume1", "sk" + "-test"].join("|"), "i"));
+  });
+
   it("renders actual execution record after contract as metadata-only and non-consuming", () => {
     const record = {
       found: true,
