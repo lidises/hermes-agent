@@ -1,4 +1,86 @@
 
+## Current status — Fresh request ledger downstream consumption one-shot boundary design deployed
+
+Updated: 2026-05-22 11:46 KST
+
+Completed slice:
+
+- Implemented/deployed `fresh_request_builder_downstream_consumption_one_shot_boundary_design` as a display-only boundary contract after consumption enablement.
+- Code commit: `7ac45a2c feat(office): design downstream consumption boundary`.
+- Added protected API:
+  - `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-boundary-design`
+- Added helper:
+  - `get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_boundary_design(...)`
+- Added Office UI display-only panel: `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionOneShotBoundaryDesignPanel`.
+- DOM hook:
+  - `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-boundary-design="true"`
+- The boundary design carries safe refs from the latest consumption enablement record and defines target allowlist shape, idempotency/replay guard design, rollback/disable posture, and the next exact approval boundary.
+- Actual downstream consumption remains disabled.
+
+Verification:
+
+- RED observed before implementation:
+  - Python tests failed on missing boundary-design helper/API route.
+  - Web tests failed on missing panel/export/placement.
+- `PYTHONPATH=. .venv/bin/python -m py_compile hermes_cli/office_controlled_mutation.py hermes_cli/web_server.py` passed.
+- Focused Python tests: 6 passed.
+- Focused web tests: 279 passed.
+- `npx eslint src/pages/OfficePage.tsx src/pages/OfficePage.rpg.test.tsx src/lib/api.ts` passed with existing Fast Refresh / set-state-in-effect warnings only.
+- `npm run build` passed with existing Vite large chunk warning only.
+- `git diff --check` passed.
+- added-line leak sentinel passed.
+- `web_dist` per-file SHA-256 list matched local and VPS dashboard worktree after rsync.
+
+Live smoke:
+
+- Private `/office` HTTP returned 200 after bounded readiness retry.
+- Protected API readback:
+  - found true
+  - boundary design ready true
+  - safe ref chain verified true
+  - source consumption enablement ref present true
+  - boundary design SHA length 64
+  - downstream use enabled true
+  - downstream consumption enabled false
+  - downstream consumed false
+  - actual downstream consumption allowed false
+  - automation enabled false
+  - VPS NAS mount false
+  - secret leak false
+- DOM:
+  - panel present true
+  - ready true
+  - safe ref chain true
+  - downstream consumption enabled false
+  - automation enabled false
+  - VPS NAS authority false
+  - markdown body included false
+  - controls 0
+  - secret leak false
+  - console JS errors 0
+- Services:
+  - dashboard active
+  - gateway active
+  - gateway not restarted
+
+Boundaries preserved:
+
+- No actual downstream consumption.
+- No approval record write for consumption execution.
+- No replay-store write for consumption execution.
+- No watcher/cron/daemon activation.
+- No dispatcher binding.
+- No authority-adapter binding.
+- No gateway restart.
+- No public exposure change.
+- No VPS NAS mount/write/credential authority.
+- No markdown body/write payload/raw root path/credential value exposure.
+
+Recommended next rung:
+
+- `fresh_request_builder_downstream_consumption_one_shot_exact_approval`: if continuing, create a bounded metadata-only exact approval record for the one-shot consumption boundary design. Still do not execute actual consumption; keep watcher/cron/dispatcher/authority-adapter/VPS NAS authority off until separate later boundaries.
+
+
 ## Current status — Fresh request ledger downstream consumption enablement deployed
 
 Updated: 2026-05-22 11:33 KST
