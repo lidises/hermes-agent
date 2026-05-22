@@ -1,3 +1,70 @@
+## Current status — Fresh request ledger actual consumption execution design deployed
+
+Updated: 2026-05-22 15:55 KST
+
+Code commit: `62d2f877 feat(office): design actual consumption execution boundary`.
+
+Completed rung: `fresh_request_builder_downstream_consumption_one_shot_actual_consumption_execution_design_if_approved`.
+
+Implemented a protected read-only API/UI surface that specifies the exact future actual-consumption execution inputs and gates while proving execution remains closed.
+
+Protected API:
+`GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-actual-consumption-execution-design`
+
+UI panel:
+`NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualConsumptionExecutionDesignPanel`
+
+DOM hook:
+`data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-consumption-execution-design="true"`
+
+Live smoke after dashboard-only restart:
+- unauthenticated protected API: 401
+- authenticated protected API: 200
+- `found=true`
+- `execution_design_ready=true`
+- `disabled_readback_verified=true`
+- `replay_store_metadata_record_verified=true`
+- `safe_ref_chain_verified=true`
+- `downstream_consumption_enabled=false`
+- `downstream_consumed=false`
+- `actual_downstream_consumption_allowed=false`
+- `actual_downstream_consumption_executed=false`
+- `replay_store_write_enabled=false`
+- `real_replay_store_written=false`
+- `watcher_enabled=false`
+- `cron_enabled=false`
+- `dispatch_enabled=false`
+- `authority_adapter_binding_enabled=false`
+- `vps_nas_mount_enabled=false`
+- `markdown_body_included=false`
+- `write_payload_included=false`
+- `raw_root_path_included=false`
+- `operator_exact_execution_approval_required=true`
+- DOM panel found, ready=true, controls=0, secret leak=false
+- console JS errors=0
+
+Verification:
+- `python3 -m py_compile hermes_cli/office_controlled_mutation.py hermes_cli/web_server.py`
+- focused Python downstream consumption chain: 22 passed
+- focused Office web downstream-consumption tests: 8 passed
+- `npm run lint` passed with existing warnings only
+- `npm run build` passed with existing chunk warning only
+- `git diff --check` passed
+- added-line leak sentinel passed
+- web_dist hash: `02cb3c0de212fa395f17e682852991be1b33b198ca917a10bbbf305d329e8470`
+
+Deployment:
+- VPS dashboard worktree reset to `62d2f877f45e9b6497616132703b6a833abc851e`
+- VPS core worktree reset to `62d2f877f45e9b6497616132703b6a833abc851e`
+- `hermes_cli/web_dist/` rsynced to VPS core worktree
+- dashboard restarted only
+- gateway remained active and was not restarted (`MainPID=519592`, `ActiveEnterTimestamp=Mon 2026-05-18 13:34:14 UTC`)
+
+Next recommended rung:
+`fresh_request_builder_downstream_consumption_one_shot_operator_exact_execution_approval`
+
+Keep this next rung safe-ref metadata-only: record a bounded operator approval object for a single future execution attempt, but do not execute actual consumption, do not write markdown/body payloads, do not enable watcher/cron/dispatcher/authority-adapter, do not mount VPS NAS authority, do not expose publicly, and do not restart gateway.
+
 
 
 ## Current status — Fresh request ledger actual consumption disabled readback deployed
