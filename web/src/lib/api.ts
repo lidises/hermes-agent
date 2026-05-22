@@ -1730,6 +1730,46 @@ export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamUseEnablement
   };
 }
 
+
+export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightResult {
+  found: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: null | {
+    schema_version: number;
+    mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_preflight";
+    selection_profile: string;
+    selected_export_review_passed: boolean;
+    manual_operator_review_record_present: boolean;
+    downstream_use_enablement_record_present: boolean;
+    consumption_preflight_passed: boolean;
+    enablement_ref?: string | null;
+    source_preflight_decision_sha256?: string | null;
+    manual_review_ref?: string | null;
+    manual_review_record_sha256?: string | null;
+    enablement_record_sha256?: string | null;
+    checksum_set_sha256?: string | null;
+    selected_item_count: number;
+    consumption_preflight_decision_sha256: string;
+    downstream_use_enabled: boolean;
+    downstream_consumption_enabled: false;
+    downstream_consumed: false;
+    actual_downstream_consumption_allowed_after_preflight: false;
+    blocked_reason: string;
+    markdown_body_included: false;
+    write_payload_included: false;
+    raw_root_path_included: false;
+    credential_value_included: false;
+    repeat_execution_replay_allowed: false;
+    watcher_enabled: false;
+    cron_enabled: false;
+    dispatch_enabled: false;
+    authority_adapter_binding_enabled: false;
+    vps_nas_mount_enabled: false;
+    capabilities: Record<string, boolean>;
+    next_required_boundary: string;
+  };
+}
+
 export interface OfficeNasKeeperExecutionFromPreviewPayload {
   handoff_ref: string;
   relay_execution_ref: string;
@@ -2165,6 +2205,8 @@ export const api = {
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerManualReviewRecordReadbackResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-manual-review-record?limit=20"),
   getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamUseEnablement: () =>
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamUseEnablementReadbackResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-use-enablements?limit=20"),
+  getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflight: () =>
+    fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-preflight?profile=latest_written&limit=20"),
   executeOfficeControlledMutationNasKeeperFreshOneShotOperatorWrite: (body: Record<string, unknown>) =>
     fetchJSON<OfficeNasKeeperFreshOneShotOperatorWriteResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-one-shot-operator-write", {
       method: "POST",

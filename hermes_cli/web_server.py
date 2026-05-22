@@ -101,6 +101,7 @@ from hermes_cli.office_controlled_mutation import (
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_readback,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_export_selection_review,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_use_preflight,
+    get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_preflight,
     append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_manual_review_record,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_manual_review_records,
     append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_use_enablement_record,
@@ -779,6 +780,18 @@ async def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger
 ):
     """Preflight downstream use of a selected export behind manual operator review."""
     return get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_use_preflight(
+        profile=profile or "latest_written",
+        limit=limit or 20,
+    )
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-preflight")
+async def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_preflight_route(
+    profile: Optional[str] = None,
+    limit: Optional[int] = None,
+):
+    """Preflight downstream consumption while actual consumption remains disabled."""
+    return get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_preflight(
         profile=profile or "latest_written",
         limit=limit or 20,
     )

@@ -74,6 +74,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
     expect(source).toContain("<NasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightPanel");
     expect(source).toContain("<NasKeeperFreshRequestBuilderLedgerManualReviewRecordPanel");
     expect(source).toContain("<NasKeeperFreshRequestBuilderLedgerDownstreamUseEnablementPanel");
+    expect(source).toContain("<NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightPanel");
 
     for (const panel of [
       "<NasKeeperLiveOperatorLanePanel",
@@ -4682,6 +4683,81 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-use-enablement-markdown-body-included="false"');
     expect(html).toContain("safe-ref enablement · consumption still disabled");
     expect(html).toContain("downstream_use_enablement_safe_ref_v1");
+    expect(html).toContain("enablement-20260521163100-aafe7001");
+    expect(html).not.toContain("Safe body");
+    expect(html).not.toContain("/Users/" + "lidises");
+    expect(html).not.toContain("/home/hermes");
+    expect(html).not.toContain("/vol" + "ume1");
+    expect(html).not.toContain("sk" + "-test");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("<form");
+    expect(html).not.toContain("<input");
+    expect(html).not.toContain("<select");
+    expect(html).not.toContain("<textarea");
+  });
+
+
+  it("renders downstream consumption preflight as readiness-gated display-only proof", () => {
+    const NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightPanel = (OfficePageModule as unknown as {
+      NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightPanel>>;
+    }).NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightPanel;
+    expect(NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightPanel).toBeTypeOf("function");
+
+    const html = renderToStaticMarkup(
+      <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightPanel
+        error={null}
+        record={{
+          found: true,
+          errors: [],
+          dto: {
+            schema_version: 1,
+            mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_preflight",
+            selection_profile: "latest_written",
+            selected_export_review_passed: true,
+            manual_operator_review_record_present: true,
+            downstream_use_enablement_record_present: true,
+            consumption_preflight_passed: true,
+            enablement_ref: "enablement-20260521163100-aafe7001",
+            source_preflight_decision_sha256: "a".repeat(64),
+            manual_review_ref: "manualreview-20260521163000-aafe7001",
+            manual_review_record_sha256: "b".repeat(64),
+            enablement_record_sha256: "d".repeat(64),
+            checksum_set_sha256: "c".repeat(64),
+            selected_item_count: 1,
+            consumption_preflight_decision_sha256: "e".repeat(64),
+            downstream_use_enabled: true,
+            downstream_consumption_enabled: false,
+            downstream_consumed: false,
+            actual_downstream_consumption_allowed_after_preflight: false,
+            blocked_reason: "actual_downstream_consumption_boundary_not_approved",
+            markdown_body_included: false,
+            write_payload_included: false,
+            raw_root_path_included: false,
+            credential_value_included: false,
+            repeat_execution_replay_allowed: false,
+            watcher_enabled: false,
+            cron_enabled: false,
+            dispatch_enabled: false,
+            authority_adapter_binding_enabled: false,
+            vps_nas_mount_enabled: false,
+            capabilities: {},
+            next_required_boundary: "fresh_request_builder_downstream_consumption_enablement",
+          },
+        }}
+      />,
+    );
+
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-preflight="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-preflight-passed="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-preflight-enable-record-present="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-preflight-downstream-use-enabled="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-preflight-downstream-consumption-enabled="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-preflight-downstream-consumed="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-preflight-automation-enabled="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-preflight-vps-nas-authority="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-preflight-markdown-body-included="false"');
+    expect(html).toContain("consumption preflight · actual consumption still disabled");
+    expect(html).toContain("downstream_consumption_preflight_safe_ref_v1");
     expect(html).toContain("enablement-20260521163100-aafe7001");
     expect(html).not.toContain("Safe body");
     expect(html).not.toContain("/Users/" + "lidises");

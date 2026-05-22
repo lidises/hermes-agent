@@ -9046,6 +9046,126 @@ def list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_down
     return {"found": bool(records), "errors": errors, "dto": dto}
 
 
+
+
+def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_preflight(
+    *,
+    queue_dir: Path | str | None = None,
+    profile: str = "latest_written",
+    limit: int = 20,
+    review_store_path: Path | None = None,
+    enablement_store_path: Path | None = None,
+) -> dict[str, object]:
+    """Preflight downstream consumption readiness without consuming downstream data."""
+    safe_limit = max(1, min(limit, 200)) if isinstance(limit, int) else 20
+    errors: list[dict[str, str]] = []
+    if profile != "latest_written":
+        errors.append(_error("profile", "unsupported_selection_profile"))
+    upstream = get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_use_preflight(
+        queue_dir=queue_dir,
+        profile=profile or "latest_written",
+        limit=safe_limit,
+        review_store_path=review_store_path,
+    )
+    upstream_dto = upstream.get("dto") if isinstance(upstream.get("dto"), Mapping) else None
+    upstream_map = cast(Mapping[str, object], upstream_dto) if isinstance(upstream_dto, Mapping) else {}
+    enablement_readback = list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_use_enablement_records(
+        store_path=enablement_store_path,
+        limit=safe_limit,
+    )
+    enablement_dto = enablement_readback.get("dto") if isinstance(enablement_readback.get("dto"), Mapping) else None
+    enablement_records = enablement_dto.get("records") if isinstance(enablement_dto, Mapping) else []
+    matching_enablement: Mapping[str, object] | None = None
+    if isinstance(enablement_records, list):
+        for record in reversed(enablement_records):
+            if not isinstance(record, Mapping):
+                continue
+            if (
+                record.get("source_preflight_decision_sha256") == upstream_map.get("preflight_decision_sha256")
+                and record.get("checksum_set_sha256") == upstream_map.get("checksum_set_sha256")
+                and record.get("selected_item_count") == upstream_map.get("selected_item_count")
+                and record.get("manual_review_record_verified") is True
+                and record.get("downstream_use_enablement_recorded") is True
+            ):
+                matching_enablement = record
+                break
+    selected_export_review_passed = bool(upstream_map.get("selected_export_review_passed"))
+    manual_review_present = bool(upstream_map.get("manual_operator_review_record_present"))
+    enablement_present = matching_enablement is not None
+    consumption_preflight_passed = bool(selected_export_review_passed and manual_review_present and enablement_present and not errors)
+    blocked_reason = (
+        "actual_downstream_consumption_boundary_not_approved"
+        if consumption_preflight_passed
+        else "downstream_use_enablement_record_not_found"
+        if selected_export_review_passed and manual_review_present
+        else "manual_operator_review_not_recorded"
+        if selected_export_review_passed
+        else "selected_export_review_not_ready"
+    )
+    decision_material = {
+        "mode": "nas_keeper_fresh_request_builder_ledger_downstream_consumption_preflight",
+        "selection_profile": "latest_written" if profile == "latest_written" else profile,
+        "source_preflight_decision_sha256": upstream_map.get("preflight_decision_sha256"),
+        "manual_review_record_sha256": matching_enablement.get("manual_review_record_sha256") if matching_enablement else None,
+        "enablement_record_sha256": matching_enablement.get("enablement_record_sha256") if matching_enablement else None,
+        "checksum_set_sha256": upstream_map.get("checksum_set_sha256"),
+        "selected_item_count": upstream_map.get("selected_item_count"),
+        "consumption_preflight_passed": consumption_preflight_passed,
+        "actual_downstream_consumption_allowed_after_preflight": False,
+    }
+    decision_sha = hashlib.sha256(
+        json.dumps(decision_material, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_downstream_consumption_preflight",
+        "selection_profile": "latest_written" if profile == "latest_written" else profile,
+        "selected_export_review_passed": selected_export_review_passed,
+        "manual_operator_review_record_present": manual_review_present,
+        "downstream_use_enablement_record_present": enablement_present,
+        "consumption_preflight_passed": consumption_preflight_passed,
+        "enablement_ref": matching_enablement.get("enablement_ref") if matching_enablement else None,
+        "source_preflight_decision_sha256": upstream_map.get("preflight_decision_sha256"),
+        "manual_review_ref": matching_enablement.get("manual_review_ref") if matching_enablement else upstream_map.get("manual_review_ref"),
+        "manual_review_record_sha256": matching_enablement.get("manual_review_record_sha256") if matching_enablement else None,
+        "enablement_record_sha256": matching_enablement.get("enablement_record_sha256") if matching_enablement else None,
+        "checksum_set_sha256": upstream_map.get("checksum_set_sha256"),
+        "selected_item_count": upstream_map.get("selected_item_count") or 0,
+        "consumption_preflight_decision_sha256": decision_sha,
+        "downstream_use_enabled": consumption_preflight_passed,
+        "downstream_consumption_enabled": False,
+        "downstream_consumed": False,
+        "actual_downstream_consumption_allowed_after_preflight": False,
+        "blocked_reason": blocked_reason,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "repeat_execution_replay_allowed": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "capabilities": {
+            "downstream_consumption_preflight_enabled": True,
+            "downstream_use_readiness_enabled": consumption_preflight_passed,
+            "downstream_consumption_enabled": False,
+            "actual_write_execution_enabled": False,
+            "repeat_execution_replay_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_credential_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+        },
+        "next_required_boundary": "fresh_request_builder_downstream_consumption_enablement" if consumption_preflight_passed else "fresh_request_builder_downstream_use_enablement",
+    }
+    return {"found": bool(upstream.get("found")), "errors": sorted(errors, key=lambda item: (item["field"], item["code"])), "dto": dto}
+
+
 def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_use_enablement_record(
     payload: object,
     *,
