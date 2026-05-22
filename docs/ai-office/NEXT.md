@@ -1,3 +1,75 @@
+## Current status — Fresh request ledger operator execution approval recorded
+
+Updated: 2026-05-22
+
+Latest code commit: f1b32329 feat(office): record operator execution approval boundary
+
+Completed rung: fresh_request_builder_downstream_consumption_one_shot_operator_exact_execution_approval
+
+What is now available:
+- Protected API POST/GET: /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-operator-execution-approvals
+- UI panel: NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionOperatorExecutionApprovalPanel
+- DOM hook: data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-operator-execution-approval="true"
+- Metadata-only operator execution approval record persisted on VPS via protected POST.
+
+Live smoke summary:
+- unauthenticated POST: 401
+- authenticated design GET: 200
+- authenticated approval POST: 200 stored=true
+- authenticated approval GET: 200 found=true record_count=1
+- operator_execution_approval_recorded=true
+- execution_design_verified=true
+- replay_store_metadata_record_verified=true
+- safe_ref_chain_verified=true
+- downstream_use_enabled=true
+- downstream_consumption_enabled=false
+- downstream_consumed=false
+- actual_downstream_consumption_allowed=false
+- actual_downstream_consumption_executed=false
+- replay_store_write_enabled=false
+- real_replay_store_written=false
+- watcher_enabled=false
+- cron_enabled=false
+- dispatch_enabled=false
+- authority_adapter_binding_enabled=false
+- vps_nas_mount_enabled=false
+- markdown_body_included=false
+- write_payload_included=false
+- raw_root_path_included=false
+- secret_value_included=false
+- forbidden payload echo=false
+- DOM found=true recorded=true controls=0
+- console JS errors=0
+
+Verification:
+- py_compile passed
+- focused Python tests passed: 5 passed
+- focused Office web tests passed: 9 passed
+- eslint passed with existing warnings only
+- npm run build passed
+- git diff --check passed
+- added-line leak sentinel passed
+
+Deployment:
+- Local main pushed.
+- VPS core and dashboard worktrees reset to f1b32329.
+- web_dist rsynced to dashboard worktree.
+- dashboard restarted only.
+- gateway was not restarted; hermes-gateway.service remained active with pre-existing MainPID 519592.
+
+Still explicitly not enabled:
+- actual downstream consumption
+- replay-store/body write
+- watcher/cron/dispatcher
+- authority-adapter binding
+- VPS NAS mount or direct VPS NAS authority
+- public exposure
+- gateway restart
+
+Next recommended rung:
+- fresh_request_builder_downstream_consumption_one_shot_idempotency_replay_guard
+
+---
 ## Current status — Fresh request ledger actual consumption execution design deployed
 
 Updated: 2026-05-22 15:55 KST
