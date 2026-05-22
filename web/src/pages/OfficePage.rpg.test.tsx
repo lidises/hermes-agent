@@ -7214,6 +7214,85 @@ describe("ControlledMutationApprovalBoundarySummaryPanel", () => {
     expect(html).not.toMatch(rawPathLeakPattern);
   });
 
+  it("renders operator execution approval as metadata-only and non-executing", () => {
+    const record = {
+      found: true,
+      errors: [],
+      dto: {
+        schema_version: 1,
+        mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_operator_execution_approval_records_readback",
+        record_count: 1,
+        skipped_count: 0,
+        records: [],
+        latest_record: {
+          schema_version: 1,
+          mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_operator_execution_approval_record",
+          operator_execution_approval_recorded: true,
+          operator_execution_approval_ref: "operatorexecapproval-20260522161000-test",
+          replay_store_entry_ref: "replaystore-entry-safe-ref",
+          noop_replay_probe_ref: "noopreplay-safe-ref",
+          replay_store_key_ref: "probe-key-safe-ref",
+          replay_store_metadata_record_sha256: "c".repeat(64),
+          execution_design_sha256: "d".repeat(64),
+          execution_design_verified: true,
+          replay_store_metadata_record_verified: true,
+          safe_ref_chain_verified: true,
+          approval_scope: "one_shot_actual_downstream_consumption_execution",
+          approved_by: "operator-safe-ref",
+          approved_at: "2026-05-22T16:10:00Z",
+          operator_confirmation: "confirmed-approve-one-shot-actual-downstream-consumption-execution-metadata-only",
+          safe_summary: "Approve one future metadata-only actual execution attempt after guards.",
+          evidence_refs: ["handoff:actual-consumption-execution-design"],
+          operator_execution_approval_record_sha256: "e".repeat(64),
+          downstream_use_enabled: true,
+          downstream_consumption_enabled: false,
+          downstream_consumed: false,
+          actual_downstream_consumption_allowed: false,
+          actual_downstream_consumption_executed: false,
+          replay_store_write_enabled: false,
+          real_replay_store_written: false,
+          markdown_body_included: false,
+          write_payload_included: false,
+          raw_root_path_included: false,
+          watcher_enabled: false,
+          cron_enabled: false,
+          dispatch_enabled: false,
+          authority_adapter_binding_enabled: false,
+          vps_nas_mount_enabled: false,
+        },
+        downstream_consumption_enabled: false,
+        downstream_consumed: false,
+        actual_downstream_consumption_allowed: false,
+        actual_downstream_consumption_executed: false,
+        real_replay_store_written: false,
+        replay_store_write_enabled: false,
+        markdown_body_included: false,
+        write_payload_included: false,
+        raw_root_path_included: false,
+        watcher_enabled: false,
+        cron_enabled: false,
+        dispatch_enabled: false,
+        authority_adapter_binding_enabled: false,
+        vps_nas_mount_enabled: false,
+        next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_idempotency_replay_guard",
+      },
+    } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionOperatorExecutionApprovalResult;
+    const html = renderToStaticMarkup(
+      <OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionOperatorExecutionApprovalPanel record={record} />,
+    );
+
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-operator-execution-approval="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-operator-execution-approval-recorded="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-operator-execution-approval-executed="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-operator-execution-approval-replay-store-write="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-operator-execution-approval-vps-nas-authority="false"');
+    expect(html).toContain("operatorexecapproval-20260522161000-test");
+    expect(html).toContain("one_shot_actual_downstream_consumption_execution");
+    expect(html).not.toContain("&lt;form");
+    expect(html).not.toContain("&lt;button");
+    expect(html).not.toMatch(/\/Users\/|\/home\/hermes|\/volume1|sk-test|write payload/i);
+  });
+
   it("renders actual consumption execution design as a read-only exact boundary", () => {
     const record = {
       found: true,
