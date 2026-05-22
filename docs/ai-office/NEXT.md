@@ -1,3 +1,48 @@
+## Current status — Fresh request ledger noop execution probe recorded
+
+Updated: 2026-05-22T09:18:20Z
+
+Latest code commit: `4cd01a6937bd41b80c604b034334c63b5a3970c1` — `feat(office): probe downstream noop execution opening`.
+
+Completed rung: `fresh_request_builder_downstream_consumption_one_shot_noop_execution_probe_after_opening`.
+
+Live write performed: one protected, safe-ref metadata-only noop execution probe record was appended on the VPS dashboard. This is still a noop/readiness proof only: actual downstream consumption, replay-store writes, markdown/body materialization, dispatcher/authority-adapter binding, watcher/cron, public exposure, gateway restart, and VPS NAS authority remain disabled.
+
+Protected API added:
+- `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-noop-execution-probes`
+- `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-noop-execution-probes`
+
+UI panel added: `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionNoopExecutionProbePanel`.
+DOM hook: `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-noop-execution-probe="true"`.
+
+Live smoke summary:
+- protected API auth boundary: unauthenticated GET/POST returned 401
+- authenticated noop probe POST stored exactly one metadata-only record
+- authenticated readback: `found=true`, `record_count=1`, `noop_execution_probe_recorded=true`, `noop_execution_probe_ready=true`
+- verified chain: execution-opening record, idempotency guard record, operator approval record, replay metadata record, execution design SHA, safe-ref chain
+- disabled fields stayed false: downstream consumption, actual execution, replay-store write, watcher, cron, dispatch, authority-adapter binding, VPS NAS mount
+- no markdown body, write payload, raw root path, or secret value included
+- DOM smoke found the panel with `ready=true`, `executed=false`, `replayStoreWrite=false`, `vpsNasAuthority=false`, `controls=0`
+- browser console JS errors: 0
+
+Verification run:
+- `python3 -m py_compile hermes_cli/office_controlled_mutation.py hermes_cli/web_server.py`
+- focused Python chain tests: 6 passed
+- focused Office web tests: 3 passed
+- `npm run lint` passed with existing warnings only
+- `npm run build` passed with existing Vite chunk-size warning only
+- `git diff --check`
+- added-line leak sentinel
+
+Deploy state:
+- local `main` pushed
+- VPS dashboard/core worktrees synced to code commit `4cd01a6937bd41b80c604b034334c63b5a3970c1`
+- `web_dist` rsynced
+- dashboard restarted only: `hermes-agent-dashboard.service`
+- gateway remained active and was not restarted
+
+Next recommended rung: `fresh_request_builder_downstream_consumption_one_shot_actual_execution_contract_after_noop_probe`.
+
 ## Current status — Fresh request ledger execution opening recorded
 
 Updated: 2026-05-22T08:52:03Z
