@@ -1,5 +1,86 @@
 
 
+## Current status — Fresh request ledger downstream consumption actual preflight deployed
+
+Updated: 2026-05-22 12:35 KST
+
+Completed slice:
+
+- Implemented/deployed `fresh_request_builder_downstream_consumption_one_shot_actual_consumption_preflight` as a display-only readiness preflight over the exact approval record.
+- Code commit: `3056787f feat(office): preflight downstream consumption execution`.
+- Added protected API:
+  - `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-actual-consumption-preflight`
+- Added helper:
+  - `get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_actual_consumption_preflight(...)`
+- Added Office UI display-only panel: `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualPreflightPanel`.
+- DOM hook:
+  - `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-preflight="true"`
+- The preflight reads the latest exact approval record, verifies exact approval + safe-ref chain readiness, and identifies the next execution-gate boundary without executing consumption.
+
+Live preflight evidence:
+
+- `exact_approval_ref=exactapproval-20260522121330-d0737608`.
+- `actual_consumption_preflight_ready=true`.
+- `exact_approval_record_verified=true`.
+- `safe_ref_chain_verified=true`.
+- exact approval record SHA length 64.
+- downstream consumption enabled false; downstream consumed false; actual downstream consumption allowed false.
+- replay-store write enabled false.
+- automation enabled false; VPS NAS mount/authority false.
+
+Verification:
+
+- RED observed before implementation:
+  - Backend/API tests failed before helper/route implementation.
+  - Web test failed on missing panel/export/API client placement.
+- `python3 -m py_compile hermes_cli/office_controlled_mutation.py hermes_cli/web_server.py` passed locally.
+- Focused Python tests: 9 passed (`boundary_design` + `exact_approval` + `actual_preflight`).
+- Focused Office web test file: 124 passed.
+- `npm run lint` passed with existing warnings only.
+- `npm run build` passed with existing Vite large chunk warning only.
+- `git diff --check` passed.
+- added-line leak sentinel passed.
+- `web_dist` relative content hash after local build/deploy: `0bd906827e4bf699b95d0747fa65e08b4930415b8b2cbe2e49279af8800dc278`.
+
+Live smoke:
+
+- Dashboard/core VPS worktrees synced to code commit `3056787f`.
+- `web_dist` rsynced to both VPS worktrees and relative content hashes match local.
+- Dashboard restarted only; gateway active and not restarted (`MainPID=519592`, active since 2026-05-18 13:34:14 UTC).
+- Protected API readback status 200.
+- DOM:
+  - panel present true
+  - exact approval panel present true
+  - ready true
+  - exact approval verified true
+  - safe ref chain verified true
+  - downstream consumption enabled false
+  - downstream consumed false
+  - actual downstream consumption allowed false
+  - replay-store write false
+  - automation enabled false
+  - VPS NAS authority false
+  - controls 0
+  - secret leak false
+  - console JS errors 0
+
+Boundaries preserved:
+
+- No actual downstream consumption.
+- No replay-store write for consumption execution.
+- No watcher/cron/daemon activation.
+- No dispatcher binding.
+- No authority-adapter binding.
+- No gateway restart.
+- No public exposure change.
+- No VPS NAS mount/write/credential authority.
+- No markdown body/write payload/raw root path/credential value exposure.
+
+Recommended next rung:
+
+- `fresh_request_builder_downstream_consumption_one_shot_actual_consumption_execution_gate`: bounded execution-gate design/record boundary for the exact preflight. Keep actual downstream consumption execution, replay-store write, watcher/cron/dispatcher/authority-adapter/VPS NAS authority off until that exact gate is implemented and separately verified.
+
+
 ## Current status — Fresh request ledger downstream consumption one-shot exact approval deployed
 
 Updated: 2026-05-22 12:15 KST
