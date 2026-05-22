@@ -1,4 +1,45 @@
 
+## Current status — Fresh request ledger downstream-use enablement record deployed
+
+Updated: 2026-05-22 10:53 KST
+
+Completed slice:
+
+- Implemented/deployed `fresh_request_builder_downstream_use_enablement` as a safe-ref readiness-only record.
+- Code commit: `112d9ecb feat(office): record downstream use enablement`.
+- Added helper/API readback and append for downstream-use enablement records:
+  - `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-use-enablements?limit=20`
+  - `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-use-enablements`
+- Added Office UI display-only panel: `NasKeeperFreshRequestBuilderLedgerDownstreamUseEnablementPanel`.
+- Local actual write smoke: `enablement-20260522104632-112d9ecb`, sha `e623676ac7ab5b5ab6dbdbde4318b8620a219bdc30c493b89325eb46f1047af5`.
+- VPS protected API actual write smoke: `enablement-20260522015130-112d9ecb`, sha `969f021ede0a64d9edc82e8170c77070c087a81f03708d3abe057456e5ecbf00`.
+- VPS live DOM smoke: enablement panel present/recorded/manual-review-verified; downstream use/consumption/consumed false; automation/VPS NAS authority false; no controls; raw leak false.
+- Dashboard restarted; gateway not restarted.
+
+Verification:
+
+- `py_compile` for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py` passed.
+- Focused Python tests: 6 passed.
+- Focused web tests: 119 passed.
+- `npm run build` passed with existing Vite large chunk warning only.
+- `git diff --check` passed.
+- added-line leak sentinel passed.
+
+Boundaries preserved:
+
+- No downstream consumption.
+- No watcher/cron/daemon activation.
+- No dispatcher/authority-adapter binding.
+- No gateway restart.
+- No public exposure change.
+- No VPS NAS mount/write/credential authority.
+- No markdown body/write payload/raw root path/credential value exposure.
+
+Recommended next rung:
+
+- `fresh_request_builder_downstream_consumption_preflight`: display-only/readiness-gated consumption preflight that proves enablement record can be recognized before any real downstream consumption. Keep actual consumption off until a separate explicit boundary.
+
+
 ## Current status — Fresh request ledger manual review record deployed
 
 Updated: 2026-05-22 09:54 KST
