@@ -1860,6 +1860,61 @@ export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionOn
   };
 }
 
+export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExactApprovalReadbackResult {
+  found: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: null | {
+    schema_version: number;
+    mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_exact_approval_records_readback";
+    record_count: number;
+    limit: number;
+    skipped_count: number;
+    records: Array<Record<string, unknown>>;
+    latest_record: null | {
+      schema_version: number;
+      mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_exact_approval_record";
+      exact_approval_recorded: boolean;
+      exact_approval_ref: string;
+      source_consumption_enablement_ref: string;
+      source_consumption_enablement_record_sha256: string;
+      boundary_design_sha256: string;
+      boundary_design_verified: boolean;
+      safe_ref_chain_verified: boolean;
+      exact_approval_record_sha256: string;
+      downstream_consumption_enabled: false;
+      downstream_consumed: false;
+      actual_downstream_consumption_allowed: false;
+      approval_record_write_enabled: boolean;
+      replay_store_write_enabled: false;
+      markdown_body_included: false;
+      write_payload_included: false;
+      watcher_enabled: false;
+      cron_enabled: false;
+      dispatch_enabled: false;
+      authority_adapter_binding_enabled: false;
+      vps_nas_mount_enabled: false;
+      [key: string]: unknown;
+    };
+    downstream_use_enabled: boolean;
+    downstream_consumption_enabled: false;
+    downstream_consumed: false;
+    actual_downstream_consumption_allowed: false;
+    approval_record_write_enabled: boolean;
+    replay_store_write_enabled: false;
+    markdown_body_included: false;
+    write_payload_included: false;
+    raw_root_path_included: false;
+    credential_value_included: false;
+    watcher_enabled: false;
+    cron_enabled: false;
+    dispatch_enabled: false;
+    authority_adapter_binding_enabled: false;
+    vps_nas_mount_enabled: false;
+    capabilities: Record<string, boolean>;
+    next_required_boundary: string;
+  };
+}
+
 export interface OfficeNasKeeperExecutionFromPreviewPayload {
   handoff_ref: string;
   relay_execution_ref: string;
@@ -2301,6 +2356,14 @@ export const api = {
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementReadbackResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablements?limit=20"),
   getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionOneShotBoundaryDesign: () =>
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionOneShotBoundaryDesignResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-boundary-design"),
+  getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExactApproval: () =>
+    fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExactApprovalReadbackResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-exact-approvals?limit=20"),
+  appendOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExactApproval: (body: Record<string, unknown>) =>
+    fetchJSON<Record<string, unknown>>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-exact-approvals", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
   executeOfficeControlledMutationNasKeeperFreshOneShotOperatorWrite: (body: Record<string, unknown>) =>
     fetchJSON<OfficeNasKeeperFreshOneShotOperatorWriteResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-one-shot-operator-write", {
       method: "POST",
