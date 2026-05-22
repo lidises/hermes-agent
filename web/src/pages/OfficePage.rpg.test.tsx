@@ -7284,6 +7284,81 @@ describe("ControlledMutationApprovalBoundarySummaryPanel", () => {
     expect(html).not.toMatch(new RegExp(["/Us" + "ers/lidises", "/ho" + "me/hermes", "/vol" + "ume1", "sk" + "-test"].join("|"), "i"));
   });
 
+  it("renders actual execution record after contract as metadata-only and non-consuming", () => {
+    const record = {
+      found: true,
+      errors: [],
+      dto: {
+        schema_version: 1,
+        mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_records_readback",
+        record_count: 1,
+        latest_record: {
+          schema_version: 1,
+          mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_record",
+          actual_execution_recorded: true,
+          actual_execution_record_ready: true,
+          actual_execution_ref: "actualexec-20260522100100-test0001",
+          noop_execution_probe_ref: "noopexec-20260522091700-probe0001",
+          noop_execution_probe_record_sha256: "a".repeat(64),
+          execution_contract_sha256: "b".repeat(64),
+          operator_confirmation_ref: "operatorconfirm-20260522100100-test0001",
+          execution_contract_verified: true,
+          noop_execution_probe_record_verified: true,
+          safe_ref_chain_verified: true,
+          execution_result_status: "metadata_only_execution_recorded_no_consumption",
+          actual_execution_record_sha256: "c".repeat(64),
+          downstream_use_enabled: true,
+          downstream_consumption_enabled: false,
+          downstream_consumed: false,
+          actual_downstream_consumption_allowed: false,
+          actual_downstream_consumption_executed: false,
+          replay_store_write_enabled: false,
+          real_replay_store_written: false,
+          markdown_body_included: false,
+          write_payload_included: false,
+          raw_root_path_included: false,
+          secret_value_included: false,
+          watcher_enabled: false,
+          cron_enabled: false,
+          dispatch_enabled: false,
+          authority_adapter_binding_enabled: false,
+          vps_nas_mount_enabled: false,
+          next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_post_execution_record_readback",
+        },
+        downstream_consumption_enabled: false,
+        downstream_consumed: false,
+        actual_downstream_consumption_allowed: false,
+        actual_downstream_consumption_executed: false,
+        replay_store_write_enabled: false,
+        real_replay_store_written: false,
+        markdown_body_included: false,
+        write_payload_included: false,
+        raw_root_path_included: false,
+        watcher_enabled: false,
+        cron_enabled: false,
+        dispatch_enabled: false,
+        authority_adapter_binding_enabled: false,
+        vps_nas_mount_enabled: false,
+        capabilities: {},
+        next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_post_execution_record_readback",
+      },
+    } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualExecutionRecordResult;
+
+    const html = renderToStaticMarkup(<OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualExecutionRecordPanel record={record} error={null} />);
+
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-execution-record="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-execution-record-ready="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-execution-record-executed="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-execution-record-replay-store-write="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-execution-record-vps-nas-authority="false"');
+    expect(html).toContain("actualexec-20260522100100-test0001");
+    expect(html).toContain("metadata_only_execution_recorded_no_consumption");
+    expect(html).toContain("actual_downstream_consumption_executed");
+    expect(html).toContain("false");
+    expect(html).not.toMatch(new RegExp(["/Us" + "ers/lidises", "/ho" + "me/hermes", "/vol" + "ume1", "sk" + "-test"].join("|"), "i"));
+    expect(html).not.toMatch(/<button|<input|<textarea|<select/i);
+  });
+
   it("renders actual execution contract after noop probe as contract-only and non-executing", () => {
     const record = {
       found: true,

@@ -2565,6 +2565,70 @@ export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionAc
   };
 }
 
+export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualExecutionRecordResult {
+  found: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: null | {
+    schema_version: number;
+    mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_records_readback";
+    record_count: number;
+    limit?: number;
+    skipped_count?: number;
+    records?: Array<Record<string, unknown>>;
+    latest_record: null | {
+      schema_version: number;
+      mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_record";
+      actual_execution_recorded: boolean;
+      actual_execution_record_ready: boolean;
+      actual_execution_ref: string;
+      noop_execution_probe_ref: string;
+      noop_execution_probe_record_sha256: string;
+      execution_contract_sha256: string;
+      operator_confirmation_ref: string;
+      execution_result_status: string;
+      execution_contract_verified: boolean;
+      noop_execution_probe_record_verified: boolean;
+      safe_ref_chain_verified: boolean;
+      actual_execution_record_sha256: string;
+      downstream_use_enabled: boolean;
+      downstream_consumption_enabled: false;
+      downstream_consumed: false;
+      actual_downstream_consumption_allowed: false;
+      actual_downstream_consumption_executed: false;
+      replay_store_write_enabled: false;
+      real_replay_store_written: false;
+      markdown_body_included: false;
+      write_payload_included: false;
+      raw_root_path_included: false;
+      secret_value_included?: false;
+      watcher_enabled: false;
+      cron_enabled: false;
+      dispatch_enabled: false;
+      authority_adapter_binding_enabled: false;
+      vps_nas_mount_enabled: false;
+      next_required_boundary: string;
+      [key: string]: unknown;
+    };
+    downstream_use_enabled?: boolean;
+    downstream_consumption_enabled?: false;
+    downstream_consumed?: false;
+    actual_downstream_consumption_allowed?: false;
+    actual_downstream_consumption_executed?: false;
+    replay_store_write_enabled?: false;
+    real_replay_store_written?: false;
+    markdown_body_included?: false;
+    write_payload_included?: false;
+    raw_root_path_included?: false;
+    watcher_enabled?: false;
+    cron_enabled?: false;
+    dispatch_enabled?: false;
+    authority_adapter_binding_enabled?: false;
+    vps_nas_mount_enabled?: false;
+    capabilities?: Record<string, boolean>;
+    next_required_boundary: string;
+  };
+}
+
 export interface OfficeNasKeeperExecutionFromPreviewPayload {
   handoff_ref: string;
   relay_execution_ref: string;
@@ -3032,6 +3096,8 @@ export const api = {
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionNoopExecutionProbeResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-noop-execution-probes"),
   getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualExecutionContract: () =>
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualExecutionContractResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-actual-execution-contract"),
+  getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualExecutionRecord: () =>
+    fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionActualExecutionRecordResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-actual-execution-records"),
   appendOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExactApproval: (body: Record<string, unknown>) =>
     fetchJSON<Record<string, unknown>>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-exact-approvals", {
       method: "POST",
