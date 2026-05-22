@@ -7384,6 +7384,60 @@ describe("ControlledMutationApprovalBoundarySummaryPanel", () => {
     expect(html).not.toMatch(new RegExp(["must" + "-not-echo", "/vol" + "ume1", "sk" + "-test"].join("|"), "i"));
   });
 
+  it("renders the downstream consumption materialization contract as contract-only and display-only", () => {
+    const record = {
+      found: true,
+      errors: [],
+      dto: {
+        schema_version: 1,
+        mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_contract",
+        consumption_payload_materialization_contract_ready: true,
+        payload_readiness_verified: true,
+        payload_contract_verified: true,
+        actual_execution_ref: "actualexec-20260522102000-smoke0001",
+        payload_contract_sha256: "a".repeat(64),
+        payload_readiness_sha256: "b".repeat(64),
+        materialization_contract_shape_version: "safe_consumption_payload_materialization_contract_v1",
+        payload_materialization_contract_sha256: "c".repeat(64),
+        payload_materialization_status: "contract_only_no_body_materialized",
+        materialization_contract_decision: "ready_for_bounded_manual_body_materialization_request_contract",
+        allowed_materialization_fields: ["actual_execution_ref", "payload_contract_sha256", "payload_readiness_sha256", "payload_materialization_contract_sha256", "materialization_contract_shape_version", "payload_materialization_status", "body_ref_placeholder", "body_sha256_placeholder", "body_bytes_placeholder"],
+        body_ref_placeholder: "future_safe_body_ref_required",
+        body_sha256_placeholder: "future_body_sha256_required",
+        body_bytes_placeholder: 0,
+        downstream_consumption_enabled: false,
+        downstream_consumed: false,
+        actual_downstream_consumption_allowed: false,
+        actual_downstream_consumption_executed: false,
+        replay_store_write_enabled: false,
+        real_replay_store_written: false,
+        markdown_body_included: false,
+        write_payload_included: false,
+        raw_root_path_included: false,
+        secret_value_included: false,
+        watcher_enabled: false,
+        cron_enabled: false,
+        dispatch_enabled: false,
+        authority_adapter_binding_enabled: false,
+        vps_nas_mount_enabled: false,
+        next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_request_after_contract",
+      },
+    } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationContractResult;
+
+    const html = renderToStaticMarkup(<OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationContractPanel record={record} error={null} />);
+
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-contract="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-contract-ready="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-contract-executed="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-contract-replay-store-write="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-contract-vps-nas-authority="false"');
+    expect(html).toContain("safe_consumption_payload_materialization_contract_v1");
+    expect(html).toContain("contract_only_no_body_materialized");
+    expect(html).toContain("future_safe_body_ref_required");
+    expect(html).not.toMatch(/<button|<input|<select|<textarea/i);
+    expect(html).not.toMatch(new RegExp(["must" + "-not-echo", "/vol" + "ume1", "sk" + "-test"].join("|"), "i"));
+  });
+
   it("renders downstream consumption payload readiness as readiness-only and display-only", () => {
     const record = {
       found: true,
