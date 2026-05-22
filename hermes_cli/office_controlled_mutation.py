@@ -3244,6 +3244,9 @@ def _default_fresh_request_builder_downstream_consumption_idempotency_replay_gua
 def _default_fresh_request_builder_downstream_consumption_execution_opening_record_store_path() -> Path:
     return get_hermes_home() / "office" / "controlled-mutation" / "fresh_request_builder_downstream_consumption_execution_opening_records.jsonl"
 
+def _default_fresh_request_builder_downstream_consumption_noop_execution_probe_record_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "fresh_request_builder_downstream_consumption_noop_execution_probe_records.jsonl"
+
 
 
 def _approval_event_envelope_capabilities() -> dict[str, bool]:
@@ -11893,6 +11896,315 @@ def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_do
     stored_payload = dict(record_material)
     stored_payload["execution_opening_record_sha256"] = record_sha
     dto = _normalize_fresh_request_builder_downstream_consumption_execution_opening_record(stored_payload)
+    if dto is None:
+        return {"stored": False, "errors": [_error("payload", "invalid_normalized_record")], "dto": None}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(dto, sort_keys=True, separators=(",", ":")) + "\n")
+    return {"stored": True, "errors": [], "dto": dto}
+
+
+def _normalize_fresh_request_builder_downstream_consumption_noop_execution_probe_record(item: Mapping[str, object]) -> dict[str, object] | None:
+    required = (
+        "noop_execution_probe_ref",
+        "execution_opening_ref",
+        "execution_opening_record_sha256",
+        "idempotency_replay_guard_ref",
+        "idempotency_replay_guard_record_sha256",
+        "operator_execution_approval_ref",
+        "operator_execution_approval_record_sha256",
+        "replay_store_entry_ref",
+        "replay_store_metadata_record_sha256",
+        "execution_design_sha256",
+        "probe_mode",
+        "noop_execution_probe_result",
+        "probed_by",
+        "probed_at",
+        "safe_summary",
+        "evidence_refs",
+        "noop_execution_probe_record_sha256",
+    )
+    if any(field not in item for field in required):
+        return None
+    for field, prefix in (
+        ("noop_execution_probe_ref", "noopexec-"),
+        ("execution_opening_ref", "executionopen-"),
+        ("idempotency_replay_guard_ref", "idempotencyguard-"),
+        ("operator_execution_approval_ref", "operatorexecapproval-"),
+        ("replay_store_entry_ref", "replaystore-"),
+    ):
+        if not _office_disabled_runtime_dispatch_valid_prefixed_ref(item.get(field), prefix):
+            return None
+    for field in (
+        "execution_opening_record_sha256",
+        "idempotency_replay_guard_record_sha256",
+        "operator_execution_approval_record_sha256",
+        "replay_store_metadata_record_sha256",
+        "execution_design_sha256",
+        "noop_execution_probe_record_sha256",
+    ):
+        value = item.get(field)
+        if not (isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value)):
+            return None
+    if item.get("probe_mode") != "noop_execution_probe_after_opening_only":
+        return None
+    if item.get("noop_execution_probe_result") != "noop_execution_probe_succeeded":
+        return None
+    if not _is_opaque_id(item.get("probed_by")):
+        return None
+    if not (isinstance(item.get("probed_at"), str) and _ISO_UTC_RE.fullmatch(str(item.get("probed_at")))):
+        return None
+    if not _is_safe_text(item.get("safe_summary")):
+        return None
+    if not _validate_evidence_refs(item.get("evidence_refs")):
+        return None
+    return {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_downstream_consumption_noop_execution_probe_record",
+        "noop_execution_probe_recorded": True,
+        "noop_execution_probe_ready": True,
+        "noop_execution_probe_ref": item.get("noop_execution_probe_ref"),
+        "execution_opening_ref": item.get("execution_opening_ref"),
+        "execution_opening_record_sha256": item.get("execution_opening_record_sha256"),
+        "idempotency_replay_guard_ref": item.get("idempotency_replay_guard_ref"),
+        "idempotency_replay_guard_record_sha256": item.get("idempotency_replay_guard_record_sha256"),
+        "operator_execution_approval_ref": item.get("operator_execution_approval_ref"),
+        "operator_execution_approval_record_sha256": item.get("operator_execution_approval_record_sha256"),
+        "replay_store_entry_ref": item.get("replay_store_entry_ref"),
+        "replay_store_metadata_record_sha256": item.get("replay_store_metadata_record_sha256"),
+        "execution_design_sha256": item.get("execution_design_sha256"),
+        "execution_opening_record_verified": True,
+        "idempotency_replay_guard_record_verified": True,
+        "operator_execution_approval_record_verified": True,
+        "replay_store_metadata_record_verified": True,
+        "execution_design_verified": True,
+        "safe_ref_chain_verified": True,
+        "probe_mode": "noop_execution_probe_after_opening_only",
+        "noop_execution_probe_result": "noop_execution_probe_succeeded",
+        "probed_by": item.get("probed_by"),
+        "probed_at": item.get("probed_at"),
+        "safe_summary": item.get("safe_summary"),
+        "evidence_refs": list(cast(list[object], item.get("evidence_refs"))),
+        "noop_execution_probe_record_sha256": item.get("noop_execution_probe_record_sha256"),
+        "downstream_use_enabled": True,
+        "downstream_consumption_enabled": False,
+        "downstream_consumed": False,
+        "actual_downstream_consumption_allowed": False,
+        "actual_downstream_consumption_executed": False,
+        "replay_store_write_enabled": False,
+        "real_replay_store_written": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "secret_value_included": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "capabilities": {
+            "noop_execution_probe_recording_enabled": True,
+            "noop_execution_probe_readback_enabled": True,
+            "actual_downstream_consumption_enabled": False,
+            "replay_store_write_enabled": False,
+            "real_replay_store_write_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_secret_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+        },
+        "next_required_boundary": "fresh_request_builder_downstream_consumption_one_shot_actual_execution_contract_after_noop_probe",
+    }
+
+
+def _read_fresh_request_builder_downstream_consumption_noop_execution_probe_records(path: Path) -> tuple[list[dict[str, object]], int]:
+    records: list[dict[str, object]] = []
+    skipped_count = 0
+    if not path.exists():
+        return records, skipped_count
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            if not line.strip():
+                continue
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped_count += 1
+                continue
+            if not isinstance(item, Mapping):
+                skipped_count += 1
+                continue
+            normalized = _normalize_fresh_request_builder_downstream_consumption_noop_execution_probe_record(item)
+            if normalized is None:
+                skipped_count += 1
+                continue
+            records.append(normalized)
+    return records, skipped_count
+
+
+def list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_noop_execution_probe_records(
+    *,
+    store_path: Path | None = None,
+    limit: int = 50,
+    noop_execution_probe_ref: object = None,
+) -> dict[str, object]:
+    safe_ref = None
+    errors: list[dict[str, str]] = []
+    if noop_execution_probe_ref is not None:
+        if _office_disabled_runtime_dispatch_valid_prefixed_ref(noop_execution_probe_ref, "noopexec-"):
+            safe_ref = str(noop_execution_probe_ref)
+        else:
+            errors.append(_error("noop_execution_probe_ref", "unsupported_ref_shape"))
+    path = store_path or _default_fresh_request_builder_downstream_consumption_noop_execution_probe_record_store_path()
+    records, skipped_count = _read_fresh_request_builder_downstream_consumption_noop_execution_probe_records(path)
+    if safe_ref:
+        records = [record for record in records if record.get("noop_execution_probe_ref") == safe_ref]
+    if errors:
+        records = []
+    max_items = max(0, min(limit, 200)) if isinstance(limit, int) else 50
+    records = records[-max_items:] if max_items else []
+    latest_record = records[-1] if records else None
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_downstream_consumption_noop_execution_probe_records_readback",
+        "record_count": len(records),
+        "limit": max_items,
+        "skipped_count": skipped_count,
+        "records": records,
+        "latest_record": latest_record,
+        "downstream_use_enabled": bool(records),
+        "downstream_consumption_enabled": False,
+        "downstream_consumed": False,
+        "actual_downstream_consumption_allowed": False,
+        "actual_downstream_consumption_executed": False,
+        "replay_store_write_enabled": False,
+        "real_replay_store_written": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "secret_value_included": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "capabilities": {
+            "noop_execution_probe_recording_enabled": True,
+            "noop_execution_probe_readback_enabled": True,
+            "actual_downstream_consumption_enabled": False,
+            "replay_store_write_enabled": False,
+            "real_replay_store_write_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_secret_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+        },
+        "next_required_boundary": "fresh_request_builder_downstream_consumption_one_shot_actual_execution_contract_after_noop_probe" if records else "fresh_request_builder_downstream_consumption_one_shot_noop_execution_probe_after_opening",
+    }
+    return {"found": bool(records), "errors": errors, "dto": dto}
+
+
+def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_noop_execution_probe_record(
+    payload: object,
+    *,
+    execution_opening_store_path: Path | None = None,
+    store_path: Path | None = None,
+) -> dict[str, object]:
+    if not isinstance(payload, Mapping):
+        return {"stored": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    openings = list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_execution_opening_records(
+        store_path=execution_opening_store_path,
+        execution_opening_ref=payload.get("execution_opening_ref"),
+        limit=1,
+    )
+    source = cast(Mapping[str, object], openings.get("dto", {})).get("latest_record") if isinstance(openings.get("dto"), Mapping) else None
+    source_map = cast(Mapping[str, object], source) if isinstance(source, Mapping) else {}
+    errors: list[dict[str, str]] = []
+    if not openings.get("found") or not source_map:
+        errors.append(_error("execution_opening_ref", "execution_opening_not_found"))
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("noop_execution_probe_ref"), "noopexec-"):
+        errors.append(_error("noop_execution_probe_ref", "unsupported_ref_shape"))
+    for field, prefix in (
+        ("execution_opening_ref", "executionopen-"),
+        ("idempotency_replay_guard_ref", "idempotencyguard-"),
+        ("operator_execution_approval_ref", "operatorexecapproval-"),
+        ("replay_store_entry_ref", "replaystore-"),
+    ):
+        if not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get(field), prefix):
+            errors.append(_error(field, "unsupported_ref_shape"))
+        elif source_map and payload.get(field) != source_map.get(field):
+            errors.append(_error(field, "execution_opening_mismatch"))
+    for field in (
+        "execution_opening_record_sha256",
+        "idempotency_replay_guard_record_sha256",
+        "operator_execution_approval_record_sha256",
+        "replay_store_metadata_record_sha256",
+        "execution_design_sha256",
+    ):
+        value = payload.get(field)
+        expected = source_map.get(field) if source_map else None
+        if not (isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value)):
+            errors.append(_error(field, "invalid_sha256"))
+        elif source_map and value != expected:
+            errors.append(_error(field, "execution_opening_mismatch"))
+    if payload.get("probe_mode") != "noop_execution_probe_after_opening_only":
+        errors.append(_error("probe_mode", "unsupported_probe_mode"))
+    if payload.get("probe_result") != "noop_execution_probe_succeeded":
+        errors.append(_error("probe_result", "unsupported_probe_result"))
+    if not _is_opaque_id(payload.get("probed_by")):
+        errors.append(_error("probed_by", "invalid_opaque_ref"))
+    if not (isinstance(payload.get("probed_at"), str) and _ISO_UTC_RE.fullmatch(str(payload.get("probed_at")))):
+        errors.append(_error("probed_at", "invalid_timestamp"))
+    if not _is_safe_text(payload.get("safe_summary")):
+        errors.append(_error("safe_summary", "invalid_safe_text"))
+    if not _validate_evidence_refs(payload.get("evidence_refs")):
+        errors.append(_error("evidence_refs", "invalid_opaque_ref"))
+    path = store_path or _default_fresh_request_builder_downstream_consumption_noop_execution_probe_record_store_path()
+    existing, _ = _read_fresh_request_builder_downstream_consumption_noop_execution_probe_records(path)
+    if any(record.get("noop_execution_probe_ref") == payload.get("noop_execution_probe_ref") for record in existing):
+        errors.append(_error("noop_execution_probe_ref", "duplicate_noop_execution_probe_ref"))
+    if any(record.get("execution_opening_ref") == payload.get("execution_opening_ref") for record in existing):
+        errors.append(_error("execution_opening_ref", "duplicate_execution_opening_probe"))
+    if any(record.get("execution_design_sha256") == payload.get("execution_design_sha256") for record in existing):
+        errors.append(_error("execution_design_sha256", "duplicate_execution_design_probe"))
+    errors = sorted(errors, key=lambda item: (item["field"], item["code"]))
+    if errors:
+        deduped: list[dict[str, str]] = []
+        seen: set[tuple[str, str]] = set()
+        for error in errors:
+            key = (error["field"], error["code"])
+            if key not in seen:
+                seen.add(key)
+                deduped.append(error)
+        return {"stored": False, "errors": deduped, "dto": None}
+    record_material = {
+        "noop_execution_probe_ref": payload.get("noop_execution_probe_ref"),
+        "execution_opening_ref": payload.get("execution_opening_ref"),
+        "execution_opening_record_sha256": payload.get("execution_opening_record_sha256"),
+        "idempotency_replay_guard_ref": payload.get("idempotency_replay_guard_ref"),
+        "idempotency_replay_guard_record_sha256": payload.get("idempotency_replay_guard_record_sha256"),
+        "operator_execution_approval_ref": payload.get("operator_execution_approval_ref"),
+        "operator_execution_approval_record_sha256": payload.get("operator_execution_approval_record_sha256"),
+        "replay_store_entry_ref": payload.get("replay_store_entry_ref"),
+        "replay_store_metadata_record_sha256": payload.get("replay_store_metadata_record_sha256"),
+        "execution_design_sha256": payload.get("execution_design_sha256"),
+        "probe_mode": "noop_execution_probe_after_opening_only",
+        "noop_execution_probe_result": "noop_execution_probe_succeeded",
+        "probed_by": payload.get("probed_by"),
+        "probed_at": payload.get("probed_at"),
+        "safe_summary": payload.get("safe_summary"),
+        "evidence_refs": list(cast(list[object], payload.get("evidence_refs"))),
+    }
+    record_sha = hashlib.sha256(json.dumps(record_material, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+    stored_payload = dict(record_material)
+    stored_payload["noop_execution_probe_record_sha256"] = record_sha
+    dto = _normalize_fresh_request_builder_downstream_consumption_noop_execution_probe_record(stored_payload)
     if dto is None:
         return {"stored": False, "errors": [_error("payload", "invalid_normalized_record")], "dto": None}
     path.parent.mkdir(parents=True, exist_ok=True)

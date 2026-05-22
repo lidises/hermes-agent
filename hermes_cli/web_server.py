@@ -127,6 +127,8 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_idempotency_replay_guard_records,
     append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_execution_opening_record,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_execution_opening_records,
+    append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_noop_execution_probe_record,
+    list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_noop_execution_probe_records,
     execute_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_write,
     execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_preview,
     record_office_controlled_mutation_nas_keeper_mac_relay_execution_state,
@@ -1025,9 +1027,25 @@ async def list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledge
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-execution-openings")
-async def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_execution_opening_record_route(payload: Any = Body(None)):
-    """Append one bounded execution-opening metadata record; actual consumption stays disabled."""
+async def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_execution_opening_record_route(request: Request, payload: Any = Body(None)):
+    _require_token(request)
     return append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_execution_opening_record(payload)
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-noop-execution-probes")
+async def list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_noop_execution_probe_records_route(
+    request: Request,
+    noop_execution_probe_ref: str | None = None,
+    limit: int = 50,
+):
+    _require_token(request)
+    return list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_noop_execution_probe_records(noop_execution_probe_ref=noop_execution_probe_ref, limit=limit)
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-noop-execution-probes")
+async def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_noop_execution_probe_record_route(request: Request, payload: Any = Body(None)):
+    _require_token(request)
+    return append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_noop_execution_probe_record(payload)
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablements")
