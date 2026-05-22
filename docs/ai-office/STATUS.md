@@ -1,4 +1,37 @@
 
+## Current status — Fresh request ledger manual review record deployed
+
+Updated: 2026-05-22 09:54 KST
+
+Completed slice:
+
+- Implemented/deployed `operator_request_ledger_manual_review_record` rung in code commit `cc149654 feat(office): record ledger manual review`.
+- Added safe-ref manual operator review record append/readback helpers and protected API:
+  - `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-manual-review-record?limit=20`
+  - `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-manual-review-record`
+- Added Office UI display-only panel `NasKeeperFreshRequestBuilderLedgerManualReviewRecordPanel` with DOM hook:
+  - `data-office-nas-keeper-fresh-request-builder-ledger-manual-review-record="true"`
+- Performed bounded manual review record writes:
+  - Mac-local actual record: `manualreview-20260522005013-cc149654`, record sha `89eda0af9b17b8147f20565a79b7010e042cbfa0897f94baf40d5bcb679c53a5`
+  - VPS API actual record: `manualreview-20260522005316-cc149654`, record sha `b8d773e0714c01e8abac64fd62e08af80be2335c55fbfaf813bd86a704649cd2`
+- Confirmed downstream-use preflight now sees manual review record present, while downstream use remains disabled.
+- Deployed to VPS `/home/hermes/.hermes/ai-office-dashboard` and `/home/hermes/.hermes/hermes-agent`; restarted `hermes-agent-dashboard.service` only; gateway stayed active and was not restarted.
+- Verification passed: Python focused 6 passed, web focused 118 passed, `npm run build` passed, `git diff --check` passed, leak sentinel passed, live private `/office` API/DOM smoke passed with JS errors 0.
+
+Preserved boundaries:
+
+- No watcher/cron/daemon activation.
+- No dispatcher binding or authority-adapter binding.
+- No gateway restart and no public exposure change.
+- No VPS NAS mount/write/credential authority.
+- No markdown body, write payload, raw root path, or credential value exposure.
+- No downstream consumption/enablement yet; manual review record is safe-ref readback only.
+
+Next recommended rung:
+
+- `fresh_request_builder_downstream_use_enablement` — display-only/readiness-gated enablement record proving manual review record can be recognized as an enablement prerequisite; keep actual downstream consumption off until a separate boundary.
+
+
 ## Current status — Fresh request ledger downstream-use preflight deployed
 
 Updated: 2026-05-22 00:55 KST
