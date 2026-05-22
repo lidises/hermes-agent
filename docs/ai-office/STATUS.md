@@ -1,3 +1,50 @@
+## Current status — Fresh request ledger post-execution record readback verified
+
+Updated: 2026-05-22T11:01:11Z
+
+Completed rung: `fresh_request_builder_downstream_consumption_one_shot_post_execution_record_readback`.
+
+Code commit: `a2dbea1f274059dda45108650a85762e3368f5e4` (`feat(office): read back downstream execution record`).
+
+What changed:
+- Added protected readback API: `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-post-execution-record-readback`.
+- Added UI panel: `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPostExecutionRecordReadbackPanel`.
+- Added DOM hook: `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-post-execution-record-readback="true"`.
+- Projected the stored metadata-only actual execution record into a safe readback surface.
+
+Live smoke:
+- unauthenticated GET returned 401.
+- authenticated GET returned 200.
+- `found=true`, `post_execution_record_readback_ready=true`, `actual_execution_record_verified=true`.
+- `noop_execution_probe_record_verified=true`, `execution_contract_verified=true`, `safe_ref_chain_verified=true`.
+- `actual_execution_record_sha256` length was 64.
+- Safety flags stayed closed: downstream consumption disabled/not consumed, actual execution not allowed/executed, replay-store write disabled, real replay-store write false, markdown/body/write payload/raw path/secret excluded, VPS NAS mount false.
+- DOM smoke found the panel with ready=true, executed=false, replay-store-write=false, VPS NAS authority=false, controls=0, raw leak false.
+- Browser console JS errors: 0.
+
+Verification:
+- `py_compile` passed.
+- Focused Python chain tests passed: 8.
+- Focused Office web tests passed: 3.
+- `npm run lint` passed with existing warnings only.
+- `npm run build` passed with existing chunk-size warning only.
+- `git diff --check` passed.
+- Added-line leak sentinel passed.
+
+Deployment:
+- VPS core and dashboard worktrees synced to code commit `a2dbea1f274059dda45108650a85762e3368f5e4`.
+- `web_dist` rsynced to both VPS worktrees.
+- Dashboard-only restart completed; gateway was not restarted.
+- Private `/office` smoke returned 200 with no raw path leak.
+
+Next recommended rung: `fresh_request_builder_downstream_consumption_one_shot_consumption_payload_contract_after_readback`.
+
+Guardrails for next rung:
+- Keep actual downstream consumption disabled.
+- Do not materialize markdown/body payload yet except as bounded contract metadata if the rung explicitly requires it.
+- Do not write real replay-store execution state.
+- Do not enable watcher/cron/dispatcher/authority-adapter, VPS NAS authority, public exposure, or gateway restart.
+
 ## Current status — Fresh request ledger actual execution record stored
 
 Updated: 2026-05-22T10:21:43Z
