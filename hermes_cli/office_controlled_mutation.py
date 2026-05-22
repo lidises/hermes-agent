@@ -12488,6 +12488,85 @@ def list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_down
     return {"found": bool(records), "errors": errors, "dto": dto}
 
 
+
+def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_post_execution_record_readback(
+    *,
+    actual_execution_record_store_path: Path | None = None,
+) -> dict[str, object]:
+    """Read back the metadata-only actual execution record after contract.
+
+    This projects only safe refs/checksums/status booleans. It does not execute
+    downstream consumption, materialize a payload body, or write replay-store state.
+    """
+
+    records_result = list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_records(
+        store_path=actual_execution_record_store_path,
+        limit=1,
+    )
+    records_dto = records_result.get("dto") if isinstance(records_result.get("dto"), Mapping) else None
+    latest = records_dto.get("latest_record") if isinstance(records_dto, Mapping) else None
+    latest_map = cast(Mapping[str, object], latest) if isinstance(latest, Mapping) else {}
+    sha_fields_valid = all(
+        isinstance(latest_map.get(field), str) and re.fullmatch(r"[0-9a-f]{64}", str(latest_map.get(field)))
+        for field in ("actual_execution_record_sha256", "execution_contract_sha256", "noop_execution_probe_record_sha256")
+    )
+    record_verified = bool(
+        latest_map
+        and latest_map.get("actual_execution_recorded") is True
+        and latest_map.get("actual_execution_record_ready") is True
+        and latest_map.get("execution_result_status") == "metadata_only_execution_recorded_no_consumption"
+        and latest_map.get("execution_contract_verified") is True
+        and latest_map.get("noop_execution_probe_record_verified") is True
+        and latest_map.get("safe_ref_chain_verified") is True
+        and sha_fields_valid
+    )
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_downstream_consumption_post_execution_record_readback",
+        "post_execution_record_readback_ready": record_verified,
+        "actual_execution_record_verified": record_verified,
+        "actual_execution_ref": latest_map.get("actual_execution_ref"),
+        "actual_execution_record_sha256": latest_map.get("actual_execution_record_sha256"),
+        "execution_contract_sha256": latest_map.get("execution_contract_sha256"),
+        "noop_execution_probe_record_sha256": latest_map.get("noop_execution_probe_record_sha256"),
+        "execution_result_status": latest_map.get("execution_result_status"),
+        "noop_execution_probe_record_verified": bool(latest_map.get("noop_execution_probe_record_verified")),
+        "execution_contract_verified": bool(latest_map.get("execution_contract_verified")),
+        "safe_ref_chain_verified": bool(latest_map.get("safe_ref_chain_verified")),
+        "downstream_use_enabled": record_verified,
+        "downstream_consumption_enabled": False,
+        "downstream_consumed": False,
+        "actual_downstream_consumption_allowed": False,
+        "actual_downstream_consumption_executed": False,
+        "replay_store_write_enabled": False,
+        "real_replay_store_written": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "secret_value_included": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "capabilities": {
+            "post_execution_record_readback_enabled": True,
+            "actual_downstream_consumption_enabled": False,
+            "replay_store_write_enabled": False,
+            "real_replay_store_write_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_secret_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+        },
+        "next_required_boundary": "fresh_request_builder_downstream_consumption_one_shot_consumption_payload_contract_after_readback" if record_verified else "fresh_request_builder_downstream_consumption_one_shot_actual_execution_record_after_contract",
+    }
+    return {"found": record_verified, "errors": list(records_result.get("errors", [])), "dto": dto}
+
+
 def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_record(
     payload: object,
     *,

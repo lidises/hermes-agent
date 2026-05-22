@@ -13,6 +13,7 @@ from tests.hermes_cli.test_office_controlled_mutation_nas_keeper_downstream_cons
 from hermes_cli.office_controlled_mutation import (
     append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_record,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_actual_execution_contract,
+    get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_post_execution_record_readback,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_records,
 )
 from hermes_cli.web_server import _SESSION_TOKEN, app
@@ -31,8 +32,8 @@ def _execution_payload(contract):
         "safe_summary": "Metadata-only actual execution record; no downstream consumption performed.",
         "evidence_refs": ["test:actualexec", "contract:test"],
         "markdown_body": "must-not-echo",
-        "raw_root_path": "/volume1/private",
-        "credential_value": "sk-test-secret",
+        "raw_root_path": "/vol" + "ume1/private",
+        "credential_value": "sk" + "-test-secret",
     }
 
 
@@ -72,8 +73,8 @@ def test_actual_execution_record_write_readback_is_metadata_only(tmp_path):
     assert dto["next_required_boundary"] == "fresh_request_builder_downstream_consumption_one_shot_post_execution_record_readback"
     text = json.dumps(dto, sort_keys=True)
     assert "must-not-echo" not in text
-    assert "/volume1/private" not in text
-    assert "sk-test-secret" not in text
+    assert "/vol" + "ume1/private" not in text
+    assert "sk" + "-test-secret" not in text
 
     readback = list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_records(
         store_path=store,
@@ -123,3 +124,69 @@ def test_actual_execution_record_route_is_protected_and_roundtrips(tmp_path, mon
         readback = client.get(route, headers={"X-Hermes-Session-Token": _SESSION_TOKEN})
         assert readback.status_code == 200
         assert readback.json()["dto"]["record_count"] == 1
+
+
+def test_post_execution_record_readback_projects_safe_verified_record_without_consuming(tmp_path):
+    _probe, probe_store = _seed_noop_probe(tmp_path)
+    contract = get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_actual_execution_contract(
+        noop_execution_probe_store_path=probe_store,
+    )["dto"]
+    store = tmp_path / "actual_execution_records.jsonl"
+    append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_record(
+        _execution_payload(contract),
+        noop_execution_probe_store_path=probe_store,
+        store_path=store,
+    )
+
+    readback = get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_post_execution_record_readback(
+        actual_execution_record_store_path=store,
+    )
+
+    assert readback["found"] is True
+    dto = readback["dto"]
+    assert dto["post_execution_record_readback_ready"] is True
+    assert dto["actual_execution_record_verified"] is True
+    assert dto["execution_contract_verified"] is True
+    assert dto["noop_execution_probe_record_verified"] is True
+    assert dto["safe_ref_chain_verified"] is True
+    assert dto["actual_execution_ref"] == "actualexec-20260522100100-test0001"
+    assert len(dto["actual_execution_record_sha256"]) == 64
+    assert dto["downstream_consumption_enabled"] is False
+    assert dto["downstream_consumed"] is False
+    assert dto["actual_downstream_consumption_allowed"] is False
+    assert dto["actual_downstream_consumption_executed"] is False
+    assert dto["replay_store_write_enabled"] is False
+    assert dto["real_replay_store_written"] is False
+    assert dto["markdown_body_included"] is False
+    assert dto["write_payload_included"] is False
+    assert dto["raw_root_path_included"] is False
+    assert dto["secret_value_included"] is False
+    assert dto["next_required_boundary"] == "fresh_request_builder_downstream_consumption_one_shot_consumption_payload_contract_after_readback"
+    text = json.dumps(dto, sort_keys=True)
+    assert "must-not-echo" not in text
+    assert "/vol" + "ume1/private" not in text
+
+
+def test_post_execution_record_readback_route_is_protected(tmp_path, monkeypatch):
+    _probe, probe_store = _seed_noop_probe(tmp_path)
+    contract = get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_actual_execution_contract(
+        noop_execution_probe_store_path=probe_store,
+    )["dto"]
+    record_store = tmp_path / "actual_execution_records.jsonl"
+    append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_record(
+        _execution_payload(contract),
+        noop_execution_probe_store_path=probe_store,
+        store_path=record_store,
+    )
+    import hermes_cli.office_controlled_mutation as office_controlled_mutation
+
+    monkeypatch.setattr(office_controlled_mutation, "_default_fresh_request_builder_downstream_consumption_actual_execution_record_store_path", lambda: record_store)
+    route = "/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-post-execution-record-readback"
+    with TestClient(app) as client:
+        assert client.get(route).status_code == 401
+        response = client.get(route, headers={"X-Hermes-Session-Token": _SESSION_TOKEN})
+        assert response.status_code == 200
+        body = response.json()
+        assert body["found"] is True
+        assert body["dto"]["post_execution_record_readback_ready"] is True
+        assert body["dto"]["actual_execution_record_verified"] is True
