@@ -75,6 +75,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
     expect(source).toContain("<NasKeeperFreshRequestBuilderLedgerManualReviewRecordPanel");
     expect(source).toContain("<NasKeeperFreshRequestBuilderLedgerDownstreamUseEnablementPanel");
     expect(source).toContain("<NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightPanel");
+    expect(source).toContain("<NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementPanel");
 
     for (const panel of [
       "<NasKeeperLiveOperatorLanePanel",
@@ -4759,6 +4760,97 @@ describe("NasKeeperQueueManualEvidenceReviewSurfacePanel", () => {
     expect(html).toContain("consumption preflight · actual consumption still disabled");
     expect(html).toContain("downstream_consumption_preflight_safe_ref_v1");
     expect(html).toContain("enablement-20260521163100-aafe7001");
+    expect(html).not.toContain("Safe body");
+    expect(html).not.toContain("/Users/" + "lidises");
+    expect(html).not.toContain("/home/hermes");
+    expect(html).not.toContain("/vol" + "ume1");
+    expect(html).not.toContain("sk" + "-test");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("<form");
+    expect(html).not.toContain("<input");
+    expect(html).not.toContain("<select");
+    expect(html).not.toContain("<textarea");
+  });
+
+
+  it("renders downstream consumption enablement record as safe-ref proof without consuming", () => {
+    const NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementPanel = (OfficePageModule as unknown as {
+      NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementPanel: React.ComponentType<React.ComponentProps<typeof OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementPanel>>;
+    }).NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementPanel;
+    expect(NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementPanel).toBeTypeOf("function");
+
+    const html = renderToStaticMarkup(
+      <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementPanel
+        error={null}
+        record={{
+          found: true,
+          errors: [],
+          dto: {
+            schema_version: 1,
+            mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_enablement_records_readback",
+            record_count: 1,
+            limit: 20,
+            skipped_count: 0,
+            records: [],
+            latest_record: {
+              downstream_consumption_enablement_recorded: true,
+              consumption_enablement_ref: "consumptionenable-20260521170000-bafe8001",
+              consumption_preflight_verified: true,
+              enablement_ref: "enablement-20260521163100-aafe7001",
+              source_consumption_preflight_decision_sha256: "e".repeat(64),
+              source_preflight_decision_sha256: "a".repeat(64),
+              manual_review_ref: "manualreview-20260521163000-aafe7001",
+              manual_review_record_sha256: "b".repeat(64),
+              enablement_record_sha256: "d".repeat(64),
+              checksum_set_sha256: "c".repeat(64),
+              selected_item_count: 1,
+              consumption_enablement_record_sha256: "f".repeat(64),
+              downstream_use_enabled: true,
+              downstream_consumption_enabled: false,
+              downstream_consumed: false,
+              actual_downstream_consumption_allowed: false,
+              markdown_body_included: false,
+              write_payload_included: false,
+              raw_root_path_included: false,
+              credential_value_included: false,
+              repeat_execution_replay_allowed: false,
+              watcher_enabled: false,
+              cron_enabled: false,
+              dispatch_enabled: false,
+              authority_adapter_binding_enabled: false,
+              vps_nas_mount_enabled: false,
+            },
+            downstream_use_enabled: true,
+            downstream_consumption_enabled: false,
+            markdown_body_included: false,
+            write_payload_included: false,
+            raw_root_path_included: false,
+            credential_value_included: false,
+            repeat_execution_replay_allowed: false,
+            watcher_enabled: false,
+            cron_enabled: false,
+            dispatch_enabled: false,
+            authority_adapter_binding_enabled: false,
+            vps_nas_mount_enabled: false,
+            capabilities: {},
+            next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_boundary",
+          },
+        }}
+      />,
+    );
+
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablement="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablement-recorded="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablement-preflight-verified="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablement-downstream-use-enabled="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablement-downstream-consumption-enabled="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablement-downstream-consumed="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablement-automation-enabled="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablement-vps-nas-authority="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablement-markdown-body-included="false"');
+    expect(html).toContain("consumption enablement · actual consumption still disabled");
+    expect(html).toContain("downstream_consumption_enablement_safe_ref_v1");
+    expect(html).toContain("consumptionenable-20260521170000-bafe8001");
     expect(html).not.toContain("Safe body");
     expect(html).not.toContain("/Users/" + "lidises");
     expect(html).not.toContain("/home/hermes");

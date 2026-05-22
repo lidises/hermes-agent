@@ -106,6 +106,8 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_manual_review_records,
     append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_use_enablement_record,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_use_enablement_records,
+    append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_enablement_record,
+    list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_enablement_records,
     execute_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_write,
     execute_office_controlled_mutation_nas_keeper_mac_relay_execution_from_preview,
     record_office_controlled_mutation_nas_keeper_mac_relay_execution_state,
@@ -831,6 +833,24 @@ async def list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledge
 async def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_use_enablement_record_route(payload: Any = Body(None)):
     """Append one bounded safe-ref downstream-use enablement record; actual consumption stays disabled."""
     return append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_use_enablement_record(payload)
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablements")
+async def list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_enablement_records_route(
+    consumption_enablement_ref: Optional[str] = None,
+    limit: Optional[int] = None,
+):
+    """Read safe downstream-consumption enablement records without consuming downstream data."""
+    return list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_enablement_records(
+        consumption_enablement_ref=consumption_enablement_ref,
+        limit=limit or 50,
+    )
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablements")
+async def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_enablement_record_route(payload: Any = Body(None)):
+    """Append one bounded safe-ref downstream-consumption enablement record; actual consumption stays disabled."""
+    return append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_enablement_record(payload)
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-one-shot-operator-write")

@@ -19,7 +19,7 @@ import {
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeManualApprovalRecordingDraftReviewStatus, type OfficeManualApprovalRecordStatus, type OfficeApprovalEventEnvelopeStatus, type OfficeManualApprovalDispatchGateReadinessStatus, type OfficeManualDispatchGateOpenRecordStatus, type OfficeManualRuntimeCommandPreviewRecordStatus, type OfficeManualRuntimeCommandInclusionRecordStatus, type OfficeManualRuntimeCommandExecutionRecordStatus, type OfficeManualTargetMutationReadinessRecordStatus, type OfficeManualTargetMutationRecordStatus, type OfficeManualAdapterDispatchRecordStatus, type OfficeManualKanbanMutationRecordStatus, type OfficeManualNasSaveRecordStatus, type OfficeManualNasKeeperHandoffRecordStatus, type OfficeNasKeeperHandoffClaimDryRunResult, type OfficeNasKeeperHandoffAuthorizationResult, type OfficeNasKeeperExecutionPayloadPreviewResult, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeMacRelayRootReadinessProbeResult, type OfficeNasKeeperLastSuccessfulMacRelayWriteResult, type OfficeNasKeeperFreshOneShotOperatorWriteResult, type OfficeNasKeeperFreshOneShotRequestBuilderResult, type OfficeNasKeeperFreshRequestBuilderLedgerReadbackResult, type OfficeNasKeeperFreshRequestBuilderLedgerExportSelectionReviewResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightResult, type OfficeNasKeeperFreshRequestBuilderLedgerManualReviewRecordReadbackResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamUseEnablementReadbackResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
+import { api, type OfficeAdapterBindingDryRunStatus, type OfficeHumanReviewedSingleDispatchStatus, type OfficeExplicitRuntimeDispatchApprovalStatus, type OfficeConcreteRuntimeSingleDispatchSliceDesign, type OfficeDisabledOneShotRuntimeDispatchExecutorSkeleton, type OfficeApprovedRealOneShotDispatchGateDesign, type OfficeManualApprovalRecordingPreflightStatus, type OfficeManualApprovalRecordingDraftStatus, type OfficeManualApprovalRecordingDraftReviewStatus, type OfficeManualApprovalRecordStatus, type OfficeApprovalEventEnvelopeStatus, type OfficeManualApprovalDispatchGateReadinessStatus, type OfficeManualDispatchGateOpenRecordStatus, type OfficeManualRuntimeCommandPreviewRecordStatus, type OfficeManualRuntimeCommandInclusionRecordStatus, type OfficeManualRuntimeCommandExecutionRecordStatus, type OfficeManualTargetMutationReadinessRecordStatus, type OfficeManualTargetMutationRecordStatus, type OfficeManualAdapterDispatchRecordStatus, type OfficeManualKanbanMutationRecordStatus, type OfficeManualNasSaveRecordStatus, type OfficeManualNasKeeperHandoffRecordStatus, type OfficeNasKeeperHandoffClaimDryRunResult, type OfficeNasKeeperHandoffAuthorizationResult, type OfficeNasKeeperExecutionPayloadPreviewResult, type OfficeAuthorityMetadataHandoffStatus, type OfficeDataSource, type OfficeDispatcherAuthorityDryRunSurface, type OfficeDispatcherAuthorityMetadataAppendStatus, type OfficeDispatcherAuthorityMetadataRecordingDraft, type OfficeDispatcherCompletionReviewStatus, type OfficeTargetDispatchContractStatus, type OfficeWatcherCronContractStatus, type OfficeRuntimeActivationReviewStatus, type OfficeRuntimePreflightStatus, type OfficeManualOneShotRuntimeDryRunStatus, type OfficeDispatcherExecutionSimulationStatus, type OfficeNasKeeperExecutionFromPreviewPayload, type OfficeNasKeeperExecutionFromPreviewResult, type OfficeMacRelayRootReadinessProbeResult, type OfficeNasKeeperLastSuccessfulMacRelayWriteResult, type OfficeNasKeeperFreshOneShotOperatorWriteResult, type OfficeNasKeeperFreshOneShotRequestBuilderResult, type OfficeNasKeeperFreshRequestBuilderLedgerReadbackResult, type OfficeNasKeeperFreshRequestBuilderLedgerExportSelectionReviewResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightResult, type OfficeNasKeeperFreshRequestBuilderLedgerManualReviewRecordReadbackResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamUseEnablementReadbackResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightResult, type OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementReadbackResult, type OfficeNasKeeperExecutionStatePayload, type OfficeNasKeeperExecutionStateResult, type OfficeNasKeeperHandoffQueueItemSummary, type OfficeNasKeeperHandoffQueueReadback, type OfficeNasMacRelayWritePayload, type OfficeNasMacRelayWriteResult, type OfficeSafeEventsResponse, type OfficeSourceStatus, type OfficeState } from "@/lib/api";
 import {
   buildOfficeAttentionItems,
   buildOfficeCharacterActivity,
@@ -7456,6 +7456,84 @@ export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflight
 }
 
 
+export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementPanel({
+  record,
+  error,
+}: {
+  record?: OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementReadbackResult | null;
+  error?: string | null;
+}) {
+  const dto = record?.dto ?? null;
+  const latest = dto?.latest_record ?? null;
+  const rows = [
+    ["record_count", String(dto?.record_count ?? 0)],
+    ["consumption_enablement_ref", String(latest?.consumption_enablement_ref ?? "waiting for consumption enablement")],
+    ["consumption_preflight_verified", String(Boolean(latest?.consumption_preflight_verified))],
+    ["enablement_ref", String(latest?.enablement_ref ?? "waiting")],
+    ["selected_item_count", String(latest?.selected_item_count ?? 0)],
+    ["consumption_enablement_record_sha256", String(latest?.consumption_enablement_record_sha256 ?? "available after enablement")],
+    ["downstream_use_enabled", String(Boolean(dto?.downstream_use_enabled || latest?.downstream_use_enabled))],
+    ["downstream_consumption_enabled", String(Boolean(dto?.downstream_consumption_enabled || latest?.downstream_consumption_enabled))],
+    ["downstream_consumed", String(Boolean(latest?.downstream_consumed))],
+    ["next_required_boundary", String(dto?.next_required_boundary ?? "fresh_request_builder_downstream_consumption_enablement")],
+  ];
+  const preview = latest
+    ? JSON.stringify({
+        format: "downstream_consumption_enablement_safe_ref_v1",
+        consumption_enablement_ref: latest.consumption_enablement_ref,
+        source_consumption_preflight_decision_sha256: latest.source_consumption_preflight_decision_sha256,
+        enablement_ref: latest.enablement_ref,
+        enablement_record_sha256: latest.enablement_record_sha256,
+        checksum_set_sha256: latest.checksum_set_sha256,
+        selected_item_count: latest.selected_item_count,
+        downstream_use_enabled: latest.downstream_use_enabled,
+        downstream_consumption_enabled: latest.downstream_consumption_enabled,
+        downstream_consumed: latest.downstream_consumed,
+        actual_downstream_consumption_allowed: latest.actual_downstream_consumption_allowed,
+      }, null, 2)
+    : "downstream consumption enablement not recorded yet";
+  return (
+    <section
+      className="rounded-2xl border border-emerald-400/20 bg-emerald-500/5 p-4 shadow-[0_0_36px_rgba(52,211,153,0.08)]"
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablement="true"
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablement-recorded={String(Boolean(latest?.downstream_consumption_enablement_recorded))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablement-preflight-verified={String(Boolean(latest?.consumption_preflight_verified))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablement-downstream-use-enabled={String(Boolean(dto?.downstream_use_enabled || latest?.downstream_use_enabled))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablement-downstream-consumption-enabled={String(Boolean(dto?.downstream_consumption_enabled || latest?.downstream_consumption_enabled))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablement-downstream-consumed={String(Boolean(latest?.downstream_consumed))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablement-automation-enabled={String(Boolean(dto?.watcher_enabled || dto?.cron_enabled || dto?.dispatch_enabled || dto?.authority_adapter_binding_enabled))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablement-vps-nas-authority={String(Boolean(dto?.vps_nas_mount_enabled || latest?.vps_nas_mount_enabled))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablement-markdown-body-included={String(Boolean(dto?.markdown_body_included || latest?.markdown_body_included))}
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">Downstream consumption enablement record</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">consumption enablement · actual consumption still disabled</h2>
+          <p className="mt-2 text-xs leading-5 text-midground/70">
+            Bounded safe-ref record that confirms the consumption preflight chain is ready for a later one-shot boundary. This panel is read-only and does not consume downstream data, replay execution, start automation, bind dispatchers/adapters, expose raw bodies, or add VPS NAS authority.
+          </p>
+        </div>
+        <div className="border border-current/15 bg-black/20 p-2 text-xs text-midground/70">
+          {error ? `error: ${error}` : record?.found ? "enablement recorded; actual consumption still disabled" : "waiting for consumption enablement"}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-5" data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablement-fields="true">
+        {rows.map(([key, value]) => (
+          <div key={key} className="border border-current/15 bg-black/20 p-3 text-xs" data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablement-field={key}>
+            <div className="font-semibold text-foreground">{key}</div>
+            <div className="mt-1 break-words leading-5 text-midground/70">{value}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 rounded border border-current/15 bg-black/30 p-3 text-[11px] leading-5 text-midground/70" data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-enablement-preview="true">
+        <div className="mb-2 font-semibold text-foreground">safe record preview</div>
+        <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words">{preview}</pre>
+      </div>
+    </section>
+  );
+}
+
+
 export function ApprovedRealOneShotDispatchGateDesignPanel({
   status,
   error,
@@ -8984,6 +9062,8 @@ export default function OfficePage() {
   const [nasKeeperFreshRequestBuilderLedgerDownstreamUseEnablementError, setNasKeeperFreshRequestBuilderLedgerDownstreamUseEnablementError] = useState<string | null>(null);
   const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightResult, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightResult] = useState<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightResult | null>(null);
   const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightError, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightError] = useState<string | null>(null);
+  const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementResult, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementResult] = useState<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementReadbackResult | null>(null);
+  const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementError, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementError] = useState<string | null>(null);
   const nasKeeperClaimDryRunKeyRef = useRef<string | null>(null);
   const nasKeeperAuthorizationKeyRef = useRef<string | null>(null);
   const nasKeeperPayloadPreviewKeyRef = useRef<string | null>(null);
@@ -9390,6 +9470,19 @@ export default function OfficePage() {
         setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightError("request failed");
       });
   }, [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightResult]);
+
+  useEffect(() => {
+    if (nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementResult?.dto) return;
+    api.getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablement()
+      .then((result) => {
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementResult(result);
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementError(null);
+      })
+      .catch(() => {
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementResult(null);
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementError("request failed");
+      });
+  }, [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementResult]);
 
 
   const executeNasSingleFileWrite = useCallback(async () => {
@@ -10539,6 +10632,7 @@ export default function OfficePage() {
       <NasKeeperFreshRequestBuilderLedgerManualReviewRecordPanel record={nasKeeperFreshRequestBuilderLedgerManualReviewRecordResult} error={nasKeeperFreshRequestBuilderLedgerManualReviewRecordError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamUseEnablementPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamUseEnablementResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamUseEnablementError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightError} />
+      <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementError} />
 
       <OfficeVisualizerEvidenceDrawer terminalResult={nasKeeperGuardedFailureStateResult}>
       <NasKeeperLiveOperatorLanePanel
