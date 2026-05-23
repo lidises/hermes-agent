@@ -83,6 +83,48 @@ describe("fetchJSON", () => {
     expect(JSON.stringify(fetchMock.mock.calls[0]?.[1])).not.toMatch(/method|body|\/Users\/|\/home\/|token=|sk-|raw markdown body/i);
   });
 
+
+  it("reads payload readback-review attestation readback through protected route", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        ["__HERMES_" + "SESSION_" + "TOKEN__"]: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        found: true,
+        errors: [],
+        dto: {
+          payload_materialization_summary_review_gate_record_readback_review_attestation_readback_verified: true,
+          source_readback_review_attestation_verified: true,
+          actual_downstream_consumption_executed: false,
+          replay_store_write_enabled: false,
+          real_replay_store_written: false,
+          markdown_body_included: false,
+          write_payload_included: false,
+          raw_root_path_included: false,
+          vps_nas_mount_enabled: false,
+        },
+      }),
+    } as Response);
+
+    const result = await api.getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadback();
+
+    expect(result.found).toBe(true);
+    expect(result.dto?.payload_materialization_summary_review_gate_record_readback_review_attestation_readback_verified).toBe(true);
+    expect(result.dto?.actual_downstream_consumption_executed).toBe(false);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-consumption-payload-materialization-summary-review-gate-record-readback-review-attestation-readback",
+      expect.objectContaining({ headers: expect.any(Headers) }),
+    );
+    const headers = fetchMock.mock.calls[0]?.[1]?.headers as Headers;
+    expect(headers.get("X-Hermes-" + "Session-Token")).toBe("session-token-for-header-only");
+    expect(JSON.stringify(fetchMock.mock.calls[0]?.[1])).not.toMatch(/method|body|\/Users\/|\/home\/|token=|sk-|raw markdown body/i);
+  });
+
   it("posts payload readback-review attestation through protected safe-ref route", async () => {
     Object.defineProperty(globalThis, "window", {
       configurable: true,

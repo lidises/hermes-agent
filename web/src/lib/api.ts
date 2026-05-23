@@ -3146,6 +3146,58 @@ export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPa
   };
 }
 
+
+export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackResult {
+  found?: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: null | {
+    schema_version: number;
+    mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_verified";
+    payload_materialization_summary_review_gate_record_readback_review_attestation_readback_verified: boolean;
+    source_readback_review_attestation_verified: boolean;
+    attestation_checksum_verified: boolean;
+    source_review_record_checksum_verified: boolean;
+    safe_ref_chain_verified: boolean;
+    manual_attestation_outcome_verified: boolean;
+    attestation_actor_verified: boolean;
+    disabled_capability_flags_verified: boolean;
+    readback_review_attestation_ref: string;
+    summary_review_gate_record_readback_review_record_ref: string;
+    summary_review_gate_record_readback_review_record_sha256: string;
+    payload_materialization_summary_review_gate_record_sha256: string;
+    readback_review_attestation_sha256: string;
+    manual_attestation_outcome: string;
+    readback_verified: boolean;
+    source_checksum_attested: boolean;
+    safe_ref_chain_attested: boolean;
+    aggregate_counts_attested: boolean;
+    disabled_capabilities_attested: boolean;
+    attested_by: string;
+    attested_at: string;
+    evidence_ref_count: number;
+    records_included: false;
+    latest_record_included: false;
+    payload_body_materialization_enabled: false;
+    downstream_consumption_enabled: false;
+    downstream_consumed: false;
+    actual_downstream_consumption_allowed: false;
+    actual_downstream_consumption_executed: false;
+    replay_store_write_enabled: false;
+    real_replay_store_written: false;
+    markdown_body_included: false;
+    write_payload_included: false;
+    raw_root_path_included: false;
+    secret_value_included?: false;
+    watcher_enabled: false;
+    cron_enabled: false;
+    dispatch_enabled: false;
+    authority_adapter_binding_enabled: false;
+    vps_nas_mount_enabled: false;
+    next_required_boundary: string;
+    [key: string]: unknown;
+  };
+}
+
 export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewResult {
   found?: boolean;
   errors: Array<{ field: string; code: string }>;
@@ -3780,6 +3832,8 @@ export const api = {
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-consumption-payload-materialization-summary-review-gate-record-readback-review"),
   getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewRecordReadback: () =>
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewRecordReadbackResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-consumption-payload-materialization-summary-review-gate-record-readback-review-record-readback"),
+  getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadback: () =>
+    fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-consumption-payload-materialization-summary-review-gate-record-readback-review-attestation-readback"),
   listOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestations: () =>
     fetchJSON<Record<string, unknown>>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-consumption-payload-materialization-summary-review-gate-record-readback-review-attestations"),
   appendOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestation: (body: Record<string, unknown>) =>
