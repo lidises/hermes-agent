@@ -8657,3 +8657,66 @@ describe("ControlledMutationApprovalBoundarySummaryPanel", () => {
   });
 
 });
+
+
+it("renders payload attestation readback review readback as read-only", () => {
+  const readback = {
+    found: true,
+    errors: [],
+    dto: {
+      schema_version: 1,
+      mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_verified",
+      payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_verified: true,
+      source_attestation_readback_review_verified: true,
+      attestation_readback_review_checksum_verified: true,
+      source_attestation_checksum_verified: true,
+      safe_ref_chain_verified: true,
+      manual_review_outcome_verified: true,
+      reviewer_metadata_verified: true,
+      disabled_capability_flags_verified: true,
+      readback_review_attestation_readback_review_ref: "attestationreadbackreview-20260523083000-smoke0001",
+      readback_review_attestation_ref: "readbackreview-20260523035000-smoke0001",
+      readback_review_attestation_sha256: "3".repeat(64),
+      summary_review_gate_record_readback_review_record_ref: "reviewrecord-20260523030000-smoke0001",
+      manual_review_outcome: "reviewed_attestation_readback_for_manual_only_no_consumption",
+      attestation_readback_verified: true,
+      source_checksum_reviewed: true,
+      safe_ref_chain_reviewed: true,
+      disabled_capabilities_reviewed: true,
+      reviewed_by: "operator:smoke",
+      reviewed_at: "2026-05-23T08:30:00Z",
+      attestation_readback_review_sha256: "4".repeat(64),
+      evidence_ref_count: 1,
+      records_included: false,
+      latest_record_included: false,
+      payload_body_materialization_enabled: false,
+      downstream_consumption_enabled: false,
+      downstream_consumed: false,
+      actual_downstream_consumption_allowed: false,
+      actual_downstream_consumption_executed: false,
+      replay_store_write_enabled: false,
+      real_replay_store_written: false,
+      markdown_body_included: false,
+      write_payload_included: false,
+      raw_root_path_included: false,
+      secret_value_included: false,
+      watcher_enabled: false,
+      cron_enabled: false,
+      dispatch_enabled: false,
+      authority_adapter_binding_enabled: false,
+      vps_nas_mount_enabled: false,
+      next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review",
+    },
+  } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackResult;
+
+  const html = renderToStaticMarkup(<OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackPanel record={readback} error={null} />);
+
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-summary-review-gate-record-readback-review-attestation-readback-review-readback="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-summary-review-gate-record-readback-review-attestation-readback-review-readback-ready="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-summary-review-gate-record-readback-review-attestation-readback-review-readback-executed="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-summary-review-gate-record-readback-review-attestation-readback-review-readback-replay-store-write="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-summary-review-gate-record-readback-review-attestation-readback-review-readback-vps-nas-authority="false"');
+  expect(html).not.toContain("must" + "-not-echo");
+  expect(html).not.toContain("/vol" + "ume1/private");
+  expect(html).not.toContain("sk" + "-test-secret");
+});
