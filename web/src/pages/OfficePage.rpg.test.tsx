@@ -7566,6 +7566,65 @@ describe("ControlledMutationApprovalBoundarySummaryPanel", () => {
     expect(html).not.toMatch(new RegExp(["must" + "-not-echo", "/vol" + "ume1", "sk" + "-test"].join("|"), "i"));
   });
 
+  it("renders downstream consumption payload materialization summary review gate as read-only", () => {
+    const review = {
+      found: true,
+      errors: [],
+      dto: {
+        schema_version: 1,
+        mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate",
+        payload_materialization_summary_review_gate_ready: true,
+        source_summary_verified: true,
+        summary_readiness_verified: true,
+        aggregate_counts_verified: true,
+        metadata_only_flags_verified: true,
+        write_gate_summary_verified: true,
+        safe_latest_refs_verified: true,
+        review_gate_decision: "ready_for_bounded_manual_payload_materialization_review_gate_only",
+        source_record_count: 1,
+        source_body_bytes_total: 128,
+        source_unique_actual_execution_ref_count: 1,
+        source_unique_body_ref_count: 1,
+        latest_payload_materialization_record_ref: "payloadmat-20260522103000-smoke0001",
+        latest_actual_execution_ref: "actualexec-20260522102000-smoke0001",
+        latest_body_ref: "bodyref-20260522103000-smoke0001",
+        latest_payload_materialization_record_sha256: "2".repeat(64),
+        records_included: false,
+        latest_record_included: false,
+        payload_body_materialization_enabled: false,
+        downstream_consumption_enabled: false,
+        downstream_consumed: false,
+        actual_downstream_consumption_allowed: false,
+        actual_downstream_consumption_executed: false,
+        replay_store_write_enabled: false,
+        real_replay_store_written: false,
+        markdown_body_included: false,
+        write_payload_included: false,
+        raw_root_path_included: false,
+        secret_value_included: false,
+        watcher_enabled: false,
+        cron_enabled: false,
+        dispatch_enabled: false,
+        authority_adapter_binding_enabled: false,
+        vps_nas_mount_enabled: false,
+        next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_summary_review_gate_record",
+      },
+    } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateResult;
+
+    const html = renderToStaticMarkup(<OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGatePanel record={review} error={null} />);
+
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-summary-review-gate="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-summary-review-gate-ready="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-summary-review-gate-executed="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-summary-review-gate-replay-store-write="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-summary-review-gate-vps-nas-authority="false"');
+    expect(html).toContain("ready_for_bounded_manual_payload_materialization_review_gate_only");
+    expect(html).toContain("source_record_count");
+    expect(html).toContain("payloadmat-20260522103000-smoke0001");
+    expect(html).not.toMatch(/<button|<input|<select|<textarea/i);
+    expect(html).not.toMatch(new RegExp(["must" + "-not-echo", "/vol" + "ume1", "sk" + "-test"].join("|"), "i"));
+  });
+
   it("renders downstream consumption payload materialization request as request-only", () => {
     const html = renderToStaticMarkup(
       <OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationRequestPanel
