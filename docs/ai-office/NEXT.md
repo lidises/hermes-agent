@@ -1,3 +1,33 @@
+## Current status — Payload materialization summary review gate readback-review record readback verified
+
+Updated: 2026-05-23T03:02:52Z
+
+- Completed rung: `fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_summary_review_gate_record_readback_review_record_readback`
+- Code commit: `8f80c9d1 feat(office): verify payload review record readback`
+- Added protected metadata-only verification/readback over the stored readback-review record.
+- Source is the metadata-only readback-review record list/latest projection; no record list/body objects are included in the verification DTO.
+- Verified stored record checksum, source review record checksum, safe ref chain, aggregate counts, review outcome, and disabled capability flags.
+- Still not enabled/executed: actual downstream consumption, markdown/body payload materialization, real replay-store execution writes, watcher/cron/dispatcher/authority-adapter, VPS NAS authority/public exposure, gateway restart.
+- Live smoke highlights: unauth GET 401, auth GET 200, found=true, readback verified=true, source_readback_review_record_verified=true, checksum refs verified=true, safe_ref_chain_verified=true, aggregate_counts_verified=true, review_outcome_verified=true, disabled flags verified=true, record sha256 length=64, raw leak=false, DOM controls=0, console JS errors=0.
+- Protected API: `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-consumption-payload-materialization-summary-review-gate-record-readback-review-record-readback`
+- UI panel: `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewRecordReadbackPanel`
+- DOM hook: `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-summary-review-gate-record-readback-review-record-readback="true"`
+
+Next recommended rung:
+
+`fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_summary_review_gate_record_readback_review_record_readback_review`
+
+Boundaries for next rung:
+
+- Source only the metadata-only readback-review-record readback projection.
+- Add manual review/attestation over the verified readback; keep it metadata-only and safe-ref-only.
+- Do not execute actual downstream consumption.
+- Do not materialize/write markdown/body payload.
+- Do not write real replay-store execution state.
+- Do not introduce watcher/cron/dispatcher/authority-adapter.
+- Do not expose VPS NAS authority or public APIs.
+- Do not restart gateway; dashboard restart only if needed.
+
 ## Current status — Payload materialization summary review gate record readback review record written/read back
 
 Updated: 2026-05-23T02:43:17Z
