@@ -3009,6 +3009,7 @@ export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPa
     latest_actual_execution_ref?: string | null;
     latest_body_ref?: string | null;
     latest_payload_materialization_record_sha256?: string | null;
+    payload_materialization_summary_review_gate_sha256?: string;
     records_included: false;
     latest_record_included: false;
     payload_body_materialization_enabled: false;
@@ -3033,6 +3034,52 @@ export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPa
     [key: string]: unknown;
   };
 }
+
+
+export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordResult {
+  found?: boolean;
+  stored?: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: null | {
+    schema_version: number;
+    mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record";
+    payload_materialization_summary_review_gate_recorded: boolean;
+    payload_materialization_summary_review_gate_record_ready: boolean;
+    source_review_gate_verified: boolean;
+    safe_ref_chain_verified: boolean;
+    summary_review_gate_record_ref: string;
+    payload_materialization_summary_review_gate_sha256: string;
+    payload_materialization_summary_review_gate_record_sha256: string;
+    review_gate_decision: string;
+    source_record_count: number;
+    source_body_bytes_total: number;
+    latest_payload_materialization_record_ref: string;
+    latest_actual_execution_ref: string;
+    latest_body_ref: string;
+    latest_payload_materialization_record_sha256: string;
+    records_included: false;
+    latest_record_included: false;
+    payload_body_materialization_enabled: false;
+    downstream_consumption_enabled: false;
+    downstream_consumed: false;
+    actual_downstream_consumption_allowed: false;
+    actual_downstream_consumption_executed: false;
+    replay_store_write_enabled: false;
+    real_replay_store_written: false;
+    markdown_body_included: false;
+    write_payload_included: false;
+    raw_root_path_included: false;
+    secret_value_included?: false;
+    watcher_enabled: false;
+    cron_enabled: false;
+    dispatch_enabled: false;
+    authority_adapter_binding_enabled: false;
+    vps_nas_mount_enabled: false;
+    next_required_boundary: string;
+    [key: string]: unknown;
+  };
+}
+
 
 export interface OfficeNasKeeperExecutionFromPreviewPayload {
   handoff_ref: string;
@@ -3521,6 +3568,13 @@ export const api = {
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationRecordSummaryResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-consumption-payload-materialization-record-summary"),
   getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGate: () =>
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-consumption-payload-materialization-summary-review-gate"),
+  getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecords: () =>
+    fetchJSON<Record<string, unknown>>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-consumption-payload-materialization-summary-review-gate-records"),
+  appendOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecord: (body: Record<string, unknown>) =>
+    fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-consumption-payload-materialization-summary-review-gate-records", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
   appendOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionExactApproval: (body: Record<string, unknown>) =>
     fetchJSON<Record<string, unknown>>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-exact-approvals", {
       method: "POST",
