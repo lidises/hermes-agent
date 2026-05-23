@@ -13257,6 +13257,85 @@ def list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_down
     return {"found": bool(records), "errors": errors, "dto": dto}
 
 
+def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_record_summary(
+    *,
+    store_path: Path | None = None,
+) -> dict[str, object]:
+    """Summarize materialization records without returning record bodies or write payloads."""
+
+    path = store_path or _default_fresh_request_builder_downstream_consumption_payload_materialization_record_store_path()
+    records, skipped_count = _read_fresh_request_builder_downstream_consumption_payload_materialization_records(path)
+    latest_record = records[-1] if records else None
+    body_bytes_total = 0
+    for record in records:
+        body_bytes = record.get("body_bytes")
+        if isinstance(body_bytes, int):
+            body_bytes_total += body_bytes
+    unique_actual_execution_refs = {record.get("actual_execution_ref") for record in records if isinstance(record.get("actual_execution_ref"), str)}
+    unique_body_refs = {record.get("body_ref") for record in records if isinstance(record.get("body_ref"), str)}
+    all_records_metadata_only = bool(records) and all(
+        record.get("materialization_result_status") == "metadata_only_body_materialization_recorded_no_body_payload"
+        and record.get("payload_body_materialization_enabled") is False
+        and record.get("markdown_body_included") is False
+        and record.get("write_payload_included") is False
+        and record.get("raw_root_path_included") is False
+        and record.get("secret_value_included") is False
+        for record in records
+    )
+    all_write_gates_verified = bool(records) and all(record.get("write_gate_verified") is True for record in records)
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_record_summary",
+        "payload_materialization_record_summary_ready": bool(records),
+        "record_count": len(records),
+        "skipped_count": skipped_count,
+        "body_bytes_total": body_bytes_total,
+        "unique_actual_execution_ref_count": len(unique_actual_execution_refs),
+        "unique_body_ref_count": len(unique_body_refs),
+        "latest_payload_materialization_record_ref": latest_record.get("payload_materialization_record_ref") if latest_record else None,
+        "latest_actual_execution_ref": latest_record.get("actual_execution_ref") if latest_record else None,
+        "latest_body_ref": latest_record.get("body_ref") if latest_record else None,
+        "latest_payload_materialization_record_sha256": latest_record.get("payload_materialization_record_sha256") if latest_record else None,
+        "all_records_metadata_only": all_records_metadata_only,
+        "all_write_gates_verified": all_write_gates_verified,
+        "records_included": False,
+        "latest_record_included": False,
+        "payload_body_materialization_enabled": False,
+        "downstream_use_enabled": bool(records),
+        "downstream_consumption_enabled": False,
+        "downstream_consumed": False,
+        "actual_downstream_consumption_allowed": False,
+        "actual_downstream_consumption_executed": False,
+        "replay_store_write_enabled": False,
+        "real_replay_store_written": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "secret_value_included": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "capabilities": {
+            "payload_materialization_record_summary_enabled": True,
+            "payload_body_materialization_enabled": False,
+            "actual_downstream_consumption_enabled": False,
+            "replay_store_write_enabled": False,
+            "real_replay_store_write_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_secret_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+        },
+        "next_required_boundary": "fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_record_summary_review_after_readback" if records else "fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_record_readback_after_write",
+    }
+    return {"found": bool(records), "errors": [], "dto": dto}
+
+
 def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_record(
     payload: object,
     *,

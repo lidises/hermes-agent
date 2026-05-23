@@ -7512,6 +7512,60 @@ describe("ControlledMutationApprovalBoundarySummaryPanel", () => {
     expect(html).not.toMatch(new RegExp(["must" + "-not-echo", "/vol" + "ume1", "sk" + "-test"].join("|"), "i"));
   });
 
+  it("renders downstream consumption payload materialization record summary as aggregate metadata-only", () => {
+    const summary = {
+      found: true,
+      errors: [],
+      dto: {
+        schema_version: 1,
+        mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_record_summary",
+        payload_materialization_record_summary_ready: true,
+        record_count: 1,
+        skipped_count: 0,
+        body_bytes_total: 128,
+        unique_actual_execution_ref_count: 1,
+        unique_body_ref_count: 1,
+        latest_payload_materialization_record_ref: "payloadmat-20260522103000-smoke0001",
+        latest_actual_execution_ref: "actualexec-20260522102000-smoke0001",
+        latest_body_ref: "bodyref-20260522103000-smoke0001",
+        latest_payload_materialization_record_sha256: "2".repeat(64),
+        all_records_metadata_only: true,
+        all_write_gates_verified: true,
+        records_included: false,
+        latest_record_included: false,
+        payload_body_materialization_enabled: false,
+        downstream_consumption_enabled: false,
+        downstream_consumed: false,
+        actual_downstream_consumption_allowed: false,
+        actual_downstream_consumption_executed: false,
+        replay_store_write_enabled: false,
+        real_replay_store_written: false,
+        markdown_body_included: false,
+        write_payload_included: false,
+        raw_root_path_included: false,
+        secret_value_included: false,
+        watcher_enabled: false,
+        cron_enabled: false,
+        dispatch_enabled: false,
+        authority_adapter_binding_enabled: false,
+        vps_nas_mount_enabled: false,
+        next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_record_summary_review_after_readback",
+      },
+    } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationRecordSummaryResult;
+
+    const html = renderToStaticMarkup(<OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationRecordSummaryPanel record={summary} error={null} />);
+
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-record-summary="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-record-summary-ready="true"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-record-summary-executed="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-record-summary-replay-store-write="false"');
+    expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-record-summary-vps-nas-authority="false"');
+    expect(html).toContain("payloadmat-20260522103000-smoke0001");
+    expect(html).toContain("body bytes total");
+    expect(html).not.toMatch(/<button|<input|<select|<textarea/i);
+    expect(html).not.toMatch(new RegExp(["must" + "-not-echo", "/vol" + "ume1", "sk" + "-test"].join("|"), "i"));
+  });
+
   it("renders downstream consumption payload materialization request as request-only", () => {
     const html = renderToStaticMarkup(
       <OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationRequestPanel
