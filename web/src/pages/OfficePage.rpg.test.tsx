@@ -8779,3 +8779,57 @@ it("renders payload attestation readback review readback review as read-only", (
   expect(html).not.toContain("/vol" + "ume1/private");
   expect(html).not.toContain("sk" + "-test-secret");
 });
+
+
+it("renders payload attestation readback review readback review readback as read-only", () => {
+  const record = {
+    found: true,
+    errors: [],
+    dto: {
+      schema_version: 1,
+      mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review_readback",
+      payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review_readback_verified: true,
+      source_attestation_readback_review_readback_review_verified: true,
+      attestation_readback_review_readback_review_checksum_verified: true,
+      safe_ref_chain_verified: true,
+      manual_review_outcome_verified: true,
+      disabled_capability_flags_verified: true,
+      attestation_readback_review_readback_review_ref: "attestationreadbackreviewreadbackreview-20260523150000-smoke0001",
+      readback_review_attestation_readback_review_ref: "attestationreadbackreview-20260523083000-smoke0001",
+      readback_review_attestation_ref: "readbackreview-20260523033000-smoke0001",
+      attestation_readback_review_sha256: "6".repeat(64),
+      attestation_readback_review_readback_review_sha256: "7".repeat(64),
+      attestation_readback_review_readback_review_readback_sha256: "8".repeat(64),
+      records_included: false,
+      latest_record_included: false,
+      payload_body_materialization_enabled: false,
+      downstream_consumption_enabled: false,
+      downstream_consumed: false,
+      actual_downstream_consumption_allowed: false,
+      actual_downstream_consumption_executed: false,
+      replay_store_write_enabled: false,
+      real_replay_store_written: false,
+      markdown_body_included: false,
+      write_payload_included: false,
+      raw_root_path_included: false,
+      secret_value_included: false,
+      watcher_enabled: false,
+      cron_enabled: false,
+      dispatch_enabled: false,
+      authority_adapter_binding_enabled: false,
+      vps_nas_mount_enabled: false,
+      next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review_readback_review",
+    },
+  } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackResult;
+
+  const html = renderToStaticMarkup(<OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackPanel record={record} error={null} />);
+
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-summary-review-gate-record-readback-review-attestation-readback-review-readback-review-readback="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-summary-review-gate-record-readback-review-attestation-readback-review-readback-review-readback-ready="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-summary-review-gate-record-readback-review-attestation-readback-review-readback-review-readback-executed="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-summary-review-gate-record-readback-review-attestation-readback-review-readback-review-readback-replay-store-write="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-summary-review-gate-record-readback-review-attestation-readback-review-readback-review-readback-vps-nas-authority="false"');
+  expect(html).toContain("payload attestation readback review readback review readback");
+  expect(html).toContain("attestationreadbackreviewreadbackreview-20260523150000-smoke0001");
+  expect(html).not.toMatch(/<button|<form|<input|<select|<textarea/);
+});
