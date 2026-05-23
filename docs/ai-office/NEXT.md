@@ -1,3 +1,71 @@
+## Current status — Payload materialization summary review gate verified
+
+Updated: 2026-05-23T01:27:05Z
+
+Baseline:
+- HEAD = origin/main = `165d27822cce2ad0e777141126a46e63c292ce82`
+- Latest code commit: `165d27822 feat(office): add payload materialization summary review gate`
+- Local git clean at handoff prep time except docs handoff edits.
+- VPS core/dashboard synced to `165d27822cce2ad0e777141126a46e63c292ce82`.
+- Dashboard restarted only; gateway stayed untouched.
+
+Completed rung:
+- `fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_summary_review_gate`
+
+Added protected API:
+- `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-consumption-payload-materialization-summary-review-gate`
+
+Added UI panel / DOM hook:
+- `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGatePanel`
+- `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-summary-review-gate="true"`
+
+Live smoke:
+- unauthenticated GET: 401
+- authenticated GET: 200
+- found=true
+- payload_materialization_summary_review_gate_ready=true
+- source_summary_verified=true
+- summary_readiness_verified=true
+- aggregate_counts_verified=true
+- metadata_only_flags_verified=true
+- write_gate_summary_verified=true
+- safe_latest_refs_verified=true
+- source_record_count=1
+- source_body_bytes_total=128
+- latest_payload_materialization_record_ref=payloadmat-20260523004825-smoke0001
+- records_included=false
+- latest_record_included=false
+- actual_downstream_consumption_executed=false
+- replay_store_write_enabled=false
+- real_replay_store_written=false
+- markdown_body_included=false
+- write_payload_included=false
+- raw_root_path_included=false
+- secret_value_included=false
+- vps_nas_mount_enabled=false
+- DOM found=true, controls=0, raw leak=false, console JS errors=0
+
+Verification:
+- py_compile passed
+- focused Python chain tests: 27 passed
+- focused Office web tests: 349 passed
+- eslint passed with existing warnings only
+- npm run build passed with existing Vite chunk-size warning only
+- git diff --check passed
+- added-line leak sentinel passed
+
+Next recommended rung:
+- `fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_summary_review_gate_record`
+
+Keep boundaries:
+- actual downstream consumption disabled
+- markdown/body payload materialization/write forbidden
+- real replay-store execution write forbidden
+- watcher/cron/dispatcher/authority-adapter forbidden
+- VPS NAS authority/public exposure forbidden
+- gateway restart forbidden
+- protected Office API only; safe-ref/metadata-only review-gate record next.
+
 ## Current status — Payload materialization record summary readback verified
 
 Updated: 2026-05-23T01:07:33Z
