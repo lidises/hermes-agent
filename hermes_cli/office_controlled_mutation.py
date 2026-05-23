@@ -3252,6 +3252,10 @@ def _default_fresh_request_builder_downstream_consumption_actual_execution_recor
     return get_hermes_home() / "office" / "controlled-mutation" / "fresh_request_builder_downstream_consumption_actual_execution_records.jsonl"
 
 
+def _default_fresh_request_builder_downstream_consumption_payload_materialization_record_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "fresh_request_builder_downstream_consumption_payload_materialization_records.jsonl"
+
+
 
 def _approval_event_envelope_capabilities() -> dict[str, bool]:
     capabilities = _approval_record_capabilities()
@@ -13051,6 +13055,302 @@ def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downs
     }
     request_errors = request.get("errors") if isinstance(request.get("errors"), list) else []
     return {"found": verified, "errors": request_errors, "dto": dto}
+
+
+def _normalize_fresh_request_builder_downstream_consumption_payload_materialization_record(item: Mapping[str, object]) -> dict[str, object] | None:
+    required = (
+        "payload_materialization_record_ref",
+        "actual_execution_ref",
+        "payload_materialization_write_gate_sha256",
+        "payload_materialization_request_sha256",
+        "payload_materialization_contract_sha256",
+        "payload_readiness_sha256",
+        "body_ref",
+        "body_sha256",
+        "body_bytes",
+        "materialization_result_status",
+        "recorded_by",
+        "recorded_at",
+        "safe_summary",
+        "evidence_refs",
+        "payload_materialization_record_sha256",
+    )
+    if any(field not in item for field in required):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(item.get("payload_materialization_record_ref"), "payloadmat-"):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(item.get("actual_execution_ref"), "actualexec-"):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(item.get("body_ref"), "bodyref-"):
+        return None
+    for field in (
+        "payload_materialization_write_gate_sha256",
+        "payload_materialization_request_sha256",
+        "payload_materialization_contract_sha256",
+        "payload_readiness_sha256",
+        "body_sha256",
+        "payload_materialization_record_sha256",
+    ):
+        value = item.get(field)
+        if not (isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value)):
+            return None
+    body_bytes = item.get("body_bytes")
+    if not (isinstance(body_bytes, int) and 0 <= body_bytes <= 1_000_000):
+        return None
+    if item.get("materialization_result_status") != "metadata_only_body_materialization_recorded_no_body_payload":
+        return None
+    if not _is_opaque_id(item.get("recorded_by")):
+        return None
+    if not (isinstance(item.get("recorded_at"), str) and _ISO_UTC_RE.fullmatch(str(item.get("recorded_at")))):
+        return None
+    if not _is_safe_text(item.get("safe_summary")):
+        return None
+    if not _validate_evidence_refs(item.get("evidence_refs")):
+        return None
+    return {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_record",
+        "payload_materialization_recorded": True,
+        "payload_materialization_record_ready": True,
+        "payload_materialization_record_ref": item.get("payload_materialization_record_ref"),
+        "actual_execution_ref": item.get("actual_execution_ref"),
+        "payload_materialization_write_gate_sha256": item.get("payload_materialization_write_gate_sha256"),
+        "payload_materialization_request_sha256": item.get("payload_materialization_request_sha256"),
+        "payload_materialization_contract_sha256": item.get("payload_materialization_contract_sha256"),
+        "payload_readiness_sha256": item.get("payload_readiness_sha256"),
+        "body_ref": item.get("body_ref"),
+        "body_sha256": item.get("body_sha256"),
+        "body_bytes": body_bytes,
+        "materialization_result_status": "metadata_only_body_materialization_recorded_no_body_payload",
+        "recorded_by": item.get("recorded_by"),
+        "recorded_at": item.get("recorded_at"),
+        "safe_summary": item.get("safe_summary"),
+        "evidence_refs": list(cast(list[object], item.get("evidence_refs"))),
+        "write_gate_verified": True,
+        "safe_ref_chain_verified": True,
+        "payload_materialization_record_sha256": item.get("payload_materialization_record_sha256"),
+        "payload_body_materialization_recorded": True,
+        "payload_body_materialization_enabled": False,
+        "downstream_use_enabled": True,
+        "downstream_consumption_enabled": False,
+        "downstream_consumed": False,
+        "actual_downstream_consumption_allowed": False,
+        "actual_downstream_consumption_executed": False,
+        "replay_store_write_enabled": False,
+        "real_replay_store_written": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "secret_value_included": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "capabilities": {
+            "payload_materialization_recording_enabled": True,
+            "payload_body_materialization_enabled": False,
+            "actual_downstream_consumption_enabled": False,
+            "replay_store_write_enabled": False,
+            "real_replay_store_write_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_secret_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+        },
+        "next_required_boundary": "fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_record_readback_after_write",
+    }
+
+
+def _read_fresh_request_builder_downstream_consumption_payload_materialization_records(path: Path) -> tuple[list[dict[str, object]], int]:
+    records: list[dict[str, object]] = []
+    skipped_count = 0
+    if not path.exists():
+        return records, skipped_count
+    with path.open("r", encoding="utf-8") as handle:
+        for line in handle:
+            if not line.strip():
+                continue
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped_count += 1
+                continue
+            if not isinstance(item, Mapping):
+                skipped_count += 1
+                continue
+            normalized = _normalize_fresh_request_builder_downstream_consumption_payload_materialization_record(item)
+            if normalized is None:
+                skipped_count += 1
+                continue
+            records.append(normalized)
+    return records, skipped_count
+
+
+def list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_records(
+    *,
+    store_path: Path | None = None,
+    limit: int = 50,
+    payload_materialization_record_ref: object = None,
+) -> dict[str, object]:
+    safe_ref = None
+    errors: list[dict[str, str]] = []
+    if payload_materialization_record_ref is not None:
+        if _office_disabled_runtime_dispatch_valid_prefixed_ref(payload_materialization_record_ref, "payloadmat-"):
+            safe_ref = str(payload_materialization_record_ref)
+        else:
+            errors.append(_error("payload_materialization_record_ref", "unsupported_ref_shape"))
+    path = store_path or _default_fresh_request_builder_downstream_consumption_payload_materialization_record_store_path()
+    records, skipped_count = _read_fresh_request_builder_downstream_consumption_payload_materialization_records(path)
+    if safe_ref:
+        records = [record for record in records if record.get("payload_materialization_record_ref") == safe_ref]
+    if errors:
+        records = []
+    max_items = max(0, min(limit, 200)) if isinstance(limit, int) else 50
+    records = records[-max_items:] if max_items else []
+    latest_record = records[-1] if records else None
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_records_readback",
+        "record_count": len(records),
+        "limit": max_items,
+        "skipped_count": skipped_count,
+        "records": records,
+        "latest_record": latest_record,
+        "payload_body_materialization_recorded": bool(records),
+        "payload_body_materialization_enabled": False,
+        "downstream_use_enabled": bool(records),
+        "downstream_consumption_enabled": False,
+        "downstream_consumed": False,
+        "actual_downstream_consumption_allowed": False,
+        "actual_downstream_consumption_executed": False,
+        "replay_store_write_enabled": False,
+        "real_replay_store_written": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "secret_value_included": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "capabilities": {
+            "payload_materialization_recording_enabled": True,
+            "payload_body_materialization_enabled": False,
+            "actual_downstream_consumption_enabled": False,
+            "replay_store_write_enabled": False,
+            "real_replay_store_write_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_secret_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+        },
+        "next_required_boundary": "fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_record_readback_after_write" if records else "fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_record_after_write_gate",
+    }
+    return {"found": bool(records), "errors": errors, "dto": dto}
+
+
+def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_record(
+    payload: object,
+    *,
+    actual_execution_record_store_path: Path | None = None,
+    store_path: Path | None = None,
+) -> dict[str, object]:
+    if not isinstance(payload, Mapping):
+        return {"stored": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    write_gate = get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_consumption_payload_materialization_write_gate(
+        actual_execution_record_store_path=actual_execution_record_store_path,
+    )
+    source = write_gate.get("dto") if isinstance(write_gate.get("dto"), Mapping) else None
+    source_map = cast(Mapping[str, object], source) if isinstance(source, Mapping) else {}
+    errors: list[dict[str, str]] = []
+    if not write_gate.get("found") or not source_map:
+        errors.append(_error("payload_materialization_write_gate_sha256", "materialization_write_gate_not_found"))
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("payload_materialization_record_ref"), "payloadmat-"):
+        errors.append(_error("payload_materialization_record_ref", "unsupported_ref_shape"))
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("actual_execution_ref"), "actualexec-"):
+        errors.append(_error("actual_execution_ref", "unsupported_ref_shape"))
+    elif source_map and payload.get("actual_execution_ref") != source_map.get("actual_execution_ref"):
+        errors.append(_error("actual_execution_ref", "materialization_write_gate_mismatch"))
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("body_ref"), "bodyref-"):
+        errors.append(_error("body_ref", "unsupported_ref_shape"))
+    for field in (
+        "payload_materialization_write_gate_sha256",
+        "payload_materialization_request_sha256",
+        "payload_materialization_contract_sha256",
+        "payload_readiness_sha256",
+    ):
+        value = payload.get(field)
+        expected = source_map.get(field) if source_map else None
+        if not (isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value)):
+            errors.append(_error(field, "invalid_sha256"))
+        elif source_map and value != expected:
+            errors.append(_error(field, "materialization_write_gate_mismatch"))
+    body_sha = payload.get("body_sha256")
+    if not (isinstance(body_sha, str) and re.fullmatch(r"[0-9a-f]{64}", body_sha)):
+        errors.append(_error("body_sha256", "invalid_sha256"))
+    body_bytes = payload.get("body_bytes")
+    if not (isinstance(body_bytes, int) and 0 <= body_bytes <= 1_000_000):
+        errors.append(_error("body_bytes", "invalid_body_bytes"))
+    if payload.get("materialization_result_status") != "metadata_only_body_materialization_recorded_no_body_payload":
+        errors.append(_error("materialization_result_status", "unsupported_materialization_result_status"))
+    if not _is_opaque_id(payload.get("recorded_by")):
+        errors.append(_error("recorded_by", "invalid_opaque_ref"))
+    if not (isinstance(payload.get("recorded_at"), str) and _ISO_UTC_RE.fullmatch(str(payload.get("recorded_at")))):
+        errors.append(_error("recorded_at", "invalid_timestamp"))
+    if not _is_safe_text(payload.get("safe_summary")):
+        errors.append(_error("safe_summary", "invalid_safe_text"))
+    if not _validate_evidence_refs(payload.get("evidence_refs")):
+        errors.append(_error("evidence_refs", "invalid_opaque_ref"))
+    path = store_path or _default_fresh_request_builder_downstream_consumption_payload_materialization_record_store_path()
+    existing, _ = _read_fresh_request_builder_downstream_consumption_payload_materialization_records(path)
+    if any(record.get("payload_materialization_record_ref") == payload.get("payload_materialization_record_ref") for record in existing):
+        errors.append(_error("payload_materialization_record_ref", "duplicate_payload_materialization_record_ref"))
+    if any(record.get("body_ref") == payload.get("body_ref") for record in existing):
+        errors.append(_error("body_ref", "duplicate_body_ref"))
+    errors = sorted(errors, key=lambda item: (item["field"], item["code"]))
+    if errors:
+        deduped: list[dict[str, str]] = []
+        seen: set[tuple[str, str]] = set()
+        for error in errors:
+            key = (error["field"], error["code"])
+            if key not in seen:
+                seen.add(key)
+                deduped.append(error)
+        return {"stored": False, "errors": deduped, "dto": None}
+    record_material = {
+        "payload_materialization_record_ref": payload.get("payload_materialization_record_ref"),
+        "actual_execution_ref": payload.get("actual_execution_ref"),
+        "payload_materialization_write_gate_sha256": payload.get("payload_materialization_write_gate_sha256"),
+        "payload_materialization_request_sha256": payload.get("payload_materialization_request_sha256"),
+        "payload_materialization_contract_sha256": payload.get("payload_materialization_contract_sha256"),
+        "payload_readiness_sha256": payload.get("payload_readiness_sha256"),
+        "body_ref": payload.get("body_ref"),
+        "body_sha256": payload.get("body_sha256"),
+        "body_bytes": body_bytes,
+        "materialization_result_status": "metadata_only_body_materialization_recorded_no_body_payload",
+        "recorded_by": payload.get("recorded_by"),
+        "recorded_at": payload.get("recorded_at"),
+        "safe_summary": payload.get("safe_summary"),
+        "evidence_refs": list(cast(list[object], payload.get("evidence_refs"))),
+    }
+    record_sha = hashlib.sha256(json.dumps(record_material, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+    stored_payload = dict(record_material)
+    stored_payload["payload_materialization_record_sha256"] = record_sha
+    dto = _normalize_fresh_request_builder_downstream_consumption_payload_materialization_record(stored_payload)
+    if dto is None:
+        return {"stored": False, "errors": [_error("payload", "invalid_normalized_record")], "dto": None}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(dto, sort_keys=True, separators=(",", ":")) + "\n")
+    return {"stored": True, "errors": [], "dto": dto}
 
 
 def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_record(
