@@ -3272,6 +3272,10 @@ def _default_fresh_request_builder_downstream_consumption_payload_materializatio
     return get_hermes_home() / "office" / "controlled-mutation" / "fresh_request_builder_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_reviews.jsonl"
 
 
+def _default_fresh_request_builder_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "fresh_request_builder_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_reviews.jsonl"
+
+
 
 def _approval_event_envelope_capabilities() -> dict[str, bool]:
     capabilities = _approval_record_capabilities()
@@ -14753,6 +14757,183 @@ def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downs
         "next_required_boundary": "fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review",
     }
     return {"found": verified, "errors": readback.get("errors", []), "dto": dto}
+
+
+def _normalize_fresh_request_builder_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review(item: Mapping[str, object]) -> dict[str, object] | None:
+    required = (
+        "attestation_readback_review_readback_review_ref",
+        "readback_review_attestation_readback_review_ref",
+        "readback_review_attestation_ref",
+        "attestation_readback_review_sha256",
+        "manual_review_outcome",
+        "attestation_readback_review_readback_verified",
+        "source_checksum_reviewed",
+        "safe_ref_chain_reviewed",
+        "disabled_capabilities_reviewed",
+        "reviewed_by",
+        "reviewed_at",
+        "safe_summary",
+        "evidence_refs",
+        "attestation_readback_review_readback_review_sha256",
+    )
+    if any(key not in item for key in required):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(item.get("attestation_readback_review_readback_review_ref"), "attestationreadbackreviewreadbackreview-"):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(item.get("readback_review_attestation_readback_review_ref"), "attestationreadbackreview-"):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(item.get("readback_review_attestation_ref"), "readbackreview-"):
+        return None
+    for key in ("attestation_readback_review_sha256", "attestation_readback_review_readback_review_sha256"):
+        if not isinstance(item.get(key), str) or not re.fullmatch(r"[0-9a-f]{64}", str(item.get(key))):
+            return None
+    if item.get("manual_review_outcome") != "reviewed_attestation_readback_review_readback_for_manual_only_no_consumption":
+        return None
+    for key in ("attestation_readback_review_readback_verified", "source_checksum_reviewed", "safe_ref_chain_reviewed", "disabled_capabilities_reviewed"):
+        if item.get(key) is not True:
+            return None
+    if not (_is_opaque_id(item.get("reviewed_by")) and isinstance(item.get("reviewed_at"), str) and _ISO_UTC_RE.fullmatch(str(item.get("reviewed_at")))):
+        return None
+    if not (_is_safe_text(item.get("safe_summary")) and _validate_evidence_refs(item.get("evidence_refs"))):
+        return None
+    normalized = {key: item.get(key) for key in required}
+    normalized.update({
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review",
+        "payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_reviewed": True,
+        "source_attestation_readback_review_readback_verified": True,
+        "records_included": False,
+        "latest_record_included": False,
+        "payload_body_materialization_enabled": False,
+        "downstream_consumption_enabled": False,
+        "downstream_consumed": False,
+        "actual_downstream_consumption_allowed": False,
+        "actual_downstream_consumption_executed": False,
+        "replay_store_write_enabled": False,
+        "real_replay_store_written": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "secret_value_included": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "next_required_boundary": "fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review_readback",
+    })
+    return normalized
+
+
+def list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_reviews(
+    *,
+    store_path: Path | None = None,
+    attestation_readback_review_readback_review_ref: str | None = None,
+    limit: int = 20,
+) -> dict[str, object]:
+    safe_ref: str | None = None
+    errors: list[dict[str, str]] = []
+    if attestation_readback_review_readback_review_ref is not None:
+        if _office_disabled_runtime_dispatch_valid_prefixed_ref(attestation_readback_review_readback_review_ref, "attestationreadbackreviewreadbackreview-"):
+            safe_ref = attestation_readback_review_readback_review_ref
+        else:
+            errors.append(_error("attestation_readback_review_readback_review_ref", "unsupported_ref_shape"))
+    path = store_path or _default_fresh_request_builder_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review_store_path()
+    records: list[dict[str, object]] = []
+    if path.exists():
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if not isinstance(item, Mapping):
+                continue
+            normalized = _normalize_fresh_request_builder_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review(item)
+            if normalized is not None:
+                records.append(normalized)
+    if safe_ref is not None:
+        records = [record for record in records if record.get("attestation_readback_review_readback_review_ref") == safe_ref]
+    records = records[-max(1, min(limit, 100)):]
+    return {"found": bool(records), "errors": errors, "record_count": len(records), "records": records, "latest_record": records[-1] if records else None}
+
+
+def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review(
+    payload: object,
+    *,
+    attestation_readback_review_store_path: Path | None = None,
+    store_path: Path | None = None,
+) -> dict[str, object]:
+    if not isinstance(payload, Mapping):
+        return {"stored": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    source = get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback(
+        store_path=attestation_readback_review_store_path,
+        readback_review_attestation_readback_review_ref=payload.get("readback_review_attestation_readback_review_ref") if isinstance(payload.get("readback_review_attestation_readback_review_ref"), str) else None,
+    )
+    source_map = cast(Mapping[str, object], source.get("dto")) if isinstance(source.get("dto"), Mapping) else {}
+    errors: list[dict[str, str]] = []
+    if not source.get("found") or not source_map:
+        errors.append(_error("readback_review_attestation_readback_review_ref", "attestation_readback_review_readback_not_found"))
+    if payload.get("attestation_readback_review_sha256") != source_map.get("attestation_readback_review_sha256"):
+        errors.append(_error("attestation_readback_review_sha256", "checksum_mismatch"))
+    if payload.get("readback_review_attestation_ref") != source_map.get("readback_review_attestation_ref"):
+        errors.append(_error("readback_review_attestation_ref", "ref_mismatch"))
+    if payload.get("manual_review_outcome") != "reviewed_attestation_readback_review_readback_for_manual_only_no_consumption":
+        errors.append(_error("manual_review_outcome", "unsupported_outcome"))
+    for key in ("attestation_readback_review_readback_verified", "source_checksum_reviewed", "safe_ref_chain_reviewed", "disabled_capabilities_reviewed"):
+        if payload.get(key) is not True:
+            errors.append(_error(key, "must_be_true"))
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("attestation_readback_review_readback_review_ref"), "attestationreadbackreviewreadbackreview-"):
+        errors.append(_error("attestation_readback_review_readback_review_ref", "unsupported_ref_shape"))
+    if not (_is_opaque_id(payload.get("reviewed_by")) and isinstance(payload.get("reviewed_at"), str) and _ISO_UTC_RE.fullmatch(str(payload.get("reviewed_at")))):
+        errors.append(_error("reviewer", "invalid_reviewer_metadata"))
+    if not (_is_safe_text(payload.get("safe_summary")) and _validate_evidence_refs(payload.get("evidence_refs"))):
+        errors.append(_error("safe_summary", "unsafe_summary_or_evidence"))
+    if errors:
+        return {"stored": False, "errors": errors, "dto": None}
+    record = {
+        "schema_version": 1,
+        "attestation_readback_review_readback_review_ref": payload.get("attestation_readback_review_readback_review_ref"),
+        "readback_review_attestation_readback_review_ref": source_map.get("readback_review_attestation_readback_review_ref"),
+        "readback_review_attestation_ref": source_map.get("readback_review_attestation_ref"),
+        "attestation_readback_review_sha256": source_map.get("attestation_readback_review_sha256"),
+        "manual_review_outcome": payload.get("manual_review_outcome"),
+        "attestation_readback_review_readback_verified": True,
+        "source_checksum_reviewed": True,
+        "safe_ref_chain_reviewed": True,
+        "disabled_capabilities_reviewed": True,
+        "reviewed_by": payload.get("reviewed_by"),
+        "reviewed_at": payload.get("reviewed_at"),
+        "safe_summary": payload.get("safe_summary"),
+        "evidence_refs": list(cast(list[object], payload.get("evidence_refs"))),
+        "payload_body_materialization_enabled": False,
+        "downstream_consumption_enabled": False,
+        "downstream_consumed": False,
+        "actual_downstream_consumption_allowed": False,
+        "actual_downstream_consumption_executed": False,
+        "replay_store_write_enabled": False,
+        "real_replay_store_written": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "secret_value_included": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+    }
+    checksum_payload = json.dumps(record, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    record["attestation_readback_review_readback_review_sha256"] = hashlib.sha256(checksum_payload).hexdigest()
+    normalized = _normalize_fresh_request_builder_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review(record)
+    if normalized is None:
+        return {"stored": False, "errors": [_error("payload", "normalization_failed")], "dto": None}
+    path = store_path or _default_fresh_request_builder_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review_store_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(record, sort_keys=True, separators=(",", ":"), ensure_ascii=False) + "\n")
+    return {"stored": True, "errors": [], "dto": normalized}
 
 
 def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_record(

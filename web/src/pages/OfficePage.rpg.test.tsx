@@ -8720,3 +8720,62 @@ it("renders payload attestation readback review readback as read-only", () => {
   expect(html).not.toContain("/vol" + "ume1/private");
   expect(html).not.toContain("sk" + "-test-secret");
 });
+
+
+it("renders payload attestation readback review readback review as read-only", () => {
+  const record = {
+    found: true,
+    errors: [],
+    record_count: 1,
+    records: [],
+    latest_record: {
+      schema_version: 1,
+      mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review",
+      payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_reviewed: true,
+      source_attestation_readback_review_readback_verified: true,
+      attestation_readback_review_readback_review_ref: "attestationreadbackreviewreadbackreview-20260523113000-smoke0001",
+      readback_review_attestation_readback_review_ref: "attestationreadbackreview-20260523083000-smoke0001",
+      readback_review_attestation_ref: "readbackreview-20260523035000-smoke0001",
+      attestation_readback_review_sha256: "4".repeat(64),
+      manual_review_outcome: "reviewed_attestation_readback_review_readback_for_manual_only_no_consumption",
+      attestation_readback_review_readback_verified: true,
+      source_checksum_reviewed: true,
+      safe_ref_chain_reviewed: true,
+      disabled_capabilities_reviewed: true,
+      reviewed_by: "operator:smoke",
+      reviewed_at: "2026-05-23T11:30:00Z",
+      attestation_readback_review_readback_review_sha256: "5".repeat(64),
+      records_included: false,
+      latest_record_included: false,
+      payload_body_materialization_enabled: false,
+      downstream_consumption_enabled: false,
+      downstream_consumed: false,
+      actual_downstream_consumption_allowed: false,
+      actual_downstream_consumption_executed: false,
+      replay_store_write_enabled: false,
+      real_replay_store_written: false,
+      markdown_body_included: false,
+      write_payload_included: false,
+      raw_root_path_included: false,
+      secret_value_included: false,
+      watcher_enabled: false,
+      cron_enabled: false,
+      dispatch_enabled: false,
+      authority_adapter_binding_enabled: false,
+      vps_nas_mount_enabled: false,
+      next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review_readback",
+    },
+  } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewsResult;
+
+  const html = renderToStaticMarkup(<OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewPanel record={record} error={null} />);
+
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-summary-review-gate-record-readback-review-attestation-readback-review-readback-review="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-summary-review-gate-record-readback-review-attestation-readback-review-readback-review-ready="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-summary-review-gate-record-readback-review-attestation-readback-review-readback-review-executed="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-summary-review-gate-record-readback-review-attestation-readback-review-readback-review-replay-store-write="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-summary-review-gate-record-readback-review-attestation-readback-review-readback-review-vps-nas-authority="false"');
+  expect(html).not.toMatch(/<button|<form|<input|<select|<textarea/);
+  expect(html).not.toContain("must" + "-not-echo");
+  expect(html).not.toContain("/vol" + "ume1/private");
+  expect(html).not.toContain("sk" + "-test-secret");
+});
