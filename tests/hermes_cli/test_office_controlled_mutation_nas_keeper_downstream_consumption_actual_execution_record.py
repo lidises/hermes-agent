@@ -25,6 +25,8 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_records,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review,
+    append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_record,
+    list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_records,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_post_execution_record_readback,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_records,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_records,
@@ -1253,3 +1255,108 @@ def test_consumption_payload_materialization_summary_review_gate_record_readback
         assert body["found"] is True
         assert body["dto"]["payload_materialization_summary_review_gate_record_readback_review_ready"] is True
         assert body["dto"]["actual_downstream_consumption_executed"] is False
+
+
+
+def _readback_review_record_payload(review):
+    return {
+        "summary_review_gate_record_readback_review_record_ref": "reviewrecord-20260522105000-test0001",
+        "summary_review_gate_record_ref": review["summary_review_gate_record_ref"],
+        "payload_materialization_summary_review_gate_record_sha256": review["payload_materialization_summary_review_gate_record_sha256"],
+        "review_outcome": review["review_outcome"],
+        "source_readback_verification_reviewed": review["source_readback_verification_reviewed"],
+        "checksum_review_passed": review["checksum_review_passed"],
+        "safe_ref_review_passed": review["safe_ref_review_passed"],
+        "aggregate_count_review_passed": review["aggregate_count_review_passed"],
+        "decision_review_passed": review["decision_review_passed"],
+        "disabled_flag_review_passed": review["disabled_flag_review_passed"],
+        "source_record_count": review["source_record_count"],
+        "source_body_bytes_total": review["source_body_bytes_total"],
+        "latest_payload_materialization_record_ref": review["latest_payload_materialization_record_ref"],
+        "latest_actual_execution_ref": review["latest_actual_execution_ref"],
+        "latest_body_ref": review["latest_body_ref"],
+        "recorded_by": "operator:test",
+        "recorded_at": "2026-05-22T10:50:00Z",
+        "safe_summary": "Metadata-only readback review record; no downstream consumption performed.",
+        "evidence_refs": ["test:readback-review-record", "summaryreview:test"],
+        "markdown_body": "must" + "-not-echo",
+        "raw_root_path": "/vol" + "ume1/private",
+        "credential_value": "sk" + "-test-secret",
+    }
+
+
+def test_consumption_payload_materialization_summary_review_gate_record_readback_review_record_is_metadata_only(tmp_path):
+    source_store = _seed_summary_review_gate_record(tmp_path)
+    review = get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review(
+        store_path=source_store,
+    )["dto"]
+    store = tmp_path / "summary_review_gate_readback_review_records.jsonl"
+
+    stored = append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_record(
+        _readback_review_record_payload(review),
+        summary_review_gate_record_store_path=source_store,
+        store_path=store,
+    )
+
+    assert stored["stored"] is True
+    dto = stored["dto"]
+    assert dto["payload_materialization_summary_review_gate_record_readback_review_recorded"] is True
+    assert dto["readback_review_record_ready"] is True
+    assert dto["source_readback_review_verified"] is True
+    assert dto["summary_review_gate_record_readback_review_record_ref"] == "reviewrecord-20260522105000-test0001"
+    assert dto["summary_review_gate_record_ref"] == "summaryreview-20260522104000-test0001"
+    assert dto["review_outcome"] == "ready_for_manual_readback_review_only_no_consumption"
+    assert dto["checksum_review_passed"] is True
+    assert dto["safe_ref_review_passed"] is True
+    assert dto["aggregate_count_review_passed"] is True
+    assert dto["decision_review_passed"] is True
+    assert dto["disabled_flag_review_passed"] is True
+    assert dto["source_record_count"] == 1
+    assert dto["source_body_bytes_total"] == 128
+    assert len(dto["summary_review_gate_record_readback_review_record_sha256"]) == 64
+    assert dto["records_included"] is False
+    assert dto["latest_record_included"] is False
+    assert dto["actual_downstream_consumption_executed"] is False
+    assert dto["replay_store_write_enabled"] is False
+    assert dto["real_replay_store_written"] is False
+    assert dto["markdown_body_included"] is False
+    assert dto["write_payload_included"] is False
+    assert dto["raw_root_path_included"] is False
+    assert dto["secret_value_included"] is False
+    assert dto["vps_nas_mount_enabled"] is False
+    assert dto["next_required_boundary"] == "fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_summary_review_gate_record_readback_review_record_readback"
+    text = json.dumps(dto, sort_keys=True)
+    assert '"records"' not in text
+    assert '"latest_record"' not in text
+    assert "must" + "-not-echo" not in text
+    assert "/vol" + "ume1/private" not in text
+    assert "sk" + "-test-secret" not in text
+
+    listed = list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_records(store_path=store)
+    assert listed["found"] is True
+    assert listed["record_count"] == 1
+    assert listed["latest_record"]["summary_review_gate_record_readback_review_record_ref"] == "reviewrecord-20260522105000-test0001"
+
+
+def test_consumption_payload_materialization_summary_review_gate_record_readback_review_record_route_is_protected(tmp_path, monkeypatch):
+    source_store = _seed_summary_review_gate_record(tmp_path)
+    import hermes_cli.office_controlled_mutation as office_controlled_mutation
+
+    monkeypatch.setattr(office_controlled_mutation, "_default_fresh_request_builder_downstream_consumption_payload_materialization_summary_review_gate_record_store_path", lambda: source_store)
+    review = get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review(
+        store_path=source_store,
+    )["dto"]
+    store = tmp_path / "summary_review_gate_readback_review_records.jsonl"
+    monkeypatch.setattr(office_controlled_mutation, "_default_fresh_request_builder_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_record_store_path", lambda: store)
+    route = "/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-consumption-payload-materialization-summary-review-gate-record-readback-review-records"
+    with TestClient(app) as client:
+        assert client.get(route).status_code == 401
+        response = client.post(route, json=_readback_review_record_payload(review), headers={"X-Hermes-Session-Token": _SESSION_TOKEN})
+        assert response.status_code == 200
+        assert response.json()["stored"] is True
+        response = client.get(route, headers={"X-Hermes-Session-Token": _SESSION_TOKEN})
+        assert response.status_code == 200
+        body = response.json()
+        assert body["found"] is True
+        assert body["latest_record"]["readback_review_record_ready"] is True
+        assert body["latest_record"]["actual_downstream_consumption_executed"] is False
