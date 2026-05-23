@@ -1,3 +1,33 @@
+## Current status — Payload materialization summary review gate readback-review attestation readback review readback reviewed/read back
+
+Updated: 2026-05-23T13:24:58Z
+
+- Completed rung: `fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review_readback`
+- Code commit: `ae9e71af2 feat(office): read back attestation review review`
+- Added protected metadata-only/safe-ref verification/readback over the stored attestation-readback-review-readback-review projection.
+- Source is only the metadata-only attestation-readback-review-readback-review list/latest projection; the new readback DTO does not return source `records`/`latest_record` objects, markdown/body payload, raw root path, credential value, or write payload.
+- Protected API: `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-consumption-payload-materialization-summary-review-gate-record-readback-review-attestation-readback-review-readback-review-readback`
+- UI panel: `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackPanel`
+- DOM hook: `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-summary-review-gate-record-readback-review-attestation-readback-review-readback-review-readback="true"`
+- Live smoke highlights: unauth GET 401, auth GET 200, found=true, readback_verified=true, source_attestation_readback_review_readback_review_verified=true, attestation_readback_review_readback_review_checksum_verified=true, safe_ref_chain_verified=true, manual_review_outcome_verified=true, disabled_capability_flags_verified=true, attestation_readback_review_readback_review_ref=attestationreadbackreviewreadbackreview-20260523124200-smoke0001, attestation_readback_review_readback_review_readback_sha256 length=64, records_included=false, latest_record_included=false, actual_downstream_consumption_executed=false, replay_store_write_enabled=false, real_replay_store_written=false, markdown_body_included=false, write_payload_included=false, raw_root_path_included=false, secret_value_included=false, vps_nas_mount_enabled=false, raw leak=false, DOM controls=0, DOM ready=true, DOM executed=false, DOM replay-store-write=false, DOM vps-nas-authority=false, console JS errors=0.
+- Validation: py_compile passed; focused Python chain tests 49 passed; focused Office web tests 153 passed; eslint passed with existing warnings only; npm run build passed with existing Vite chunk-size warning only; git diff --check passed; added-line leak sentinel passed; docs leak sentinel passed.
+- VPS: core/dashboard worktrees synced to code commit `ae9e71af2ae2688edd0153a1ce4f8c08afe06d6c`; `web_dist` rsynced to both VPS core and dashboard trees; dashboard restarted and active (`MainPID=880167`, `ActiveEnterTimestamp=Sat 2026-05-23 13:23:04 UTC`); gateway active and untouched (`MainPID=812845`, `ActiveEnterTimestamp=Fri 2026-05-22 11:14:49 UTC`).
+- Still not enabled/executed: actual downstream consumption, markdown/body payload materialization, real replay-store execution writes, watcher/cron/dispatcher/authority-adapter, VPS NAS authority/public exposure, gateway restart.
+
+Next recommended rung:
+
+`fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review_readback_review`
+
+Boundaries for next rung:
+
+- Source only the metadata-only attestation-readback-review-readback-review-readback DTO.
+- Add bounded metadata-only/safe-ref review over the verified readback; keep actual downstream consumption disabled.
+- Do not materialize/write markdown/body payload.
+- Do not write real replay-store execution state.
+- Do not introduce watcher/cron/dispatcher/authority-adapter.
+- Do not expose VPS NAS authority or public APIs.
+- Do not restart gateway; dashboard restart only if code/UI changes require it.
+
 ## Current status — Payload materialization summary review gate readback-review attestation readback review readback reviewed
 
 Updated: 2026-05-23T13:02:11Z
