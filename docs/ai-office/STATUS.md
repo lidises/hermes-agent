@@ -1,3 +1,93 @@
+## Current status — Payload materialization summary review gate record readback review verified
+
+Updated: 2026-05-23T02:22:52Z
+
+Baseline:
+- HEAD/origin main code commit: `58409313d1338c4a7a3f3de0b8baf82e1299afa3`
+- Latest code commit: `58409313d feat(office): review payload readback verification`
+- Completed rung: `fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_summary_review_gate_record_readback_review`
+
+Implemented:
+- Added protected metadata-only readback review projection over verified summary review gate record readback.
+- Reviewed checksum verification, source readback verification, safe refs, aggregate counts, decision, and disabled capability flags.
+- Added UI display-only panel and DOM smoke hook for the readback review.
+- Did not include records/latest_record objects in the review DTO.
+- Did not materialize or write markdown/body payloads.
+- Did not execute actual downstream consumption or real replay-store execution write.
+
+Protected API:
+- `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-consumption-payload-materialization-summary-review-gate-record-readback-review`
+
+UI panel:
+- `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewPanel`
+
+DOM hook:
+- `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-summary-review-gate-record-readback-review="true"`
+
+Live smoke:
+- unauthenticated GET: 401
+- authenticated GET: 200
+- found=true
+- readback_review_ready=true
+- source_readback_verification_reviewed=true
+- checksum_review_passed=true
+- safe_ref_review_passed=true
+- aggregate_count_review_passed=true
+- decision_review_passed=true
+- disabled_flag_review_passed=true
+- review_outcome=`ready_for_manual_readback_review_only_no_consumption`
+- summary_review_gate_record_ref=`summaryreview-20260523014506-smoke0001`
+- payload_materialization_summary_review_gate_record_sha256 length=64
+- source_record_count=1
+- source_body_bytes_total=128
+- latest_payload_materialization_record_ref=`payloadmat-20260523004825-smoke0001`
+- records_included=false
+- latest_record_included=false
+- actual_downstream_consumption_executed=false
+- replay_store_write_enabled=false
+- real_replay_store_written=false
+- markdown_body_included=false
+- write_payload_included=false
+- raw_root_path_included=false
+- secret_value_included=false
+- vps_nas_mount_enabled=false
+- raw value leak=false
+- DOM found=true
+- DOM controls=0
+- DOM ready=true
+- DOM executed=false
+- DOM replay-store-write=false
+- DOM vps-nas-authority=false
+- DOM review outcome visible=true
+- browser console JS errors=0
+
+Validation:
+- py_compile passed
+- focused Python chain tests: 33 passed
+- focused Office web tests: 352 passed
+- eslint passed, existing warnings only
+- npm run build passed, existing Vite chunk-size warning only
+- git diff --check passed
+- added-line leak sentinel passed
+
+VPS:
+- core/dashboard synced to code commit `58409313d1338c4a7a3f3de0b8baf82e1299afa3`
+- web_dist rsynced with explicit SSH identity
+- dashboard restarted only
+- gateway active and untouched
+
+Next recommended rung:
+- `fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_summary_review_gate_record_readback_review_record`
+
+Boundaries for next rung:
+- Source only the verified metadata-only readback review projection.
+- Add a metadata-only review-record append/readback for the readback-review state.
+- Keep actual downstream consumption disabled.
+- Do not materialize/write markdown/body payloads.
+- Do not write real replay-store execution state.
+- Keep watcher/cron/dispatcher/authority-adapter/VPS NAS authority/public exposure/gateway restart forbidden.
+- Dashboard restart only if code/UI changes require it.
+
 ## Current status — Payload materialization summary review gate record readback verified
 
 Updated: 2026-05-23T02:07:26Z
