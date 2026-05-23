@@ -1,3 +1,32 @@
+## Current status — Payload materialization summary review gate readback-review attestation readback verified
+
+Updated: 2026-05-23T04:30:00Z
+
+- Completed rung: `fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback`
+- Code commit: `c4b0f140f feat(office): read back payload attestation`
+- Added protected metadata-only/safe-ref verification/readback over the stored readback-review attestation projection.
+- Source is only the metadata-only readback-review attestation list/latest projection; no records/latest_record objects, markdown/body payload, raw root path, or credential value are returned.
+- Protected API: `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-consumption-payload-materialization-summary-review-gate-record-readback-review-attestation-readback`
+- UI panel: `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackPanel`
+- DOM hook: `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-summary-review-gate-record-readback-review-attestation-readback="true"`
+- Live smoke highlights: unauth GET 401, auth GET found=true, readback verified=true, source_readback_review_attestation_verified=true, attestation_checksum_verified=true, safe_ref_chain_verified=true, disabled_capability_flags_verified=true, readback_review_attestation_sha256 length=64, actual_downstream_consumption_executed=false, replay_store_write_enabled=false, real_replay_store_written=false, markdown_body_included=false, write_payload_included=false, raw_root_path_included=false, secret_value_included=false, vps_nas_mount_enabled=false, records_included=false, latest_record_included=false, raw leak=false, DOM controls=0, console JS errors=0.
+- Still not enabled/executed: actual downstream consumption, markdown/body payload materialization, real replay-store execution writes, watcher/cron/dispatcher/authority-adapter, VPS NAS authority/public exposure, gateway restart.
+
+Next recommended rung:
+
+`fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review`
+
+Boundaries for next rung:
+
+- Source only the metadata-only readback-review attestation readback projection.
+- Add manual review/attestation over the verified attestation readback; keep it metadata-only and safe-ref-only.
+- Do not execute actual downstream consumption.
+- Do not materialize/write markdown/body payload.
+- Do not write real replay-store execution state.
+- Do not introduce watcher/cron/dispatcher/authority-adapter.
+- Do not expose VPS NAS authority or public APIs.
+- Do not restart gateway; dashboard restart only if needed.
+
 ## Current status — Payload materialization summary review gate readback-review attestation written/read back
 
 Updated: 2026-05-23T03:29:30Z
