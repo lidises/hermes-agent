@@ -1,3 +1,17 @@
+## Current status — Payload materialization summary review gate readback-review attestation readback review readback review readback review complete (2026-05-23T14:11:00Z)
+
+- Latest completed rung: `fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review_readback_review`.
+- Latest code commit: `1e7e4151a feat(office): review attestation review readback`.
+- Added protected API: `GET/POST /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-consumption-payload-materialization-summary-review-gate-record-readback-review-attestation-readback-review-readback-review-readback-reviews`.
+- Added UI panel: `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackReviewPanel`.
+- DOM hook: `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-summary-review-gate-record-readback-review-attestation-readback-review-readback-review-readback-review="true"`.
+- Scope held to metadata-only/safe-ref manual review over the verified attestation-review-review readback. No actual downstream consumption, no markdown/body materialization, no replay-store execution write, no watcher/cron/dispatcher/authority adapter, no VPS NAS authority/public exposure, and no gateway restart.
+- Verification: `py_compile` passed; focused Python chain tests `51 passed`; focused Office RPG tests `154 passed`; `eslint` passed with existing warnings only; `npm run build` passed with existing Vite chunk-size warning only; `git diff --check` passed; added-line leak sentinel passed.
+- VPS deploy: both `/home/hermes/.hermes/hermes-agent` and `/home/hermes/.hermes/ai-office-dashboard` synced to `1e7e4151a`; dashboard restarted only; gateway remained untouched.
+- Live smoke: unauth GET 401; source GET 200; POST 200 stored=true; GET 200 found=true; reviewed=true; source verified=true; checksum length=64; forbidden flags false; raw leak=false; DOM found=true/ready=true/controls=0/raw leak=false; browser console JS errors=0.
+- Next recommended rung: `fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review_readback_review_readback`.
+- Next boundary: source only this review record/list projection; continue bounded metadata-only/safe-ref readback; do not materialize payload body, execute downstream consumption, write replay-store execution state, add watcher/cron/dispatcher/authority adapter, expose VPS NAS authority, or restart gateway.
+
 ## Current status — Payload materialization summary review gate readback-review attestation readback review readback reviewed/read back
 
 Updated: 2026-05-23T13:24:58Z
