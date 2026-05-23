@@ -13994,6 +13994,125 @@ def list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_down
     }
 
 
+def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_record_readback(
+    *,
+    store_path: Path | None = None,
+    summary_review_gate_record_readback_review_record_ref: str | None = None,
+) -> dict[str, object]:
+    """Verify the latest stored metadata-only readback-review record without returning record bodies."""
+
+    readback = list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_records(
+        store_path=store_path,
+        summary_review_gate_record_readback_review_record_ref=summary_review_gate_record_readback_review_record_ref,
+        limit=1,
+    )
+    latest = readback.get("latest_record") if isinstance(readback.get("latest_record"), Mapping) else None
+    latest_map = cast(Mapping[str, object], latest) if isinstance(latest, Mapping) else {}
+    found = bool(readback.get("found") and latest_map)
+    record_checksum_verified = bool(
+        isinstance(latest_map.get("summary_review_gate_record_readback_review_record_sha256"), str)
+        and re.fullmatch(r"[0-9a-f]{64}", str(latest_map.get("summary_review_gate_record_readback_review_record_sha256")))
+    )
+    source_review_record_checksum_verified = bool(
+        isinstance(latest_map.get("payload_materialization_summary_review_gate_record_sha256"), str)
+        and re.fullmatch(r"[0-9a-f]{64}", str(latest_map.get("payload_materialization_summary_review_gate_record_sha256")))
+    )
+    safe_ref_chain_verified = bool(
+        _office_disabled_runtime_dispatch_valid_prefixed_ref(latest_map.get("summary_review_gate_record_readback_review_record_ref"), "reviewrecord-")
+        and _office_disabled_runtime_dispatch_valid_prefixed_ref(latest_map.get("summary_review_gate_record_ref"), "summaryreview-")
+        and _office_disabled_runtime_dispatch_valid_prefixed_ref(latest_map.get("latest_payload_materialization_record_ref"), "payloadmat-")
+        and _office_disabled_runtime_dispatch_valid_prefixed_ref(latest_map.get("latest_actual_execution_ref"), "actualexec-")
+        and _office_disabled_runtime_dispatch_valid_prefixed_ref(latest_map.get("latest_body_ref"), "bodyref-")
+    )
+    aggregate_counts_verified = bool(
+        isinstance(latest_map.get("source_record_count"), int)
+        and int(cast(int, latest_map.get("source_record_count"))) >= 1
+        and isinstance(latest_map.get("source_body_bytes_total"), int)
+        and int(cast(int, latest_map.get("source_body_bytes_total"))) >= 0
+    )
+    review_outcome_verified = latest_map.get("review_outcome") == "ready_for_manual_readback_review_only_no_consumption"
+    disabled_capability_flags_verified = all(
+        latest_map.get(flag) is False
+        for flag in (
+            "payload_body_materialization_enabled",
+            "downstream_consumption_enabled",
+            "downstream_consumed",
+            "actual_downstream_consumption_allowed",
+            "actual_downstream_consumption_executed",
+            "replay_store_write_enabled",
+            "real_replay_store_written",
+            "markdown_body_included",
+            "write_payload_included",
+            "raw_root_path_included",
+            "secret_value_included",
+            "watcher_enabled",
+            "cron_enabled",
+            "dispatch_enabled",
+            "authority_adapter_binding_enabled",
+            "vps_nas_mount_enabled",
+        )
+    ) if latest_map else False
+    source_readback_review_record_verified = bool(latest_map.get("readback_review_record_ready") is True and latest_map.get("source_readback_review_verified") is True)
+    verified = bool(
+        found
+        and source_readback_review_record_verified
+        and record_checksum_verified
+        and source_review_record_checksum_verified
+        and safe_ref_chain_verified
+        and aggregate_counts_verified
+        and review_outcome_verified
+        and disabled_capability_flags_verified
+    )
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_record_readback_verified",
+        "payload_materialization_summary_review_gate_record_readback_review_record_readback_verified": verified,
+        "source_readback_review_record_verified": source_readback_review_record_verified,
+        "record_checksum_verified": record_checksum_verified,
+        "source_review_record_checksum_verified": source_review_record_checksum_verified,
+        "safe_ref_chain_verified": safe_ref_chain_verified,
+        "aggregate_counts_verified": aggregate_counts_verified,
+        "review_outcome_verified": bool(review_outcome_verified),
+        "disabled_capability_flags_verified": disabled_capability_flags_verified,
+        "summary_review_gate_record_readback_review_record_ref": latest_map.get("summary_review_gate_record_readback_review_record_ref"),
+        "summary_review_gate_record_ref": latest_map.get("summary_review_gate_record_ref"),
+        "payload_materialization_summary_review_gate_record_sha256": latest_map.get("payload_materialization_summary_review_gate_record_sha256"),
+        "summary_review_gate_record_readback_review_record_sha256": latest_map.get("summary_review_gate_record_readback_review_record_sha256"),
+        "review_outcome": latest_map.get("review_outcome"),
+        "source_readback_verification_reviewed": latest_map.get("source_readback_verification_reviewed") is True,
+        "checksum_review_passed": latest_map.get("checksum_review_passed") is True,
+        "safe_ref_review_passed": latest_map.get("safe_ref_review_passed") is True,
+        "aggregate_count_review_passed": latest_map.get("aggregate_count_review_passed") is True,
+        "decision_review_passed": latest_map.get("decision_review_passed") is True,
+        "disabled_flag_review_passed": latest_map.get("disabled_flag_review_passed") is True,
+        "source_record_count": latest_map.get("source_record_count"),
+        "source_body_bytes_total": latest_map.get("source_body_bytes_total"),
+        "latest_payload_materialization_record_ref": latest_map.get("latest_payload_materialization_record_ref"),
+        "latest_actual_execution_ref": latest_map.get("latest_actual_execution_ref"),
+        "latest_body_ref": latest_map.get("latest_body_ref"),
+        "records_included": False,
+        "latest_record_included": False,
+        "payload_body_materialization_enabled": False,
+        "downstream_consumption_enabled": False,
+        "downstream_consumed": False,
+        "actual_downstream_consumption_allowed": False,
+        "actual_downstream_consumption_executed": False,
+        "replay_store_write_enabled": False,
+        "real_replay_store_written": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "secret_value_included": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "next_required_boundary": "fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_summary_review_gate_record_readback_review_record_readback_review",
+    }
+    return {"found": verified, "errors": readback.get("errors", []), "dto": dto}
+
+
 def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_record(
     payload: object,
     *,
