@@ -1,3 +1,74 @@
+## Current status — Payload materialization record summary readback verified
+
+Updated: 2026-05-23T01:07:33Z
+
+Baseline:
+- local HEAD = origin/main = a8650ae91c87042eba2305e5a3eabc9e40baa5d0 after code commit `feat(office): summarize payload materialization records`.
+- VPS dashboard/core worktrees synced to a8650ae91 before docs handoff.
+- Dashboard restarted only; gateway stayed active and was not restarted.
+
+Completed rung:
+- `fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_record_summary_after_readback`
+
+Added protected API:
+- `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-one-shot-consumption-payload-materialization-record-summary`
+
+Added UI panel:
+- `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationRecordSummaryPanel`
+
+DOM hook:
+- `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-materialization-record-summary="true"`
+
+Live smoke:
+- unauthenticated GET: 401
+- authenticated GET: 200
+- found=true
+- payload_materialization_record_summary_ready=true
+- record_count=1
+- body_bytes_total=128
+- all_records_metadata_only=true
+- all_write_gates_verified=true
+- records_included=false
+- latest_record_included=false
+- actual_downstream_consumption_executed=false
+- replay_store_write_enabled=false
+- real_replay_store_written=false
+- markdown_body_included=false
+- write_payload_included=false
+- raw_root_path_included=false
+- secret_value_included=false
+- vps_nas_mount_enabled=false
+- latest_payload_materialization_record_ref=payloadmat-20260523004825-smoke0001
+- DOM found=true, ready=true, controls=0, raw leak=false
+- browser console JS errors=0
+
+Verification:
+- py_compile passed
+- focused Python chain tests: 25 passed
+- focused Office web tests: 348 passed
+- eslint passed with existing warnings only
+- npm run build passed with existing Vite chunk-size warning only
+- git diff --check passed
+- added-line leak sentinel passed
+
+Boundaries still closed:
+- actual downstream consumption disabled
+- markdown/body payload materialization/write disabled
+- real replay-store execution write disabled
+- watcher/cron/dispatcher/authority-adapter disabled
+- VPS NAS authority/public exposure disabled
+- gateway restart forbidden/untouched
+
+Next recommended rung:
+- `fresh_request_builder_downstream_consumption_one_shot_consumption_payload_materialization_summary_review_gate`
+
+Next-rung boundary:
+- bounded metadata-only/read-only review gate over the summary DTO only.
+- Do not include records/latest_record arrays in the review DTO.
+- Do not materialize or write markdown/body payload.
+- Do not execute downstream consumption or real replay-store writes.
+- Do not restart gateway.
+
 ## Current status — Fresh request ledger consumption payload materialization record readback verified
 
 Updated: 2026-05-23T00:49:11Z
