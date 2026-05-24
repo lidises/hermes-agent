@@ -1,69 +1,92 @@
-## Current status — manual real NAS write boundary after final gate (2026-05-24T14:18:38Z)
+## Current status — separate real NAS production write approval after manual boundary (2026-05-24T15:07:22Z)
 
 - Repo: `/Users/lidises/dev/hermes-agent`
 - Branch: `main`
-- Local `HEAD` = `origin/main` = `454626d1589a411a06fa38ad11c36b8904e26343` before docs commit.
-- Latest code commit: `454626d15 feat(office): record manual NAS write boundary proof`
-- Local git: clean before docs updates.
-- VPS core/dashboard worktrees: synced to `454626d1589a411a06fa38ad11c36b8904e26343` and clean before docs updates.
-- Dashboard active after dashboard-only restart: MainPID `940686`, ActiveEnterTimestamp `Sun 2026-05-24 14:12:03 UTC`.
-- Gateway active and untouched: MainPID `812845`, ActiveEnterTimestamp `Fri 2026-05-22 11:14:49 UTC`.
+- Local `HEAD` = `origin/main` = `ec21f0a83302ef8dd57db3791477d0d08de5b720`
+- Latest code commit: `ec21f0a83 feat(office): record separate NAS write approval proof`
+- Local git: clean before docs update
+- VPS `/home/hermes/.hermes/hermes-agent` = `ec21f0a83302ef8dd57db3791477d0d08de5b720`, clean
+- VPS `/home/hermes/.hermes/ai-office-dashboard` = `ec21f0a83302ef8dd57db3791477d0d08de5b720`, clean
+- Dashboard restarted only:
+  - `hermes-agent-dashboard.service` active
+  - MainPID `942647`
+  - ActiveEnterTimestamp `Sun 2026-05-24 14:52:24 UTC`
+- Gateway untouched:
+  - `hermes-gateway.service` active
+  - MainPID `812845`
+  - ActiveEnterTimestamp `Fri 2026-05-22 11:14:49 UTC`
 
-## Latest completed rung
+## Completed rung
 
-`fresh_request_builder_downstream_consumption_one_shot_manual_real_nas_write_boundary_after_final_execution_gate`
+`fresh_request_builder_downstream_consumption_one_shot_separate_real_nas_production_write_approval_after_manual_boundary`
 
-What changed:
+This rung moves write-readiness past the manual real NAS write boundary by recording a separate exact production-write approval envelope/token as metadata only. It does not perform the real NAS production write.
 
-- Added a metadata-only manual real NAS write boundary record after the final execution gate.
-- Source is the latest verified final execution gate / pre-real-write lock.
-- Recorded an explicit separate-exact-real-NAS-write approval requirement and Mac relay operator presence requirement.
-- Bound the manual boundary to safe refs only:
-  - final execution gate ref/checksum
-  - execution-record ref
-  - execution-envelope ref
-  - dry-run seal ref
-  - production-write approval ref
-  - target filename contract ref
-  - post-write verification contract ref
-  - pre-execution proof ref
-- Duplicate POST is idempotent replay and skips duplicate manual-boundary writes.
+## Added protected API
 
-Protected API:
+- `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-separate-real-nas-production-write-approval`
+- `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-separate-real-nas-production-write-approval`
 
-- `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-manual-real-nas-write-boundary`
-- `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-manual-real-nas-write-boundary`
+## Added UI panel
 
-UI panel:
-
-- `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryPanel`
+`NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalPanel`
 
 DOM hook:
 
-- `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-manual-real-nas-write-boundary="true"`
+`data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-separate-real-nas-production-write-approval="true"`
 
-## Live smoke summary
+## Contract recorded
 
-Protected API smoke:
+- Source manual boundary verified.
+- Manual boundary contract verified.
+- Approval envelope recorded.
+- Approval token recorded.
+- Approval is metadata-only.
+- Approval does not execute write.
+- Approval does not materialize payload/write_payload.
+- Payload/write_payload preview contract remains verified by safe refs/checksums only.
+- Replay/idempotency metadata recorded.
+- Mac relay tmp-root write smoke remains verified.
+- Target filename and post-write verification contracts verified.
+- Safe-ref chain preserved back through final gate, execution record/envelope, dry-run seal, production-write approval, and pre-execution proof.
 
-- unauth GET: `401`
-- unauth POST: `401`
-- source final-gate GET: `200`
-- auth POST: `200`
+## Live smoke
+
+Protected API:
+
+- unauthenticated GET: `401`
+- unauthenticated POST: `401`
+- source manual-boundary GET: found `true`
+- authenticated POST: `200`
+- stored: `true`
 - duplicate POST: `200`
 - duplicate replayed: `true`
-- auth GET: `200`
+- authenticated GET: `200`
 - found: `true`
-- `manual_real_nas_write_boundary_ready=true`
-- `source_mac_relay_real_nas_write_final_execution_gate_verified=true`
-- `source_final_execution_gate_contract_verified=true`
-- `manual_boundary_contract_recorded=true`
-- `manual_boundary_does_not_execute_write=true`
-- `manual_boundary_does_not_materialize_payload=true`
-- `separate_exact_real_nas_write_approval_required=true`
-- `mac_relay_operator_presence_required=true`
-- manual boundary sha256 length: `64`
-- latest smoke ref: `nasmanualboundary-20260524141255-smoke0001`
+- `separate_real_nas_production_write_approval_ready=true`
+- `source_manual_real_nas_write_boundary_verified=true`
+- `approval_envelope_recorded=true`
+- `approval_token_recorded=true`
+- `approval_does_not_execute_write=true`
+- `payload_write_preview_contract_verified=true`
+- `replay_idempotency_metadata_recorded=true`
+- `mac_relay_tmp_root_write_smoke_executed=true`
+- approval sha256 length: `64`
+- `real_nas_production_write_enabled=false`
+- `real_nas_production_write_executed=false`
+- `vps_direct_nas_authority_enabled=false`
+- `watcher_enabled=false`
+- `cron_enabled=false`
+- `dispatch_enabled=false`
+- `authority_adapter_binding_enabled=false`
+- `public_exposure_enabled=false`
+- `gateway_restart_required=false`
+- `approval_includes_payload_body=false`
+- `approval_includes_write_payload=false`
+- `approval_includes_raw_root_path=false`
+- `approval_includes_secret_value=false`
+- raw leak: `false`
+- latest smoke ref: `nasprodapproval-20260524145400-smoke0001`
 
 DOM smoke:
 
@@ -73,20 +96,20 @@ DOM smoke:
 - VPS NAS authority attr: `false`
 - controls: `0`
 - contains `100%`: `true`
-- contains `manual_boundary_does_not_execute_write`: `true`
-- contains `separate_exact_real_nas_write_approval_required`: `true`
+- contains `approval_does_not_execute_write`: `true`
+- contains `approval_envelope_recorded`: `true`
 - raw leak: `false`
 - browser console JS errors: `0`
 
-## Verification
+## Verification completed
 
-- `py_compile`: passed
-- focused Python chain tests: `81 passed`
-- focused Office web tests: `24 passed`
-- `eslint`: passed with existing warnings only
-- `npm run build`: passed with existing Vite chunk-size warning only
-- `git diff --check`: passed
-- added-line leak sentinel: passed
+- `py_compile` passed
+- focused Python chain tests: `83 passed`
+- focused Office web tests: `25 passed`
+- `npm run lint` passed with existing warnings only
+- `npm run build` passed with existing Vite chunk-size warning only
+- `git diff --check` passed
+- added-line leak sentinel passed
 
 ## Boundaries still closed
 
@@ -104,12 +127,13 @@ DOM smoke:
 
 ## Next recommended rung
 
-`fresh_request_builder_downstream_consumption_one_shot_separately_approved_real_nas_production_write_after_manual_boundary`
+`fresh_request_builder_downstream_consumption_one_shot_real_nas_production_write_execution_preflight_after_separate_approval`
 
-Recommended scope:
+Recommended scope for the next rung:
 
-- Continue shortest safe path toward write, but still metadata-only unless the user gives an exact separate approval for real NAS production write.
-- Source the new manual boundary record.
-- Add an exact approval-token/approval-envelope shape for the future production write boundary.
-- Keep actual real NAS production write disabled.
-- Keep VPS direct NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, gateway restart, raw markdown/path/secret echo, and replay-store execution write disabled.
+1. Use the separate approval envelope/token record as the source.
+2. Record a final execution preflight for the eventual real NAS production write.
+3. Keep it metadata-only and safe-ref/checksum based.
+4. Require a new exact approval before any actual real NAS production write.
+5. Continue allowing Mac relay tmp-root write smoke only.
+6. Continue forbidding real NAS production write, VPS direct NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, gateway restart, raw markdown/path/secret echo.
