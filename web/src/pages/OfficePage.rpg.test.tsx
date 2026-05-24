@@ -9141,3 +9141,72 @@ it("NAS Keeper replay/idempotency metadata panel stays display-only and closed-l
   expect(html).not.toContain("/vol" + "ume1/private");
   expect(html).not.toContain("sk" + "-test-secret");
 });
+
+it("NAS Keeper Mac relay precommit metadata panel stays display-only and advances write readiness", () => {
+  const record = {
+    found: true,
+    errors: [],
+    record_count: 1,
+    latest_record: {
+      schema_version: 1,
+      mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_precommit_metadata_recorded",
+      mac_relay_precommit_ref: "precommit-20260524031200-test0001",
+      mac_relay_precommit_metadata_ready: true,
+      source_replay_idempotency_metadata_verified: true,
+      source_idempotency_duplicate_skip_verified: true,
+      source_replay_idempotency_metadata_ref: "replayidem-20260524024100-test0001",
+      source_replay_idempotency_metadata_sha256: "c".repeat(64),
+      idempotency_key_sha256: "b".repeat(64),
+      idempotency_replayed: false,
+      idempotency_duplicate_precommit_write_skipped: false,
+      idempotency_replay_store_written: false,
+      replay_store_write_enabled: false,
+      real_replay_store_written: false,
+      write_readiness_stage: "mac_relay_precommit_metadata_after_replay_idempotency",
+      write_readiness_percent: 90,
+      mac_relay_tmp_root_write_smoke_executed: true,
+      tmp_root_filesystem_write_executed: true,
+      tmp_root_readback_verified: true,
+      tmp_root_audit_written: true,
+      payload_body_materialized: true,
+      payload_body_materialization_scope: "internal_tmp_root_smoke_only",
+      markdown_body_included: false,
+      write_payload_included: false,
+      write_payload_materialized: false,
+      actual_downstream_consumption_executed: false,
+      real_nas_production_write_enabled: false,
+      vps_nas_mount_enabled: false,
+      raw_root_path_included: false,
+      secret_value_included: false,
+      watcher_enabled: false,
+      cron_enabled: false,
+      dispatch_enabled: false,
+      authority_adapter_binding_enabled: false,
+      public_exposure_enabled: false,
+      gateway_restart_required: false,
+      recorded_by: "operator:test",
+      recorded_at: "2026-05-24T03:12:00Z",
+      next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_mac_relay_precommit_manifest_after_replay_idempotency",
+      mac_relay_precommit_metadata_sha256: "d".repeat(64),
+      markdown_body: "must-not-echo",
+      raw_root_path: "/vol" + "ume1/private",
+      credential_value: "sk" + "-test-secret",
+    },
+  } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataResult;
+
+  const html = renderToStaticMarkup(<OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataPanel record={record} error={null} />);
+
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-precommit-metadata="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-precommit-metadata-ready="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-precommit-metadata-replay-store-write="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-precommit-metadata-real-nas-production="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-precommit-metadata-vps-nas-authority="false"');
+  expect(html).toContain("Mac relay precommit metadata");
+  expect(html).toContain("precommit-20260524031200-test0001");
+  expect(html).toContain("mac_relay_precommit_metadata_after_replay_idempotency");
+  expect(html).toContain("90%");
+  expect(html).not.toMatch(/<button|<input|<select|<textarea|<form/i);
+  expect(html).not.toContain("must" + "-not-echo");
+  expect(html).not.toContain("/vol" + "ume1/private");
+  expect(html).not.toContain("sk" + "-test-secret");
+});

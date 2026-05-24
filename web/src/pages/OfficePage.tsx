@@ -8954,6 +8954,55 @@ export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayIde
   );
 }
 
+export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataPanel({
+  record,
+  error,
+}: {
+  record?: { found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null;
+  error?: string | null;
+}) {
+  const dto = record?.dto ?? record?.latest_record;
+  const percent = typeof dto?.write_readiness_percent === "number" ? `${dto.write_readiness_percent}%` : "0%";
+  return (
+    <section
+      className="office-panel office-panel--readonly"
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-precommit-metadata="true"
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-precommit-metadata-ready={String(Boolean(dto?.mac_relay_precommit_metadata_ready))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-precommit-metadata-replay-store-write={String(Boolean(dto?.replay_store_write_enabled) || Boolean(dto?.real_replay_store_written) || Boolean(dto?.idempotency_replay_store_written))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-precommit-metadata-real-nas-production={String(Boolean(dto?.real_nas_production_write_enabled))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-precommit-metadata-vps-nas-authority={String(Boolean(dto?.vps_nas_mount_enabled))}
+    >
+      <h3>NAS Keeper Mac relay precommit metadata</h3>
+      <p className="muted">Metadata-only precommit checkpoint backed by replay/idempotency proof. It raises write readiness toward a Mac relay precommit manifest while keeping replay-store writes, production NAS writes, dispatch, watcher, cron, VPS NAS authority, public exposure, and gateway restart closed.</p>
+      {error ? <p className="office-error">{error}</p> : null}
+      <dl className="office-fact-grid">
+        <dt>found</dt><dd>{String(Boolean(record?.found))}</dd>
+        <dt>stored</dt><dd>{String(Boolean(record?.stored))}</dd>
+        <dt>record_count</dt><dd>{String(record?.record_count ?? 0)}</dd>
+        <dt>mac_relay_precommit_ref</dt><dd>{String(dto?.mac_relay_precommit_ref ?? "pending")}</dd>
+        <dt>mac_relay_precommit_metadata_ready</dt><dd>{String(Boolean(dto?.mac_relay_precommit_metadata_ready))}</dd>
+        <dt>source_replay_idempotency_metadata_verified</dt><dd>{String(Boolean(dto?.source_replay_idempotency_metadata_verified))}</dd>
+        <dt>source_idempotency_duplicate_skip_verified</dt><dd>{String(Boolean(dto?.source_idempotency_duplicate_skip_verified))}</dd>
+        <dt>write_readiness_stage</dt><dd>{String(dto?.write_readiness_stage ?? "pending")}</dd>
+        <dt>write_readiness_percent</dt><dd>{percent}</dd>
+        <dt>idempotency_duplicate_precommit_write_skipped</dt><dd>{String(Boolean(dto?.idempotency_duplicate_precommit_write_skipped))}</dd>
+        <dt>mac_relay_precommit_metadata_sha256</dt><dd>{String(dto?.mac_relay_precommit_metadata_sha256 ?? "pending")}</dd>
+        <dt>tmp_root_readback_verified</dt><dd>{String(Boolean(dto?.tmp_root_readback_verified))}</dd>
+        <dt>payload_body_materialization_scope</dt><dd>{String(dto?.payload_body_materialization_scope ?? "pending")}</dd>
+        <dt>replay_store_write_enabled</dt><dd>{String(Boolean(dto?.replay_store_write_enabled))}</dd>
+        <dt>real_replay_store_written</dt><dd>{String(Boolean(dto?.real_replay_store_written))}</dd>
+        <dt>real_nas_production_write_enabled</dt><dd>{String(Boolean(dto?.real_nas_production_write_enabled))}</dd>
+        <dt>vps_nas_mount_enabled</dt><dd>{String(Boolean(dto?.vps_nas_mount_enabled))}</dd>
+        <dt>watcher_enabled</dt><dd>{String(Boolean(dto?.watcher_enabled))}</dd>
+        <dt>cron_enabled</dt><dd>{String(Boolean(dto?.cron_enabled))}</dd>
+        <dt>dispatch_enabled</dt><dd>{String(Boolean(dto?.dispatch_enabled))}</dd>
+        <dt>authority_adapter_binding_enabled</dt><dd>{String(Boolean(dto?.authority_adapter_binding_enabled))}</dd>
+        <dt>next_required_boundary</dt><dd>{String(dto?.next_required_boundary ?? "fresh_request_builder_downstream_consumption_one_shot_mac_relay_precommit_manifest_after_replay_idempotency")}</dd>
+      </dl>
+    </section>
+  );
+}
+
 export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractPanel({
   record,
   error,
@@ -11336,6 +11385,8 @@ export default function OfficePage() {
   const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayTmpRootWriteSmokeError, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayTmpRootWriteSmokeError] = useState<string | null>(null);
   const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayIdempotencyMetadataResult, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayIdempotencyMetadataResult] = useState<{ found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null>(null);
   const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayIdempotencyMetadataError, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayIdempotencyMetadataError] = useState<string | null>(null);
+  const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataResult, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataResult] = useState<{ found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null>(null);
+  const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataError, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataError] = useState<string | null>(null);
   const nasKeeperClaimDryRunKeyRef = useRef<string | null>(null);
   const nasKeeperAuthorizationKeyRef = useRef<string | null>(null);
   const nasKeeperPayloadPreviewKeyRef = useRef<string | null>(null);
@@ -12268,6 +12319,19 @@ export default function OfficePage() {
         setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayIdempotencyMetadataError("request failed");
       });
   }, [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayIdempotencyMetadataResult]);
+
+  useEffect(() => {
+    if (nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataResult?.dto || nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataResult?.latest_record) return;
+    api.getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadata()
+      .then((result) => {
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataResult(result);
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataError(null);
+      })
+      .catch(() => {
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataResult(null);
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataError("request failed");
+      });
+  }, [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataResult]);
 
   useEffect(() => {
     if (nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractResult?.dto) return;
@@ -13468,6 +13532,7 @@ export default function OfficePage() {
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayTmpRootWriteSmokePanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayTmpRootWriteSmokeResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayTmpRootWriteSmokeError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayIdempotencyMetadataPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayIdempotencyMetadataResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayIdempotencyMetadataError} />
+      <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewRecordPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewRecordResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewRecordError} />
 

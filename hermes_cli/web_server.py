@@ -162,6 +162,8 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_tmp_root_write_smoke_records,
     append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_replay_idempotency_metadata,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_replay_idempotency_metadata_records,
+    append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_precommit_metadata,
+    list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_precommit_metadata_records,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_records,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_records,
     append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_record,
@@ -1300,6 +1302,24 @@ async def append_office_controlled_mutation_nas_keeper_fresh_request_builder_led
     _require_token(request)
     payload = await request.json()
     return append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_replay_idempotency_metadata(payload)
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-precommit-metadata")
+async def list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_precommit_metadata_route(
+    request: Request,
+) -> dict[str, object]:
+    _require_token(request)
+    return list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_precommit_metadata_records()
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-precommit-metadata")
+async def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_precommit_metadata_route(
+    request: Request,
+) -> dict[str, object]:
+    _require_token(request)
+    payload = await request.json()
+    return append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_precommit_metadata(payload)
+
 
 @app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-write-preview-contract")
 async def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_write_preview_contract_route(

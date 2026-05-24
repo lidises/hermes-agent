@@ -3292,6 +3292,10 @@ def _default_fresh_request_builder_downstream_consumption_replay_idempotency_met
     return get_hermes_home() / "office" / "controlled-mutation" / "fresh_request_builder_downstream_consumption_replay_idempotency_metadata_records.jsonl"
 
 
+def _default_fresh_request_builder_downstream_consumption_mac_relay_precommit_metadata_record_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "fresh_request_builder_downstream_consumption_mac_relay_precommit_metadata_records.jsonl"
+
+
 
 def _approval_event_envelope_capabilities() -> dict[str, bool]:
     capabilities = _approval_record_capabilities()
@@ -15637,6 +15641,152 @@ def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_do
         "next_required_boundary": "fresh_request_builder_downstream_consumption_one_shot_replay_idempotency_metadata_readback_after_tmp_root_write_smoke",
     }
     dto["replay_idempotency_metadata_sha256"] = hashlib.sha256(json.dumps(dto, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")).hexdigest()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(dto, sort_keys=True, separators=(",", ":"), ensure_ascii=False) + "\n")
+    return {"stored": True, "errors": [], "dto": dto}
+
+
+def _read_fresh_request_builder_downstream_consumption_mac_relay_precommit_metadata_records(path: Path) -> tuple[list[dict[str, object]], int]:
+    records: list[dict[str, object]] = []
+    skipped = 0
+    if not path.exists():
+        return records, skipped
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            if not line.strip():
+                continue
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped += 1
+                continue
+            if not isinstance(item, Mapping):
+                skipped += 1
+                continue
+            if item.get("mode") != "nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_precommit_metadata_recorded":
+                skipped += 1
+                continue
+            if not _office_disabled_runtime_dispatch_valid_prefixed_ref(item.get("mac_relay_precommit_ref"), "precommit-"):
+                skipped += 1
+                continue
+            if item.get("mac_relay_precommit_metadata_ready") is not True:
+                skipped += 1
+                continue
+            records.append(dict(item))
+    return records, skipped
+
+
+def list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_precommit_metadata_records(
+    *, store_path: Path | None = None, limit: int = 20
+) -> dict[str, object]:
+    path = store_path or _default_fresh_request_builder_downstream_consumption_mac_relay_precommit_metadata_record_store_path()
+    records, skipped = _read_fresh_request_builder_downstream_consumption_mac_relay_precommit_metadata_records(path)
+    limited = records[-max(1, min(limit, 100)):]
+    latest = limited[-1] if limited else None
+    return {"found": bool(latest), "record_count": len(records), "skipped_count": skipped, "records": limited, "latest_record": latest, "errors": []}
+
+
+def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_precommit_metadata(
+    payload: object,
+    *,
+    replay_idempotency_metadata_store_path: Path | None = None,
+    store_path: Path | None = None,
+) -> dict[str, object]:
+    """Store a metadata-only precommit marker backed by replay/idempotency proof."""
+    if not isinstance(payload, Mapping):
+        return {"stored": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    allowed = {"mac_relay_precommit_ref", "replay_idempotency_metadata_ref", "replay_idempotency_metadata_sha256", "idempotency_key_sha256", "recorded_by", "recorded_at", "markdown_body", "raw_root_path", "credential_value"}
+    if set(payload) - allowed:
+        return {"stored": False, "errors": [_error("unsupported_fields", "unsupported_field")], "dto": None}
+    errors: list[dict[str, str]] = []
+    precommit_ref = payload.get("mac_relay_precommit_ref")
+    replay_ref = payload.get("replay_idempotency_metadata_ref")
+    replay_sha = payload.get("replay_idempotency_metadata_sha256")
+    idempotency_sha = payload.get("idempotency_key_sha256")
+    recorded_by = payload.get("recorded_by")
+    recorded_at = payload.get("recorded_at")
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(precommit_ref, "precommit-"):
+        errors.append(_error("mac_relay_precommit_ref", "invalid_ref"))
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(replay_ref, "replayidem-"):
+        errors.append(_error("replay_idempotency_metadata_ref", "invalid_ref"))
+    for field, value in (("replay_idempotency_metadata_sha256", replay_sha), ("idempotency_key_sha256", idempotency_sha)):
+        if not (isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value)):
+            errors.append(_error(field, "invalid_checksum"))
+    if not _is_opaque_id(recorded_by):
+        errors.append(_error("recorded_by", "invalid_opaque_id"))
+    if not (isinstance(recorded_at, str) and _ISO_UTC_RE.fullmatch(recorded_at)):
+        errors.append(_error("recorded_at", "invalid_timestamp"))
+    source_list = list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_replay_idempotency_metadata_records(store_path=replay_idempotency_metadata_store_path, limit=100)
+    source: Mapping[str, object] | None = None
+    for record in cast(list[dict[str, object]], source_list.get("records") or []):
+        if record.get("replay_idempotency_metadata_ref") == replay_ref:
+            source = record
+            break
+    if source is None:
+        errors.append(_error("replay_idempotency_metadata_ref", "source_replay_metadata_not_found"))
+    else:
+        if source.get("replay_idempotency_metadata_sha256") != replay_sha:
+            errors.append(_error("replay_idempotency_metadata_sha256", "checksum_mismatch"))
+        if source.get("idempotency_key_sha256") != idempotency_sha:
+            errors.append(_error("idempotency_key_sha256", "checksum_mismatch"))
+        if source.get("replay_idempotency_metadata_ready") is not True:
+            errors.append(_error("replay_idempotency_metadata_ready", "source_not_ready"))
+        if source.get("real_replay_store_written") is not False:
+            errors.append(_error("real_replay_store_written", "source_replay_store_write_not_closed"))
+    if errors:
+        return {"stored": False, "errors": sorted(errors, key=lambda item: (item["field"], item["code"])), "dto": None}
+    path = store_path or _default_fresh_request_builder_downstream_consumption_mac_relay_precommit_metadata_record_store_path()
+    existing, _ = _read_fresh_request_builder_downstream_consumption_mac_relay_precommit_metadata_records(path)
+    for record in existing:
+        if record.get("mac_relay_precommit_ref") == precommit_ref or record.get("idempotency_key_sha256") == idempotency_sha:
+            replayed = dict(record)
+            replayed["idempotency_replayed"] = True
+            replayed["idempotency_duplicate_precommit_write_skipped"] = True
+            return {"stored": False, "idempotency_replayed": True, "errors": [], "dto": replayed}
+    assert source is not None
+    dto: dict[str, object] = {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_precommit_metadata_recorded",
+        "mac_relay_precommit_ref": precommit_ref,
+        "mac_relay_precommit_metadata_ready": True,
+        "source_replay_idempotency_metadata_verified": True,
+        "source_idempotency_duplicate_skip_verified": True,
+        "source_replay_idempotency_metadata_ref": replay_ref,
+        "source_replay_idempotency_metadata_sha256": replay_sha,
+        "idempotency_key_sha256": idempotency_sha,
+        "idempotency_replayed": False,
+        "idempotency_duplicate_precommit_write_skipped": False,
+        "idempotency_replay_store_written": False,
+        "replay_store_write_enabled": False,
+        "real_replay_store_written": False,
+        "write_readiness_stage": "mac_relay_precommit_metadata_after_replay_idempotency",
+        "write_readiness_percent": 90,
+        "mac_relay_tmp_root_write_smoke_executed": True,
+        "tmp_root_filesystem_write_executed": True,
+        "tmp_root_readback_verified": True,
+        "tmp_root_audit_written": bool(source.get("tmp_root_audit_written") is True),
+        "payload_body_materialized": True,
+        "payload_body_materialization_scope": "internal_tmp_root_smoke_only",
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "write_payload_materialized": False,
+        "actual_downstream_consumption_executed": False,
+        "real_nas_production_write_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "raw_root_path_included": False,
+        "secret_value_included": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "public_exposure_enabled": False,
+        "gateway_restart_required": False,
+        "recorded_by": recorded_by,
+        "recorded_at": recorded_at,
+        "next_required_boundary": "fresh_request_builder_downstream_consumption_one_shot_mac_relay_precommit_manifest_after_replay_idempotency",
+    }
+    dto["mac_relay_precommit_metadata_sha256"] = hashlib.sha256(json.dumps(dto, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")).hexdigest()
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(dto, sort_keys=True, separators=(",", ":"), ensure_ascii=False) + "\n")
