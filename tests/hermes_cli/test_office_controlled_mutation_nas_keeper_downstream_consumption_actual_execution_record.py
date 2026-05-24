@@ -41,6 +41,8 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review_readback_reviews,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review_readback_review_readback,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_write_preview_contract,
+    execute_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_tmp_root_write_smoke,
+    list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_tmp_root_write_smoke_records,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_post_execution_record_readback,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_records,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_records,
@@ -2208,3 +2210,86 @@ def test_consumption_payload_write_preview_contract_route_is_protected(tmp_path,
         assert body["dto"]["write_payload_included"] is False
         assert "records" not in body["dto"]
         assert "latest_record" not in body["dto"]
+
+
+
+def test_mac_relay_tmp_root_write_smoke_after_payload_preview_writes_only_tmp_root_metadata(tmp_path):
+    store, _review = _seed_attestation_readback_review_readback_review_readback_review(tmp_path)
+    record_store = tmp_path / "tmp-root-write-smoke-records.jsonl"
+    root = tmp_path / "tmp-relay-root"
+
+    result = execute_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_tmp_root_write_smoke(
+        {"tmp_root_write_smoke_ref": "tmprootsmoke-20260524021500-test0001", "requested_by": "operator:test", "requested_at": "2026-05-24T02:15:00Z"},
+        attestation_readback_review_readback_review_readback_review_store_path=store,
+        store_path=record_store,
+        root_path=root,
+    )
+
+    assert result["written"] is True
+    assert result["recorded"] is True
+    dto = result["dto"]
+    assert dto["tmp_root_write_smoke_ref"] == "tmprootsmoke-20260524021500-test0001"
+    assert dto["payload_write_preview_contract_verified"] is True
+    assert dto["mac_relay_tmp_root_write_smoke_enabled"] is True
+    assert dto["mac_relay_tmp_root_write_smoke_executed"] is True
+    assert dto["tmp_root_filesystem_write_executed"] is True
+    assert dto["tmp_root_readback_verified"] is True
+    assert dto["tmp_root_audit_written"] is True
+    assert len(dto["tmp_root_readback_sha256"]) == 64
+    assert len(dto["idempotency_key_sha256"]) == 64
+    assert dto["payload_body_materialized"] is True
+    assert dto["payload_body_materialization_scope"] == "internal_tmp_root_smoke_only"
+    assert dto["markdown_body_included"] is False
+    assert dto["write_payload_included"] is False
+    assert dto["write_payload_materialized"] is False
+    assert dto["actual_downstream_consumption_executed"] is False
+    assert dto["replay_store_write_enabled"] is False
+    assert dto["real_replay_store_written"] is False
+    assert dto["real_nas_production_write_enabled"] is False
+    assert dto["vps_nas_mount_enabled"] is False
+    assert dto["watcher_enabled"] is False
+    assert dto["cron_enabled"] is False
+    assert dto["dispatch_enabled"] is False
+    assert dto["authority_adapter_binding_enabled"] is False
+    assert dto["raw_root_path_included"] is False
+    assert dto["secret_value_included"] is False
+    assert dto["next_required_boundary"] == "fresh_request_builder_downstream_consumption_one_shot_replay_idempotency_metadata_after_tmp_root_write_smoke"
+    assert "tmp_relay_root" not in json.dumps(dto, sort_keys=True)
+    text = json.dumps(dto, sort_keys=True)
+    assert "must" + "-not-echo" not in text
+    assert "/vol" + "ume1/private" not in text
+    assert "sk" + "-test-secret" not in text
+    assert (root / "tmprootvault" / "fresh-request-builder-tmp-root-smoke.md").exists()
+
+    listed = list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_tmp_root_write_smoke_records(store_path=record_store)
+    assert listed["found"] is True
+    assert listed["record_count"] == 1
+    assert listed["latest_record"]["tmp_root_readback_verified"] is True
+    assert "records" in listed
+
+
+def test_mac_relay_tmp_root_write_smoke_route_is_protected_and_records(tmp_path, monkeypatch):
+    store, _review = _seed_attestation_readback_review_readback_review_readback_review(tmp_path)
+    record_store = tmp_path / "tmp-root-write-smoke-route-records.jsonl"
+    root = tmp_path / "route-root"
+    import hermes_cli.office_controlled_mutation as office_controlled_mutation
+
+    monkeypatch.setattr(office_controlled_mutation, "_default_fresh_request_builder_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review_readback_review_store_path", lambda: store)
+    monkeypatch.setattr(office_controlled_mutation, "_default_fresh_request_builder_downstream_consumption_mac_relay_tmp_root_write_smoke_record_store_path", lambda: record_store)
+    monkeypatch.setattr(office_controlled_mutation, "_default_fresh_request_builder_downstream_consumption_mac_relay_tmp_root_write_smoke_root_path", lambda: root)
+    route = "/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-tmp-root-write-smoke"
+    payload = {"tmp_root_write_smoke_ref": "tmprootsmoke-20260524021600-route0001", "requested_by": "operator:route", "requested_at": "2026-05-24T02:16:00Z"}
+    with TestClient(app) as client:
+        assert client.get(route).status_code == 401
+        assert client.post(route, json=payload).status_code == 401
+        response = client.post(route, json=payload, headers={"X-Hermes-" + "Session-Token": _SESSION_TOKEN})
+        assert response.status_code == 200
+        body = response.json()
+        assert body["written"] is True
+        assert body["dto"]["tmp_root_readback_verified"] is True
+        assert body["dto"]["markdown_body_included"] is False
+        readback = client.get(route, headers={"X-Hermes-" + "Session-Token": _SESSION_TOKEN})
+        assert readback.status_code == 200
+        listed = readback.json()
+        assert listed["found"] is True
+        assert listed["latest_record"]["mac_relay_tmp_root_write_smoke_executed"] is True

@@ -3280,6 +3280,14 @@ def _default_fresh_request_builder_downstream_consumption_payload_materializatio
     return get_hermes_home() / "office" / "controlled-mutation" / "fresh_request_builder_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review_readback_reviews.jsonl"
 
 
+def _default_fresh_request_builder_downstream_consumption_mac_relay_tmp_root_write_smoke_record_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "fresh_request_builder_downstream_consumption_mac_relay_tmp_root_write_smoke_records.jsonl"
+
+
+def _default_fresh_request_builder_downstream_consumption_mac_relay_tmp_root_write_smoke_root_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "tmp-root-write-smoke-root"
+
+
 
 def _approval_event_envelope_capabilities() -> dict[str, bool]:
     capabilities = _approval_record_capabilities()
@@ -15303,6 +15311,186 @@ def get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downs
     contract_seed = json.dumps(dto, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
     dto["payload_write_preview_contract_sha256"] = hashlib.sha256(contract_seed).hexdigest()
     return {"found": bool(dto["payload_write_preview_contract_ready"]), "errors": source.get("errors", []), "dto": dto}
+
+
+
+
+def _read_fresh_request_builder_downstream_consumption_mac_relay_tmp_root_write_smoke_records(path: Path) -> tuple[list[dict[str, object]], int]:
+    records: list[dict[str, object]] = []
+    skipped = 0
+    if not path.exists():
+        return records, skipped
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            if not line.strip():
+                continue
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped += 1
+                continue
+            if not isinstance(item, Mapping):
+                skipped += 1
+                continue
+            if item.get("mode") != "nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_tmp_root_write_smoke_completed":
+                skipped += 1
+                continue
+            if not _office_disabled_runtime_dispatch_valid_prefixed_ref(item.get("tmp_root_write_smoke_ref"), "tmprootsmoke-"):
+                skipped += 1
+                continue
+            if item.get("tmp_root_readback_verified") is not True:
+                skipped += 1
+                continue
+            records.append(dict(item))
+    return records, skipped
+
+
+def list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_tmp_root_write_smoke_records(
+    *, store_path: Path | None = None, limit: int = 20
+) -> dict[str, object]:
+    path = store_path or _default_fresh_request_builder_downstream_consumption_mac_relay_tmp_root_write_smoke_record_store_path()
+    records, skipped = _read_fresh_request_builder_downstream_consumption_mac_relay_tmp_root_write_smoke_records(path)
+    limited = records[-max(1, min(limit, 100)):]
+    latest = limited[-1] if limited else None
+    return {
+        "found": bool(latest),
+        "record_count": len(records),
+        "skipped_count": skipped,
+        "records": limited,
+        "latest_record": latest,
+        "errors": [],
+    }
+
+
+def execute_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_tmp_root_write_smoke(
+    payload: object | None = None,
+    *,
+    attestation_readback_review_readback_review_readback_review_store_path: Path | None = None,
+    store_path: Path | None = None,
+    root_path: Path | str | None = None,
+) -> dict[str, object]:
+    """Execute one bounded tmp-root Mac relay smoke and store safe metadata only."""
+    if payload is None:
+        payload = {}
+    if not isinstance(payload, Mapping):
+        return {"written": False, "recorded": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    allowed = {"tmp_root_write_smoke_ref", "requested_by", "requested_at"}
+    if set(payload) - allowed:
+        return {"written": False, "recorded": False, "errors": [_error("unsupported_fields", "unsupported_field")], "dto": None}
+    errors: list[dict[str, str]] = []
+    smoke_ref = payload.get("tmp_root_write_smoke_ref") or f"tmprootsmoke-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:8]}"
+    requested_by = payload.get("requested_by") or "operator:system"
+    requested_at = payload.get("requested_at") or datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(smoke_ref, "tmprootsmoke-"):
+        errors.append(_error("tmp_root_write_smoke_ref", "invalid_ref"))
+    if not _is_opaque_id(requested_by):
+        errors.append(_error("requested_by", "invalid_opaque_id"))
+    if not (isinstance(requested_at, str) and _ISO_UTC_RE.fullmatch(requested_at)):
+        errors.append(_error("requested_at", "invalid_timestamp"))
+
+    contract = get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_write_preview_contract(
+        attestation_readback_review_readback_review_readback_review_store_path=attestation_readback_review_readback_review_readback_review_store_path,
+    )
+    contract_dto = cast(Mapping[str, object], contract.get("dto")) if isinstance(contract.get("dto"), Mapping) else {}
+    if contract.get("found") is not True or contract_dto.get("payload_write_preview_contract_ready") is not True:
+        errors.append(_error("payload_write_preview_contract", "source_contract_not_ready"))
+    if errors:
+        return {"written": False, "recorded": False, "errors": sorted(errors, key=lambda item: (item["field"], item["code"])), "dto": None}
+
+    path = store_path or _default_fresh_request_builder_downstream_consumption_mac_relay_tmp_root_write_smoke_record_store_path()
+    existing, _ = _read_fresh_request_builder_downstream_consumption_mac_relay_tmp_root_write_smoke_records(path)
+    idempotency_seed = json.dumps(
+        {
+            "smoke_ref": smoke_ref,
+            "payload_preview_ref": contract_dto.get("payload_preview_ref"),
+            "write_payload_preview_ref": contract_dto.get("write_payload_preview_ref"),
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    idempotency_key_sha256 = hashlib.sha256(idempotency_seed).hexdigest()
+    for record in existing:
+        if record.get("idempotency_key_sha256") == idempotency_key_sha256:
+            replayed = dict(record)
+            replayed["idempotency_replayed"] = True
+            replayed["idempotency_duplicate_write_skipped"] = True
+            return {"written": False, "recorded": False, "idempotency_replayed": True, "errors": [], "dto": replayed}
+
+    root = Path(root_path) if root_path is not None else _default_fresh_request_builder_downstream_consumption_mac_relay_tmp_root_write_smoke_root_path()
+    markdown_body = "# AI Office tmp-root write smoke\n\nSafe bounded tmp-root smoke for payload/write-payload preview contract.\n"
+    write_payload = {
+        "relay_request_ref": "relayrequest:frb-tmp-root-smoke",
+        "relay_execution_ref": f"relayexec:{str(smoke_ref).replace('-', ':')[:96]}",
+        "write_ref": "write:frb-tmp-root-smoke",
+        "package_ref": "package:frb-tmp-root-smoke",
+        "target_vault_ref": "tmprootvault",
+        "safe_slug": "fresh-request-builder-tmp-root-smoke",
+        "safe_title": "AI Office tmp-root write smoke",
+        "markdown_body": markdown_body,
+        "requested_by": requested_by,
+        "requested_at": requested_at,
+        "nas_keeper_ref": "naskeeper:frb-tmp-root-smoke",
+        "relay_node_ref": "relaynode:mac-tmp-root-smoke",
+        "relay_authorized_by": requested_by,
+        "relay_authorized_at": requested_at,
+    }
+    executed = execute_office_controlled_mutation_nas_mac_relay_write(write_payload, root_path=root)
+    if executed.get("written") is not True:
+        return {"written": False, "recorded": False, "errors": cast(list[dict[str, str]], executed.get("errors") or []), "dto": None}
+    exec_dto = cast(Mapping[str, object], executed["dto"])
+    dto: dict[str, object] = {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_tmp_root_write_smoke_completed",
+        "tmp_root_write_smoke_ref": smoke_ref,
+        "payload_write_preview_contract_verified": True,
+        "source_payload_preview_ref": contract_dto.get("payload_preview_ref"),
+        "source_write_payload_preview_ref": contract_dto.get("write_payload_preview_ref"),
+        "source_payload_write_preview_contract_sha256": contract_dto.get("payload_write_preview_contract_sha256"),
+        "write_readiness_stage": "mac_relay_tmp_root_write_smoke",
+        "write_readiness_percent": 82,
+        "tmp_root_write_scope": "local_tmp_root_only_no_real_nas",
+        "mac_relay_tmp_root_write_smoke_enabled": True,
+        "mac_relay_tmp_root_write_smoke_executed": True,
+        "tmp_root_filesystem_write_executed": True,
+        "tmp_root_readback_verified": bool(exec_dto.get("readback_verified") is True),
+        "tmp_root_readback_sha256": exec_dto.get("readback_sha256"),
+        "tmp_root_audit_written": bool(exec_dto.get("audit_written") is True),
+        "tmp_root_audit_ref": exec_dto.get("audit_ref"),
+        "tmp_root_rollback_created": bool(exec_dto.get("rollback_created") is True),
+        "tmp_root_rollback_ref": exec_dto.get("rollback_ref"),
+        "safe_logical_path": exec_dto.get("safe_logical_path"),
+        "safe_display_path": exec_dto.get("safe_display_path"),
+        "bytes_written": exec_dto.get("bytes_written"),
+        "idempotency_key_sha256": idempotency_key_sha256,
+        "idempotency_replayed": False,
+        "idempotency_duplicate_write_skipped": False,
+        "payload_body_materialized": True,
+        "payload_body_materialization_scope": "internal_tmp_root_smoke_only",
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "write_payload_materialized": False,
+        "actual_downstream_consumption_executed": False,
+        "replay_store_write_enabled": False,
+        "real_replay_store_written": False,
+        "real_nas_production_write_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "raw_root_path_included": False,
+        "secret_value_included": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "public_exposure_enabled": False,
+        "gateway_restart_required": False,
+        "requested_by": requested_by,
+        "requested_at": requested_at,
+        "next_required_boundary": "fresh_request_builder_downstream_consumption_one_shot_replay_idempotency_metadata_after_tmp_root_write_smoke",
+    }
+    dto["tmp_root_write_smoke_record_sha256"] = hashlib.sha256(json.dumps(dto, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")).hexdigest()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(dto, sort_keys=True, separators=(",", ":"), ensure_ascii=False) + "\n")
+    return {"written": True, "recorded": True, "errors": [], "dto": dto}
 
 def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review(
     payload: object,
