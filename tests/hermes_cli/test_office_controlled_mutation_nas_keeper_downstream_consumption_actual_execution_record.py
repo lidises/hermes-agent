@@ -43,6 +43,8 @@ from hermes_cli.office_controlled_mutation import (
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_write_preview_contract,
     execute_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_tmp_root_write_smoke,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_tmp_root_write_smoke_records,
+    append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_replay_idempotency_metadata,
+    list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_replay_idempotency_metadata_records,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_post_execution_record_readback,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_records,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_records,
@@ -2293,3 +2295,120 @@ def test_mac_relay_tmp_root_write_smoke_route_is_protected_and_records(tmp_path,
         listed = readback.json()
         assert listed["found"] is True
         assert listed["latest_record"]["mac_relay_tmp_root_write_smoke_executed"] is True
+
+
+def test_replay_idempotency_metadata_after_tmp_root_write_smoke_records_safe_checkpoint(tmp_path):
+    store, _review = _seed_attestation_readback_review_readback_review_readback_review(tmp_path)
+    tmp_root_store = tmp_path / "tmp-root-write-smoke-records.jsonl"
+    replay_store = tmp_path / "replay-idempotency-metadata-records.jsonl"
+    root = tmp_path / "tmp-relay-root"
+    smoke = execute_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_tmp_root_write_smoke(
+        {"tmp_root_write_smoke_ref": "tmprootsmoke-20260524024000-replay01", "requested_by": "operator:test", "requested_at": "2026-05-24T02:40:00Z"},
+        attestation_readback_review_readback_review_readback_review_store_path=store,
+        store_path=tmp_root_store,
+        root_path=root,
+    )["dto"]
+
+    result = append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_replay_idempotency_metadata(
+        {
+            "replay_idempotency_metadata_ref": "replayidem-20260524024100-test0001",
+            "tmp_root_write_smoke_ref": smoke["tmp_root_write_smoke_ref"],
+            "tmp_root_write_smoke_record_sha256": smoke["tmp_root_write_smoke_record_sha256"],
+            "idempotency_key_sha256": smoke["idempotency_key_sha256"],
+            "recorded_by": "operator:test",
+            "recorded_at": "2026-05-24T02:41:00Z",
+            "markdown_body": "must-not-echo",
+            "raw_root_path": "/vol" + "ume1/private",
+            "credential_value": "sk" + "-test-secret",
+        },
+        tmp_root_write_smoke_store_path=tmp_root_store,
+        store_path=replay_store,
+    )
+
+    assert result["stored"] is True
+    dto = result["dto"]
+    assert dto["replay_idempotency_metadata_ready"] is True
+    assert dto["source_tmp_root_write_smoke_verified"] is True
+    assert dto["source_tmp_root_readback_verified"] is True
+    assert dto["source_idempotency_key_verified"] is True
+    assert dto["idempotency_metadata_recorded"] is True
+    assert dto["idempotency_replay_store_written"] is False
+    assert dto["real_replay_store_written"] is False
+    assert dto["replay_store_write_enabled"] is False
+    assert dto["write_readiness_stage"] == "replay_idempotency_metadata_after_tmp_root_write_smoke"
+    assert dto["write_readiness_percent"] == 86
+    assert len(dto["replay_idempotency_metadata_sha256"]) == 64
+    assert dto["markdown_body_included"] is False
+    assert dto["write_payload_included"] is False
+    assert dto["real_nas_production_write_enabled"] is False
+    assert dto["vps_nas_mount_enabled"] is False
+    assert dto["watcher_enabled"] is False
+    assert dto["cron_enabled"] is False
+    assert dto["dispatch_enabled"] is False
+    assert dto["authority_adapter_binding_enabled"] is False
+    assert dto["next_required_boundary"] == "fresh_request_builder_downstream_consumption_one_shot_replay_idempotency_metadata_readback_after_tmp_root_write_smoke"
+    text = json.dumps(dto, sort_keys=True)
+    assert "must" + "-not-echo" not in text
+    assert "/vol" + "ume1/private" not in text
+    assert "sk" + "-test-secret" not in text
+
+    duplicate = append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_replay_idempotency_metadata(
+        {
+            "replay_idempotency_metadata_ref": "replayidem-20260524024100-test0001",
+            "tmp_root_write_smoke_ref": smoke["tmp_root_write_smoke_ref"],
+            "tmp_root_write_smoke_record_sha256": smoke["tmp_root_write_smoke_record_sha256"],
+            "idempotency_key_sha256": smoke["idempotency_key_sha256"],
+            "recorded_by": "operator:test",
+            "recorded_at": "2026-05-24T02:41:00Z",
+        },
+        tmp_root_write_smoke_store_path=tmp_root_store,
+        store_path=replay_store,
+    )
+    assert duplicate["stored"] is False
+    assert duplicate["idempotency_replayed"] is True
+    assert duplicate["dto"]["idempotency_duplicate_metadata_write_skipped"] is True
+
+    listed = list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_replay_idempotency_metadata_records(store_path=replay_store)
+    assert listed["found"] is True
+    assert listed["record_count"] == 1
+    assert listed["latest_record"]["replay_idempotency_metadata_ready"] is True
+    assert listed["latest_record"]["idempotency_replayed"] is False
+
+
+def test_replay_idempotency_metadata_route_is_protected_and_records(tmp_path, monkeypatch):
+    store, _review = _seed_attestation_readback_review_readback_review_readback_review(tmp_path)
+    tmp_root_store = tmp_path / "tmp-root-write-smoke-route-records.jsonl"
+    replay_store = tmp_path / "replay-idempotency-metadata-route-records.jsonl"
+    root = tmp_path / "route-root"
+    import hermes_cli.office_controlled_mutation as office_controlled_mutation
+
+    monkeypatch.setattr(office_controlled_mutation, "_default_fresh_request_builder_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review_readback_review_store_path", lambda: store)
+    monkeypatch.setattr(office_controlled_mutation, "_default_fresh_request_builder_downstream_consumption_mac_relay_tmp_root_write_smoke_record_store_path", lambda: tmp_root_store)
+    monkeypatch.setattr(office_controlled_mutation, "_default_fresh_request_builder_downstream_consumption_mac_relay_tmp_root_write_smoke_root_path", lambda: root)
+    monkeypatch.setattr(office_controlled_mutation, "_default_fresh_request_builder_downstream_consumption_replay_idempotency_metadata_record_store_path", lambda: replay_store)
+    smoke = execute_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_tmp_root_write_smoke(
+        {"tmp_root_write_smoke_ref": "tmprootsmoke-20260524024200-route001", "requested_by": "operator:route", "requested_at": "2026-05-24T02:42:00Z"},
+    )["dto"]
+    route = "/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-idempotency-metadata"
+    payload = {
+        "replay_idempotency_metadata_ref": "replayidem-20260524024300-route001",
+        "tmp_root_write_smoke_ref": smoke["tmp_root_write_smoke_ref"],
+        "tmp_root_write_smoke_record_sha256": smoke["tmp_root_write_smoke_record_sha256"],
+        "idempotency_key_sha256": smoke["idempotency_key_sha256"],
+        "recorded_by": "operator:route",
+        "recorded_at": "2026-05-24T02:43:00Z",
+    }
+    with TestClient(app) as client:
+        assert client.get(route).status_code == 401
+        assert client.post(route, json=payload).status_code == 401
+        response = client.post(route, json=payload, headers={"X-Hermes-" + "Session-Token": _SESSION_TOKEN})
+        assert response.status_code == 200
+        body = response.json()
+        assert body["stored"] is True
+        assert body["dto"]["replay_idempotency_metadata_ready"] is True
+        assert body["dto"]["real_replay_store_written"] is False
+        readback = client.get(route, headers={"X-Hermes-" + "Session-Token": _SESSION_TOKEN})
+        assert readback.status_code == 200
+        listed = readback.json()
+        assert listed["found"] is True
+        assert listed["latest_record"]["source_tmp_root_write_smoke_verified"] is True

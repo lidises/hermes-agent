@@ -9074,3 +9074,70 @@ it("NAS Keeper Mac relay tmp-root write smoke panel shows metadata-only tmp-root
   expect(html).not.toContain("/vol" + "ume1/private");
   expect(html).not.toContain("sk" + "-test-secret");
 });
+
+it("NAS Keeper replay/idempotency metadata panel stays display-only and closed-lane", () => {
+  const record = {
+    found: true,
+    errors: [],
+    record_count: 1,
+    latest_record: {
+      schema_version: 1,
+      mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_replay_idempotency_metadata_recorded",
+      replay_idempotency_metadata_ref: "replayidem-20260524024100-test0001",
+      replay_idempotency_metadata_ready: true,
+      source_tmp_root_write_smoke_verified: true,
+      source_tmp_root_readback_verified: true,
+      source_idempotency_key_verified: true,
+      source_tmp_root_write_smoke_ref: "tmprootsmoke-20260524024000-replay01",
+      source_tmp_root_write_smoke_record_sha256: "a".repeat(64),
+      idempotency_key_sha256: "b".repeat(64),
+      idempotency_metadata_recorded: true,
+      idempotency_replayed: false,
+      idempotency_duplicate_metadata_write_skipped: false,
+      idempotency_replay_store_written: false,
+      replay_store_write_enabled: false,
+      real_replay_store_written: false,
+      write_readiness_stage: "replay_idempotency_metadata_after_tmp_root_write_smoke",
+      write_readiness_percent: 86,
+      mac_relay_tmp_root_write_smoke_executed: true,
+      tmp_root_filesystem_write_executed: true,
+      tmp_root_readback_verified: true,
+      tmp_root_audit_written: true,
+      payload_body_materialized: true,
+      payload_body_materialization_scope: "internal_tmp_root_smoke_only",
+      markdown_body_included: false,
+      write_payload_included: false,
+      write_payload_materialized: false,
+      actual_downstream_consumption_executed: false,
+      real_nas_production_write_enabled: false,
+      vps_nas_mount_enabled: false,
+      raw_root_path_included: false,
+      secret_value_included: false,
+      watcher_enabled: false,
+      cron_enabled: false,
+      dispatch_enabled: false,
+      authority_adapter_binding_enabled: false,
+      public_exposure_enabled: false,
+      gateway_restart_required: false,
+      recorded_by: "operator:test",
+      recorded_at: "2026-05-24T02:41:00Z",
+      next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_replay_idempotency_metadata_readback_after_tmp_root_write_smoke",
+      replay_idempotency_metadata_sha256: "c".repeat(64),
+    },
+  } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayIdempotencyMetadataResult;
+
+  const html = renderToStaticMarkup(<OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayIdempotencyMetadataPanel record={record} error={null} />);
+
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-idempotency-metadata="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-idempotency-metadata-ready="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-idempotency-metadata-replay-store-write="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-idempotency-metadata-real-nas-production="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-idempotency-metadata-vps-nas-authority="false"');
+  expect(html).toContain("Replay/idempotency metadata");
+  expect(html).toContain("replayidem-20260524024100-test0001");
+  expect(html).toContain("replay_idempotency_metadata_after_tmp_root_write_smoke");
+  expect(html).not.toMatch(/<button|<input|<select|<textarea|<form/i);
+  expect(html).not.toContain("must" + "-not-echo");
+  expect(html).not.toContain("/vol" + "ume1/private");
+  expect(html).not.toContain("sk" + "-test-secret");
+});
