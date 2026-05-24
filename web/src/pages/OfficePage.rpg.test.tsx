@@ -9620,3 +9620,79 @@ it("NAS Keeper Mac relay production-write approval panel stays display-only and 
   expect(html).not.toContain("/vol" + "ume1/private");
   expect(html).not.toContain("sk" + "-test-secret");
 });
+
+
+it("NAS Keeper Mac relay real NAS write dry-run seal panel stays display-only and blocks production write", () => {
+  const record = {
+    found: true,
+    stored: true,
+    record_count: 1,
+    errors: [],
+    dto: {
+      schema_version: 1,
+      mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_real_nas_write_dry_run_seal_recorded",
+      mac_relay_real_nas_write_dry_run_seal_ref: "nasdryrunseal-20260524100000-test0001",
+      mac_relay_real_nas_write_dry_run_seal_ready: true,
+      source_mac_relay_production_write_approval_verified: true,
+      source_production_write_approval_boundary_verified: true,
+      target_filename_contract_verified: true,
+      post_write_verification_contract_verified: true,
+      safe_ref_chain_verified: true,
+      write_readiness_stage: "mac_relay_real_nas_write_dry_run_seal_after_production_approval",
+      write_readiness_percent: 100,
+      dry_run_seal_is_metadata_only: true,
+      dry_run_seal_does_not_execute_write: true,
+      final_safe_refs_verified_for_next_rung: true,
+      real_nas_write_target_filename_contract_ready: true,
+      post_write_readback_contract_ready: true,
+      metadata_only_record_write_executed: true,
+      replay_store_write_enabled: false,
+      real_replay_store_written: false,
+      real_nas_production_write_enabled: false,
+      real_nas_production_write_executed: false,
+      vps_nas_mount_enabled: false,
+      vps_direct_nas_authority_enabled: false,
+      watcher_enabled: false,
+      cron_enabled: false,
+      dispatch_enabled: false,
+      authority_adapter_binding_enabled: false,
+      public_exposure_enabled: false,
+      gateway_restart_required: false,
+      dry_run_seal_includes_payload_body: false,
+      dry_run_seal_includes_write_payload: false,
+      dry_run_seal_includes_raw_root_path: false,
+      dry_run_seal_includes_secret_value: false,
+      markdown_body_included: false,
+      write_payload_included: false,
+      raw_root_path_included: false,
+      secret_value_included: false,
+      recorded_by: "operator:test",
+      recorded_at: "2026-05-24T10:00:00Z",
+      next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_mac_relay_real_nas_write_execution_after_dry_run_seal",
+      mac_relay_real_nas_write_dry_run_seal_sha256: "e".repeat(64),
+      markdown_body: "must" + "-not-echo",
+      write_payload: { raw: "must" + "-not-echo" },
+      raw_root_path: "/vol" + "ume1/private",
+      credential_value: "sk" + "-test-secret",
+    },
+  } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteDryRunSealResult;
+
+  const html = renderToStaticMarkup(<OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteDryRunSealPanel record={record} error={null} />);
+
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-dry-run-seal="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-dry-run-seal-ready="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-dry-run-seal-replay-store-write="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-dry-run-seal-real-nas-production="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-dry-run-seal-vps-nas-authority="false"');
+  expect(html).toContain("Mac relay real NAS write dry-run seal");
+  expect(html).toContain("nasdryrunseal-20260524100000-test0001");
+  expect(html).toContain("mac_relay_real_nas_write_dry_run_seal_after_production_approval");
+  expect(html).toContain("100%");
+  expect(html).toContain("dry_run_seal_does_not_execute_write");
+  expect(html).toContain("target_filename_contract_verified");
+  expect(html).toContain("post_write_verification_contract_verified");
+  expect(html).not.toMatch(/<button|<input|<select|<textarea|<form/i);
+  expect(html).not.toContain("must" + "-not-echo");
+  expect(html).not.toContain("/vol" + "ume1/private");
+  expect(html).not.toContain("sk" + "-test-secret");
+});
