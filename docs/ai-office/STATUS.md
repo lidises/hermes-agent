@@ -1,3 +1,85 @@
+## Current status — Payload/write-payload preview contract
+
+- Updated: 2026-05-24T02:00:26Z
+- Local/origin/VPS HEAD: `b3ea17331c954856c6fbba45afd342fc2fab7541`
+- Latest code commit: `b3ea17331 feat(office): add payload write preview contract`
+- Completed rung: `fresh_request_builder_downstream_consumption_payload_write_preview_contract`
+
+What changed:
+- Added a protected safe-ref/checksum-only payload/write-payload preview contract over the verified previous readback DTO.
+- Emits stable preview refs/checksums (`payload_preview_ref`, `write_payload_preview_ref`, `payload_preview_sha256`, `write_payload_preview_sha256`) without markdown/body payload or write-payload object materialization.
+- UI adds a display-only panel with DOM smoke hook and zero controls.
+
+Protected API:
+- `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-write-preview-contract`
+
+UI panel:
+- `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractPanel`
+
+DOM hook:
+- `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-write-preview-contract="true"`
+
+Live smoke:
+- unauth GET: 401
+- auth GET: 200
+- found=true
+- payload_write_preview_contract_ready=true
+- write_readiness_stage=payload_write_preview_contract
+- write_readiness_percent=72
+- source_readback_verified=true
+- safe_ref_chain_verified=true
+- payload_preview_ref=payloadpreview-c300e7a0876d2c32
+- write_payload_preview_ref=writepayloadpreview-c300e7a0876d2c32
+- payload_preview_sha256 length=64
+- write_payload_preview_sha256 length=64
+- markdown_body_included=false
+- write_payload_included=false
+- write_payload_materialized=false
+- actual_downstream_consumption_executed=false
+- replay_store_write_enabled=false
+- real_replay_store_written=false
+- mac_relay_tmp_root_write_smoke_enabled=false
+- real_nas_production_write_enabled=false
+- vps_nas_mount_enabled=false
+- DOM found=true
+- DOM ready=true
+- DOM controls=0
+- raw leak=false
+- browser console JS errors=0
+
+Verification:
+- `py_compile` passed
+- focused Python chain tests: 55 passed
+- focused Office RPG tests: 156 passed
+- `npm run lint` passed with existing warnings only
+- `npm run build` passed with existing Vite chunk-size warning only
+- `git diff --check` passed
+- added-line leak sentinel passed
+
+VPS:
+- `/home/hermes/.hermes/hermes-agent` = `b3ea17331c954856c6fbba45afd342fc2fab7541`
+- `/home/hermes/.hermes/ai-office-dashboard` = `b3ea17331c954856c6fbba45afd342fc2fab7541`
+- worktrees clean after sync
+- dashboard active: MainPID=906475, ActiveEnterTimestamp=Sun 2026-05-24 01:58:38 UTC
+- gateway active and untouched: MainPID=812845, ActiveEnterTimestamp=Fri 2026-05-22 11:14:49 UTC
+
+Boundaries kept:
+- Actual downstream consumption remains disabled.
+- No markdown/body payload materialization or write-payload object materialization.
+- No real replay-store execution write.
+- No real NAS production write or VPS direct NAS authority.
+- No watcher/cron/dispatcher/authority-adapter activation.
+- No public exposure.
+- Gateway was not restarted.
+
+Next recommended rung:
+- `fresh_request_builder_downstream_consumption_one_shot_mac_relay_tmp_root_write_smoke_after_payload_write_preview`
+
+Next boundary:
+- Use this payload/write-payload preview contract as the source.
+- Add the shortest safe Mac relay tmp-root write smoke path only; keep real NAS production writes, VPS NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, gateway restart, raw markdown/path/secret echo, and real replay-store execution writes disabled.
+
+
 ## Current status — Payload materialization summary review gate readback-review attestation readback review readback review readback review readback
 
 - Updated: 2026-05-23T14:44:57Z
