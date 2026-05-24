@@ -6651,6 +6651,79 @@ export function OfficeVisualizerEvidenceDrawer({
   );
 }
 
+
+export function OfficeControlledMutationCompactDashboardPanel({
+  latestApproval,
+  detailCount,
+  children,
+}: {
+  latestApproval?: { found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null;
+  detailCount: number;
+  children: ReactNode;
+}) {
+  const dto = (latestApproval?.dto || latestApproval?.latest_record) as Record<string, unknown> | null | undefined;
+  const readiness = Number(dto?.write_readiness_percent ?? 0);
+  const ready = Boolean(dto?.separate_real_nas_production_write_approval_ready || dto?.approval_envelope_recorded || dto?.approval_token_recorded);
+  const realWrite = Boolean(dto?.real_nas_production_write_enabled || dto?.real_nas_production_write_executed);
+  const vpsAuthority = Boolean(dto?.vps_direct_nas_authority_enabled || dto?.vps_nas_mount_enabled);
+  const blockedRuntime = Boolean(dto?.watcher_enabled || dto?.cron_enabled || dto?.dispatch_enabled || dto?.authority_adapter_binding_enabled || dto?.public_exposure_enabled || dto?.gateway_restart_required);
+  const safeRef = String(dto?.separate_real_nas_production_write_approval_ref ?? "아직 기록 없음");
+
+  return (
+    <section
+      className="border border-emerald-300/20 bg-emerald-950/10 p-4"
+      data-office-controlled-mutation-compact-dashboard="true"
+      data-office-controlled-mutation-compact-dashboard-ready={String(ready)}
+      data-office-controlled-mutation-compact-dashboard-real-write={String(realWrite)}
+      data-office-controlled-mutation-compact-dashboard-vps-authority={String(vpsAuthority)}
+      data-office-controlled-mutation-compact-dashboard-runtime-open={String(blockedRuntime)}
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">NAS Keeper 요약</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">쓰기 직전 상태만 간단히 보기</h2>
+          <p className="mt-2 max-w-3xl text-xs leading-5 text-midground/70">
+            지금 사용자가 봐야 할 것은 최신 승인 경계와 닫힌 권한뿐입니다. 이전 사다리·검증·읽기 전용 증거 패널은 아래 접힘 안으로 보냈습니다.
+          </p>
+        </div>
+        <div className="grid gap-2 text-xs text-midground/75 sm:grid-cols-3 lg:min-w-[28rem]">
+          <div className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-compact-card="readiness">
+            <div className="text-[10px] uppercase tracking-[0.14em] text-midground/55">write-readiness</div>
+            <div className="mt-1 text-xl font-semibold text-emerald-200">{readiness}%</div>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-compact-card="approval">
+            <div className="text-[10px] uppercase tracking-[0.14em] text-midground/55">latest boundary</div>
+            <div className="mt-1 font-semibold text-foreground">{ready ? "별도 승인 envelope 기록" : "대기"}</div>
+          </div>
+          <div className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-compact-card="safety">
+            <div className="text-[10px] uppercase tracking-[0.14em] text-midground/55">실행 권한</div>
+            <div className="mt-1 font-semibold text-foreground">{realWrite || vpsAuthority || blockedRuntime ? "확인 필요" : "닫힘"}</div>
+          </div>
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 text-xs text-midground/75 md:grid-cols-4" data-office-controlled-mutation-compact-facts="true">
+        <div className="border border-current/15 bg-black/15 p-2">real NAS write: {String(realWrite)}</div>
+        <div className="border border-current/15 bg-black/15 p-2">VPS NAS authority: {String(vpsAuthority)}</div>
+        <div className="border border-current/15 bg-black/15 p-2">watcher/cron/dispatch/public: {String(blockedRuntime)}</div>
+        <div className="border border-current/15 bg-black/15 p-2">ref: {safeRef}</div>
+      </div>
+      <details
+        className="mt-4 border border-current/15 bg-black/20 p-3 text-xs text-midground/70"
+        data-office-controlled-mutation-archive-drawer="true"
+        data-office-controlled-mutation-archive-drawer-default-open="false"
+      >
+        <summary className="cursor-pointer text-sm font-semibold text-foreground">세부 기록 {detailCount}개는 접어둠</summary>
+        <p className="mt-2 max-w-3xl leading-5 text-midground/60">
+          회귀 확인이나 handoff 검증이 필요할 때만 펼칩니다. 이 영역도 버튼/입력 없이 표시 전용입니다.
+        </p>
+        <div className="mt-4 grid gap-4" data-office-controlled-mutation-archive-drawer-content="true">
+          {children}
+        </div>
+      </details>
+    </section>
+  );
+}
+
 export function MacLocalRelayRootAuthorityPreflightPanel({
   terminalResult,
   error,
@@ -15033,6 +15106,7 @@ export default function OfficePage() {
         </div>
       </section>
 
+      <OfficeControlledMutationCompactDashboardPanel latestApproval={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult} detailCount={12}>
       <section
         className="border border-sky-300/20 bg-sky-950/10 p-4"
         data-office-controlled-mutation-proposal-contract="true"
@@ -15305,6 +15379,7 @@ export default function OfficePage() {
       <ControlledMutationTargetDispatchForbiddenBoundaryPanel boundary={controlledMutationTargetDispatchForbiddenBoundary} />
       <ControlledMutationSafeContinuationCompletionReviewPanel review={controlledMutationSafeContinuationCompletionReview} />
       <ControlledMutationApprovalBoundarySummaryPanel boundary={controlledMutationApprovalBoundarySummary} />
+      </OfficeControlledMutationCompactDashboardPanel>
 
       {showOverview ? (
         <OfficeRpgMap

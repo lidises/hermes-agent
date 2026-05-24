@@ -9980,3 +9980,53 @@ it("NAS Keeper separate real NAS production write approval panel stays display-o
   expect(html).not.toContain(forbiddenPath);
   expect(html).not.toContain(forbiddenSecret);
 });
+
+
+describe("Office controlled mutation compact dashboard", () => {
+  it("summarizes latest write-readiness and hides historical ladders by default", () => {
+    const CompactPanel = (OfficePageModule as unknown as {
+      OfficeControlledMutationCompactDashboardPanel: React.ComponentType<{
+        latestApproval?: { found?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null } | null;
+        detailCount: number;
+        children: React.ReactNode;
+      }>;
+    }).OfficeControlledMutationCompactDashboardPanel;
+    const markup = renderToStaticMarkup(
+      <CompactPanel
+        latestApproval={{
+          found: true,
+          dto: {
+            write_readiness_percent: 100,
+            separate_real_nas_production_write_approval_ready: true,
+            approval_does_not_execute_write: true,
+            real_nas_production_write_enabled: false,
+            vps_direct_nas_authority_enabled: false,
+            watcher_enabled: false,
+            cron_enabled: false,
+            dispatch_enabled: false,
+            authority_adapter_binding_enabled: false,
+            public_exposure_enabled: false,
+            gateway_restart_required: false,
+            separate_real_nas_production_write_approval_ref: "nasprodapproval-safe-ref",
+          },
+        }}
+        detailCount={12}
+      >
+        <section data-office-controlled-mutation-proposal-contract="true">historical ladder detail</section>
+      </CompactPanel>,
+    );
+
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard="true"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-ready="true"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-real-write="false"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-vps-authority="false"');
+    expect(markup).toContain('data-office-controlled-mutation-archive-drawer-default-open="false"');
+    expect(markup).toContain('NAS Keeper 요약');
+    expect(markup).toContain('100%');
+    expect(markup).toContain('세부 기록 12개는 접어둠');
+    expect(markup).toContain('historical ladder detail');
+    expect(markup).not.toContain('<button');
+    expect(markup).not.toContain('<input');
+    expect(markup).not.toContain('<form');
+  });
+});
