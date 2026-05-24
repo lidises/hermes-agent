@@ -47,6 +47,8 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_replay_idempotency_metadata_records,
     append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_precommit_metadata,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_precommit_metadata_records,
+    append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_precommit_manifest,
+    list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_precommit_manifest_records,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_post_execution_record_readback,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_records,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_records,
@@ -2549,3 +2551,141 @@ def test_mac_relay_precommit_metadata_route_is_protected_and_records(tmp_path, m
         listed = readback.json()
         assert listed["found"] is True
         assert listed["latest_record"]["source_replay_idempotency_metadata_verified"] is True
+
+
+def _seed_mac_relay_precommit_metadata_record(tmp_path):
+    store, _review = _seed_attestation_readback_review_readback_review_readback_review(tmp_path)
+    tmp_root_store = tmp_path / "tmp-root-write-smoke-manifest.jsonl"
+    replay_store = tmp_path / "replay-idempotency-manifest.jsonl"
+    precommit_store = tmp_path / "mac-relay-precommit-manifest-source.jsonl"
+    smoke = execute_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_tmp_root_write_smoke(
+        {"tmp_root_write_smoke_ref": "tmprootsmoke-20260524041000-manif1", "requested_by": "operator:test", "requested_at": "2026-05-24T04:10:00Z"},
+        attestation_readback_review_readback_review_readback_review_store_path=store,
+        store_path=tmp_root_store,
+        root_path=tmp_path / "manifest-root",
+    )["dto"]
+    replay = append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_replay_idempotency_metadata(
+        {
+            "replay_idempotency_metadata_ref": "replayidem-20260524041100-manif1",
+            "tmp_root_write_smoke_ref": smoke["tmp_root_write_smoke_ref"],
+            "tmp_root_write_smoke_record_sha256": smoke["tmp_root_write_smoke_record_sha256"],
+            "idempotency_key_sha256": smoke["idempotency_key_sha256"],
+            "recorded_by": "operator:test",
+            "recorded_at": "2026-05-24T04:11:00Z",
+        },
+        tmp_root_write_smoke_store_path=tmp_root_store,
+        store_path=replay_store,
+    )["dto"]
+    precommit = append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_precommit_metadata(
+        {
+            "mac_relay_precommit_ref": "precommit-20260524041200-manif1",
+            "replay_idempotency_metadata_ref": replay["replay_idempotency_metadata_ref"],
+            "replay_idempotency_metadata_sha256": replay["replay_idempotency_metadata_sha256"],
+            "idempotency_key_sha256": replay["idempotency_key_sha256"],
+            "recorded_by": "operator:test",
+            "recorded_at": "2026-05-24T04:12:00Z",
+        },
+        replay_idempotency_metadata_store_path=replay_store,
+        store_path=precommit_store,
+    )["dto"]
+    return precommit_store, precommit
+
+
+def test_mac_relay_precommit_manifest_after_precommit_metadata_records_safe_manifest(tmp_path):
+    precommit_store, precommit = _seed_mac_relay_precommit_metadata_record(tmp_path)
+    manifest_store = tmp_path / "mac-relay-precommit-manifest-records.jsonl"
+
+    result = append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_precommit_manifest(
+        {
+            "mac_relay_precommit_manifest_ref": "precommitmanifest-20260524042000-test0001",
+            "mac_relay_precommit_ref": precommit["mac_relay_precommit_ref"],
+            "mac_relay_precommit_metadata_sha256": precommit["mac_relay_precommit_metadata_sha256"],
+            "idempotency_key_sha256": precommit["idempotency_key_sha256"],
+            "recorded_by": "operator:test",
+            "recorded_at": "2026-05-24T04:20:00Z",
+            "markdown_body": "must-not-echo",
+            "raw_root_path": "/vol" + "ume1/private",
+            "credential_value": "sk" + "-test-secret",
+        },
+        mac_relay_precommit_metadata_store_path=precommit_store,
+        store_path=manifest_store,
+    )
+
+    assert result["stored"] is True
+    dto = result["dto"]
+    assert dto["mac_relay_precommit_manifest_ready"] is True
+    assert dto["source_mac_relay_precommit_metadata_verified"] is True
+    assert dto["safe_manifest_checklist_verified"] is True
+    assert dto["write_readiness_stage"] == "mac_relay_precommit_manifest_after_replay_idempotency"
+    assert dto["write_readiness_percent"] == 94
+    assert len(dto["mac_relay_precommit_manifest_sha256"]) == 64
+    assert dto["manifest_includes_payload_body"] is False
+    assert dto["manifest_includes_write_payload"] is False
+    assert dto["manifest_includes_raw_root_path"] is False
+    assert dto["manifest_includes_secret_value"] is False
+    assert dto["replay_store_write_enabled"] is False
+    assert dto["real_replay_store_written"] is False
+    assert dto["real_nas_production_write_enabled"] is False
+    assert dto["vps_nas_mount_enabled"] is False
+    assert dto["watcher_enabled"] is False
+    assert dto["cron_enabled"] is False
+    assert dto["dispatch_enabled"] is False
+    assert dto["authority_adapter_binding_enabled"] is False
+    assert dto["public_exposure_enabled"] is False
+    assert dto["gateway_restart_required"] is False
+    assert dto["next_required_boundary"] == "fresh_request_builder_downstream_consumption_one_shot_mac_relay_final_preflight_after_precommit_manifest"
+    text = json.dumps(dto, sort_keys=True)
+    assert "must" + "-not-echo" not in text
+    assert "/vol" + "ume1/private" not in text
+    assert "sk" + "-test-secret" not in text
+
+    duplicate = append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_precommit_manifest(
+        {
+            "mac_relay_precommit_manifest_ref": "precommitmanifest-20260524042000-test0001",
+            "mac_relay_precommit_ref": precommit["mac_relay_precommit_ref"],
+            "mac_relay_precommit_metadata_sha256": precommit["mac_relay_precommit_metadata_sha256"],
+            "idempotency_key_sha256": precommit["idempotency_key_sha256"],
+            "recorded_by": "operator:test",
+            "recorded_at": "2026-05-24T04:20:00Z",
+        },
+        mac_relay_precommit_metadata_store_path=precommit_store,
+        store_path=manifest_store,
+    )
+    assert duplicate["stored"] is False
+    assert duplicate["idempotency_replayed"] is True
+    assert duplicate["dto"]["idempotency_duplicate_manifest_write_skipped"] is True
+    listed = list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_precommit_manifest_records(store_path=manifest_store)
+    assert listed["found"] is True
+    assert listed["record_count"] == 1
+
+
+def test_mac_relay_precommit_manifest_route_is_protected_and_records(tmp_path, monkeypatch):
+    precommit_store, precommit = _seed_mac_relay_precommit_metadata_record(tmp_path)
+    manifest_store = tmp_path / "mac-relay-precommit-manifest-route.jsonl"
+    import hermes_cli.office_controlled_mutation as office_controlled_mutation
+
+    monkeypatch.setattr(office_controlled_mutation, "_default_fresh_request_builder_downstream_consumption_mac_relay_precommit_metadata_record_store_path", lambda: precommit_store)
+    monkeypatch.setattr(office_controlled_mutation, "_default_fresh_request_builder_downstream_consumption_mac_relay_precommit_manifest_record_store_path", lambda: manifest_store)
+    route = "/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-precommit-manifest"
+    payload = {
+        "mac_relay_precommit_manifest_ref": "precommitmanifest-20260524042100-route01",
+        "mac_relay_precommit_ref": precommit["mac_relay_precommit_ref"],
+        "mac_relay_precommit_metadata_sha256": precommit["mac_relay_precommit_metadata_sha256"],
+        "idempotency_key_sha256": precommit["idempotency_key_sha256"],
+        "recorded_by": "operator:route",
+        "recorded_at": "2026-05-24T04:21:00Z",
+    }
+    with TestClient(app) as client:
+        assert client.get(route).status_code == 401
+        assert client.post(route, json=payload).status_code == 401
+        response = client.post(route, json=payload, headers={"X-Hermes-" + "Session-Token": _SESSION_TOKEN})
+        assert response.status_code == 200
+        body = response.json()
+        assert body["stored"] is True
+        assert body["dto"]["mac_relay_precommit_manifest_ready"] is True
+        assert body["dto"]["real_nas_production_write_enabled"] is False
+        readback = client.get(route, headers={"X-Hermes-" + "Session-Token": _SESSION_TOKEN})
+        assert readback.status_code == 200
+        listed = readback.json()
+        assert listed["found"] is True
+        assert listed["latest_record"]["source_mac_relay_precommit_metadata_verified"] is True

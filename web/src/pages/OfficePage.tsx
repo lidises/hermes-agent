@@ -9003,6 +9003,59 @@ export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayP
   );
 }
 
+export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifestPanel({
+  record,
+  error,
+}: {
+  record?: { found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null;
+  error?: string | null;
+}) {
+  const dto = record?.dto ?? record?.latest_record;
+  const percent = typeof dto?.write_readiness_percent === "number" ? `${dto.write_readiness_percent}%` : "0%";
+  return (
+    <section
+      className="office-panel office-panel--readonly"
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-precommit-manifest="true"
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-precommit-manifest-ready={String(Boolean(dto?.mac_relay_precommit_manifest_ready))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-precommit-manifest-replay-store-write={String(Boolean(dto?.replay_store_write_enabled) || Boolean(dto?.real_replay_store_written))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-precommit-manifest-real-nas-production={String(Boolean(dto?.real_nas_production_write_enabled))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-precommit-manifest-vps-nas-authority={String(Boolean(dto?.vps_nas_mount_enabled) || Boolean(dto?.vps_direct_nas_authority_enabled))}
+    >
+      <h3>NAS Keeper Mac relay precommit manifest</h3>
+      <p className="muted">Metadata-only safe-ref manifest/checklist backed by Mac relay precommit metadata. It raises write readiness without including payload bodies, write_payload objects, raw root paths, secrets, replay-store writes, production NAS writes, dispatch, watcher, cron, public exposure, or gateway restart.</p>
+      {error ? <p className="office-error">{error}</p> : null}
+      <dl className="office-fact-grid">
+        <dt>found</dt><dd>{String(Boolean(record?.found))}</dd>
+        <dt>stored</dt><dd>{String(Boolean(record?.stored))}</dd>
+        <dt>record_count</dt><dd>{String(record?.record_count ?? 0)}</dd>
+        <dt>mac_relay_precommit_manifest_ref</dt><dd>{String(dto?.mac_relay_precommit_manifest_ref ?? "pending")}</dd>
+        <dt>mac_relay_precommit_manifest_ready</dt><dd>{String(Boolean(dto?.mac_relay_precommit_manifest_ready))}</dd>
+        <dt>source_mac_relay_precommit_metadata_verified</dt><dd>{String(Boolean(dto?.source_mac_relay_precommit_metadata_verified))}</dd>
+        <dt>safe_manifest_checklist_verified</dt><dd>{String(Boolean(dto?.safe_manifest_checklist_verified))}</dd>
+        <dt>safe_ref_chain_verified</dt><dd>{String(Boolean(dto?.safe_ref_chain_verified))}</dd>
+        <dt>write_readiness_stage</dt><dd>{String(dto?.write_readiness_stage ?? "pending")}</dd>
+        <dt>write_readiness_percent</dt><dd>{percent}</dd>
+        <dt>idempotency_duplicate_manifest_write_skipped</dt><dd>{String(Boolean(dto?.idempotency_duplicate_manifest_write_skipped))}</dd>
+        <dt>mac_relay_precommit_manifest_sha256</dt><dd>{String(dto?.mac_relay_precommit_manifest_sha256 ?? "pending")}</dd>
+        <dt>manifest_includes_payload_body</dt><dd>{String(Boolean(dto?.manifest_includes_payload_body))}</dd>
+        <dt>manifest_includes_write_payload</dt><dd>{String(Boolean(dto?.manifest_includes_write_payload))}</dd>
+        <dt>manifest_includes_raw_root_path</dt><dd>{String(Boolean(dto?.manifest_includes_raw_root_path))}</dd>
+        <dt>manifest_includes_secret_value</dt><dd>{String(Boolean(dto?.manifest_includes_secret_value))}</dd>
+        <dt>replay_store_write_enabled</dt><dd>{String(Boolean(dto?.replay_store_write_enabled))}</dd>
+        <dt>real_replay_store_written</dt><dd>{String(Boolean(dto?.real_replay_store_written))}</dd>
+        <dt>real_nas_production_write_enabled</dt><dd>{String(Boolean(dto?.real_nas_production_write_enabled))}</dd>
+        <dt>vps_nas_mount_enabled</dt><dd>{String(Boolean(dto?.vps_nas_mount_enabled))}</dd>
+        <dt>vps_direct_nas_authority_enabled</dt><dd>{String(Boolean(dto?.vps_direct_nas_authority_enabled))}</dd>
+        <dt>watcher_enabled</dt><dd>{String(Boolean(dto?.watcher_enabled))}</dd>
+        <dt>cron_enabled</dt><dd>{String(Boolean(dto?.cron_enabled))}</dd>
+        <dt>dispatch_enabled</dt><dd>{String(Boolean(dto?.dispatch_enabled))}</dd>
+        <dt>authority_adapter_binding_enabled</dt><dd>{String(Boolean(dto?.authority_adapter_binding_enabled))}</dd>
+        <dt>next_required_boundary</dt><dd>{String(dto?.next_required_boundary ?? "fresh_request_builder_downstream_consumption_one_shot_mac_relay_final_preflight_after_precommit_manifest")}</dd>
+      </dl>
+    </section>
+  );
+}
+
 export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractPanel({
   record,
   error,
@@ -11387,6 +11440,8 @@ export default function OfficePage() {
   const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayIdempotencyMetadataError, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayIdempotencyMetadataError] = useState<string | null>(null);
   const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataResult, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataResult] = useState<{ found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null>(null);
   const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataError, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataError] = useState<string | null>(null);
+  const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifestResult, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifestResult] = useState<{ found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null>(null);
+  const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifestError, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifestError] = useState<string | null>(null);
   const nasKeeperClaimDryRunKeyRef = useRef<string | null>(null);
   const nasKeeperAuthorizationKeyRef = useRef<string | null>(null);
   const nasKeeperPayloadPreviewKeyRef = useRef<string | null>(null);
@@ -12332,6 +12387,19 @@ export default function OfficePage() {
         setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataError("request failed");
       });
   }, [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataResult]);
+
+  useEffect(() => {
+    if (nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifestResult?.dto || nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifestResult?.latest_record) return;
+    api.getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifest()
+      .then((result) => {
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifestResult(result);
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifestError(null);
+      })
+      .catch(() => {
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifestResult(null);
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifestError("request failed");
+      });
+  }, [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifestResult]);
 
   useEffect(() => {
     if (nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractResult?.dto) return;
@@ -13533,6 +13601,7 @@ export default function OfficePage() {
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayTmpRootWriteSmokePanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayTmpRootWriteSmokeResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayTmpRootWriteSmokeError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayIdempotencyMetadataPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayIdempotencyMetadataResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayIdempotencyMetadataError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataError} />
+      <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifestPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifestResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifestError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewRecordPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewRecordResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewRecordError} />
 

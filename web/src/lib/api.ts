@@ -3501,6 +3501,69 @@ export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMa
   skipped_count?: number;
 }
 
+export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifestResult {
+  found?: boolean;
+  stored?: boolean;
+  idempotency_replayed?: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto?: null | {
+    schema_version: number;
+    mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_precommit_manifest_recorded";
+    mac_relay_precommit_manifest_ref: string;
+    mac_relay_precommit_manifest_ready: boolean;
+    source_mac_relay_precommit_metadata_verified: boolean;
+    source_mac_relay_precommit_ref: string;
+    source_mac_relay_precommit_metadata_sha256: string;
+    source_replay_idempotency_metadata_ref: string;
+    source_replay_idempotency_metadata_sha256: string;
+    idempotency_key_sha256: string;
+    idempotency_replayed: boolean;
+    idempotency_duplicate_manifest_write_skipped: boolean;
+    safe_manifest_checklist_verified: boolean;
+    safe_ref_chain_verified: boolean;
+    manifest_ref_chain_includes_precommit_metadata: boolean;
+    manifest_ref_chain_includes_replay_metadata: boolean;
+    manifest_ref_chain_includes_tmp_root_smoke: boolean;
+    replay_store_write_enabled: false;
+    real_replay_store_written: false;
+    write_readiness_stage: string;
+    write_readiness_percent: number;
+    mac_relay_tmp_root_write_smoke_executed: boolean;
+    tmp_root_filesystem_write_executed: boolean;
+    tmp_root_readback_verified: boolean;
+    payload_body_materialized: true;
+    payload_body_materialization_scope: string;
+    manifest_includes_payload_body: false;
+    manifest_includes_write_payload: false;
+    manifest_includes_raw_root_path: false;
+    manifest_includes_secret_value: false;
+    markdown_body_included: false;
+    write_payload_included: false;
+    write_payload_materialized: false;
+    actual_downstream_consumption_executed: false;
+    real_nas_production_write_enabled: false;
+    vps_nas_mount_enabled: false;
+    vps_direct_nas_authority_enabled: false;
+    raw_root_path_included: false;
+    secret_value_included: false;
+    watcher_enabled: false;
+    cron_enabled: false;
+    dispatch_enabled: false;
+    authority_adapter_binding_enabled: false;
+    public_exposure_enabled: false;
+    gateway_restart_required: false;
+    recorded_by: string;
+    recorded_at: string;
+    next_required_boundary: string;
+    mac_relay_precommit_manifest_sha256: string;
+    [key: string]: unknown;
+  };
+  latest_record?: OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifestResult["dto"];
+  records?: Array<NonNullable<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifestResult["dto"]>>;
+  record_count?: number;
+  skipped_count?: number;
+}
+
 export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractResult {
   found?: boolean;
   errors: Array<{ field: string; code: string }>;
@@ -4359,6 +4422,10 @@ export const api = {
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-precommit-metadata"),
   postOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadata: (payload: Record<string, unknown>) =>
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-precommit-metadata", { method: "POST", body: JSON.stringify(payload) }),
+  getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifest: () =>
+    fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifestResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-precommit-manifest"),
+  postOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifest: (payload: Record<string, unknown>) =>
+    fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifestResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-precommit-manifest", { method: "POST", body: JSON.stringify(payload) }),
   getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContract: () =>
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-write-preview-contract"),
   postOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackReview: (payload: Record<string, unknown>) =>
