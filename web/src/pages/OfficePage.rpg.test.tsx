@@ -9467,3 +9467,85 @@ it("NAS Keeper Mac relay real-write gate panel stays display-only and blocks wit
   expect(html).not.toContain("/vol" + "ume1/private");
   expect(html).not.toContain("sk" + "-test-secret");
 });
+
+it("NAS Keeper Mac relay approval-token panel stays display-only and reaches production approval boundary", () => {
+  const record = {
+    found: true,
+    stored: true,
+    record_count: 1,
+    errors: [],
+    dto: {
+      schema_version: 1,
+      mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_approval_token_recorded",
+      mac_relay_approval_token_ref: "approvaltoken-20260524070500-test0001",
+      mac_relay_approval_token_ready: true,
+      approval_token_is_secret: false,
+      approval_token_is_non_secret_safe_ref: true,
+      approval_token_materialized_value_included: false,
+      source_mac_relay_real_write_gate_verified: true,
+      source_real_write_gate_checklist_verified: true,
+      source_mac_relay_real_write_gate_ref: "realwritegate-20260524062200-test0001",
+      source_mac_relay_real_write_gate_sha256: "a".repeat(64),
+      idempotency_key_sha256: "b".repeat(64),
+      idempotency_replayed: false,
+      idempotency_duplicate_approval_token_write_skipped: false,
+      approval_token_contract_verified: true,
+      safe_ref_chain_verified: true,
+      write_readiness_stage: "mac_relay_approval_token_after_real_write_gate",
+      write_readiness_percent: 100,
+      explicit_real_nas_production_approval_present: false,
+      approval_token_blocks_without_explicit_production_approval: true,
+      next_write_boundary_requires_explicit_real_nas_production_approval: true,
+      metadata_only_record_write_executed: true,
+      replay_store_write_enabled: false,
+      real_replay_store_written: false,
+      mac_relay_tmp_root_write_smoke_executed: true,
+      tmp_root_filesystem_write_executed: true,
+      tmp_root_readback_verified: true,
+      approval_token_includes_payload_body: false,
+      approval_token_includes_write_payload: false,
+      approval_token_includes_raw_root_path: false,
+      approval_token_includes_secret_value: false,
+      markdown_body_included: false,
+      write_payload_included: false,
+      actual_downstream_consumption_executed: false,
+      real_nas_production_write_enabled: false,
+      real_nas_production_write_executed: false,
+      vps_nas_mount_enabled: false,
+      vps_direct_nas_authority_enabled: false,
+      raw_root_path_included: false,
+      secret_value_included: false,
+      watcher_enabled: false,
+      cron_enabled: false,
+      dispatch_enabled: false,
+      authority_adapter_binding_enabled: false,
+      public_exposure_enabled: false,
+      gateway_restart_required: false,
+      recorded_by: "operator:test",
+      recorded_at: "2026-05-24T07:05:00Z",
+      next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_mac_relay_production_write_approval_after_token",
+      mac_relay_approval_token_sha256: "c".repeat(64),
+      markdown_body: "must" + "-not-echo",
+      write_payload: { raw: "must" + "-not-echo" },
+      raw_root_path: "/vol" + "ume1/private",
+      credential_value: "sk" + "-test-secret",
+    },
+  } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayApprovalTokenResult;
+
+  const html = renderToStaticMarkup(<OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayApprovalTokenPanel record={record} error={null} />);
+
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-approval-token="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-approval-token-ready="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-approval-token-replay-store-write="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-approval-token-real-nas-production="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-approval-token-vps-nas-authority="false"');
+  expect(html).toContain("Mac relay approval-token contract");
+  expect(html).toContain("approvaltoken-20260524070500-test0001");
+  expect(html).toContain("mac_relay_approval_token_after_real_write_gate");
+  expect(html).toContain("100%");
+  expect(html).toContain("approval_token_blocks_without_explicit_production_approval");
+  expect(html).not.toMatch(/<button|<input|<select|<textarea|<form/i);
+  expect(html).not.toContain("must" + "-not-echo");
+  expect(html).not.toContain("/vol" + "ume1/private");
+  expect(html).not.toContain("sk" + "-test-secret");
+});
