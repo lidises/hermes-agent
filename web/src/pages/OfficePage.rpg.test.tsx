@@ -9831,3 +9831,57 @@ it("NAS Keeper Mac relay real NAS write execution-record panel stays display-onl
   expect(html).not.toContain("/vol" + "ume1/private");
   expect(html).not.toContain("sk" + "-test-secret");
 });
+
+
+it("NAS Keeper Mac relay real NAS write final-execution-gate panel stays display-only before manual real write boundary", () => {
+  const record = {
+    found: true,
+    stored: true,
+    record_count: 1,
+    errors: [],
+    dto: {
+      mac_relay_real_nas_write_final_execution_gate_ready: true,
+      source_mac_relay_real_nas_write_execution_record_verified: true,
+      source_execution_record_contract_verified: true,
+      final_execution_gate_is_metadata_only: true,
+      final_execution_gate_does_not_execute_write: true,
+      final_execution_gate_does_not_materialize_payload: true,
+      final_manual_real_nas_write_boundary_locked: true,
+      pre_real_nas_write_lock_recorded: true,
+      write_readiness_percent: 100,
+      real_nas_write_final_execution_gate_ready: true,
+      real_nas_production_write_enabled: false,
+      real_nas_production_write_executed: false,
+      vps_direct_nas_authority_enabled: false,
+      watcher_enabled: false,
+      cron_enabled: false,
+      dispatch_enabled: false,
+      authority_adapter_binding_enabled: false,
+      public_exposure_enabled: false,
+      gateway_restart_required: false,
+      final_execution_gate_includes_payload_body: false,
+      final_execution_gate_includes_write_payload: false,
+      final_execution_gate_includes_raw_root_path: false,
+      final_execution_gate_includes_secret_value: false,
+      next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_manual_real_nas_write_boundary_after_final_execution_gate",
+    },
+  };
+
+  const html = renderToStaticMarkup(<OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteFinalExecutionGatePanel record={record} error={null} />);
+
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-final-execution-gate="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-final-execution-gate-ready="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-final-execution-gate-real-nas-production="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-final-execution-gate-vps-nas-authority="false"');
+  expect(html).toContain('Mac relay real NAS write final execution gate');
+  expect(html).toContain('100%');
+  expect(html).toContain('final_execution_gate_does_not_execute_write');
+  expect(html).toContain('final_manual_real_nas_write_boundary_locked');
+  expect(html).toContain('pre_real_nas_write_lock_recorded');
+  expect(html).not.toMatch(/<button|<input|<select|<textarea|<form/i);
+  const forbiddenBody = ["must", "not", "echo"].join("-");
+  const forbiddenPath = ["", "volume1", "private"].join("/");
+  expect(html).not.toContain(forbiddenBody);
+  expect(html).not.toContain(forbiddenPath);
+  expect(html).not.toContain('sk-test-secret');
+});

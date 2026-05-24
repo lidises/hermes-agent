@@ -63,6 +63,8 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_real_nas_write_execution_envelope_records,
     append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_real_nas_write_execution_record,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_real_nas_write_execution_record_records,
+    append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_real_nas_write_final_execution_gate,
+    list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_real_nas_write_final_execution_gate_records,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_post_execution_record_readback,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_records,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_records,
@@ -3650,3 +3652,155 @@ def test_mac_relay_real_nas_write_execution_record_route_is_protected_and_record
         listed = readback.json()
         assert listed["found"] is True
         assert listed["latest_record"]["source_mac_relay_real_nas_write_execution_envelope_verified"] is True
+
+
+
+def _seed_mac_relay_real_nas_write_execution_record(tmp_path):
+    envelope_store, envelope = _seed_mac_relay_real_nas_write_execution_envelope_record(tmp_path)
+    record_store = tmp_path / "seed-mac-relay-real-nas-write-execution-records.jsonl"
+    result = append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_real_nas_write_execution_record(
+        {
+            "mac_relay_real_nas_write_execution_record_ref": "nasexecrec-20260524113000-seed0001",
+            "mac_relay_real_nas_write_execution_envelope_ref": envelope["mac_relay_real_nas_write_execution_envelope_ref"],
+            "mac_relay_real_nas_write_execution_envelope_sha256": envelope["mac_relay_real_nas_write_execution_envelope_sha256"],
+            "idempotency_key_sha256": envelope["idempotency_key_sha256"],
+            "target_filename_contract_ref": envelope["target_filename_contract_ref"],
+            "post_write_verification_contract_ref": envelope["post_write_verification_contract_ref"],
+            "execution_intent_ref": envelope["execution_intent_ref"],
+            "pre_execution_proof_ref": "preexecproof-20260524113000-seed0001",
+            "execution_record_decision": "pre_execution_recorded_for_next_rung_only_no_real_nas_write",
+            "recorded_by": "operator:seed",
+            "recorded_at": "2026-05-24T11:30:00Z",
+        },
+        mac_relay_real_nas_write_execution_envelope_store_path=envelope_store,
+        store_path=record_store,
+    )
+    assert result["stored"] is True
+    return record_store, result["dto"]
+
+
+def test_mac_relay_real_nas_write_final_execution_gate_after_execution_record_locks_last_metadata_gate_without_write(tmp_path):
+    record_store, record = _seed_mac_relay_real_nas_write_execution_record(tmp_path)
+    gate_store = tmp_path / "mac-relay-real-nas-write-final-execution-gate-records.jsonl"
+
+    result = append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_real_nas_write_final_execution_gate(
+        {
+            "mac_relay_real_nas_write_final_execution_gate_ref": "nasfinalgate-20260524123000-test0001",
+            "mac_relay_real_nas_write_execution_record_ref": record["mac_relay_real_nas_write_execution_record_ref"],
+            "mac_relay_real_nas_write_execution_record_sha256": record["mac_relay_real_nas_write_execution_record_sha256"],
+            "idempotency_key_sha256": record["idempotency_key_sha256"],
+            "target_filename_contract_ref": record["target_filename_contract_ref"],
+            "post_write_verification_contract_ref": record["post_write_verification_contract_ref"],
+            "execution_intent_ref": record["execution_intent_ref"],
+            "pre_execution_proof_ref": record["pre_execution_proof_ref"],
+            "final_execution_gate_decision": "final_execution_gate_recorded_for_manual_real_nas_write_boundary_only",
+            "recorded_by": "operator:test",
+            "recorded_at": "2026-05-24T12:30:00Z",
+            "markdown_body": "must" + "-not-echo",
+            "write_payload": {"raw": "must" + "-not-echo"},
+            "raw_root_path": "/vol" + "ume1/private",
+            "credential_value": "sk" + "-test-secret",
+        },
+        mac_relay_real_nas_write_execution_record_store_path=record_store,
+        store_path=gate_store,
+    )
+
+    assert result["stored"] is True
+    dto = result["dto"]
+    assert dto["mac_relay_real_nas_write_final_execution_gate_ready"] is True
+    assert dto["source_mac_relay_real_nas_write_execution_record_verified"] is True
+    assert dto["source_execution_record_contract_verified"] is True
+    assert dto["final_execution_gate_is_metadata_only"] is True
+    assert dto["final_execution_gate_does_not_execute_write"] is True
+    assert dto["final_execution_gate_does_not_materialize_payload"] is True
+    assert dto["final_manual_real_nas_write_boundary_locked"] is True
+    assert dto["pre_real_nas_write_lock_recorded"] is True
+    assert dto["target_filename_contract_verified"] is True
+    assert dto["post_write_verification_contract_verified"] is True
+    assert dto["safe_ref_chain_verified"] is True
+    assert dto["write_readiness_stage"] == "mac_relay_real_nas_write_final_execution_gate_after_execution_record"
+    assert dto["write_readiness_percent"] == 100
+    assert dto["real_nas_write_final_execution_gate_ready"] is True
+    assert len(dto["mac_relay_real_nas_write_final_execution_gate_sha256"]) == 64
+    assert dto["metadata_only_record_write_executed"] is True
+    assert dto["replay_store_write_enabled"] is False
+    assert dto["real_replay_store_written"] is False
+    assert dto["real_nas_production_write_enabled"] is False
+    assert dto["real_nas_production_write_executed"] is False
+    assert dto["vps_direct_nas_authority_enabled"] is False
+    assert dto["watcher_enabled"] is False
+    assert dto["cron_enabled"] is False
+    assert dto["dispatch_enabled"] is False
+    assert dto["authority_adapter_binding_enabled"] is False
+    assert dto["public_exposure_enabled"] is False
+    assert dto["gateway_restart_required"] is False
+    assert dto["final_execution_gate_includes_payload_body"] is False
+    assert dto["final_execution_gate_includes_write_payload"] is False
+    assert dto["final_execution_gate_includes_raw_root_path"] is False
+    assert dto["final_execution_gate_includes_secret_value"] is False
+    assert dto["next_required_boundary"] == "fresh_request_builder_downstream_consumption_one_shot_manual_real_nas_write_boundary_after_final_execution_gate"
+    text = json.dumps(dto, sort_keys=True)
+    assert "must" + "-not-echo" not in text
+    assert "/vol" + "ume1/private" not in text
+    assert "sk" + "-test-secret" not in text
+
+    duplicate = append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_real_nas_write_final_execution_gate(
+        {
+            "mac_relay_real_nas_write_final_execution_gate_ref": "nasfinalgate-20260524123000-test0001",
+            "mac_relay_real_nas_write_execution_record_ref": record["mac_relay_real_nas_write_execution_record_ref"],
+            "mac_relay_real_nas_write_execution_record_sha256": record["mac_relay_real_nas_write_execution_record_sha256"],
+            "idempotency_key_sha256": record["idempotency_key_sha256"],
+            "target_filename_contract_ref": record["target_filename_contract_ref"],
+            "post_write_verification_contract_ref": record["post_write_verification_contract_ref"],
+            "execution_intent_ref": record["execution_intent_ref"],
+            "pre_execution_proof_ref": record["pre_execution_proof_ref"],
+            "final_execution_gate_decision": "final_execution_gate_recorded_for_manual_real_nas_write_boundary_only",
+            "recorded_by": "operator:test",
+            "recorded_at": "2026-05-24T12:30:00Z",
+        },
+        mac_relay_real_nas_write_execution_record_store_path=record_store,
+        store_path=gate_store,
+    )
+    assert duplicate["stored"] is False
+    assert duplicate["idempotency_replayed"] is True
+    assert duplicate["dto"]["idempotency_duplicate_final_execution_gate_skipped"] is True
+    listed = list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_real_nas_write_final_execution_gate_records(store_path=gate_store)
+    assert listed["found"] is True
+    assert listed["record_count"] == 1
+
+
+def test_mac_relay_real_nas_write_final_execution_gate_route_is_protected_and_records(tmp_path, monkeypatch):
+    record_store, record = _seed_mac_relay_real_nas_write_execution_record(tmp_path)
+    gate_store = tmp_path / "mac-relay-real-nas-write-final-execution-gate-route.jsonl"
+    import hermes_cli.office_controlled_mutation as office_controlled_mutation
+
+    monkeypatch.setattr(office_controlled_mutation, "_default_fresh_request_builder_downstream_consumption_mac_relay_real_nas_write_execution_record_store_path", lambda: record_store)
+    monkeypatch.setattr(office_controlled_mutation, "_default_fresh_request_builder_downstream_consumption_mac_relay_real_nas_write_final_execution_gate_store_path", lambda: gate_store)
+    route = "/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-final-execution-gate"
+    payload = {
+        "mac_relay_real_nas_write_final_execution_gate_ref": "nasfinalgate-20260524123100-route1",
+        "mac_relay_real_nas_write_execution_record_ref": record["mac_relay_real_nas_write_execution_record_ref"],
+        "mac_relay_real_nas_write_execution_record_sha256": record["mac_relay_real_nas_write_execution_record_sha256"],
+        "idempotency_key_sha256": record["idempotency_key_sha256"],
+        "target_filename_contract_ref": record["target_filename_contract_ref"],
+        "post_write_verification_contract_ref": record["post_write_verification_contract_ref"],
+        "execution_intent_ref": record["execution_intent_ref"],
+        "pre_execution_proof_ref": record["pre_execution_proof_ref"],
+        "final_execution_gate_decision": "final_execution_gate_recorded_for_manual_real_nas_write_boundary_only",
+        "recorded_by": "operator:route",
+        "recorded_at": "2026-05-24T12:31:00Z",
+    }
+    with TestClient(app) as client:
+        assert client.get(route).status_code == 401
+        assert client.post(route, json=payload).status_code == 401
+        response = client.post(route, json=payload, headers={"X-Hermes-" + "Session-Token": _SESSION_TOKEN})
+        assert response.status_code == 200
+        body = response.json()
+        assert body["stored"] is True
+        assert body["dto"]["mac_relay_real_nas_write_final_execution_gate_ready"] is True
+        assert body["dto"]["real_nas_production_write_enabled"] is False
+        readback = client.get(route, headers={"X-Hermes-" + "Session-Token": _SESSION_TOKEN})
+        assert readback.status_code == 200
+        listed = readback.json()
+        assert listed["found"] is True
+        assert listed["latest_record"]["source_mac_relay_real_nas_write_execution_record_verified"] is True
