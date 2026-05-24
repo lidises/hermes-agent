@@ -9374,3 +9374,96 @@ it("NAS Keeper Mac relay final preflight panel stays display-only and reaches ex
   expect(html).not.toContain("/vol" + "ume1/private");
   expect(html).not.toContain("sk" + "-test-secret");
 });
+
+it("NAS Keeper Mac relay real-write gate panel stays display-only and blocks without explicit approval", () => {
+  const record = {
+    found: true,
+    stored: true,
+    record_count: 1,
+    errors: [],
+    dto: {
+      schema_version: 1,
+      mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_real_write_gate_recorded",
+      mac_relay_real_write_gate_ref: "realwritegate-20260524062200-test0001",
+      mac_relay_real_write_gate_ready: true,
+      source_mac_relay_final_preflight_verified: true,
+      source_final_preflight_checklist_verified: true,
+      source_mac_relay_final_preflight_ref: "finalpreflight-20260524052200-test0001",
+      source_mac_relay_final_preflight_sha256: "f".repeat(64),
+      source_mac_relay_precommit_manifest_ref: "precommitmanifest-20260524042000-test0001",
+      source_mac_relay_precommit_manifest_sha256: "e".repeat(64),
+      source_mac_relay_precommit_ref: "precommit-20260524031200-test0001",
+      source_mac_relay_precommit_metadata_sha256: "d".repeat(64),
+      source_replay_idempotency_metadata_ref: "replayidem-20260524024100-test0001",
+      source_replay_idempotency_metadata_sha256: "c".repeat(64),
+      idempotency_key_sha256: "b".repeat(64),
+      idempotency_replayed: false,
+      idempotency_duplicate_real_write_gate_write_skipped: false,
+      real_write_gate_checklist_verified: true,
+      safe_ref_chain_verified: true,
+      real_write_gate_ref_chain_includes_final_preflight: true,
+      real_write_gate_ref_chain_includes_precommit_manifest: true,
+      real_write_gate_ref_chain_includes_precommit_metadata: true,
+      real_write_gate_ref_chain_includes_replay_metadata: true,
+      real_write_gate_ref_chain_includes_tmp_root_smoke: true,
+      write_readiness_stage: "mac_relay_real_write_gate_after_final_preflight",
+      write_readiness_percent: 99,
+      explicit_real_nas_production_approval_present: false,
+      real_write_gate_blocks_without_explicit_approval: true,
+      next_write_boundary_requires_explicit_real_nas_production_approval: true,
+      metadata_only_record_write_executed: true,
+      replay_store_write_enabled: false,
+      real_replay_store_written: false,
+      mac_relay_tmp_root_write_smoke_executed: true,
+      tmp_root_filesystem_write_executed: true,
+      tmp_root_readback_verified: true,
+      payload_body_materialized: true,
+      payload_body_materialization_scope: "internal_tmp_root_smoke_only",
+      real_write_gate_includes_payload_body: false,
+      real_write_gate_includes_write_payload: false,
+      real_write_gate_includes_raw_root_path: false,
+      real_write_gate_includes_secret_value: false,
+      markdown_body_included: false,
+      write_payload_included: false,
+      write_payload_materialized: false,
+      actual_downstream_consumption_executed: false,
+      real_nas_production_write_enabled: false,
+      real_nas_production_write_executed: false,
+      vps_nas_mount_enabled: false,
+      vps_direct_nas_authority_enabled: false,
+      raw_root_path_included: false,
+      secret_value_included: false,
+      watcher_enabled: false,
+      cron_enabled: false,
+      dispatch_enabled: false,
+      authority_adapter_binding_enabled: false,
+      public_exposure_enabled: false,
+      gateway_restart_required: false,
+      recorded_by: "operator:test",
+      recorded_at: "2026-05-24T06:22:00Z",
+      next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_mac_relay_approval_token_after_real_write_gate",
+      mac_relay_real_write_gate_sha256: "a".repeat(64),
+      markdown_body: "must" + "-not-echo",
+      write_payload: { raw: "must" + "-not-echo" },
+      raw_root_path: "/vol" + "ume1/private",
+      credential_value: "sk" + "-test-secret",
+    },
+  } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealWriteGateResult;
+
+  const html = renderToStaticMarkup(<OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealWriteGatePanel record={record} error={null} />);
+
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-write-gate="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-write-gate-ready="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-write-gate-replay-store-write="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-write-gate-real-nas-production="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-write-gate-vps-nas-authority="false"');
+  expect(html).toContain("Mac relay real-write gate");
+  expect(html).toContain("realwritegate-20260524062200-test0001");
+  expect(html).toContain("mac_relay_real_write_gate_after_final_preflight");
+  expect(html).toContain("99%");
+  expect(html).toContain("real_write_gate_blocks_without_explicit_approval");
+  expect(html).not.toMatch(/<button|<input|<select|<textarea|<form/i);
+  expect(html).not.toContain("must" + "-not-echo");
+  expect(html).not.toContain("/vol" + "ume1/private");
+  expect(html).not.toContain("sk" + "-test-secret");
+});

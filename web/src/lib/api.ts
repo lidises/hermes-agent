@@ -3633,6 +3633,81 @@ export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMa
   skipped_count?: number;
 }
 
+export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealWriteGateResult {
+  found?: boolean;
+  stored?: boolean;
+  idempotency_replayed?: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto?: null | {
+    schema_version: number;
+    mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_real_write_gate_recorded";
+    mac_relay_real_write_gate_ref: string;
+    mac_relay_real_write_gate_ready: boolean;
+    source_mac_relay_final_preflight_verified: boolean;
+    source_final_preflight_checklist_verified: boolean;
+    source_mac_relay_final_preflight_ref: string;
+    source_mac_relay_final_preflight_sha256: string;
+    source_mac_relay_precommit_manifest_ref: string;
+    source_mac_relay_precommit_manifest_sha256: string;
+    source_mac_relay_precommit_ref: string;
+    source_mac_relay_precommit_metadata_sha256: string;
+    source_replay_idempotency_metadata_ref: string;
+    source_replay_idempotency_metadata_sha256: string;
+    idempotency_key_sha256: string;
+    idempotency_replayed: boolean;
+    idempotency_duplicate_real_write_gate_write_skipped: boolean;
+    real_write_gate_checklist_verified: boolean;
+    safe_ref_chain_verified: boolean;
+    real_write_gate_ref_chain_includes_final_preflight: boolean;
+    real_write_gate_ref_chain_includes_precommit_manifest: boolean;
+    real_write_gate_ref_chain_includes_precommit_metadata: boolean;
+    real_write_gate_ref_chain_includes_replay_metadata: boolean;
+    real_write_gate_ref_chain_includes_tmp_root_smoke: boolean;
+    write_readiness_stage: string;
+    write_readiness_percent: number;
+    explicit_real_nas_production_approval_present: false;
+    real_write_gate_blocks_without_explicit_approval: true;
+    next_write_boundary_requires_explicit_real_nas_production_approval: boolean;
+    metadata_only_record_write_executed: boolean;
+    replay_store_write_enabled: false;
+    real_replay_store_written: false;
+    mac_relay_tmp_root_write_smoke_executed: boolean;
+    tmp_root_filesystem_write_executed: boolean;
+    tmp_root_readback_verified: boolean;
+    payload_body_materialized: true;
+    payload_body_materialization_scope: string;
+    real_write_gate_includes_payload_body: false;
+    real_write_gate_includes_write_payload: false;
+    real_write_gate_includes_raw_root_path: false;
+    real_write_gate_includes_secret_value: false;
+    markdown_body_included: false;
+    write_payload_included: false;
+    write_payload_materialized: false;
+    actual_downstream_consumption_executed: false;
+    real_nas_production_write_enabled: false;
+    real_nas_production_write_executed: false;
+    vps_nas_mount_enabled: false;
+    vps_direct_nas_authority_enabled: false;
+    raw_root_path_included: false;
+    secret_value_included: false;
+    watcher_enabled: false;
+    cron_enabled: false;
+    dispatch_enabled: false;
+    authority_adapter_binding_enabled: false;
+    public_exposure_enabled: false;
+    gateway_restart_required: false;
+    recorded_by: string;
+    recorded_at: string;
+    next_required_boundary: string;
+    mac_relay_real_write_gate_sha256: string;
+    [key: string]: unknown;
+  };
+  latest_record?: OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealWriteGateResult["dto"];
+  records?: Array<NonNullable<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealWriteGateResult["dto"]>>;
+  record_count?: number;
+  skipped_count?: number;
+}
+
 export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractResult {
   found?: boolean;
   errors: Array<{ field: string; code: string }>;
@@ -4499,6 +4574,10 @@ export const api = {
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayFinalPreflightResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-final-preflight"),
   postOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayFinalPreflight: (payload: Record<string, unknown>) =>
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayFinalPreflightResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-final-preflight", { method: "POST", body: JSON.stringify(payload) }),
+  getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealWriteGate: () =>
+    fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealWriteGateResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-write-gate"),
+  postOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealWriteGate: (payload: Record<string, unknown>) =>
+    fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealWriteGateResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-write-gate", { method: "POST", body: JSON.stringify(payload) }),
   getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContract: () =>
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-write-preview-contract"),
   postOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackReview: (payload: Record<string, unknown>) =>
