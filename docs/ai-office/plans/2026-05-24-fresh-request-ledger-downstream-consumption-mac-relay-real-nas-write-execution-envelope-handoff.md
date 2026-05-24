@@ -1,23 +1,26 @@
-## Current status — Mac relay real NAS write execution envelope after dry-run seal (2026-05-24T11:25:29Z)
+# Handoff — fresh request ledger downstream consumption Mac relay real NAS write execution envelope
 
-- Local `main` and `origin/main`: `a9030049315fa32868314b9fd189dd08bc83c56c`.
-- Latest code commit: `a90300493 feat(office): add Mac relay NAS write execution envelope`.
-- Local git was clean after code commit/push before docs update.
-- VPS `/home/hermes/.hermes/hermes-agent`: `a9030049315fa32868314b9fd189dd08bc83c56c`.
-- VPS `/home/hermes/.hermes/ai-office-dashboard`: `a9030049315fa32868314b9fd189dd08bc83c56c`.
-- VPS dashboard restarted only; active with `MainPID=932552`, `ActiveEnterTimestamp=Sun 2026-05-24 11:23:50 UTC`.
-- Gateway was not restarted or modified; live `systemctl --user show` reported `ActiveState=inactive`, `MainPID=0` at handoff time.
+Time: 2026-05-24T11:25:29Z
 
-Completed rung:
+Repo: `/Users/lidises/dev/hermes-agent`
+Branch: `main`
+Code commit: `a9030049315fa32868314b9fd189dd08bc83c56c`
+Code commit message: `feat(office): add Mac relay NAS write execution envelope`
 
-- `fresh_request_builder_downstream_consumption_one_shot_mac_relay_real_nas_write_execution_envelope_after_dry_run_seal`
+## Completed rung
 
-Added protected API:
+`fresh_request_builder_downstream_consumption_one_shot_mac_relay_real_nas_write_execution_envelope_after_dry_run_seal`
+
+This rung added a protected metadata-only execution envelope after the dry-run seal. It records final execution-intent safe refs and post-write verification-plan refs for the next rung, while real NAS production write execution remains disabled.
+
+## Added surfaces
+
+Protected API:
 
 - `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-execution-envelope`
 - `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-execution-envelope`
 
-Added UI panel:
+UI panel:
 
 - `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionEnvelopePanel`
 
@@ -25,8 +28,9 @@ DOM hook:
 
 - `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-execution-envelope="true"`
 
-Live smoke summary:
+## Live smoke evidence
 
+- `/office`: `200`
 - unauthenticated GET: `401`
 - unauthenticated POST: `401`
 - authenticated dry-run seal GET: `200`
@@ -42,7 +46,7 @@ Live smoke summary:
 - `post_write_verification_contract_verified=true`
 - `safe_ref_chain_verified=true`
 - `write_readiness_percent=100`
-- envelope checksum length: `64`
+- `mac_relay_real_nas_write_execution_envelope_sha256` length: `64`
 - `metadata_only_record_write_executed=true`
 - `execution_envelope_does_not_execute_write=true`
 - `real_nas_production_write_enabled=false`
@@ -70,7 +74,7 @@ DOM smoke:
 - raw leak: `false`
 - browser console JS errors: `0`
 
-Verification completed:
+## Verification
 
 - `py_compile` passed for edited backend modules.
 - focused Python chain tests: `75 passed`.
@@ -80,26 +84,32 @@ Verification completed:
 - `git diff --check` passed.
 - added-line leak sentinel passed.
 
-Boundary status:
+## VPS state at handoff
 
-- Real NAS production write execution remains disabled and unexecuted.
-- VPS direct NAS authority remains disabled.
-- Watcher, cron, dispatcher, and authority-adapter remain disabled.
-- Public exposure remains disabled.
-- Gateway restart was not performed.
-- Metadata-only record write occurred for the execution envelope.
-- Mac relay tmp-root write smoke remains the only approved filesystem-write evidence class in the chain.
-- No markdown/body payload, write-payload object, raw root path, or secret value is echoed in API/DOM smoke.
+- `/home/hermes/.hermes/hermes-agent`: `a9030049315fa32868314b9fd189dd08bc83c56c`
+- `/home/hermes/.hermes/ai-office-dashboard`: `a9030049315fa32868314b9fd189dd08bc83c56c`
+- dashboard active: `MainPID=932552`, `ActiveEnterTimestamp=Sun 2026-05-24 11:23:50 UTC`
+- gateway was not restarted or modified; live `systemctl --user show` reported `ActiveState=inactive`, `MainPID=0`
 
-Next recommended rung:
+## Boundaries preserved
 
-- `fresh_request_builder_downstream_consumption_one_shot_mac_relay_real_nas_write_execution_record_after_execution_envelope`
+- Real NAS production write execution: not enabled, not executed.
+- VPS direct NAS authority: not enabled.
+- Watcher/cron/dispatcher/authority-adapter: not enabled.
+- Public exposure: not enabled.
+- Gateway restart: not performed.
+- Metadata-only record write: executed for this rung.
+- Mac relay tmp-root write smoke: preserved as prior approved filesystem-write evidence only.
+- Raw markdown/body payload, write-payload object, raw root path, and secret values: not echoed by API/DOM smoke.
 
-Next rung guardrails:
+## Next recommended rung
 
-- Continue to keep real NAS production write disabled until an explicit separate approval says otherwise.
-- Use the execution-envelope record as the source.
-- If proceeding without production write approval, record only a metadata-only execution-record placeholder / final pre-execution record, not a real NAS write.
+`fresh_request_builder_downstream_consumption_one_shot_mac_relay_real_nas_write_execution_record_after_execution_envelope`
+
+Suggested scope:
+
+- Source from the execution-envelope record.
+- Record a metadata-only execution-record placeholder / final pre-execution proof if real NAS production write is still not explicitly approved.
+- Keep actual production NAS write disabled unless the user gives explicit production-write execution approval.
 - Keep protected Office API only.
 - Do not enable VPS direct NAS authority, watcher, cron, dispatcher, authority-adapter, public exposure, or gateway restart.
-- Dashboard restart remains allowed; gateway restart remains forbidden.
