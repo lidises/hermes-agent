@@ -1,3 +1,84 @@
+## Current status — Replay/idempotency metadata after tmp-root write smoke
+
+- Updated: 2026-05-24T02:59:07Z
+- Local/origin/VPS HEAD: `23eb3e648e1bc2c274b32814dfb2d8217e8af82f`
+- Latest code commit: `23eb3e648 feat(office): record replay idempotency metadata`
+- Completed rung: `fresh_request_builder_downstream_consumption_one_shot_replay_idempotency_metadata_after_tmp_root_write_smoke`
+
+What changed:
+- Added a protected replay/idempotency metadata checkpoint sourced from the latest verified Mac relay tmp-root write-smoke record.
+- Stores metadata-only replay/idempotency proof with source tmp-root smoke ref/checksum, source readback proof, idempotency key hash, and duplicate metadata write skip behavior.
+- Replayed POSTs are detected and skipped without appending duplicate records.
+- No real replay-store write, production NAS write, downstream consumption, VPS NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, gateway restart, or raw markdown/path/secret echo.
+- UI adds a display-only panel with DOM smoke hook and zero controls.
+
+Protected API:
+- `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-idempotency-metadata`
+- `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-idempotency-metadata`
+
+UI panel:
+- `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayIdempotencyMetadataPanel`
+
+DOM hook:
+- `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-replay-idempotency-metadata="true"`
+
+Live smoke:
+- unauth GET: 401
+- auth GET before write: 200
+- source tmp-root write-smoke found=true
+- auth POST: 200, stored=true
+- replay_idempotency_metadata_ready=true
+- source_tmp_root_write_smoke_verified=true
+- source_tmp_root_readback_verified=true
+- source_idempotency_key_verified=true
+- replay_idempotency_metadata_sha256 length=64
+- duplicate POST: 200, idempotency_replayed=true, idempotency_duplicate_metadata_write_skipped=true
+- auth GET after write: found=true
+- replay_store_write_enabled=false
+- real_replay_store_written=false
+- real_nas_production_write_enabled=false
+- vps_nas_mount_enabled=false
+- raw leak=false
+- DOM found=true
+- DOM ready=true
+- DOM replay-store-write=false
+- DOM real NAS production=false
+- DOM VPS NAS authority=false
+- DOM controls=0
+- browser console JS errors=0
+
+Verification:
+- `py_compile` passed
+- focused Python chain tests: 59 passed
+- focused Office RPG tests: 158 passed
+- `npm run lint` passed with existing warnings only
+- `npm run build` passed with existing Vite chunk-size warning only
+- `git diff --check` passed
+- added-line leak sentinel passed
+
+VPS:
+- `/home/hermes/.hermes/hermes-agent` = `23eb3e648e1bc2c274b32814dfb2d8217e8af82f`
+- `/home/hermes/.hermes/ai-office-dashboard` = `23eb3e648e1bc2c274b32814dfb2d8217e8af82f`
+- worktrees clean after code sync
+- dashboard active: MainPID=909917, ActiveEnterTimestamp=Sun 2026-05-24 02:56:18 UTC
+- gateway active and untouched: MainPID=812845, ActiveEnterTimestamp=Fri 2026-05-22 11:14:49 UTC
+
+Boundaries kept:
+- Actual downstream consumption remains disabled.
+- No raw markdown/body payload, raw path, credential, or write-payload object is returned/echoed.
+- No real replay-store execution write.
+- No real NAS production write or VPS direct NAS authority.
+- No watcher/cron/dispatcher/authority-adapter activation.
+- No public exposure.
+- Gateway was not restarted.
+
+Next recommended rung:
+- `fresh_request_builder_downstream_consumption_one_shot_replay_idempotency_metadata_readback_after_tmp_root_write_smoke`
+
+Next boundary:
+- Read back the replay/idempotency metadata record and prove duplicate-skip/idempotency safety from stored metadata only.
+- Keep real NAS production writes, VPS NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, gateway restart, raw markdown/path/secret echo, and real replay-store execution writes disabled.
+
 ## Current status — Mac relay tmp-root write smoke after payload preview
 
 - Updated: 2026-05-24T02:24:00Z
