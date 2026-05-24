@@ -9763,3 +9763,71 @@ it("NAS Keeper Mac relay real NAS write execution-envelope panel stays display-o
   expect(html).not.toContain("/vol" + "ume1/private");
   expect(html).not.toContain("sk" + "-test-secret");
 });
+
+
+it("NAS Keeper Mac relay real NAS write execution-record panel stays display-only and blocks production write", () => {
+  const record = {
+    found: true,
+    stored: true,
+    record_count: 1,
+    errors: [],
+    dto: {
+      mac_relay_real_nas_write_execution_record_ref: "nasexecrec-20260524113000-test0001",
+      mac_relay_real_nas_write_execution_record_ready: true,
+      source_mac_relay_real_nas_write_execution_envelope_verified: true,
+      source_execution_envelope_contract_verified: true,
+      pre_execution_proof_recorded: true,
+      execution_record_is_metadata_only: true,
+      execution_record_does_not_execute_write: true,
+      execution_record_does_not_materialize_payload: true,
+      target_filename_contract_verified: true,
+      post_write_verification_contract_verified: true,
+      safe_ref_chain_verified: true,
+      real_nas_write_execution_record_ready: true,
+      real_nas_write_execution_record_includes_pre_execution_proof: true,
+      real_nas_write_execution_record_includes_post_write_verification_plan: true,
+      write_readiness_stage: "mac_relay_real_nas_write_execution_record_after_execution_envelope",
+      write_readiness_percent: 100,
+      idempotency_duplicate_execution_record_skipped: false,
+      mac_relay_real_nas_write_execution_record_sha256: "e".repeat(64),
+      metadata_only_record_write_executed: true,
+      replay_store_write_enabled: false,
+      real_replay_store_written: false,
+      real_nas_production_write_enabled: false,
+      real_nas_production_write_executed: false,
+      vps_nas_mount_enabled: false,
+      vps_direct_nas_authority_enabled: false,
+      watcher_enabled: false,
+      cron_enabled: false,
+      dispatch_enabled: false,
+      authority_adapter_binding_enabled: false,
+      public_exposure_enabled: false,
+      gateway_restart_required: false,
+      execution_record_includes_payload_body: false,
+      execution_record_includes_write_payload: false,
+      execution_record_includes_raw_root_path: false,
+      execution_record_includes_secret_value: false,
+      ["markdown_" + "body"]: "must" + "-not-echo",
+      write_payload: { raw: "must" + "-not-echo" },
+      ["raw_" + "root_path"]: "/vol" + "ume1/private",
+      ["credential_" + "value"]: "sk" + "-test-secret",
+    },
+  } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordResult;
+
+  const html = renderToStaticMarkup(<OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordPanel record={record} error={null} />);
+
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-execution-record="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-execution-record-ready="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-execution-record-real-nas-production="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-execution-record-vps-nas-authority="false"');
+  expect(html).toContain("Mac relay real NAS write execution record");
+  expect(html).toContain("nasexecrec-20260524113000-test0001");
+  expect(html).toContain("mac_relay_real_nas_write_execution_record_after_execution_envelope");
+  expect(html).toContain("100%");
+  expect(html).toContain("execution_record_does_not_execute_write");
+  expect(html).toContain("real_nas_write_execution_record_includes_pre_execution_proof");
+  expect(html).not.toMatch(/<button|<input|<select|<textarea|<form/i);
+  expect(html).not.toContain("must" + "-not-echo");
+  expect(html).not.toContain("/vol" + "ume1/private");
+  expect(html).not.toContain("sk" + "-test-secret");
+});

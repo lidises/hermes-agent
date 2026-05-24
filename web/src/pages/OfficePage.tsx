@@ -9430,6 +9430,72 @@ export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayR
   );
 }
 
+export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordPanel({
+  record,
+  error,
+}: {
+  record?: { found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null;
+  error?: string | null;
+}) {
+  const dto = record?.dto ?? record?.latest_record;
+  const percent = typeof dto?.write_readiness_percent === "number" ? `${dto.write_readiness_percent}%` : "0%";
+  return (
+    <section
+      className="office-panel office-panel--readonly"
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-execution-record="true"
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-execution-record-ready={String(Boolean(dto?.mac_relay_real_nas_write_execution_record_ready))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-execution-record-replay-store-write={String(Boolean(dto?.replay_store_write_enabled) || Boolean(dto?.real_replay_store_written))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-execution-record-real-nas-production={String(Boolean(dto?.real_nas_production_write_enabled) || Boolean(dto?.real_nas_production_write_executed))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-execution-record-vps-nas-authority={String(Boolean(dto?.vps_nas_mount_enabled) || Boolean(dto?.vps_direct_nas_authority_enabled))}
+    >
+      <h3>NAS Keeper Mac relay real NAS write execution record</h3>
+      <p className="muted">Metadata-only pre-execution proof sourced from the execution envelope. It records final record shape and post-write verification-plan refs for the next gate while real NAS production write execution remains disabled.</p>
+      {error ? <p className="office-error">{error}</p> : null}
+      <dl className="office-fact-grid">
+        <dt>found</dt><dd>{String(Boolean(record?.found))}</dd>
+        <dt>stored</dt><dd>{String(Boolean(record?.stored))}</dd>
+        <dt>record_count</dt><dd>{String(record?.record_count ?? 0)}</dd>
+        <dt>mac_relay_real_nas_write_execution_record_ref</dt><dd>{String(dto?.mac_relay_real_nas_write_execution_record_ref ?? "pending")}</dd>
+        <dt>mac_relay_real_nas_write_execution_record_ready</dt><dd>{String(Boolean(dto?.mac_relay_real_nas_write_execution_record_ready))}</dd>
+        <dt>source_mac_relay_real_nas_write_execution_envelope_verified</dt><dd>{String(Boolean(dto?.source_mac_relay_real_nas_write_execution_envelope_verified))}</dd>
+        <dt>source_execution_envelope_contract_verified</dt><dd>{String(Boolean(dto?.source_execution_envelope_contract_verified))}</dd>
+        <dt>pre_execution_proof_recorded</dt><dd>{String(Boolean(dto?.pre_execution_proof_recorded))}</dd>
+        <dt>target_filename_contract_verified</dt><dd>{String(Boolean(dto?.target_filename_contract_verified))}</dd>
+        <dt>post_write_verification_contract_verified</dt><dd>{String(Boolean(dto?.post_write_verification_contract_verified))}</dd>
+        <dt>safe_ref_chain_verified</dt><dd>{String(Boolean(dto?.safe_ref_chain_verified))}</dd>
+        <dt>write_readiness_stage</dt><dd>{String(dto?.write_readiness_stage ?? "pending")}</dd>
+        <dt>write_readiness_percent</dt><dd>{percent}</dd>
+        <dt>execution_record_is_metadata_only</dt><dd>{String(Boolean(dto?.execution_record_is_metadata_only))}</dd>
+        <dt>execution_record_does_not_execute_write</dt><dd>{String(Boolean(dto?.execution_record_does_not_execute_write))}</dd>
+        <dt>execution_record_does_not_materialize_payload</dt><dd>{String(Boolean(dto?.execution_record_does_not_materialize_payload))}</dd>
+        <dt>real_nas_write_execution_record_ready</dt><dd>{String(Boolean(dto?.real_nas_write_execution_record_ready))}</dd>
+        <dt>real_nas_write_execution_record_includes_pre_execution_proof</dt><dd>{String(Boolean(dto?.real_nas_write_execution_record_includes_pre_execution_proof))}</dd>
+        <dt>real_nas_write_execution_record_includes_post_write_verification_plan</dt><dd>{String(Boolean(dto?.real_nas_write_execution_record_includes_post_write_verification_plan))}</dd>
+        <dt>idempotency_duplicate_execution_record_skipped</dt><dd>{String(Boolean(dto?.idempotency_duplicate_execution_record_skipped))}</dd>
+        <dt>mac_relay_real_nas_write_execution_record_sha256</dt><dd>{String(dto?.mac_relay_real_nas_write_execution_record_sha256 ?? "pending")}</dd>
+        <dt>execution_record_includes_payload_body</dt><dd>{String(Boolean(dto?.execution_record_includes_payload_body))}</dd>
+        <dt>execution_record_includes_write_payload</dt><dd>{String(Boolean(dto?.execution_record_includes_write_payload))}</dd>
+        <dt>execution_record_includes_raw_root_path</dt><dd>{String(Boolean(dto?.execution_record_includes_raw_root_path))}</dd>
+        <dt>execution_record_includes_secret_value</dt><dd>{String(Boolean(dto?.execution_record_includes_secret_value))}</dd>
+        <dt>metadata_only_record_write_executed</dt><dd>{String(Boolean(dto?.metadata_only_record_write_executed))}</dd>
+        <dt>replay_store_write_enabled</dt><dd>{String(Boolean(dto?.replay_store_write_enabled))}</dd>
+        <dt>real_replay_store_written</dt><dd>{String(Boolean(dto?.real_replay_store_written))}</dd>
+        <dt>real_nas_production_write_enabled</dt><dd>{String(Boolean(dto?.real_nas_production_write_enabled))}</dd>
+        <dt>real_nas_production_write_executed</dt><dd>{String(Boolean(dto?.real_nas_production_write_executed))}</dd>
+        <dt>vps_nas_mount_enabled</dt><dd>{String(Boolean(dto?.vps_nas_mount_enabled))}</dd>
+        <dt>vps_direct_nas_authority_enabled</dt><dd>{String(Boolean(dto?.vps_direct_nas_authority_enabled))}</dd>
+        <dt>watcher_enabled</dt><dd>{String(Boolean(dto?.watcher_enabled))}</dd>
+        <dt>cron_enabled</dt><dd>{String(Boolean(dto?.cron_enabled))}</dd>
+        <dt>dispatch_enabled</dt><dd>{String(Boolean(dto?.dispatch_enabled))}</dd>
+        <dt>authority_adapter_binding_enabled</dt><dd>{String(Boolean(dto?.authority_adapter_binding_enabled))}</dd>
+        <dt>public_exposure_enabled</dt><dd>{String(Boolean(dto?.public_exposure_enabled))}</dd>
+        <dt>gateway_restart_required</dt><dd>{String(Boolean(dto?.gateway_restart_required))}</dd>
+        <dt>next_required_boundary</dt><dd>{String(dto?.next_required_boundary ?? "fresh_request_builder_downstream_consumption_one_shot_mac_relay_real_nas_write_final_execution_gate_after_execution_record")}</dd>
+      </dl>
+    </section>
+  );
+}
+
 export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractPanel({
   record,
   error,
@@ -11828,6 +11894,8 @@ export default function OfficePage() {
   const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteDryRunSealError, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteDryRunSealError] = useState<string | null>(null);
   const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionEnvelopeResult, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionEnvelopeResult] = useState<{ found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null>(null);
   const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionEnvelopeError, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionEnvelopeError] = useState<string | null>(null);
+  const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordResult, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordResult] = useState<{ found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null>(null);
+  const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordError, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordError] = useState<string | null>(null);
   const nasKeeperClaimDryRunKeyRef = useRef<string | null>(null);
   const nasKeeperAuthorizationKeyRef = useRef<string | null>(null);
   const nasKeeperPayloadPreviewKeyRef = useRef<string | null>(null);
@@ -12864,6 +12932,19 @@ export default function OfficePage() {
         setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionEnvelopeError("request failed");
       });
   }, [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionEnvelopeResult]);
+
+  useEffect(() => {
+    if (nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordResult?.dto || nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordResult?.latest_record) return;
+    api.getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecord()
+      .then((result) => {
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordResult(result);
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordError(null);
+      })
+      .catch(() => {
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordResult(null);
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordError("request failed");
+      });
+  }, [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordResult]);
 
   useEffect(() => {
     if (nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractResult?.dto) return;
@@ -14072,6 +14153,7 @@ export default function OfficePage() {
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayProductionWriteApprovalPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayProductionWriteApprovalResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayProductionWriteApprovalError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteDryRunSealPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteDryRunSealResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteDryRunSealError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionEnvelopePanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionEnvelopeResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionEnvelopeError} />
+      <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewRecordPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewRecordResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewRecordError} />
 

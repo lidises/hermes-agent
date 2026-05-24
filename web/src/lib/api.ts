@@ -3929,6 +3929,56 @@ export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMa
   record_count?: number;
 }
 
+export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordResult {
+  found?: boolean;
+  stored?: boolean;
+  idempotency_replayed?: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto?: {
+    schema_version?: number;
+    mode?: string;
+    mac_relay_real_nas_write_execution_record_ref?: string;
+    mac_relay_real_nas_write_execution_record_ready?: boolean;
+    source_mac_relay_real_nas_write_execution_envelope_verified?: boolean;
+    source_execution_envelope_contract_verified?: boolean;
+    pre_execution_proof_recorded?: boolean;
+    execution_record_is_metadata_only?: boolean;
+    execution_record_does_not_execute_write?: boolean;
+    execution_record_does_not_materialize_payload?: boolean;
+    target_filename_contract_verified?: boolean;
+    post_write_verification_contract_verified?: boolean;
+    safe_ref_chain_verified?: boolean;
+    real_nas_write_execution_record_ready?: boolean;
+    real_nas_write_execution_record_includes_pre_execution_proof?: boolean;
+    real_nas_write_execution_record_includes_post_write_verification_plan?: boolean;
+    write_readiness_stage?: string;
+    write_readiness_percent?: number;
+    idempotency_duplicate_execution_record_skipped?: boolean;
+    mac_relay_real_nas_write_execution_record_sha256?: string;
+    metadata_only_record_write_executed?: boolean;
+    replay_store_write_enabled?: boolean;
+    real_replay_store_written?: boolean;
+    real_nas_production_write_enabled?: boolean;
+    real_nas_production_write_executed?: boolean;
+    vps_nas_mount_enabled?: boolean;
+    vps_direct_nas_authority_enabled?: boolean;
+    watcher_enabled?: boolean;
+    cron_enabled?: boolean;
+    dispatch_enabled?: boolean;
+    authority_adapter_binding_enabled?: boolean;
+    public_exposure_enabled?: boolean;
+    gateway_restart_required?: boolean;
+    execution_record_includes_payload_body?: boolean;
+    execution_record_includes_write_payload?: boolean;
+    execution_record_includes_raw_root_path?: boolean;
+    execution_record_includes_secret_value?: boolean;
+    [key: string]: unknown;
+  } | null;
+  latest_record?: OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordResult["dto"];
+  records?: Array<NonNullable<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordResult["dto"]>>;
+  record_count?: number;
+}
+
 export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractResult {
   found?: boolean;
   errors: Array<{ field: string; code: string }>;
@@ -4815,6 +4865,10 @@ export const api = {
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionEnvelopeResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-execution-envelope"),
   postOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionEnvelope: (payload: Record<string, unknown>) =>
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionEnvelopeResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-execution-envelope", { method: "POST", body: JSON.stringify(payload) }),
+  getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecord: () =>
+    fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-execution-record"),
+  postOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecord: (payload: Record<string, unknown>) =>
+    fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-execution-record", { method: "POST", body: JSON.stringify(payload) }),
   getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContract: () =>
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-write-preview-contract"),
   postOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackReview: (payload: Record<string, unknown>) =>
