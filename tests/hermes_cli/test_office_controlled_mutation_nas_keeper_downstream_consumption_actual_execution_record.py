@@ -55,6 +55,8 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_real_write_gate_records,
     append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_approval_token,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_approval_token_records,
+    append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_production_write_approval,
+    list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_production_write_approval_records,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_post_execution_record_readback,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_records,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_records,
@@ -3064,3 +3066,133 @@ def test_mac_relay_approval_token_route_is_protected_and_records(tmp_path, monke
         listed = readback.json()
         assert listed["found"] is True
         assert listed["latest_record"]["source_mac_relay_real_write_gate_verified"] is True
+
+
+def _seed_mac_relay_approval_token_record(tmp_path):
+    gate_store, gate = _seed_mac_relay_real_write_gate_record(tmp_path)
+    token_store = tmp_path / "mac-relay-approval-token-seed.jsonl"
+    token = append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_approval_token(
+        {
+            "mac_relay_approval_token_ref": "approvaltoken-20260524070500-prod1",
+            "mac_relay_real_write_gate_ref": gate["mac_relay_real_write_gate_ref"],
+            "mac_relay_real_write_gate_sha256": gate["mac_relay_real_write_gate_sha256"],
+            "idempotency_key_sha256": gate["idempotency_key_sha256"],
+            "recorded_by": "operator:test",
+            "recorded_at": "2026-05-24T07:05:00Z",
+        },
+        mac_relay_real_write_gate_store_path=gate_store,
+        store_path=token_store,
+    )["dto"]
+    return token_store, token
+
+
+def test_mac_relay_production_write_approval_after_token_records_explicit_boundary_without_execution(tmp_path):
+    token_store, token = _seed_mac_relay_approval_token_record(tmp_path)
+    approval_store = tmp_path / "mac-relay-production-write-approval-records.jsonl"
+
+    result = append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_production_write_approval(
+        {
+            "mac_relay_production_write_approval_ref": "prodapproval-20260524081000-test0001",
+            "mac_relay_approval_token_ref": token["mac_relay_approval_token_ref"],
+            "mac_relay_approval_token_sha256": token["mac_relay_approval_token_sha256"],
+            "idempotency_key_sha256": token["idempotency_key_sha256"],
+            "operator_confirmation_ref": "operatorconfirm-20260524081000-test0001",
+            "approval_decision": "approved_for_next_rung_only_no_execution",
+            "recorded_by": "operator:test",
+            "recorded_at": "2026-05-24T08:10:00Z",
+            "markdown_body": "must" + "-not-echo",
+            "write_payload": {"raw": "must" + "-not-echo"},
+            "raw_root_path": "/vol" + "ume1/private",
+            "credential_value": "sk" + "-test-secret",
+        },
+        mac_relay_approval_token_store_path=token_store,
+        store_path=approval_store,
+    )
+
+    assert result["stored"] is True
+    dto = result["dto"]
+    assert dto["mac_relay_production_write_approval_ready"] is True
+    assert dto["source_mac_relay_approval_token_verified"] is True
+    assert dto["source_approval_token_contract_verified"] is True
+    assert dto["production_write_approval_boundary_verified"] is True
+    assert dto["safe_ref_chain_verified"] is True
+    assert dto["write_readiness_stage"] == "mac_relay_production_write_approval_after_token"
+    assert dto["write_readiness_percent"] == 100
+    assert dto["explicit_real_nas_production_approval_present"] is True
+    assert dto["production_write_approval_is_metadata_only"] is True
+    assert dto["production_write_approval_does_not_execute_write"] is True
+    assert len(dto["mac_relay_production_write_approval_sha256"]) == 64
+    assert dto["metadata_only_record_write_executed"] is True
+    assert dto["real_nas_production_write_enabled"] is False
+    assert dto["real_nas_production_write_executed"] is False
+    assert dto["vps_direct_nas_authority_enabled"] is False
+    assert dto["watcher_enabled"] is False
+    assert dto["cron_enabled"] is False
+    assert dto["dispatch_enabled"] is False
+    assert dto["authority_adapter_binding_enabled"] is False
+    assert dto["public_exposure_enabled"] is False
+    assert dto["gateway_restart_required"] is False
+    assert dto["production_write_approval_includes_payload_body"] is False
+    assert dto["production_write_approval_includes_write_payload"] is False
+    assert dto["production_write_approval_includes_raw_root_path"] is False
+    assert dto["production_write_approval_includes_secret_value"] is False
+    assert dto["next_required_boundary"] == "fresh_request_builder_downstream_consumption_one_shot_mac_relay_real_nas_write_after_production_approval"
+    text = json.dumps(dto, sort_keys=True)
+    assert "must" + "-not-echo" not in text
+    assert "/vol" + "ume1/private" not in text
+    assert "sk" + "-test-secret" not in text
+
+    duplicate = append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_production_write_approval(
+        {
+            "mac_relay_production_write_approval_ref": "prodapproval-20260524081000-test0001",
+            "mac_relay_approval_token_ref": token["mac_relay_approval_token_ref"],
+            "mac_relay_approval_token_sha256": token["mac_relay_approval_token_sha256"],
+            "idempotency_key_sha256": token["idempotency_key_sha256"],
+            "operator_confirmation_ref": "operatorconfirm-20260524081000-test0001",
+            "approval_decision": "approved_for_next_rung_only_no_execution",
+            "recorded_by": "operator:test",
+            "recorded_at": "2026-05-24T08:10:00Z",
+        },
+        mac_relay_approval_token_store_path=token_store,
+        store_path=approval_store,
+    )
+    assert duplicate["stored"] is False
+    assert duplicate["idempotency_replayed"] is True
+    assert duplicate["dto"]["idempotency_duplicate_production_write_approval_skipped"] is True
+    listed = list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_production_write_approval_records(store_path=approval_store)
+    assert listed["found"] is True
+    assert listed["record_count"] == 1
+
+
+def test_mac_relay_production_write_approval_route_is_protected_and_records(tmp_path, monkeypatch):
+    token_store, token = _seed_mac_relay_approval_token_record(tmp_path)
+    approval_store = tmp_path / "mac-relay-production-write-approval-route.jsonl"
+    import hermes_cli.office_controlled_mutation as office_controlled_mutation
+
+    monkeypatch.setattr(office_controlled_mutation, "_default_fresh_request_builder_downstream_consumption_mac_relay_approval_token_record_store_path", lambda: token_store)
+    monkeypatch.setattr(office_controlled_mutation, "_default_fresh_request_builder_downstream_consumption_mac_relay_production_write_approval_record_store_path", lambda: approval_store)
+    route = "/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-production-write-approval"
+    payload = {
+        "mac_relay_production_write_approval_ref": "prodapproval-20260524081100-route1",
+        "mac_relay_approval_token_ref": token["mac_relay_approval_token_ref"],
+        "mac_relay_approval_token_sha256": token["mac_relay_approval_token_sha256"],
+        "idempotency_key_sha256": token["idempotency_key_sha256"],
+        "operator_confirmation_ref": "operatorconfirm-20260524081100-route1",
+        "approval_decision": "approved_for_next_rung_only_no_execution",
+        "recorded_by": "operator:route",
+        "recorded_at": "2026-05-24T08:11:00Z",
+    }
+    with TestClient(app) as client:
+        assert client.get(route).status_code == 401
+        assert client.post(route, json=payload).status_code == 401
+        response = client.post(route, json=payload, headers={"X-Hermes-" + "Session-Token": _SESSION_TOKEN})
+        assert response.status_code == 200
+        body = response.json()
+        assert body["stored"] is True
+        assert body["dto"]["mac_relay_production_write_approval_ready"] is True
+        assert body["dto"]["real_nas_production_write_enabled"] is False
+        readback = client.get(route, headers={"X-Hermes-" + "Session-Token": _SESSION_TOKEN})
+        assert readback.status_code == 200
+        listed = readback.json()
+        assert listed["found"] is True
+        assert listed["latest_record"]["source_mac_relay_approval_token_verified"] is True

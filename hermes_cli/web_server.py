@@ -172,6 +172,8 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_real_write_gate_records,
     append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_approval_token,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_approval_token_records,
+    append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_production_write_approval,
+    list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_production_write_approval_records,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_records,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_records,
     append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_record,
@@ -1395,6 +1397,23 @@ async def append_office_controlled_mutation_nas_keeper_fresh_request_builder_led
     _require_token(request)
     payload = await request.json()
     return append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_approval_token(payload)
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-production-write-approval")
+async def list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_production_write_approval_route(
+    request: Request,
+) -> dict[str, object]:
+    _require_token(request)
+    return list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_production_write_approval_records()
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-production-write-approval")
+async def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_production_write_approval_route(
+    request: Request,
+) -> dict[str, object]:
+    _require_token(request)
+    payload = await request.json()
+    return append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_production_write_approval(payload)
 
 
 @app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-write-preview-contract")

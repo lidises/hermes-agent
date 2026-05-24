@@ -9549,3 +9549,74 @@ it("NAS Keeper Mac relay approval-token panel stays display-only and reaches pro
   expect(html).not.toContain("/vol" + "ume1/private");
   expect(html).not.toContain("sk" + "-test-secret");
 });
+
+it("NAS Keeper Mac relay production-write approval panel stays display-only and blocks execution", () => {
+  const record = {
+    found: true,
+    stored: true,
+    record_count: 1,
+    errors: [],
+    dto: {
+      schema_version: 1,
+      mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_production_write_approval_recorded",
+      mac_relay_production_write_approval_ref: "prodapproval-20260524081000-test0001",
+      mac_relay_production_write_approval_ready: true,
+      source_mac_relay_approval_token_verified: true,
+      source_approval_token_contract_verified: true,
+      production_write_approval_boundary_verified: true,
+      safe_ref_chain_verified: true,
+      write_readiness_stage: "mac_relay_production_write_approval_after_token",
+      write_readiness_percent: 100,
+      explicit_real_nas_production_approval_present: true,
+      production_write_approval_is_metadata_only: true,
+      production_write_approval_does_not_execute_write: true,
+      next_boundary_is_real_nas_write_execution: true,
+      metadata_only_record_write_executed: true,
+      replay_store_write_enabled: false,
+      real_replay_store_written: false,
+      real_nas_production_write_enabled: false,
+      real_nas_production_write_executed: false,
+      vps_nas_mount_enabled: false,
+      vps_direct_nas_authority_enabled: false,
+      watcher_enabled: false,
+      cron_enabled: false,
+      dispatch_enabled: false,
+      authority_adapter_binding_enabled: false,
+      public_exposure_enabled: false,
+      gateway_restart_required: false,
+      production_write_approval_includes_payload_body: false,
+      production_write_approval_includes_write_payload: false,
+      production_write_approval_includes_raw_root_path: false,
+      production_write_approval_includes_secret_value: false,
+      markdown_body_included: false,
+      write_payload_included: false,
+      raw_root_path_included: false,
+      secret_value_included: false,
+      recorded_by: "operator:test",
+      recorded_at: "2026-05-24T08:10:00Z",
+      next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_mac_relay_real_nas_write_after_production_approval",
+      mac_relay_production_write_approval_sha256: "d".repeat(64),
+      markdown_body: "must" + "-not-echo",
+      write_payload: { raw: "must" + "-not-echo" },
+      raw_root_path: "/vol" + "ume1/private",
+      credential_value: "sk" + "-test-secret",
+    },
+  } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayProductionWriteApprovalResult;
+
+  const html = renderToStaticMarkup(<OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayProductionWriteApprovalPanel record={record} error={null} />);
+
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-production-write-approval="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-production-write-approval-ready="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-production-write-approval-replay-store-write="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-production-write-approval-real-nas-production="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-production-write-approval-vps-nas-authority="false"');
+  expect(html).toContain("Mac relay production-write approval boundary");
+  expect(html).toContain("prodapproval-20260524081000-test0001");
+  expect(html).toContain("mac_relay_production_write_approval_after_token");
+  expect(html).toContain("100%");
+  expect(html).toContain("production_write_approval_does_not_execute_write");
+  expect(html).not.toMatch(/<button|<input|<select|<textarea|<form/i);
+  expect(html).not.toContain("must" + "-not-echo");
+  expect(html).not.toContain("/vol" + "ume1/private");
+  expect(html).not.toContain("sk" + "-test-secret");
+});

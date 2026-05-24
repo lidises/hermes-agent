@@ -3772,6 +3772,59 @@ export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMa
   skipped_count?: number;
 }
 
+export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayProductionWriteApprovalResult {
+  found?: boolean;
+  stored?: boolean;
+  idempotency_replayed?: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto?: null | {
+    schema_version: number;
+    mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_production_write_approval_recorded";
+    mac_relay_production_write_approval_ref: string;
+    mac_relay_production_write_approval_ready: boolean;
+    source_mac_relay_approval_token_verified: boolean;
+    source_approval_token_contract_verified: boolean;
+    production_write_approval_boundary_verified: boolean;
+    safe_ref_chain_verified: boolean;
+    write_readiness_stage: string;
+    write_readiness_percent: number;
+    explicit_real_nas_production_approval_present: true;
+    production_write_approval_is_metadata_only: true;
+    production_write_approval_does_not_execute_write: true;
+    next_boundary_is_real_nas_write_execution: true;
+    metadata_only_record_write_executed: boolean;
+    replay_store_write_enabled: false;
+    real_replay_store_written: false;
+    real_nas_production_write_enabled: false;
+    real_nas_production_write_executed: false;
+    vps_nas_mount_enabled: false;
+    vps_direct_nas_authority_enabled: false;
+    watcher_enabled: false;
+    cron_enabled: false;
+    dispatch_enabled: false;
+    authority_adapter_binding_enabled: false;
+    public_exposure_enabled: false;
+    gateway_restart_required: false;
+    production_write_approval_includes_payload_body: false;
+    production_write_approval_includes_write_payload: false;
+    production_write_approval_includes_raw_root_path: false;
+    production_write_approval_includes_secret_value: false;
+    markdown_body_included: false;
+    write_payload_included: false;
+    raw_root_path_included: false;
+    secret_value_included: false;
+    recorded_by: string;
+    recorded_at: string;
+    next_required_boundary: string;
+    mac_relay_production_write_approval_sha256: string;
+    [key: string]: unknown;
+  };
+  latest_record?: OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayProductionWriteApprovalResult["dto"];
+  records?: Array<NonNullable<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayProductionWriteApprovalResult["dto"]>>;
+  record_count?: number;
+  skipped_count?: number;
+}
+
 export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractResult {
   found?: boolean;
   errors: Array<{ field: string; code: string }>;
@@ -4646,6 +4699,10 @@ export const api = {
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayApprovalTokenResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-approval-token"),
   postOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayApprovalToken: (payload: Record<string, unknown>) =>
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayApprovalTokenResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-approval-token", { method: "POST", body: JSON.stringify(payload) }),
+  getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayProductionWriteApproval: () =>
+    fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayProductionWriteApprovalResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-production-write-approval"),
+  postOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayProductionWriteApproval: (payload: Record<string, unknown>) =>
+    fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayProductionWriteApprovalResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-production-write-approval", { method: "POST", body: JSON.stringify(payload) }),
   getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContract: () =>
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-write-preview-contract"),
   postOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackReview: (payload: Record<string, unknown>) =>
