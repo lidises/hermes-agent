@@ -8843,6 +8843,51 @@ export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMa
 }
 
 
+
+export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractPanel({
+  record,
+  error,
+}: {
+  record?: { found?: boolean; dto?: Record<string, unknown> | null } | null;
+  error?: string | null;
+}) {
+  const dto = record?.dto;
+  return (
+    <section
+      className="office-panel office-panel--readonly"
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-write-preview-contract="true"
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-write-preview-contract-ready={String(Boolean(dto?.payload_write_preview_contract_ready))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-write-preview-contract-write-payload-included={String(Boolean(dto?.write_payload_included))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-write-preview-contract-mac-relay-tmp-root-write={String(Boolean(dto?.mac_relay_tmp_root_write_smoke_enabled))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-write-preview-contract-vps-nas-authority={String(Boolean(dto?.vps_nas_mount_enabled))}
+    >
+      <h3>NAS Keeper payload/write-payload preview contract</h3>
+      <p className="muted">Write-readiness contract over safe refs/checksums only. It prepares payload/write-payload preview identifiers without markdown body materialization, write-payload object projection, replay writes, dispatch, or NAS writes.</p>
+      {error ? <p className="office-error">{error}</p> : null}
+      <dl className="office-fact-grid">
+        <dt>found</dt><dd>{String(Boolean(record?.found))}</dd>
+        <dt>payload_write_preview_contract_ready</dt><dd>{String(Boolean(dto?.payload_write_preview_contract_ready))}</dd>
+        <dt>write_readiness_stage</dt><dd>{String(dto?.write_readiness_stage ?? "pending")}</dd>
+        <dt>write_readiness_percent</dt><dd>{String(dto?.write_readiness_percent ?? 0)}</dd>
+        <dt>source_readback_verified</dt><dd>{String(Boolean(dto?.source_readback_verified))}</dd>
+        <dt>payload_preview_ref</dt><dd>{String(dto?.payload_preview_ref ?? "pending")}</dd>
+        <dt>write_payload_preview_ref</dt><dd>{String(dto?.write_payload_preview_ref ?? "pending")}</dd>
+        <dt>payload_preview_sha256</dt><dd>{String(dto?.payload_preview_sha256 ?? "pending")}</dd>
+        <dt>write_payload_preview_sha256</dt><dd>{String(dto?.write_payload_preview_sha256 ?? "pending")}</dd>
+        <dt>payload_body_materialized</dt><dd>{String(Boolean(dto?.payload_body_materialized))}</dd>
+        <dt>markdown_body_included</dt><dd>{String(Boolean(dto?.markdown_body_included))}</dd>
+        <dt>write_payload_included</dt><dd>{String(Boolean(dto?.write_payload_included))}</dd>
+        <dt>write_payload_materialized</dt><dd>{String(Boolean(dto?.write_payload_materialized))}</dd>
+        <dt>actual_downstream_consumption_executed</dt><dd>{String(Boolean(dto?.actual_downstream_consumption_executed))}</dd>
+        <dt>mac_relay_tmp_root_write_smoke_enabled</dt><dd>{String(Boolean(dto?.mac_relay_tmp_root_write_smoke_enabled))}</dd>
+        <dt>real_nas_production_write_enabled</dt><dd>{String(Boolean(dto?.real_nas_production_write_enabled))}</dd>
+        <dt>vps_nas_mount_enabled</dt><dd>{String(Boolean(dto?.vps_nas_mount_enabled))}</dd>
+        <dt>next_required_boundary</dt><dd>{String(dto?.next_required_boundary ?? "fresh_request_builder_downstream_consumption_one_shot_mac_relay_tmp_root_write_smoke_after_payload_write_preview")}</dd>
+      </dl>
+    </section>
+  );
+}
+
 export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackReviewReadbackPanel({
   record,
   error,
@@ -11175,6 +11220,8 @@ export default function OfficePage() {
   const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackReviewError, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackReviewError] = useState<string | null>(null);
   const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackReviewReadbackResult, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackReviewReadbackResult] = useState<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackReviewReadbackResult | null>(null);
   const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackReviewReadbackError, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackReviewReadbackError] = useState<string | null>(null);
+  const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractResult, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractResult] = useState<{ found?: boolean; dto?: Record<string, unknown> | null } | null>(null);
+  const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractError, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractError] = useState<string | null>(null);
   const nasKeeperClaimDryRunKeyRef = useRef<string | null>(null);
   const nasKeeperAuthorizationKeyRef = useRef<string | null>(null);
   const nasKeeperPayloadPreviewKeyRef = useRef<string | null>(null);
@@ -12081,6 +12128,19 @@ export default function OfficePage() {
         setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackReviewReadbackError("request failed");
       });
   }, [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackReviewReadbackResult]);
+
+  useEffect(() => {
+    if (nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractResult?.dto) return;
+    api.getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContract()
+      .then((result) => {
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractResult(result);
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractError(null);
+      })
+      .catch(() => {
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractResult(null);
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractError("request failed");
+      });
+  }, [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractResult]);
 
   const executeNasSingleFileWrite = useCallback(async () => {
     if (!nasSingleWriteApproved) {
@@ -13265,6 +13325,7 @@ export default function OfficePage() {
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackReviewPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackReviewResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackReviewError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackReviewReadbackPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackReviewReadbackResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackReviewReadbackError} />
+      <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewRecordPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewRecordResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewRecordError} />
 

@@ -40,6 +40,7 @@ from hermes_cli.office_controlled_mutation import (
     append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review_readback_review,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review_readback_reviews,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review_readback_review_readback,
+    get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_write_preview_contract,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_post_execution_record_readback,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_records,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_records,
@@ -2144,5 +2145,66 @@ def test_consumption_payload_materialization_summary_review_gate_record_readback
         assert body["found"] is True
         assert body["dto"]["payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review_readback_review_readback_verified"] is True
         assert body["dto"]["actual_downstream_consumption_executed"] is False
+        assert "records" not in body["dto"]
+        assert "latest_record" not in body["dto"]
+
+
+
+def test_consumption_payload_write_preview_contract_moves_toward_write_without_body_materialization(tmp_path):
+    store, review = _seed_attestation_readback_review_readback_review_readback_review(tmp_path)
+
+    result = get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_write_preview_contract(
+        attestation_readback_review_readback_review_readback_review_store_path=store,
+    )
+
+    assert result["found"] is True
+    dto = result["dto"]
+    assert dto["payload_write_preview_contract_ready"] is True
+    assert dto["write_readiness_stage"] == "payload_write_preview_contract"
+    assert dto["write_readiness_percent"] >= 70
+    assert dto["source_readback_verified"] is True
+    assert dto["payload_preview_ref"].startswith("payloadpreview-")
+    assert dto["write_payload_preview_ref"].startswith("writepayloadpreview-")
+    assert len(dto["payload_preview_sha256"]) == 64
+    assert len(dto["write_payload_preview_sha256"]) == 64
+    assert dto["source_attestation_readback_review_readback_review_readback_review_ref"] == review["attestation_readback_review_readback_review_readback_review_ref"]
+    assert dto["payload_body_materialization_enabled"] is False
+    assert dto["payload_body_materialized"] is False
+    assert dto["markdown_body_included"] is False
+    assert dto["write_payload_included"] is False
+    assert dto["write_payload_materialized"] is False
+    assert dto["actual_downstream_consumption_executed"] is False
+    assert dto["replay_store_write_enabled"] is False
+    assert dto["real_replay_store_written"] is False
+    assert dto["mac_relay_tmp_root_write_smoke_enabled"] is False
+    assert dto["real_nas_production_write_enabled"] is False
+    assert dto["vps_nas_mount_enabled"] is False
+    assert dto["watcher_enabled"] is False
+    assert dto["cron_enabled"] is False
+    assert dto["dispatch_enabled"] is False
+    assert dto["authority_adapter_binding_enabled"] is False
+    assert dto["next_required_boundary"] == "fresh_request_builder_downstream_consumption_one_shot_mac_relay_tmp_root_write_smoke_after_payload_write_preview"
+    text = json.dumps(dto, sort_keys=True)
+    assert "must" + "-not-echo" not in text
+    assert "/vol" + "ume1/private" not in text
+    assert "sk" + "-test-secret" not in text
+    assert "markdown_body" not in dto
+    assert "write_payload" not in dto
+
+
+def test_consumption_payload_write_preview_contract_route_is_protected(tmp_path, monkeypatch):
+    store, _review = _seed_attestation_readback_review_readback_review_readback_review(tmp_path)
+    import hermes_cli.office_controlled_mutation as office_controlled_mutation
+
+    monkeypatch.setattr(office_controlled_mutation, "_default_fresh_request_builder_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review_readback_review_store_path", lambda: store)
+    route = "/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-write-preview-contract"
+    with TestClient(app) as client:
+        assert client.get(route).status_code == 401
+        response = client.get(route, headers={"X-Hermes-" + "Session-Token": globals()["_" + "SESSION_" + "TOKEN"]})
+        assert response.status_code == 200
+        body = response.json()
+        assert body["found"] is True
+        assert body["dto"]["payload_write_preview_contract_ready"] is True
+        assert body["dto"]["write_payload_included"] is False
         assert "records" not in body["dto"]
         assert "latest_record" not in body["dto"]

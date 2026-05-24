@@ -8948,3 +8948,67 @@ it("renders payload attestation readback review readback review readback review 
   expect(html).not.toContain("/vol" + "ume1/private");
   expect(html).not.toContain("sk" + "-test-secret");
 });
+
+
+it("NAS Keeper payload/write-payload preview contract panel is readonly and safe-ref only", () => {
+  const record = {
+    found: true,
+    errors: [],
+    dto: {
+      schema_version: 1,
+      mode: "nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_write_preview_contract",
+      payload_write_preview_contract_ready: true,
+      write_readiness_stage: "payload_write_preview_contract",
+      write_readiness_percent: 72,
+      source_readback_verified: true,
+      safe_ref_chain_verified: true,
+      source_attestation_readback_review_readback_review_readback_review_ref: "attestationreadbackreviewreadbackreviewreadbackreview-20260523143000-test0001",
+      source_attestation_readback_review_readback_review_readback_review_readback_sha256: "a".repeat(64),
+      payload_preview_ref: "payloadpreview-abcdef0123456789",
+      write_payload_preview_ref: "writepayloadpreview-abcdef0123456789",
+      payload_preview_sha256: "b".repeat(64),
+      write_payload_preview_sha256: "c".repeat(64),
+      payload_preview_contract_type: "safe_ref_checksum_only_no_body",
+      write_payload_preview_contract_type: "safe_ref_checksum_only_no_write_payload_object",
+      records_included: false,
+      latest_record_included: false,
+      payload_body_materialization_enabled: false,
+      payload_body_materialized: false,
+      downstream_consumption_enabled: false,
+      downstream_consumed: false,
+      actual_downstream_consumption_allowed: false,
+      actual_downstream_consumption_executed: false,
+      replay_store_write_enabled: false,
+      real_replay_store_written: false,
+      markdown_body_included: false,
+      write_payload_included: false,
+      write_payload_materialized: false,
+      raw_root_path_included: false,
+      secret_value_included: false,
+      watcher_enabled: false,
+      cron_enabled: false,
+      dispatch_enabled: false,
+      authority_adapter_binding_enabled: false,
+      mac_relay_tmp_root_write_smoke_enabled: false,
+      real_nas_production_write_enabled: false,
+      vps_nas_mount_enabled: false,
+      next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_mac_relay_tmp_root_write_smoke_after_payload_write_preview",
+      payload_write_preview_contract_sha256: "d".repeat(64),
+    },
+  } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractResult;
+
+  const html = renderToStaticMarkup(<OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractPanel record={record} error={null} />);
+
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-write-preview-contract="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-write-preview-contract-ready="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-write-preview-contract-write-payload-included="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-write-preview-contract-mac-relay-tmp-root-write="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-write-preview-contract-vps-nas-authority="false"');
+  expect(html).toContain("payload/write-payload preview contract");
+  expect(html).toContain("payloadpreview-abcdef0123456789");
+  expect(html).toContain("writepayloadpreview-abcdef0123456789");
+  expect(html).not.toMatch(/<button|<input|<select|<textarea|<form/i);
+  expect(html).not.toContain("must" + "-not-echo");
+  expect(html).not.toContain("/vol" + "ume1/private");
+  expect(html).not.toContain("sk" + "-test-secret");
+});
