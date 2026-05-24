@@ -14506,6 +14506,12 @@ export default function OfficePage() {
       <NasKeeperTerminalExecutionStateCompletionReviewPanel result={nasKeeperGuardedFailureStateResult} error={nasKeeperGuardedFailureStateError} />
       </OfficeVisualizerEvidenceDrawer>
 
+      <OfficeControlledMutationCompactDashboardPanel latestApproval={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult} detailCount={12}>
+        <div className="border border-current/15 bg-black/15 p-3" data-office-controlled-mutation-archive-placeholder="true">
+          이전 controlled-mutation 사다리는 기본 화면에서 숨겼습니다. 필요한 회귀 검증은 protected API와 테스트에서 확인합니다.
+        </div>
+      </OfficeControlledMutationCompactDashboardPanel>
+
       {SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES ? (
         <>
       <OfficeDeskRpgRoomShell projection={deskRpgProjection} />
