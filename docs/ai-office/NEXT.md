@@ -1,105 +1,92 @@
-## Current status — Mac relay real NAS write execution envelope after dry-run seal (2026-05-24T11:25:29Z)
+## Current status — Mac relay real NAS write execution record after execution envelope (2026-05-24T12:19:27Z)
 
-- Local `main` and `origin/main`: `a9030049315fa32868314b9fd189dd08bc83c56c`.
-- Latest code commit: `a90300493 feat(office): add Mac relay NAS write execution envelope`.
-- Local git was clean after code commit/push before docs update.
-- VPS `/home/hermes/.hermes/hermes-agent`: `a9030049315fa32868314b9fd189dd08bc83c56c`.
-- VPS `/home/hermes/.hermes/ai-office-dashboard`: `a9030049315fa32868314b9fd189dd08bc83c56c`.
-- VPS dashboard restarted only; active with `MainPID=932552`, `ActiveEnterTimestamp=Sun 2026-05-24 11:23:50 UTC`.
-- Gateway was not restarted or modified; live `systemctl --user show` reported `ActiveState=inactive`, `MainPID=0` at handoff time.
+- Local `main` and `origin/main`: `7726c80deb98637afca83dfdb3606a08e158b897`.
+- Latest code commit: `7726c80de feat(office): record Mac relay NAS write execution proof`.
+- Local git was clean after code commit/deploy before this docs update.
+- VPS `/home/hermes/.hermes/hermes-agent`: `7726c80deb98637afca83dfdb3606a08e158b897`, clean.
+- VPS `/home/hermes/.hermes/ai-office-dashboard`: `7726c80deb98637afca83dfdb3606a08e158b897`, clean.
+- Dashboard service restarted only: `hermes-agent-dashboard.service`, active, `MainPID=935101`, `ActiveEnterTimestamp=Sun 2026-05-24 12:06:41 UTC`.
+- Gateway was not restarted or modified: `hermes-gateway.service`, active, `MainPID=812845`, `ActiveEnterTimestamp=Fri 2026-05-22 11:14:49 UTC`.
 
-Completed rung:
+## Latest completed rung
 
-- `fresh_request_builder_downstream_consumption_one_shot_mac_relay_real_nas_write_execution_envelope_after_dry_run_seal`
+`fresh_request_builder_downstream_consumption_one_shot_mac_relay_real_nas_write_execution_record_after_execution_envelope`
+
+Implemented a protected metadata-only real NAS write execution-record/pre-execution-proof rung sourced from the prior execution envelope.
 
 Added protected API:
 
-- `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-execution-envelope`
-- `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-execution-envelope`
+- `GET /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-execution-record`
+- `POST /api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-execution-record`
 
 Added UI panel:
 
-- `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionEnvelopePanel`
+- `NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordPanel`
 
 DOM hook:
 
-- `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-execution-envelope="true"`
+- `data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-execution-record="true"`
 
-Live smoke summary:
+## Safety boundaries preserved
+
+- Real NAS production write remains disabled and was not executed.
+- VPS direct NAS authority remains disabled.
+- Watcher/cron/dispatcher/authority-adapter remain disabled.
+- Public exposure remains disabled.
+- Gateway restart was not performed.
+- Replay-store write remains disabled.
+- Markdown/body payload, `write_payload`, raw root path, and secret values are not projected or echoed.
+- The record is metadata-only and does not materialize payload/write payload.
+
+## Live protected API smoke
 
 - unauthenticated GET: `401`
 - unauthenticated POST: `401`
-- authenticated dry-run seal GET: `200`
-- authenticated execution-envelope POST: `200`
-- duplicate POST: `200`, `idempotency_replayed=true`
-- authenticated execution-envelope GET: `200`
-- `found=true`
-- `record_count=1`
-- `mac_relay_real_nas_write_execution_envelope_ready=true`
-- `source_mac_relay_real_nas_write_dry_run_seal_verified=true`
-- `source_dry_run_seal_contract_verified=true`
-- `target_filename_contract_verified=true`
-- `post_write_verification_contract_verified=true`
-- `safe_ref_chain_verified=true`
-- `write_readiness_percent=100`
-- envelope checksum length: `64`
-- `metadata_only_record_write_executed=true`
-- `execution_envelope_does_not_execute_write=true`
+- source execution-envelope GET: `200`
+- authenticated POST: `200`
+- duplicate authenticated POST: `200`
+- duplicate replayed: `true`
+- authenticated GET: `200`
+- found: `true`
+- record_count: `1`
+- `mac_relay_real_nas_write_execution_record_ready=true`
+- `source_mac_relay_real_nas_write_execution_envelope_verified=true`
+- `source_execution_envelope_contract_verified=true`
+- `pre_execution_proof_recorded=true`
+- `execution_record_does_not_execute_write=true`
+- `execution_record_does_not_materialize_payload=true`
+- `mac_relay_real_nas_write_execution_record_sha256` length: `64`
 - `real_nas_production_write_enabled=false`
 - `real_nas_production_write_executed=false`
 - `vps_direct_nas_authority_enabled=false`
-- `watcher_enabled=false`
-- `cron_enabled=false`
-- `dispatch_enabled=false`
-- `authority_adapter_binding_enabled=false`
-- `public_exposure_enabled=false`
-- `gateway_restart_required=false`
 - raw leak: `false`
+- smoke latest ref: `nasexecrec-20260524120916-smoke0001`
 
-DOM smoke:
+## DOM smoke
 
-- panel found: `true`
+- execution-record panel found: `true`
 - ready attr: `true`
-- replay-store-write attr: `false`
 - real NAS production attr: `false`
 - VPS NAS authority attr: `false`
 - controls: `0`
 - contains `100%`: `true`
-- contains `execution_envelope_does_not_execute_write`: `true`
-- contains post-write verification plan line: `true`
+- contains `execution_record_does_not_execute_write`: `true`
+- contains `real_nas_write_execution_record_includes_pre_execution_proof`: `true`
 - raw leak: `false`
 - browser console JS errors: `0`
 
-Verification completed:
+## Verification completed
 
-- `py_compile` passed for edited backend modules.
-- focused Python chain tests: `75 passed`.
-- focused Office web tests: `10 passed` for NAS Keeper Mac relay panels.
-- `npm run lint` passed with existing warnings only.
-- `npm run build` passed with existing Vite chunk-size warning only.
-- `git diff --check` passed.
-- added-line leak sentinel passed.
+- `py_compile`: passed
+- focused Python chain tests: `77 passed`
+- focused Office web tests: `22 passed`
+- eslint: passed, existing warnings only
+- `npm run build`: passed, existing Vite chunk-size warning only
+- `git diff --check`: passed
+- added-line leak sentinel: passed
 
-Boundary status:
+## Next recommended rung
 
-- Real NAS production write execution remains disabled and unexecuted.
-- VPS direct NAS authority remains disabled.
-- Watcher, cron, dispatcher, and authority-adapter remain disabled.
-- Public exposure remains disabled.
-- Gateway restart was not performed.
-- Metadata-only record write occurred for the execution envelope.
-- Mac relay tmp-root write smoke remains the only approved filesystem-write evidence class in the chain.
-- No markdown/body payload, write-payload object, raw root path, or secret value is echoed in API/DOM smoke.
+`fresh_request_builder_downstream_consumption_one_shot_mac_relay_real_nas_write_final_execution_gate_after_execution_record`
 
-Next recommended rung:
-
-- `fresh_request_builder_downstream_consumption_one_shot_mac_relay_real_nas_write_execution_record_after_execution_envelope`
-
-Next rung guardrails:
-
-- Continue to keep real NAS production write disabled until an explicit separate approval says otherwise.
-- Use the execution-envelope record as the source.
-- If proceeding without production write approval, record only a metadata-only execution-record placeholder / final pre-execution record, not a real NAS write.
-- Keep protected Office API only.
-- Do not enable VPS direct NAS authority, watcher, cron, dispatcher, authority-adapter, public exposure, or gateway restart.
-- Dashboard restart remains allowed; gateway restart remains forbidden.
+Recommended scope: add a metadata-only final execution gate sourced from this execution-record/pre-execution-proof. This should be the last explicit gate before any future real NAS write approval, but under the current boundary it must still not execute real NAS production write. Continue using protected Office APIs only, no watcher/cron/dispatcher/authority-adapter, no VPS NAS authority, no public exposure, no gateway restart, and no raw markdown/path/secret echo.
