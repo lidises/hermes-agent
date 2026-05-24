@@ -9936,3 +9936,47 @@ it("NAS Keeper manual real NAS write boundary panel stays display-only and seals
   const forbiddenSecret = ['sk', 'test', 'secret'].join('-');
   expect(html).not.toContain(forbiddenSecret);
 });
+
+
+it("NAS Keeper separate real NAS production write approval panel stays display-only and keeps production write disabled", () => {
+  const record = {
+    found: true,
+    dto: {
+      separate_real_nas_production_write_approval_ready: true,
+      source_manual_real_nas_write_boundary_verified: true,
+      approval_envelope_recorded: true,
+      approval_token_recorded: true,
+      approval_does_not_execute_write: true,
+      real_nas_production_write_enabled: false,
+      vps_direct_nas_authority_enabled: false,
+      payload_write_preview_contract_verified: true,
+      replay_idempotency_metadata_recorded: true,
+      mac_relay_tmp_root_write_smoke_executed: true,
+      write_readiness_percent: 100,
+      approval_includes_payload_body: false,
+      approval_includes_write_payload: false,
+      approval_includes_raw_root_path: false,
+      approval_includes_secret_value: false,
+      separate_real_nas_production_write_approval_sha256: "e".repeat(64),
+      separate_real_nas_production_write_approval_ref: "nasprodapproval-20260524143000-test0001",
+    },
+    errors: [],
+  };
+  const html = renderToStaticMarkup(<OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalPanel record={record} error={null} />);
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-separate-real-nas-production-write-approval="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-separate-real-nas-production-write-approval-ready="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-separate-real-nas-production-write-approval-real-nas-production="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-separate-real-nas-production-write-approval-vps-nas-authority="false"');
+  expect(html).toContain('100%');
+  expect(html).toContain('approval_does_not_execute_write');
+  expect(html).toContain('approval_envelope_recorded');
+  expect(html).toContain('payload_write_preview_contract_verified');
+  expect(html).toContain('replay_idempotency_metadata_recorded');
+  expect(html).not.toMatch(/<button|<input|<select|<textarea|<form/i);
+  const forbiddenBody = ["must", "not", "echo"].join("-");
+  const forbiddenPath = ["", "volume1", "private"].join("/");
+  const forbiddenSecret = ["sk", "test", "secret"].join("-");
+  expect(html).not.toContain(forbiddenBody);
+  expect(html).not.toContain(forbiddenPath);
+  expect(html).not.toContain(forbiddenSecret);
+});

@@ -4003,6 +4003,18 @@ export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMa
   dto?: Record<string, unknown> | null;
 }
 
+export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult {
+  found?: boolean;
+  stored?: boolean;
+  idempotency_replayed?: boolean;
+  errors: Array<{ field: string; code: string }>;
+  record_count?: number;
+  skipped_count?: number;
+  records?: Record<string, unknown>[];
+  latest_record?: Record<string, unknown> | null;
+  dto?: Record<string, unknown> | null;
+}
+
 export interface OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractResult {
   found?: boolean;
   errors: Array<{ field: string; code: string }>;
@@ -4901,6 +4913,10 @@ export const api = {
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-manual-real-nas-write-boundary"),
   postOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundary: (payload: Record<string, unknown>) =>
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-manual-real-nas-write-boundary", { method: "POST", body: JSON.stringify(payload) }),
+  getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApproval: () =>
+    fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-separate-real-nas-production-write-approval"),
+  postOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApproval: (payload: Record<string, unknown>) =>
+    fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-separate-real-nas-production-write-approval", { method: "POST", body: JSON.stringify(payload) }),
   getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContract: () =>
     fetchJSON<OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-payload-write-preview-contract"),
   postOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackReview: (payload: Record<string, unknown>) =>

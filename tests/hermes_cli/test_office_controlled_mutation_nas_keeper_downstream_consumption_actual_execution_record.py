@@ -67,6 +67,8 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_real_nas_write_final_execution_gate_records,
     append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_manual_real_nas_write_boundary,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_manual_real_nas_write_boundary_records,
+    append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_separate_real_nas_production_write_approval,
+    list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_separate_real_nas_production_write_approval_records,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_post_execution_record_readback,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_records,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_records,
@@ -3937,6 +3939,148 @@ def test_manual_real_nas_write_boundary_route_is_protected_and_records(tmp_path,
         body = response.json()
         assert body["stored"] is True
         assert body["dto"]["manual_real_nas_write_boundary_ready"] is True
+        assert body["dto"]["real_nas_production_write_enabled"] is False
+        listed = client.get(route, headers={"X-Hermes-Session-Token": _SESSION_TOKEN})
+        assert listed.status_code == 200
+        assert listed.json()["found"] is True
+
+
+
+def _seed_manual_real_nas_write_boundary(tmp_path):
+    final_gate_store, final_gate = _seed_mac_relay_real_nas_write_final_execution_gate(tmp_path)
+    boundary_store = tmp_path / "manual-real-nas-write-boundary-seed.jsonl"
+    result = append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_manual_real_nas_write_boundary(
+        {
+            "manual_real_nas_write_boundary_ref": "nasmanualboundary-20260524142000-seed0001",
+            "mac_relay_real_nas_write_final_execution_gate_ref": final_gate["mac_relay_real_nas_write_final_execution_gate_ref"],
+            "mac_relay_real_nas_write_final_execution_gate_sha256": final_gate["mac_relay_real_nas_write_final_execution_gate_sha256"],
+            "idempotency_key_sha256": final_gate["idempotency_key_sha256"],
+            "target_filename_contract_ref": final_gate["target_filename_contract_ref"],
+            "post_write_verification_contract_ref": final_gate["post_write_verification_contract_ref"],
+            "pre_execution_proof_ref": final_gate["pre_execution_proof_ref"],
+            "manual_boundary_decision": "manual_real_nas_write_boundary_recorded_no_production_write",
+            "recorded_by": "operator:seed",
+            "recorded_at": "2026-05-24T14:20:00Z",
+        },
+        final_execution_gate_store_path=final_gate_store,
+        store_path=boundary_store,
+    )
+    assert result["stored"] is True
+    return boundary_store, result["dto"]
+
+
+def test_separate_real_nas_production_write_approval_after_manual_boundary_records_approval_envelope_without_write(tmp_path):
+    boundary_store, boundary = _seed_manual_real_nas_write_boundary(tmp_path)
+    approval_store = tmp_path / "separate-real-nas-production-write-approval.jsonl"
+    forbidden_body = "must" + "-not" + "-echo"
+    forbidden_path = "/" + "volume1" + "/private"
+    forbidden_secret = "sk" + "-test" + "-secret"
+    payload = {
+        "separate_real_nas_production_write_approval_ref": "nasprodapproval-20260524143000-test0001",
+        "manual_real_nas_write_boundary_ref": boundary["manual_real_nas_write_boundary_ref"],
+        "manual_real_nas_write_boundary_sha256": boundary["manual_real_nas_write_boundary_sha256"],
+        "idempotency_key_sha256": boundary["idempotency_key_sha256"],
+        "target_filename_contract_ref": boundary["target_filename_contract_ref"],
+        "post_write_verification_contract_ref": boundary["post_write_verification_contract_ref"],
+        "pre_execution_proof_ref": boundary["pre_execution_proof_ref"],
+        "approval_token_ref": "approvaltoken-20260524143000-test0001",
+        "approval_envelope_ref": "approvalenvelope-20260524143000-test0001",
+        "approval_decision": "separate_exact_real_nas_production_write_approval_envelope_recorded_no_write",
+        "approved_by": "operator:test",
+        "approved_at": "2026-05-24T14:30:00Z",
+        "markdown_body": forbidden_body,
+        "write_payload": {"body": forbidden_body},
+        "raw_root_path": forbidden_path,
+        "credential_value": forbidden_secret,
+    }
+    result = append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_separate_real_nas_production_write_approval(
+        payload,
+        manual_boundary_store_path=boundary_store,
+        store_path=approval_store,
+    )
+    assert result["stored"] is True
+    dto = result["dto"]
+    assert dto["separate_real_nas_production_write_approval_ready"] is True
+    assert dto["source_manual_real_nas_write_boundary_verified"] is True
+    assert dto["source_manual_boundary_contract_verified"] is True
+    assert dto["approval_envelope_recorded"] is True
+    assert dto["approval_token_recorded"] is True
+    assert dto["approval_is_metadata_only"] is True
+    assert dto["approval_does_not_execute_write"] is True
+    assert dto["approval_does_not_materialize_payload"] is True
+    assert dto["manual_boundary_does_not_execute_write"] is True
+    assert dto["mac_relay_operator_presence_required"] is True
+    assert dto["target_filename_contract_verified"] is True
+    assert dto["post_write_verification_contract_verified"] is True
+    assert dto["write_readiness_stage"] == "separate_real_nas_production_write_approval_after_manual_boundary"
+    assert dto["write_readiness_percent"] == 100
+    assert len(dto["separate_real_nas_production_write_approval_sha256"]) == 64
+    assert dto["metadata_only_record_write_executed"] is True
+    assert dto["mac_relay_tmp_root_write_smoke_executed"] is True
+    assert dto["tmp_root_filesystem_write_executed"] is True
+    assert dto["tmp_root_readback_verified"] is True
+    assert dto["payload_write_preview_contract_verified"] is True
+    assert dto["replay_idempotency_metadata_recorded"] is True
+    assert dto["real_nas_production_write_enabled"] is False
+    assert dto["real_nas_production_write_executed"] is False
+    assert dto["vps_direct_nas_authority_enabled"] is False
+    assert dto["watcher_enabled"] is False
+    assert dto["cron_enabled"] is False
+    assert dto["dispatch_enabled"] is False
+    assert dto["authority_adapter_binding_enabled"] is False
+    assert dto["public_exposure_enabled"] is False
+    assert dto["gateway_restart_required"] is False
+    assert dto["approval_includes_payload_body"] is False
+    assert dto["approval_includes_write_payload"] is False
+    assert dto["approval_includes_raw_root_path"] is False
+    assert dto["approval_includes_secret_value"] is False
+    assert dto["next_required_boundary"] == "fresh_request_builder_downstream_consumption_one_shot_real_nas_production_write_execution_after_separate_approval"
+    text = json.dumps(dto, sort_keys=True)
+    assert forbidden_body not in text
+    assert forbidden_path not in text
+    assert forbidden_secret not in text
+
+    duplicate = append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_separate_real_nas_production_write_approval(
+        payload,
+        manual_boundary_store_path=boundary_store,
+        store_path=approval_store,
+    )
+    assert duplicate["idempotency_replayed"] is True
+    assert duplicate["dto"]["idempotency_duplicate_approval_skipped"] is True
+    listed = list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_separate_real_nas_production_write_approval_records(store_path=approval_store)
+    assert listed["found"] is True
+    assert listed["latest_record"]["separate_real_nas_production_write_approval_ref"] == "nasprodapproval-20260524143000-test0001"
+
+
+def test_separate_real_nas_production_write_approval_route_is_protected_and_records(tmp_path, monkeypatch):
+    boundary_store, boundary = _seed_manual_real_nas_write_boundary(tmp_path)
+    approval_store = tmp_path / "separate-real-nas-production-write-approval-route.jsonl"
+    import hermes_cli.office_controlled_mutation as office_controlled_mutation
+    monkeypatch.setattr(office_controlled_mutation, "_default_fresh_request_builder_downstream_consumption_manual_real_nas_write_boundary_store_path", lambda: boundary_store)
+    monkeypatch.setattr(office_controlled_mutation, "_default_fresh_request_builder_downstream_consumption_separate_real_nas_production_write_approval_store_path", lambda: approval_store)
+    route = "/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-separate-real-nas-production-write-approval"
+    payload = {
+        "separate_real_nas_production_write_approval_ref": "nasprodapproval-20260524143100-route1",
+        "manual_real_nas_write_boundary_ref": boundary["manual_real_nas_write_boundary_ref"],
+        "manual_real_nas_write_boundary_sha256": boundary["manual_real_nas_write_boundary_sha256"],
+        "idempotency_key_sha256": boundary["idempotency_key_sha256"],
+        "target_filename_contract_ref": boundary["target_filename_contract_ref"],
+        "post_write_verification_contract_ref": boundary["post_write_verification_contract_ref"],
+        "pre_execution_proof_ref": boundary["pre_execution_proof_ref"],
+        "approval_token_ref": "approvaltoken-20260524143100-route1",
+        "approval_envelope_ref": "approvalenvelope-20260524143100-route1",
+        "approval_decision": "separate_exact_real_nas_production_write_approval_envelope_recorded_no_write",
+        "approved_by": "operator:route",
+        "approved_at": "2026-05-24T14:31:00Z",
+    }
+    with TestClient(app) as client:
+        assert client.get(route).status_code == 401
+        assert client.post(route, json=payload).status_code == 401
+        response = client.post(route, json=payload, headers={"X-Hermes-Session-Token": _SESSION_TOKEN})
+        assert response.status_code == 200
+        body = response.json()
+        assert body["stored"] is True
+        assert body["dto"]["separate_real_nas_production_write_approval_ready"] is True
         assert body["dto"]["real_nas_production_write_enabled"] is False
         listed = client.get(route, headers={"X-Hermes-Session-Token": _SESSION_TOKEN})
         assert listed.status_code == 200

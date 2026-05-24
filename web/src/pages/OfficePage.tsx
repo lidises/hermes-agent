@@ -9612,6 +9612,56 @@ export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRea
   );
 }
 
+
+export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalPanel({
+  record,
+  error,
+}: {
+  record?: { found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null;
+  error?: string | null;
+}) {
+  const dto = (record?.dto || record?.latest_record) as Record<string, unknown> | null | undefined;
+  return (
+    <section
+      className="office-panel office-panel--readonly"
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-separate-real-nas-production-write-approval="true"
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-separate-real-nas-production-write-approval-ready={String(Boolean(dto?.separate_real_nas_production_write_approval_ready))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-separate-real-nas-production-write-approval-real-nas-production={String(Boolean(dto?.real_nas_production_write_enabled) || Boolean(dto?.real_nas_production_write_executed))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-separate-real-nas-production-write-approval-vps-nas-authority={String(Boolean(dto?.vps_nas_mount_enabled) || Boolean(dto?.vps_direct_nas_authority_enabled))}
+    >
+      <div className="office-panel__eyebrow">NAS KEEPER · SEPARATE REAL NAS PRODUCTION WRITE APPROVAL</div>
+      <h3>별도 real NAS production write 승인 envelope</h3>
+      <p className="office-panel__copy">
+        수동 boundary 이후 future production write를 위한 approval envelope/token만 metadata-only로 기록합니다. 이 패널은 real NAS production write, payload materialization, VPS NAS authority, watcher/cron/dispatch를 실행하지 않습니다.
+      </p>
+      {error ? <p className="office-panel__error">{error}</p> : null}
+      <div className="office-readiness-grid">
+        <div><strong>{String(dto?.write_readiness_percent ?? 0)}%</strong><span>write-readiness</span></div>
+        <div><strong>{String(Boolean(dto?.approval_envelope_recorded))}</strong><span>approval_envelope_recorded</span></div>
+        <div><strong>{String(Boolean(dto?.approval_token_recorded))}</strong><span>approval_token_recorded</span></div>
+        <div><strong>{String(Boolean(dto?.approval_does_not_execute_write))}</strong><span>approval_does_not_execute_write</span></div>
+      </div>
+      <ul className="office-safe-list">
+        <li>source manual boundary verified: {String(Boolean(dto?.source_manual_real_nas_write_boundary_verified))}</li>
+        <li>source manual boundary contract verified: {String(Boolean(dto?.source_manual_boundary_contract_verified))}</li>
+        <li>payload_write_preview_contract_verified: {String(Boolean(dto?.payload_write_preview_contract_verified))}</li>
+        <li>replay_idempotency_metadata_recorded: {String(Boolean(dto?.replay_idempotency_metadata_recorded))}</li>
+        <li>Mac relay tmp-root write smoke executed: {String(Boolean(dto?.mac_relay_tmp_root_write_smoke_executed))}</li>
+        <li>target filename contract verified: {String(Boolean(dto?.target_filename_contract_verified))}</li>
+        <li>post-write verification contract verified: {String(Boolean(dto?.post_write_verification_contract_verified))}</li>
+        <li>payload body included: {String(Boolean(dto?.approval_includes_payload_body))}</li>
+        <li>write payload included: {String(Boolean(dto?.approval_includes_write_payload))}</li>
+        <li>raw root path included: {String(Boolean(dto?.approval_includes_raw_root_path))}</li>
+        <li>secret included: {String(Boolean(dto?.approval_includes_secret_value))}</li>
+        <li>real NAS production enabled/executed: {String(Boolean(dto?.real_nas_production_write_enabled) || Boolean(dto?.real_nas_production_write_executed))}</li>
+        <li>VPS NAS authority enabled: {String(Boolean(dto?.vps_direct_nas_authority_enabled))}</li>
+        <li>watcher/cron/dispatch/authority-adapter/public: {String(Boolean(dto?.watcher_enabled) || Boolean(dto?.cron_enabled) || Boolean(dto?.dispatch_enabled) || Boolean(dto?.authority_adapter_binding_enabled) || Boolean(dto?.public_exposure_enabled))}</li>
+      </ul>
+      <p className="office-panel__meta">ref: {String(dto?.separate_real_nas_production_write_approval_ref ?? "none")} · sha256: {String(dto?.separate_real_nas_production_write_approval_sha256 ?? "none")}</p>
+    </section>
+  );
+}
+
 export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractPanel({
   record,
   error,
@@ -12016,6 +12066,8 @@ export default function OfficePage() {
   const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteFinalExecutionGateError, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteFinalExecutionGateError] = useState<string | null>(null);
   const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryResult, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryResult] = useState<{ found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null>(null);
   const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryError, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryError] = useState<string | null>(null);
+  const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult] = useState<{ found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null>(null);
+  const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalError, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalError] = useState<string | null>(null);
   const nasKeeperClaimDryRunKeyRef = useRef<string | null>(null);
   const nasKeeperAuthorizationKeyRef = useRef<string | null>(null);
   const nasKeeperPayloadPreviewKeyRef = useRef<string | null>(null);
@@ -13091,6 +13143,20 @@ export default function OfficePage() {
         setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryError("request failed");
       });
   }, [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryResult]);
+
+
+  useEffect(() => {
+    if (nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult?.dto || nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult?.latest_record) return;
+    api.getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApproval()
+      .then((result) => {
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult(result);
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalError(null);
+      })
+      .catch(() => {
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult(null);
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalError("request failed");
+      });
+  }, [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult]);
 
   useEffect(() => {
     if (nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractResult?.dto) return;
@@ -14302,6 +14368,7 @@ export default function OfficePage() {
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteFinalExecutionGatePanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteFinalExecutionGateResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteFinalExecutionGateError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryError} />
+      <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewRecordPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewRecordResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewRecordError} />
 
