@@ -9564,6 +9564,54 @@ export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayR
   );
 }
 
+
+export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryPanel({
+  record,
+  error,
+}: {
+  record?: { found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null;
+  error?: string | null;
+}) {
+  const dto = (record?.dto || record?.latest_record) as Record<string, unknown> | null | undefined;
+  return (
+    <section
+      className="office-panel office-panel--readonly"
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-manual-real-nas-write-boundary="true"
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-manual-real-nas-write-boundary-ready={String(Boolean(dto?.manual_real_nas_write_boundary_ready))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-manual-real-nas-write-boundary-real-nas-production={String(Boolean(dto?.real_nas_production_write_enabled) || Boolean(dto?.real_nas_production_write_executed))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-manual-real-nas-write-boundary-vps-nas-authority={String(Boolean(dto?.vps_nas_mount_enabled) || Boolean(dto?.vps_direct_nas_authority_enabled))}
+    >
+      <div className="office-panel__eyebrow">NAS KEEPER · MANUAL REAL NAS WRITE BOUNDARY</div>
+      <h3>수동 real NAS write 경계 계약</h3>
+      <p className="office-panel__copy">
+        final execution gate 이후 별도 정확 승인과 Mac relay operator presence가 필요한 마지막 수동 경계를 metadata-only로 기록합니다. 이 패널은 production write, payload materialization, VPS NAS authority, watcher/cron/dispatch를 실행하지 않습니다.
+      </p>
+      {error ? <p className="office-panel__error">{error}</p> : null}
+      <div className="office-readiness-grid">
+        <div><strong>{String(dto?.write_readiness_percent ?? 0)}%</strong><span>write-readiness</span></div>
+        <div><strong>{String(Boolean(dto?.manual_boundary_contract_recorded))}</strong><span>manual_boundary_contract_recorded</span></div>
+        <div><strong>{String(Boolean(dto?.separate_exact_real_nas_write_approval_required))}</strong><span>separate_exact_real_nas_write_approval_required</span></div>
+        <div><strong>{String(Boolean(dto?.manual_boundary_does_not_execute_write))}</strong><span>manual_boundary_does_not_execute_write</span></div>
+      </div>
+      <ul className="office-safe-list">
+        <li>source final gate verified: {String(Boolean(dto?.source_mac_relay_real_nas_write_final_execution_gate_verified))}</li>
+        <li>source final gate contract verified: {String(Boolean(dto?.source_final_execution_gate_contract_verified))}</li>
+        <li>target filename contract verified: {String(Boolean(dto?.target_filename_contract_verified))}</li>
+        <li>post-write verification contract verified: {String(Boolean(dto?.post_write_verification_contract_verified))}</li>
+        <li>Mac relay operator presence required: {String(Boolean(dto?.mac_relay_operator_presence_required))}</li>
+        <li>payload body included: {String(Boolean(dto?.manual_boundary_includes_payload_body))}</li>
+        <li>write payload included: {String(Boolean(dto?.manual_boundary_includes_write_payload))}</li>
+        <li>raw root path included: {String(Boolean(dto?.manual_boundary_includes_raw_root_path))}</li>
+        <li>secret included: {String(Boolean(dto?.manual_boundary_includes_secret_value))}</li>
+        <li>real NAS production enabled/executed: {String(Boolean(dto?.real_nas_production_write_enabled) || Boolean(dto?.real_nas_production_write_executed))}</li>
+        <li>VPS NAS authority enabled: {String(Boolean(dto?.vps_direct_nas_authority_enabled))}</li>
+        <li>watcher/cron/dispatch/authority-adapter/public: {String(Boolean(dto?.watcher_enabled) || Boolean(dto?.cron_enabled) || Boolean(dto?.dispatch_enabled) || Boolean(dto?.authority_adapter_binding_enabled) || Boolean(dto?.public_exposure_enabled))}</li>
+      </ul>
+      <p className="office-panel__meta">ref: {String(dto?.manual_real_nas_write_boundary_ref ?? "none")} · sha256: {String(dto?.manual_real_nas_write_boundary_sha256 ?? "none")}</p>
+    </section>
+  );
+}
+
 export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractPanel({
   record,
   error,
@@ -11966,6 +12014,8 @@ export default function OfficePage() {
   const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordError, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordError] = useState<string | null>(null);
   const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteFinalExecutionGateResult, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteFinalExecutionGateResult] = useState<{ found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null>(null);
   const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteFinalExecutionGateError, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteFinalExecutionGateError] = useState<string | null>(null);
+  const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryResult, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryResult] = useState<{ found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null>(null);
+  const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryError, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryError] = useState<string | null>(null);
   const nasKeeperClaimDryRunKeyRef = useRef<string | null>(null);
   const nasKeeperAuthorizationKeyRef = useRef<string | null>(null);
   const nasKeeperPayloadPreviewKeyRef = useRef<string | null>(null);
@@ -13028,6 +13078,19 @@ export default function OfficePage() {
         setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteFinalExecutionGateError("request failed");
       });
   }, [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteFinalExecutionGateResult]);
+
+  useEffect(() => {
+    if (nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryResult?.dto || nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryResult?.latest_record) return;
+    api.getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundary()
+      .then((result) => {
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryResult(result);
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryError(null);
+      })
+      .catch(() => {
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryResult(null);
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryError("request failed");
+      });
+  }, [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryResult]);
 
   useEffect(() => {
     if (nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractResult?.dto) return;
@@ -14238,6 +14301,7 @@ export default function OfficePage() {
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionEnvelopePanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionEnvelopeResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionEnvelopeError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteFinalExecutionGatePanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteFinalExecutionGateResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteFinalExecutionGateError} />
+      <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewRecordPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewRecordResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewRecordError} />
 

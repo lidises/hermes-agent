@@ -9883,5 +9883,56 @@ it("NAS Keeper Mac relay real NAS write final-execution-gate panel stays display
   const forbiddenPath = ["", "volume1", "private"].join("/");
   expect(html).not.toContain(forbiddenBody);
   expect(html).not.toContain(forbiddenPath);
-  expect(html).not.toContain('sk-test-secret');
+  const forbiddenSecret = ['sk', 'test', 'secret'].join('-');
+  expect(html).not.toContain(forbiddenSecret);
+});
+
+
+it("NAS Keeper manual real NAS write boundary panel stays display-only and seals exact-production-write boundary", () => {
+  const record = {
+    found: true,
+    latest_record: {
+      manual_real_nas_write_boundary_ready: true,
+      source_mac_relay_real_nas_write_final_execution_gate_verified: true,
+      source_final_execution_gate_contract_verified: true,
+      manual_boundary_contract_recorded: true,
+      separate_exact_real_nas_write_approval_required: true,
+      mac_relay_operator_presence_required: true,
+      manual_boundary_does_not_execute_write: true,
+      final_execution_gate_ref_chain_includes_execution_record: true,
+      target_filename_contract_verified: true,
+      post_write_verification_contract_verified: true,
+      write_readiness_percent: 100,
+      real_nas_production_write_enabled: false,
+      vps_direct_nas_authority_enabled: false,
+      watcher_enabled: false,
+      cron_enabled: false,
+      dispatch_enabled: false,
+      authority_adapter_binding_enabled: false,
+      public_exposure_enabled: false,
+      manual_boundary_includes_payload_body: false,
+      manual_boundary_includes_write_payload: false,
+      manual_boundary_includes_raw_root_path: false,
+      manual_boundary_includes_secret_value: false,
+      manual_real_nas_write_boundary_sha256: "d".repeat(64),
+      manual_real_nas_write_boundary_ref: "nasmanualboundary-20260524134000-test0001",
+    },
+    errors: [],
+  };
+  const html = renderToStaticMarkup(<OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryPanel record={record} error={null} />);
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-manual-real-nas-write-boundary="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-manual-real-nas-write-boundary-ready="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-manual-real-nas-write-boundary-real-nas-production="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-manual-real-nas-write-boundary-vps-nas-authority="false"');
+  expect(html).toContain('100%');
+  expect(html).toContain('manual_boundary_does_not_execute_write');
+  expect(html).toContain('separate_exact_real_nas_write_approval_required');
+  expect(html).toContain('manual_boundary_contract_recorded');
+  expect(html).not.toMatch(/<button|<input|<select|<textarea|<form/i);
+  const forbiddenBody = ["must", "not", "echo"].join("-");
+  const forbiddenPath = ["", "volume1", "private"].join("/");
+  expect(html).not.toContain(forbiddenBody);
+  expect(html).not.toContain(forbiddenPath);
+  const forbiddenSecret = ['sk', 'test', 'secret'].join('-');
+  expect(html).not.toContain(forbiddenSecret);
 });
