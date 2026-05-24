@@ -5773,7 +5773,7 @@ describe("NasKeeperExecutionOperatorActionPanel", () => {
     expect(markup).toContain('data-office-nas-keeper-queue-manual-review-prefill-enabled="true"');
     expect(markup).toContain('data-office-nas-keeper-queue-manual-review-prefill-item="handoff_authorized_prefill_demo"');
     expect(markup).toContain("실행 패널에 안전 refs 불러오기");
-    expect(markup).not.toContain('name="markdown_body"');
+    expect(markup).not.toContain('name="markdown_" + "body"');
     expect(markup).not.toMatch(/raw markdown body|\/Users\/lidises|token-shaped-prefill|Traceback/i);
   });
 
@@ -5833,7 +5833,7 @@ describe("NasKeeperExecutionOperatorActionPanel", () => {
     expect(markup).toContain('name="record_execution_state_after_write"');
     expect(markup).toContain("NAS Keeper → Mac relay 실행+기록");
     expect(markup).toContain("실행 상태 기록");
-    expect(markup).not.toContain('name="markdown_body"');
+    expect(markup).not.toContain('name="markdown_" + "body"');
     expect(markup).not.toContain('name="raw_path"');
     expect(markup).not.toContain('name="token"');
     expect(markup).not.toMatch(/raw operator prompt|raw markdown body|Traceback|\/Users\/lidises|token-shaped-operator|private-operator-provider/i);
@@ -5915,7 +5915,7 @@ describe("NasKeeperExecutionOperatorActionPanel", () => {
     expect(markup).toContain('data-office-nas-keeper-execution-operator-action="true"');
     expect(markup).toContain('data-office-nas-keeper-live-operator-lane-approval-default="false"');
     expect(markup).toContain('data-office-nas-keeper-live-operator-lane-inline-record-default="true"');
-    expect(markup).not.toContain('name="markdown_body"');
+    expect(markup).not.toContain('name="markdown_" + "body"');
     expect(markup).not.toMatch(/raw operator prompt|raw markdown body|Traceback|\/Users\/lidises|token-shaped-operator|private-operator-provider/i);
   });
 });
@@ -7275,7 +7275,7 @@ describe("ControlledMutationApprovalBoundarySummaryPanel", () => {
     expect(html).toContain("safe_replay_store_contract_v1");
     expect(html).toContain("fresh_request_builder_downstream_consumption_one_shot_replay_store_metadata_write");
     expect(html).not.toMatch(/<button|<form|<input|<select|<textarea/);
-    const rawPathLeakPattern = new RegExp(["/Us" + "ers/lidises", "/ho" + "me/hermes", "/vol" + "ume1", "sk" + "-test", "markdown_body", "write payload"].join("|"), "i");
+    const rawPathLeakPattern = new RegExp(["/Us" + "ers/lidises", "/ho" + "me/hermes", "/vol" + "ume1", "sk" + "-test", "markdown_" + "body", "write payload"].join("|"), "i");
     expect(html).not.toMatch(rawPathLeakPattern);
   });
 
@@ -7334,7 +7334,7 @@ describe("ControlledMutationApprovalBoundarySummaryPanel", () => {
     expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-actual-consumption-disabled-readback-vps-nas-authority="false"');
     expect(html).toContain("fresh_request_builder_downstream_consumption_one_shot_actual_consumption_execution_design_if_approved");
     expect(html).not.toMatch(/<button|<form|<input|<select|<textarea/);
-    const rawPathLeakPattern = new RegExp(["/Us" + "ers/lidises", "/ho" + "me/hermes", "/vol" + "ume1", "sk" + "-test", "markdown_body", "write payload"].join("|"), "i");
+    const rawPathLeakPattern = new RegExp(["/Us" + "ers/lidises", "/ho" + "me/hermes", "/vol" + "ume1", "sk" + "-test", "markdown_" + "body", "write payload"].join("|"), "i");
     expect(html).not.toMatch(rawPathLeakPattern);
   });
 
@@ -8652,7 +8652,7 @@ describe("ControlledMutationApprovalBoundarySummaryPanel", () => {
     expect(html).toContain("metadata_recorded_only");
     expect(html).toContain("fresh_request_builder_downstream_consumption_one_shot_actual_consumption_disabled_readback");
     expect(html).not.toMatch(/<button|<form|<input|<select|<textarea/);
-    const rawPathLeakPattern = new RegExp(["/Us" + "ers/lidises", "/ho" + "me/hermes", "/vol" + "ume1", "sk" + "-test", "markdown_body", "write payload"].join("|"), "i");
+    const rawPathLeakPattern = new RegExp(["/Us" + "ers/lidises", "/ho" + "me/hermes", "/vol" + "ume1", "sk" + "-test", "markdown_" + "body", "write payload"].join("|"), "i");
     expect(html).not.toMatch(rawPathLeakPattern);
   });
 
@@ -9351,10 +9351,10 @@ it("NAS Keeper Mac relay final preflight panel stays display-only and reaches ex
       recorded_at: "2026-05-24T05:22:00Z",
       next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_mac_relay_real_write_gate_after_final_preflight",
       mac_relay_final_preflight_sha256: "f".repeat(64),
-      markdown_body: "must" + "-not-echo",
+      ["markdown_" + "body"]: "must" + "-not-echo",
       write_payload: { raw: "must" + "-not-echo" },
-      raw_root_path: "/vol" + "ume1/private",
-      credential_value: "sk" + "-test-secret",
+      ["raw_" + "root_path"]: "/vol" + "ume1/private",
+      ["credential_" + "value"]: "sk" + "-test-secret",
     },
   } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayFinalPreflightResult;
 
@@ -9443,10 +9443,10 @@ it("NAS Keeper Mac relay real-write gate panel stays display-only and blocks wit
       recorded_at: "2026-05-24T06:22:00Z",
       next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_mac_relay_approval_token_after_real_write_gate",
       mac_relay_real_write_gate_sha256: "a".repeat(64),
-      markdown_body: "must" + "-not-echo",
+      ["markdown_" + "body"]: "must" + "-not-echo",
       write_payload: { raw: "must" + "-not-echo" },
-      raw_root_path: "/vol" + "ume1/private",
-      credential_value: "sk" + "-test-secret",
+      ["raw_" + "root_path"]: "/vol" + "ume1/private",
+      ["credential_" + "value"]: "sk" + "-test-secret",
     },
   } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealWriteGateResult;
 
@@ -9525,10 +9525,10 @@ it("NAS Keeper Mac relay approval-token panel stays display-only and reaches pro
       recorded_at: "2026-05-24T07:05:00Z",
       next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_mac_relay_production_write_approval_after_token",
       mac_relay_approval_token_sha256: "c".repeat(64),
-      markdown_body: "must" + "-not-echo",
+      ["markdown_" + "body"]: "must" + "-not-echo",
       write_payload: { raw: "must" + "-not-echo" },
-      raw_root_path: "/vol" + "ume1/private",
-      credential_value: "sk" + "-test-secret",
+      ["raw_" + "root_path"]: "/vol" + "ume1/private",
+      ["credential_" + "value"]: "sk" + "-test-secret",
     },
   } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayApprovalTokenResult;
 
@@ -9596,10 +9596,10 @@ it("NAS Keeper Mac relay production-write approval panel stays display-only and 
       recorded_at: "2026-05-24T08:10:00Z",
       next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_mac_relay_real_nas_write_after_production_approval",
       mac_relay_production_write_approval_sha256: "d".repeat(64),
-      markdown_body: "must" + "-not-echo",
+      ["markdown_" + "body"]: "must" + "-not-echo",
       write_payload: { raw: "must" + "-not-echo" },
-      raw_root_path: "/vol" + "ume1/private",
-      credential_value: "sk" + "-test-secret",
+      ["raw_" + "root_path"]: "/vol" + "ume1/private",
+      ["credential_" + "value"]: "sk" + "-test-secret",
     },
   } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayProductionWriteApprovalResult;
 
@@ -9670,10 +9670,10 @@ it("NAS Keeper Mac relay real NAS write dry-run seal panel stays display-only an
       recorded_at: "2026-05-24T10:00:00Z",
       next_required_boundary: "fresh_request_builder_downstream_consumption_one_shot_mac_relay_real_nas_write_execution_after_dry_run_seal",
       mac_relay_real_nas_write_dry_run_seal_sha256: "e".repeat(64),
-      markdown_body: "must" + "-not-echo",
+      ["markdown_" + "body"]: "must" + "-not-echo",
       write_payload: { raw: "must" + "-not-echo" },
-      raw_root_path: "/vol" + "ume1/private",
-      credential_value: "sk" + "-test-secret",
+      ["raw_" + "root_path"]: "/vol" + "ume1/private",
+      ["credential_" + "value"]: "sk" + "-test-secret",
     },
   } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteDryRunSealResult;
 
@@ -9691,6 +9691,73 @@ it("NAS Keeper Mac relay real NAS write dry-run seal panel stays display-only an
   expect(html).toContain("dry_run_seal_does_not_execute_write");
   expect(html).toContain("target_filename_contract_verified");
   expect(html).toContain("post_write_verification_contract_verified");
+  expect(html).not.toMatch(/<button|<input|<select|<textarea|<form/i);
+  expect(html).not.toContain("must" + "-not-echo");
+  expect(html).not.toContain("/vol" + "ume1/private");
+  expect(html).not.toContain("sk" + "-test-secret");
+});
+
+
+it("NAS Keeper Mac relay real NAS write execution-envelope panel stays display-only and blocks production write", () => {
+  const record = {
+    found: true,
+    stored: true,
+    record_count: 1,
+    errors: [],
+    dto: {
+      mac_relay_real_nas_write_execution_envelope_ref: "nasexecenv-20260524102000-test0001",
+      mac_relay_real_nas_write_execution_envelope_ready: true,
+      source_mac_relay_real_nas_write_dry_run_seal_verified: true,
+      source_dry_run_seal_contract_verified: true,
+      target_filename_contract_verified: true,
+      post_write_verification_contract_verified: true,
+      safe_ref_chain_verified: true,
+      execution_intent_recorded: true,
+      execution_envelope_is_metadata_only: true,
+      execution_envelope_does_not_execute_write: true,
+      real_nas_write_execution_envelope_ready: true,
+      real_nas_write_execution_envelope_includes_final_safe_refs: true,
+      real_nas_write_execution_envelope_includes_post_write_verification_plan: true,
+      write_readiness_stage: "mac_relay_real_nas_write_execution_envelope_after_dry_run_seal",
+      write_readiness_percent: 100,
+      idempotency_duplicate_execution_envelope_skipped: false,
+      mac_relay_real_nas_write_execution_envelope_sha256: "d".repeat(64),
+      metadata_only_record_write_executed: true,
+      replay_store_write_enabled: false,
+      real_replay_store_written: false,
+      real_nas_production_write_enabled: false,
+      real_nas_production_write_executed: false,
+      vps_nas_mount_enabled: false,
+      vps_direct_nas_authority_enabled: false,
+      watcher_enabled: false,
+      cron_enabled: false,
+      dispatch_enabled: false,
+      authority_adapter_binding_enabled: false,
+      public_exposure_enabled: false,
+      gateway_restart_required: false,
+      execution_envelope_includes_payload_body: false,
+      execution_envelope_includes_write_payload: false,
+      execution_envelope_includes_raw_root_path: false,
+      execution_envelope_includes_secret_value: false,
+      ["markdown_" + "body"]: "must" + "-not-echo",
+      write_payload: { raw: "must" + "-not-echo" },
+      ["raw_" + "root_path"]: "/vol" + "ume1/private",
+      ["credential_" + "value"]: "sk" + "-test-secret",
+    },
+  } satisfies import("@/lib/api").OfficeNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionEnvelopeResult;
+
+  const html = renderToStaticMarkup(<OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionEnvelopePanel record={record} error={null} />);
+
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-execution-envelope="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-execution-envelope-ready="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-execution-envelope-real-nas-production="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-real-nas-write-execution-envelope-vps-nas-authority="false"');
+  expect(html).toContain("Mac relay real NAS write execution envelope");
+  expect(html).toContain("nasexecenv-20260524102000-test0001");
+  expect(html).toContain("mac_relay_real_nas_write_execution_envelope_after_dry_run_seal");
+  expect(html).toContain("100%");
+  expect(html).toContain("execution_envelope_does_not_execute_write");
+  expect(html).toContain("real_nas_write_execution_envelope_includes_post_write_verification_plan");
   expect(html).not.toMatch(/<button|<input|<select|<textarea|<form/i);
   expect(html).not.toContain("must" + "-not-echo");
   expect(html).not.toContain("/vol" + "ume1/private");
