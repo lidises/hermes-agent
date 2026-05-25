@@ -1,56 +1,55 @@
-## NEXT — Mac relay tmp-root write smoke after manual receipt deployed (2026-05-25T19:36Z)
+## NEXT — replay/idempotency metadata compact dashboard deployed (2026-05-25T11:44Z)
 
 Current repo/deploy state:
 - Branch: `main`
-- Code commit: `9dae525ce feat(office): attach tmp-root smoke to manual receipt rung`
+- Code commit: `9ce9d0416 feat(office): surface replay metadata in compact dashboard`
 - Local/origin: synced after push.
-- VPS core worktree: synced to `9dae525ce`.
-- VPS dashboard worktree: synced to `9dae525ce`.
+- VPS core worktree: synced to `9ce9d0416`.
+- VPS dashboard worktree: synced to `9ce9d041`.
 - `web_dist` rebuilt locally and rsynced to both VPS checkouts.
 - Dashboard/core services restarted only for this code/assets deploy.
 - Gateway service was not restarted and remained active.
 
 Latest functional write-readiness rung:
-`fresh_request_builder_downstream_consumption_one_shot_mac_relay_tmp_root_write_smoke_after_manual_receipt`
+`fresh_request_builder_downstream_consumption_one_shot_replay_idempotency_metadata_after_tmp_root_write_smoke`
 
-What is now implemented:
-- Bounded Mac relay tmp-root write smoke can attach to the verified manual operator receipt record.
-- The smoke performs only an isolated tmp-root filesystem write/readback/audit and records safe metadata.
-- Protected GET/POST API route remains:
-  `/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-tmp-root-write-smoke`
-- Duplicate POST idempotency replay/skip semantics include the manual receipt source ref in the idempotency seed.
-- Compact `/office` summary now prefers the tmp-root write smoke when present, above manual receipt, with heavy ladder detail suppressed.
-- Safe DTO/DOM output only: refs, hashes, booleans, timestamps, operator label, safe logical/display path; no markdown body, write_payload body, raw root path, or secret value echo.
+What is now implemented/deployed:
+- Protected replay/idempotency metadata API records a metadata-only checkpoint sourced from the verified tmp-root write smoke.
+- The checkpoint records safe source smoke ref/SHA, source readback verification, idempotency-key verification, duplicate-skip posture, and closed capability flags.
+- Duplicate POSTs are replayed/skipped without appending another metadata record.
+- Compact `/office` summary now prefers replay/idempotency metadata above the tmp-root smoke when present.
+- Safe DTO/DOM output only: refs, checksums, booleans, timestamps, operator label, safe stage labels; no markdown body, write_payload body, raw root path, or secret value echo.
 
 Verified in this slice:
+- Frontend RED first: new compact replay metadata test failed before the compact panel was promoted.
 - Backend focused pytest: `8 passed, 85 deselected`.
-- Frontend focused tests: `4 passed, 171 skipped`.
+- Frontend focused tests: `6 passed, 170 skipped`.
 - `python3 -m py_compile hermes_cli/office_controlled_mutation.py hermes_cli/web_server.py`: passed.
 - `git diff --check`: passed.
-- Added-line leak scan for raw path/secret/body markers: passed.
+- Production-source added-line leak scan for raw path/secret/body markers: passed.
 - `npm run build`: passed with existing Vite chunk-size warning only.
 - VPS protected API smoke:
-  - unauthenticated tmp-root smoke GET: `401`
-  - tmp-root smoke POST: 200 and written/replayed success
-  - source manual operator receipt verified=true
-  - tmp-root write executed=true and readback verified=true
-  - duplicate POST replay=true
-  - GET after POST found=true; record_count=2
-  - real NAS write, VPS NAS authority, watcher/cron/dispatch/public/gateway, and payload echo flags stayed false
-  - raw leak probe: none
+  - unauthenticated replay metadata GET: `401`
+  - source tmp-root smoke GET found=true
+  - replay metadata POST stored=true
+  - duplicate replay metadata POST idempotency_replayed=true and duplicate write skipped
+  - replay metadata GET found=true; record_count=2
+  - replay metadata ready=true; source tmp-root smoke/readback/idempotency verified=true
+  - replay-store write, real NAS write, VPS NAS authority, runtime automation, public exposure, gateway restart, and payload echo flags stayed false
 - VPS hydrated DOM smoke on `/office`:
   - compact hook found=true
-  - tmp-root smoke ready=true
-  - tmp-root readback=true
+  - replay metadata ready=true
+  - source verified=true
+  - replay-store write=false
   - real-write=false
-  - VPS authority=false
+  - VPS-authority=false
   - runtime-open=false
   - payload-echo=false
+  - latest boundary label is replay/idempotency metadata
   - scoped controls/forms/inputs=0
   - raw leak=false
   - browser console JS errors=0
 - Private dashboard probes returned 200 on both protected dashboard ports.
-- Public exposure was not enabled; public probe remained unavailable/closed from the VPS-side check.
 
 Still forbidden / not done:
 - real NAS production write
@@ -62,11 +61,11 @@ Still forbidden / not done:
 - real replay-store execution write
 
 Recommended next safe rung:
-- `fresh_request_builder_downstream_consumption_one_shot_replay_idempotency_metadata_after_tmp_root_write_smoke`
-- Record only metadata over the verified tmp-root smoke: source smoke ref/SHA, readback hash, duplicate-skip/idempotency facts, and closed capability flags.
+- `fresh_request_builder_downstream_consumption_one_shot_replay_idempotency_metadata_readback_after_tmp_root_write_smoke`
+- Add a readback verifier over the replay/idempotency metadata record and compact summary, proving the metadata-only record can be recovered safely before moving to Mac relay precommit metadata.
 - Keep production NAS write, VPS NAS authority, automation, gateway, public exposure, raw body/path/secret echo, and real replay-store write closed.
 
 Suggested next-session start:
-1. `git status --branch --short` and confirm `HEAD=origin/main` at `9dae525ce` or newer.
+1. `git status --branch --short` and confirm `HEAD=origin/main` at the docs commit after this handoff or newer.
 2. Recheck VPS core/dashboard worktree HEADs and `hermes-agent-dashboard.service`/`hermes-vps-core-dashboard.service` activity; do not restart gateway.
-3. Start TDD for replay/idempotency metadata after tmp-root smoke; do not jump directly to real NAS production write.
+3. Start TDD for replay/idempotency metadata readback after tmp-root smoke; do not jump directly to precommit or real NAS production write.
