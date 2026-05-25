@@ -73,6 +73,8 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_real_nas_production_write_execution_preflight_records,
     append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_real_nas_production_write_execution_packet,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_real_nas_production_write_execution_packet_records,
+    append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_real_nas_production_write_manual_operator_execution,
+    list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_real_nas_production_write_manual_operator_execution_records,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_one_shot_post_execution_record_readback,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_actual_execution_records,
     list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_payload_materialization_records,
@@ -4390,6 +4392,155 @@ def test_real_nas_production_write_execution_packet_route_is_protected_and_recor
         body = response.json()
         assert body["stored"] is True
         assert body["dto"]["real_nas_production_write_execution_packet_ready"] is True
+        assert body["dto"]["real_nas_production_write_enabled"] is False
+        listed = client.get(route, headers={"X-Hermes-Session-Token": _SESSION_TOKEN})
+        assert listed.status_code == 200
+        assert listed.json()["found"] is True
+
+
+def _seed_real_nas_production_write_execution_packet(tmp_path):
+    preflight_store, preflight = _seed_real_nas_production_write_execution_preflight(tmp_path)
+    packet_store = tmp_path / "real-nas-production-write-execution-packet-seed.jsonl"
+    result = append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_real_nas_production_write_execution_packet(
+        {
+            "real_nas_production_write_execution_packet_ref": "naswritepacket-20260525102000-seed0001",
+            "real_nas_production_write_execution_preflight_ref": preflight["real_nas_production_write_execution_preflight_ref"],
+            "real_nas_production_write_execution_preflight_sha256": preflight["real_nas_production_write_execution_preflight_sha256"],
+            "separate_real_nas_production_write_approval_ref": preflight["source_separate_real_nas_production_write_approval_ref"],
+            "approval_token_ref": preflight["approval_token_ref"],
+            "approval_envelope_ref": preflight["approval_envelope_ref"],
+            "idempotency_key_sha256": preflight["idempotency_key_sha256"],
+            "target_filename_contract_ref": preflight["target_filename_contract_ref"],
+            "post_write_verification_contract_ref": preflight["post_write_verification_contract_ref"],
+            "pre_execution_proof_ref": preflight["pre_execution_proof_ref"],
+            "payload_preview_ref": preflight["payload_preview_contract_ref"],
+            "write_payload_preview_ref": preflight["write_payload_preview_contract_ref"],
+            "tmp_root_write_smoke_ref": preflight["tmp_root_write_smoke_ref"],
+            "execution_packet_decision": "real_nas_production_write_execution_packet_recorded_no_write",
+            "execution_packet_manifest_ref": "execpacketmanifest-20260525102000-seed0001",
+            "execution_packet_idempotency_ref": "execpacketidem-20260525102000-seed0001",
+            "recorded_by": "operator:seed",
+            "recorded_at": "2026-05-25T10:20:00Z",
+        },
+        preflight_store_path=preflight_store,
+        store_path=packet_store,
+    )
+    assert result["stored"] is True
+    return packet_store, result["dto"]
+
+
+def test_real_nas_production_write_manual_operator_execution_after_packet_records_metadata_only_envelope_receipt(tmp_path):
+    packet_store, packet = _seed_real_nas_production_write_execution_packet(tmp_path)
+    operator_store = tmp_path / "real-nas-production-write-manual-operator-execution.jsonl"
+    forbidden_body = "manual" + "-operator" + "-must-not-echo"
+    forbidden_path = "/" + "Users" + "/private/nas"
+    forbidden_secret = "ghp" + "_manualoperatorsecret"
+    payload = {
+        "real_nas_production_write_manual_operator_execution_ref": "nasmanualexec-20260525103000-test0001",
+        "real_nas_production_write_execution_packet_ref": packet["real_nas_production_write_execution_packet_ref"],
+        "real_nas_production_write_execution_packet_sha256": packet["real_nas_production_write_execution_packet_sha256"],
+        "execution_packet_manifest_ref": packet["execution_packet_manifest_ref"],
+        "execution_packet_idempotency_ref": packet["execution_packet_idempotency_ref"],
+        "approval_token_ref": packet["approval_token_ref"],
+        "approval_envelope_ref": packet["approval_envelope_ref"],
+        "idempotency_key_sha256": packet["idempotency_key_sha256"],
+        "target_filename_contract_ref": packet["target_filename_contract_ref"],
+        "post_write_verification_contract_ref": packet["post_write_verification_contract_ref"],
+        "pre_execution_proof_ref": packet["pre_execution_proof_ref"],
+        "manual_operator_envelope_ref": "manualenvelope-20260525103000-test0001",
+        "manual_operator_receipt_contract_ref": "manualreceipt-20260525103000-test0001",
+        "manual_operator_execution_decision": "manual_operator_execution_envelope_recorded_no_production_write",
+        "recorded_by": "operator:test",
+        "recorded_at": "2026-05-25T10:30:00Z",
+        "markdown_body": forbidden_body,
+        "write_payload": {"body": forbidden_body},
+        "raw_root_path": forbidden_path,
+        "credential_value": forbidden_secret,
+    }
+    result = append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_real_nas_production_write_manual_operator_execution(
+        payload,
+        execution_packet_store_path=packet_store,
+        store_path=operator_store,
+    )
+    assert result["stored"] is True
+    dto = result["dto"]
+    assert dto["real_nas_production_write_manual_operator_execution_ready"] is True
+    assert dto["source_real_nas_production_write_execution_packet_verified"] is True
+    assert dto["source_execution_packet_sha256_verified"] is True
+    assert dto["manual_operator_execution_is_metadata_only"] is True
+    assert dto["manual_operator_execution_does_not_execute_write"] is True
+    assert dto["manual_operator_execution_does_not_materialize_payload"] is True
+    assert dto["manual_operator_envelope_contract_recorded"] is True
+    assert dto["manual_operator_receipt_contract_recorded"] is True
+    assert dto["manual_operator_envelope_ref"] == "manualenvelope-20260525103000-test0001"
+    assert dto["manual_operator_receipt_contract_ref"] == "manualreceipt-20260525103000-test0001"
+    assert dto["write_readiness_stage"] == "real_nas_production_write_manual_operator_execution_after_packet"
+    assert dto["write_readiness_percent"] == 100
+    assert len(dto["real_nas_production_write_manual_operator_execution_sha256"]) == 64
+    assert dto["real_nas_production_write_enabled"] is False
+    assert dto["real_nas_production_write_executed"] is False
+    assert dto["vps_direct_nas_authority_enabled"] is False
+    assert dto["watcher_enabled"] is False
+    assert dto["cron_enabled"] is False
+    assert dto["dispatch_enabled"] is False
+    assert dto["authority_adapter_binding_enabled"] is False
+    assert dto["public_exposure_enabled"] is False
+    assert dto["gateway_restart_required"] is False
+    assert dto["markdown_body_included"] is False
+    assert dto["write_payload_included"] is False
+    assert dto["raw_root_path_included"] is False
+    assert dto["secret_value_included"] is False
+    assert dto["next_required_boundary"] == "fresh_request_builder_downstream_consumption_one_shot_real_nas_production_write_manual_operator_receipt_after_envelope"
+    text = json.dumps(dto, sort_keys=True)
+    assert forbidden_body not in text
+    assert forbidden_path not in text
+    assert forbidden_secret not in text
+
+    duplicate = append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_real_nas_production_write_manual_operator_execution(
+        payload,
+        execution_packet_store_path=packet_store,
+        store_path=operator_store,
+    )
+    assert duplicate["idempotency_replayed"] is True
+    assert duplicate["dto"]["idempotency_duplicate_manual_operator_execution_skipped"] is True
+    listed = list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_real_nas_production_write_manual_operator_execution_records(store_path=operator_store)
+    assert listed["found"] is True
+    assert listed["latest_record"]["real_nas_production_write_manual_operator_execution_ref"] == "nasmanualexec-20260525103000-test0001"
+
+
+def test_real_nas_production_write_manual_operator_execution_route_is_protected_and_records(tmp_path, monkeypatch):
+    packet_store, packet = _seed_real_nas_production_write_execution_packet(tmp_path)
+    operator_store = tmp_path / "real-nas-production-write-manual-operator-execution-route.jsonl"
+    import hermes_cli.office_controlled_mutation as office_controlled_mutation
+    monkeypatch.setattr(office_controlled_mutation, "_default_fresh_request_builder_downstream_consumption_real_nas_production_write_execution_packet_store_path", lambda: packet_store)
+    monkeypatch.setattr(office_controlled_mutation, "_default_fresh_request_builder_downstream_consumption_real_nas_production_write_manual_operator_execution_store_path", lambda: operator_store)
+    route = "/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-real-nas-production-write-manual-operator-execution"
+    payload = {
+        "real_nas_production_write_manual_operator_execution_ref": "nasmanualexec-20260525103100-route1",
+        "real_nas_production_write_execution_packet_ref": packet["real_nas_production_write_execution_packet_ref"],
+        "real_nas_production_write_execution_packet_sha256": packet["real_nas_production_write_execution_packet_sha256"],
+        "execution_packet_manifest_ref": packet["execution_packet_manifest_ref"],
+        "execution_packet_idempotency_ref": packet["execution_packet_idempotency_ref"],
+        "approval_token_ref": packet["approval_token_ref"],
+        "approval_envelope_ref": packet["approval_envelope_ref"],
+        "idempotency_key_sha256": packet["idempotency_key_sha256"],
+        "target_filename_contract_ref": packet["target_filename_contract_ref"],
+        "post_write_verification_contract_ref": packet["post_write_verification_contract_ref"],
+        "pre_execution_proof_ref": packet["pre_execution_proof_ref"],
+        "manual_operator_envelope_ref": "manualenvelope-20260525103100-route1",
+        "manual_operator_receipt_contract_ref": "manualreceipt-20260525103100-route1",
+        "manual_operator_execution_decision": "manual_operator_execution_envelope_recorded_no_production_write",
+        "recorded_by": "operator:route",
+        "recorded_at": "2026-05-25T10:31:00Z",
+    }
+    with TestClient(app) as client:
+        assert client.get(route).status_code == 401
+        assert client.post(route, json=payload).status_code == 401
+        response = client.post(route, json=payload, headers={"X-Hermes-Session-Token": _SESSION_TOKEN})
+        assert response.status_code == 200
+        body = response.json()
+        assert body["stored"] is True
+        assert body["dto"]["real_nas_production_write_manual_operator_execution_ready"] is True
         assert body["dto"]["real_nas_production_write_enabled"] is False
         listed = client.get(route, headers={"X-Hermes-Session-Token": _SESSION_TOKEN})
         assert listed.status_code == 200

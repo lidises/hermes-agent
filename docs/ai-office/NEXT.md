@@ -1,74 +1,49 @@
-## Current status — Office dashboard compacted, gateway restarted (2026-05-25T05:26:47Z)
+## NEXT — manual operator execution envelope/receipt contract rung (2026-05-25T06:50Z)
 
-- Repo: `/Users/lidises/dev/hermes-agent`
-- Branch: `main`
-- Local `HEAD` = `origin/main` = `be9d095a4a118addf546986d2e7f38f667dba2ac`
-- VPS core `/home/hermes/.hermes/hermes-agent` = `be9d095a4a118addf546986d2e7f38f667dba2ac`
-- VPS dashboard `/home/hermes/.hermes/ai-office-dashboard` = `be9d095a4a118addf546986d2e7f38f667dba2ac`
-- Local/VPS worktrees: clean after docs commit should be rechecked by next session
+Current repo baseline before commit:
+- `/Users/lidises/dev/hermes-agent`
+- `main`
+- HEAD/origin before this rung: `f66608302bd1b0dcd4e5a4827c25796496f83148`
 
-Latest code commits:
-- `83d55ac6a fix(office): remove heavy NAS Keeper ladders from DOM`
-- `be9d095a4 fix(office): suppress NAS Keeper heavy panels`
+Current latest functional rung:
+`fresh_request_builder_downstream_consumption_one_shot_real_nas_production_write_manual_operator_execution_after_packet`
 
-What changed:
-- `/office` dashboard was still rendering many long NAS Keeper/controlled-mutation panels directly in the main RPG focused shell.
-- The compact drawer alone was not enough because the heavy panels were siblings before the drawer.
-- Replaced that long panel sequence with one short summary section:
-  - `data-office-nas-keeper-heavy-ladders-suppressed="true"`
-  - `data-office-nas-keeper-heavy-ladders-dom-rendered="false"`
-- Kept compact NAS Keeper summary/dashboard:
-  - `data-office-controlled-mutation-compact-dashboard="true"`
-  - archive drawer content is `summary-only`
-  - heavy archive DOM rendered is `false`
-- Kept technical evidence drawer summary-only:
-  - heavy evidence DOM rendered is `false`
+Implemented this rung:
+- Backend safe-store functions for metadata-only manual operator execution envelope/receipt contract.
+- Protected GET/POST API route for the new rung.
+- Focused tests for:
+  - metadata-only DTO and disabled authority flags
+  - upstream execution packet SHA/ref verification
+  - idempotency replay/duplicate skip
+  - protected route 401/authorized record/list behavior
+  - raw markdown/path/secret values not echoed
+- `/office` compact dashboard now recognizes the manual operator envelope/receipt rung and exposes only compact safety attrs; heavy ladder DOM remains suppressed.
 
-Verification completed:
-- focused Office web tests: passed
-- `npm run build`: passed
-- `git diff --check`: passed
-- added-line raw leak sentinel: passed
-- VPS `/office` HTTP smoke: 200
-- Browser DOM smoke:
-  - bodyLen about 12k, down from very large page text
-  - compact dashboard found=true
-  - compact dashboard ready=true
-  - archive open=false
-  - archive heavy DOM rendered=false
-  - archive content=summary-only
-  - evidence drawer open=false
-  - evidence heavy DOM rendered=false
-  - heavy NAS Keeper suppressed=true
+Verified:
+- Targeted pytest: `4 passed, 85 deselected` with `-o 'addopts='`.
+- `npm run build`: passed.
+- Browser DOM smoke on `/office?compact-smoke=1`:
+  - heavy ladders suppressed=true
   - heavy ladders DOM rendered=false
-  - packetInDom=false
-  - totalOfficePanels=0
-  - long NAS Keeper selectors count=0
-  - historical long ladder text=false
-  - controls in archive=0
-  - raw leak=false
-  - browser console JS errors=0
-- Browser visual check: `/office` now shows concise AI Office 통합 운영실, four summary cards, and RPG visualizer; long NAS Keeper/controlled-mutation lists are not visible.
+  - total `.office-panel` count=0
+  - long selector count=0
+  - browser console errors=0
 
-Services:
-- Dashboard restarted:
-  - MainPID `973831`
-  - ActiveEnterTimestamp `Mon 2026-05-25 05:25:25 UTC`
-- Gateway restarted by user request:
-  - MainPID `973848`
-  - ActiveEnterTimestamp `Mon 2026-05-25 05:25:26 UTC`
+Still forbidden:
+- real NAS production write
+- VPS direct NAS authority or raw mount authority
+- watcher/cron/dispatcher/authority-adapter activation
+- public exposure
+- raw markdown/path/secret/credential echo
 
-Boundaries preserved:
-- real NAS production write: not executed
-- VPS direct NAS authority: not enabled
-- watcher/cron/dispatcher/authority-adapter: not enabled
-- public exposure: not enabled
-- raw markdown/path/secret echo: absent
+Next safe work item:
+- Implement metadata-only manual operator receipt/readback contract after the envelope rung.
+- Keep it no-write/no-dispatch/no-consumption.
+- Verify upstream `nasmanualexec-` ref and SHA, carry safe refs only, and expose compact DOM smoke attrs without rendering heavy panels.
 
-Current latest functional NAS Keeper rung remains:
-`fresh_request_builder_downstream_consumption_one_shot_real_nas_production_write_execution_packet_after_preflight`
-
-Recommended next session start:
-1. Recheck local/origin/VPS clean state.
-2. Open `/office` and verify compact UI still has no heavy NAS Keeper DOM.
-3. If continuing write-readiness, proceed from execution packet toward manual operator execution envelope/receipt contract, still metadata-only unless user gives exact real NAS production write approval.
+Suggested verification before/after next edit:
+1. `git status --branch --short`
+2. `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_downstream_consumption_actual_execution_record.py -k 'manual_operator_execution or real_nas_production_write_execution_packet' -o 'addopts=' -q`
+3. `cd web && npm run build`
+4. Browser smoke `/office?compact-smoke=1` for compactness and console errors.
+5. Safety scan added lines for forbidden raw payload/path/secret echo and enabled authority flags.
