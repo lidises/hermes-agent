@@ -6623,7 +6623,7 @@ export function NasKeeperTerminalExecutionStateCompletionReviewPanel({
 
 
 export function OfficeVisualizerEvidenceDrawer({
-  children,
+  children: _children,
   terminalResult,
 }: {
   children: ReactNode;
@@ -6637,15 +6637,16 @@ export function OfficeVisualizerEvidenceDrawer({
       data-office-visualizer-evidence-drawer="true"
       data-office-visualizer-evidence-drawer-default-open="false"
       data-office-visualizer-evidence-drawer-terminal-complete={String(Boolean(terminal))}
+      data-office-visualizer-evidence-heavy-dom-rendered="false"
     >
       <summary className="cursor-pointer list-none text-sm font-semibold text-foreground" data-office-visualizer-evidence-drawer-summary="true">
-        기술 증거 / 승인 사다리 보기 · 기본 화면에서는 RPG visualizer만 보기
+        기술 증거 / 승인 사다리 · 요약만 표시
       </summary>
       <p className="mt-2 max-w-3xl text-xs leading-5 text-midground/65">
-        사용자가 직접 볼 필요가 적은 상태 패널과 승인 사다리는 접어둡니다. 필요할 때만 펼쳐서 확인하며, 이 접힘은 실행/저장/배포 권한을 열지 않습니다.
+        긴 상태 패널은 기본 DOM에서도 제거했습니다. 세부 검증은 protected API, 테스트, handoff 문서에서 확인하고, 화면에는 최신 경계 요약만 둡니다.
       </p>
-      <div className="mt-4 grid gap-4" data-office-visualizer-evidence-drawer-content="true">
-        {children}
+      <div className="mt-4 border border-current/15 bg-black/15 p-3 text-xs text-midground/65" data-office-visualizer-evidence-drawer-content="summary-only">
+        heavy evidence DOM rendered: false · terminal closed: {String(Boolean(terminal))}
       </div>
     </details>
   );
@@ -6657,7 +6658,7 @@ export function OfficeControlledMutationCompactDashboardPanel({
   latestPreflight,
   latestPacket,
   detailCount,
-  children,
+  children: _children,
 }: {
   latestApproval?: { found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null;
   latestPreflight?: { found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null;
@@ -6715,13 +6716,14 @@ export function OfficeControlledMutationCompactDashboardPanel({
         className="mt-4 border border-current/15 bg-black/20 p-3 text-xs text-midground/70"
         data-office-controlled-mutation-archive-drawer="true"
         data-office-controlled-mutation-archive-drawer-default-open="false"
+        data-office-controlled-mutation-archive-heavy-dom-rendered="false"
       >
-        <summary className="cursor-pointer text-sm font-semibold text-foreground">세부 기록 {detailCount}개는 접어둠</summary>
+        <summary className="cursor-pointer text-sm font-semibold text-foreground">세부 기록 {detailCount}개는 문서/API로 이동</summary>
         <p className="mt-2 max-w-3xl leading-5 text-midground/60">
-          회귀 확인이나 handoff 검증이 필요할 때만 펼칩니다. 이 영역도 버튼/입력 없이 표시 전용입니다.
+          긴 controlled-mutation 사다리는 화면 DOM에서도 제거했습니다. 회귀 확인은 protected API, focused tests, handoff 문서로 확인합니다.
         </p>
-        <div className="mt-4 grid gap-4" data-office-controlled-mutation-archive-drawer-content="true">
-          {children}
+        <div className="mt-4 border border-current/15 bg-black/15 p-3" data-office-controlled-mutation-archive-drawer-content="summary-only">
+          heavy archive DOM rendered: false · visible summary only
         </div>
       </details>
     </section>

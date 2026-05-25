@@ -10025,8 +10025,10 @@ describe("Office controlled mutation compact dashboard", () => {
     expect(markup).toContain('data-office-controlled-mutation-archive-drawer-default-open="false"');
     expect(markup).toContain('NAS Keeper 요약');
     expect(markup).toContain('100%');
-    expect(markup).toContain('세부 기록 12개는 접어둠');
-    expect(markup).toContain('historical ladder detail');
+    expect(markup).toContain('세부 기록 12개는 문서/API로 이동');
+    expect(markup).toContain('data-office-controlled-mutation-archive-heavy-dom-rendered="false"');
+    expect(markup).toContain('data-office-controlled-mutation-archive-drawer-content="summary-only"');
+    expect(markup).not.toContain('historical ladder detail');
     expect(markup).not.toContain('<button');
     expect(markup).not.toContain('<input');
     expect(markup).not.toContain('<form');
