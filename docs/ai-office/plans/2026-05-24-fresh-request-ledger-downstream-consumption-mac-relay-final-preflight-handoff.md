@@ -100,6 +100,20 @@ This rung records a metadata-only final preflight sourced from the verified Mac 
 - gateway restart: forbidden/not performed
 - raw markdown/path/secret echo: forbidden/not present
 
+## 2026-05-25 final-preflight compact/dashboard follow-up
+
+- local/origin HEAD: `7e2951939b2f2fb58cf0e6d9392da5d6dc4fa9c5`
+- latest code commit: `7e295193 fix(office): flag final preflight production-write execution guard`
+- compact dashboard now surfaces the latest Mac relay final-preflight summary above earlier precommit summary.
+- final-preflight metadata includes explicit `real_nas_production_write_executed=false` in addition to `real_nas_production_write_enabled=false`.
+- protected API full-chain smoke wrote metadata-only records through tmp-root smoke → replay/idempotency metadata → precommit metadata → precommit manifest → final preflight.
+- live final preflight safe ref: `finalpreflight-20260525154400-vpsapi1`
+- live readback: `record_count=3`, `write_readiness_percent=97`, `real_nas_production_write_enabled=false`, `real_nas_production_write_executed=false`, `gateway_restart_required=false`.
+- duplicate final-preflight POST replayed idempotently with duplicate write skipped.
+- DOM smoke confirmed `/office` summary shows `WRITE-READINESS 97%`, `LATEST BOUNDARY Mac relay final preflight`, closed execution authority, and the final-preflight safe ref.
+- browser console JS errors: `0`.
+- VPS core and dashboard worktrees synced to `7e295193`; `web_dist` hashes match; dashboard services restarted; gateway stayed active and was not restarted.
+
 ## Next recommended rung
 
 `fresh_request_builder_downstream_consumption_one_shot_mac_relay_real_write_gate_after_final_preflight`
