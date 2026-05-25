@@ -1,52 +1,56 @@
-## NEXT — manual operator receipt rung deployed (2026-05-25T09:33Z)
+## NEXT — Mac relay tmp-root write smoke after manual receipt deployed (2026-05-25T19:36Z)
 
 Current repo/deploy state:
 - Branch: `main`
-- Code commit: `32f941119 feat(office): add manual operator receipt rung`
+- Code commit: `9dae525ce feat(office): attach tmp-root smoke to manual receipt rung`
 - Local/origin: synced after push.
-- VPS core worktree: synced to `32f941119`.
-- VPS dashboard worktree: synced to `32f941119`.
-- `web_dist` rsync: local/core/dashboard relative asset hash matched (`57b3de7feb1371185412fc1d2543d428607053b0071ace68eabe0a2644c9f49a`).
-- Dashboard service restarted only for this code/assets deploy.
-- Gateway service was not restarted; gateway PID remained active during post-deploy checks.
+- VPS core worktree: synced to `9dae525ce`.
+- VPS dashboard worktree: synced to `9dae525ce`.
+- `web_dist` rebuilt locally and rsynced to both VPS checkouts.
+- Dashboard/core services restarted only for this code/assets deploy.
+- Gateway service was not restarted and remained active.
 
 Latest functional write-readiness rung:
-`fresh_request_builder_downstream_consumption_one_shot_real_nas_production_write_manual_operator_receipt_after_envelope`
+`fresh_request_builder_downstream_consumption_one_shot_mac_relay_tmp_root_write_smoke_after_manual_receipt`
 
 What is now implemented:
-- Metadata-only manual operator receipt/readback record after the manual operator envelope rung.
-- Protected GET/POST API route:
-  `/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-real-nas-production-write-manual-operator-receipt`
-- Duplicate POST idempotency replay/skip semantics.
-- Compact `/office` summary attrs for the receipt rung with heavy ladder detail suppressed.
-- Safe DTO output only: refs, hashes, booleans, timestamps, operator label; no markdown body, write_payload body, raw root path, or secret value echo.
+- Bounded Mac relay tmp-root write smoke can attach to the verified manual operator receipt record.
+- The smoke performs only an isolated tmp-root filesystem write/readback/audit and records safe metadata.
+- Protected GET/POST API route remains:
+  `/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-tmp-root-write-smoke`
+- Duplicate POST idempotency replay/skip semantics include the manual receipt source ref in the idempotency seed.
+- Compact `/office` summary now prefers the tmp-root write smoke when present, above manual receipt, with heavy ladder detail suppressed.
+- Safe DTO/DOM output only: refs, hashes, booleans, timestamps, operator label, safe logical/display path; no markdown body, write_payload body, raw root path, or secret value echo.
 
 Verified in this slice:
-- Backend focused pytest: `6 passed, 85 deselected`.
-- Frontend focused receipt test: `1 passed, 173 skipped`.
+- Backend focused pytest: `8 passed, 85 deselected`.
+- Frontend focused tests: `4 passed, 171 skipped`.
 - `python3 -m py_compile hermes_cli/office_controlled_mutation.py hermes_cli/web_server.py`: passed.
 - `git diff --check`: passed.
 - Added-line leak scan for raw path/secret/body markers: passed.
 - `npm run build`: passed with existing Vite chunk-size warning only.
 - VPS protected API smoke:
-  - unauthenticated receipt GET: `401`
-  - execution packet source GET: found=true
-  - manual operator execution POST: stored=true; duplicate replay=true
-  - manual operator receipt POST: stored=true; duplicate replay=true; duplicate receipt write skipped=true
-  - receipt GET after POST: found=true; record_count=1
-  - forbidden capability flags stayed false
+  - unauthenticated tmp-root smoke GET: `401`
+  - tmp-root smoke POST: 200 and written/replayed success
+  - source manual operator receipt verified=true
+  - tmp-root write executed=true and readback verified=true
+  - duplicate POST replay=true
+  - GET after POST found=true; record_count=2
+  - real NAS write, VPS NAS authority, watcher/cron/dispatch/public/gateway, and payload echo flags stayed false
   - raw leak probe: none
 - VPS hydrated DOM smoke on `/office`:
   - compact hook found=true
-  - receipt ready=true
-  - receipt metadata-only=true
-  - receipt real-write=false
-  - receipt VPS authority=false
-  - receipt runtime-open=false
-  - receipt payload-echo=false
+  - tmp-root smoke ready=true
+  - tmp-root readback=true
+  - real-write=false
+  - VPS authority=false
+  - runtime-open=false
+  - payload-echo=false
   - scoped controls/forms/inputs=0
   - raw leak=false
   - browser console JS errors=0
+- Private dashboard probes returned 200 on both protected dashboard ports.
+- Public exposure was not enabled; public probe remained unavailable/closed from the VPS-side check.
 
 Still forbidden / not done:
 - real NAS production write
@@ -58,12 +62,11 @@ Still forbidden / not done:
 - real replay-store execution write
 
 Recommended next safe rung:
-- `fresh_request_builder_downstream_consumption_one_shot_mac_relay_tmp_root_write_smoke_after_manual_receipt`
-- This may perform only an isolated temporary-root Mac relay write smoke if explicitly kept within the already-approved temp-root boundary.
-- Source it from the verified manual operator receipt record and return only safe refs/hashes/booleans/readback/audit/idempotency metadata.
+- `fresh_request_builder_downstream_consumption_one_shot_replay_idempotency_metadata_after_tmp_root_write_smoke`
+- Record only metadata over the verified tmp-root smoke: source smoke ref/SHA, readback hash, duplicate-skip/idempotency facts, and closed capability flags.
 - Keep production NAS write, VPS NAS authority, automation, gateway, public exposure, raw body/path/secret echo, and real replay-store write closed.
 
 Suggested next-session start:
-1. `git status --branch --short` and confirm `HEAD=origin/main` at the latest docs commit.
-2. Recheck VPS core/dashboard worktree HEADs and `hermes-agent-dashboard.service`/`hermes-gateway.service` activity.
-3. Start TDD for the temp-root-after-receipt rung with RED backend tests first; do not jump directly to real NAS production write.
+1. `git status --branch --short` and confirm `HEAD=origin/main` at `9dae525ce` or newer.
+2. Recheck VPS core/dashboard worktree HEADs and `hermes-agent-dashboard.service`/`hermes-vps-core-dashboard.service` activity; do not restart gateway.
+3. Start TDD for replay/idempotency metadata after tmp-root smoke; do not jump directly to real NAS production write.

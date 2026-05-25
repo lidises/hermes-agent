@@ -1,24 +1,24 @@
-## Current status — manual operator receipt rung deployed (2026-05-25T09:33Z)
+## Current status — Mac relay tmp-root write smoke after manual receipt deployed (2026-05-25T19:36Z)
 
 Current deployed baseline:
 - Branch: `main`
-- Code commit: `32f941119 feat(office): add manual operator receipt rung`
+- Code commit: `9dae525ce feat(office): attach tmp-root smoke to manual receipt rung`
 - Local and origin are synced for the code commit.
 - VPS core checkout and dashboard checkout are synced to the code commit.
 - Dashboard assets were rebuilt locally and rsynced to both VPS checkouts.
-- Dashboard service was restarted; gateway service stayed active and was not restarted.
+- Dashboard/core services were restarted; gateway service stayed active and was not restarted.
 
 Implemented rung:
-`fresh_request_builder_downstream_consumption_one_shot_real_nas_production_write_manual_operator_receipt_after_envelope`
+`fresh_request_builder_downstream_consumption_one_shot_mac_relay_tmp_root_write_smoke_after_manual_receipt`
 
 Changes:
-- Added safe-store list/append helpers for metadata-only manual operator receipt records.
-- Added upstream manual operator execution ref/SHA and contract verification.
-- Added idempotent duplicate replay/skip behavior for receipt POSTs.
-- Added protected GET/POST API route for manual operator receipt records.
-- Added typed Web API wrapper.
-- Updated compact `/office` controlled-mutation dashboard summary to prefer the receipt rung when present.
-- Added backend and frontend focused tests.
+- Extended the tmp-root write smoke executor to optionally bind to the latest verified manual operator receipt record.
+- Added source receipt ref/SHA verification metadata into the tmp-root smoke DTO.
+- Advanced the write-readiness stage when receipt-backed smoke is present.
+- Added real NAS write executed and VPS direct NAS authority false flags to the smoke DTO.
+- Kept duplicate POST idempotency replay/skip semantics and included receipt source in the idempotency seed.
+- Updated the compact `/office` controlled-mutation dashboard summary to prefer the tmp-root write smoke when present.
+- Added backend and frontend focused tests for the receipt-backed tmp-root smoke and compact summary.
 
 Boundaries preserved:
 - real NAS production write: not enabled and not executed
@@ -29,10 +29,10 @@ Boundaries preserved:
 - raw markdown / write_payload / raw path / secret echo: excluded from DTO and compact DOM summary
 
 Local verification:
-- `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_downstream_consumption_actual_execution_record.py -k 'manual_operator_receipt or manual_operator_execution or real_nas_production_write_execution_packet' -o 'addopts=' -q`
-  - result: `6 passed, 85 deselected`
-- `cd web && npm test -- --run src/pages/OfficePage.rpg.test.tsx -t 'manual operator receipt'`
-  - result: `1 passed, 173 skipped`
+- `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_downstream_consumption_actual_execution_record.py -k 'tmp_root_write_smoke or manual_operator_receipt or replay_idempotency_metadata' -o 'addopts=' -q`
+  - result: `8 passed, 85 deselected`
+- `cd web && npm test -- --run src/pages/OfficePage.rpg.test.tsx -t 'Mac relay tmp-root write smoke|manual operator receipt|compact dashboard'`
+  - result: `4 passed, 171 skipped`
 - `python3 -m py_compile hermes_cli/office_controlled_mutation.py hermes_cli/web_server.py`
   - result: passed
 - `git diff --check`
@@ -43,26 +43,28 @@ Local verification:
   - result: passed; only the known large Vite chunk warning appeared
 
 Known unrelated/frontend-suite note:
-- The whole `OfficePage.rpg.test.tsx` file still has two pre-existing source-placement assertions that fail against the current compact-dashboard structure. The new receipt-specific test passes, and the production build passes.
+- The whole `OfficePage.rpg.test.tsx` file still has two pre-existing source-placement assertions that fail against the current compact-dashboard structure. The new tmp-root/receipt/compact focused tests pass, and the production build passes.
 
 VPS deployment / smoke:
-- Both VPS worktrees reset to `32f941119`.
+- Both VPS worktrees reset to `9dae525ce`.
 - `hermes_cli/web_dist/` rsynced to both VPS worktrees.
-- Relative `web_dist` hash matched across local, VPS core, and VPS dashboard: `57b3de7feb1371185412fc1d2543d428607053b0071ace68eabe0a2644c9f49a`.
 - `hermes-agent-dashboard.service`: active after restart.
-- `hermes-gateway.service`: active; gateway PID remained active and was not restarted.
+- `hermes-vps-core-dashboard.service`: active after restart.
+- `hermes-gateway.service`: active; gateway was not restarted.
 - Protected API smoke:
-  - unauthenticated receipt GET returned `401`
-  - source execution packet found=true
-  - manual operator execution metadata POST stored=true; duplicate replay=true
-  - manual operator receipt metadata POST stored=true; duplicate replay=true; duplicate receipt write skipped=true
-  - receipt GET found=true and record_count=1
+  - unauthenticated tmp-root smoke GET returned `401`
+  - tmp-root smoke POST returned 200 and recorded/written success or idempotent replay
+  - source manual operator receipt verified=true
+  - tmp-root filesystem write executed=true
+  - tmp-root readback verified=true
+  - duplicate tmp-root smoke POST replay=true
+  - tmp-root smoke GET found=true and record_count=2
   - forbidden capability flags false
   - raw leak probe empty
 - Hydrated DOM smoke:
   - compact dashboard hook found=true
-  - receipt-ready=true
-  - receipt metadata-only=true
+  - tmp-root smoke ready=true
+  - tmp-root readback=true
   - real-write=false
   - VPS-authority=false
   - runtime-open=false
@@ -72,12 +74,12 @@ VPS deployment / smoke:
   - browser console JS errors=0
 
 Next safe boundary:
-`fresh_request_builder_downstream_consumption_one_shot_mac_relay_tmp_root_write_smoke_after_manual_receipt`
+`fresh_request_builder_downstream_consumption_one_shot_replay_idempotency_metadata_after_tmp_root_write_smoke`
 
 Do not cross without exact later approval:
 - real NAS production write
 - VPS direct NAS authority
 - durable queue/watcher/cron/dispatcher/authority-adapter activation
-- public exposure
 - gateway restart
+- public exposure
 - raw markdown/path/secret echo
