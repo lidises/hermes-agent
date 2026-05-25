@@ -9988,6 +9988,7 @@ describe("Office controlled mutation compact dashboard", () => {
       OfficeControlledMutationCompactDashboardPanel: React.ComponentType<{
         latestApproval?: { found?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null } | null;
         latestPreflight?: { found?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null } | null;
+        latestPacket?: { found?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null } | null;
         detailCount: number;
         children: React.ReactNode;
       }>;
@@ -10065,6 +10066,47 @@ it("NAS Keeper real NAS production write execution preflight panel stays display
   expect(html).toContain('payload_write_preview_contract_verified');
   expect(html).toContain('replay_idempotency_metadata_recorded');
   expect(html).toContain('mac_relay_tmp_root_write_smoke_executed');
+  expect(html).not.toMatch(/<button|<input|<select|<textarea|<form/i);
+  const forbiddenBody = ["must", "not", "echo"].join("-");
+  const forbiddenPath = ["", "volume1", "private"].join("/");
+  const forbiddenSecret = ["sk", "test", "secret"].join("-");
+  expect(html).not.toContain(forbiddenBody);
+  expect(html).not.toContain(forbiddenPath);
+  expect(html).not.toContain(forbiddenSecret);
+});
+
+
+it("NAS Keeper real NAS production write execution packet panel stays display-only and keeps production write disabled", () => {
+  const record = {
+    found: true,
+    dto: {
+      real_nas_production_write_execution_packet_ready: true,
+      source_real_nas_production_write_execution_preflight_verified: true,
+      source_preflight_sha256_verified: true,
+      execution_packet_does_not_execute_write: true,
+      execution_packet_does_not_materialize_payload: true,
+      payload_write_preview_contract_verified: true,
+      replay_idempotency_metadata_recorded: true,
+      mac_relay_tmp_root_write_smoke_executed: true,
+      real_nas_production_write_enabled: false,
+      real_nas_production_write_executed: false,
+      vps_direct_nas_authority_enabled: false,
+      execution_packet_manifest_ref: "execpacketmanifest-20260525101000-test0001",
+      write_readiness_percent: 100,
+      real_nas_production_write_execution_packet_sha256: "f".repeat(64),
+      real_nas_production_write_execution_packet_ref: "naswritepacket-20260525101000-test0001",
+    },
+    errors: [],
+  };
+  const html = renderToStaticMarkup(<OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPacketPanel record={record} error={null} />);
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-real-nas-production-write-execution-packet="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-real-nas-production-write-execution-packet-ready="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-real-nas-production-write-execution-packet-real-nas-production="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-real-nas-production-write-execution-packet-vps-nas-authority="false"');
+  expect(html).toContain('execution_packet_does_not_execute_write');
+  expect(html).toContain('payload_write_preview_contract_verified');
+  expect(html).toContain('replay_idempotency_metadata_recorded');
+  expect(html).toContain('execpacketmanifest-20260525101000-test0001');
   expect(html).not.toMatch(/<button|<input|<select|<textarea|<form/i);
   const forbiddenBody = ["must", "not", "echo"].join("-");
   const forbiddenPath = ["", "volume1", "private"].join("/");

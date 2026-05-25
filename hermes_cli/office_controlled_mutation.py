@@ -3344,6 +3344,10 @@ def _default_fresh_request_builder_downstream_consumption_real_nas_production_wr
     return get_hermes_home() / "office" / "controlled-mutation" / "fresh_request_builder_downstream_consumption_real_nas_production_write_execution_preflight_records.jsonl"
 
 
+def _default_fresh_request_builder_downstream_consumption_real_nas_production_write_execution_packet_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "fresh_request_builder_downstream_consumption_real_nas_production_write_execution_packet_records.jsonl"
+
+
 
 def _approval_event_envelope_capabilities() -> dict[str, bool]:
     capabilities = _approval_record_capabilities()
@@ -18284,6 +18288,269 @@ def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_do
         "next_required_boundary": "fresh_request_builder_downstream_consumption_one_shot_real_nas_production_write_execution_after_preflight",
     }
     dto["real_nas_production_write_execution_preflight_sha256"] = hashlib.sha256(json.dumps(dto, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")).hexdigest()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(dto, sort_keys=True, separators=(",", ":"), ensure_ascii=False) + "\n")
+    return {"stored": True, "errors": [], "dto": dto}
+
+
+def _read_fresh_request_builder_downstream_consumption_real_nas_production_write_execution_packet_records(path: Path) -> tuple[list[dict[str, object]], int]:
+    records: list[dict[str, object]] = []
+    skipped = 0
+    if not path.exists():
+        return records, skipped
+    with path.open("r", encoding="utf-8") as handle:
+        for line in handle:
+            stripped = line.strip()
+            if not stripped:
+                continue
+            try:
+                item = json.loads(stripped)
+            except json.JSONDecodeError:
+                skipped += 1
+                continue
+            if not isinstance(item, dict):
+                skipped += 1
+                continue
+            if item.get("mode") != "nas_keeper_fresh_request_builder_ledger_downstream_consumption_real_nas_production_write_execution_packet_recorded":
+                skipped += 1
+                continue
+            if not _office_disabled_runtime_dispatch_valid_prefixed_ref(item.get("real_nas_production_write_execution_packet_ref"), "naswritepacket-"):
+                skipped += 1
+                continue
+            if item.get("real_nas_production_write_execution_packet_ready") is not True:
+                skipped += 1
+                continue
+            records.append(item)
+    return records, skipped
+
+
+def list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_real_nas_production_write_execution_packet_records(
+    *, store_path: Path | None = None, limit: int = 20
+) -> dict[str, object]:
+    path = store_path or _default_fresh_request_builder_downstream_consumption_real_nas_production_write_execution_packet_store_path()
+    records, skipped = _read_fresh_request_builder_downstream_consumption_real_nas_production_write_execution_packet_records(path)
+    limited = records[-max(1, min(limit, 100)):]
+    latest = limited[-1] if limited else None
+    return {"found": bool(latest), "record_count": len(records), "skipped_count": skipped, "records": limited, "latest_record": latest, "errors": []}
+
+
+def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_real_nas_production_write_execution_packet(
+    payload: object,
+    *,
+    preflight_store_path: Path | None = None,
+    store_path: Path | None = None,
+) -> dict[str, object]:
+    """Store a metadata-only final execution packet after production-write preflight."""
+    if not isinstance(payload, Mapping):
+        return {"stored": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    allowed = {
+        "real_nas_production_write_execution_packet_ref",
+        "real_nas_production_write_execution_preflight_ref",
+        "real_nas_production_write_execution_preflight_sha256",
+        "separate_real_nas_production_write_approval_ref",
+        "approval_token_ref",
+        "approval_envelope_ref",
+        "idempotency_key_sha256",
+        "target_filename_contract_ref",
+        "post_write_verification_contract_ref",
+        "pre_execution_proof_ref",
+        "payload_preview_ref",
+        "write_payload_preview_ref",
+        "tmp_root_write_smoke_ref",
+        "execution_packet_decision",
+        "execution_packet_manifest_ref",
+        "execution_packet_idempotency_ref",
+        "recorded_by",
+        "recorded_at",
+        "markdown_body",
+        "write_payload",
+        "raw_root_path",
+        "credential_value",
+    }
+    if set(payload) - allowed:
+        return {"stored": False, "errors": [_error("unsupported_fields", "unsupported_field")], "dto": None}
+    errors: list[dict[str, str]] = []
+    packet_ref = payload.get("real_nas_production_write_execution_packet_ref")
+    preflight_ref = payload.get("real_nas_production_write_execution_preflight_ref")
+    preflight_sha = payload.get("real_nas_production_write_execution_preflight_sha256")
+    approval_ref = payload.get("separate_real_nas_production_write_approval_ref")
+    approval_token_ref = payload.get("approval_token_ref")
+    approval_envelope_ref = payload.get("approval_envelope_ref")
+    idempotency_sha = payload.get("idempotency_key_sha256")
+    target_filename_ref = payload.get("target_filename_contract_ref")
+    post_write_ref = payload.get("post_write_verification_contract_ref")
+    pre_execution_proof_ref = payload.get("pre_execution_proof_ref")
+    payload_preview_ref = payload.get("payload_preview_ref")
+    write_payload_preview_ref = payload.get("write_payload_preview_ref")
+    tmp_root_write_smoke_ref = payload.get("tmp_root_write_smoke_ref")
+    packet_decision = payload.get("execution_packet_decision")
+    packet_manifest_ref = payload.get("execution_packet_manifest_ref")
+    packet_idempotency_ref = payload.get("execution_packet_idempotency_ref")
+    recorded_by = payload.get("recorded_by")
+    recorded_at = payload.get("recorded_at")
+    ref_checks = (
+        ("real_nas_production_write_execution_packet_ref", packet_ref, "naswritepacket-"),
+        ("real_nas_production_write_execution_preflight_ref", preflight_ref, "naswritepreflight-"),
+        ("separate_real_nas_production_write_approval_ref", approval_ref, "nasprodapproval-"),
+        ("approval_token_ref", approval_token_ref, "approvaltoken-"),
+        ("approval_envelope_ref", approval_envelope_ref, "approvalenvelope-"),
+        ("target_filename_contract_ref", target_filename_ref, "targetfilecontract-"),
+        ("post_write_verification_contract_ref", post_write_ref, "postwriteverify-"),
+        ("pre_execution_proof_ref", pre_execution_proof_ref, "preexecproof-"),
+        ("payload_preview_ref", payload_preview_ref, "payloadpreview-"),
+        ("write_payload_preview_ref", write_payload_preview_ref, "writepayloadpreview-"),
+        ("tmp_root_write_smoke_ref", tmp_root_write_smoke_ref, "tmprootsmoke-"),
+        ("execution_packet_manifest_ref", packet_manifest_ref, "execpacketmanifest-"),
+        ("execution_packet_idempotency_ref", packet_idempotency_ref, "execpacketidem-"),
+    )
+    for field, value, prefix in ref_checks:
+        if not _office_disabled_runtime_dispatch_valid_prefixed_ref(value, prefix):
+            errors.append(_error(field, "invalid_ref"))
+    for field, value in (("real_nas_production_write_execution_preflight_sha256", preflight_sha), ("idempotency_key_sha256", idempotency_sha)):
+        if not (isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value)):
+            errors.append(_error(field, "invalid_checksum"))
+    if packet_decision != "real_nas_production_write_execution_packet_recorded_no_write":
+        errors.append(_error("execution_packet_decision", "unsupported_decision"))
+    if not _is_opaque_id(recorded_by):
+        errors.append(_error("recorded_by", "invalid_opaque_id"))
+    if not (isinstance(recorded_at, str) and _ISO_UTC_RE.fullmatch(recorded_at)):
+        errors.append(_error("recorded_at", "invalid_timestamp"))
+    source_list = list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_real_nas_production_write_execution_preflight_records(store_path=preflight_store_path, limit=100)
+    source: Mapping[str, object] | None = None
+    for record in cast(list[dict[str, object]], source_list.get("records") or []):
+        if record.get("real_nas_production_write_execution_preflight_ref") == preflight_ref:
+            source = record
+            break
+    if source is None:
+        errors.append(_error("real_nas_production_write_execution_preflight_ref", "source_preflight_not_found"))
+    else:
+        comparisons = (
+            ("real_nas_production_write_execution_preflight_sha256", preflight_sha),
+            ("source_separate_real_nas_production_write_approval_ref", approval_ref),
+            ("approval_token_ref", approval_token_ref),
+            ("approval_envelope_ref", approval_envelope_ref),
+            ("idempotency_key_sha256", idempotency_sha),
+            ("target_filename_contract_ref", target_filename_ref),
+            ("post_write_verification_contract_ref", post_write_ref),
+            ("pre_execution_proof_ref", pre_execution_proof_ref),
+            ("payload_preview_contract_ref", payload_preview_ref),
+            ("write_payload_preview_contract_ref", write_payload_preview_ref),
+            ("tmp_root_write_smoke_ref", tmp_root_write_smoke_ref),
+        )
+        for field, value in comparisons:
+            if source.get(field) != value:
+                errors.append(_error(field, "source_mismatch"))
+        for field in (
+            "real_nas_production_write_execution_preflight_ready",
+            "source_separate_real_nas_production_write_approval_verified",
+            "source_approval_envelope_verified",
+            "source_approval_token_verified",
+            "preflight_is_metadata_only",
+            "preflight_does_not_execute_write",
+            "preflight_does_not_materialize_payload",
+            "payload_write_preview_contract_verified",
+            "replay_idempotency_metadata_recorded",
+            "mac_relay_tmp_root_write_smoke_executed",
+            "tmp_root_filesystem_write_executed",
+            "tmp_root_readback_verified",
+            "metadata_only_record_write_executed",
+            "target_filename_contract_verified",
+            "post_write_verification_contract_verified",
+            "safe_ref_chain_verified",
+        ):
+            if source.get(field) is not True:
+                errors.append(_error(field, "source_not_verified"))
+        for field in (
+            "real_nas_production_write_enabled",
+            "real_nas_production_write_executed",
+            "vps_direct_nas_authority_enabled",
+            "watcher_enabled",
+            "cron_enabled",
+            "dispatch_enabled",
+            "authority_adapter_binding_enabled",
+            "public_exposure_enabled",
+            "gateway_restart_required",
+            "replay_store_write_enabled",
+            "real_replay_store_written",
+            "markdown_body_included",
+            "write_payload_included",
+            "raw_root_path_included",
+            "secret_value_included",
+        ):
+            if source.get(field) is not False:
+                errors.append(_error(field, "source_capability_not_closed"))
+    if errors:
+        return {"stored": False, "errors": sorted(errors, key=lambda item: (item["field"], item["code"])), "dto": None}
+    path = store_path or _default_fresh_request_builder_downstream_consumption_real_nas_production_write_execution_packet_store_path()
+    existing, _ = _read_fresh_request_builder_downstream_consumption_real_nas_production_write_execution_packet_records(path)
+    for record in existing:
+        if record.get("real_nas_production_write_execution_packet_ref") == packet_ref or record.get("idempotency_key_sha256") == idempotency_sha:
+            replayed = dict(record)
+            replayed["idempotency_replayed"] = True
+            replayed["idempotency_duplicate_execution_packet_skipped"] = True
+            return {"stored": False, "idempotency_replayed": True, "errors": [], "dto": replayed}
+    assert source is not None
+    dto: dict[str, object] = {
+        "schema_version": 1,
+        "mode": "nas_keeper_fresh_request_builder_ledger_downstream_consumption_real_nas_production_write_execution_packet_recorded",
+        "real_nas_production_write_execution_packet_ref": packet_ref,
+        "real_nas_production_write_execution_packet_ready": True,
+        "source_real_nas_production_write_execution_preflight_verified": True,
+        "source_preflight_sha256_verified": True,
+        "source_real_nas_production_write_execution_preflight_ref": preflight_ref,
+        "source_real_nas_production_write_execution_preflight_sha256": preflight_sha,
+        "source_separate_real_nas_production_write_approval_ref": approval_ref,
+        "approval_token_ref": approval_token_ref,
+        "approval_envelope_ref": approval_envelope_ref,
+        "idempotency_key_sha256": idempotency_sha,
+        "execution_packet_decision": packet_decision,
+        "execution_packet_is_metadata_only": True,
+        "execution_packet_does_not_execute_write": True,
+        "execution_packet_does_not_materialize_payload": True,
+        "execution_packet_manifest_ref": packet_manifest_ref,
+        "execution_packet_idempotency_ref": packet_idempotency_ref,
+        "payload_write_preview_contract_verified": True,
+        "payload_preview_contract_ref": payload_preview_ref,
+        "write_payload_preview_contract_ref": write_payload_preview_ref,
+        "replay_idempotency_metadata_recorded": True,
+        "idempotency_replayed": False,
+        "idempotency_duplicate_execution_packet_skipped": False,
+        "mac_relay_tmp_root_write_smoke_executed": True,
+        "tmp_root_write_smoke_ref": tmp_root_write_smoke_ref,
+        "tmp_root_filesystem_write_executed": True,
+        "tmp_root_readback_verified": True,
+        "metadata_only_record_write_executed": True,
+        "target_filename_contract_ref": target_filename_ref,
+        "post_write_verification_contract_ref": post_write_ref,
+        "pre_execution_proof_ref": pre_execution_proof_ref,
+        "target_filename_contract_verified": True,
+        "post_write_verification_contract_verified": True,
+        "safe_ref_chain_verified": True,
+        "write_readiness_stage": "real_nas_production_write_execution_packet_after_preflight",
+        "write_readiness_percent": 100,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "write_payload_materialized": False,
+        "raw_root_path_included": False,
+        "secret_value_included": False,
+        "real_nas_production_write_enabled": False,
+        "real_nas_production_write_executed": False,
+        "vps_nas_mount_enabled": False,
+        "vps_direct_nas_authority_enabled": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "public_exposure_enabled": False,
+        "gateway_restart_required": False,
+        "replay_store_write_enabled": False,
+        "real_replay_store_written": False,
+        "recorded_by": recorded_by,
+        "recorded_at": recorded_at,
+        "next_required_boundary": "fresh_request_builder_downstream_consumption_one_shot_real_nas_production_write_manual_operator_execution_after_packet",
+    }
+    dto["real_nas_production_write_execution_packet_sha256"] = hashlib.sha256(json.dumps(dto, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")).hexdigest()
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(dto, sort_keys=True, separators=(",", ":"), ensure_ascii=False) + "\n")
