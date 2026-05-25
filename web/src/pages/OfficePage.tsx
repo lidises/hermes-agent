@@ -6623,7 +6623,6 @@ export function NasKeeperTerminalExecutionStateCompletionReviewPanel({
 
 
 export function OfficeVisualizerEvidenceDrawer({
-  children: _children,
   terminalResult,
 }: {
   children: ReactNode;
@@ -6662,8 +6661,8 @@ export function OfficeControlledMutationCompactDashboardPanel({
   latestTmpRootWriteSmoke,
   latestReplayIdempotencyMetadata,
   latestPrecommitMetadata,
+  latestPrecommitManifest,
   detailCount,
-  children: _children,
 }: {
   latestApproval?: { found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null;
   latestPreflight?: { found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null;
@@ -6673,18 +6672,20 @@ export function OfficeControlledMutationCompactDashboardPanel({
   latestTmpRootWriteSmoke?: { found?: boolean; written?: boolean; recorded?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null;
   latestReplayIdempotencyMetadata?: { found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null;
   latestPrecommitMetadata?: { found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null;
+  latestPrecommitManifest?: { found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null;
   detailCount: number;
   children: ReactNode;
 }) {
-  const dto = (latestPrecommitMetadata?.dto || latestPrecommitMetadata?.latest_record || latestReplayIdempotencyMetadata?.dto || latestReplayIdempotencyMetadata?.latest_record || latestTmpRootWriteSmoke?.dto || latestTmpRootWriteSmoke?.latest_record || latestManualOperatorReceipt?.dto || latestManualOperatorReceipt?.latest_record || latestManualOperatorExecution?.dto || latestManualOperatorExecution?.latest_record || latestPacket?.dto || latestPacket?.latest_record || latestPreflight?.dto || latestPreflight?.latest_record || latestApproval?.dto || latestApproval?.latest_record) as Record<string, unknown> | null | undefined;
+  const dto = (latestPrecommitManifest?.dto || latestPrecommitManifest?.latest_record || latestPrecommitMetadata?.dto || latestPrecommitMetadata?.latest_record || latestReplayIdempotencyMetadata?.dto || latestReplayIdempotencyMetadata?.latest_record || latestTmpRootWriteSmoke?.dto || latestTmpRootWriteSmoke?.latest_record || latestManualOperatorReceipt?.dto || latestManualOperatorReceipt?.latest_record || latestManualOperatorExecution?.dto || latestManualOperatorExecution?.latest_record || latestPacket?.dto || latestPacket?.latest_record || latestPreflight?.dto || latestPreflight?.latest_record || latestApproval?.dto || latestApproval?.latest_record) as Record<string, unknown> | null | undefined;
   const readiness = Number(dto?.write_readiness_percent ?? 0);
-  const ready = Boolean(dto?.mac_relay_precommit_metadata_ready || dto?.replay_idempotency_metadata_ready || dto?.mac_relay_tmp_root_write_smoke_executed || dto?.real_nas_production_write_manual_operator_receipt_ready || dto?.real_nas_production_write_manual_operator_execution_ready || dto?.real_nas_production_write_execution_packet_ready || dto?.real_nas_production_write_execution_preflight_ready || dto?.separate_real_nas_production_write_approval_ready || dto?.approval_envelope_recorded || dto?.approval_token_recorded);
+  const ready = Boolean(dto?.mac_relay_precommit_manifest_ready || dto?.mac_relay_precommit_metadata_ready || dto?.replay_idempotency_metadata_ready || dto?.mac_relay_tmp_root_write_smoke_executed || dto?.real_nas_production_write_manual_operator_receipt_ready || dto?.real_nas_production_write_manual_operator_execution_ready || dto?.real_nas_production_write_execution_packet_ready || dto?.real_nas_production_write_execution_preflight_ready || dto?.separate_real_nas_production_write_approval_ready || dto?.approval_envelope_recorded || dto?.approval_token_recorded);
   const realWrite = Boolean(dto?.real_nas_production_write_enabled || dto?.real_nas_production_write_executed);
   const vpsAuthority = Boolean(dto?.vps_direct_nas_authority_enabled || dto?.vps_nas_mount_enabled);
   const replayStoreWrite = Boolean(dto?.replay_store_write_enabled || dto?.real_replay_store_written || dto?.idempotency_replay_store_written);
   const blockedRuntime = Boolean(dto?.watcher_enabled || dto?.cron_enabled || dto?.dispatch_enabled || dto?.authority_adapter_binding_enabled || dto?.public_exposure_enabled || dto?.gateway_restart_required);
   const payloadEcho = Boolean(dto?.markdown_body_included) || Boolean(dto?.write_payload_included) || Boolean(dto?.raw_root_path_included) || Boolean(dto?.secret_value_included);
-  const safeRef = String(dto?.mac_relay_precommit_ref ?? dto?.replay_idempotency_metadata_ref ?? dto?.tmp_root_write_smoke_ref ?? dto?.real_nas_production_write_manual_operator_receipt_ref ?? dto?.real_nas_production_write_manual_operator_execution_ref ?? dto?.real_nas_production_write_execution_packet_ref ?? dto?.real_nas_production_write_execution_preflight_ref ?? dto?.separate_real_nas_production_write_approval_ref ?? "아직 기록 없음");
+  const manifestPayloadEcho = payloadEcho || Boolean(dto?.manifest_includes_payload_body) || Boolean(dto?.manifest_includes_write_payload) || Boolean(dto?.manifest_includes_raw_root_path) || Boolean(dto?.manifest_includes_secret_value);
+  const safeRef = String(dto?.mac_relay_precommit_manifest_ref ?? dto?.mac_relay_precommit_ref ?? dto?.replay_idempotency_metadata_ref ?? dto?.tmp_root_write_smoke_ref ?? dto?.real_nas_production_write_manual_operator_receipt_ref ?? dto?.real_nas_production_write_manual_operator_execution_ref ?? dto?.real_nas_production_write_execution_packet_ref ?? dto?.real_nas_production_write_execution_preflight_ref ?? dto?.separate_real_nas_production_write_approval_ref ?? "아직 기록 없음");
 
   return (
     <section
@@ -6723,6 +6724,13 @@ export function OfficeControlledMutationCompactDashboardPanel({
       data-office-controlled-mutation-compact-dashboard-mac-relay-precommit-metadata-vps-authority={String(vpsAuthority)}
       data-office-controlled-mutation-compact-dashboard-mac-relay-precommit-metadata-runtime-open={String(blockedRuntime)}
       data-office-controlled-mutation-compact-dashboard-mac-relay-precommit-metadata-payload-echo={String(payloadEcho)}
+      data-office-controlled-mutation-compact-dashboard-mac-relay-precommit-manifest-ready={String(Boolean(dto?.mac_relay_precommit_manifest_ready))}
+      data-office-controlled-mutation-compact-dashboard-mac-relay-precommit-manifest-source-verified={String(Boolean(dto?.source_mac_relay_precommit_metadata_verified) && Boolean(dto?.safe_manifest_checklist_verified) && Boolean(dto?.safe_ref_chain_verified))}
+      data-office-controlled-mutation-compact-dashboard-mac-relay-precommit-manifest-replay-store-write={String(replayStoreWrite)}
+      data-office-controlled-mutation-compact-dashboard-mac-relay-precommit-manifest-real-write={String(realWrite)}
+      data-office-controlled-mutation-compact-dashboard-mac-relay-precommit-manifest-vps-authority={String(vpsAuthority)}
+      data-office-controlled-mutation-compact-dashboard-mac-relay-precommit-manifest-runtime-open={String(blockedRuntime)}
+      data-office-controlled-mutation-compact-dashboard-mac-relay-precommit-manifest-payload-echo={String(manifestPayloadEcho)}
       data-office-controlled-mutation-compact-dashboard-real-write={String(realWrite)}
       data-office-controlled-mutation-compact-dashboard-vps-authority={String(vpsAuthority)}
       data-office-controlled-mutation-compact-dashboard-runtime-open={String(blockedRuntime)}
@@ -6742,7 +6750,7 @@ export function OfficeControlledMutationCompactDashboardPanel({
           </div>
           <div className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-compact-card="approval">
             <div className="text-[10px] uppercase tracking-[0.14em] text-midground/55">latest boundary</div>
-            <div className="mt-1 font-semibold text-foreground">{dto?.mac_relay_precommit_metadata_ready ? "Mac relay precommit metadata" : dto?.replay_idempotency_metadata_ready ? "Replay/idempotency metadata" : dto?.mac_relay_tmp_root_write_smoke_executed ? "Mac relay tmp-root write smoke" : dto?.real_nas_production_write_manual_operator_receipt_ready ? "수동 operator receipt 기록" : dto?.real_nas_production_write_manual_operator_execution_ready ? "수동 operator envelope/receipt 기록" : dto?.real_nas_production_write_execution_packet_ready ? "실행 packet 기록" : dto?.real_nas_production_write_execution_preflight_ready ? "실행 preflight 기록" : ready ? "별도 승인 envelope 기록" : "대기"}</div>
+            <div className="mt-1 font-semibold text-foreground">{dto?.mac_relay_precommit_manifest_ready ? "Mac relay precommit manifest" : dto?.mac_relay_precommit_metadata_ready ? "Mac relay precommit metadata" : dto?.replay_idempotency_metadata_ready ? "Replay/idempotency metadata" : dto?.mac_relay_tmp_root_write_smoke_executed ? "Mac relay tmp-root write smoke" : dto?.real_nas_production_write_manual_operator_receipt_ready ? "수동 operator receipt 기록" : dto?.real_nas_production_write_manual_operator_execution_ready ? "수동 operator envelope/receipt 기록" : dto?.real_nas_production_write_execution_packet_ready ? "실행 packet 기록" : dto?.real_nas_production_write_execution_preflight_ready ? "실행 preflight 기록" : ready ? "별도 승인 envelope 기록" : "대기"}</div>
           </div>
           <div className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-compact-card="safety">
             <div className="text-[10px] uppercase tracking-[0.14em] text-midground/55">실행 권한</div>
@@ -14715,7 +14723,7 @@ export default function OfficePage() {
       <NasKeeperTerminalExecutionStateCompletionReviewPanel result={nasKeeperGuardedFailureStateResult} error={nasKeeperGuardedFailureStateError} />
       </OfficeVisualizerEvidenceDrawer>
 
-      <OfficeControlledMutationCompactDashboardPanel latestApproval={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult} latestPreflight={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightResult} latestPacket={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPacketResult} latestManualOperatorExecution={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteManualOperatorExecutionResult} latestManualOperatorReceipt={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteManualOperatorReceiptResult} latestTmpRootWriteSmoke={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayTmpRootWriteSmokeResult} latestReplayIdempotencyMetadata={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayIdempotencyMetadataResult} latestPrecommitMetadata={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataResult} detailCount={17}>
+      <OfficeControlledMutationCompactDashboardPanel latestApproval={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult} latestPreflight={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightResult} latestPacket={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPacketResult} latestManualOperatorExecution={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteManualOperatorExecutionResult} latestManualOperatorReceipt={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteManualOperatorReceiptResult} latestTmpRootWriteSmoke={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayTmpRootWriteSmokeResult} latestReplayIdempotencyMetadata={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayIdempotencyMetadataResult} latestPrecommitMetadata={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataResult} latestPrecommitManifest={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifestResult} detailCount={18}>
         <div className="border border-current/15 bg-black/15 p-3" data-office-controlled-mutation-archive-placeholder="true">
           이전 controlled-mutation 사다리는 기본 화면에서 숨겼습니다. 필요한 회귀 검증은 protected API와 테스트에서 확인합니다.
         </div>
@@ -15321,7 +15329,7 @@ export default function OfficePage() {
         </div>
       </section>
 
-      <OfficeControlledMutationCompactDashboardPanel latestApproval={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult} latestPreflight={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightResult} latestPacket={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPacketResult} latestManualOperatorExecution={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteManualOperatorExecutionResult} latestManualOperatorReceipt={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteManualOperatorReceiptResult} latestTmpRootWriteSmoke={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayTmpRootWriteSmokeResult} latestReplayIdempotencyMetadata={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayIdempotencyMetadataResult} latestPrecommitMetadata={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataResult} detailCount={17}>
+      <OfficeControlledMutationCompactDashboardPanel latestApproval={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult} latestPreflight={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightResult} latestPacket={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPacketResult} latestManualOperatorExecution={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteManualOperatorExecutionResult} latestManualOperatorReceipt={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteManualOperatorReceiptResult} latestTmpRootWriteSmoke={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayTmpRootWriteSmokeResult} latestReplayIdempotencyMetadata={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayIdempotencyMetadataResult} latestPrecommitMetadata={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataResult} latestPrecommitManifest={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifestResult} detailCount={18}>
       <section
         className="border border-sky-300/20 bg-sky-950/10 p-4"
         data-office-controlled-mutation-proposal-contract="true"
