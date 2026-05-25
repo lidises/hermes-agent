@@ -9987,6 +9987,7 @@ describe("Office controlled mutation compact dashboard", () => {
     const CompactPanel = (OfficePageModule as unknown as {
       OfficeControlledMutationCompactDashboardPanel: React.ComponentType<{
         latestApproval?: { found?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null } | null;
+        latestPreflight?: { found?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null } | null;
         detailCount: number;
         children: React.ReactNode;
       }>;
@@ -10029,4 +10030,46 @@ describe("Office controlled mutation compact dashboard", () => {
     expect(markup).not.toContain('<input');
     expect(markup).not.toContain('<form');
   });
+});
+
+
+it("NAS Keeper real NAS production write execution preflight panel stays display-only and keeps production write disabled", () => {
+  const record = {
+    found: true,
+    dto: {
+      real_nas_production_write_execution_preflight_ready: true,
+      source_separate_real_nas_production_write_approval_verified: true,
+      source_approval_envelope_verified: true,
+      source_approval_token_verified: true,
+      preflight_does_not_execute_write: true,
+      preflight_does_not_materialize_payload: true,
+      payload_write_preview_contract_verified: true,
+      replay_idempotency_metadata_recorded: true,
+      mac_relay_tmp_root_write_smoke_executed: true,
+      real_nas_production_write_enabled: false,
+      real_nas_production_write_executed: false,
+      vps_direct_nas_authority_enabled: false,
+      write_readiness_percent: 100,
+      real_nas_production_write_execution_preflight_sha256: "f".repeat(64),
+      real_nas_production_write_execution_preflight_ref: "naswritepreflight-20260524153000-test0001",
+    },
+    errors: [],
+  };
+  const html = renderToStaticMarkup(<OfficePageModule.NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightPanel record={record} error={null} />);
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-real-nas-production-write-execution-preflight="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-real-nas-production-write-execution-preflight-ready="true"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-real-nas-production-write-execution-preflight-real-nas-production="false"');
+  expect(html).toContain('data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-real-nas-production-write-execution-preflight-vps-nas-authority="false"');
+  expect(html).toContain('100%');
+  expect(html).toContain('preflight_does_not_execute_write');
+  expect(html).toContain('payload_write_preview_contract_verified');
+  expect(html).toContain('replay_idempotency_metadata_recorded');
+  expect(html).toContain('mac_relay_tmp_root_write_smoke_executed');
+  expect(html).not.toMatch(/<button|<input|<select|<textarea|<form/i);
+  const forbiddenBody = ["must", "not", "echo"].join("-");
+  const forbiddenPath = ["", "volume1", "private"].join("/");
+  const forbiddenSecret = ["sk", "test", "secret"].join("-");
+  expect(html).not.toContain(forbiddenBody);
+  expect(html).not.toContain(forbiddenPath);
+  expect(html).not.toContain(forbiddenSecret);
 });

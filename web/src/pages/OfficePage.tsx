@@ -6654,20 +6654,22 @@ export function OfficeVisualizerEvidenceDrawer({
 
 export function OfficeControlledMutationCompactDashboardPanel({
   latestApproval,
+  latestPreflight,
   detailCount,
   children,
 }: {
   latestApproval?: { found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null;
+  latestPreflight?: { found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null;
   detailCount: number;
   children: ReactNode;
 }) {
-  const dto = (latestApproval?.dto || latestApproval?.latest_record) as Record<string, unknown> | null | undefined;
+  const dto = (latestPreflight?.dto || latestPreflight?.latest_record || latestApproval?.dto || latestApproval?.latest_record) as Record<string, unknown> | null | undefined;
   const readiness = Number(dto?.write_readiness_percent ?? 0);
-  const ready = Boolean(dto?.separate_real_nas_production_write_approval_ready || dto?.approval_envelope_recorded || dto?.approval_token_recorded);
+  const ready = Boolean(dto?.real_nas_production_write_execution_preflight_ready || dto?.separate_real_nas_production_write_approval_ready || dto?.approval_envelope_recorded || dto?.approval_token_recorded);
   const realWrite = Boolean(dto?.real_nas_production_write_enabled || dto?.real_nas_production_write_executed);
   const vpsAuthority = Boolean(dto?.vps_direct_nas_authority_enabled || dto?.vps_nas_mount_enabled);
   const blockedRuntime = Boolean(dto?.watcher_enabled || dto?.cron_enabled || dto?.dispatch_enabled || dto?.authority_adapter_binding_enabled || dto?.public_exposure_enabled || dto?.gateway_restart_required);
-  const safeRef = String(dto?.separate_real_nas_production_write_approval_ref ?? "아직 기록 없음");
+  const safeRef = String(dto?.real_nas_production_write_execution_preflight_ref ?? dto?.separate_real_nas_production_write_approval_ref ?? "아직 기록 없음");
 
   return (
     <section
@@ -6693,7 +6695,7 @@ export function OfficeControlledMutationCompactDashboardPanel({
           </div>
           <div className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-compact-card="approval">
             <div className="text-[10px] uppercase tracking-[0.14em] text-midground/55">latest boundary</div>
-            <div className="mt-1 font-semibold text-foreground">{ready ? "별도 승인 envelope 기록" : "대기"}</div>
+            <div className="mt-1 font-semibold text-foreground">{dto?.real_nas_production_write_execution_preflight_ready ? "실행 preflight 기록" : ready ? "별도 승인 envelope 기록" : "대기"}</div>
           </div>
           <div className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-compact-card="safety">
             <div className="text-[10px] uppercase tracking-[0.14em] text-midground/55">실행 권한</div>
@@ -9686,6 +9688,50 @@ export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRea
 }
 
 
+
+
+export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightPanel({
+  record,
+  error,
+}: {
+  record?: { found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null;
+  error?: string | null;
+}) {
+  const dto = (record?.dto || record?.latest_record) as Record<string, unknown> | null | undefined;
+  return (
+    <section
+      className="office-panel office-panel--readonly"
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-real-nas-production-write-execution-preflight="true"
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-real-nas-production-write-execution-preflight-ready={String(Boolean(dto?.real_nas_production_write_execution_preflight_ready))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-real-nas-production-write-execution-preflight-real-nas-production={String(Boolean(dto?.real_nas_production_write_enabled) || Boolean(dto?.real_nas_production_write_executed))}
+      data-office-nas-keeper-fresh-request-builder-ledger-downstream-consumption-real-nas-production-write-execution-preflight-vps-nas-authority={String(Boolean(dto?.vps_nas_mount_enabled) || Boolean(dto?.vps_direct_nas_authority_enabled))}
+    >
+      <div className="office-panel__eyebrow">NAS Keeper · real NAS write execution preflight</div>
+      <h2>production write preflight recorded · actual NAS write still closed</h2>
+      <p className="office-panel__meta">
+        {error ? `error: ${error}` : "metadata-only execution preflight after separate approval; payload/write_payload preview contract only."}
+      </p>
+      <div className="office-panel__grid office-panel__grid--three">
+        <div><strong>ready</strong><span>{String(Boolean(dto?.real_nas_production_write_execution_preflight_ready))}</span></div>
+        <div><strong>write-readiness</strong><span>{String(dto?.write_readiness_percent ?? 0)}%</span></div>
+        <div><strong>real NAS write</strong><span>{String(Boolean(dto?.real_nas_production_write_enabled) || Boolean(dto?.real_nas_production_write_executed))}</span></div>
+      </div>
+      <ul className="office-panel__list">
+        <li>source_separate_real_nas_production_write_approval_verified: {String(Boolean(dto?.source_separate_real_nas_production_write_approval_verified))}</li>
+        <li>source_approval_envelope_verified: {String(Boolean(dto?.source_approval_envelope_verified))}</li>
+        <li>source_approval_token_verified: {String(Boolean(dto?.source_approval_token_verified))}</li>
+        <li>preflight_does_not_execute_write: {String(Boolean(dto?.preflight_does_not_execute_write))}</li>
+        <li>preflight_does_not_materialize_payload: {String(Boolean(dto?.preflight_does_not_materialize_payload))}</li>
+        <li>payload_write_preview_contract_verified: {String(Boolean(dto?.payload_write_preview_contract_verified))}</li>
+        <li>replay_idempotency_metadata_recorded: {String(Boolean(dto?.replay_idempotency_metadata_recorded))}</li>
+        <li>mac_relay_tmp_root_write_smoke_executed: {String(Boolean(dto?.mac_relay_tmp_root_write_smoke_executed))}</li>
+        <li>raw markdown/path/secret echoed: false</li>
+      </ul>
+      <p className="office-panel__meta">ref: {String(dto?.real_nas_production_write_execution_preflight_ref ?? "none")} · sha256: {String(dto?.real_nas_production_write_execution_preflight_sha256 ?? "none")}</p>
+    </section>
+  );
+}
+
 export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalPanel({
   record,
   error,
@@ -12141,6 +12187,8 @@ export default function OfficePage() {
   const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryError, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryError] = useState<string | null>(null);
   const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult] = useState<{ found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null>(null);
   const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalError, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalError] = useState<string | null>(null);
+  const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightResult, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightResult] = useState<{ found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null>(null);
+  const [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightError, setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightError] = useState<string | null>(null);
   const nasKeeperClaimDryRunKeyRef = useRef<string | null>(null);
   const nasKeeperAuthorizationKeyRef = useRef<string | null>(null);
   const nasKeeperPayloadPreviewKeyRef = useRef<string | null>(null);
@@ -13230,6 +13278,19 @@ export default function OfficePage() {
         setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalError("request failed");
       });
   }, [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult]);
+
+  useEffect(() => {
+    if (nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightResult?.dto || nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightResult?.latest_record) return;
+    api.getOfficeControlledMutationNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflight()
+      .then((result) => {
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightResult(result);
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightError(null);
+      })
+      .catch(() => {
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightResult(null);
+        setNasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightError("request failed");
+      });
+  }, [nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightResult]);
 
   useEffect(() => {
     if (nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadWritePreviewContractResult?.dto) return;
@@ -14442,6 +14503,7 @@ export default function OfficePage() {
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteFinalExecutionGatePanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteFinalExecutionGateResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteFinalExecutionGateError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionManualRealNasWriteBoundaryError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalError} />
+      <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewAttestationReadbackReviewReadbackReviewReadbackError} />
       <NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewRecordPanel record={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewRecordResult} error={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPayloadMaterializationSummaryReviewGateRecordReadbackReviewRecordError} />
 
@@ -14506,7 +14568,7 @@ export default function OfficePage() {
       <NasKeeperTerminalExecutionStateCompletionReviewPanel result={nasKeeperGuardedFailureStateResult} error={nasKeeperGuardedFailureStateError} />
       </OfficeVisualizerEvidenceDrawer>
 
-      <OfficeControlledMutationCompactDashboardPanel latestApproval={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult} detailCount={12}>
+      <OfficeControlledMutationCompactDashboardPanel latestApproval={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult} latestPreflight={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightResult} detailCount={13}>
         <div className="border border-current/15 bg-black/15 p-3" data-office-controlled-mutation-archive-placeholder="true">
           이전 controlled-mutation 사다리는 기본 화면에서 숨겼습니다. 필요한 회귀 검증은 protected API와 테스트에서 확인합니다.
         </div>
@@ -15112,7 +15174,7 @@ export default function OfficePage() {
         </div>
       </section>
 
-      <OfficeControlledMutationCompactDashboardPanel latestApproval={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult} detailCount={12}>
+      <OfficeControlledMutationCompactDashboardPanel latestApproval={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult} latestPreflight={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightResult} detailCount={13}>
       <section
         className="border border-sky-300/20 bg-sky-950/10 p-4"
         data-office-controlled-mutation-proposal-contract="true"
