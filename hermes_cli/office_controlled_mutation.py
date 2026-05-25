@@ -16178,6 +16178,7 @@ def append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_do
         "write_payload_materialized": False,
         "actual_downstream_consumption_executed": False,
         "real_nas_production_write_enabled": False,
+        "real_nas_production_write_executed": False,
         "vps_nas_mount_enabled": False,
         "vps_direct_nas_authority_enabled": False,
         "raw_root_path_included": False,

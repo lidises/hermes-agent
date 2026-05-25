@@ -2773,6 +2773,7 @@ def test_mac_relay_final_preflight_after_precommit_manifest_records_write_readin
     assert dto["final_preflight_includes_raw_root_path"] is False
     assert dto["final_preflight_includes_secret_value"] is False
     assert dto["real_nas_production_write_enabled"] is False
+    assert dto["real_nas_production_write_executed"] is False
     assert dto["vps_direct_nas_authority_enabled"] is False
     assert dto["watcher_enabled"] is False
     assert dto["cron_enabled"] is False
