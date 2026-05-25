@@ -1,21 +1,21 @@
-## Current status — replay/idempotency metadata compact dashboard deployed (2026-05-25T11:44Z)
+## Current status — Mac relay precommit metadata compact dashboard deployed (2026-05-25T13:12Z)
 
 Current deployed baseline:
 - Branch: `main`
-- Code commit: `9ce9d0416 feat(office): surface replay metadata in compact dashboard`
+- Code commit: `3cb6d0304 feat(office): surface precommit metadata in compact dashboard`
 - Local and origin are synced for the code commit.
 - VPS core checkout and dashboard checkout are synced to the code commit.
 - Dashboard assets were rebuilt locally and rsynced to both VPS checkouts.
 - Dashboard/core services were restarted; gateway service stayed active and was not restarted.
 
 Implemented rung:
-`fresh_request_builder_downstream_consumption_one_shot_replay_idempotency_metadata_after_tmp_root_write_smoke`
+`fresh_request_builder_downstream_consumption_one_shot_mac_relay_precommit_metadata_after_replay_idempotency`
 
 Changes:
-- Promoted replay/idempotency metadata to the compact `/office` controlled-mutation summary above the tmp-root smoke.
-- Added compact DOM hooks for replay metadata readiness, source verification, replay-store-write closure, real-write closure, VPS-authority closure, runtime closure, and payload-echo closure.
-- The protected replay metadata API already stores safe metadata-only records over verified tmp-root smoke source refs/checksums; this slice exercised that live on the VPS and surfaced it in the dashboard.
-- Added frontend regression coverage proving replay metadata wins over tmp-root smoke in the compact summary without rendering historical ladders, controls, raw paths, markdown bodies, or secrets.
+- Promoted Mac relay precommit metadata to the compact `/office` controlled-mutation summary above replay/idempotency metadata.
+- Added compact DOM hooks for precommit metadata readiness, source verification, replay-store-write closure, real-write closure, VPS-authority closure, runtime closure, and payload-echo closure.
+- Exercised the protected precommit metadata API live on the VPS as a metadata-only record write sourced from verified replay/idempotency metadata.
+- Added frontend regression coverage proving precommit metadata wins over replay/tmp-root in the compact summary without rendering historical ladders, controls, raw paths, markdown bodies, or secrets.
 
 Boundaries preserved:
 - real NAS production write: not enabled and not executed
@@ -26,22 +26,19 @@ Boundaries preserved:
 - raw markdown / write_payload / raw path / secret echo: excluded from DTO and compact DOM summary
 
 Local verification:
-- Frontend RED first: replay metadata compact-dashboard test failed before implementation.
-- `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_downstream_consumption_actual_execution_record.py -k 'tmp_root_write_smoke or manual_operator_receipt or replay_idempotency_metadata' -o 'addopts=' -q`
-  - result: `8 passed, 85 deselected`
-- `cd web && npm test -- --run src/pages/OfficePage.rpg.test.tsx -t 'Mac relay tmp-root write smoke|manual operator receipt|compact dashboard|replay/idempotency metadata'`
-  - result: `6 passed, 170 skipped`
+- Frontend RED first: precommit metadata compact-dashboard test failed before implementation.
+- `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_downstream_consumption_actual_execution_record.py -k 'tmp_root_write_smoke or manual_operator_receipt or replay_idempotency_metadata or mac_relay_precommit_metadata' -o 'addopts=' -q`
+  - result: `10 passed, 83 deselected`
+- `cd web && npm test -- --run src/pages/OfficePage.rpg.test.tsx -t 'Mac relay tmp-root write smoke|manual operator receipt|compact dashboard|replay/idempotency metadata|Mac relay precommit metadata'`
+  - result: `8 passed, 169 skipped`
 - `python3 -m py_compile hermes_cli/office_controlled_mutation.py hermes_cli/web_server.py`
   - result: passed
 - `git diff --check`
   - result: passed
-- production-source added-line leak scan for raw path/secret/body markers
-  - result: no matches
+- production-source leak scan for raw path/secret/body markers
+  - result: no production matches
 - `cd web && npm run build`
   - result: passed; only the known large Vite chunk warning appeared
-
-Known unrelated/frontend-suite note:
-- The whole `OfficePage.rpg.test.tsx` file still has pre-existing source-placement assertions outside this focused path. The new replay/tmp-root/compact focused tests pass, and the production build passes.
 
 VPS deployment / smoke:
 - Both VPS worktrees reset to the code commit.
@@ -50,13 +47,16 @@ VPS deployment / smoke:
 - `hermes-vps-core-dashboard.service`: active after restart.
 - `hermes-gateway.service`: active; gateway was not restarted.
 - Protected API smoke:
-  - unauthenticated replay metadata GET returned `401`
-  - source tmp-root smoke GET found=true
-  - replay metadata POST stored=true
-  - duplicate replay metadata POST idempotency_replayed=true
-  - replay metadata GET found=true and record_count=2
-  - replay metadata ready=true
-  - source tmp-root smoke/readback/idempotency verified=true
+  - unauthenticated precommit metadata GET returned `401`
+  - source replay metadata GET found=true
+  - precommit metadata POST stored=true
+  - duplicate precommit metadata POST idempotency_replayed=true
+  - duplicate precommit metadata write skipped=true
+  - precommit metadata GET found=true and record_count=2
+  - precommit metadata ready=true
+  - source replay/idempotency metadata verified=true
+  - duplicate-skip source verified=true
+  - write_readiness_percent=90
   - replay-store write=false
   - real-write=false
   - VPS-authority=false
@@ -64,20 +64,20 @@ VPS deployment / smoke:
   - payload-echo=false
 - Hydrated DOM smoke:
   - compact dashboard hook found=true
-  - replay metadata ready=true
+  - precommit metadata ready=true
   - source verified=true
   - replay-store write=false
   - real-write=false
   - VPS-authority=false
   - runtime-open=false
   - payload-echo=false
-  - latest boundary label: replay/idempotency metadata
+  - latest boundary label: Mac relay precommit metadata
   - scoped controls/forms/inputs=0
   - raw leak=false
   - browser console JS errors=0
 
 Next safe boundary:
-`fresh_request_builder_downstream_consumption_one_shot_replay_idempotency_metadata_readback_after_tmp_root_write_smoke`
+`fresh_request_builder_downstream_consumption_one_shot_mac_relay_precommit_manifest_after_replay_idempotency`
 
 Do not cross without exact later approval:
 - real NAS production write
