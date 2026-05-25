@@ -6659,6 +6659,7 @@ export function OfficeControlledMutationCompactDashboardPanel({
   latestPacket,
   latestManualOperatorExecution,
   latestManualOperatorReceipt,
+  latestTmpRootWriteSmoke,
   detailCount,
   children: _children,
 }: {
@@ -6667,17 +6668,18 @@ export function OfficeControlledMutationCompactDashboardPanel({
   latestPacket?: { found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null;
   latestManualOperatorExecution?: { found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null;
   latestManualOperatorReceipt?: { found?: boolean; stored?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null;
+  latestTmpRootWriteSmoke?: { found?: boolean; written?: boolean; recorded?: boolean; idempotency_replayed?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null; record_count?: number } | null;
   detailCount: number;
   children: ReactNode;
 }) {
-  const dto = (latestManualOperatorReceipt?.dto || latestManualOperatorReceipt?.latest_record || latestManualOperatorExecution?.dto || latestManualOperatorExecution?.latest_record || latestPacket?.dto || latestPacket?.latest_record || latestPreflight?.dto || latestPreflight?.latest_record || latestApproval?.dto || latestApproval?.latest_record) as Record<string, unknown> | null | undefined;
+  const dto = (latestTmpRootWriteSmoke?.dto || latestTmpRootWriteSmoke?.latest_record || latestManualOperatorReceipt?.dto || latestManualOperatorReceipt?.latest_record || latestManualOperatorExecution?.dto || latestManualOperatorExecution?.latest_record || latestPacket?.dto || latestPacket?.latest_record || latestPreflight?.dto || latestPreflight?.latest_record || latestApproval?.dto || latestApproval?.latest_record) as Record<string, unknown> | null | undefined;
   const readiness = Number(dto?.write_readiness_percent ?? 0);
-  const ready = Boolean(dto?.real_nas_production_write_manual_operator_receipt_ready || dto?.real_nas_production_write_manual_operator_execution_ready || dto?.real_nas_production_write_execution_packet_ready || dto?.real_nas_production_write_execution_preflight_ready || dto?.separate_real_nas_production_write_approval_ready || dto?.approval_envelope_recorded || dto?.approval_token_recorded);
+  const ready = Boolean(dto?.mac_relay_tmp_root_write_smoke_executed || dto?.real_nas_production_write_manual_operator_receipt_ready || dto?.real_nas_production_write_manual_operator_execution_ready || dto?.real_nas_production_write_execution_packet_ready || dto?.real_nas_production_write_execution_preflight_ready || dto?.separate_real_nas_production_write_approval_ready || dto?.approval_envelope_recorded || dto?.approval_token_recorded);
   const realWrite = Boolean(dto?.real_nas_production_write_enabled || dto?.real_nas_production_write_executed);
   const vpsAuthority = Boolean(dto?.vps_direct_nas_authority_enabled || dto?.vps_nas_mount_enabled);
   const blockedRuntime = Boolean(dto?.watcher_enabled || dto?.cron_enabled || dto?.dispatch_enabled || dto?.authority_adapter_binding_enabled || dto?.public_exposure_enabled || dto?.gateway_restart_required);
   const payloadEcho = Boolean(dto?.markdown_body_included) || Boolean(dto?.write_payload_included) || Boolean(dto?.raw_root_path_included) || Boolean(dto?.secret_value_included);
-  const safeRef = String(dto?.real_nas_production_write_manual_operator_receipt_ref ?? dto?.real_nas_production_write_manual_operator_execution_ref ?? dto?.real_nas_production_write_execution_packet_ref ?? dto?.real_nas_production_write_execution_preflight_ref ?? dto?.separate_real_nas_production_write_approval_ref ?? "아직 기록 없음");
+  const safeRef = String(dto?.tmp_root_write_smoke_ref ?? dto?.real_nas_production_write_manual_operator_receipt_ref ?? dto?.real_nas_production_write_manual_operator_execution_ref ?? dto?.real_nas_production_write_execution_packet_ref ?? dto?.real_nas_production_write_execution_preflight_ref ?? dto?.separate_real_nas_production_write_approval_ref ?? "아직 기록 없음");
 
   return (
     <section
@@ -6696,6 +6698,12 @@ export function OfficeControlledMutationCompactDashboardPanel({
       data-office-controlled-mutation-compact-dashboard-manual-operator-receipt-vps-authority={String(vpsAuthority)}
       data-office-controlled-mutation-compact-dashboard-manual-operator-receipt-runtime-open={String(blockedRuntime)}
       data-office-controlled-mutation-compact-dashboard-manual-operator-receipt-payload-echo={String(payloadEcho)}
+      data-office-controlled-mutation-compact-dashboard-tmp-root-write-smoke-ready={String(Boolean(dto?.mac_relay_tmp_root_write_smoke_executed))}
+      data-office-controlled-mutation-compact-dashboard-tmp-root-write-smoke-readback={String(Boolean(dto?.tmp_root_readback_verified))}
+      data-office-controlled-mutation-compact-dashboard-tmp-root-write-smoke-real-write={String(realWrite)}
+      data-office-controlled-mutation-compact-dashboard-tmp-root-write-smoke-vps-authority={String(vpsAuthority)}
+      data-office-controlled-mutation-compact-dashboard-tmp-root-write-smoke-runtime-open={String(blockedRuntime)}
+      data-office-controlled-mutation-compact-dashboard-tmp-root-write-smoke-payload-echo={String(payloadEcho)}
       data-office-controlled-mutation-compact-dashboard-real-write={String(realWrite)}
       data-office-controlled-mutation-compact-dashboard-vps-authority={String(vpsAuthority)}
       data-office-controlled-mutation-compact-dashboard-runtime-open={String(blockedRuntime)}
@@ -6715,7 +6723,7 @@ export function OfficeControlledMutationCompactDashboardPanel({
           </div>
           <div className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-compact-card="approval">
             <div className="text-[10px] uppercase tracking-[0.14em] text-midground/55">latest boundary</div>
-            <div className="mt-1 font-semibold text-foreground">{dto?.real_nas_production_write_manual_operator_receipt_ready ? "수동 operator receipt 기록" : dto?.real_nas_production_write_manual_operator_execution_ready ? "수동 operator envelope/receipt 기록" : dto?.real_nas_production_write_execution_packet_ready ? "실행 packet 기록" : dto?.real_nas_production_write_execution_preflight_ready ? "실행 preflight 기록" : ready ? "별도 승인 envelope 기록" : "대기"}</div>
+            <div className="mt-1 font-semibold text-foreground">{dto?.mac_relay_tmp_root_write_smoke_executed ? "Mac relay tmp-root write smoke" : dto?.real_nas_production_write_manual_operator_receipt_ready ? "수동 operator receipt 기록" : dto?.real_nas_production_write_manual_operator_execution_ready ? "수동 operator envelope/receipt 기록" : dto?.real_nas_production_write_execution_packet_ready ? "실행 packet 기록" : dto?.real_nas_production_write_execution_preflight_ready ? "실행 preflight 기록" : ready ? "별도 승인 envelope 기록" : "대기"}</div>
           </div>
           <div className="border border-current/15 bg-black/20 p-3" data-office-controlled-mutation-compact-card="safety">
             <div className="text-[10px] uppercase tracking-[0.14em] text-midground/55">실행 권한</div>
@@ -14688,7 +14696,7 @@ export default function OfficePage() {
       <NasKeeperTerminalExecutionStateCompletionReviewPanel result={nasKeeperGuardedFailureStateResult} error={nasKeeperGuardedFailureStateError} />
       </OfficeVisualizerEvidenceDrawer>
 
-      <OfficeControlledMutationCompactDashboardPanel latestApproval={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult} latestPreflight={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightResult} latestPacket={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPacketResult} latestManualOperatorExecution={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteManualOperatorExecutionResult} latestManualOperatorReceipt={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteManualOperatorReceiptResult} detailCount={15}>
+      <OfficeControlledMutationCompactDashboardPanel latestApproval={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult} latestPreflight={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightResult} latestPacket={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPacketResult} latestManualOperatorExecution={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteManualOperatorExecutionResult} latestManualOperatorReceipt={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteManualOperatorReceiptResult} latestTmpRootWriteSmoke={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayTmpRootWriteSmokeResult} detailCount={15}>
         <div className="border border-current/15 bg-black/15 p-3" data-office-controlled-mutation-archive-placeholder="true">
           이전 controlled-mutation 사다리는 기본 화면에서 숨겼습니다. 필요한 회귀 검증은 protected API와 테스트에서 확인합니다.
         </div>
@@ -15294,7 +15302,7 @@ export default function OfficePage() {
         </div>
       </section>
 
-      <OfficeControlledMutationCompactDashboardPanel latestApproval={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult} latestPreflight={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightResult} latestPacket={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPacketResult} latestManualOperatorExecution={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteManualOperatorExecutionResult} latestManualOperatorReceipt={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteManualOperatorReceiptResult} detailCount={15}>
+      <OfficeControlledMutationCompactDashboardPanel latestApproval={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult} latestPreflight={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightResult} latestPacket={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPacketResult} latestManualOperatorExecution={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteManualOperatorExecutionResult} latestManualOperatorReceipt={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteManualOperatorReceiptResult} latestTmpRootWriteSmoke={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayTmpRootWriteSmokeResult} detailCount={15}>
       <section
         className="border border-sky-300/20 bg-sky-950/10 p-4"
         data-office-controlled-mutation-proposal-contract="true"

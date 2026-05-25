@@ -15434,6 +15434,7 @@ def execute_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_d
     payload: object | None = None,
     *,
     attestation_readback_review_readback_review_readback_review_store_path: Path | None = None,
+    manual_operator_receipt_store_path: Path | None = None,
     store_path: Path | None = None,
     root_path: Path | str | None = None,
 ) -> dict[str, object]:
@@ -15462,6 +15463,14 @@ def execute_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_d
     contract_dto = cast(Mapping[str, object], contract.get("dto")) if isinstance(contract.get("dto"), Mapping) else {}
     if contract.get("found") is not True or contract_dto.get("payload_write_preview_contract_ready") is not True:
         errors.append(_error("payload_write_preview_contract", "source_contract_not_ready"))
+
+    receipt_records: list[dict[str, object]] = []
+    receipt_path = manual_operator_receipt_store_path or _default_fresh_request_builder_downstream_consumption_real_nas_production_write_manual_operator_receipt_store_path()
+    if manual_operator_receipt_store_path is not None or receipt_path.exists():
+        receipt_records, _ = _read_fresh_request_builder_downstream_consumption_real_nas_production_write_manual_operator_receipt_records(receipt_path)
+        if manual_operator_receipt_store_path is not None and not receipt_records:
+            errors.append(_error("manual_operator_receipt", "source_receipt_not_ready"))
+    source_receipt = receipt_records[-1] if receipt_records else None
     if errors:
         return {"written": False, "recorded": False, "errors": sorted(errors, key=lambda item: (item["field"], item["code"])), "dto": None}
 
@@ -15472,6 +15481,7 @@ def execute_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_d
             "smoke_ref": smoke_ref,
             "payload_preview_ref": contract_dto.get("payload_preview_ref"),
             "write_payload_preview_ref": contract_dto.get("write_payload_preview_ref"),
+            "manual_operator_receipt_ref": source_receipt.get("real_nas_production_write_manual_operator_receipt_ref") if source_receipt else None,
         },
         sort_keys=True,
         separators=(",", ":"),
@@ -15514,8 +15524,11 @@ def execute_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_d
         "source_payload_preview_ref": contract_dto.get("payload_preview_ref"),
         "source_write_payload_preview_ref": contract_dto.get("write_payload_preview_ref"),
         "source_payload_write_preview_contract_sha256": contract_dto.get("payload_write_preview_contract_sha256"),
-        "write_readiness_stage": "mac_relay_tmp_root_write_smoke",
-        "write_readiness_percent": 82,
+        "source_manual_operator_receipt_verified": bool(source_receipt),
+        "source_real_nas_production_write_manual_operator_receipt_ref": source_receipt.get("real_nas_production_write_manual_operator_receipt_ref") if source_receipt else None,
+        "source_real_nas_production_write_manual_operator_receipt_sha256": source_receipt.get("real_nas_production_write_manual_operator_receipt_sha256") if source_receipt else None,
+        "write_readiness_stage": "mac_relay_tmp_root_write_smoke_after_manual_receipt" if source_receipt else "mac_relay_tmp_root_write_smoke",
+        "write_readiness_percent": 88 if source_receipt else 82,
         "tmp_root_write_scope": "local_tmp_root_only_no_real_nas",
         "mac_relay_tmp_root_write_smoke_enabled": True,
         "mac_relay_tmp_root_write_smoke_executed": True,
@@ -15541,6 +15554,8 @@ def execute_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_d
         "replay_store_write_enabled": False,
         "real_replay_store_written": False,
         "real_nas_production_write_enabled": False,
+        "real_nas_production_write_executed": False,
+        "vps_direct_nas_authority_enabled": False,
         "vps_nas_mount_enabled": False,
         "raw_root_path_included": False,
         "secret_value_included": False,

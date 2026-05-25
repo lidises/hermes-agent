@@ -4697,3 +4697,143 @@ def test_real_nas_production_write_manual_operator_receipt_route_is_protected_an
         listed = client.get(route, headers={"X-Hermes-Session-Token": _SESSION_TOKEN})
         assert listed.status_code == 200
         assert listed.json()["found"] is True
+
+
+
+def _seed_real_nas_production_write_manual_operator_receipt(tmp_path):
+    operator_store, operator = _seed_real_nas_production_write_manual_operator_execution(tmp_path)
+    receipt_store = tmp_path / "real-nas-production-write-manual-operator-receipt-seed.jsonl"
+    result = append_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_real_nas_production_write_manual_operator_receipt(
+        {
+            "real_nas_production_write_manual_operator_receipt_ref": "nasmanualreceipt-20260525110000-seed0001",
+            "real_nas_production_write_manual_operator_execution_ref": operator["real_nas_production_write_manual_operator_execution_ref"],
+            "real_nas_production_write_manual_operator_execution_sha256": operator["real_nas_production_write_manual_operator_execution_sha256"],
+            "manual_operator_envelope_ref": operator["manual_operator_envelope_ref"],
+            "manual_operator_receipt_contract_ref": operator["manual_operator_receipt_contract_ref"],
+            "execution_packet_manifest_ref": operator["execution_packet_manifest_ref"],
+            "execution_packet_idempotency_ref": operator["execution_packet_idempotency_ref"],
+            "approval_token_ref": operator["approval_token_ref"],
+            "approval_envelope_ref": operator["approval_envelope_ref"],
+            "idempotency_key_sha256": operator["idempotency_key_sha256"],
+            "target_filename_contract_ref": operator["target_filename_contract_ref"],
+            "post_write_verification_contract_ref": operator["post_write_verification_contract_ref"],
+            "pre_execution_proof_ref": operator["pre_execution_proof_ref"],
+            "manual_operator_receipt_decision": "manual_operator_receipt_recorded_no_production_write",
+            "recorded_by": "operator:seed",
+            "recorded_at": "2026-05-25T11:00:00Z",
+        },
+        manual_operator_execution_store_path=operator_store,
+        store_path=receipt_store,
+    )
+    assert result["stored"] is True
+    return receipt_store, result["dto"]
+
+
+def test_mac_relay_tmp_root_write_smoke_after_manual_receipt_executes_isolated_metadata_only_smoke(tmp_path):
+    receipt_store, receipt = _seed_real_nas_production_write_manual_operator_receipt(tmp_path)
+    preview_source_root = tmp_path / "preview-source"
+    preview_source_root.mkdir()
+    preview_source_store, _preview_source = _seed_attestation_readback_review_readback_review_readback_review(preview_source_root)
+    smoke_store = tmp_path / "mac-relay-tmp-root-write-smoke-after-receipt.jsonl"
+    tmp_root = tmp_path / "isolated-safe-root"
+    result = execute_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_tmp_root_write_smoke(
+        {
+            "tmp_root_write_smoke_ref": "tmprootsmoke-20260525111000-test0001",
+            "requested_by": "operator:test",
+            "requested_at": "2026-05-25T11:10:00Z",
+        },
+        attestation_readback_review_readback_review_readback_review_store_path=preview_source_store,
+        manual_operator_receipt_store_path=receipt_store,
+        store_path=smoke_store,
+        root_path=tmp_root,
+    )
+    assert result["written"] is True
+    assert result["recorded"] is True
+    dto = result["dto"]
+    assert dto["source_manual_operator_receipt_verified"] is True
+    assert dto["source_real_nas_production_write_manual_operator_receipt_ref"] == receipt["real_nas_production_write_manual_operator_receipt_ref"]
+    assert dto["source_real_nas_production_write_manual_operator_receipt_sha256"] == receipt["real_nas_production_write_manual_operator_receipt_sha256"]
+    assert dto["write_readiness_stage"] == "mac_relay_tmp_root_write_smoke_after_manual_receipt"
+    assert dto["mac_relay_tmp_root_write_smoke_executed"] is True
+    assert dto["tmp_root_filesystem_write_executed"] is True
+    assert dto["tmp_root_readback_verified"] is True
+    assert dto["tmp_root_audit_written"] is True
+    assert len(dto["tmp_root_readback_sha256"]) == 64
+    assert len(dto["tmp_root_write_smoke_record_sha256"]) == 64
+    assert len(dto["idempotency_key_sha256"]) == 64
+    assert dto["payload_body_materialized"] is True
+    assert dto["payload_body_materialization_scope"] == "internal_tmp_root_smoke_only"
+    assert dto["markdown_body_included"] is False
+    assert dto["write_payload_included"] is False
+    assert dto["write_payload_materialized"] is False
+    assert dto["real_nas_production_write_enabled"] is False
+    assert dto["real_nas_production_write_executed"] is False
+    assert dto["vps_direct_nas_authority_enabled"] is False
+    assert dto["vps_nas_mount_enabled"] is False
+    assert dto["watcher_enabled"] is False
+    assert dto["cron_enabled"] is False
+    assert dto["dispatch_enabled"] is False
+    assert dto["authority_adapter_binding_enabled"] is False
+    assert dto["public_exposure_enabled"] is False
+    assert dto["gateway_restart_required"] is False
+    assert dto["next_required_boundary"] == "fresh_request_builder_downstream_consumption_one_shot_replay_idempotency_metadata_after_tmp_root_write_smoke"
+    text = json.dumps(dto, sort_keys=True)
+    assert "receipt" + "-body" + "-must-not-echo" not in text
+    assert "/" + "Users" not in text
+    assert "/" + "home" not in text
+    assert "sk-" not in text
+    assert "ghp_" not in text
+
+    duplicate = execute_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_tmp_root_write_smoke(
+        {
+            "tmp_root_write_smoke_ref": "tmprootsmoke-20260525111000-test0001",
+            "requested_by": "operator:test",
+            "requested_at": "2026-05-25T11:10:00Z",
+        },
+        attestation_readback_review_readback_review_readback_review_store_path=preview_source_store,
+        manual_operator_receipt_store_path=receipt_store,
+        store_path=smoke_store,
+        root_path=tmp_root,
+    )
+    assert duplicate["idempotency_replayed"] is True
+    assert duplicate["dto"]["idempotency_duplicate_write_skipped"] is True
+    listed = list_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_downstream_consumption_mac_relay_tmp_root_write_smoke_records(store_path=smoke_store)
+    assert listed["found"] is True
+    assert listed["record_count"] == 1
+
+
+def test_mac_relay_tmp_root_write_smoke_route_after_manual_receipt_is_protected_and_records(tmp_path, monkeypatch):
+    receipt_store, _receipt = _seed_real_nas_production_write_manual_operator_receipt(tmp_path)
+    preview_source_root = tmp_path / "preview-source"
+    preview_source_root.mkdir()
+    preview_source_store, _preview_source = _seed_attestation_readback_review_readback_review_readback_review(preview_source_root)
+    smoke_store = tmp_path / "mac-relay-tmp-root-write-smoke-after-receipt-route.jsonl"
+    tmp_root = tmp_path / "isolated-safe-root-route"
+    import hermes_cli.office_controlled_mutation as office_controlled_mutation
+    monkeypatch.setattr(office_controlled_mutation, "_default_fresh_request_builder_downstream_consumption_real_nas_production_write_manual_operator_receipt_store_path", lambda: receipt_store)
+    monkeypatch.setattr(office_controlled_mutation, "_default_fresh_request_builder_downstream_consumption_payload_materialization_summary_review_gate_record_readback_review_attestation_readback_review_readback_review_readback_review_store_path", lambda: preview_source_store)
+    monkeypatch.setattr(office_controlled_mutation, "_default_fresh_request_builder_downstream_consumption_mac_relay_tmp_root_write_smoke_record_store_path", lambda: smoke_store)
+    monkeypatch.setattr(office_controlled_mutation, "_default_fresh_request_builder_downstream_consumption_mac_relay_tmp_root_write_smoke_root_path", lambda: tmp_root)
+    route = "/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-request-builder-ledger-downstream-consumption-mac-relay-tmp-root-write-smoke"
+    payload = {
+        "tmp_root_write_smoke_ref": "tmprootsmoke-20260525111100-route1",
+        "requested_by": "operator:route",
+        "requested_at": "2026-05-25T11:11:00Z",
+    }
+    with TestClient(app) as client:
+        assert client.get(route).status_code == 401
+        assert client.post(route, json=payload).status_code == 401
+        response = client.post(route, json=payload, headers={"X-Hermes-Session-Token": _SESSION_TOKEN})
+        assert response.status_code == 200
+        body = response.json()
+        assert body["written"] is True
+        assert body["dto"]["source_manual_operator_receipt_verified"] is True
+        assert body["dto"]["mac_relay_tmp_root_write_smoke_executed"] is True
+        assert body["dto"]["real_nas_production_write_enabled"] is False
+        duplicate = client.post(route, json=payload, headers={"X-Hermes-Session-Token": _SESSION_TOKEN})
+        assert duplicate.status_code == 200
+        assert duplicate.json()["idempotency_replayed"] is True
+        listed = client.get(route, headers={"X-Hermes-Session-Token": _SESSION_TOKEN})
+        assert listed.status_code == 200
+        assert listed.json()["found"] is True
+        assert listed.json()["record_count"] == 1
