@@ -10423,6 +10423,95 @@ describe("Office controlled mutation compact dashboard", () => {
     expect(markup).not.toContain('<input');
     expect(markup).not.toContain('<form');
   });
+
+  it("summarizes latest Mac relay final preflight above precommit manifest without unsafe echo", () => {
+    const CompactPanel = (OfficePageModule as unknown as {
+      OfficeControlledMutationCompactDashboardPanel: React.ComponentType<{
+        latestPrecommitManifest?: { found?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null } | null;
+        latestFinalPreflight?: { found?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null } | null;
+        detailCount: number;
+        children: React.ReactNode;
+      }>;
+    }).OfficeControlledMutationCompactDashboardPanel;
+    const forbiddenBody = ["final", "body", "must", "not", "echo"].join("-");
+    const forbiddenPath = ["", "Users", "private", "nas-final-preflight"].join("/");
+    const forbiddenSecret = ["sk", "final-preflight-secret"].join("-");
+    const markup = renderToStaticMarkup(
+      <CompactPanel
+        latestPrecommitManifest={{
+          found: true,
+          dto: {
+            write_readiness_percent: 94,
+            mac_relay_precommit_manifest_ref: "precommitmanifest-safe-ref",
+            mac_relay_precommit_manifest_ready: true,
+            source_mac_relay_precommit_metadata_verified: true,
+            safe_manifest_checklist_verified: true,
+            safe_ref_chain_verified: true,
+          },
+        }}
+        latestFinalPreflight={{
+          found: true,
+          dto: {
+            write_readiness_percent: 97,
+            mac_relay_final_preflight_ref: "finalpreflight-safe-ref",
+            mac_relay_final_preflight_ready: true,
+            source_mac_relay_precommit_manifest_verified: true,
+            source_safe_manifest_checklist_verified: true,
+            final_preflight_checklist_verified: true,
+            safe_ref_chain_verified: true,
+            final_preflight_ref_chain_includes_precommit_manifest: true,
+            final_preflight_ref_chain_includes_precommit_metadata: true,
+            final_preflight_ref_chain_includes_replay_metadata: true,
+            final_preflight_ref_chain_includes_tmp_root_smoke: true,
+            replay_store_write_enabled: false,
+            real_replay_store_written: false,
+            real_nas_production_write_enabled: false,
+            real_nas_production_write_executed: false,
+            vps_direct_nas_authority_enabled: false,
+            vps_nas_mount_enabled: false,
+            watcher_enabled: false,
+            cron_enabled: false,
+            dispatch_enabled: false,
+            authority_adapter_binding_enabled: false,
+            public_exposure_enabled: false,
+            gateway_restart_required: false,
+            markdown_body_included: false,
+            write_payload_included: false,
+            raw_root_path_included: false,
+            secret_value_included: false,
+            final_preflight_includes_payload_body: false,
+            final_preflight_includes_write_payload: false,
+            final_preflight_includes_raw_root_path: false,
+            final_preflight_includes_secret_value: false,
+            unsafe_body: forbiddenBody,
+            unsafe_path: forbiddenPath,
+            unsafe_secret: forbiddenSecret,
+          },
+        }}
+        detailCount={19}
+      >
+        <section data-office-controlled-mutation-proposal-contract="true">historical ladder detail</section>
+      </CompactPanel>,
+    );
+
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-final-preflight-ready="true"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-final-preflight-source-verified="true"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-final-preflight-replay-store-write="false"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-final-preflight-real-write="false"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-final-preflight-vps-authority="false"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-final-preflight-runtime-open="false"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-final-preflight-payload-echo="false"');
+    expect(markup).toContain('Mac relay final preflight');
+    expect(markup).toContain('finalpreflight-safe-ref');
+    expect(markup).not.toContain('precommitmanifest-safe-ref</div>');
+    expect(markup).not.toContain('historical ladder detail');
+    expect(markup).not.toContain(forbiddenBody);
+    expect(markup).not.toContain(forbiddenPath);
+    expect(markup).not.toContain(forbiddenSecret);
+    expect(markup).not.toContain('<button');
+    expect(markup).not.toContain('<input');
+    expect(markup).not.toContain('<form');
+  });
 });
 
 
