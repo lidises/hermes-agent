@@ -10768,6 +10768,94 @@ describe("Office controlled mutation compact dashboard", () => {
     expect(markup).not.toContain('<input');
     expect(markup).not.toContain('<form');
   });
+
+  it("summarizes latest Mac relay real NAS write dry-run seal above production approval without unsafe echo", () => {
+    const CompactPanel = (OfficePageModule as unknown as {
+      OfficeControlledMutationCompactDashboardPanel: React.ComponentType<{
+        latestProductionApproval?: { found?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null } | null;
+        latestDryRunSeal?: { found?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null } | null;
+        detailCount: number;
+        children: React.ReactNode;
+      }>;
+    }).OfficeControlledMutationCompactDashboardPanel;
+    const forbiddenBody = ["dry", "run", "seal", "must", "not", "echo"].join("-");
+    const forbiddenPath = ["", "Users", "private", "nas-dry-run-seal"].join("/");
+    const forbiddenSecret = ["sk", "dry-run-seal-secret"].join("-");
+    const markup = renderToStaticMarkup(
+      <CompactPanel
+        latestProductionApproval={{
+          found: true,
+          dto: {
+            write_readiness_percent: 100,
+            mac_relay_production_write_approval_ref: "prodapproval-safe-ref",
+            mac_relay_production_write_approval_ready: true,
+          },
+        }}
+        latestDryRunSeal={{
+          found: true,
+          dto: {
+            write_readiness_percent: 100,
+            mac_relay_real_nas_write_dry_run_seal_ref: "nasdryrunseal-safe-ref",
+            mac_relay_real_nas_write_dry_run_seal_ready: true,
+            source_mac_relay_production_write_approval_verified: true,
+            source_production_write_approval_boundary_verified: true,
+            target_filename_contract_verified: true,
+            post_write_verification_contract_verified: true,
+            safe_ref_chain_verified: true,
+            dry_run_seal_is_metadata_only: true,
+            dry_run_seal_does_not_execute_write: true,
+            final_safe_refs_verified_for_next_rung: true,
+            real_nas_write_target_filename_contract_ready: true,
+            post_write_readback_contract_ready: true,
+            replay_store_write_enabled: false,
+            real_replay_store_written: false,
+            real_nas_production_write_enabled: false,
+            real_nas_production_write_executed: false,
+            vps_direct_nas_authority_enabled: false,
+            vps_nas_mount_enabled: false,
+            watcher_enabled: false,
+            cron_enabled: false,
+            dispatch_enabled: false,
+            authority_adapter_binding_enabled: false,
+            public_exposure_enabled: false,
+            gateway_restart_required: false,
+            markdown_body_included: false,
+            write_payload_included: false,
+            raw_root_path_included: false,
+            secret_value_included: false,
+            dry_run_seal_includes_payload_body: false,
+            dry_run_seal_includes_write_payload: false,
+            dry_run_seal_includes_raw_root_path: false,
+            dry_run_seal_includes_secret_value: false,
+            unsafe_body: forbiddenBody,
+            unsafe_path: forbiddenPath,
+            unsafe_secret: forbiddenSecret,
+          },
+        }}
+        detailCount={23}
+      >
+        <section data-office-controlled-mutation-proposal-contract="true">historical ladder detail</section>
+      </CompactPanel>,
+    );
+
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-real-nas-write-dry-run-seal-ready="true"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-real-nas-write-dry-run-seal-source-verified="true"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-real-nas-write-dry-run-seal-replay-store-write="false"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-real-nas-write-dry-run-seal-real-write="false"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-real-nas-write-dry-run-seal-vps-authority="false"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-real-nas-write-dry-run-seal-runtime-open="false"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-real-nas-write-dry-run-seal-payload-echo="false"');
+    expect(markup).toContain('Mac relay real NAS write dry-run seal');
+    expect(markup).toContain('nasdryrunseal-safe-ref');
+    expect(markup).not.toContain('prodapproval-safe-ref</div>');
+    expect(markup).not.toContain('historical ladder detail');
+    expect(markup).not.toContain(forbiddenBody);
+    expect(markup).not.toContain(forbiddenPath);
+    expect(markup).not.toContain(forbiddenSecret);
+    expect(markup).not.toContain('<button');
+    expect(markup).not.toContain('<input');
+    expect(markup).not.toContain('<form');
+  });
 });
 
 
