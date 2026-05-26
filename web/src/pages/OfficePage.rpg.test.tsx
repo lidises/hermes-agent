@@ -10683,6 +10683,91 @@ describe("Office controlled mutation compact dashboard", () => {
     expect(markup).not.toContain('<input');
     expect(markup).not.toContain('<form');
   });
+
+  it("summarizes latest Mac relay production-write approval above approval token without unsafe echo", () => {
+    const CompactPanel = (OfficePageModule as unknown as {
+      OfficeControlledMutationCompactDashboardPanel: React.ComponentType<{
+        latestApprovalToken?: { found?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null } | null;
+        latestProductionApproval?: { found?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null } | null;
+        detailCount: number;
+        children: React.ReactNode;
+      }>;
+    }).OfficeControlledMutationCompactDashboardPanel;
+    const forbiddenBody = ["production", "approval", "must", "not", "echo"].join("-");
+    const forbiddenPath = ["", "Users", "private", "prod-approval"].join("/");
+    const forbiddenSecret = ["sk", "prod-approval-secret"].join("-");
+    const markup = renderToStaticMarkup(
+      <CompactPanel
+        latestApprovalToken={{
+          found: true,
+          dto: {
+            write_readiness_percent: 100,
+            mac_relay_approval_token_ref: "approvaltoken-safe-ref",
+            mac_relay_approval_token_ready: true,
+            approval_token_contract_verified: true,
+          },
+        }}
+        latestProductionApproval={{
+          found: true,
+          dto: {
+            write_readiness_percent: 100,
+            mac_relay_production_write_approval_ref: "prodapproval-safe-ref",
+            mac_relay_production_write_approval_ready: true,
+            source_mac_relay_approval_token_verified: true,
+            source_approval_token_contract_verified: true,
+            production_write_approval_boundary_verified: true,
+            production_write_approval_is_metadata_only: true,
+            production_write_approval_does_not_execute_write: true,
+            safe_ref_chain_verified: true,
+            replay_store_write_enabled: false,
+            real_replay_store_written: false,
+            real_nas_production_write_enabled: false,
+            real_nas_production_write_executed: false,
+            vps_direct_nas_authority_enabled: false,
+            vps_nas_mount_enabled: false,
+            watcher_enabled: false,
+            cron_enabled: false,
+            dispatch_enabled: false,
+            authority_adapter_binding_enabled: false,
+            public_exposure_enabled: false,
+            gateway_restart_required: false,
+            markdown_body_included: false,
+            write_payload_included: false,
+            raw_root_path_included: false,
+            secret_value_included: false,
+            production_write_approval_includes_payload_body: false,
+            production_write_approval_includes_write_payload: false,
+            production_write_approval_includes_raw_root_path: false,
+            production_write_approval_includes_secret_value: false,
+            unsafe_body: forbiddenBody,
+            unsafe_path: forbiddenPath,
+            unsafe_secret: forbiddenSecret,
+          },
+        }}
+        detailCount={22}
+      >
+        <section data-office-controlled-mutation-proposal-contract="true">historical ladder detail</section>
+      </CompactPanel>,
+    );
+
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-production-write-approval-ready="true"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-production-write-approval-source-verified="true"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-production-write-approval-replay-store-write="false"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-production-write-approval-real-write="false"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-production-write-approval-vps-authority="false"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-production-write-approval-runtime-open="false"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-production-write-approval-payload-echo="false"');
+    expect(markup).toContain('Mac relay production-write approval');
+    expect(markup).toContain('prodapproval-safe-ref');
+    expect(markup).not.toContain('approvaltoken-safe-ref</div>');
+    expect(markup).not.toContain('historical ladder detail');
+    expect(markup).not.toContain(forbiddenBody);
+    expect(markup).not.toContain(forbiddenPath);
+    expect(markup).not.toContain(forbiddenSecret);
+    expect(markup).not.toContain('<button');
+    expect(markup).not.toContain('<input');
+    expect(markup).not.toContain('<form');
+  });
 });
 
 
