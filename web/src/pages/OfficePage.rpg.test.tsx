@@ -10597,6 +10597,92 @@ describe("Office controlled mutation compact dashboard", () => {
     expect(markup).not.toContain('<input');
     expect(markup).not.toContain('<form');
   });
+
+  it("summarizes latest Mac relay approval token above real-write gate without unsafe echo", () => {
+    const CompactPanel = (OfficePageModule as unknown as {
+      OfficeControlledMutationCompactDashboardPanel: React.ComponentType<{
+        latestRealWriteGate?: { found?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null } | null;
+        latestApprovalToken?: { found?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null } | null;
+        detailCount: number;
+        children: React.ReactNode;
+      }>;
+    }).OfficeControlledMutationCompactDashboardPanel;
+    const forbiddenBody = ["approval", "token", "must", "not", "echo"].join("-");
+    const forbiddenPath = ["", "Users", "private", "nas-approval-token"].join("/");
+    const forbiddenSecret = ["sk", "approval-token-secret"].join("-");
+    const markup = renderToStaticMarkup(
+      <CompactPanel
+        latestRealWriteGate={{
+          found: true,
+          dto: {
+            write_readiness_percent: 99,
+            mac_relay_real_write_gate_ref: "realwritegate-safe-ref",
+            mac_relay_real_write_gate_ready: true,
+          },
+        }}
+        latestApprovalToken={{
+          found: true,
+          dto: {
+            write_readiness_percent: 100,
+            mac_relay_approval_token_ref: "approvaltoken-safe-ref",
+            mac_relay_approval_token_ready: true,
+            approval_token_is_secret: false,
+            approval_token_is_non_secret_safe_ref: true,
+            approval_token_materialized_value_included: false,
+            source_mac_relay_real_write_gate_verified: true,
+            source_real_write_gate_checklist_verified: true,
+            approval_token_contract_verified: true,
+            safe_ref_chain_verified: true,
+            approval_token_blocks_without_explicit_production_approval: true,
+            replay_store_write_enabled: false,
+            real_replay_store_written: false,
+            real_nas_production_write_enabled: false,
+            real_nas_production_write_executed: false,
+            vps_direct_nas_authority_enabled: false,
+            vps_nas_mount_enabled: false,
+            watcher_enabled: false,
+            cron_enabled: false,
+            dispatch_enabled: false,
+            authority_adapter_binding_enabled: false,
+            public_exposure_enabled: false,
+            gateway_restart_required: false,
+            markdown_body_included: false,
+            write_payload_included: false,
+            raw_root_path_included: false,
+            secret_value_included: false,
+            approval_token_includes_payload_body: false,
+            approval_token_includes_write_payload: false,
+            approval_token_includes_raw_root_path: false,
+            approval_token_includes_secret_value: false,
+            unsafe_body: forbiddenBody,
+            unsafe_path: forbiddenPath,
+            unsafe_secret: forbiddenSecret,
+          },
+        }}
+        detailCount={21}
+      >
+        <section data-office-controlled-mutation-proposal-contract="true">historical ladder detail</section>
+      </CompactPanel>,
+    );
+
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-approval-token-ready="true"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-approval-token-source-verified="true"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-approval-token-replay-store-write="false"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-approval-token-real-write="false"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-approval-token-vps-authority="false"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-approval-token-runtime-open="false"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-approval-token-payload-echo="false"');
+    expect(markup).toContain('Mac relay approval token');
+    expect(markup).toContain('approvaltoken-safe-ref');
+    expect(markup).not.toContain('realwritegate-safe-ref</div>');
+    expect(markup).not.toContain('historical ladder detail');
+    expect(markup).not.toContain(forbiddenBody);
+    expect(markup).not.toContain(forbiddenPath);
+    expect(markup).not.toContain(forbiddenSecret);
+    expect(markup).not.toContain('<button');
+    expect(markup).not.toContain('<input');
+    expect(markup).not.toContain('<form');
+  });
 });
 
 
