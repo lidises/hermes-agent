@@ -10097,6 +10097,73 @@ describe("Office controlled mutation compact dashboard", () => {
     expect(markup).not.toContain('<form');
   });
 
+  it("prefers manual operator receipt over an older execution packet while keeping authority closed", () => {
+    const CompactPanel = (OfficePageModule as unknown as {
+      OfficeControlledMutationCompactDashboardPanel: React.ComponentType<{
+        latestPacket?: { found?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null } | null;
+        latestManualOperatorReceipt?: { found?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null } | null;
+        detailCount: number;
+        children: React.ReactNode;
+      }>;
+    }).OfficeControlledMutationCompactDashboardPanel;
+    const markup = renderToStaticMarkup(
+      <CompactPanel
+        latestPacket={{
+          found: true,
+          dto: {
+            write_readiness_percent: 99,
+            real_nas_production_write_execution_packet_ready: true,
+            real_nas_production_write_execution_packet_ref: "naswritepacket-older-ref",
+            execution_packet_does_not_execute_write: true,
+            execution_packet_does_not_materialize_payload: true,
+            payload_write_preview_contract_verified: true,
+            replay_idempotency_metadata_recorded: true,
+            mac_relay_tmp_root_write_smoke_executed: true,
+            safe_ref_chain_verified: true,
+            real_nas_production_write_enabled: false,
+            real_nas_production_write_executed: false,
+          },
+        }}
+        latestManualOperatorReceipt={{
+          found: true,
+          dto: {
+            write_readiness_percent: 100,
+            real_nas_production_write_manual_operator_receipt_ready: true,
+            manual_operator_receipt_is_metadata_only: true,
+            real_nas_production_write_manual_operator_receipt_ref: "nasmanualreceipt-newer-ref",
+            real_nas_production_write_enabled: false,
+            real_nas_production_write_executed: false,
+            vps_direct_nas_authority_enabled: false,
+            vps_nas_mount_enabled: false,
+            watcher_enabled: false,
+            cron_enabled: false,
+            dispatch_enabled: false,
+            authority_adapter_binding_enabled: false,
+            public_exposure_enabled: false,
+            gateway_restart_required: false,
+            markdown_body_included: false,
+            write_payload_included: false,
+            raw_root_path_included: false,
+            secret_value_included: false,
+          },
+        }}
+        detailCount={16}
+      >
+        <section data-office-controlled-mutation-proposal-contract="true">historical ladder detail</section>
+      </CompactPanel>,
+    );
+
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-manual-operator-receipt-ready="true"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-manual-operator-receipt-real-write="false"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-real-nas-production-write-execution-packet-ready="false"');
+    expect(markup).toContain('수동 operator receipt 기록');
+    expect(markup).toContain('nasmanualreceipt-newer-ref');
+    expect(markup).not.toContain('naswritepacket-older-ref</div>');
+    expect(markup).not.toContain('<button');
+    expect(markup).not.toContain('<input');
+    expect(markup).not.toContain('<form');
+  });
+
 
   it("summarizes latest Mac relay tmp-root write smoke above manual receipt without unsafe echo", () => {
     const CompactPanel = (OfficePageModule as unknown as {
