@@ -11032,6 +11032,91 @@ describe("Office controlled mutation compact dashboard", () => {
     expect(markup).not.toContain('<input');
     expect(markup).not.toContain('<form');
   });
+
+  it("summarizes real NAS production write execution packet above final execution gate without opening unsafe authority", () => {
+    const CompactPanel = (OfficePageModule as unknown as {
+      OfficeControlledMutationCompactDashboardPanel: React.ComponentType<{
+        latestFinalExecutionGate?: { found?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null } | null;
+        latestPacket?: { found?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null } | null;
+        detailCount: number;
+        children: React.ReactNode;
+      }>;
+    }).OfficeControlledMutationCompactDashboardPanel;
+    const forbiddenBody = ["execution", "packet", "body", "must", "not", "echo"].join("-");
+    const forbiddenPath = ["", "Users", "private", "nas-execution-packet"].join("/");
+    const forbiddenSecret = ["sk", "execution-packet-secret"].join("-");
+    const markup = renderToStaticMarkup(
+      <CompactPanel
+        latestFinalExecutionGate={{
+          found: true,
+          dto: {
+            write_readiness_percent: 100,
+            mac_relay_real_nas_write_final_execution_gate_ref: "nasfinalgate-safe-ref",
+            mac_relay_real_nas_write_final_execution_gate_ready: true,
+          },
+        }}
+        latestPacket={{
+          found: true,
+          dto: {
+            write_readiness_percent: 100,
+            real_nas_production_write_execution_packet_ref: "naswritepacket-safe-ref",
+            real_nas_production_write_execution_packet_ready: true,
+            source_real_nas_production_write_execution_preflight_verified: true,
+            source_preflight_sha256_verified: true,
+            execution_packet_does_not_execute_write: true,
+            execution_packet_does_not_materialize_payload: true,
+            payload_write_preview_contract_verified: true,
+            replay_idempotency_metadata_recorded: true,
+            mac_relay_tmp_root_write_smoke_executed: true,
+            safe_ref_chain_verified: true,
+            replay_store_write_enabled: false,
+            real_replay_store_written: false,
+            real_nas_production_write_enabled: false,
+            real_nas_production_write_executed: false,
+            vps_direct_nas_authority_enabled: false,
+            vps_nas_mount_enabled: false,
+            watcher_enabled: false,
+            cron_enabled: false,
+            dispatch_enabled: false,
+            authority_adapter_binding_enabled: false,
+            public_exposure_enabled: false,
+            gateway_restart_required: false,
+            markdown_body_included: false,
+            write_payload_included: false,
+            raw_root_path_included: false,
+            secret_value_included: false,
+            execution_packet_includes_payload_body: false,
+            execution_packet_includes_write_payload: false,
+            execution_packet_includes_raw_root_path: false,
+            execution_packet_includes_secret_value: false,
+            unsafe_body: forbiddenBody,
+            unsafe_path: forbiddenPath,
+            unsafe_secret: forbiddenSecret,
+          },
+        }}
+        detailCount={26}
+      >
+        <section data-office-controlled-mutation-proposal-contract="true">historical ladder detail</section>
+      </CompactPanel>,
+    );
+
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-real-nas-production-write-execution-packet-ready="true"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-real-nas-production-write-execution-packet-source-verified="true"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-real-nas-production-write-execution-packet-real-write="false"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-real-nas-production-write-execution-packet-vps-authority="false"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-real-nas-production-write-execution-packet-runtime-open="false"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-real-nas-production-write-execution-packet-payload-echo="false"');
+    expect(markup).toContain('Real NAS production write execution packet');
+    expect(markup).toContain('naswritepacket-safe-ref');
+    expect(markup).not.toContain('nasfinalgate-safe-ref</div>');
+    expect(markup).not.toContain('historical ladder detail');
+    expect(markup).not.toContain(forbiddenBody);
+    expect(markup).not.toContain(forbiddenPath);
+    expect(markup).not.toContain(forbiddenSecret);
+    expect(markup).not.toContain('<button');
+    expect(markup).not.toContain('<input');
+    expect(markup).not.toContain('<form');
+  });
 });
 
 
