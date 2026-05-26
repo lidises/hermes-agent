@@ -20,7 +20,7 @@ vi.mock("@/lib/api", () => ({
 import * as OfficePageModule from "./OfficePage";
 import { OfficeRpgMap } from "./OfficePage";
 import type { NasKeeperExecutionStateDraft } from "./OfficePage";
-import { buildOfficeKanbanProjection, buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerAssignmentCandidateGate, buildOfficeWorkerRequestDraftPreview, buildOfficeWorkerHumanConfirmationEnvelope, buildOfficeWorkerAuthorityHandoffEnvelope, buildOfficeWorkerDispatchDryRunEnvelope, buildOfficeWorkerAuditPreviewEnvelope, buildOfficeWorkerRollbackPreviewEnvelope, buildOfficeWorkerFinalGateChecklist, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeNasKeeperSaveRequestGate, buildOfficeNasKeeperRollbackEvidencePreview, buildOfficeNasEvidencePackageStoreReadbackStatus, buildOfficeNasPathValidationStatusSurface, buildOfficeNasPathPreviewStatusSurface, buildOfficeNasPathPreviewStoreReadbackStatusSurface, buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface, buildOfficeNasRuntimeSingleFileWriteApprovalAction, buildOfficeNasKeeperQueueManualEvidenceReviewSurface, buildOfficeNasKeeperExecutionOperatorAction, buildOfficeDeskRpgReadOnlyChainCompletionReview, buildOfficeEventDrivenCharacterStateProjection, buildOfficeCharacterStateRoomOverlay, buildOfficeCharacterRoomInteractionPosture, buildOfficeCharacterInspectorDetailPosture, buildOfficeCharacterDetailSafeDialogueCopy, buildOfficeCharacterBubbleInspectorAlignment, buildOfficeCharacterPanelBoundarySummary, buildOfficeCharacterFacilityRoleLegend, buildOfficeCharacterFacilityBoundaryStrip, buildOfficeCharacterFacilitySourceLedgerStrip, buildOfficeCharacterFacilityCompletionReview, buildOfficeControlledMutationProposalContract, buildOfficeControlledMutationDryRunPlan, buildOfficeControlledMutationAuditSinkPlan, buildOfficeControlledMutationRollbackVerificationPlan, buildOfficeControlledMutationHumanApprovalPlan, buildOfficeControlledMutationAuthoritySummary, buildOfficeControlledMutationExecutionReadinessSummary, buildOfficeControlledMutationContractPostureProjection, buildOfficeControlledMutationContractPosturePolish, buildOfficeControlledMutationReadinessHandoffRibbon, buildOfficeControlledMutationReadinessSummaryPolish, buildOfficeControlledMutationRequestStorePosture, buildOfficeControlledMutationRequestStoreHardeningPlan, buildOfficeControlledMutationNextApprovalBoundary, buildOfficeControlledMutationPostDecisionApprovalBoundary, buildOfficeControlledMutationPostRegistryApprovalBoundary, buildOfficeControlledMutationTargetDispatchForbiddenBoundary, buildOfficeControlledMutationSafeContinuationCompletionReview, buildOfficeControlledMutationApprovalBoundarySummary, buildOfficeRpgRuntimeFanoutDrilldown, buildOfficeRpgFanoutApprovalEventBridge, buildOfficeRpgScene } from "./officeView";
+import { buildOfficeKanbanProjection, buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerAssignmentCandidateGate, buildOfficeWorkerRequestDraftPreview, buildOfficeWorkerHumanConfirmationEnvelope, buildOfficeWorkerAuthorityHandoffEnvelope, buildOfficeWorkerDispatchDryRunEnvelope, buildOfficeWorkerAuditPreviewEnvelope, buildOfficeWorkerRollbackPreviewEnvelope, buildOfficeWorkerFinalGateChecklist, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeNasKeeperSaveRequestGate, buildOfficeNasKeeperRollbackEvidencePreview, buildOfficeNasEvidencePackageStoreReadbackStatus, buildOfficeNasPathValidationStatusSurface, buildOfficeNasPathPreviewStatusSurface, buildOfficeNasPathPreviewStoreReadbackStatusSurface, buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface, buildOfficeNasRuntimeSingleFileWriteApprovalAction, buildOfficeNasKeeperQueueManualEvidenceReviewSurface, buildOfficeNasKeeperExecutionOperatorAction, buildOfficeDeskRpgReadOnlyChainCompletionReview, buildOfficeEventDrivenCharacterStateProjection, buildOfficeCharacterStateRoomOverlay, buildOfficeCharacterRoomInteractionPosture, buildOfficeCharacterInspectorDetailPosture, buildOfficeCharacterDetailSafeDialogueCopy, buildOfficeCharacterBubbleInspectorAlignment, buildOfficeCharacterPanelBoundarySummary, buildOfficeCharacterFacilityRoleLegend, buildOfficeCharacterFacilityBoundaryStrip, buildOfficeCharacterFacilitySourceLedgerStrip, buildOfficeCharacterFacilityCompletionReview, buildOfficeControlledMutationProposalContract, buildOfficeControlledMutationDryRunPlan, buildOfficeControlledMutationAuditSinkPlan, buildOfficeControlledMutationRollbackVerificationPlan, buildOfficeControlledMutationHumanApprovalPlan, buildOfficeControlledMutationAuthoritySummary, buildOfficeControlledMutationExecutionReadinessSummary, buildOfficeControlledMutationContractPostureProjection, buildOfficeControlledMutationContractPosturePolish, buildOfficeControlledMutationReadinessHandoffRibbon, buildOfficeControlledMutationReadinessSummaryPolish, buildOfficeControlledMutationRequestStorePosture, buildOfficeControlledMutationRequestStoreHardeningPlan, buildOfficeControlledMutationNextApprovalBoundary, buildOfficeControlledMutationPostDecisionApprovalBoundary, buildOfficeControlledMutationPostRegistryApprovalBoundary, buildOfficeControlledMutationTargetDispatchForbiddenBoundary, buildOfficeControlledMutationSafeContinuationCompletionReview, buildOfficeControlledMutationApprovalBoundarySummary, buildOfficeRpgRuntimeFanoutDrilldown, buildOfficeRpgFanoutApprovalEventBridge, buildOfficeRpgApprovalEventEnvelopeDetail, buildOfficeRpgScene } from "./officeView";
 import type { OfficeAuthorityMetadataHandoffStatus, OfficeDispatcherAuthorityDryRunSurface, OfficeDispatcherAuthorityMetadataAppendStatus, OfficeDispatcherAuthorityMetadataRecordingDraft, OfficeDispatcherExecutionSimulationStatus, OfficeNasKeeperExecutionFromPreviewPayload, OfficeNasKeeperExecutionFromPreviewResult, OfficeNasKeeperExecutionStateResult, OfficeNasKeeperHandoffQueueReadback, OfficeState } from "@/lib/api";
 
 function officeFixture(overrides: Partial<OfficeState> = {}): OfficeState {
@@ -63,20 +63,27 @@ describe("Office controlled-mutation runtime status panel placement", () => {
     expect(drawerCloseIndex).toBeGreaterThan(drawerIndex);
     expect(source).toContain('data-office-rpg-focused-shell="true"');
     expect(source).toContain('data-office-visualizer-evidence-drawer="true"');
-    expect(source).toContain("<MacLocalRelayRootAuthorityPreflightPanel");
-    expect(source).toContain("<MacLocalRelayRootAuthorityConfigContractPanel");
-    expect(source).toContain("<MacLocalRelayRootReadinessProbeContractPanel");
-    expect(source).toContain("<NasKeeperLastSuccessfulMacRelayWriteStatusPanel");
-    expect(source).toContain("<NasKeeperFreshOneShotOperatorFlowPanel");
-    expect(source).toContain("<NasKeeperFreshOneShotRequestBuilderPanel");
-    expect(source).toContain("<NasKeeperFreshRequestBuilderLedgerPanel");
-    expect(source).toContain("<NasKeeperFreshRequestBuilderLedgerExportSelectionReviewPanel");
-    expect(source).toContain("<NasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightPanel");
-    expect(source).toContain("<NasKeeperFreshRequestBuilderLedgerManualReviewRecordPanel");
-    expect(source).toContain("<NasKeeperFreshRequestBuilderLedgerDownstreamUseEnablementPanel");
-    expect(source).toContain("<NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightPanel");
-    expect(source).toContain("<NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementPanel");
-    expect(source).toContain("<NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionOneShotBoundaryDesignPanel");
+    expect(source).toContain('data-office-nas-keeper-heavy-ladders-suppressed="true"');
+    expect(source).toContain('data-office-nas-keeper-heavy-ladders-dom-rendered="false"');
+    expect(source).toContain("Mac relay, payload/write_payload preview, replay/idempotency, execution packet");
+    for (const hiddenPanel of [
+      "<MacLocalRelayRootAuthorityPreflightPanel",
+      "<MacLocalRelayRootAuthorityConfigContractPanel",
+      "<MacLocalRelayRootReadinessProbeContractPanel",
+      "<NasKeeperLastSuccessfulMacRelayWriteStatusPanel",
+      "<NasKeeperFreshOneShotOperatorFlowPanel",
+      "<NasKeeperFreshOneShotRequestBuilderPanel",
+      "<NasKeeperFreshRequestBuilderLedgerPanel",
+      "<NasKeeperFreshRequestBuilderLedgerExportSelectionReviewPanel",
+      "<NasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightPanel",
+      "<NasKeeperFreshRequestBuilderLedgerManualReviewRecordPanel",
+      "<NasKeeperFreshRequestBuilderLedgerDownstreamUseEnablementPanel",
+      "<NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionPreflightPanel",
+      "<NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionEnablementPanel",
+      "<NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionOneShotBoundaryDesignPanel",
+    ]) {
+      expect(source).not.toContain(hiddenPanel);
+    }
 
     for (const panel of [
       "<NasKeeperLiveOperatorLanePanel",
@@ -128,13 +135,6 @@ describe("Office controlled-mutation runtime status panel placement", () => {
       "<NasKeeperExecutionFromPreviewGuardedFailureStatusPanel",
       "<NasKeeperGuardedFailureExecutionStateRecordStatusPanel",
       "<NasKeeperTerminalExecutionStateCompletionReviewPanel",
-      "<NasKeeperLastSuccessfulMacRelayWriteStatusPanel",
-      "<NasKeeperFreshOneShotOperatorFlowPanel",
-      "<NasKeeperFreshOneShotRequestBuilderPanel",
-      "<NasKeeperFreshRequestBuilderLedgerPanel",
-      "<NasKeeperFreshRequestBuilderLedgerExportSelectionReviewPanel",
-      "<NasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightPanel",
-      "<NasKeeperFreshRequestBuilderLedgerManualReviewRecordPanel",
     ]) {
       const panelIndex = source.indexOf(panel);
       expect(panelIndex).toBeGreaterThan(0);
@@ -153,16 +153,9 @@ describe("Office controlled-mutation runtime status panel placement", () => {
       "<NasKeeperHandoffClaimDryRunStatusPanel",
       "<NasKeeperHandoffAuthorizationRecordStatusPanel",
       "<NasKeeperMacRelayExecutionPayloadPreviewStatusPanel",
-      "<NasKeeperExecutionFromPreviewGuardedFailureStatusPanel",
-      "<NasKeeperGuardedFailureExecutionStateRecordStatusPanel",
-      "<NasKeeperTerminalExecutionStateCompletionReviewPanel",
-      "<NasKeeperLastSuccessfulMacRelayWriteStatusPanel",
-      "<NasKeeperFreshOneShotOperatorFlowPanel",
-      "<NasKeeperFreshOneShotRequestBuilderPanel",
-      "<NasKeeperFreshRequestBuilderLedgerPanel",
-      "<NasKeeperFreshRequestBuilderLedgerExportSelectionReviewPanel",
-      "<NasKeeperFreshRequestBuilderLedgerDownstreamUsePreflightPanel",
-      "<NasKeeperFreshRequestBuilderLedgerManualReviewRecordPanel",
+        "<NasKeeperExecutionFromPreviewGuardedFailureStatusPanel",
+        "<NasKeeperGuardedFailureExecutionStateRecordStatusPanel",
+        "<NasKeeperTerminalExecutionStateCompletionReviewPanel",
       ].includes(panel)) {
         expect(source.indexOf(panel, panelIndex + 1)).toBe(-1);
       }
@@ -931,6 +924,64 @@ describe("RpgFanoutApprovalEventBridgePanel", () => {
     expect(markup).not.toContain("<button");
     expect(markup).not.toContain("<input");
     expect(markup).not.toMatch(/raw fanout bridge prompt|raw fanout bridge task|Traceback|\/Users\/lidises|token-shaped-fanout-bridge|private-fanout-provider/i);
+  });
+});
+
+
+
+describe("RpgApprovalEventEnvelopeDetailPanel", () => {
+  it("renders a read-only approval-event envelope detail without controls", () => {
+    const RpgApprovalEventEnvelopeDetailPanel = (OfficePageModule as unknown as {
+      RpgApprovalEventEnvelopeDetailPanel: React.ComponentType<{ detail: ReturnType<typeof buildOfficeRpgApprovalEventEnvelopeDetail> }>;
+    }).RpgApprovalEventEnvelopeDetailPanel;
+    const secretSentinel = ["token", "shaped", "approval", "envelope"].join("-");
+    const state = officeFixture({
+      agents: [
+        { id: "agent-1", status: "active", prompt: "raw approval envelope prompt", provider: "private-approval-envelope-provider", api_key: secretSentinel },
+        { id: "agent-2", status: "active", prompt: "raw approval envelope prompt", provider: "private-approval-envelope-provider", api_key: secretSentinel },
+        { id: "agent-3", status: "active", prompt: "raw approval envelope prompt", provider: "private-approval-envelope-provider", api_key: secretSentinel },
+        { id: "agent-4", status: "active", prompt: "raw approval envelope prompt", provider: "private-approval-envelope-provider", api_key: secretSentinel },
+      ],
+      work_items: [
+        { id: "task-approval-envelope", status: "blocked", title: "raw approval envelope task", body: "/Users/lidises/private/approval-envelope.md", transcript: "Traceback approval envelope transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-20T00:00:00Z", item_count: 8, warning_count: 3, error_summary: "Traceback approval envelope source" },
+      ],
+    });
+    const projection = buildOfficeDeskRpgProjectionModel(state);
+    const scene = buildOfficeRpgScene(state);
+    const fanout = buildOfficeRpgRuntimeFanoutDrilldown(scene);
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const posture = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
+    const requestEnvelope = buildOfficeOrchestratorRequestEnvelopeDetail(projection, posture);
+    const route = buildOfficeApprovalRequestRouteDetail(requestEnvelope, dialogue);
+    const bridge = buildOfficeRpgFanoutApprovalEventBridge(fanout, route);
+    const detail = buildOfficeRpgApprovalEventEnvelopeDetail(bridge);
+
+    const markup = renderToStaticMarkup(<RpgApprovalEventEnvelopeDetailPanel detail={detail} />);
+
+    expect(markup).toContain("data-office-rpg-approval-event-envelope-detail=\"true\"");
+    expect(markup).toContain("data-office-rpg-approval-event-envelope-detail-enabled-controls=\"0\"");
+    expect(markup).toContain("data-office-rpg-approval-event-envelope-detail-request-row-created=\"false\"");
+    expect(markup).toContain("data-office-rpg-approval-event-envelope-detail-approval-event-created=\"false\"");
+    expect(markup).toContain("data-office-rpg-approval-event-envelope-detail-event-persisted=\"false\"");
+    expect(markup).toContain("data-office-rpg-approval-event-envelope-detail-idempotency-key-reserved=\"false\"");
+    expect(markup).toContain("data-office-rpg-approval-event-envelope-detail-readback-performed=\"false\"");
+    expect(markup).toContain("data-office-rpg-approval-event-envelope-detail-audit-event-appended=\"false\"");
+    expect(markup).toContain("data-office-rpg-approval-event-envelope-detail-kanban-write-enabled=\"false\"");
+    expect(markup).toContain("data-office-rpg-approval-event-envelope-detail-dispatch-enabled=\"false\"");
+    expect(markup).toContain("data-office-rpg-approval-event-envelope-detail-nas-save-enabled=\"false\"");
+    expect(markup).toContain("data-office-rpg-approval-event-envelope-detail-safe-projection-only=\"true\"");
+    expect(markup).toContain("data-office-rpg-approval-event-envelope-detail-raw-excluded=\"true\"");
+    expect(markup.match(/data-office-rpg-approval-event-envelope-field=/g)?.length).toBe(5);
+    expect(markup).toContain("Desk RPG approval-event envelope detail");
+    expect(markup).not.toContain("<form");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toContain("<select");
+    expect(markup).not.toContain("<textarea");
+    expect(markup).not.toMatch(/raw approval envelope prompt|raw approval envelope task|Traceback|\/Users\/lidises|token-shaped-approval-envelope|private-approval-envelope-provider/i);
   });
 });
 

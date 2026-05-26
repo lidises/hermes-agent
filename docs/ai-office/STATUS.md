@@ -1,3 +1,30 @@
+## Current status — AI Office RPG Visualizer slice refreshed at current HEAD (2026-05-26T16:36Z)
+
+Current repo baseline before this slice:
+- Branch: `main`
+- Starting HEAD: `045353f0e docs(office): refresh status next at current head`
+- Scope: frontend-only/read-only AI Office RPG Visualizer continuation. No backend route, schema, Kanban, cron, NAS, VPS service, public exposure, gateway, or authority-adapter mutation was part of this slice.
+
+Completed in this slice:
+- Added `Desk RPG Approval Event Envelope Detail 1` as the next read-only RPG visualizer step after the fan-out → approval-event bridge.
+- The new projection enumerates the future approval-event envelope fields: request id, approval event id, idempotency key, readback anchor, and audit anchor.
+- The slice keeps all executable capabilities disabled: request row creation, approval event creation, event persistence, idempotency reservation, readback, audit append, Kanban write, dispatch, and NAS save are all false.
+- The `/office` RPG map now renders the envelope detail under the existing fan-out bridge using stable `data-office-rpg-approval-event-envelope-*` DOM hooks.
+
+Verification captured locally:
+- RED: focused Vitest initially failed because `buildOfficeRpgApprovalEventEnvelopeDetail` was missing.
+- GREEN: focused helper/component Vitest passed after implementation.
+- Combined focused Office frontend tests passed: `OfficePage.test.ts` + `OfficePage.rpg.test.tsx` = 346/346.
+- `git diff --check`, `npm run lint` (0 errors, existing warnings only), and `npm run build` passed.
+- Browser smoke loaded `/office` on local Vite without JS errors; because no backend API was running, the page correctly stopped at the existing API 500 unavailable state rather than the live Office DOM.
+
+Safety boundaries preserved:
+- No real NAS production write.
+- No request row or approval event creation.
+- No event persistence or replay-store write.
+- No Kanban mutation, dispatch, audit write, watcher/cron/authority-adapter activation, VPS direct NAS authority, public exposure, or gateway restart.
+- No raw prompt/task/path/provider/token projection in the new helper or rendered panel tests.
+
 ## Current status — AI Office baseline refreshed at current HEAD (2026-05-26T15:56Z)
 
 Current repo baseline:

@@ -1,3 +1,29 @@
+## NEXT — AI Office RPG Visualizer continuation after approval-event envelope detail (2026-05-26T16:36Z)
+
+Current next stage:
+- Continue from the frontend-only/read-only RPG Visualizer chain at `Desk RPG Approval Event Envelope Detail 1`.
+- Treat this as a visual/projection contract slice only, not as approval-event persistence or mutation enablement.
+
+Recommended next safe slice:
+- `Desk RPG Approval Event Readback/Audit Checklist 1`
+- Compose only the new `OfficeRpgApprovalEventEnvelopeDetail` DTO.
+- Show which future checks would be required before event persistence: duplicate/idempotency check, envelope readback, audit anchor verification, dispatch-still-disabled check, and NAS-save-still-disabled check.
+- Keep every executable flag false: no request row creation, no approval event creation, no event persistence, no idempotency reservation, no readback execution, no audit append, no Kanban write, no dispatch, no NAS save.
+
+Required first checks next time:
+1. Read this file and `docs/ai-office/STATUS.md`.
+2. Confirm `git status --short --branch` and latest commit.
+3. Start with a new RED helper/component test; do not do review/readback-only work.
+4. If deployment is requested, separately confirm VPS core/dashboard checkout clean state and service health before touching services.
+
+Still forbidden unless separately and explicitly approved:
+- backend/schema/API route changes for event persistence
+- request/approval event creation
+- Kanban mutation, target mutation, dispatch, watcher/cron, authority-adapter binding
+- real NAS production write or VPS direct NAS authority
+- public exposure or gateway restart
+- raw prompt/task/path/provider/token/payload echo
+
 ## NEXT — AI Office next slice starts from current HEAD `0f40b3592` (2026-05-26T15:56Z)
 
 Current repo/deploy reference:

@@ -111,6 +111,7 @@ import {
   buildOfficeRpgScene,
   buildOfficeRpgRuntimeFanoutDrilldown,
   buildOfficeRpgFanoutApprovalEventBridge,
+  buildOfficeRpgApprovalEventEnvelopeDetail,
   buildOfficeDeskRpgProjectionModel,
   buildOfficeDeskRpgWorkerRoleVisibility,
   buildOfficeDisabledApprovalDialoguePosture,
@@ -727,6 +728,60 @@ describe("Desk RPG Fanout Approval Event Bridge 1", () => {
     expect(bridge.safeProjectionOnly).toBe(true);
     expect(bridge.rawExcluded).toBe(true);
     expect(JSON.stringify(bridge)).not.toMatch(/raw fanout bridge prompt|raw fanout bridge task|Traceback|\/Users\/lidises|token-shaped-fanout-bridge|private-fanout-provider/i);
+  });
+});
+
+
+
+describe("Desk RPG Approval Event Envelope Detail 1", () => {
+  it("projects a disabled approval-event envelope without creating events, writes, or raw payloads", () => {
+    const secretSentinel = ["token", "shaped", "approval", "envelope"].join("-");
+    const state = officeFixture({
+      agents: [
+        { id: "agent-1", status: "active", prompt: "raw approval envelope prompt", provider: "private-approval-envelope-provider", api_key: secretSentinel },
+        { id: "agent-2", status: "active", prompt: "raw approval envelope prompt", provider: "private-approval-envelope-provider", api_key: secretSentinel },
+        { id: "agent-3", status: "active", prompt: "raw approval envelope prompt", provider: "private-approval-envelope-provider", api_key: secretSentinel },
+        { id: "agent-4", status: "active", prompt: "raw approval envelope prompt", provider: "private-approval-envelope-provider", api_key: secretSentinel },
+      ],
+      work_items: [
+        { id: "task-approval-envelope", status: "blocked", title: "raw approval envelope task", body: "/Users/lidises/private/approval-envelope.md", transcript: "Traceback approval envelope transcript" } as unknown as OfficeState["work_items"][number],
+      ],
+      data_sources: [
+        { id: "paperclip", status: "partial", checked_at: "2026-05-20T00:00:00Z", item_count: 8, warning_count: 3, error_summary: "Traceback approval envelope source" },
+      ],
+    });
+    const projection = buildOfficeDeskRpgProjectionModel(state);
+    const scene = buildOfficeRpgScene(state);
+    const fanout = buildOfficeRpgRuntimeFanoutDrilldown(scene);
+    const dialogue = buildOfficeDisabledApprovalDialoguePosture(projection);
+    const posture = buildOfficeBossOrchestratorRequestPostureDetail(projection, dialogue);
+    const requestEnvelope = buildOfficeOrchestratorRequestEnvelopeDetail(projection, posture);
+    const route = buildOfficeApprovalRequestRouteDetail(requestEnvelope, dialogue);
+    const bridge = buildOfficeRpgFanoutApprovalEventBridge(fanout, route);
+
+    const envelope = buildOfficeRpgApprovalEventEnvelopeDetail(bridge);
+
+    expect(envelope.stageLabel).toBe("Desk RPG Approval Event Envelope Detail 1");
+    expect(envelope.detailKind).toBe("desk_rpg_approval_event_envelope_detail");
+    expect(envelope.sourceBridgeKind).toBe("desk_rpg_fanout_approval_event_bridge");
+    expect(envelope.envelopeFields.map((field) => field.id)).toEqual(["request_id", "approval_event_id", "idempotency_key", "readback_anchor", "audit_anchor"]);
+    expect(envelope.requiredFieldCount).toBe(5);
+    expect(envelope.sourceBridgeCardCount).toBe(4);
+    expect(envelope.aggregateLaneCount).toBe(5);
+    expect(envelope.hiddenRuntimeCount).toBeGreaterThanOrEqual(1);
+    expect(envelope.enabledControls).toBe(0);
+    expect(envelope.requestRowCreated).toBe(false);
+    expect(envelope.approvalEventCreated).toBe(false);
+    expect(envelope.eventPersisted).toBe(false);
+    expect(envelope.idempotencyKeyReserved).toBe(false);
+    expect(envelope.readbackPerformed).toBe(false);
+    expect(envelope.auditEventAppended).toBe(false);
+    expect(envelope.kanbanWriteEnabled).toBe(false);
+    expect(envelope.dispatchEnabled).toBe(false);
+    expect(envelope.nasSaveEnabled).toBe(false);
+    expect(envelope.safeProjectionOnly).toBe(true);
+    expect(envelope.rawExcluded).toBe(true);
+    expect(JSON.stringify(envelope)).not.toMatch(/raw approval envelope prompt|raw approval envelope task|Traceback|\/Users\/lidises|token-shaped-approval-envelope|private-approval-envelope-provider/i);
   });
 });
 

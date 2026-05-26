@@ -87,6 +87,7 @@ import {
   buildOfficeRpgApprovalConsoleFacility,
   buildOfficeRpgRuntimeFanoutDrilldown,
   buildOfficeRpgFanoutApprovalEventBridge,
+  buildOfficeRpgApprovalEventEnvelopeDetail,
   buildOfficeRpgScene,
   buildOfficeUnifiedWorkbenchView,
   buildOfficeApprovalRequestView,
@@ -243,6 +244,7 @@ import {
   type OfficeRpgRoomId,
   type OfficeRpgRuntimeFanoutDrilldown,
   type OfficeRpgFanoutApprovalEventBridge,
+  type OfficeRpgApprovalEventEnvelopeDetail,
   type OfficeRpgScene,
   type OfficeRpgSceneEntity,
   type OfficeRpgSeverity,
@@ -2258,6 +2260,52 @@ export function RpgFanoutApprovalEventBridgePanel({ bridge }: { bridge: OfficeRp
   );
 }
 
+
+export function RpgApprovalEventEnvelopeDetailPanel({ detail }: { detail: OfficeRpgApprovalEventEnvelopeDetail }) {
+  return (
+    <section
+      className="border border-sky-300/20 bg-sky-950/10 p-3"
+      data-office-rpg-approval-event-envelope-detail="true"
+      data-office-rpg-approval-event-envelope-detail-enabled-controls={detail.enabledControls}
+      data-office-rpg-approval-event-envelope-detail-request-row-created={String(detail.requestRowCreated)}
+      data-office-rpg-approval-event-envelope-detail-approval-event-created={String(detail.approvalEventCreated)}
+      data-office-rpg-approval-event-envelope-detail-event-persisted={String(detail.eventPersisted)}
+      data-office-rpg-approval-event-envelope-detail-idempotency-key-reserved={String(detail.idempotencyKeyReserved)}
+      data-office-rpg-approval-event-envelope-detail-readback-performed={String(detail.readbackPerformed)}
+      data-office-rpg-approval-event-envelope-detail-audit-event-appended={String(detail.auditEventAppended)}
+      data-office-rpg-approval-event-envelope-detail-kanban-write-enabled={String(detail.kanbanWriteEnabled)}
+      data-office-rpg-approval-event-envelope-detail-dispatch-enabled={String(detail.dispatchEnabled)}
+      data-office-rpg-approval-event-envelope-detail-nas-save-enabled={String(detail.nasSaveEnabled)}
+      data-office-rpg-approval-event-envelope-detail-safe-projection-only={String(detail.safeProjectionOnly)}
+      data-office-rpg-approval-event-envelope-detail-raw-excluded={String(detail.rawExcluded)}
+      aria-label={detail.title}
+    >
+      <div className="flex flex-col gap-1 text-xs text-midground/70 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <div className="font-semibold uppercase tracking-[0.18em] text-sky-100">{detail.stageLabel}</div>
+          <div className="mt-1 text-sm font-semibold text-foreground">Desk RPG approval-event envelope detail</div>
+        </div>
+        <div>required fields {detail.requiredFieldCount} · lanes {detail.aggregateLaneCount} · controls {detail.enabledControls}</div>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-5">
+        {detail.envelopeFields.map((field) => (
+          <div
+            key={field.id}
+            className="border border-current/15 bg-black/15 p-2 text-xs"
+            data-office-rpg-approval-event-envelope-field={field.id}
+            data-office-rpg-approval-event-envelope-field-required={String(field.required)}
+            data-office-rpg-approval-event-envelope-field-value-materialized={String(field.valueMaterialized)}
+            data-office-rpg-approval-event-envelope-field-raw-excluded={String(field.rawExcluded)}
+          >
+            <div className="font-semibold text-foreground">{field.label}</div>
+            <div className="mt-2 leading-5 text-midground/70">{field.summary}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function OfficeRpgMap({
   scene,
   selectedEntityId,
@@ -2290,6 +2338,7 @@ export function OfficeRpgMap({
   const reviewCornerFacility = buildOfficeRpgReviewCornerFacility(scene);
   const approvalConsoleFacility = buildOfficeRpgApprovalConsoleFacility(scene);
   const runtimeFanoutDrilldown = buildOfficeRpgRuntimeFanoutDrilldown(scene);
+  const approvalEventEnvelopeDetail = fanoutApprovalEventBridge ? buildOfficeRpgApprovalEventEnvelopeDetail(fanoutApprovalEventBridge) : null;
   const visualEntities = rpgVisualEntities(visibleEntities);
 
   return (
@@ -2568,6 +2617,7 @@ export function OfficeRpgMap({
         </section>
         <OfficeRpgRuntimeFanoutDrilldownPanel drilldown={runtimeFanoutDrilldown} />
         {fanoutApprovalEventBridge ? <RpgFanoutApprovalEventBridgePanel bridge={fanoutApprovalEventBridge} /> : null}
+        {approvalEventEnvelopeDetail ? <RpgApprovalEventEnvelopeDetailPanel detail={approvalEventEnvelopeDetail} /> : null}
         <div className="grid gap-2 text-xs md:grid-cols-4" data-office-rpg-filters="true">
           <label className="grid gap-1 text-midground/65">
             <span>방</span>

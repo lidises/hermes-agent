@@ -976,6 +976,40 @@ export type OfficeRpgFanoutApprovalEventBridge = {
   rawExcluded: true;
 };
 
+
+export type OfficeRpgApprovalEventEnvelopeField = {
+  id: "request_id" | "approval_event_id" | "idempotency_key" | "readback_anchor" | "audit_anchor";
+  label: string;
+  summary: string;
+  required: true;
+  valueMaterialized: false;
+  rawExcluded: true;
+};
+
+export type OfficeRpgApprovalEventEnvelopeDetail = {
+  stageLabel: "Desk RPG Approval Event Envelope Detail 1";
+  title: string;
+  detailKind: "desk_rpg_approval_event_envelope_detail";
+  sourceBridgeKind: OfficeRpgFanoutApprovalEventBridge["bridgeKind"];
+  envelopeFields: OfficeRpgApprovalEventEnvelopeField[];
+  requiredFieldCount: number;
+  sourceBridgeCardCount: number;
+  aggregateLaneCount: number;
+  hiddenRuntimeCount: number;
+  requestRowCreated: false;
+  approvalEventCreated: false;
+  eventPersisted: false;
+  idempotencyKeyReserved: false;
+  readbackPerformed: false;
+  auditEventAppended: false;
+  kanbanWriteEnabled: false;
+  dispatchEnabled: false;
+  nasSaveEnabled: false;
+  enabledControls: 0;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+};
+
 export type OfficeDeskRpgProjectionActorRole = "user_boss" | "orchestrator" | "search_worker" | "reviewer" | "wiki_writer" | "nas_keeper";
 
 export type OfficeDeskRpgProjectionFacilityId = "boss_desk" | "orchestrator_desk" | "worker_cluster" | "central_board" | "right_inspector" | "nas_vault" | "security_ops_corner" | "calm_activity_lane";
@@ -6704,6 +6738,76 @@ export function buildOfficeRpgFanoutApprovalEventBridge(
     kanbanWriteEnabled: false,
     dispatchEnabled: false,
     auditWriteEnabled: false,
+    nasSaveEnabled: false,
+    enabledControls: 0,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+  };
+}
+
+
+export function buildOfficeRpgApprovalEventEnvelopeDetail(bridge: OfficeRpgFanoutApprovalEventBridge): OfficeRpgApprovalEventEnvelopeDetail {
+  const envelopeFields: OfficeRpgApprovalEventEnvelopeField[] = [
+    {
+      id: "request_id",
+      label: "request id",
+      summary: "Symbolic future request reference only; no request row is created.",
+      required: true,
+      valueMaterialized: false,
+      rawExcluded: true,
+    },
+    {
+      id: "approval_event_id",
+      label: "approval event id",
+      summary: "Symbolic approval-event reference only; no event is emitted or persisted.",
+      required: true,
+      valueMaterialized: false,
+      rawExcluded: true,
+    },
+    {
+      id: "idempotency_key",
+      label: "idempotency key",
+      summary: "Future duplicate guard is named, but no key is reserved or stored in this read-only slice.",
+      required: true,
+      valueMaterialized: false,
+      rawExcluded: true,
+    },
+    {
+      id: "readback_anchor",
+      label: "readback anchor",
+      summary: "Future readback proof is listed as a required field; no readback is performed.",
+      required: true,
+      valueMaterialized: false,
+      rawExcluded: true,
+    },
+    {
+      id: "audit_anchor",
+      label: "audit anchor",
+      summary: "Future audit linkage is documented without appending audit events.",
+      required: true,
+      valueMaterialized: false,
+      rawExcluded: true,
+    },
+  ];
+
+  return {
+    stageLabel: "Desk RPG Approval Event Envelope Detail 1",
+    title: "Desk RPG approval-event envelope detail",
+    detailKind: "desk_rpg_approval_event_envelope_detail",
+    sourceBridgeKind: bridge.bridgeKind,
+    envelopeFields,
+    requiredFieldCount: envelopeFields.length,
+    sourceBridgeCardCount: bridge.cards.length,
+    aggregateLaneCount: bridge.aggregateLaneCount,
+    hiddenRuntimeCount: bridge.hiddenRuntimeCount,
+    requestRowCreated: false,
+    approvalEventCreated: false,
+    eventPersisted: false,
+    idempotencyKeyReserved: false,
+    readbackPerformed: false,
+    auditEventAppended: false,
+    kanbanWriteEnabled: false,
+    dispatchEnabled: false,
     nasSaveEnabled: false,
     enabledControls: 0,
     safeProjectionOnly: true,
