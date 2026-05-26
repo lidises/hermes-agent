@@ -10512,6 +10512,91 @@ describe("Office controlled mutation compact dashboard", () => {
     expect(markup).not.toContain('<input');
     expect(markup).not.toContain('<form');
   });
+
+  it("summarizes latest Mac relay real-write gate above final preflight without unsafe echo", () => {
+    const CompactPanel = (OfficePageModule as unknown as {
+      OfficeControlledMutationCompactDashboardPanel: React.ComponentType<{
+        latestFinalPreflight?: { found?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null } | null;
+        latestRealWriteGate?: { found?: boolean; dto?: Record<string, unknown> | null; latest_record?: Record<string, unknown> | null } | null;
+        detailCount: number;
+        children: React.ReactNode;
+      }>;
+    }).OfficeControlledMutationCompactDashboardPanel;
+    const forbiddenBody = ["real", "write", "gate", "must", "not", "echo"].join("-");
+    const forbiddenPath = ["", "Users", "private", "nas-real-write-gate"].join("/");
+    const forbiddenSecret = ["sk", "real-write-gate-secret"].join("-");
+    const markup = renderToStaticMarkup(
+      <CompactPanel
+        latestFinalPreflight={{
+          found: true,
+          dto: {
+            write_readiness_percent: 97,
+            mac_relay_final_preflight_ref: "finalpreflight-safe-ref",
+            mac_relay_final_preflight_ready: true,
+            final_preflight_checklist_verified: true,
+            safe_ref_chain_verified: true,
+          },
+        }}
+        latestRealWriteGate={{
+          found: true,
+          dto: {
+            write_readiness_percent: 99,
+            mac_relay_real_write_gate_ref: "realwritegate-safe-ref",
+            mac_relay_real_write_gate_ready: true,
+            source_mac_relay_final_preflight_verified: true,
+            source_final_preflight_checklist_verified: true,
+            real_write_gate_checklist_verified: true,
+            safe_ref_chain_verified: true,
+            real_write_gate_blocks_without_explicit_approval: true,
+            replay_store_write_enabled: false,
+            real_replay_store_written: false,
+            real_nas_production_write_enabled: false,
+            real_nas_production_write_executed: false,
+            vps_direct_nas_authority_enabled: false,
+            vps_nas_mount_enabled: false,
+            watcher_enabled: false,
+            cron_enabled: false,
+            dispatch_enabled: false,
+            authority_adapter_binding_enabled: false,
+            public_exposure_enabled: false,
+            gateway_restart_required: false,
+            markdown_body_included: false,
+            write_payload_included: false,
+            raw_root_path_included: false,
+            secret_value_included: false,
+            real_write_gate_includes_payload_body: false,
+            real_write_gate_includes_write_payload: false,
+            real_write_gate_includes_raw_root_path: false,
+            real_write_gate_includes_secret_value: false,
+            unsafe_body: forbiddenBody,
+            unsafe_path: forbiddenPath,
+            unsafe_secret: forbiddenSecret,
+          },
+        }}
+        detailCount={20}
+      >
+        <section data-office-controlled-mutation-proposal-contract="true">historical ladder detail</section>
+      </CompactPanel>,
+    );
+
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-real-write-gate-ready="true"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-real-write-gate-source-verified="true"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-real-write-gate-replay-store-write="false"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-real-write-gate-real-write="false"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-real-write-gate-vps-authority="false"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-real-write-gate-runtime-open="false"');
+    expect(markup).toContain('data-office-controlled-mutation-compact-dashboard-mac-relay-real-write-gate-payload-echo="false"');
+    expect(markup).toContain('Mac relay real-write gate');
+    expect(markup).toContain('realwritegate-safe-ref');
+    expect(markup).not.toContain('finalpreflight-safe-ref</div>');
+    expect(markup).not.toContain('historical ladder detail');
+    expect(markup).not.toContain(forbiddenBody);
+    expect(markup).not.toContain(forbiddenPath);
+    expect(markup).not.toContain(forbiddenSecret);
+    expect(markup).not.toContain('<button');
+    expect(markup).not.toContain('<input');
+    expect(markup).not.toContain('<form');
+  });
 });
 
 
