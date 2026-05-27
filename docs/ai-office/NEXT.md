@@ -1,3 +1,26 @@
+## NEXT — after NAS Keeper selected durable preview contract (2026-05-27T02:57Z)
+
+Current next stage:
+- The safest newly closed rung is a protected metadata-only selected durable item preview/record contract for one authorized queue item.
+- The route stores safe refs/checksums only, verifies replay/idempotency metadata, and keeps approval unchecked plus execution disabled.
+- The next shortest safe rung is a Mac relay tmp-root write smoke sourced from this selected-contract boundary, using an isolated tmp root and readback verification only; do not use real NAS production roots.
+- Do not execute against production NAS or grant VPS direct NAS authority unless a later prompt explicitly approves that exact higher boundary.
+
+Still forbidden unless separately and explicitly approved:
+- real NAS production write
+- VPS direct NAS authority, NAS mount credentials, or direct VPS file write
+- watcher/cron/dispatcher/authority-adapter activation
+- public exposure
+- gateway restart
+- raw markdown/body/path/secret/raw write payload echo
+
+Required first checks next time:
+1. Read `docs/ai-office/STATUS.md` and this file.
+2. Confirm local/VPS git, `web_dist`, and service health before deploy/runtime work.
+3. Start with RED tests and keep each rung bounded.
+4. If running tmp-root smoke, use only an isolated temporary Mac relay root, verify readback SHA, preserve no raw path/body echo, and keep production NAS/write authority closed.
+5. Treat idempotent replay as success only when the record SHA/ref matches the selected source boundary.
+
 ## NEXT — after NAS Keeper durable guarded operator surface deploy (2026-05-27T02:35Z)
 
 Current next stage:

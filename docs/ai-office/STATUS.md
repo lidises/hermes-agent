@@ -1,3 +1,29 @@
+## Current status — NAS Keeper selected durable preview contract deployed (2026-05-27T02:57Z)
+
+Scope completed:
+- Added and deployed a protected metadata-only selected durable item preview/record contract route.
+- The route rereads one authorized durable queue item, computes payload/record SHA metadata, persists only the safe selected-contract record, and stops before relay execution.
+- Replay is idempotent by selected contract ref/record SHA and does not append a second record.
+- The contract requires operator_approval_checked=false and execution_requested=false; approval/execution attempts fail closed.
+
+Evidence captured:
+- Commit deployed: `99df70f04`.
+- RED observed first: selected durable contract tests failed on missing backend function/route.
+- GREEN after implementation: selected durable contract tests passed; combined NAS Keeper focused tests = 14/14 passed.
+- Frontend Office tests: `OfficePage.test.ts` + `OfficePage.rpg.test.tsx` = 348/348 passed.
+- `py_compile`, `git diff --check`, `npm run lint` (0 errors, existing warnings only), and `npm run build` passed.
+- VPS core/dashboard synced to `origin/main`; `web_dist` rsynced; dashboard and core dashboard restarted and healthy; gateway stayed active and was not restarted.
+- Protected API smoke: durable rehearsal auth=200 queued/authorized/previewed; selected contract auth=200 recorded=true, metadataOnly=true, payloadReady=true, executionDisabled=true, executed=false, written=false; replay auth=200 idempotent_replay=true, same record SHA.
+- DOM smoke: `/office` loaded; guarded readiness panel present; approval default false; execution disabled default true; controls=0; raw leak probe=false; browser console errors=0.
+
+Safety boundaries preserved:
+- Real NAS production write: false.
+- VPS direct NAS authority: false.
+- watcher/cron/dispatcher/authority-adapter: false.
+- public exposure change: false.
+- gateway restart: false.
+- raw filesystem root/path, raw markdown body, token, secret, or raw write payload echo: false.
+
 ## Current status — NAS Keeper durable guarded operator surface deployed (2026-05-27T02:35Z)
 
 Scope completed:
