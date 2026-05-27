@@ -337,6 +337,13 @@ _NAS_KEEPER_HANDOFF_EXECUTION_STATE_FIELDS = {
     "safe_summary",
     "evidence_refs",
 }
+_NAS_KEEPER_SELECTED_DURABLE_ITEM_PREVIEW_CONTRACT_FIELDS = _NAS_KEEPER_HANDOFF_EXECUTION_PAYLOAD_PREVIEW_FIELDS | {
+    "selected_contract_ref",
+    "recorded_by",
+    "recorded_at",
+    "operator_approval_checked",
+    "execution_requested",
+}
 _NAS_KEEPER_FRESH_ONE_SHOT_OPERATOR_WRITE_FIELDS = (
     _NAS_KEEPER_HANDOFF_QUEUE_FIELDS
     | _NAS_KEEPER_HANDOFF_AUTHORIZE_FIELDS
@@ -7959,6 +7966,10 @@ def preview_office_controlled_mutation_nas_keeper_mac_relay_execution_payload(
     return {"previewed": True, "errors": [], "dto": dto}
 
 
+def _default_nas_keeper_selected_durable_item_preview_contract_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "nas_keeper_selected_durable_item_preview_contract_records.jsonl"
+
+
 def rehearse_office_controlled_mutation_nas_keeper_durable_queue(
     payload: object, *, queue_dir: Path | str | None = None
 ) -> dict[str, object]:
@@ -8145,6 +8156,191 @@ def rehearse_office_controlled_mutation_nas_keeper_durable_queue(
         "dto": dto,
     }
 
+def _read_nas_keeper_selected_durable_item_preview_contract_records(path: Path) -> list[dict[str, object]]:
+    records: list[dict[str, object]] = []
+    if not path.exists():
+        return records
+    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        if not line.strip():
+            continue
+        try:
+            item = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(item, dict) and item.get("mode") == "nas_keeper_selected_durable_item_preview_record_contract":
+            records.append(cast(dict[str, object], item))
+    return records
+
+
+def record_office_controlled_mutation_nas_keeper_selected_durable_item_preview_contract(
+    payload: object, *, queue_dir: Path | str | None = None, store_path: Path | str | None = None
+) -> dict[str, object]:
+    """Record a metadata-only preview contract for one selected authorized durable queue item.
+
+    This raises write-readiness by persisting the selected item's safe preview
+    contract and idempotency metadata. It never includes the markdown body,
+    never exposes the raw write payload, never executes a relay write, and never
+    grants VPS NAS authority.
+    """
+
+    if not isinstance(payload, Mapping):
+        return {
+            "recorded": False,
+            "executed": False,
+            "written": False,
+            "idempotent_replay": False,
+            "errors": [_error("payload", "invalid_payload_type")],
+            "dto": None,
+        }
+    errors: list[dict[str, str]] = []
+    if set(payload) - _NAS_KEEPER_SELECTED_DURABLE_ITEM_PREVIEW_CONTRACT_FIELDS:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+    for field in sorted(_NAS_KEEPER_SELECTED_DURABLE_ITEM_PREVIEW_CONTRACT_FIELDS):
+        if field not in payload:
+            errors.append(_error(field, "missing_field"))
+    for field in (
+        "handoff_ref",
+        "relay_execution_ref",
+        "nas_keeper_ref",
+        "relay_node_ref",
+        "relay_authorized_by",
+        "selected_contract_ref",
+        "recorded_by",
+    ):
+        if field in payload and not _is_opaque_id(payload.get(field)):
+            errors.append(_error(field, "invalid_opaque_id"))
+    if payload.get("operator_approval_checked") is not False:
+        errors.append(_error("operator_approval_checked", "must_remain_false_for_preview_contract"))
+    if payload.get("execution_requested") is not False:
+        errors.append(_error("execution_requested", "must_remain_false_for_preview_contract"))
+    if "recorded_at" in payload and not (isinstance(payload.get("recorded_at"), str) and _ISO_UTC_RE.fullmatch(str(payload.get("recorded_at")))):
+        errors.append(_error("recorded_at", "invalid_timestamp"))
+    if errors:
+        return {
+            "recorded": False,
+            "executed": False,
+            "written": False,
+            "idempotent_replay": False,
+            "errors": sorted(errors, key=lambda item: (item["field"], item["code"])),
+            "dto": None,
+        }
+
+    preview_payload = {field: payload[field] for field in _NAS_KEEPER_HANDOFF_EXECUTION_PAYLOAD_PREVIEW_FIELDS}
+    previewed = preview_office_controlled_mutation_nas_keeper_mac_relay_execution_payload(preview_payload, queue_dir=queue_dir)
+    if not previewed.get("previewed"):
+        return {
+            "recorded": False,
+            "executed": False,
+            "written": False,
+            "idempotent_replay": False,
+            "errors": cast(list[dict[str, str]], previewed.get("errors") or []),
+            "dto": None,
+        }
+
+    preview_dto = cast(dict[str, object], previewed.get("dto") or {})
+    payload_contract_material = {
+        "handoff_ref": preview_dto.get("handoff_ref"),
+        "authorization_ref": preview_dto.get("authorization_ref"),
+        "relay_execution_ref": preview_dto.get("relay_execution_ref"),
+        "queue_ref": preview_dto.get("queue_ref"),
+        "queue_status": preview_dto.get("queue_status"),
+        "safe_logical_path": preview_dto.get("safe_logical_path"),
+        "safe_display_path": preview_dto.get("safe_display_path"),
+        "payload_bytes": preview_dto.get("payload_bytes"),
+        "markdown_body_sha256": preview_dto.get("markdown_body_sha256"),
+        "markdown_body_bytes": preview_dto.get("markdown_body_bytes"),
+    }
+    payload_contract_sha = hashlib.sha256(
+        json.dumps(payload_contract_material, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    record_material = {
+        "selected_contract_ref": payload.get("selected_contract_ref"),
+        "handoff_ref": preview_dto.get("handoff_ref"),
+        "relay_execution_ref": preview_dto.get("relay_execution_ref"),
+        "payload_contract_sha256": payload_contract_sha,
+        "recorded_by": payload.get("recorded_by"),
+        "recorded_at": payload.get("recorded_at"),
+        "operator_approval_checked": False,
+        "execution_requested": False,
+    }
+    record_sha = hashlib.sha256(
+        json.dumps(record_material, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    path = Path(store_path).expanduser() if store_path is not None else _default_nas_keeper_selected_durable_item_preview_contract_store_path()
+    existing = _read_nas_keeper_selected_durable_item_preview_contract_records(path)
+    for record in existing:
+        if record.get("selected_contract_record_sha256") == record_sha or record.get("selected_contract_ref") == payload.get("selected_contract_ref"):
+            return {
+                "recorded": False,
+                "executed": False,
+                "written": False,
+                "idempotent_replay": True,
+                "errors": [],
+                "dto": record,
+            }
+
+    capabilities = {
+        "queue_read_enabled": True,
+        "selected_durable_item_preview_recording_enabled": True,
+        "execution_payload_preview_enabled": True,
+        "execution_from_preview_enabled": False,
+        "mac_relay_write_enabled": False,
+        "actual_nas_write_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "vps_credential_access_enabled": False,
+        "direct_vps_nas_write_enabled": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "public_exposure_enabled": False,
+        "gateway_restart_required": False,
+    }
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_selected_durable_item_preview_record_contract",
+        "selected_contract_ref": payload.get("selected_contract_ref"),
+        "selected_contract_record_sha256": record_sha,
+        "payload_contract_sha256": payload_contract_sha,
+        "handoff_ref": preview_dto.get("handoff_ref"),
+        "authorization_ref": preview_dto.get("authorization_ref"),
+        "relay_execution_ref": preview_dto.get("relay_execution_ref"),
+        "queue_ref": preview_dto.get("queue_ref"),
+        "queue_status": preview_dto.get("queue_status"),
+        "safe_logical_path": preview_dto.get("safe_logical_path"),
+        "safe_display_path": preview_dto.get("safe_display_path"),
+        "payload_bytes": preview_dto.get("payload_bytes"),
+        "markdown_body_sha256": preview_dto.get("markdown_body_sha256"),
+        "markdown_body_bytes": preview_dto.get("markdown_body_bytes"),
+        "recorded_by": payload.get("recorded_by"),
+        "recorded_at": payload.get("recorded_at"),
+        "operator_approval_checked": False,
+        "execution_requested": False,
+        "execution_disabled_by_default": True,
+        "metadata_only_record_written": True,
+        "execution_payload_previewed": True,
+        "payload_contract_ready": True,
+        "execution_payload_included": False,
+        "write_payload_included": False,
+        "markdown_body_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "executed": False,
+        "written": False,
+        "capabilities": capabilities,
+        "next_required_boundary": "operator_explicit_guarded_execution_from_selected_durable_item",
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(dto, sort_keys=True, separators=(",", ":")) + "\n")
+    return {
+        "recorded": True,
+        "executed": False,
+        "written": False,
+        "idempotent_replay": False,
+        "errors": [],
+        "dto": dto,
+    }
 
 
 def review_office_controlled_mutation_nas_keeper_one_shot_write_payload_arm(
