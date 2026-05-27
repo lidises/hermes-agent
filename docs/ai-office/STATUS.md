@@ -1,3 +1,21 @@
+## Current status — AI Office unified workbench consolidation polish deployed locally (2026-05-28)
+
+Scope completed locally before deploy:
+- Continued the `/office` consolidation sequence after former projects were labeled as RPG layers.
+- Added absorbed sidebar/plugin navigation as internal `/office` anchors instead of competing top-level product surfaces.
+- Replaced the verbose unified-workbench header metadata with compact safe status badges.
+- Added RPG inspector evidence facets for Kanban, Paperclip/sourceTags, and NAS Keeper so evidence is discoverable from the visualizer layer.
+- Added `docs/ai-office/unified-workbench-superseded-index.md` to preserve older AI Office plans as superseded mappings rather than deleting history.
+
+Safety boundaries preserved:
+- UI/read-only consolidation only.
+- No real NAS production write or replacement write.
+- No direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway restart, raw markdown/path/secret/write-payload echo, or action-button UI.
+
+Verification before deploy:
+- RED observed in OfficePage helper/source tests for missing absorbed nav/status badges/inspector facets.
+- GREEN: focused frontend Office tests passed 354/354.
+
 ## Current status — NAS Keeper step 10 completion receipt recorded; ready for read-only rendering (2026-05-27T12:00Z)
 
 Scope completed:

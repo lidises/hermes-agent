@@ -14970,8 +14970,12 @@ export default function OfficePage() {
             </div>
             <h1 className="mt-3 text-3xl font-semibold tracking-wide text-foreground md:text-4xl">{unifiedWorkbenchView.title}</h1>
             <p className="mt-3 text-sm leading-6 text-midground/80">{unifiedWorkbenchView.subtitle}</p>
-            <div className="mt-3 text-xs text-midground/55">
-              표시 순서: {unifiedWorkbenchView.renderOrder.join(" → ")} · 승인 모델 {unifiedWorkbenchView.safetyPosture.approvalModel.status} · 실행 컨트롤 {unifiedWorkbenchView.safetyPosture.approvalModel.enabledControls}개
+            <div className="mt-3 flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.14em]" data-office-unified-status-badges="true">
+              {unifiedWorkbenchView.statusBadges.map((badge) => (
+                <span key={badge.id} className="border border-emerald-300/20 bg-black/20 px-2 py-1 text-emerald-100" data-office-unified-status-badge={badge.id} data-office-unified-status-badge-tone={badge.tone}>
+                  {badge.label}: {badge.value}
+                </span>
+              ))}
             </div>
           </div>
           <div className="grid min-w-72 gap-2 text-xs text-midground/70 sm:grid-cols-2 xl:grid-cols-1">
@@ -14983,6 +14987,7 @@ export default function OfficePage() {
           {unifiedWorkbenchView.layers.map((layer) => (
             <div
               key={layer.id}
+              id={layer.id === "operatingBoard" ? "office-rpg-operating-board" : layer.id === "projectionCache" ? "office-rpg-projection-cache" : undefined}
               className="border border-current/15 bg-black/25 p-3"
               data-office-unified-layer={layer.id}
               data-office-unified-layer-tone={layer.tone}
@@ -15003,6 +15008,16 @@ export default function OfficePage() {
               <span key={`${alias.layerId}:${alias.label}`} className="border border-current/15 bg-black/20 px-2 py-1" data-office-merged-project-alias={alias.layerId}>
                 {alias.label} → RPG visualizer 통합
               </span>
+            ))}
+          </div>
+        </div>
+        <div className="mt-3 border border-cyan-300/15 bg-cyan-950/10 p-3" data-office-absorbed-navigation="true">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-100/70">흡수된 sidebar/plugin nav</div>
+          <div className="mt-2 flex flex-wrap gap-2 text-xs text-midground/70">
+            {unifiedWorkbenchView.absorbedNavigationItems.map((item) => (
+              <a key={`${item.layerId}:${item.label}`} href={item.target} className="border border-current/15 bg-black/20 px-2 py-1 hover:text-foreground" data-office-absorbed-nav-item={item.layerId}>
+                {item.label} → /office
+              </a>
             ))}
           </div>
         </div>
@@ -15028,6 +15043,15 @@ export default function OfficePage() {
           }}
         />
       ) : null}
+
+      <section className="grid gap-2 border border-emerald-300/15 bg-black/20 p-3 text-xs text-midground/70 md:grid-cols-3" data-office-rpg-inspector-evidence="true">
+        {unifiedWorkbenchView.inspectorEvidenceFacets.map((facet) => (
+          <a key={facet.id} href={facet.target} className="border border-current/15 bg-black/20 p-2 hover:text-foreground" data-office-rpg-inspector-evidence-facet={facet.id} data-office-rpg-inspector-evidence-controls={facet.enabledControls}>
+            <span className="block font-semibold text-foreground">{facet.label}</span>
+            <span className="mt-1 block leading-5">{facet.detail}</span>
+          </a>
+        ))}
+      </section>
 
       <OfficeRpgVisualizerTabsDrawer>
         <details id="office-rpg-tab-nas-keeper" role="tabpanel" data-office-rpg-tab-panel="nas-keeper" data-office-rpg-tab-panel-default-open="false" className="grid gap-4 scroll-mt-24 border border-emerald-300/10 bg-black/10 p-3">

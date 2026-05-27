@@ -1,3 +1,17 @@
+## NEXT — after unified workbench consolidation polish (2026-05-28)
+
+Current next stage:
+- `/office` remains the canonical AI Office surface.
+- Former Kanban/Paperclip/Projection/RPG/NAS Keeper surfaces are represented as layers, absorbed anchors, default-closed diagnostic tabs, and a superseded-index doc.
+
+Allowed next work:
+- Verify full frontend/backend/build, deploy/sync to VPS dashboard/core, rsync `web_dist`, restart dashboard/core only, and run protected DOM/API smoke.
+- Continue only read-only visual consolidation unless a new exact approval grants a stronger boundary.
+
+Still forbidden unless separately and explicitly approved:
+- Additional real NAS production write or replacement write.
+- Direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, gateway restart, raw markdown/path/secret/write-payload echo, or executable action controls.
+
 ## NEXT — step 11 read-only rendering boundary (2026-05-27T12:00Z)
 
 Current next stage:

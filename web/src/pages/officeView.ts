@@ -503,12 +503,37 @@ export type OfficeUnifiedWorkbenchMergedProjectAlias = {
   layerId: OfficeUnifiedWorkbenchLayerId;
 };
 
+export type OfficeUnifiedWorkbenchAbsorbedNavigationItem = {
+  label: string;
+  target: string;
+  layerId: OfficeUnifiedWorkbenchLayerId;
+};
+
+export type OfficeUnifiedWorkbenchStatusBadge = {
+  id: "readOnly" | "controls" | "raw" | "surface";
+  label: string;
+  value: string;
+  tone: OfficeDeltaBadge["tone"];
+};
+
+export type OfficeUnifiedWorkbenchInspectorEvidenceFacet = {
+  id: "kanban" | "paperclip" | "nas-keeper";
+  label: string;
+  detail: string;
+  target: string;
+  enabledControls: 0;
+  rawExcluded: true;
+};
+
 export type OfficeUnifiedWorkbenchView = {
   title: "AI Office 통합 운영실";
   subtitle: string;
   generatedAt: string;
   layers: OfficeUnifiedWorkbenchLayer[];
   mergedProjectAliases: OfficeUnifiedWorkbenchMergedProjectAlias[];
+  absorbedNavigationItems: OfficeUnifiedWorkbenchAbsorbedNavigationItem[];
+  statusBadges: OfficeUnifiedWorkbenchStatusBadge[];
+  inspectorEvidenceFacets: OfficeUnifiedWorkbenchInspectorEvidenceFacet[];
   safetyPosture: {
     readOnly: boolean;
     privateOnly: boolean;
@@ -10260,6 +10285,23 @@ export function buildOfficeUnifiedWorkbenchView(state: OfficeState): OfficeUnifi
       { label: "Paperclip / sourceTags", layerId: "evidenceLayer" },
       { label: "Projection Pipeline / safe cache", layerId: "projectionCache" },
       { label: "DeskRPG / RPG Visualizer", layerId: "rpgRoom" },
+    ],
+    absorbedNavigationItems: [
+      { label: "Sidebar Office", target: "#office-rpg-map", layerId: "rpgRoom" },
+      { label: "Kanban plugin/tab", target: "#office-rpg-operating-board", layerId: "operatingBoard" },
+      { label: "Paperclip plugin/tab", target: "#office-rpg-source_archive", layerId: "evidenceLayer" },
+      { label: "Projection cache panel", target: "#office-rpg-projection-cache", layerId: "projectionCache" },
+    ],
+    statusBadges: [
+      { id: "readOnly", label: "read-only", value: String(state.capabilities.read_only !== false), tone: "positive" },
+      { id: "controls", label: "controls", value: "0", tone: "positive" },
+      { id: "raw", label: "raw echo", value: "excluded", tone: "positive" },
+      { id: "surface", label: "surface", value: "/office", tone: "neutral" },
+    ],
+    inspectorEvidenceFacets: [
+      { id: "kanban", label: "Kanban", detail: `운영 보드 ${boardCount}개 · 상태만 흡수`, target: "#office-rpg-operating-board", enabledControls: 0, rawExcluded: true },
+      { id: "paperclip", label: "Paperclip", detail: `source-tag ${paperclipWorkbench.sources.length}개 · 근거 레이어`, target: "#office-rpg-source_archive", enabledControls: 0, rawExcluded: true },
+      { id: "nas-keeper", label: "NAS Keeper", detail: "승인·receipt·boundary evidence만 inspector에 연결", target: "#office-rpg-tab-nas-keeper", enabledControls: 0, rawExcluded: true },
     ],
     safetyPosture: {
       readOnly: state.capabilities.read_only !== false,

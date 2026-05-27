@@ -3852,6 +3852,20 @@ describe("Desk RPG Projection ViewModel Helper 1", () => {
       { label: "Projection Pipeline / safe cache", layerId: "projectionCache" },
       { label: "DeskRPG / RPG Visualizer", layerId: "rpgRoom" },
     ]);
+    expect(view.absorbedNavigationItems).toEqual([
+      { label: "Sidebar Office", target: "#office-rpg-map", layerId: "rpgRoom" },
+      { label: "Kanban plugin/tab", target: "#office-rpg-operating-board", layerId: "operatingBoard" },
+      { label: "Paperclip plugin/tab", target: "#office-rpg-source_archive", layerId: "evidenceLayer" },
+      { label: "Projection cache panel", target: "#office-rpg-projection-cache", layerId: "projectionCache" },
+    ]);
+    expect(view.statusBadges).toEqual([
+      { id: "readOnly", label: "read-only", value: "true", tone: "positive" },
+      { id: "controls", label: "controls", value: "0", tone: "positive" },
+      { id: "raw", label: "raw echo", value: "excluded", tone: "positive" },
+      { id: "surface", label: "surface", value: "/office", tone: "neutral" },
+    ]);
+    expect(view.inspectorEvidenceFacets.map((facet) => facet.id)).toEqual(["kanban", "paperclip", "nas-keeper"]);
+    expect(view.inspectorEvidenceFacets.every((facet) => facet.enabledControls === 0 && facet.rawExcluded)).toBe(true);
     expect(JSON.stringify(view)).not.toMatch(/raw prompt|raw title|secret body|raw result|raw event|raw warning|private\.py|\/Users\/lidises|token/i);
   });
 
