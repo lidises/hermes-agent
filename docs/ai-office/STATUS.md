@@ -1,3 +1,31 @@
+## Current status — NAS Keeper durable queue rehearsal/readback added (2026-05-27T02:30Z)
+
+Scope completed:
+- Added a protected metadata-only durable queue rehearsal route: `/api/office/controlled-mutation/nas-runtime/nas-keeper-durable-queue-rehearsal`.
+- The helper appends exactly one safe durable local-profile handoff item, records NAS Keeper authorization, and previews the execution payload, then stops.
+- It does not execute from preview, write NAS files, expose markdown bodies, expose `write_payload`, start watcher/cron/dispatcher/authority-adapter, grant VPS NAS authority, or restart the gateway.
+- Local durable queue rehearsal was run once against the default profile queue.
+
+Evidence captured:
+- Durable queue line count delta: +1 (16 → 17).
+- Result: rehearsed=true, queued=true, authorized=true, previewed=true, idempotent_replay=false.
+- Queue status: `authorized_for_mac_relay_execution`.
+- Public DTO safety: markdown_body_included=false, write_payload_included=false, actual_nas_write_enabled=false, direct_vps_nas_write_enabled=false, raw leak probe=false.
+
+Verification:
+- RED observed first: new durable queue rehearsal test initially failed on missing import.
+- Focused GREEN: `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_durable_queue_rehearsal.py -q -o 'addopts='` → 4 passed.
+- Combined NAS Keeper queue/authorization/readback/payload-preview tests: 13 passed.
+- `py_compile` for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py` passed.
+
+Safety boundaries preserved:
+- Real NAS production write: false.
+- VPS direct NAS authority: false.
+- watcher/cron/dispatcher/authority-adapter: false.
+- public exposure change: false.
+- gateway restart: false.
+- raw filesystem root/path, raw markdown body, token, secret, or `write_payload` echo: false.
+
 ## Current status — NAS Keeper real Mac relay NAS write completed (2026-05-27T02:00Z)
 
 Scope completed:

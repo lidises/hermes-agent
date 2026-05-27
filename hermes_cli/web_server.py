@@ -205,6 +205,7 @@ from hermes_cli.office_controlled_mutation import (
     dry_run_office_controlled_mutation_nas_keeper_mac_relay_claim,
     authorize_office_controlled_mutation_nas_keeper_mac_relay_handoff,
     preview_office_controlled_mutation_nas_keeper_mac_relay_execution_payload,
+    rehearse_office_controlled_mutation_nas_keeper_durable_queue,
     enqueue_office_controlled_mutation_nas_keeper_mac_relay_handoff,
     prepare_office_controlled_mutation_nas_mac_relay_write_request,
     build_office_controlled_mutation_nas_evidence_package_contract,
@@ -1774,6 +1775,12 @@ async def list_office_controlled_mutation_nas_keeper_mac_relay_handoff_queue_rou
         if value is not None
     }
     return list_office_controlled_mutation_nas_keeper_mac_relay_handoff_queue(filters)
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-durable-queue-rehearsal")
+async def rehearse_office_controlled_mutation_nas_keeper_durable_queue_route(payload: Any = Body(None)):
+    """Create/authorize/preview one durable queue item without relay execution."""
+    return rehearse_office_controlled_mutation_nas_keeper_durable_queue(payload)
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/mac-relay-write-execute")

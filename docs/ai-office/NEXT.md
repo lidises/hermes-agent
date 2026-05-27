@@ -1,3 +1,24 @@
+## NEXT — after NAS Keeper durable queue rehearsal/readback (2026-05-27T02:30Z)
+
+Current next stage:
+- The safest write-readiness rung now closed is durable local-profile queue rehearsal: append + authorization + execution-payload preview, no execution.
+- The next safe step is a guarded operator UI/DOM surface for the existing durable item, with approval unchecked and execution disabled by default.
+- Do not execute from the durable item unless the next prompt explicitly approves that exact guarded execution boundary.
+
+Still forbidden unless separately and explicitly approved:
+- real NAS production write
+- VPS direct NAS authority, NAS mount credentials, or direct VPS file write
+- watcher/cron/dispatcher/authority-adapter activation
+- public exposure
+- gateway restart
+- raw markdown/body/path/secret/`write_payload` echo
+
+Required first checks next time:
+1. Read `docs/ai-office/STATUS.md` and this file.
+2. Confirm local/VPS git and service state before deploy/runtime work.
+3. Start with RED tests and keep each rung bounded.
+4. If using the durable queue item, filter by its safe handoff ref and verify approval unchecked + execute disabled before any higher-risk action.
+
 ## NEXT — after NAS Keeper real Mac relay NAS write smoke (2026-05-27T02:00Z)
 
 Current next stage:

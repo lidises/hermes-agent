@@ -7959,6 +7959,194 @@ def preview_office_controlled_mutation_nas_keeper_mac_relay_execution_payload(
     return {"previewed": True, "errors": [], "dto": dto}
 
 
+def rehearse_office_controlled_mutation_nas_keeper_durable_queue(
+    payload: object, *, queue_dir: Path | str | None = None
+) -> dict[str, object]:
+    """Append/authorize/preview one durable queue item without executing it.
+
+    This is a metadata-only rehearsal for the local-profile production queue. It
+    intentionally stops after execution-payload preview: no Mac relay write, no
+    NAS filesystem access, no watcher/cron/dispatch, and no VPS NAS authority.
+    """
+
+    if not isinstance(payload, Mapping):
+        return {
+            "rehearsed": False,
+            "queued": False,
+            "authorized": False,
+            "previewed": False,
+            "executed": False,
+            "written": False,
+            "idempotent_replay": False,
+            "errors": [_error("payload", "invalid_payload_type")],
+            "dto": None,
+        }
+    allowed_fields = (
+        _NAS_KEEPER_HANDOFF_QUEUE_FIELDS
+        | _NAS_KEEPER_HANDOFF_AUTHORIZE_FIELDS
+        | _NAS_KEEPER_HANDOFF_EXECUTION_PAYLOAD_PREVIEW_FIELDS
+    ) - {"authorization_decision"}
+    if set(payload) - allowed_fields:
+        return {
+            "rehearsed": False,
+            "queued": False,
+            "authorized": False,
+            "previewed": False,
+            "executed": False,
+            "written": False,
+            "idempotent_replay": False,
+            "errors": [_error("unsupported_fields", "unsupported_field")],
+            "dto": None,
+        }
+
+    handoff_payload = {field: payload[field] for field in _NAS_KEEPER_HANDOFF_QUEUE_FIELDS if field in payload}
+    auth_payload = {field: payload[field] for field in _NAS_KEEPER_HANDOFF_AUTHORIZE_FIELDS if field in payload}
+    auth_payload.setdefault("authorization_decision", "authorize_mac_relay_execution")
+    preview_payload = {
+        field: payload[field]
+        for field in _NAS_KEEPER_HANDOFF_EXECUTION_PAYLOAD_PREVIEW_FIELDS
+        if field in payload
+    }
+
+    queued = enqueue_office_controlled_mutation_nas_keeper_mac_relay_handoff(handoff_payload, queue_dir=queue_dir)
+    idempotent_replay = False
+    queued_now = bool(queued.get("queued"))
+    if not queued_now:
+        queue_errors = cast(list[dict[str, str]], queued.get("errors") or [])
+        duplicate_only = len(queue_errors) == 1 and queue_errors[0] == _error("handoff_ref", "duplicate_handoff_ref")
+        if not duplicate_only:
+            return {
+                "rehearsed": False,
+                "queued": False,
+                "authorized": False,
+                "previewed": False,
+                "executed": False,
+                "written": False,
+                "idempotent_replay": False,
+                "errors": queue_errors,
+                "dto": None,
+            }
+        listed = list_office_controlled_mutation_nas_keeper_mac_relay_handoff_queue(
+            {"handoff_ref": payload.get("handoff_ref"), "limit": 1}, queue_dir=queue_dir
+        )
+        items = cast(dict[str, object], listed.get("dto") or {}).get("items", [])
+        existing = cast(list[object], items)[0] if isinstance(items, Sequence) and items else None
+        if not isinstance(existing, Mapping) or existing.get("queue_status") != "authorized_for_mac_relay_execution":
+            return {
+                "rehearsed": False,
+                "queued": False,
+                "authorized": False,
+                "previewed": False,
+                "executed": False,
+                "written": False,
+                "idempotent_replay": False,
+                "errors": [_error("handoff_ref", "duplicate_handoff_ref")],
+                "dto": None,
+            }
+        idempotent_replay = True
+
+    authorized_now = False
+    if not idempotent_replay:
+        authorized = authorize_office_controlled_mutation_nas_keeper_mac_relay_handoff(auth_payload, queue_dir=queue_dir)
+        authorized_now = bool(authorized.get("authorized"))
+        if not authorized_now:
+            return {
+                "rehearsed": False,
+                "queued": queued_now,
+                "authorized": False,
+                "previewed": False,
+                "executed": False,
+                "written": False,
+                "idempotent_replay": False,
+                "errors": cast(list[dict[str, str]], authorized.get("errors") or []),
+                "dto": None,
+            }
+
+    previewed = preview_office_controlled_mutation_nas_keeper_mac_relay_execution_payload(
+        preview_payload, queue_dir=queue_dir
+    )
+    if not previewed.get("previewed"):
+        return {
+            "rehearsed": False,
+            "queued": queued_now,
+            "authorized": authorized_now,
+            "previewed": False,
+            "executed": False,
+            "written": False,
+            "idempotent_replay": idempotent_replay,
+            "errors": cast(list[dict[str, str]], previewed.get("errors") or []),
+            "dto": None,
+        }
+    preview_dto = cast(dict[str, object], previewed.get("dto") or {})
+    listed = list_office_controlled_mutation_nas_keeper_mac_relay_handoff_queue(
+        {"handoff_ref": payload.get("handoff_ref"), "limit": 1}, queue_dir=queue_dir
+    )
+    queue_readback = cast(dict[str, object], listed.get("dto") or {})
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_durable_queue_rehearsal",
+        "rehearsed": True,
+        "queued": queued_now,
+        "authorized": authorized_now,
+        "previewed": True,
+        "idempotent_replay": idempotent_replay,
+        "idempotency_status": "existing_authorized_handoff_reused" if idempotent_replay else "new_handoff_authorized",
+        "queue_storage_ref": "ai_office_local_profile::nas_keeper_mac_relay_handoff_queue",
+        "handoff_ref": preview_dto.get("handoff_ref"),
+        "authorization_ref": preview_dto.get("authorization_ref"),
+        "relay_execution_ref": preview_dto.get("relay_execution_ref"),
+        "queue_ref": preview_dto.get("queue_ref"),
+        "queue_status": preview_dto.get("queue_status"),
+        "safe_logical_path": preview_dto.get("safe_logical_path"),
+        "safe_display_path": preview_dto.get("safe_display_path"),
+        "payload_bytes": preview_dto.get("payload_bytes"),
+        "markdown_body_sha256": preview_dto.get("markdown_body_sha256"),
+        "markdown_body_bytes": preview_dto.get("markdown_body_bytes"),
+        "queue_readback_count": queue_readback.get("count", 0),
+        "queue_available_count": queue_readback.get("available_count", 0),
+        "durable_queue_mutation_enabled": True,
+        "execution_payload_previewed": True,
+        "execution_payload_included": False,
+        "write_payload_included": False,
+        "markdown_body_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "target_exists_after_rehearsal": False,
+        "executed": False,
+        "written": False,
+        "capabilities": {
+            "queue_read_enabled": True,
+            "queue_append_enabled": queued_now,
+            "durable_queue_rehearsal_enabled": True,
+            "nas_keeper_authorization_recording_enabled": authorized_now,
+            "execution_payload_preview_enabled": True,
+            "execution_from_preview_enabled": False,
+            "mac_relay_write_enabled": False,
+            "actual_nas_write_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_credential_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+        },
+        "next_required_boundary": "separate_operator_approval_for_guarded_execution_from_existing_durable_item",
+    }
+    return {
+        "rehearsed": True,
+        "queued": queued_now,
+        "authorized": authorized_now,
+        "previewed": True,
+        "executed": False,
+        "written": False,
+        "idempotent_replay": idempotent_replay,
+        "errors": [],
+        "dto": dto,
+    }
+
+
+
 def review_office_controlled_mutation_nas_keeper_one_shot_write_payload_arm(
     payload: object, *, queue_dir: Path | str | None = None, root_path: Path | str | None = None
 ) -> dict[str, object]:
