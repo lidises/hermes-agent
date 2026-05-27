@@ -4407,6 +4407,8 @@ export function NasKeeperDurableQueueGuardedOperatorReadinessPanel({ readiness }
       data-office-nas-keeper-durable-queue-guarded-operator-tmp-root-replay-idempotency-metadata-endpoint={readiness.tmpRootReplayIdempotencyMetadataEndpoint}
       data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-precommit-metadata-ready={String(readiness.macRelayPrecommitMetadataReady)}
       data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-precommit-metadata-endpoint={readiness.macRelayPrecommitMetadataEndpoint}
+      data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-precommit-manifest-ready={String(readiness.macRelayPrecommitManifestReady)}
+      data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-precommit-manifest-endpoint={readiness.macRelayPrecommitManifestEndpoint}
       data-office-nas-keeper-durable-queue-guarded-operator-payload-preview-required={String(readiness.payloadPreviewRequiredBeforeExecution)}
       data-office-nas-keeper-durable-queue-guarded-operator-real-nas-production-write-enabled={String(readiness.realNasProductionWriteEnabled)}
       data-office-nas-keeper-durable-queue-guarded-operator-vps-nas-authority-enabled={String(readiness.vpsNasAuthorityEnabled)}
@@ -4430,6 +4432,7 @@ export function NasKeeperDurableQueueGuardedOperatorReadinessPanel({ readiness }
             <span>metadata-only record write ready {String(readiness.metadataOnlyRecordWriteReady)}</span>
             <span>tmp-root replay/idempotency metadata ready {String(readiness.tmpRootReplayIdempotencyMetadataReady)}</span>
             <span>Mac relay precommit metadata ready {String(readiness.macRelayPrecommitMetadataReady)}</span>
+            <span>Mac relay precommit manifest ready {String(readiness.macRelayPrecommitManifestReady)}</span>
             <span>preview required {String(readiness.payloadPreviewRequiredBeforeExecution)}</span>
           </div>
         </div>

@@ -103,6 +103,8 @@ from hermes_cli.office_controlled_mutation import (
     get_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_replay_idempotency_metadata_readback,
     append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_metadata,
     get_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_metadata_readback,
+    append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_manifest,
+    get_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_manifest_readback,
     get_office_controlled_mutation_nas_keeper_last_successful_mac_relay_write,
     build_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_request,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_readback,
@@ -858,6 +860,18 @@ async def get_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_
 async def append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_metadata_route(payload: Any = Body(None)):
     """Record metadata-only precommit readiness sourced from selected replay metadata."""
     return append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_metadata(payload)
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-precommit-manifest")
+async def get_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_manifest_route():
+    """Read selected tmp-root Mac relay precommit manifest without raw payload/path."""
+    return get_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_manifest_readback()
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-precommit-manifest")
+async def append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_manifest_route(payload: Any = Body(None)):
+    """Record a metadata-only precommit manifest sourced from selected precommit metadata."""
+    return append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_manifest(payload)
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-one-shot-write-payload-arm-review")

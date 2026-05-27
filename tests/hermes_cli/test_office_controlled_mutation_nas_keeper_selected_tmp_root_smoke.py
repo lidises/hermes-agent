@@ -107,7 +107,7 @@ def test_selected_contract_tmp_root_smoke_writes_reads_back_records_and_replays(
     serialized = json.dumps({"result": result, "replay": replay}, sort_keys=True).lower()
     assert "this safe note is ready" not in serialized
     assert "markdown_body\":" not in serialized
-    assert "write_payload\":" not in serialized
+    assert '"write_payload":' not in serialized
     assert "/users/lidises" not in serialized
     assert "/home/hermes" not in serialized
     assert "sk-" not in serialized
@@ -254,7 +254,7 @@ def test_selected_tmp_root_replay_metadata_records_safe_source_and_replays(tmp_p
     serialized = json.dumps({"result": result, "replay": replay, "readback": readback}, sort_keys=True).lower()
     assert "this safe note is ready" not in serialized
     assert "markdown_body\":" not in serialized
-    assert "write_payload\":" not in serialized
+    assert '"write_payload":' not in serialized
     assert "/users/lidises" not in serialized
     assert "/home/hermes" not in serialized
     assert "sk-" not in serialized
@@ -387,7 +387,7 @@ def test_selected_tmp_root_precommit_metadata_records_safe_source_and_replays(tm
     serialized = json.dumps({"result": result, "replay": replay, "readback": readback}, sort_keys=True).lower()
     assert "this safe note is ready" not in serialized
     assert "markdown_body\":" not in serialized
-    assert "write_payload\":" not in serialized
+    assert '"write_payload":' not in serialized
     assert "/users/lidises" not in serialized
     assert "/home/hermes" not in serialized
     assert "sk-" not in serialized
@@ -441,3 +441,148 @@ def test_selected_tmp_root_precommit_metadata_api_requires_session_token(tmp_pat
     assert readback.status_code == 200
     assert readback.json()["found"] is True
     assert readback.json()["latest"]["replay_metadata_ref"] == replay["dto"]["replay_metadata_ref"]
+
+
+def selected_precommit_manifest_payload(precommit_dto, **overrides):
+    payload = {
+        "mac_relay_precommit_manifest_ref": "precommit_manifest_selected_tmp_root_20260527",
+        "mac_relay_precommit_ref": precommit_dto["mac_relay_precommit_ref"],
+        "mac_relay_precommit_metadata_record_sha256": precommit_dto["mac_relay_precommit_metadata_record_sha256"],
+        "replay_metadata_ref": precommit_dto["replay_metadata_ref"],
+        "selected_contract_ref": precommit_dto["selected_contract_ref"],
+        "tmp_root_smoke_ref": precommit_dto["tmp_root_smoke_ref"],
+        "idempotency_key_sha256": precommit_dto["idempotency_key_sha256"],
+        "recorded_by": "agent_nas_keeper",
+        "recorded_at": "2026-05-27T04:20:00Z",
+    }
+    payload.update(overrides)
+    return payload
+
+
+def _record_selected_precommit_metadata(tmp_path):
+    from hermes_cli.office_controlled_mutation import append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_metadata
+
+    replay_dto, replay_store = _record_selected_replay_metadata(tmp_path)
+    precommit_store = tmp_path / "selected-precommit-metadata.jsonl"
+    precommit = append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_metadata(
+        selected_precommit_payload(replay_dto), replay_store_path=replay_store, precommit_store_path=precommit_store
+    )
+    assert precommit["recorded"] is True
+    return precommit["dto"], precommit_store
+
+
+def test_selected_tmp_root_precommit_manifest_records_safe_source_and_replays(tmp_path):
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_manifest,
+        get_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_manifest_readback,
+    )
+
+    precommit_dto, precommit_store = _record_selected_precommit_metadata(tmp_path)
+    manifest_store = tmp_path / "selected-precommit-manifest.jsonl"
+
+    result = append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_manifest(
+        selected_precommit_manifest_payload(precommit_dto),
+        precommit_store_path=precommit_store,
+        manifest_store_path=manifest_store,
+    )
+    replay = append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_manifest(
+        selected_precommit_manifest_payload(precommit_dto),
+        precommit_store_path=precommit_store,
+        manifest_store_path=manifest_store,
+    )
+    readback = get_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_manifest_readback(
+        store_path=manifest_store
+    )
+
+    assert result["recorded"] is True
+    assert result["idempotent_replay"] is False
+    assert replay["recorded"] is False
+    assert replay["idempotent_replay"] is True
+    dto = result["dto"]
+    assert dto["mode"] == "nas_keeper_selected_tmp_root_mac_relay_precommit_manifest"
+    assert dto["mac_relay_precommit_manifest_ready"] is True
+    assert dto["source_mac_relay_precommit_metadata_verified"] is True
+    assert dto["source_precommit_metadata_record_sha256_verified"] is True
+    assert dto["safe_manifest_checklist_verified"] is True
+    assert dto["safe_ref_chain_verified"] is True
+    assert dto["manifest_duplicate_write_skipped"] is False
+    assert dto["write_readiness_stage"] == "mac_relay_precommit_manifest_after_selected_tmp_root_precommit_metadata"
+    assert dto["write_readiness_percent"] == 94
+    assert dto["next_write_boundary"] == "mac_relay_final_preflight_after_precommit_manifest"
+    assert dto["metadata_only_record_write_executed"] is True
+    assert dto["manifest_includes_payload_body"] is False
+    assert dto["manifest_includes_write_payload"] is False
+    assert dto["manifest_includes_raw_root_path"] is False
+    assert dto["manifest_includes_secret_value"] is False
+    assert dto["real_nas_production_write_enabled"] is False
+    assert dto["real_nas_production_write_executed"] is False
+    assert dto["vps_direct_nas_authority_enabled"] is False
+    assert dto["watcher_cron_dispatcher_enabled"] is False
+    assert dto["authority_adapter_binding_enabled"] is False
+    assert dto["public_exposure_enabled"] is False
+    assert dto["gateway_restart_required"] is False
+    assert len(dto["mac_relay_precommit_manifest_record_sha256"]) == 64
+    assert replay["dto"]["manifest_duplicate_write_skipped"] is True
+    assert replay["dto"]["mac_relay_precommit_manifest_record_sha256"] == dto["mac_relay_precommit_manifest_record_sha256"]
+    assert readback["found"] is True
+    assert readback["latest"]["mac_relay_precommit_manifest_ref"] == "precommit_manifest_selected_tmp_root_20260527"
+    assert len(manifest_store.read_text(encoding="utf-8").splitlines()) == 1
+    serialized = json.dumps({"result": result, "replay": replay, "readback": readback}, sort_keys=True).lower()
+    assert "this safe note is ready" not in serialized
+    assert "markdown_body\":" not in serialized
+    assert '"write_payload":' not in serialized
+    assert "/users/lidises" not in serialized
+    assert "/home/hermes" not in serialized
+    assert "sk-" not in serialized
+
+
+def test_selected_tmp_root_precommit_manifest_rejects_cross_source_precommit(tmp_path):
+    from hermes_cli.office_controlled_mutation import append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_manifest
+
+    precommit_dto, precommit_store = _record_selected_precommit_metadata(tmp_path)
+    bad_ref = append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_manifest(
+        selected_precommit_manifest_payload(precommit_dto, mac_relay_precommit_ref="different_precommit_ref"),
+        precommit_store_path=precommit_store,
+        manifest_store_path=tmp_path / "manifest.jsonl",
+    )
+    bad_sha = append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_manifest(
+        selected_precommit_manifest_payload(precommit_dto, mac_relay_precommit_metadata_record_sha256="0" * 64),
+        precommit_store_path=precommit_store,
+        manifest_store_path=tmp_path / "manifest.jsonl",
+    )
+
+    assert bad_ref["recorded"] is False
+    assert bad_ref["errors"] == [{"field": "mac_relay_precommit_ref", "code": "source_precommit_metadata_not_found"}]
+    assert bad_sha["recorded"] is False
+    assert bad_sha["errors"] == [{"field": "mac_relay_precommit_metadata_record_sha256", "code": "checksum_mismatch"}]
+
+
+def test_selected_tmp_root_precommit_manifest_api_requires_session_token(tmp_path, monkeypatch):
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
+    monkeypatch.setenv("HERMES_AI_OFFICE_MAC_RELAY_TMP_ROOT", str(tmp_path / "tmp-root"))
+    from hermes_cli.office_controlled_mutation import (
+        record_office_controlled_mutation_nas_keeper_selected_durable_item_preview_contract,
+        execute_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_write_smoke,
+        append_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_replay_idempotency_metadata,
+        append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_metadata,
+    )
+    from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+
+    queue_dir = tmp_path / "hermes" / "ai-office" / "nas-keeper-handoff"
+    prepare_authorized_handoff(queue_dir)
+    record_office_controlled_mutation_nas_keeper_selected_durable_item_preview_contract(selected_contract_payload())
+    smoke = execute_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_write_smoke(tmp_root_smoke_payload(), root_path=tmp_path / "tmp-root")
+    replay = append_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_replay_idempotency_metadata(replay_metadata_payload(smoke["dto"]))
+    precommit = append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_metadata(selected_precommit_payload(replay["dto"]))
+    route = "/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-precommit-manifest"
+    client = TestClient(app)
+
+    unauthenticated = client.post(route, json=selected_precommit_manifest_payload(precommit["dto"]))
+    assert unauthenticated.status_code == 401
+    recorded = client.post(route, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN}, json=selected_precommit_manifest_payload(precommit["dto"]))
+    assert recorded.status_code == 200
+    assert recorded.json()["recorded"] is True
+    readback = client.get(route, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN})
+    assert readback.status_code == 200
+    assert readback.json()["found"] is True
+    assert readback.json()["latest"]["mac_relay_precommit_ref"] == precommit["dto"]["mac_relay_precommit_ref"]
