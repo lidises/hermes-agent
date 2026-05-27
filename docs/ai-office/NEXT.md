@@ -851,3 +851,24 @@ Still forbidden by default:
 - VPS direct NAS authority.
 - Gateway restart.
 - Raw markdown/path/secret/write-payload echo.
+## NEXT — after completed real-write receipt metadata (2026-05-27T15:20Z)
+
+Current position:
+- The approved one-shot real NAS write is now represented by a metadata-only receipt.
+- Duplicate receipt submission is idempotent and does not create another record or trigger another NAS write.
+- The next boundary remains new explicit approval for any additional or replacement real NAS write.
+
+Recommended next safe rung:
+1. Add read-only UI/status projection for the completed real-write receipt metadata.
+2. Add a noop replacement/replay guard probe for the completed write ref.
+3. Keep tests/docs/smoke metadata-only; do not write another production NAS file.
+
+Still requires new explicit approval:
+- Any additional real NAS production write.
+- Any replacement write to the same safe logical note.
+- Any watcher/cron/dispatcher/authority-adapter or public exposure change.
+
+Still forbidden by default:
+- VPS direct NAS authority.
+- Gateway restart.
+- Raw markdown/path/secret/write-payload echo.

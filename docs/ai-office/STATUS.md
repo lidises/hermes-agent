@@ -1068,3 +1068,32 @@ Still closed:
 - No public exposure change.
 - No gateway restart.
 - No raw markdown/path/secret/write-payload projection.
+## Current status — completed real-write receipt recorded (2026-05-27T15:20Z)
+
+Latest completed rung:
+- Added and deployed a metadata-only completed real-write receipt boundary.
+- Recorded the prior one-shot Mac relay real NAS write as safe refs/checksums only.
+- Replayed the same receipt once and verified it is idempotent: no second receipt row and no second NAS write.
+
+Safe receipt metadata:
+- completed receipt ref: `realwrite-20260527-001`
+- safe logical path: `ai_office_controlled_mutation::nas-keeper-controlled-mutation-real-write-20260527.md`
+- readback sha256: `14ca76decb988b26502680578f560e96a36eab0778fbc8112818ccfa59f75901`
+- receipt count: 1
+- next boundary: `new_explicit_approval_required_for_additional_real_write`
+
+Verification:
+- TDD RED: helper import missing and route 405 before implementation.
+- Python focused Mac relay/receipt tests: 8/8 passed.
+- Python focused aggregate+Mac relay tests: 46/46 passed.
+- Web focused tests: 245/245 passed; build passed.
+- Protected API smoke: unauth=401, stored=true, replay stored=false, replay idempotent=true, count=1.
+- DOM smoke: Step 11 panel present, controls=0, forbidden raw path/secret/raw-field patterns absent, console errors=0.
+
+Still closed:
+- No additional real NAS write.
+- No direct VPS NAS authority.
+- No watcher/cron/dispatcher/authority-adapter activation.
+- No public exposure change.
+- No gateway restart.
+- No raw markdown/path/secret/write-payload projection.
