@@ -1,3 +1,34 @@
+## Current status — NAS Keeper durable queue rehearsal/readback completed (2026-05-27T05:56Z)
+
+Scope completed:
+- Advanced the non-real-write operational stage after the bounded real Mac relay smoke by creating exactly one durable local-profile NAS Keeper queue rehearsal item on the VPS runtime profile.
+- The item was queued, authorized for Mac relay review, and execution-payload previewed only; execution-from-preview was not called, and no NAS write occurred.
+- Duplicate protected POST replay reused the existing authorized handoff without appending a second item.
+- Protected API and hydrated DOM smokes preserved zero runtime controls, no raw payload/body/path echo, no VPS NAS authority, and no watcher/cron/dispatcher/authority-adapter activation.
+
+Evidence captured:
+- Focused regression tests: durable queue rehearsal + handoff queue + authorize handoff + execution-payload preview = 13/13 passed.
+- `py_compile` and `git diff --check` passed.
+- Durable queue before/after count: 16 -> 17; target rehearsal count: 1.
+- Safe rehearsal refs: handoff `handoff_20260527op2rehearsalc`, authorization `authz_20260527op2rehearsalc`, safe slug `durable-queue-rehearsal-20260527op2rehearsalc`.
+- Protected API smoke: unauth POST=401; authenticated POST=200; duplicate POST=200 with idempotent replay=true.
+- Rehearsal DTO: rehearsed=true, queued=true, authorized=true, previewed=true, executed=false, written=false, queue_status=authorized_for_mac_relay_execution, queue_readback_count=1, target_exists_after_rehearsal=false.
+- Capability flags: actual_nas_write_enabled=false, direct_vps_nas_write_enabled=false, watcher_enabled=false, cron_enabled=false, dispatch_enabled=false, authority_adapter_binding_enabled=false.
+- Public DTO raw leak probe: false for the withheld note body, raw filesystem path, and raw write payload values.
+- DOM smoke: compact dashboard/readiness hooks present, scoped controlled-mutation execution controls=0, targeted raw-value leak=false, browser console errors=0.
+
+Safety boundaries preserved:
+- Real NAS production write: false for this rung.
+- Direct VPS NAS authority: false.
+- watcher/cron/dispatcher/authority-adapter: false.
+- public exposure change: false.
+- gateway restart: false.
+- raw filesystem root/path, raw markdown body, secret, or raw write payload echo: false.
+
+Readiness/result note:
+- The durable production-queue rehearsal/readback stage is complete without execution. This raises operational readiness beyond temporary queues while keeping execution and automation closed.
+- The next higher-risk stage is a separately approved one-shot guarded execution of the existing durable item; do not start watcher/cron/dispatcher automation.
+
 ## Current status — NAS Keeper real Mac relay NAS write completed (2026-05-27T05:42Z)
 
 Scope completed:

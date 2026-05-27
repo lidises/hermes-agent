@@ -1,3 +1,27 @@
+## NEXT — after NAS Keeper durable queue rehearsal/readback (2026-05-27T05:56Z)
+
+Current next stage:
+- The durable production-queue rehearsal/readback stage is complete: one VPS runtime-profile queue item was appended, authorized for Mac relay review, and execution-payload previewed only.
+- The exact durable rehearsal item is `handoff_20260527op2rehearsalc`; duplicate rehearsal POSTs should replay idempotently rather than appending another row.
+- Do not call execution-from-preview for this item unless the user separately approves a one-shot guarded execution rung. Do not turn on watcher/cron/dispatcher/authority-adapter.
+- The next safe operational choices are either:
+  1. one-shot guarded execution of the existing durable item through the approved operator UI/API boundary, still no watcher/cron/dispatcher, or
+  2. retention/cleanup policy for the completed smoke/rehearsal artifacts.
+
+Still forbidden unless separately and explicitly approved:
+- additional real NAS production writes beyond an exact approved target/content boundary
+- direct VPS NAS authority, NAS mount credentials, or direct VPS NAS file write
+- watcher/cron/dispatcher/authority-adapter activation
+- public exposure
+- gateway restart
+- raw markdown/body/path/secret/raw write payload echo
+
+Required first checks next time:
+1. Read `docs/ai-office/STATUS.md` and this file.
+2. Confirm local/VPS git, service health, durable queue target count for `handoff_20260527op2rehearsalc`, and whether the completed smoke/rehearsal artifacts should be retained or cleaned up.
+3. Treat the durable queue item as authorized-for-review only, not executed.
+4. Require exact approval before execution-from-preview, additional real NAS write, watcher/cron/dispatcher/authority-adapter, or any VPS NAS authority change.
+
 ## NEXT — after NAS Keeper real Mac relay NAS write (2026-05-27T05:42Z)
 
 Current next stage:
@@ -7,7 +31,7 @@ Current next stage:
 - VPS direct NAS authority remains intentionally closed; future writes should still route through NAS Keeper -> Mac relay unless the user separately designs a different authority model.
 
 Still forbidden unless separately and explicitly approved:
-- direct VPS NAS authority, NAS mount credentials, or direct VPS file write
+- direct VPS NAS authority, NAS mount credentials, or direct VPS NAS file write
 - watcher/cron/dispatcher/authority-adapter activation
 - public exposure
 - gateway restart
