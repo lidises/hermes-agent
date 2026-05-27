@@ -4403,6 +4403,8 @@ export function NasKeeperDurableQueueGuardedOperatorReadinessPanel({ readiness }
       data-office-nas-keeper-durable-queue-guarded-operator-approval-default={String(readiness.executionApprovalDefault)}
       data-office-nas-keeper-durable-queue-guarded-operator-execution-disabled-default={String(readiness.executionDisabledByDefault)}
       data-office-nas-keeper-durable-queue-guarded-operator-metadata-only-record-write-ready={String(readiness.metadataOnlyRecordWriteReady)}
+      data-office-nas-keeper-durable-queue-guarded-operator-tmp-root-replay-idempotency-metadata-ready={String(readiness.tmpRootReplayIdempotencyMetadataReady)}
+      data-office-nas-keeper-durable-queue-guarded-operator-tmp-root-replay-idempotency-metadata-endpoint={readiness.tmpRootReplayIdempotencyMetadataEndpoint}
       data-office-nas-keeper-durable-queue-guarded-operator-payload-preview-required={String(readiness.payloadPreviewRequiredBeforeExecution)}
       data-office-nas-keeper-durable-queue-guarded-operator-real-nas-production-write-enabled={String(readiness.realNasProductionWriteEnabled)}
       data-office-nas-keeper-durable-queue-guarded-operator-vps-nas-authority-enabled={String(readiness.vpsNasAuthorityEnabled)}
@@ -4424,6 +4426,7 @@ export function NasKeeperDurableQueueGuardedOperatorReadinessPanel({ readiness }
             <span>execution approval default {String(readiness.executionApprovalDefault)}</span>
             <span>execution disabled default {String(readiness.executionDisabledByDefault)}</span>
             <span>metadata-only record write ready {String(readiness.metadataOnlyRecordWriteReady)}</span>
+            <span>tmp-root replay/idempotency metadata ready {String(readiness.tmpRootReplayIdempotencyMetadataReady)}</span>
             <span>preview required {String(readiness.payloadPreviewRequiredBeforeExecution)}</span>
           </div>
         </div>

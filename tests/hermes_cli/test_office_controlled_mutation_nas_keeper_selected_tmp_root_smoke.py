@@ -166,3 +166,144 @@ def test_selected_contract_tmp_root_smoke_api_requires_session_token_and_tmp_roo
     assert readback.status_code == 200
     assert readback.json()["found"] is True
     assert readback.json()["latest"]["tmp_root_smoke_ref"] == "tmp_root_smoke_selected_contract_20260527"
+
+
+def replay_metadata_payload(smoke_dto, **overrides):
+    payload = {
+        "replay_metadata_ref": "replay_metadata_selected_tmp_root_20260527",
+        "selected_contract_ref": smoke_dto["selected_contract_ref"],
+        "selected_contract_record_sha256": smoke_dto["selected_contract_record_sha256"],
+        "tmp_root_smoke_ref": smoke_dto["tmp_root_smoke_ref"],
+        "tmp_root_smoke_record_sha256": smoke_dto["tmp_root_smoke_record_sha256"],
+        "idempotency_key_sha256": smoke_dto["idempotency_key_sha256"],
+        "recorded_by": "agent_nas_keeper",
+        "recorded_at": "2026-05-27T03:35:00Z",
+    }
+    payload.update(overrides)
+    return payload
+
+
+def _record_selected_tmp_root_smoke(tmp_path):
+    from hermes_cli.office_controlled_mutation import (
+        record_office_controlled_mutation_nas_keeper_selected_durable_item_preview_contract,
+        execute_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_write_smoke,
+    )
+
+    queue_dir = tmp_path / "queue"
+    root = tmp_path / "isolated-mac-relay-root"
+    contract_store = tmp_path / "selected-contracts.jsonl"
+    smoke_store = tmp_path / "tmp-root-smokes.jsonl"
+    prepare_authorized_handoff(queue_dir)
+    record_office_controlled_mutation_nas_keeper_selected_durable_item_preview_contract(
+        selected_contract_payload(), queue_dir=queue_dir, store_path=contract_store
+    )
+    smoke = execute_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_write_smoke(
+        tmp_root_smoke_payload(),
+        queue_dir=queue_dir,
+        contract_store_path=contract_store,
+        smoke_store_path=smoke_store,
+        root_path=root,
+    )
+    assert smoke["recorded"] is True
+    return smoke["dto"], smoke_store
+
+
+def test_selected_tmp_root_replay_metadata_records_safe_source_and_replays(tmp_path):
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_replay_idempotency_metadata,
+        get_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_replay_idempotency_metadata_readback,
+    )
+
+    smoke_dto, smoke_store = _record_selected_tmp_root_smoke(tmp_path)
+    replay_store = tmp_path / "selected-tmp-root-replay-metadata.jsonl"
+
+    result = append_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_replay_idempotency_metadata(
+        replay_metadata_payload(smoke_dto), smoke_store_path=smoke_store, replay_store_path=replay_store
+    )
+    replay = append_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_replay_idempotency_metadata(
+        replay_metadata_payload(smoke_dto), smoke_store_path=smoke_store, replay_store_path=replay_store
+    )
+    readback = get_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_replay_idempotency_metadata_readback(
+        store_path=replay_store
+    )
+
+    assert result["recorded"] is True
+    assert result["idempotent_replay"] is False
+    assert replay["recorded"] is False
+    assert replay["idempotent_replay"] is True
+    dto = result["dto"]
+    assert dto["mode"] == "nas_keeper_selected_durable_tmp_root_replay_idempotency_metadata"
+    assert dto["replay_idempotency_metadata_ready"] is True
+    assert dto["source_selected_contract_verified"] is True
+    assert dto["source_tmp_root_write_smoke_verified"] is True
+    assert dto["source_tmp_root_readback_verified"] is True
+    assert dto["source_idempotency_key_verified"] is True
+    assert dto["idempotency_duplicate_skip_verified"] is True
+    assert dto["metadata_record_written"] is True
+    assert dto["replay_store_write_enabled"] is True
+    assert dto["real_replay_store_written"] is True
+    assert dto["real_nas_production_write_enabled"] is False
+    assert dto["vps_direct_nas_authority_enabled"] is False
+    assert dto["markdown_body_included"] is False
+    assert dto["write_payload_included"] is False
+    assert dto["raw_root_path_included"] is False
+    assert len(dto["replay_metadata_record_sha256"]) == 64
+    assert readback["found"] is True
+    assert readback["latest"]["replay_metadata_record_sha256"] == dto["replay_metadata_record_sha256"]
+    assert len(replay_store.read_text(encoding="utf-8").splitlines()) == 1
+    serialized = json.dumps({"result": result, "replay": replay, "readback": readback}, sort_keys=True).lower()
+    assert "this safe note is ready" not in serialized
+    assert "markdown_body\":" not in serialized
+    assert "write_payload\":" not in serialized
+    assert "/users/lidises" not in serialized
+    assert "/home/hermes" not in serialized
+    assert "sk-" not in serialized
+
+
+def test_selected_tmp_root_replay_metadata_rejects_cross_source_replay(tmp_path):
+    from hermes_cli.office_controlled_mutation import append_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_replay_idempotency_metadata
+
+    smoke_dto, smoke_store = _record_selected_tmp_root_smoke(tmp_path)
+    bad_ref = append_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_replay_idempotency_metadata(
+        replay_metadata_payload(smoke_dto, tmp_root_smoke_ref="different_tmp_root_smoke_ref"),
+        smoke_store_path=smoke_store,
+        replay_store_path=tmp_path / "replay.jsonl",
+    )
+    bad_sha = append_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_replay_idempotency_metadata(
+        replay_metadata_payload(smoke_dto, tmp_root_smoke_record_sha256="0" * 64),
+        smoke_store_path=smoke_store,
+        replay_store_path=tmp_path / "replay.jsonl",
+    )
+
+    assert bad_ref["recorded"] is False
+    assert bad_ref["errors"] == [{"field": "tmp_root_smoke_ref", "code": "source_smoke_record_not_found"}]
+    assert bad_sha["recorded"] is False
+    assert bad_sha["errors"] == [{"field": "tmp_root_smoke_record_sha256", "code": "checksum_mismatch"}]
+
+
+def test_selected_tmp_root_replay_metadata_api_requires_session_token(tmp_path, monkeypatch):
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
+    monkeypatch.setenv("HERMES_AI_OFFICE_MAC_RELAY_TMP_ROOT", str(tmp_path / "tmp-root"))
+    from hermes_cli.office_controlled_mutation import (
+        record_office_controlled_mutation_nas_keeper_selected_durable_item_preview_contract,
+        execute_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_write_smoke,
+    )
+    from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+
+    queue_dir = tmp_path / "hermes" / "ai-office" / "nas-keeper-handoff"
+    prepare_authorized_handoff(queue_dir)
+    record_office_controlled_mutation_nas_keeper_selected_durable_item_preview_contract(selected_contract_payload())
+    smoke = execute_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_write_smoke(tmp_root_smoke_payload(), root_path=tmp_path / "tmp-root")
+    assert smoke["recorded"] is True
+    route = "/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-durable-tmp-root-replay-idempotency-metadata"
+    client = TestClient(app)
+
+    unauthenticated = client.post(route, json=replay_metadata_payload(smoke["dto"]))
+    assert unauthenticated.status_code == 401
+    recorded = client.post(route, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN}, json=replay_metadata_payload(smoke["dto"]))
+    assert recorded.status_code == 200
+    assert recorded.json()["recorded"] is True
+    readback = client.get(route, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN})
+    assert readback.status_code == 200
+    assert readback.json()["found"] is True
+    assert readback.json()["latest"]["tmp_root_smoke_ref"] == smoke["dto"]["tmp_root_smoke_ref"]

@@ -2414,6 +2414,8 @@ export type OfficeNasKeeperDurableQueueGuardedOperatorReadiness = {
   executionApprovalDefault: false;
   executionDisabledByDefault: true;
   metadataOnlyRecordWriteReady: true;
+  tmpRootReplayIdempotencyMetadataReady: true;
+  tmpRootReplayIdempotencyMetadataEndpoint: "/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-durable-tmp-root-replay-idempotency-metadata";
   payloadPreviewRequiredBeforeExecution: true;
   executionEndpoint: OfficeNasKeeperExecutionOperatorAction["executionEndpoint"];
   executionStateEndpoint: OfficeNasKeeperExecutionOperatorAction["executionStateEndpoint"];
@@ -5907,6 +5909,8 @@ export function buildOfficeNasKeeperDurableQueueGuardedOperatorReadiness(action:
     executionApprovalDefault: false,
     executionDisabledByDefault: true,
     metadataOnlyRecordWriteReady: true,
+    tmpRootReplayIdempotencyMetadataReady: true,
+    tmpRootReplayIdempotencyMetadataEndpoint: "/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-durable-tmp-root-replay-idempotency-metadata",
     payloadPreviewRequiredBeforeExecution: true,
     executionEndpoint: action.executionEndpoint,
     executionStateEndpoint: action.executionStateEndpoint,
