@@ -251,3 +251,139 @@ def test_cleanup_execution_gate_api_requires_session_and_stays_metadata_only(tmp
     readback = client.get(route, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN})
     assert readback.status_code == 200
     assert readback.json()["dto"]["record_count"] == 1
+
+
+def cleanup_hold_payload(**overrides):
+    payload = {
+        "cleanup_hold_ref": "cleanuphold-20260527-artifact-retention-1",
+        "cleanup_gate_ref": "cleanupgate-20260527-retention-plan-1",
+        "requested_by": "agent_nas_keeper",
+        "requested_at": "2026-05-27T08:45:00Z",
+        "operator_confirmation": "dry-run-hold-only-no-delete-no-move-no-write",
+        "candidate_actions": [
+            {
+                "candidate_ref": "candidate:fresh-write-20260527071608-rollback",
+                "artifact_ref": "artifact:fresh-write-20260527071608-rollback",
+                "safe_logical_ref": "rollback::rollback_write_fresh_20260527071608_2",
+                "proposed_action": "hold_cleanup_candidate",
+                "terminal_status": "rollback_verified",
+            }
+        ],
+        "evidence_refs": ["sha:fdd01554e34264a023efbf4c3ad1b76bf4dd73cb97db1a8190e43640a1f1111e"],
+    }
+    payload.update(overrides)
+    return payload
+
+
+def test_cleanup_execution_hold_records_dry_run_only_and_is_idempotent(tmp_path):
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_nas_keeper_artifact_retention_plan,
+        append_office_controlled_mutation_nas_keeper_cleanup_execution_gate,
+        append_office_controlled_mutation_nas_keeper_cleanup_execution_hold,
+    )
+
+    plan_path = tmp_path / "retention-plans.jsonl"
+    gate_path = tmp_path / "cleanup-gates.jsonl"
+    hold_path = tmp_path / "cleanup-holds.jsonl"
+    plan = append_office_controlled_mutation_nas_keeper_artifact_retention_plan(
+        safe_plan_payload(), store_path=plan_path
+    )
+    append_office_controlled_mutation_nas_keeper_cleanup_execution_gate(
+        cleanup_gate_payload(plan["dto"]["retention_plan_sha256"]), plan_store_path=plan_path, gate_store_path=gate_path
+    )
+
+    first = append_office_controlled_mutation_nas_keeper_cleanup_execution_hold(
+        cleanup_hold_payload(), gate_store_path=gate_path, hold_store_path=hold_path
+    )
+    second = append_office_controlled_mutation_nas_keeper_cleanup_execution_hold(
+        cleanup_hold_payload(), gate_store_path=gate_path, hold_store_path=hold_path
+    )
+
+    assert first["stored"] is True
+    assert first["idempotent_replay"] is False
+    assert first["errors"] == []
+    dto = first["dto"]
+    assert dto["mode"] == "nas_keeper_cleanup_execution_dry_run_hold_recorded"
+    assert dto["metadata_only_record_write"] is True
+    assert dto["dry_run"] is True
+    assert dto["cleanup_execution_opened"] is False
+    assert dto["candidate_count"] == 1
+    assert dto["actual_nas_delete_enabled"] is False
+    assert dto["actual_nas_move_enabled"] is False
+    assert dto["actual_nas_write_enabled"] is False
+    assert dto["direct_vps_nas_write_enabled"] is False
+    assert dto["watcher_enabled"] is False
+    assert dto["cron_enabled"] is False
+    assert dto["dispatch_enabled"] is False
+    assert dto["authority_adapter_binding_enabled"] is False
+    assert second["stored"] is False
+    assert second["idempotent_replay"] is True
+    serialized = json.dumps(first, sort_keys=True).lower()
+    assert "/users/lidises" not in serialized
+    assert "/home/hermes" not in serialized
+    assert "fresh approved" not in serialized
+    assert '"write_payload":' not in serialized
+    assert "sk-" not in serialized
+    assert len(hold_path.read_text(encoding="utf-8").splitlines()) == 1
+
+
+def test_cleanup_execution_hold_requires_existing_gate_and_rejects_raw_candidate_without_echo(tmp_path):
+    from hermes_cli.office_controlled_mutation import append_office_controlled_mutation_nas_keeper_cleanup_execution_hold
+
+    missing = append_office_controlled_mutation_nas_keeper_cleanup_execution_hold(
+        cleanup_hold_payload(), gate_store_path=tmp_path / "missing-gates.jsonl", hold_store_path=tmp_path / "holds.jsonl"
+    )
+    assert missing["stored"] is False
+    assert missing["dto"] is None
+    assert missing["errors"] == [{"field": "cleanup_gate_ref", "code": "cleanup_gate_not_found"}]
+
+    raw = append_office_controlled_mutation_nas_keeper_cleanup_execution_hold(
+        cleanup_hold_payload(
+            candidate_actions=[
+                {
+                    "candidate_ref": "candidate:bad",
+                    "artifact_ref": "artifact:bad",
+                    "safe_logical_ref": "/" + "Users/lidises/private.md",
+                    "proposed_action": "hold_cleanup_candidate",
+                    "terminal_status": "rollback_verified",
+                }
+            ]
+        ),
+        gate_store_path=tmp_path / "missing-gates.jsonl",
+        hold_store_path=tmp_path / "holds.jsonl",
+    )
+    assert raw["stored"] is False
+    assert {item["code"] for item in raw["errors"]} >= {"invalid_cleanup_hold"}
+    assert "/users/lidises" not in json.dumps(raw, sort_keys=True).lower()
+
+
+def test_cleanup_execution_hold_api_requires_session_and_stays_dry_run_only(tmp_path, monkeypatch):
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_nas_keeper_artifact_retention_plan,
+        append_office_controlled_mutation_nas_keeper_cleanup_execution_gate,
+    )
+    from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+
+    plan = append_office_controlled_mutation_nas_keeper_artifact_retention_plan(safe_plan_payload())
+    append_office_controlled_mutation_nas_keeper_cleanup_execution_gate(cleanup_gate_payload(plan["dto"]["retention_plan_sha256"]))
+    client = TestClient(app)
+    route = "/api/office/controlled-mutation/nas-runtime/nas-keeper-cleanup-execution-hold"
+
+    unauthenticated = client.post(route, json=cleanup_hold_payload())
+    assert unauthenticated.status_code == 401
+
+    recorded = client.post(route, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN}, json=cleanup_hold_payload())
+    assert recorded.status_code == 200
+    body = recorded.json()
+    assert body["stored"] is True
+    assert body["dto"]["dry_run"] is True
+    assert body["dto"]["metadata_only_record_write"] is True
+    assert body["dto"]["cleanup_execution_opened"] is False
+    assert body["dto"]["actual_nas_delete_enabled"] is False
+    assert body["dto"]["actual_nas_move_enabled"] is False
+    assert body["dto"]["actual_nas_write_enabled"] is False
+
+    readback = client.get(route, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN})
+    assert readback.status_code == 200
+    assert readback.json()["dto"]["record_count"] == 1

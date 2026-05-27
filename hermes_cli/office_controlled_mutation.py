@@ -10205,6 +10205,16 @@ _NAS_KEEPER_CLEANUP_EXECUTION_GATE_FIELDS = {
     "intended_cleanup_action",
     "evidence_refs",
 }
+_NAS_KEEPER_CLEANUP_EXECUTION_HOLD_FIELDS = {
+    "cleanup_hold_ref",
+    "cleanup_gate_ref",
+    "requested_by",
+    "requested_at",
+    "operator_confirmation",
+    "candidate_actions",
+    "evidence_refs",
+}
+_NAS_KEEPER_CLEANUP_HOLD_ACTIONS = {"hold_cleanup_candidate", "retain_for_manual_review"}
 
 
 def _default_nas_keeper_artifact_retention_plan_store_path() -> Path:
@@ -10213,6 +10223,10 @@ def _default_nas_keeper_artifact_retention_plan_store_path() -> Path:
 
 def _default_nas_keeper_cleanup_execution_gate_store_path() -> Path:
     return get_hermes_home() / "office" / "controlled-mutation" / "nas_keeper_cleanup_execution_gate_records.jsonl"
+
+
+def _default_nas_keeper_cleanup_execution_hold_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "nas_keeper_cleanup_execution_hold_records.jsonl"
 
 
 def _stable_metadata_sha256(value: Mapping[str, object]) -> str:
@@ -10621,6 +10635,212 @@ def append_office_controlled_mutation_nas_keeper_cleanup_execution_gate(
     with path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(record, sort_keys=True, ensure_ascii=False) + "\n")
     return {"stored": True, "idempotent_replay": False, "errors": [], "dto": _cleanup_execution_gate_dto(record)}
+
+
+def _normalize_nas_keeper_cleanup_execution_hold_record(value: object) -> dict[str, object] | None:
+    if not isinstance(value, Mapping):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(value.get("cleanup_hold_ref"), "cleanuphold-"):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(value.get("cleanup_gate_ref"), "cleanupgate-"):
+        return None
+    if not _is_opaque_id(value.get("requested_by")):
+        return None
+    if not (isinstance(value.get("requested_at"), str) and _ISO_UTC_RE.fullmatch(str(value.get("requested_at")))):
+        return None
+    if value.get("operator_confirmation") != "dry-run-hold-only-no-delete-no-move-no-write":
+        return None
+    candidate_actions = value.get("candidate_actions")
+    if not isinstance(candidate_actions, Sequence) or isinstance(candidate_actions, (str, bytes)):
+        return None
+    if len(candidate_actions) < 1 or len(candidate_actions) > 20:
+        return None
+    normalized_candidates: list[dict[str, object]] = []
+    for candidate in candidate_actions:
+        if not isinstance(candidate, Mapping):
+            return None
+        candidate_ref = candidate.get("candidate_ref")
+        artifact_ref = candidate.get("artifact_ref")
+        safe_logical_ref = candidate.get("safe_logical_ref")
+        proposed_action = candidate.get("proposed_action")
+        terminal_status = candidate.get("terminal_status")
+        if not _is_opaque_ref(candidate_ref):
+            return None
+        if not _is_opaque_ref(artifact_ref):
+            return None
+        if not _is_safe_text(safe_logical_ref) or "/" in str(safe_logical_ref) or ".." in str(safe_logical_ref):
+            return None
+        if proposed_action not in _NAS_KEEPER_CLEANUP_HOLD_ACTIONS:
+            return None
+        if not _is_safe_text(terminal_status):
+            return None
+        normalized_candidates.append(
+            {
+                "candidate_ref": candidate_ref,
+                "artifact_ref": artifact_ref,
+                "safe_logical_ref": safe_logical_ref,
+                "proposed_action": proposed_action,
+                "terminal_status": terminal_status,
+            }
+        )
+    if not _validate_evidence_refs(value.get("evidence_refs")):
+        return None
+    return {
+        "cleanup_hold_ref": value["cleanup_hold_ref"],
+        "cleanup_gate_ref": value["cleanup_gate_ref"],
+        "requested_by": value["requested_by"],
+        "requested_at": value["requested_at"],
+        "operator_confirmation": value["operator_confirmation"],
+        "candidate_actions": normalized_candidates,
+        "candidate_count": len(normalized_candidates),
+        "evidence_refs": list(cast(Sequence[object], value["evidence_refs"])),
+    }
+
+
+def _read_nas_keeper_cleanup_execution_hold_records(path: Path) -> tuple[list[dict[str, object]], int]:
+    records: list[dict[str, object]] = []
+    skipped_count = 0
+    if not path.exists():
+        return records, skipped_count
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            if not line.strip():
+                continue
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped_count += 1
+                continue
+            normalized = _normalize_nas_keeper_cleanup_execution_hold_record(item)
+            if normalized is None:
+                skipped_count += 1
+                continue
+            records.append(normalized)
+    return records, skipped_count
+
+
+def _cleanup_execution_hold_dto(record: Mapping[str, object], *, idempotent_replay: bool = False) -> dict[str, object]:
+    return {
+        "schema_version": 1,
+        "mode": "nas_keeper_cleanup_execution_dry_run_hold_recorded",
+        "cleanup_hold_ref": record["cleanup_hold_ref"],
+        "cleanup_gate_ref": record["cleanup_gate_ref"],
+        "requested_by": record["requested_by"],
+        "requested_at": record["requested_at"],
+        "candidate_actions": record["candidate_actions"],
+        "candidate_count": record["candidate_count"],
+        "evidence_refs": record["evidence_refs"],
+        "idempotent_replay": idempotent_replay,
+        "metadata_only_record_write": True,
+        "dry_run": True,
+        "cleanup_hold_path": [
+            "cleanup_gate_verified",
+            "candidate_actions_previewed",
+            "dry_run_hold_recorded",
+            "no_nas_delete_move_or_write",
+        ],
+        "cleanup_execution_opened": False,
+        "actual_nas_delete_enabled": False,
+        "actual_nas_move_enabled": False,
+        "actual_nas_write_enabled": False,
+        "direct_vps_nas_write_enabled": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "next_required_boundary": "separate_exact_cleanup_execution_approval",
+    }
+
+
+def list_office_controlled_mutation_nas_keeper_cleanup_execution_hold_records(
+    *, hold_store_path: Path | None = None, limit: int = 50, cleanup_hold_ref: object = None
+) -> dict[str, object]:
+    errors: list[dict[str, str]] = []
+    safe_cleanup_hold_ref = None
+    if cleanup_hold_ref is not None:
+        if _office_disabled_runtime_dispatch_valid_prefixed_ref(cleanup_hold_ref, "cleanuphold-"):
+            safe_cleanup_hold_ref = str(cleanup_hold_ref)
+        else:
+            errors.append(_error("cleanup_hold_ref", "unsupported_ref_shape"))
+    path = hold_store_path or _default_nas_keeper_cleanup_execution_hold_store_path()
+    records, skipped_count = _read_nas_keeper_cleanup_execution_hold_records(path)
+    if safe_cleanup_hold_ref:
+        records = [record for record in records if record.get("cleanup_hold_ref") == safe_cleanup_hold_ref]
+    if errors:
+        records = []
+    max_items = max(0, min(limit, 200)) if isinstance(limit, int) else 50
+    records = records[-max_items:] if max_items else []
+    return {
+        "found": bool(records),
+        "errors": errors,
+        "dto": {
+            "schema_version": 1,
+            "mode": "nas_keeper_cleanup_execution_dry_run_hold_records_readback",
+            "record_count": len(records),
+            "limit": max_items,
+            "skipped_count": skipped_count,
+            "records": records,
+            "latest_record": records[-1] if records else None,
+            "metadata_only_record_write": True,
+            "dry_run": True,
+            "cleanup_execution_opened": False,
+            "actual_nas_delete_enabled": False,
+            "actual_nas_move_enabled": False,
+            "actual_nas_write_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "next_required_boundary": "separate_exact_cleanup_execution_approval" if records else "cleanup_execution_hold_record",
+        },
+    }
+
+
+def append_office_controlled_mutation_nas_keeper_cleanup_execution_hold(
+    payload: object, *, gate_store_path: Path | None = None, hold_store_path: Path | None = None
+) -> dict[str, object]:
+    if not isinstance(payload, Mapping):
+        return {"stored": False, "idempotent_replay": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    errors: list[dict[str, str]] = []
+    if set(payload) - _NAS_KEEPER_CLEANUP_EXECUTION_HOLD_FIELDS:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+    for field in sorted(_NAS_KEEPER_CLEANUP_EXECUTION_HOLD_FIELDS):
+        if field not in payload:
+            errors.append(_error(field, "missing_field"))
+    normalized = _normalize_nas_keeper_cleanup_execution_hold_record(payload)
+    if normalized is None:
+        errors.append(_error("cleanup_hold", "invalid_cleanup_hold"))
+    gate_path = gate_store_path or _default_nas_keeper_cleanup_execution_gate_store_path()
+    gates, _gate_skipped = _read_nas_keeper_cleanup_execution_gate_records(gate_path)
+    if not any(gate.get("cleanup_gate_ref") == payload.get("cleanup_gate_ref") for gate in gates):
+        errors.append(_error("cleanup_gate_ref", "cleanup_gate_not_found"))
+    if errors:
+        return {
+            "stored": False,
+            "idempotent_replay": False,
+            "errors": sorted(errors, key=lambda item: (item["field"], item["code"])),
+            "dto": None,
+        }
+    record = cast(dict[str, object], normalized)
+    path = hold_store_path or _default_nas_keeper_cleanup_execution_hold_store_path()
+    records, _skipped = _read_nas_keeper_cleanup_execution_hold_records(path)
+    for existing in records:
+        if existing.get("cleanup_hold_ref") == record["cleanup_hold_ref"]:
+            return {
+                "stored": False,
+                "idempotent_replay": True,
+                "errors": [],
+                "dto": _cleanup_execution_hold_dto(existing, idempotent_replay=True),
+            }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(record, sort_keys=True, ensure_ascii=False) + "\n")
+    return {"stored": True, "idempotent_replay": False, "errors": [], "dto": _cleanup_execution_hold_dto(record)}
 
 
 def build_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_request(
