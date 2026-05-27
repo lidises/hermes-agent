@@ -97,6 +97,8 @@ from hermes_cli.office_controlled_mutation import (
     probe_office_controlled_mutation_mac_relay_root_readiness,
     review_office_controlled_mutation_nas_keeper_one_shot_write_payload_arm,
     record_office_controlled_mutation_nas_keeper_selected_durable_item_preview_contract,
+    execute_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_write_smoke,
+    get_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_write_smoke_readback,
     get_office_controlled_mutation_nas_keeper_last_successful_mac_relay_write,
     build_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_request,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_readback,
@@ -813,6 +815,21 @@ async def probe_office_controlled_mutation_mac_relay_root_readiness_route():
 async def record_office_controlled_mutation_nas_keeper_selected_durable_item_preview_contract_route(payload: Any = Body(None)):
     """Record metadata-only selected durable item preview contract without execution."""
     return record_office_controlled_mutation_nas_keeper_selected_durable_item_preview_contract(payload)
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-durable-tmp-root-write-smoke")
+async def get_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_write_smoke_route():
+    """Read back the latest metadata-only selected durable tmp-root write smoke record."""
+    return get_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_write_smoke_readback()
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-durable-tmp-root-write-smoke")
+async def execute_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_write_smoke_route(payload: Any = Body(None)):
+    """Run an isolated tmp-root write smoke sourced from selected durable contract metadata."""
+    return execute_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_write_smoke(
+        payload,
+        root_path=os.environ.get("HERMES_AI_OFFICE_MAC_RELAY_TMP_ROOT"),
+    )
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-one-shot-write-payload-arm-review")
