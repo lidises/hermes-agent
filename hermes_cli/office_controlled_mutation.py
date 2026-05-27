@@ -7462,6 +7462,221 @@ def _extract_safe_execution_ref_sha(evidence_refs: object, prefix: str) -> str |
     return None
 
 
+def _default_nas_keeper_completed_real_write_receipt_store_path() -> Path:
+    configured = os.environ.get("HERMES_AI_OFFICE_COMPLETED_REAL_WRITE_RECEIPT_STORE")
+    if configured:
+        return Path(configured).expanduser()
+    return get_hermes_home() / "office" / "controlled-mutation" / "nas_keeper_completed_real_write_receipt_records.jsonl"
+
+
+def _is_safe_logical_markdown_path(value: object) -> bool:
+    return (
+        isinstance(value, str)
+        and "::" in value
+        and value.endswith(".md")
+        and len(value) <= 240
+        and not _has_raw_marker(value)
+        and ".." not in value
+        and "\\" not in value
+        and "<" not in value
+        and ">" not in value
+    )
+
+
+def _normalize_nas_keeper_completed_real_write_receipt_record(value: object) -> dict[str, object] | None:
+    if not isinstance(value, Mapping):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(value.get("completed_write_receipt_ref"), "realwrite-"):
+        return None
+    for field in ("write_ref", "relay_execution_ref", "recorded_by"):
+        if not _is_opaque_id(value.get(field)):
+            return None
+    if not _is_safe_logical_markdown_path(value.get("safe_logical_path")):
+        return None
+    if not _is_safe_text(value.get("safe_display_path")):
+        return None
+    if not isinstance(value.get("readback_sha256"), str) or not re.fullmatch(r"[0-9a-f]{64}", value["readback_sha256"]):
+        return None
+    bytes_written = value.get("bytes_written")
+    if not isinstance(bytes_written, int) or isinstance(bytes_written, bool) or bytes_written < 1:
+        return None
+    if not isinstance(value.get("audit_written"), bool) or not isinstance(value.get("rollback_created"), bool):
+        return None
+    if not isinstance(value.get("recorded_at"), str) or not _ISO_UTC_RE.fullmatch(value["recorded_at"]):
+        return None
+    if value.get("source_boundary") != "mac_relay_real_nas_write_completed":
+        return None
+    return {
+        "schema_version": 1,
+        "completed_write_receipt_ref": value["completed_write_receipt_ref"],
+        "write_ref": value["write_ref"],
+        "relay_execution_ref": value["relay_execution_ref"],
+        "safe_logical_path": value["safe_logical_path"],
+        "safe_display_path": value["safe_display_path"],
+        "readback_sha256": value["readback_sha256"],
+        "bytes_written": bytes_written,
+        "audit_written": value["audit_written"],
+        "rollback_created": value["rollback_created"],
+        "recorded_by": value["recorded_by"],
+        "recorded_at": value["recorded_at"],
+        "source_boundary": "mac_relay_real_nas_write_completed",
+    }
+
+
+def _read_nas_keeper_completed_real_write_receipt_records(path: Path) -> tuple[list[dict[str, object]], int]:
+    if not path.exists():
+        return [], 0
+    records: list[dict[str, object]] = []
+    skipped_count = 0
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            item = json.loads(line)
+        except json.JSONDecodeError:
+            skipped_count += 1
+            continue
+        normalized = _normalize_nas_keeper_completed_real_write_receipt_record(item)
+        if normalized is None:
+            skipped_count += 1
+            continue
+        records.append(normalized)
+    return records, skipped_count
+
+
+def _completed_real_write_receipt_dto(record: Mapping[str, object], *, idempotent_replay: bool = False) -> dict[str, object]:
+    return {
+        "schema_version": 1,
+        "mode": "nas_keeper_completed_real_write_receipt_recorded",
+        "completed_write_receipt_ref": record["completed_write_receipt_ref"],
+        "completed_write_receipt_sha256": _stable_metadata_sha256(record),
+        "write_ref": record["write_ref"],
+        "relay_execution_ref": record["relay_execution_ref"],
+        "safe_logical_path": record["safe_logical_path"],
+        "safe_display_path": record["safe_display_path"],
+        "readback_sha256": record["readback_sha256"],
+        "readback_verified": True,
+        "bytes_written": record["bytes_written"],
+        "audit_written": record["audit_written"],
+        "rollback_created": record["rollback_created"],
+        "recorded_by": record["recorded_by"],
+        "recorded_at": record["recorded_at"],
+        "source_boundary": record["source_boundary"],
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "idempotent_replay": idempotent_replay,
+        "repeat_write_requires_new_explicit_approval": True,
+        "replacement_write_requires_new_explicit_approval": True,
+        "capabilities": {
+            "completed_write_receipt_recording_enabled": True,
+            "metadata_only_record_write_enabled": True,
+            "actual_nas_write_enabled": False,
+            "repeat_execution_replay_enabled": False,
+            "execution_payload_replay_enabled": False,
+            "vps_nas_mount_enabled": False,
+            "vps_credential_access_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+        },
+        "next_required_boundary": "new_explicit_approval_required_for_additional_real_write",
+    }
+
+
+def append_office_controlled_mutation_nas_keeper_completed_real_write_receipt(
+    payload: object, *, completed_write_receipt_store_path: Path | None = None
+) -> dict[str, object]:
+    if not isinstance(payload, Mapping):
+        return {"stored": False, "idempotent_replay": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    allowed = {
+        "completed_write_receipt_ref",
+        "write_ref",
+        "relay_execution_ref",
+        "safe_logical_path",
+        "safe_display_path",
+        "readback_sha256",
+        "bytes_written",
+        "audit_written",
+        "rollback_created",
+        "recorded_by",
+        "recorded_at",
+        "source_boundary",
+    }
+    errors: list[dict[str, str]] = []
+    if set(payload) - allowed:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+    normalized = _normalize_nas_keeper_completed_real_write_receipt_record(payload)
+    if normalized is None:
+        for field in sorted(allowed):
+            if field not in payload:
+                errors.append(_error(field, "missing_field"))
+        if "safe_display_path" in payload and not _is_safe_text(payload.get("safe_display_path")):
+            errors.append(_error("safe_display_path", "invalid_safe_text"))
+        if "recorded_by" in payload and not _is_opaque_id(payload.get("recorded_by")):
+            errors.append(_error("recorded_by", "invalid_opaque_id"))
+        if not errors:
+            errors.append(_error("completed_write_receipt", "invalid_completed_write_receipt"))
+        return {"stored": False, "idempotent_replay": False, "errors": sorted(errors, key=lambda item: (item["field"], item["code"])), "dto": None}
+    path = completed_write_receipt_store_path or _default_nas_keeper_completed_real_write_receipt_store_path()
+    records, _skipped = _read_nas_keeper_completed_real_write_receipt_records(path)
+    for existing in records:
+        if existing.get("completed_write_receipt_ref") == normalized["completed_write_receipt_ref"]:
+            return {"stored": False, "idempotent_replay": True, "errors": [], "dto": _completed_real_write_receipt_dto(existing, idempotent_replay=True)}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(normalized, ensure_ascii=False, sort_keys=True) + "\n")
+    return {"stored": True, "idempotent_replay": False, "errors": [], "dto": _completed_real_write_receipt_dto(normalized)}
+
+
+def list_office_controlled_mutation_nas_keeper_completed_real_write_receipts(
+    *, completed_write_receipt_store_path: Path | None = None, limit: int = 50
+) -> dict[str, object]:
+    path = completed_write_receipt_store_path or _default_nas_keeper_completed_real_write_receipt_store_path()
+    records, skipped_count = _read_nas_keeper_completed_real_write_receipt_records(path)
+    records = sorted(records, key=lambda item: (str(item.get("recorded_at") or ""), str(item.get("completed_write_receipt_ref") or "")), reverse=True)
+    visible = records[: max(1, min(int(limit), 200))]
+    latest = visible[0] if visible else None
+    return {
+        "listed": True,
+        "errors": [],
+        "dto": {
+            "schema_version": 1,
+            "mode": "nas_keeper_completed_real_write_receipt_records_readback",
+            "count": len(records),
+            "returned_count": len(visible),
+            "skipped_count": skipped_count,
+            "latest_completed_write_receipt_ref": latest.get("completed_write_receipt_ref") if latest else None,
+            "latest_completed_write_receipt_sha256": _stable_metadata_sha256(latest) if latest else None,
+            "latest_safe_logical_path": latest.get("safe_logical_path") if latest else None,
+            "latest_readback_sha256": latest.get("readback_sha256") if latest else None,
+            "items": [_completed_real_write_receipt_dto(record) for record in visible],
+            "markdown_body_included": False,
+            "write_payload_included": False,
+            "raw_root_path_included": False,
+            "repeat_write_requires_new_explicit_approval": True,
+            "replacement_write_requires_new_explicit_approval": True,
+            "capabilities": {
+                "completed_write_receipt_readback_enabled": True,
+                "actual_nas_write_enabled": False,
+                "repeat_execution_replay_enabled": False,
+                "execution_payload_replay_enabled": False,
+                "vps_nas_mount_enabled": False,
+                "vps_credential_access_enabled": False,
+                "direct_vps_nas_write_enabled": False,
+                "watcher_enabled": False,
+                "cron_enabled": False,
+                "dispatch_enabled": False,
+                "authority_adapter_binding_enabled": False,
+            },
+            "next_required_boundary": "new_explicit_approval_required_for_additional_real_write" if records else "completed_real_write_receipt_recording",
+        },
+    }
+
+
 def get_office_controlled_mutation_nas_keeper_last_successful_mac_relay_write(
     *, queue_dir: Path | str | None = None
 ) -> dict[str, object]:

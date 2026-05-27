@@ -112,6 +112,8 @@ from hermes_cli.office_controlled_mutation import (
     append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_approval_token,
     get_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_approval_token_readback,
     get_office_controlled_mutation_nas_keeper_last_successful_mac_relay_write,
+    append_office_controlled_mutation_nas_keeper_completed_real_write_receipt,
+    list_office_controlled_mutation_nas_keeper_completed_real_write_receipts,
     append_office_controlled_mutation_nas_keeper_artifact_retention_plan,
     list_office_controlled_mutation_nas_keeper_artifact_retention_plan_records,
     append_office_controlled_mutation_nas_keeper_cleanup_execution_gate,
@@ -953,6 +955,18 @@ async def review_office_controlled_mutation_nas_keeper_one_shot_write_payload_ar
 async def get_office_controlled_mutation_nas_keeper_last_successful_mac_relay_write_route():
     """Return last successful bounded Mac relay write refs/readback without replay authority."""
     return get_office_controlled_mutation_nas_keeper_last_successful_mac_relay_write()
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-completed-real-write-receipt")
+async def list_office_controlled_mutation_nas_keeper_completed_real_write_receipts_route(limit: Optional[int] = None):
+    """Read completed real-write receipt metadata without enabling another NAS write."""
+    return list_office_controlled_mutation_nas_keeper_completed_real_write_receipts(limit=limit or 50)
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-completed-real-write-receipt")
+async def append_office_controlled_mutation_nas_keeper_completed_real_write_receipt_route(payload: Any = Body(None)):
+    """Append a metadata-only completed real-write receipt; no production NAS write."""
+    return append_office_controlled_mutation_nas_keeper_completed_real_write_receipt(payload)
 
 
 @app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-artifact-retention-plan")

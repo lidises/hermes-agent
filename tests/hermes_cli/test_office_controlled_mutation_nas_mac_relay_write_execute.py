@@ -171,3 +171,91 @@ def test_mac_relay_write_execute_api_requires_session_token_and_local_root(tmp_p
     assert body["executed"] is True
     assert body["dto"]["capabilities"]["direct_vps_nas_write_enabled"] is False
     assert (tmp_path / "vault_personal_wiki_demo" / "usable-ai-office-mac-relay-exec.md").exists()
+
+
+def safe_completed_real_write_receipt_payload(**overrides):
+    payload = {
+        "completed_write_receipt_ref": "realwrite-20260527-001",
+        "write_ref": "write_20260527_real_nas_001",
+        "relay_execution_ref": "relay_exec_20260527_real_write_001",
+        "safe_logical_path": "ai_office_controlled_mutation::nas-keeper-controlled-mutation-real-write-20260527.md",
+        "safe_display_path": "ai_office_controlled_mutation / nas-keeper-controlled-mutation-real-write-20260527.md",
+        "readback_sha256": "14ca76decb988b26502680578f560e96a36eab0778fbc8112818ccfa59f75901",
+        "bytes_written": 328,
+        "audit_written": True,
+        "rollback_created": False,
+        "recorded_by": "operator_ai_office",
+        "recorded_at": "2026-05-27T14:54:00Z",
+        "source_boundary": "mac_relay_real_nas_write_completed",
+    }
+    payload.update(overrides)
+    return payload
+
+
+def test_completed_real_write_receipt_records_safe_metadata_only_and_is_idempotent(tmp_path):
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_nas_keeper_completed_real_write_receipt,
+        list_office_controlled_mutation_nas_keeper_completed_real_write_receipts,
+    )
+
+    store = tmp_path / "completed-real-write-receipts.jsonl"
+    first = append_office_controlled_mutation_nas_keeper_completed_real_write_receipt(
+        safe_completed_real_write_receipt_payload(), completed_write_receipt_store_path=store
+    )
+    replay = append_office_controlled_mutation_nas_keeper_completed_real_write_receipt(
+        safe_completed_real_write_receipt_payload(), completed_write_receipt_store_path=store
+    )
+    listed = list_office_controlled_mutation_nas_keeper_completed_real_write_receipts(
+        completed_write_receipt_store_path=store
+    )
+
+    assert first["stored"] is True
+    assert first["dto"]["mode"] == "nas_keeper_completed_real_write_receipt_recorded"
+    assert first["dto"]["readback_verified"] is True
+    assert first["dto"]["repeat_write_requires_new_explicit_approval"] is True
+    assert first["dto"]["capabilities"]["actual_nas_write_enabled"] is False
+    assert first["dto"]["capabilities"]["direct_vps_nas_write_enabled"] is False
+    assert replay["stored"] is False
+    assert replay["idempotent_replay"] is True
+    assert listed["dto"]["count"] == 1
+    assert listed["dto"]["latest_completed_write_receipt_ref"] == "realwrite-20260527-001"
+    serialized = json.dumps({"first": first, "listed": listed}, sort_keys=True).lower()
+    assert "markdown_body\":" not in serialized
+    assert "write_payload\":" not in serialized
+    assert ("/" + "users" + "/lidises") not in serialized
+    assert ("/" + "home" + "/hermes") not in serialized
+
+
+def test_completed_real_write_receipt_api_requires_auth_and_rejects_raw_echo(tmp_path, monkeypatch):
+    from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+
+    store = tmp_path / "completed-real-write-receipts.jsonl"
+    monkeypatch.setenv("HERMES_AI_OFFICE_COMPLETED_REAL_WRITE_RECEIPT_STORE", str(store))
+    client = TestClient(app)
+    route = "/api/office/controlled-mutation/nas-runtime/nas-keeper-completed-real-write-receipt"
+
+    unauthenticated = client.post(route, json=safe_completed_real_write_receipt_payload())
+    assert unauthenticated.status_code == 401
+
+    private_path = "/" + "Users" + "/lidises/private.md"
+    token_like = "sk-" + "A" * 24
+    bad = client.post(
+        route,
+        headers={_SESSION_HEADER_NAME: _SESSION_TOKEN},
+        json=safe_completed_real_write_receipt_payload(safe_display_path=private_path, recorded_by=token_like),
+    )
+    assert bad.status_code == 200
+    bad_text = json.dumps(bad.json(), sort_keys=True)
+    assert "invalid_safe_text" in bad_text
+    assert private_path not in bad_text
+    assert token_like not in bad_text
+
+    stored = client.post(route, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN}, json=safe_completed_real_write_receipt_payload())
+    assert stored.status_code == 200
+    assert stored.json()["stored"] is True
+    readback = client.get(route, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN})
+    assert readback.status_code == 200
+    body = readback.json()
+    assert body["listed"] is True
+    assert body["dto"]["count"] == 1
+    assert body["dto"]["capabilities"]["actual_nas_write_enabled"] is False
