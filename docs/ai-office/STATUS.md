@@ -1,3 +1,29 @@
+## Current status — NAS Keeper selected durable tmp-root write smoke deployed (2026-05-27T03:24Z)
+
+Scope completed:
+- Added and deployed a protected selected durable tmp-root write smoke boundary sourced from the selected preview contract.
+- The boundary materializes the queued body only inside an isolated tmp-root smoke execution, verifies readback SHA, writes safe smoke metadata, and idempotently replays by smoke ref/record SHA.
+- VPS protected API stays fail-closed without a configured tmp-root and does not receive production NAS authority.
+- Local Mac relay tmp-root smoke executed against an isolated temporary root only; no raw root path/body/write payload was echoed.
+
+Evidence captured:
+- Commit deployed: `ee9983206`.
+- RED observed first: selected tmp-root smoke tests failed on missing backend function/route.
+- GREEN after implementation: selected tmp-root smoke tests passed; combined selected/preview/from-preview focused tests = 13/13 passed.
+- Frontend Office tests: `OfficePage.test.ts` + `OfficePage.rpg.test.tsx` = 348/348 passed.
+- `py_compile`, `git diff --check`, `npm run lint` (0 errors, existing warnings only), and `npm run build` passed.
+- VPS core/dashboard synced to `origin/main`; `web_dist` rsynced; dashboard and core dashboard restarted and healthy; gateway stayed active and was not restarted.
+- Protected VPS API/DOM smoke: `/office` loaded; guarded readiness panel present; controls=0; raw leak probe=false; unauth tmp-root route=401; authenticated tmp-root route=200 fail-closed with tmp root not configured, executed=false, written=false, recorded=false.
+- Local tmp-root API smoke: contract_recorded=true; first smoke executed=true, written=true, recorded=true, metadata_record_written=true, tmp_root_readback_verified=true; replay executed=false, written=false, recorded=false, idempotent_replay=true, same record SHA; metadata readback found one latest record.
+
+Safety boundaries preserved:
+- Real NAS production write: false.
+- VPS direct NAS authority: false.
+- watcher/cron/dispatcher/authority-adapter: false.
+- public exposure change: false.
+- gateway restart: false.
+- raw filesystem root/path, raw markdown body, token, secret, or raw write payload echo: false.
+
 ## Current status — NAS Keeper selected durable preview contract deployed (2026-05-27T02:57Z)
 
 Scope completed:

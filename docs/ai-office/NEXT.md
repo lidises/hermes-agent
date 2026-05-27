@@ -1,3 +1,26 @@
+## NEXT — after NAS Keeper selected durable tmp-root write smoke (2026-05-27T03:24Z)
+
+Current next stage:
+- The safest newly closed rung is selected-contract-sourced tmp-root write smoke with readback SHA and metadata-only replay record.
+- VPS route is deployed but remains fail-closed unless an isolated tmp-root is configured; it still has no production NAS authority.
+- The next shortest safe rung is tmp-root replay/idempotency metadata hardening: expose/read back the latest smoke record through safe DTO/UI copy and verify no stale replay can cross selected_contract_ref or tmp_root_smoke_ref.
+- Do not execute against production NAS or grant VPS direct NAS authority unless a later prompt explicitly approves that exact higher boundary.
+
+Still forbidden unless separately and explicitly approved:
+- real NAS production write
+- VPS direct NAS authority, NAS mount credentials, or direct VPS file write
+- watcher/cron/dispatcher/authority-adapter activation
+- public exposure
+- gateway restart
+- raw markdown/body/path/secret/raw write payload echo
+
+Required first checks next time:
+1. Read `docs/ai-office/STATUS.md` and this file.
+2. Confirm local/VPS git, `web_dist`, and service health before deploy/runtime work.
+3. Start with RED tests and keep each rung bounded.
+4. For any tmp-root smoke, use only an isolated temporary Mac relay root, verify readback SHA, preserve no raw path/body echo, and keep production NAS/write authority closed.
+5. Treat idempotent replay as success only when the record SHA/ref matches both selected_contract_ref and tmp_root_smoke_ref.
+
 ## NEXT — after NAS Keeper selected durable preview contract (2026-05-27T02:57Z)
 
 Current next stage:
