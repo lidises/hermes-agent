@@ -1,3 +1,36 @@
+## Current status — NAS Keeper durable queue one-shot guarded execution completed (2026-05-27T06:26Z)
+
+Scope completed:
+- After explicit approval for option 1, executed exactly the existing durable queue rehearsal item once through the Mac relay guarded execution path.
+- The durable target row was synchronized from the VPS runtime queue to the Mac relay execution context, executed against the Mac-local NAS root, recorded inline execution state, then the terminal queue state was synchronized back to the VPS durable queue without adding another queue row.
+- This was a one-shot guarded execution only: watcher/cron/dispatcher/authority-adapter stayed closed, VPS direct NAS authority stayed closed, public exposure stayed unchanged, and gateway was not restarted.
+
+Evidence captured:
+- Target handoff: `handoff_20260527op2rehearsalc`.
+- Queue line count unchanged: 17 -> 17; target row count: 1.
+- Queue status: `authorized_for_mac_relay_execution` -> `mac_relay_execution_succeeded`.
+- Safe execution refs: relay `relay_execution_20260527op2c`, execution record `exec_record_20260527op2c`.
+- Real NAS target existed before=false and after=true for the safe logical rehearsal target.
+- Readback SHA-256 matched queued markdown SHA-256: `6a908d3e625858c741218f9df4dcad4e19ab0cb7a02bf23326cdd2f7de2bc47b`.
+- Execution result: executed=true, written=true, recorded=true, readback_verified=true, audit_written=true, rollback_created=false.
+- Capability flags from execution/readback: actual_nas_write_enabled=true for the Mac relay execution only; direct_vps_nas_write_enabled=false; watcher_enabled=false; cron_enabled=false; dispatch_enabled=false; authority_adapter_binding_enabled=false.
+- Focused regression tests: execution-from-preview + execution-state-record + NAS runtime write + durable queue rehearsal = 21/21 passed.
+- `py_compile` and `git diff --check` passed.
+- VPS protected queue readback smoke: unauth=401, auth=200, count=1, terminal status=`mac_relay_execution_succeeded`.
+- DOM smoke: compact dashboard/readiness hooks present, raw leak=false, browser console errors=0.
+
+Safety boundaries preserved:
+- Additional queue item creation for this rung: false.
+- Direct VPS NAS authority: false.
+- watcher/cron/dispatcher/authority-adapter: false.
+- public exposure change: false.
+- gateway restart: false.
+- raw filesystem root/path, raw markdown body, secret, or raw write payload echo: false.
+
+Readiness/result note:
+- The existing durable queue item has now crossed from authorized preview to terminal one-shot Mac relay execution with readback and queue-state evidence.
+- This still does not approve automation. The next safe operational stage is retention/cleanup policy for smoke/rehearsal artifacts or a separately scoped new exact target/content boundary.
+
 ## Current status — NAS Keeper durable queue rehearsal/readback completed (2026-05-27T05:56Z)
 
 Scope completed:

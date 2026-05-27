@@ -1,3 +1,25 @@
+## NEXT — after NAS Keeper durable queue one-shot guarded execution (2026-05-27T06:26Z)
+
+Current next stage:
+- The existing durable queue item `handoff_20260527op2rehearsalc` has been executed exactly once and is terminal: `mac_relay_execution_succeeded`.
+- Do not replay this item; repeat execution requires a fresh exact target/content boundary with fresh refs and separate approval.
+- The next safe operational stage is retention/cleanup policy for completed smoke/rehearsal artifacts, or a separately scoped new exact target/content write boundary.
+- Do not start watcher/cron/dispatcher/authority-adapter automation from this success state.
+
+Still forbidden unless separately and explicitly approved:
+- additional real NAS production writes beyond a fresh exact approved target/content boundary
+- direct VPS NAS authority, NAS mount credentials, or direct VPS NAS file write
+- watcher/cron/dispatcher/authority-adapter activation
+- public exposure
+- gateway restart
+- raw markdown/body/path/secret/raw write payload echo
+
+Required first checks next time:
+1. Read `docs/ai-office/STATUS.md` and this file.
+2. Confirm local/VPS git, service health, durable queue target count/status for `handoff_20260527op2rehearsalc`, and whether completed artifacts should be retained or cleaned up.
+3. Treat the durable queue item as terminal and non-replayable.
+4. Require fresh exact approval before any additional execution-from-preview, real NAS write, watcher/cron/dispatcher/authority-adapter, or VPS NAS authority change.
+
 ## NEXT — after NAS Keeper durable queue rehearsal/readback (2026-05-27T05:56Z)
 
 Current next stage:
