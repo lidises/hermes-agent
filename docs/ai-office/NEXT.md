@@ -1,3 +1,25 @@
+## NEXT — after NAS Keeper fresh approved Mac relay write (2026-05-27T07:08Z)
+
+Current next stage:
+- The fresh approved safe write target `Inbox::ai-office-nas-keeper-fresh-write-20260527070454.md` has been created, replaced, read back, audited, and rollback-verified through the Mac relay path.
+- Do not replay the fresh handoff refs; repeat execution requires a fresh exact target/content boundary with fresh refs and separate approval.
+- The next safe operational stage is retention/cleanup policy for completed smoke/rehearsal/fresh-write artifacts, or a separately scoped new exact target/content write boundary.
+- Do not start watcher/cron/dispatcher/authority-adapter automation from this success state.
+
+Still forbidden unless separately and explicitly approved:
+- additional real NAS production writes beyond a fresh exact approved target/content boundary
+- direct VPS NAS authority, NAS mount credentials, or direct VPS NAS file write
+- watcher/cron/dispatcher/authority-adapter activation
+- public exposure
+- gateway restart
+- raw markdown/body/path/secret/raw write payload echo
+
+Required first checks next time:
+1. Read `docs/ai-office/STATUS.md` and this file.
+2. Confirm local/VPS git, service health, durable queue target count/status for `handoff_20260527op2rehearsalc`, and whether completed artifacts should be retained or cleaned up.
+3. Treat both the durable queue item and the fresh temp-queue refs as terminal and non-replayable.
+4. Require fresh exact approval before any additional execution-from-preview, real NAS write, watcher/cron/dispatcher/authority-adapter, or VPS NAS authority change.
+
 ## NEXT — after NAS Keeper durable queue one-shot guarded execution (2026-05-27T06:26Z)
 
 Current next stage:
