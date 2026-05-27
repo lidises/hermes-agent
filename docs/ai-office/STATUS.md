@@ -1,3 +1,34 @@
+## Current status — NAS Keeper selected tmp-root real-write gate deployed (2026-05-27T05:09Z)
+
+Scope completed:
+- Added and deployed metadata-only Mac relay real-write gate records sourced only from selected tmp-root final preflight records.
+- The real-write gate verifies final preflight ref/checksum, precommit manifest ref/checksum, precommit metadata ref/checksum, replay metadata ref, selected contract ref, tmp-root smoke ref, and idempotency checksum before appending metadata.
+- Duplicate real-write-gate attempts append no second record and return the existing safe record with duplicate-write skipped.
+- The durable guarded operator UI now exposes a display-only real-write-gate endpoint/readiness marker with no controls.
+
+Evidence captured:
+- Commit deployed: `536e25520`.
+- RED observed first: real-write gate test failed on missing backend functions/routes.
+- GREEN after implementation: selected tmp-root smoke/replay/precommit/manifest/final-preflight/real-write-gate tests passed; combined selected/preview/from-preview focused tests = 28/28 passed.
+- Frontend Office tests: `OfficePage.test.ts` + `OfficePage.rpg.test.tsx` = 348/348 passed.
+- `py_compile`, `git diff --check`, `npm run lint` (0 errors, existing warnings only), and `npm run build` passed.
+- VPS core/dashboard synced to `origin/main`; `web_dist` rsynced; dashboard and core dashboard restarted and healthy after retry; gateway stayed active and was not restarted.
+- Protected VPS API/DOM smoke: `/office` loaded; real-write-gate readiness marker present; real write=false; VPS NAS authority=false; watcher/cron=false; unauth real-write-gate route=401; authenticated route=200 fail-closed without source final preflight, recorded=false.
+- Local Mac relay isolated tmp-root chain: contract recorded, tmp-root write smoke written/read back, replay metadata recorded, precommit metadata recorded, manifest recorded, final preflight recorded, real-write gate recorded, duplicate real-write gate idempotent, readback found one latest record, raw leak probe=false.
+
+Safety boundaries preserved:
+- Real NAS production write: false.
+- Explicit real NAS production approval present: false.
+- Real-write gate blocks without explicit approval: true.
+- VPS direct NAS authority: false.
+- watcher/cron/dispatcher/authority-adapter: false.
+- public exposure change: false.
+- gateway restart: false.
+- raw filesystem root/path, raw markdown body, token, secret, or raw write payload echo: false.
+
+Readiness note:
+- Not 100% yet: the chain is now ready through selected tmp-root real-write gate with write_readiness_percent=99, but the explicit approval-token/production approval boundary remains intentionally closed.
+
 ## Current status — NAS Keeper selected tmp-root final preflight deployed (2026-05-27T04:49Z)
 
 Scope completed:
