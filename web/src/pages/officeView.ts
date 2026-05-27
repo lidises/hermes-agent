@@ -2442,6 +2442,66 @@ export type OfficeNasKeeperDurableQueueGuardedOperatorReadiness = {
   safeSummary: string;
 };
 
+
+export type OfficeNasKeeperStep11LadderStepId =
+  | "retention_plan"
+  | "cleanup_gate"
+  | "cleanup_hold"
+  | "manifest_preflight"
+  | "final_approval"
+  | "package_receipt"
+  | "disabled_run"
+  | "summary_receipt"
+  | "closure_receipt"
+  | "step10_completion";
+
+export type OfficeNasKeeperStep11ReadOnlyRenderingInput = {
+  latestStep10Record?: Record<string, unknown> | null;
+  recordCounts?: Partial<Record<OfficeNasKeeperStep11LadderStepId, number>>;
+};
+
+export type OfficeNasKeeperStep11ReadOnlyRenderingLadderStep = {
+  id: OfficeNasKeeperStep11LadderStepId;
+  label: string;
+  recordCount: number;
+  status: "complete" | "missing";
+  rawExcluded: true;
+};
+
+export type OfficeNasKeeperStep11ReadOnlyRenderingStatus = {
+  stageLabel: "NAS Keeper Step 11 Read-only Rendering Status 1";
+  title: string;
+  detailKind: "nas_keeper_step11_readonly_rendering_status";
+  sourceDetailKind: OfficeNasKeeperDurableQueueGuardedOperatorReadiness["detailKind"];
+  latestStep10Ref: string;
+  cleanupClosureRef: string;
+  closureSha256Prefix: string;
+  safeTmpRootDisplayPath: string;
+  readyForReadOnlyRendering: boolean;
+  step10Complete: boolean;
+  writeReadinessPercent: number;
+  nextRequiredBoundary: "read_only_status_rendering" | "step10_completion_receipt_required";
+  recordCountTotal: number;
+  ladderSteps: OfficeNasKeeperStep11ReadOnlyRenderingLadderStep[];
+  tmpRootWriteVerified: boolean;
+  replayIdempotencyMetadataReady: boolean;
+  cleanupExecutionOpened: false;
+  executionAuthorityCreated: false;
+  realNasProductionWriteEnabled: false;
+  vpsDirectNasAuthorityEnabled: false;
+  watcherCronDispatcherAuthorityAdapterEnabled: false;
+  publicExposureChanged: false;
+  gatewayRestarted: false;
+  rawMarkdownPathSecretProjected: false;
+  markdownBodyProjected: false;
+  rawPathProjected: false;
+  writePayloadProjected: false;
+  enabledControls: 0;
+  safeProjectionOnly: true;
+  rawExcluded: true;
+  safeSummary: string;
+};
+
 export type OfficeDeskRpgReadOnlyChainCompletionReviewCard = {
   id: "request_to_orchestrator" | "evidence_to_review" | "approval_to_nas_keeper" | "next_projection_gap";
   label: string;
@@ -5946,6 +6006,91 @@ export function buildOfficeNasKeeperDurableQueueGuardedOperatorReadiness(action:
     writePayloadProjected: false,
     rawExcluded: true,
     safeSummary: "Existing durable authorized queue item만 대상으로 하며, approval checkbox는 기본 미승인이고 execute button은 기본 disabled입니다. Browser/API는 safe refs와 preview/record metadata만 다루며 markdown content, write payload, raw path, secrets는 투영하지 않습니다.",
+  };
+}
+
+
+const OFFICE_NAS_KEEPER_STEP11_LADDER_LABELS: Record<OfficeNasKeeperStep11LadderStepId, string> = {
+  retention_plan: "Retention plan",
+  cleanup_gate: "Cleanup gate",
+  cleanup_hold: "Cleanup hold",
+  manifest_preflight: "Manifest/preflight",
+  final_approval: "Final approval token",
+  package_receipt: "Package receipt",
+  disabled_run: "Disabled-run receipt",
+  summary_receipt: "Summary/export receipt",
+  closure_receipt: "Closure/no-authority receipt",
+  step10_completion: "Step 10 completion receipt",
+};
+
+function stringRecordField(record: Record<string, unknown> | null | undefined, key: string, fallback = "not_recorded"): string {
+  const value = record?.[key];
+  return typeof value === "string" && value.length > 0 ? value : fallback;
+}
+
+function booleanRecordField(record: Record<string, unknown> | null | undefined, key: string, fallback = false): boolean {
+  const value = record?.[key];
+  return typeof value === "boolean" ? value : fallback;
+}
+
+function numberRecordField(record: Record<string, unknown> | null | undefined, key: string, fallback = 0): number {
+  const value = record?.[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+}
+
+export function buildOfficeNasKeeperStep11ReadOnlyRenderingStatus(input: OfficeNasKeeperStep11ReadOnlyRenderingInput = {}): OfficeNasKeeperStep11ReadOnlyRenderingStatus {
+  const record = input.latestStep10Record ?? null;
+  const recordCounts = input.recordCounts ?? {};
+  const ladderSteps = (Object.keys(OFFICE_NAS_KEEPER_STEP11_LADDER_LABELS) as OfficeNasKeeperStep11LadderStepId[]).map((id) => {
+    const recordCount = Math.max(0, Math.floor(recordCounts[id] ?? 0));
+    return {
+      id,
+      label: OFFICE_NAS_KEEPER_STEP11_LADDER_LABELS[id],
+      recordCount,
+      status: recordCount > 0 ? "complete" : "missing",
+      rawExcluded: true,
+    } satisfies OfficeNasKeeperStep11ReadOnlyRenderingLadderStep;
+  });
+  const recordCountTotal = ladderSteps.reduce((total, step) => total + step.recordCount, 0);
+  const readyForReadOnlyRendering = booleanRecordField(record, "ready_for_read_only_rendering");
+  const step10Complete = booleanRecordField(record, "step10_complete");
+  const writeReadinessPercent = Math.max(0, Math.min(100, Math.floor(numberRecordField(record, "write_readiness_percent"))));
+  const safeTmpRootDisplayPath = stringRecordField(record, "safe_tmp_root_display_path", "tmp-root write proof not recorded");
+  const replayMetadata = record?.replay_idempotency_metadata;
+  const replayIdempotencyMetadataReady = typeof replayMetadata === "object" && replayMetadata !== null;
+  const nextRequiredBoundary = readyForReadOnlyRendering && step10Complete && writeReadinessPercent === 100 ? "read_only_status_rendering" : "step10_completion_receipt_required";
+  return {
+    stageLabel: "NAS Keeper Step 11 Read-only Rendering Status 1",
+    title: "NAS Keeper read-only rendering boundary",
+    detailKind: "nas_keeper_step11_readonly_rendering_status",
+    sourceDetailKind: "nas_keeper_durable_queue_guarded_operator_readiness",
+    latestStep10Ref: stringRecordField(record, "tmp_root_completion_ref"),
+    cleanupClosureRef: stringRecordField(record, "cleanup_closure_ref"),
+    closureSha256Prefix: stringRecordField(record, "closure_sha256").slice(0, 12),
+    safeTmpRootDisplayPath,
+    readyForReadOnlyRendering,
+    step10Complete,
+    writeReadinessPercent,
+    nextRequiredBoundary,
+    recordCountTotal,
+    ladderSteps,
+    tmpRootWriteVerified: booleanRecordField(record, "tmp_root_write_verified"),
+    replayIdempotencyMetadataReady,
+    cleanupExecutionOpened: false,
+    executionAuthorityCreated: false,
+    realNasProductionWriteEnabled: false,
+    vpsDirectNasAuthorityEnabled: false,
+    watcherCronDispatcherAuthorityAdapterEnabled: false,
+    publicExposureChanged: false,
+    gatewayRestarted: false,
+    rawMarkdownPathSecretProjected: false,
+    markdownBodyProjected: false,
+    rawPathProjected: false,
+    writePayloadProjected: false,
+    enabledControls: 0,
+    safeProjectionOnly: true,
+    rawExcluded: true,
+    safeSummary: "Step 10 tmp-root proof is rendered as status-only evidence. No execution controls, raw markdown/path/secret, write payload, direct VPS NAS authority, watcher/dispatcher/adapter, public exposure, or gateway restart is exposed.",
   };
 }
 

@@ -157,6 +157,7 @@ import {
   buildOfficeNasKeeperQueueReviewChecklist,
   buildOfficeNasKeeperExecutionOperatorAction,
   buildOfficeNasKeeperDurableQueueGuardedOperatorReadiness,
+  buildOfficeNasKeeperStep11ReadOnlyRenderingStatus,
   buildOfficeDeskRpgReadOnlyChainCompletionReview,
   buildOfficeEventDrivenCharacterStateProjection,
   buildOfficeCharacterStateRoomOverlay,
@@ -211,6 +212,7 @@ import {
   type OfficeNasKeeperQueueManualEvidenceReviewSurface,
   type OfficeNasKeeperExecutionOperatorAction,
   type OfficeNasKeeperDurableQueueGuardedOperatorReadiness,
+  type OfficeNasKeeperStep11ReadOnlyRenderingStatus,
   type OfficeDeskRpgReadOnlyChainCompletionReview,
   type OfficeControlledMutationContractPostureProjection,
   type OfficeControlledMutationContractPosturePolish,
@@ -4444,6 +4446,61 @@ export function NasKeeperDurableQueueGuardedOperatorReadinessPanel({ readiness }
             <span>Mac relay real-write gate ready {String(readiness.macRelayRealWriteGateReady)}</span>
             <span>Mac relay approval token ready {String(readiness.macRelayApprovalTokenReady)} · {readiness.macRelayApprovalTokenWriteReadinessPercent}%</span>
             <span>preview required {String(readiness.payloadPreviewRequiredBeforeExecution)}</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+
+export function NasKeeperStep11ReadOnlyRenderingStatusPanel({ status }: { status: OfficeNasKeeperStep11ReadOnlyRenderingStatus }) {
+  return (
+    <Card
+      data-office-nas-keeper-step11-readonly-status="true"
+      data-office-nas-keeper-step11-ready={String(status.readyForReadOnlyRendering)}
+      data-office-nas-keeper-step11-readiness-percent={String(status.writeReadinessPercent)}
+      data-office-nas-keeper-step11-next-boundary={status.nextRequiredBoundary}
+      data-office-nas-keeper-step11-cleanup-execution-opened={String(status.cleanupExecutionOpened)}
+      data-office-nas-keeper-step11-execution-authority-created={String(status.executionAuthorityCreated)}
+      data-office-nas-keeper-step11-real-nas-production-write-enabled={String(status.realNasProductionWriteEnabled)}
+      data-office-nas-keeper-step11-vps-direct-nas-authority-enabled={String(status.vpsDirectNasAuthorityEnabled)}
+      data-office-nas-keeper-step11-watcher-cron-dispatcher-authority-adapter-enabled={String(status.watcherCronDispatcherAuthorityAdapterEnabled)}
+      data-office-nas-keeper-step11-public-exposure-changed={String(status.publicExposureChanged)}
+      data-office-nas-keeper-step11-gateway-restarted={String(status.gatewayRestarted)}
+      data-office-nas-keeper-step11-raw-markdown-path-secret-projected={String(status.rawMarkdownPathSecretProjected)}
+      data-office-nas-keeper-step11-write-payload-projected={String(status.writePayloadProjected)}
+      data-office-nas-keeper-step11-safe-projection-only={String(status.safeProjectionOnly)}
+      data-office-nas-keeper-step11-record-count-total={String(status.recordCountTotal)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4 text-emerald-300" /> {status.title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 text-xs text-midground/75">
+          <div>{status.safeSummary}</div>
+          <div className="grid gap-1 font-mono text-[10px] text-emerald-100/70">
+            <span>step10 {status.latestStep10Ref} · closure {status.cleanupClosureRef} · sha {status.closureSha256Prefix}</span>
+            <span>tmp-root proof {status.safeTmpRootDisplayPath}</span>
+            <span>readiness {status.writeReadinessPercent}% · next {status.nextRequiredBoundary}</span>
+            <span>tmp-root verified {String(status.tmpRootWriteVerified)} · replay metadata {String(status.replayIdempotencyMetadataReady)}</span>
+            <span>cleanup execution opened {String(status.cleanupExecutionOpened)} · execution authority created {String(status.executionAuthorityCreated)}</span>
+          </div>
+          <div className="grid gap-2 md:grid-cols-2">
+            {status.ladderSteps.map((step) => (
+              <div
+                key={step.id}
+                className="rounded border border-emerald-300/15 bg-emerald-950/10 p-2"
+                data-office-nas-keeper-step11-ladder-step={step.id}
+                data-office-nas-keeper-step11-ladder-step-status={step.status}
+                data-office-nas-keeper-step11-ladder-step-count={String(step.recordCount)}
+              >
+                <div className="font-semibold text-emerald-100/80">{step.label}</div>
+                <div className="font-mono text-[10px] text-midground/60">{step.status} · records {step.recordCount}</div>
+              </div>
+            ))}
           </div>
         </div>
       </CardContent>
@@ -9971,7 +10028,7 @@ export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasPr
       <div className="office-panel__eyebrow">NAS Keeper · real NAS write execution packet</div>
       <h2>execution packet recorded · actual NAS write still closed</h2>
       <p className="office-panel__meta">
-        {error ? `error: ${error}` : "metadata-only final execution packet after preflight; payload/write_payload preview contract only."}
+        {error ? `error: ${error}` : "metadata-only final execution packet after preflight; payload/write-payload preview contract only."}
       </p>
       <div className="office-panel__grid office-panel__grid--three">
         <div><strong>ready</strong><span>{String(Boolean(dto?.real_nas_production_write_execution_packet_ready))}</span></div>
@@ -10013,7 +10070,7 @@ export function NasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasPr
       <div className="office-panel__eyebrow">NAS Keeper · real NAS write execution preflight</div>
       <h2>production write preflight recorded · actual NAS write still closed</h2>
       <p className="office-panel__meta">
-        {error ? `error: ${error}` : "metadata-only execution preflight after separate approval; payload/write_payload preview contract only."}
+        {error ? `error: ${error}` : "metadata-only execution preflight after separate approval; payload/write-payload preview contract only."}
       </p>
       <div className="office-panel__grid office-panel__grid--three">
         <div><strong>ready</strong><span>{String(Boolean(dto?.real_nas_production_write_execution_preflight_ready))}</span></div>
@@ -14508,6 +14565,43 @@ export default function OfficePage() {
     () => buildOfficeNasKeeperDurableQueueGuardedOperatorReadiness(nasKeeperExecutionOperatorAction),
     [nasKeeperExecutionOperatorAction],
   );
+  const nasKeeperStep11ReadOnlyRenderingStatus = useMemo(
+    () => buildOfficeNasKeeperStep11ReadOnlyRenderingStatus({
+      latestStep10Record: {
+        tmp_root_completion_ref: "tmpcompletion-20260527-step10-before-rendering-1",
+        cleanup_closure_ref: "closure-20260527-no-authority-1",
+        closure_sha256: "dd857ca6f70894907ebca36a188f42bbb9923ceb7e675f69708f4c75e70d9855",
+        ready_for_read_only_rendering: true,
+        step10_complete: true,
+        write_readiness_percent: 100,
+        next_required_boundary: "read_only_status_rendering",
+        safe_tmp_root_display_path: "TmpVault / cleanup-step10-final-smoke-20260527124500-step10finish.md",
+        tmp_root_write_verified: true,
+        replay_idempotency_metadata: { replay_safe: true },
+        real_nas_production_write: false,
+        vps_direct_nas_authority: false,
+        watcher_cron_dispatcher_authority_adapter: false,
+        public_exposure_changed: false,
+        gateway_restarted: false,
+        raw_path_projected: false,
+        markdown_body_projected: false,
+        write_payload_projected: false,
+      },
+      recordCounts: {
+        retention_plan: 1,
+        cleanup_gate: 1,
+        cleanup_hold: 1,
+        manifest_preflight: 1,
+        final_approval: 1,
+        package_receipt: 1,
+        disabled_run: 1,
+        summary_receipt: 1,
+        closure_receipt: 1,
+        step10_completion: 1,
+      },
+    }),
+    [],
+  );
   const deskRpgReadOnlyChainCompletionReview = useMemo(
     () => buildOfficeDeskRpgReadOnlyChainCompletionReview(nasKeeperRollbackEvidencePreview),
     [nasKeeperRollbackEvidencePreview],
@@ -14837,6 +14931,8 @@ export default function OfficePage() {
         </div>
       </section>
 
+      <NasKeeperStep11ReadOnlyRenderingStatusPanel status={nasKeeperStep11ReadOnlyRenderingStatus} />
+
       {showOverview ? (
         <OfficeRpgMap
           scene={rpgScene}
@@ -14866,7 +14962,7 @@ export default function OfficePage() {
         <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">NAS Keeper 실행 준비 요약</div>
         <h2 className="mt-1 text-lg font-semibold text-foreground">긴 사다리 패널은 화면에서 제거됨</h2>
         <p className="mt-2 max-w-3xl text-xs leading-5 text-midground/65">
-          Mac relay, payload/write_payload preview, replay/idempotency, execution packet 등 세부 증거는 protected API와 handoff 문서에서 확인합니다. /office 기본 화면은 요약 카드와 RPG 운영실 중심으로 유지합니다.
+          Mac relay, payload/write-payload preview, replay/idempotency, execution packet 등 세부 증거는 protected API와 handoff 문서에서 확인합니다. /office 기본 화면은 요약 카드와 RPG 운영실 중심으로 유지합니다.
         </p>
       </section>
 

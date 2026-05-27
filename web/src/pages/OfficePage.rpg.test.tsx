@@ -18,6 +18,7 @@ vi.mock("@/lib/api", () => ({
 }));
 
 import * as OfficePageModule from "./OfficePage";
+import * as OfficeView from "./officeView";
 import { OfficeRpgMap } from "./OfficePage";
 import type { NasKeeperExecutionStateDraft } from "./OfficePage";
 import { buildOfficeKanbanProjection, buildOfficeDeskRpgProjectionModel, buildOfficeDeskRpgWorkerRoleVisibility, buildOfficeDisabledApprovalDialoguePosture, buildOfficeReviewerWikiHandoffPosture, buildOfficeApprovalDialogueInspectorDetail, buildOfficeReviewerWikiEvidenceDetailPosture, buildOfficeBoardEvidenceInspectorDrilldown, buildOfficeBossOrchestratorRequestPostureDetail, buildOfficeOrchestratorRequestEnvelopeDetail, buildOfficeApprovalRequestRouteDetail, buildOfficeEventRequestContractProjection, buildOfficeApprovalDialogueRouteInspector, buildOfficeEventTimelineProjection, buildOfficeTimelineWorkerHandoffDrilldown, buildOfficeApprovalRequestDetailDeepening, buildOfficeApprovalRequestView, buildOfficeApprovalAuditTimeline, buildOfficeApprovalExecutionGate, buildOfficeAuthorityAdapterContract, buildOfficeOrchestratorMediationQueue, buildOfficeWorkerIntentRouting, buildOfficeWorkerFacilityReadiness, buildOfficeWorkerAssignmentCandidateGate, buildOfficeWorkerRequestDraftPreview, buildOfficeWorkerHumanConfirmationEnvelope, buildOfficeWorkerAuthorityHandoffEnvelope, buildOfficeWorkerDispatchDryRunEnvelope, buildOfficeWorkerAuditPreviewEnvelope, buildOfficeWorkerRollbackPreviewEnvelope, buildOfficeWorkerFinalGateChecklist, buildOfficeWorkerFacilityLanePolish, buildOfficeWorkerRequestHandoffDetail, buildOfficeApprovalNasBoundaryPolish, buildOfficeApprovalAuthorityReadinessDetail, buildOfficeApprovalAuthorityDecisionEnvelopePreview, buildOfficeApprovalDecisionAuditNasTracePreview, buildOfficeNasKeeperSaveRequestGate, buildOfficeNasKeeperRollbackEvidencePreview, buildOfficeNasEvidencePackageStoreReadbackStatus, buildOfficeNasPathValidationStatusSurface, buildOfficeNasPathPreviewStatusSurface, buildOfficeNasPathPreviewStoreReadbackStatusSurface, buildOfficeNasRuntimeN3ApprovalBoundaryStatusSurface, buildOfficeNasRuntimeSingleFileWriteApprovalAction, buildOfficeNasKeeperQueueManualEvidenceReviewSurface, buildOfficeNasKeeperExecutionOperatorAction, buildOfficeNasKeeperDurableQueueGuardedOperatorReadiness, buildOfficeDeskRpgReadOnlyChainCompletionReview, buildOfficeEventDrivenCharacterStateProjection, buildOfficeCharacterStateRoomOverlay, buildOfficeCharacterRoomInteractionPosture, buildOfficeCharacterInspectorDetailPosture, buildOfficeCharacterDetailSafeDialogueCopy, buildOfficeCharacterBubbleInspectorAlignment, buildOfficeCharacterPanelBoundarySummary, buildOfficeCharacterFacilityRoleLegend, buildOfficeCharacterFacilityBoundaryStrip, buildOfficeCharacterFacilitySourceLedgerStrip, buildOfficeCharacterFacilityCompletionReview, buildOfficeControlledMutationProposalContract, buildOfficeControlledMutationDryRunPlan, buildOfficeControlledMutationAuditSinkPlan, buildOfficeControlledMutationRollbackVerificationPlan, buildOfficeControlledMutationHumanApprovalPlan, buildOfficeControlledMutationAuthoritySummary, buildOfficeControlledMutationExecutionReadinessSummary, buildOfficeControlledMutationContractPostureProjection, buildOfficeControlledMutationContractPosturePolish, buildOfficeControlledMutationReadinessHandoffRibbon, buildOfficeControlledMutationReadinessSummaryPolish, buildOfficeControlledMutationRequestStorePosture, buildOfficeControlledMutationRequestStoreHardeningPlan, buildOfficeControlledMutationNextApprovalBoundary, buildOfficeControlledMutationPostDecisionApprovalBoundary, buildOfficeControlledMutationPostRegistryApprovalBoundary, buildOfficeControlledMutationTargetDispatchForbiddenBoundary, buildOfficeControlledMutationSafeContinuationCompletionReview, buildOfficeControlledMutationApprovalBoundarySummary, buildOfficeRpgRuntimeFanoutDrilldown, buildOfficeRpgFanoutApprovalEventBridge, buildOfficeRpgApprovalEventEnvelopeDetail, buildOfficeRpgScene } from "./officeView";
@@ -65,7 +66,7 @@ describe("Office controlled-mutation runtime status panel placement", () => {
     expect(source).toContain('data-office-visualizer-evidence-drawer="true"');
     expect(source).toContain('data-office-nas-keeper-heavy-ladders-suppressed="true"');
     expect(source).toContain('data-office-nas-keeper-heavy-ladders-dom-rendered="false"');
-    expect(source).toContain("Mac relay, payload/write_payload preview, replay/idempotency, execution packet");
+    expect(source).toContain("Mac relay, payload/write-payload preview, replay/idempotency, execution packet");
     for (const hiddenPanel of [
       "<MacLocalRelayRootAuthorityPreflightPanel",
       "<MacLocalRelayRootAuthorityConfigContractPanel",
@@ -5964,6 +5965,121 @@ describe("NasKeeperExecutionOperatorActionPanel", () => {
     expect(markup).not.toContain("<button");
     expect(markup).not.toContain("<input");
     expect(markup).not.toMatch(/raw markdown body|write_payload|Traceback|\/Users\/lidises|token-shaped-operator|private-operator-provider/i);
+  });
+
+
+  it("builds step 11 NAS Keeper read-only rendering status from step 10 completion without opening execution authority", () => {
+    const status = OfficeView.buildOfficeNasKeeperStep11ReadOnlyRenderingStatus({
+      latestStep10Record: {
+        tmp_root_completion_ref: "tmpcompletion-20260527-step10-before-rendering-1",
+        cleanup_closure_ref: "closure-20260527-no-authority-1",
+        closure_sha256: "d".repeat(64),
+        ready_for_read_only_rendering: true,
+        step10_complete: true,
+        write_readiness_percent: 100,
+        next_required_boundary: "read_only_status_rendering",
+        safe_tmp_root_display_path: "TmpVault / cleanup-step10-final-smoke-20260527124500-step10finish.md",
+        tmp_root_write_verified: true,
+        replay_idempotency_metadata: { idempotency_key: "step10-final-smoke", replay_safe: true },
+        real_nas_production_write: false,
+        vps_direct_nas_authority: false,
+        watcher_cron_dispatcher_authority_adapter: false,
+        public_exposure_changed: false,
+        gateway_restarted: false,
+        raw_path_projected: false,
+        markdown_body_projected: false,
+        write_payload_projected: false,
+      },
+      recordCounts: {
+        retention_plan: 1,
+        cleanup_gate: 1,
+        cleanup_hold: 1,
+        manifest_preflight: 1,
+        final_approval: 1,
+        package_receipt: 1,
+        disabled_run: 1,
+        summary_receipt: 1,
+        closure_receipt: 1,
+        step10_completion: 1,
+      },
+    });
+
+    expect(status.stageLabel).toBe("NAS Keeper Step 11 Read-only Rendering Status 1");
+    expect(status.readyForReadOnlyRendering).toBe(true);
+    expect(status.writeReadinessPercent).toBe(100);
+    expect(status.recordCountTotal).toBe(10);
+    expect(status.nextRequiredBoundary).toBe("read_only_status_rendering");
+    expect(status.cleanupExecutionOpened).toBe(false);
+    expect(status.executionAuthorityCreated).toBe(false);
+    expect(status.realNasProductionWriteEnabled).toBe(false);
+    expect(status.vpsDirectNasAuthorityEnabled).toBe(false);
+    expect(status.watcherCronDispatcherAuthorityAdapterEnabled).toBe(false);
+    expect(status.publicExposureChanged).toBe(false);
+    expect(status.gatewayRestarted).toBe(false);
+    expect(status.rawMarkdownPathSecretProjected).toBe(false);
+    expect(status.writePayloadProjected).toBe(false);
+    expect(status.enabledControls).toBe(0);
+    expect(status.safeProjectionOnly).toBe(true);
+    expect(status.ladderSteps.map((step) => step.id)).toEqual([
+      "retention_plan",
+      "cleanup_gate",
+      "cleanup_hold",
+      "manifest_preflight",
+      "final_approval",
+      "package_receipt",
+      "disabled_run",
+      "summary_receipt",
+      "closure_receipt",
+      "step10_completion",
+    ]);
+    expect(JSON.stringify(status)).not.toMatch(/write_payload|raw markdown body|\/Users\/lidises|\/home\/hermes|token-shaped-operator|private-operator-provider/i);
+  });
+
+  it("renders step 11 NAS Keeper read-only status without action controls or raw payload/path projection", () => {
+    const Panel = (OfficePageModule as unknown as {
+      NasKeeperStep11ReadOnlyRenderingStatusPanel: React.ComponentType<{ status: ReturnType<typeof OfficeView.buildOfficeNasKeeperStep11ReadOnlyRenderingStatus> }>;
+    }).NasKeeperStep11ReadOnlyRenderingStatusPanel;
+    const status = OfficeView.buildOfficeNasKeeperStep11ReadOnlyRenderingStatus({
+      latestStep10Record: {
+        tmp_root_completion_ref: "tmpcompletion-20260527-step10-before-rendering-1",
+        cleanup_closure_ref: "closure-20260527-no-authority-1",
+        closure_sha256: "d".repeat(64),
+        ready_for_read_only_rendering: true,
+        step10_complete: true,
+        write_readiness_percent: 100,
+        next_required_boundary: "read_only_status_rendering",
+        safe_tmp_root_display_path: "TmpVault / cleanup-step10-final-smoke-20260527124500-step10finish.md",
+        tmp_root_write_verified: true,
+        replay_idempotency_metadata: { idempotency_key: "step10-final-smoke", replay_safe: true },
+        real_nas_production_write: false,
+        vps_direct_nas_authority: false,
+        watcher_cron_dispatcher_authority_adapter: false,
+        public_exposure_changed: false,
+        gateway_restarted: false,
+        raw_path_projected: false,
+        markdown_body_projected: false,
+        write_payload_projected: false,
+      },
+      recordCounts: { step10_completion: 1, closure_receipt: 1 },
+    });
+
+    const markup = renderToStaticMarkup(<Panel status={status} />);
+
+    expect(markup).toContain('data-office-nas-keeper-step11-readonly-status="true"');
+    expect(markup).toContain('data-office-nas-keeper-step11-ready="true"');
+    expect(markup).toContain('data-office-nas-keeper-step11-readiness-percent="100"');
+    expect(markup).toContain('data-office-nas-keeper-step11-next-boundary="read_only_status_rendering"');
+    expect(markup).toContain('data-office-nas-keeper-step11-cleanup-execution-opened="false"');
+    expect(markup).toContain('data-office-nas-keeper-step11-execution-authority-created="false"');
+    expect(markup).toContain('data-office-nas-keeper-step11-real-nas-production-write-enabled="false"');
+    expect(markup).toContain('data-office-nas-keeper-step11-vps-direct-nas-authority-enabled="false"');
+    expect(markup).toContain('data-office-nas-keeper-step11-watcher-cron-dispatcher-authority-adapter-enabled="false"');
+    expect(markup).toContain('data-office-nas-keeper-step11-write-payload-projected="false"');
+    expect(markup).toContain('data-office-nas-keeper-step11-safe-projection-only="true"');
+    expect(markup).toContain("TmpVault / cleanup-step10-final-smoke-20260527124500-step10finish.md");
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("<input");
+    expect(markup).not.toMatch(/write_payload|raw markdown body|\/Users\/lidises|\/home\/hermes|token-shaped-operator|private-operator-provider/i);
   });
 
   it("renders the live NAS Keeper queue and operator lane outside legacy diagnostics", () => {
