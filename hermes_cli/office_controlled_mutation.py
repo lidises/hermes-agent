@@ -10172,6 +10172,252 @@ def _safe_ref_fragment(value: str) -> str:
     return fragment[:48] or "intent"
 
 
+_NAS_KEEPER_ARTIFACT_RETENTION_PLAN_FIELDS = {
+    "cleanup_plan_ref",
+    "planned_by",
+    "planned_at",
+    "selection_profile",
+    "operator_confirmation",
+    "safe_summary",
+    "artifact_refs",
+    "evidence_refs",
+}
+_NAS_KEEPER_ARTIFACT_RETENTION_TYPES = {
+    "smoke_note",
+    "audit_sidecar",
+    "rollback_artifact",
+    "queue_item",
+    "execution_record",
+}
+_NAS_KEEPER_ARTIFACT_RETENTION_DECISIONS = {
+    "retain_latest_evidence",
+    "retain_until_cleanup_approval",
+    "cleanup_candidate_after_review",
+    "archive_candidate_after_review",
+}
+
+
+def _default_nas_keeper_artifact_retention_plan_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "nas_keeper_artifact_retention_plan_records.jsonl"
+
+
+def _normalize_nas_keeper_artifact_retention_plan_record(value: object) -> dict[str, object] | None:
+    if not isinstance(value, Mapping):
+        return None
+    artifact_refs = value.get("artifact_refs")
+    evidence_refs = value.get("evidence_refs")
+    if not isinstance(artifact_refs, Sequence) or isinstance(artifact_refs, (str, bytes)):
+        return None
+    if len(artifact_refs) < 1 or len(artifact_refs) > 20:
+        return None
+    normalized_artifacts: list[dict[str, object]] = []
+    for artifact in artifact_refs:
+        if not isinstance(artifact, Mapping):
+            return None
+        artifact_ref = artifact.get("artifact_ref")
+        artifact_type = artifact.get("artifact_type")
+        safe_logical_ref = artifact.get("safe_logical_ref")
+        terminal_status = artifact.get("terminal_status")
+        retention_decision = artifact.get("retention_decision")
+        if not _is_opaque_ref(artifact_ref):
+            return None
+        if artifact_type not in _NAS_KEEPER_ARTIFACT_RETENTION_TYPES:
+            return None
+        if not _is_safe_text(safe_logical_ref) or "/" in str(safe_logical_ref) or ".." in str(safe_logical_ref):
+            return None
+        if not _is_safe_text(terminal_status):
+            return None
+        if retention_decision not in _NAS_KEEPER_ARTIFACT_RETENTION_DECISIONS:
+            return None
+        normalized_artifacts.append(
+            {
+                "artifact_ref": artifact_ref,
+                "artifact_type": artifact_type,
+                "safe_logical_ref": safe_logical_ref,
+                "terminal_status": terminal_status,
+                "retention_decision": retention_decision,
+            }
+        )
+    if not _validate_evidence_refs(evidence_refs):
+        return None
+    return {
+        "cleanup_plan_ref": value.get("cleanup_plan_ref"),
+        "planned_by": value.get("planned_by"),
+        "planned_at": value.get("planned_at"),
+        "selection_profile": value.get("selection_profile"),
+        "operator_confirmation": value.get("operator_confirmation"),
+        "safe_summary": value.get("safe_summary"),
+        "artifact_refs": normalized_artifacts,
+        "evidence_refs": list(cast(Sequence[object], evidence_refs)),
+        "artifact_count": len(normalized_artifacts),
+    }
+
+
+def _read_nas_keeper_artifact_retention_plan_records(path: Path) -> tuple[list[dict[str, object]], int]:
+    records: list[dict[str, object]] = []
+    skipped_count = 0
+    if not path.exists():
+        return records, skipped_count
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            if not line.strip():
+                continue
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped_count += 1
+                continue
+            normalized = _normalize_nas_keeper_artifact_retention_plan_record(item)
+            if normalized is None:
+                skipped_count += 1
+                continue
+            records.append(normalized)
+    return records, skipped_count
+
+
+def _artifact_retention_plan_dto(record: Mapping[str, object], *, idempotent_replay: bool = False) -> dict[str, object]:
+    return {
+        "schema_version": 1,
+        "mode": "nas_keeper_artifact_retention_plan_recorded",
+        "cleanup_plan_ref": record["cleanup_plan_ref"],
+        "planned_by": record["planned_by"],
+        "planned_at": record["planned_at"],
+        "selection_profile": record["selection_profile"],
+        "safe_summary": record["safe_summary"],
+        "artifact_refs": record["artifact_refs"],
+        "artifact_count": record["artifact_count"],
+        "evidence_refs": record["evidence_refs"],
+        "idempotent_replay": idempotent_replay,
+        "metadata_only_record_write": True,
+        "cleanup_plan_path": [
+            "completed_artifact_safe_refs_selected",
+            "retention_policy_preview_recorded",
+            "cleanup_execution_requires_separate_approval",
+            "no_nas_write_or_delete",
+        ],
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "cleanup_execution_enabled": False,
+        "actual_nas_write_enabled": False,
+        "actual_nas_delete_enabled": False,
+        "direct_vps_nas_write_enabled": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "capabilities": {
+            "metadata_only_record_write_enabled": True,
+            "artifact_retention_plan_readback_enabled": True,
+            "cleanup_execution_enabled": False,
+            "actual_nas_write_enabled": False,
+            "actual_nas_delete_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+        },
+        "next_required_boundary": "explicit_artifact_cleanup_execution_approval",
+    }
+
+
+def list_office_controlled_mutation_nas_keeper_artifact_retention_plan_records(
+    *, store_path: Path | None = None, limit: int = 50, cleanup_plan_ref: object = None
+) -> dict[str, object]:
+    errors: list[dict[str, str]] = []
+    safe_cleanup_plan_ref = None
+    if cleanup_plan_ref is not None:
+        if _office_disabled_runtime_dispatch_valid_prefixed_ref(cleanup_plan_ref, "cleanupplan-"):
+            safe_cleanup_plan_ref = str(cleanup_plan_ref)
+        else:
+            errors.append(_error("cleanup_plan_ref", "unsupported_ref_shape"))
+    path = store_path or _default_nas_keeper_artifact_retention_plan_store_path()
+    records, skipped_count = _read_nas_keeper_artifact_retention_plan_records(path)
+    if safe_cleanup_plan_ref:
+        records = [record for record in records if record.get("cleanup_plan_ref") == safe_cleanup_plan_ref]
+    if errors:
+        records = []
+    max_items = max(0, min(limit, 200)) if isinstance(limit, int) else 50
+    records = records[-max_items:] if max_items else []
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_artifact_retention_plan_records_readback",
+        "record_count": len(records),
+        "limit": max_items,
+        "skipped_count": skipped_count,
+        "records": records,
+        "latest_record": records[-1] if records else None,
+        "metadata_only_record_write": True,
+        "cleanup_execution_enabled": False,
+        "actual_nas_write_enabled": False,
+        "actual_nas_delete_enabled": False,
+        "direct_vps_nas_write_enabled": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "next_required_boundary": "explicit_artifact_cleanup_execution_approval" if records else "artifact_retention_plan_record",
+    }
+    return {"found": bool(records), "errors": errors, "dto": dto}
+
+
+def append_office_controlled_mutation_nas_keeper_artifact_retention_plan(
+    payload: object, *, store_path: Path | None = None
+) -> dict[str, object]:
+    if not isinstance(payload, Mapping):
+        return {"stored": False, "idempotent_replay": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    errors: list[dict[str, str]] = []
+    if set(payload) - _NAS_KEEPER_ARTIFACT_RETENTION_PLAN_FIELDS:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+    for field in sorted(_NAS_KEEPER_ARTIFACT_RETENTION_PLAN_FIELDS):
+        if field not in payload:
+            errors.append(_error(field, "missing_field"))
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("cleanup_plan_ref"), "cleanupplan-"):
+        errors.append(_error("cleanup_plan_ref", "unsupported_ref_shape"))
+    if not _is_opaque_id(payload.get("planned_by")):
+        errors.append(_error("planned_by", "invalid_opaque_id"))
+    if not (isinstance(payload.get("planned_at"), str) and _ISO_UTC_RE.fullmatch(str(payload.get("planned_at")))):
+        errors.append(_error("planned_at", "invalid_timestamp"))
+    if payload.get("selection_profile") != "completed_smoke_and_fresh_write_artifacts":
+        errors.append(_error("selection_profile", "unsupported_selection_profile"))
+    if payload.get("operator_confirmation") != "metadata-only-retention-plan-no-delete-no-write":
+        errors.append(_error("operator_confirmation", "unsupported_confirmation"))
+    if not _is_safe_text(payload.get("safe_summary")):
+        errors.append(_error("safe_summary", "invalid_safe_text"))
+    normalized = _normalize_nas_keeper_artifact_retention_plan_record(payload)
+    if normalized is None:
+        errors.append(_error("artifact_refs", "invalid_artifact_ref"))
+    if errors:
+        return {
+            "stored": False,
+            "idempotent_replay": False,
+            "errors": sorted(errors, key=lambda item: (item["field"], item["code"])),
+            "dto": None,
+        }
+    record = cast(dict[str, object], normalized)
+    path = store_path or _default_nas_keeper_artifact_retention_plan_store_path()
+    records, _skipped = _read_nas_keeper_artifact_retention_plan_records(path)
+    for existing in records:
+        if existing.get("cleanup_plan_ref") == record["cleanup_plan_ref"]:
+            return {
+                "stored": False,
+                "idempotent_replay": True,
+                "errors": [],
+                "dto": _artifact_retention_plan_dto(existing, idempotent_replay=True),
+            }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(record, sort_keys=True, ensure_ascii=False) + "\n")
+    return {
+        "stored": True,
+        "idempotent_replay": False,
+        "errors": [],
+        "dto": _artifact_retention_plan_dto(record),
+    }
+
+
 def build_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_request(
     payload: object,
     *,

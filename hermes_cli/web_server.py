@@ -112,6 +112,8 @@ from hermes_cli.office_controlled_mutation import (
     append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_approval_token,
     get_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_approval_token_readback,
     get_office_controlled_mutation_nas_keeper_last_successful_mac_relay_write,
+    append_office_controlled_mutation_nas_keeper_artifact_retention_plan,
+    list_office_controlled_mutation_nas_keeper_artifact_retention_plan_records,
     build_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_request,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_readback,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_export_selection_review,
@@ -929,6 +931,24 @@ async def review_office_controlled_mutation_nas_keeper_one_shot_write_payload_ar
 async def get_office_controlled_mutation_nas_keeper_last_successful_mac_relay_write_route():
     """Return last successful bounded Mac relay write refs/readback without replay authority."""
     return get_office_controlled_mutation_nas_keeper_last_successful_mac_relay_write()
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-artifact-retention-plan")
+async def list_office_controlled_mutation_nas_keeper_artifact_retention_plan_records_route(
+    cleanup_plan_ref: Optional[str] = None,
+    limit: Optional[int] = None,
+):
+    """Read metadata-only artifact retention/cleanup plans without NAS writes or deletes."""
+    return list_office_controlled_mutation_nas_keeper_artifact_retention_plan_records(
+        cleanup_plan_ref=cleanup_plan_ref,
+        limit=limit or 50,
+    )
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-artifact-retention-plan")
+async def append_office_controlled_mutation_nas_keeper_artifact_retention_plan_route(payload: Any = Body(None)):
+    """Append a metadata-only artifact retention/cleanup plan; no NAS write/delete."""
+    return append_office_controlled_mutation_nas_keeper_artifact_retention_plan(payload)
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-one-shot-request-builder")

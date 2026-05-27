@@ -1,3 +1,26 @@
+## NEXT — after NAS Keeper artifact retention plan metadata rung (2026-05-27T07:31Z)
+
+Current next stage:
+- Deploy and smoke the metadata-only artifact retention plan route, then record one bounded retention plan for completed smoke/fresh-write artifacts using safe logical refs only.
+- This is a metadata-only record write into AI Office state, not a NAS write/delete/move/archive.
+- Cleanup execution remains closed until separate explicit approval.
+- Write-readiness is already 100%; the useful next movement is operational-readiness: retention planning, cleanup execution gate, then explicit cleanup execution only if separately approved.
+
+Still forbidden unless separately and explicitly approved:
+- additional real NAS production writes beyond a fresh exact approved target/content boundary
+- actual NAS delete/move/archive cleanup
+- direct VPS NAS authority, NAS mount credentials, or direct VPS NAS file write
+- watcher/cron/dispatcher/authority-adapter activation
+- public exposure
+- gateway restart
+- raw markdown/body/path/secret/raw write payload echo
+
+Required first checks next time:
+1. Read `docs/ai-office/STATUS.md` and this file.
+2. Confirm local/VPS git, dashboard/core service health, and whether the artifact retention plan record exists.
+3. Treat all durable and fresh execution refs as terminal and non-replayable.
+4. Require separate exact approval before any cleanup execution, additional real NAS write, watcher/cron/dispatcher/authority-adapter, or VPS NAS authority change.
+
 ## NEXT — after NAS Keeper fresh approved Mac relay write (2026-05-27T07:17Z)
 
 Current next stage:

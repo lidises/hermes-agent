@@ -1,3 +1,30 @@
+## Current status — NAS Keeper artifact retention plan metadata rung implemented (2026-05-27T07:31Z)
+
+Scope completed:
+- Added a metadata-only artifact retention/cleanup planning rung for completed NAS Keeper smoke/fresh-write artifacts.
+- This rung records safe logical artifact refs, retention decisions, evidence refs, and idempotency metadata only; it does not write, delete, move, archive, scan raw NAS paths, or expose raw markdown/write payloads.
+- Added protected API read/write routes for the retention plan record and focused tests covering record write, idempotent replay, raw-value rejection, and route auth.
+
+Evidence captured:
+- New route: `POST/GET /api/office/controlled-mutation/nas-runtime/nas-keeper-artifact-retention-plan`.
+- New helper: `append_office_controlled_mutation_nas_keeper_artifact_retention_plan`.
+- Test: `tests/hermes_cli/test_office_controlled_mutation_nas_keeper_artifact_retention_plan.py`.
+- Focused tests passed: artifact retention plan + execution-from-preview + execution-payload preview + durable queue rehearsal = 15/15.
+- `py_compile` and `git diff --check` passed.
+
+Safety boundaries preserved:
+- Real NAS production write: false.
+- Actual NAS delete/move/archive: false.
+- Direct VPS NAS authority: false.
+- watcher/cron/dispatcher/authority-adapter: false.
+- public exposure change: false.
+- gateway restart: false.
+- raw filesystem root/path, raw markdown body, secret, or raw write payload echo: false.
+
+Readiness/result note:
+- Write-readiness remains 100%; this rung raises operational readiness after repeated successful writes by adding a safe retention planning boundary before any cleanup execution.
+- Next shortest safe rung is to deploy/smoke the protected metadata-only route and record one bounded retention plan for the completed smoke/fresh-write artifacts; cleanup execution still requires separate approval.
+
 ## Current status — NAS Keeper fresh approved Mac relay write completed (2026-05-27T07:17Z)
 
 Scope completed:
