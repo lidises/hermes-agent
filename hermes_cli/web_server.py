@@ -114,6 +114,8 @@ from hermes_cli.office_controlled_mutation import (
     get_office_controlled_mutation_nas_keeper_last_successful_mac_relay_write,
     append_office_controlled_mutation_nas_keeper_artifact_retention_plan,
     list_office_controlled_mutation_nas_keeper_artifact_retention_plan_records,
+    append_office_controlled_mutation_nas_keeper_cleanup_execution_gate,
+    list_office_controlled_mutation_nas_keeper_cleanup_execution_gate_records,
     build_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_request,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_readback,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_export_selection_review,
@@ -949,6 +951,24 @@ async def list_office_controlled_mutation_nas_keeper_artifact_retention_plan_rec
 async def append_office_controlled_mutation_nas_keeper_artifact_retention_plan_route(payload: Any = Body(None)):
     """Append a metadata-only artifact retention/cleanup plan; no NAS write/delete."""
     return append_office_controlled_mutation_nas_keeper_artifact_retention_plan(payload)
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-cleanup-execution-gate")
+async def list_office_controlled_mutation_nas_keeper_cleanup_execution_gate_records_route(
+    cleanup_gate_ref: Optional[str] = None,
+    limit: Optional[int] = None,
+):
+    """Read metadata-only cleanup execution gates without NAS writes/deletes/moves."""
+    return list_office_controlled_mutation_nas_keeper_cleanup_execution_gate_records(
+        cleanup_gate_ref=cleanup_gate_ref,
+        limit=limit or 50,
+    )
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-cleanup-execution-gate")
+async def append_office_controlled_mutation_nas_keeper_cleanup_execution_gate_route(payload: Any = Body(None)):
+    """Append a metadata-only cleanup execution gate; execution remains closed."""
+    return append_office_controlled_mutation_nas_keeper_cleanup_execution_gate(payload)
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-one-shot-request-builder")

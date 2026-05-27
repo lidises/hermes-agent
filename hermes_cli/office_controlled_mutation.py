@@ -10195,10 +10195,28 @@ _NAS_KEEPER_ARTIFACT_RETENTION_DECISIONS = {
     "cleanup_candidate_after_review",
     "archive_candidate_after_review",
 }
+_NAS_KEEPER_CLEANUP_EXECUTION_GATE_FIELDS = {
+    "cleanup_gate_ref",
+    "cleanup_plan_ref",
+    "cleanup_plan_sha256",
+    "approved_by",
+    "approved_at",
+    "operator_confirmation",
+    "intended_cleanup_action",
+    "evidence_refs",
+}
 
 
 def _default_nas_keeper_artifact_retention_plan_store_path() -> Path:
     return get_hermes_home() / "office" / "controlled-mutation" / "nas_keeper_artifact_retention_plan_records.jsonl"
+
+
+def _default_nas_keeper_cleanup_execution_gate_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "nas_keeper_cleanup_execution_gate_records.jsonl"
+
+
+def _stable_metadata_sha256(value: Mapping[str, object]) -> str:
+    return hashlib.sha256(json.dumps(value, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode("utf-8")).hexdigest()
 
 
 def _normalize_nas_keeper_artifact_retention_plan_record(value: object) -> dict[str, object] | None:
@@ -10276,6 +10294,7 @@ def _read_nas_keeper_artifact_retention_plan_records(path: Path) -> tuple[list[d
 
 
 def _artifact_retention_plan_dto(record: Mapping[str, object], *, idempotent_replay: bool = False) -> dict[str, object]:
+    retention_plan_sha256 = _stable_metadata_sha256(record)
     return {
         "schema_version": 1,
         "mode": "nas_keeper_artifact_retention_plan_recorded",
@@ -10287,6 +10306,7 @@ def _artifact_retention_plan_dto(record: Mapping[str, object], *, idempotent_rep
         "artifact_refs": record["artifact_refs"],
         "artifact_count": record["artifact_count"],
         "evidence_refs": record["evidence_refs"],
+        "retention_plan_sha256": retention_plan_sha256,
         "idempotent_replay": idempotent_replay,
         "metadata_only_record_write": True,
         "cleanup_plan_path": [
@@ -10341,14 +10361,15 @@ def list_office_controlled_mutation_nas_keeper_artifact_retention_plan_records(
         records = []
     max_items = max(0, min(limit, 200)) if isinstance(limit, int) else 50
     records = records[-max_items:] if max_items else []
+    records_with_checksums = [dict(record, retention_plan_sha256=_stable_metadata_sha256(record)) for record in records]
     dto = {
         "schema_version": 1,
         "mode": "nas_keeper_artifact_retention_plan_records_readback",
-        "record_count": len(records),
+        "record_count": len(records_with_checksums),
         "limit": max_items,
         "skipped_count": skipped_count,
-        "records": records,
-        "latest_record": records[-1] if records else None,
+        "records": records_with_checksums,
+        "latest_record": records_with_checksums[-1] if records_with_checksums else None,
         "metadata_only_record_write": True,
         "cleanup_execution_enabled": False,
         "actual_nas_write_enabled": False,
@@ -10416,6 +10437,190 @@ def append_office_controlled_mutation_nas_keeper_artifact_retention_plan(
         "errors": [],
         "dto": _artifact_retention_plan_dto(record),
     }
+
+
+def _normalize_nas_keeper_cleanup_execution_gate_record(value: object) -> dict[str, object] | None:
+    if not isinstance(value, Mapping):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(value.get("cleanup_gate_ref"), "cleanupgate-"):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(value.get("cleanup_plan_ref"), "cleanupplan-"):
+        return None
+    checksum = value.get("cleanup_plan_sha256")
+    if not (isinstance(checksum, str) and re.fullmatch(r"[a-f0-9]{64}", checksum)):
+        return None
+    if not _is_opaque_id(value.get("approved_by")):
+        return None
+    if not (isinstance(value.get("approved_at"), str) and _ISO_UTC_RE.fullmatch(str(value.get("approved_at")))):
+        return None
+    if value.get("operator_confirmation") != "metadata-only-cleanup-gate-no-delete-no-move-no-write":
+        return None
+    if value.get("intended_cleanup_action") != "hold_for_separate_execution_approval":
+        return None
+    if not _validate_evidence_refs(value.get("evidence_refs")):
+        return None
+    return {
+        "cleanup_gate_ref": value["cleanup_gate_ref"],
+        "cleanup_plan_ref": value["cleanup_plan_ref"],
+        "cleanup_plan_sha256": value["cleanup_plan_sha256"],
+        "approved_by": value["approved_by"],
+        "approved_at": value["approved_at"],
+        "operator_confirmation": value["operator_confirmation"],
+        "intended_cleanup_action": value["intended_cleanup_action"],
+        "evidence_refs": list(cast(Sequence[object], value["evidence_refs"])),
+    }
+
+
+def _read_nas_keeper_cleanup_execution_gate_records(path: Path) -> tuple[list[dict[str, object]], int]:
+    records: list[dict[str, object]] = []
+    skipped_count = 0
+    if not path.exists():
+        return records, skipped_count
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            if not line.strip():
+                continue
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped_count += 1
+                continue
+            normalized = _normalize_nas_keeper_cleanup_execution_gate_record(item)
+            if normalized is None:
+                skipped_count += 1
+                continue
+            records.append(normalized)
+    return records, skipped_count
+
+
+def _cleanup_execution_gate_dto(record: Mapping[str, object], *, idempotent_replay: bool = False) -> dict[str, object]:
+    return {
+        "schema_version": 1,
+        "mode": "nas_keeper_cleanup_execution_gate_recorded",
+        "cleanup_gate_ref": record["cleanup_gate_ref"],
+        "cleanup_plan_ref": record["cleanup_plan_ref"],
+        "cleanup_plan_sha256": record["cleanup_plan_sha256"],
+        "approved_by": record["approved_by"],
+        "approved_at": record["approved_at"],
+        "intended_cleanup_action": record["intended_cleanup_action"],
+        "evidence_refs": record["evidence_refs"],
+        "retention_plan_checksum_matched": True,
+        "idempotent_replay": idempotent_replay,
+        "metadata_only_record_write": True,
+        "cleanup_gate_path": [
+            "retention_plan_checksum_verified",
+            "cleanup_gate_metadata_recorded",
+            "execution_still_requires_separate_approval",
+            "no_nas_delete_move_or_write",
+        ],
+        "cleanup_execution_opened": False,
+        "actual_nas_delete_enabled": False,
+        "actual_nas_move_enabled": False,
+        "actual_nas_write_enabled": False,
+        "direct_vps_nas_write_enabled": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "next_required_boundary": "separate_exact_cleanup_execution_approval",
+    }
+
+
+def list_office_controlled_mutation_nas_keeper_cleanup_execution_gate_records(
+    *, gate_store_path: Path | None = None, limit: int = 50, cleanup_gate_ref: object = None
+) -> dict[str, object]:
+    errors: list[dict[str, str]] = []
+    safe_cleanup_gate_ref = None
+    if cleanup_gate_ref is not None:
+        if _office_disabled_runtime_dispatch_valid_prefixed_ref(cleanup_gate_ref, "cleanupgate-"):
+            safe_cleanup_gate_ref = str(cleanup_gate_ref)
+        else:
+            errors.append(_error("cleanup_gate_ref", "unsupported_ref_shape"))
+    path = gate_store_path or _default_nas_keeper_cleanup_execution_gate_store_path()
+    records, skipped_count = _read_nas_keeper_cleanup_execution_gate_records(path)
+    if safe_cleanup_gate_ref:
+        records = [record for record in records if record.get("cleanup_gate_ref") == safe_cleanup_gate_ref]
+    if errors:
+        records = []
+    max_items = max(0, min(limit, 200)) if isinstance(limit, int) else 50
+    records = records[-max_items:] if max_items else []
+    return {
+        "found": bool(records),
+        "errors": errors,
+        "dto": {
+            "schema_version": 1,
+            "mode": "nas_keeper_cleanup_execution_gate_records_readback",
+            "record_count": len(records),
+            "limit": max_items,
+            "skipped_count": skipped_count,
+            "records": records,
+            "latest_record": records[-1] if records else None,
+            "metadata_only_record_write": True,
+            "cleanup_execution_opened": False,
+            "actual_nas_delete_enabled": False,
+            "actual_nas_move_enabled": False,
+            "actual_nas_write_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "next_required_boundary": "separate_exact_cleanup_execution_approval" if records else "cleanup_execution_gate_record",
+        },
+    }
+
+
+def append_office_controlled_mutation_nas_keeper_cleanup_execution_gate(
+    payload: object, *, plan_store_path: Path | None = None, gate_store_path: Path | None = None
+) -> dict[str, object]:
+    if not isinstance(payload, Mapping):
+        return {"stored": False, "idempotent_replay": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    errors: list[dict[str, str]] = []
+    if set(payload) - _NAS_KEEPER_CLEANUP_EXECUTION_GATE_FIELDS:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+    for field in sorted(_NAS_KEEPER_CLEANUP_EXECUTION_GATE_FIELDS):
+        if field not in payload:
+            errors.append(_error(field, "missing_field"))
+    normalized = _normalize_nas_keeper_cleanup_execution_gate_record(payload)
+    if normalized is None:
+        errors.append(_error("cleanup_gate", "invalid_cleanup_gate"))
+    plan_path = plan_store_path or _default_nas_keeper_artifact_retention_plan_store_path()
+    plans, _plan_skipped = _read_nas_keeper_artifact_retention_plan_records(plan_path)
+    matched_plan = None
+    for plan in plans:
+        if plan.get("cleanup_plan_ref") == payload.get("cleanup_plan_ref"):
+            matched_plan = plan
+            break
+    if matched_plan is None:
+        errors.append(_error("cleanup_plan_ref", "cleanup_plan_not_found"))
+    elif normalized is not None and _stable_metadata_sha256(matched_plan) != normalized["cleanup_plan_sha256"]:
+        errors.append(_error("cleanup_plan_sha256", "cleanup_plan_checksum_mismatch"))
+    if errors:
+        return {
+            "stored": False,
+            "idempotent_replay": False,
+            "errors": sorted(errors, key=lambda item: (item["field"], item["code"])),
+            "dto": None,
+        }
+    record = cast(dict[str, object], normalized)
+    path = gate_store_path or _default_nas_keeper_cleanup_execution_gate_store_path()
+    records, _skipped = _read_nas_keeper_cleanup_execution_gate_records(path)
+    for existing in records:
+        if existing.get("cleanup_gate_ref") == record["cleanup_gate_ref"]:
+            return {
+                "stored": False,
+                "idempotent_replay": True,
+                "errors": [],
+                "dto": _cleanup_execution_gate_dto(existing, idempotent_replay=True),
+            }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(record, sort_keys=True, ensure_ascii=False) + "\n")
+    return {"stored": True, "idempotent_replay": False, "errors": [], "dto": _cleanup_execution_gate_dto(record)}
 
 
 def build_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_request(
