@@ -1,3 +1,26 @@
+## NEXT — after NAS Keeper durable guarded operator surface deploy (2026-05-27T02:35Z)
+
+Current next stage:
+- The safest newly closed rung is a deployed, default-disabled guarded operator-readiness surface over the durable NAS Keeper queue path.
+- Protected API smoke proved queue rehearsal, idempotent replay, and metadata-only guarded execution-state recording without NAS write or relay execution.
+- The next safe rung is a more explicit operator preview/record contract around one selected authorized durable item, still requiring manual approval and still stopping before execution.
+- Do not execute from the durable item unless the next prompt explicitly approves that exact guarded execution boundary.
+
+Still forbidden unless separately and explicitly approved:
+- real NAS production write
+- VPS direct NAS authority, NAS mount credentials, or direct VPS file write
+- watcher/cron/dispatcher/authority-adapter activation
+- public exposure
+- gateway restart
+- raw markdown/body/path/secret/raw write payload echo
+
+Required first checks next time:
+1. Read `docs/ai-office/STATUS.md` and this file.
+2. Confirm local/VPS git, `web_dist`, and service health before deploy/runtime work.
+3. Start with RED tests and keep each rung bounded.
+4. If using a durable queue item, filter by a safe handoff ref and verify approval unchecked + execute disabled before any higher-risk action.
+5. Prefer preview/record/idempotency metadata before any new write-capable boundary; keep real production write and VPS NAS authority closed.
+
 ## NEXT — after NAS Keeper durable queue rehearsal/readback (2026-05-27T02:30Z)
 
 Current next stage:

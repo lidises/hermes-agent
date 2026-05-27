@@ -1,3 +1,34 @@
+## Current status — NAS Keeper durable guarded operator surface deployed (2026-05-27T02:35Z)
+
+Scope completed:
+- Added and deployed a guarded operator-readiness UI/DOM surface for the durable NAS Keeper queue path.
+- The surface is display-only: approval default is false, execution disabled by default is true, and it has no buttons/inputs/selects/textareas.
+- The panel exposes only safe readiness booleans and safe refs; it does not project markdown content, write payload contents, raw paths, secrets, or executable authority.
+- A protected API smoke appended one durable local-profile queue rehearsal item, replayed it idempotently, then recorded a metadata-only guarded-failure execution state. No NAS write or relay execution ran.
+
+Evidence captured:
+- Commits deployed: `62c24d9e5`, `61b520489`, `1c2d8d146`.
+- Protected durable-queue rehearsal API: auth=200, rehearsed=true, queued=true, authorized=true, previewed=true, executed=false, written=false.
+- Protected idempotency replay API: auth=200, idempotent_replay=true, queued=false, authorized=false, previewed=true, executed=false, written=false.
+- Protected execution-state record API: auth=200, recorded=true, queue_status_before=`authorized_for_mac_relay_execution`, queue_status_after=`mac_relay_execution_failed_guarded`, execution_status=`failed_guarded`.
+- DOM smoke: guarded readiness panel present; approvalDefault=false, executionDisabledDefault=true, metadataOnly=true, productionWrite=false, vpsNas=false, watcher=false, writePayloadProjected=false, controls=0, scoped leak probe=false; console errors=0.
+
+Verification:
+- RED observed first: strengthened leak guard failed on the initial panel copy because it contained a forbidden raw field token.
+- GREEN after copy hardening: focused durable guarded operator tests passed.
+- Combined frontend Office tests: `OfficePage.test.ts` + `OfficePage.rpg.test.tsx` = 348/348 passed.
+- Backend NAS Keeper focused tests: durable queue rehearsal + execution-from-preview + execution-state record = 12/12 passed.
+- `git diff --check`, `npm run lint` (0 errors, existing warnings only), and `npm run build` passed.
+- VPS core/dashboard worktrees synced to `origin/main`; `web_dist` rsynced; dashboard and core dashboard restarted and healthy; gateway stayed active and was not restarted.
+
+Safety boundaries preserved:
+- Real NAS production write: false.
+- VPS direct NAS authority: false.
+- watcher/cron/dispatcher/authority-adapter: false.
+- public exposure change: false.
+- gateway restart: false.
+- raw filesystem root/path, raw markdown body, token, secret, or raw write payload echo: false.
+
 ## Current status — NAS Keeper durable queue rehearsal/readback added (2026-05-27T02:30Z)
 
 Scope completed:
