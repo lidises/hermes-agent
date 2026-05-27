@@ -118,6 +118,8 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_nas_keeper_cleanup_execution_gate_records,
     append_office_controlled_mutation_nas_keeper_cleanup_execution_hold,
     list_office_controlled_mutation_nas_keeper_cleanup_execution_hold_records,
+    append_office_controlled_mutation_nas_keeper_cleanup_execution_manifest_preflight,
+    list_office_controlled_mutation_nas_keeper_cleanup_execution_manifest_preflight_records,
     build_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_request,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_readback,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_export_selection_review,
@@ -989,6 +991,24 @@ async def list_office_controlled_mutation_nas_keeper_cleanup_execution_hold_reco
 async def append_office_controlled_mutation_nas_keeper_cleanup_execution_hold_route(payload: Any = Body(None)):
     """Append a metadata-only cleanup dry-run/hold record; execution remains closed."""
     return append_office_controlled_mutation_nas_keeper_cleanup_execution_hold(payload)
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-cleanup-execution-manifest-preflight")
+async def list_office_controlled_mutation_nas_keeper_cleanup_execution_manifest_preflight_records_route(
+    cleanup_manifest_ref: Optional[str] = None,
+    limit: Optional[int] = None,
+):
+    """Read metadata-only cleanup manifest/preflight records without NAS writes/deletes/moves."""
+    return list_office_controlled_mutation_nas_keeper_cleanup_execution_manifest_preflight_records(
+        cleanup_manifest_ref=cleanup_manifest_ref,
+        limit=limit or 50,
+    )
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-cleanup-execution-manifest-preflight")
+async def append_office_controlled_mutation_nas_keeper_cleanup_execution_manifest_preflight_route(payload: Any = Body(None)):
+    """Append a metadata-only cleanup manifest/preflight record; execution remains closed."""
+    return append_office_controlled_mutation_nas_keeper_cleanup_execution_manifest_preflight(payload)
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-one-shot-request-builder")
