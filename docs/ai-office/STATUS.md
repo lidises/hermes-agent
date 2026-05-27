@@ -1,3 +1,32 @@
+## Current status — NAS Keeper selected tmp-root replay metadata deployed (2026-05-27T03:44Z)
+
+Scope completed:
+- Added and deployed selected tmp-root replay/idempotency metadata recording sourced only from the selected durable tmp-root write smoke record.
+- The record verifies selected_contract_ref, selected_contract_record_sha256, tmp_root_smoke_ref, tmp_root_smoke_record_sha256, idempotency_key_sha256, and tmp-root readback before appending metadata.
+- Duplicate replay appends no second record and returns the original safe record by matching the same selected contract / tmp-root smoke / idempotency tuple.
+- The durable guarded operator UI now exposes a display-only replay/idempotency metadata endpoint/readiness marker with no controls.
+
+Evidence captured:
+- Commit deployed: `c8c57b6e9`.
+- RED observed first: selected tmp-root replay metadata tests failed on missing backend functions/routes and 405 route response.
+- GREEN after implementation: selected tmp-root smoke/replay metadata tests passed; combined selected/preview/from-preview focused tests = 16/16 passed.
+- Frontend Office tests: `OfficePage.test.ts` + `OfficePage.rpg.test.tsx` = 348/348 passed.
+- `py_compile`, `git diff --check`, `npm run lint` (0 errors, existing warnings only), and `npm run build` passed.
+- VPS core/dashboard synced to `origin/main`; `web_dist` rsynced; dashboard and core dashboard restarted and healthy; gateway stayed active and was not restarted.
+- Protected VPS API/DOM smoke: `/office` loaded; replay metadata readiness marker present; controls=0; real write=false; VPS NAS authority=false; raw leak probe=false; unauth replay metadata route=401; authenticated route=200 fail-closed without source smoke record, recorded=false.
+- Local Mac relay isolated tmp-root smoke: contract recorded, tmp-root write/readback verified, replay metadata recorded, replay idempotent, readback found one latest record, raw leak probe=false.
+
+Safety boundaries preserved:
+- Real NAS production write: false.
+- VPS direct NAS authority: false.
+- watcher/cron/dispatcher/authority-adapter: false.
+- public exposure change: false.
+- gateway restart: false.
+- raw filesystem root/path, raw markdown body, token, secret, or raw write payload echo: false.
+
+Readiness note:
+- Not 100% yet: the chain is now ready through selected tmp-root replay/idempotency metadata, but production NAS write, final approval token/gate, authority adapter, and watcher/dispatcher remain intentionally closed.
+
 ## Current status — NAS Keeper selected durable tmp-root write smoke deployed (2026-05-27T03:24Z)
 
 Scope completed:

@@ -1,3 +1,26 @@
+## NEXT — after NAS Keeper selected tmp-root replay metadata (2026-05-27T03:44Z)
+
+Current next stage:
+- The safest newly closed rung is selected tmp-root replay/idempotency metadata hardening, including source checksum verification, duplicate skip semantics, safe readback, protected API smoke, and display-only DOM readiness.
+- VPS remains fail-closed for replay metadata unless a matching source smoke record exists; it has no production NAS authority and no tmp-root authority for this rung.
+- The next shortest safe rung is a metadata-only precommit/readiness record sourced from this replay metadata record, verifying that selected_contract_ref, tmp_root_smoke_ref, replay_metadata_ref, and record SHA all chain together before any higher write gate.
+- Readiness is not 100% yet. Do not claim 100% until real production NAS write gate/approval/execution readiness is complete under explicit approval while preserving no raw body/path/secret echo.
+
+Still forbidden unless separately and explicitly approved:
+- real NAS production write
+- VPS direct NAS authority, NAS mount credentials, or direct VPS file write
+- watcher/cron/dispatcher/authority-adapter activation
+- public exposure
+- gateway restart
+- raw markdown/body/path/secret/raw write payload echo
+
+Required first checks next time:
+1. Read `docs/ai-office/STATUS.md` and this file.
+2. Confirm local/VPS git, `web_dist`, and service health before deploy/runtime work.
+3. Start with RED tests and keep each rung bounded.
+4. Source the next metadata-only rung from the selected replay metadata record; reject stale/cross-source refs and checksum mismatches.
+5. Keep production NAS/write authority closed unless the prompt explicitly approves that exact higher boundary.
+
 ## NEXT — after NAS Keeper selected durable tmp-root write smoke (2026-05-27T03:24Z)
 
 Current next stage:
