@@ -830,3 +830,24 @@ Not allowed without exact separate approval:
 - Public exposure change.
 - Gateway restart.
 - Raw markdown/path/secret/write-payload echo.
+## NEXT — after approved one-shot Mac relay real NAS write (2026-05-27T14:54Z)
+
+Current position:
+- The exact real-write approval was used once.
+- One NAS Keeper → Mac relay write completed with safe readback and audit metadata.
+- The VPS execution route remains intentionally not configured for real NAS writes and fails closed.
+
+Do next only with a new explicit approval:
+- Any additional real NAS production write.
+- Any repeat/replacement write to the same safe logical note.
+- Any watcher/cron/dispatcher/authority-adapter or public exposure change.
+
+Allowed without a new real-write approval:
+- Read-only status projection of the safe result metadata.
+- Metadata-only replay/idempotency receipt for the completed write.
+- Tests/docs/smoke that do not write another production NAS file.
+
+Still forbidden by default:
+- VPS direct NAS authority.
+- Gateway restart.
+- Raw markdown/path/secret/write-payload echo.

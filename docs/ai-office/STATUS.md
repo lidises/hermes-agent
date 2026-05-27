@@ -1038,3 +1038,33 @@ Current boundary:
 - Readiness remains 100% for the approved pre-production controlled-mutation ladder.
 - Real NAS production write remains blocked pending exact separate approval.
 - No direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, gateway restart, raw markdown/path/secret/write-payload projection.
+## Current status — approved real NAS write completed through Mac relay (2026-05-27T14:54Z)
+
+Latest completed rung:
+- User gave exact approval to cross the real NAS production write boundary.
+- Executed one one-shot NAS Keeper → Mac relay write from the Mac context only.
+- Wrote exactly one safe logical note and one safe audit sidecar; no watcher/cron/dispatcher/authority-adapter was created.
+
+Safe result metadata:
+- safe logical path: `ai_office_controlled_mutation::nas-keeper-controlled-mutation-real-write-20260527.md`
+- safe display path: `ai_office_controlled_mutation / nas-keeper-controlled-mutation-real-write-20260527.md`
+- write ref: `write_20260527_real_nas_001`
+- readback verified: true
+- readback sha256: `14ca76decb988b26502680578f560e96a36eab0778fbc8112818ccfa59f75901`
+- bytes written: 328
+- audit written: true
+- rollback created: false
+
+Verification:
+- Independent readback confirmed target exists, audit exists, checksum matches, audit contains no raw markdown/write-payload fields, and audit contains no raw root path.
+- Python focused Mac relay tests: 10/10 passed.
+- Web focused tests: 245/245 passed; build passed.
+- VPS protected route smoke remained fail-closed: unauth=401, authenticated result executed=false, written=false, error=mac_relay_root_not_configured.
+- DOM smoke: Step 11 panel present, controls=0, forbidden raw path/secret patterns absent, console errors=0.
+
+Still closed:
+- No direct VPS NAS authority.
+- No watcher/cron/dispatcher/authority-adapter activation.
+- No public exposure change.
+- No gateway restart.
+- No raw markdown/path/secret/write-payload projection.
