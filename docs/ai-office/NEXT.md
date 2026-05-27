@@ -1,3 +1,23 @@
+## NEXT — after NAS Keeper real Mac relay NAS write smoke (2026-05-27T02:00Z)
+
+Current next stage:
+- The first bounded real NAS write via Mac relay has completed and verified create + replace + rollback/readback metadata.
+- The next safe step is not to enable automation. Continue with durable-production-queue rehearsal/readback design or a guarded operator UX/readback surface only if requested.
+
+Still forbidden unless separately and explicitly approved:
+- watcher/cron/dispatcher/authority-adapter activation
+- durable production queue mutation or automatic replay-store execution
+- VPS direct NAS authority, NAS mount credentials, or direct VPS file write
+- public exposure
+- gateway restart
+- raw markdown/body/path/secret echo
+
+Required first checks next time:
+1. Read `docs/ai-office/STATUS.md` and this file.
+2. Confirm local/VPS git and service state before deploy/runtime work.
+3. If adding code, start with RED tests and keep each rung bounded.
+4. If executing another real NAS write, use safe logical refs, temporary queue unless production queue is explicitly named, readback SHA verification, rollback evidence, and raw-leak checks.
+
 ## NEXT — AI Office RPG Visualizer continuation after approval-event envelope detail (2026-05-26T16:36Z)
 
 Current next stage:

@@ -1,3 +1,28 @@
+## Current status — NAS Keeper real Mac relay NAS write completed (2026-05-27T02:00Z)
+
+Scope completed:
+- User explicitly moved from 100% write-readiness to the real write step.
+- Performed a bounded Mac-relay real NAS write smoke through the existing NAS Keeper execution-from-preview bridge.
+- Used a temporary isolated handoff queue; no durable production queue, watcher, cron, dispatcher, authority adapter, gateway restart, public exposure, or VPS direct NAS authority was introduced.
+
+Evidence captured:
+- Safe logical target: `ai_office_write_smoke::nas-keeper-real-write-smoke-20260527020002.md`.
+- Create pass: executed=true, written=true, recorded=true, readback_verified=true, audit_written=true, markdown_body_included=false.
+- Replace pass: executed=true, written=true, recorded=true, readback_verified=true, rollback_created=true, audit_written=true, markdown_body_included=false.
+- Final readback SHA-256 matched the replacement body SHA-256: `fe02521cb0d07ef2c8e8077c5007c56bbc45f341887308ab785de749b2bff90d`.
+- Rollback evidence ref: `rollback_write_real_nas_write_20260527020002_replace`.
+- Raw leak probe over the serialized public evidence result: false.
+
+Safety boundaries preserved:
+- VPS direct NAS authority: false.
+- watcher/cron/dispatcher/authority-adapter: false.
+- public exposure change: false.
+- gateway restart: false.
+- raw filesystem root/path, raw markdown body, token, or secret echo in public evidence: false.
+
+Verification:
+- `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_from_preview.py tests/hermes_cli/test_office_controlled_mutation_nas_mac_relay_write_execute.py -q -o 'addopts='` → 10 passed.
+
 ## Current status — AI Office RPG Visualizer slice refreshed at current HEAD (2026-05-26T16:36Z)
 
 Current repo baseline before this slice:
