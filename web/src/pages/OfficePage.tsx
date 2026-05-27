@@ -14851,9 +14851,9 @@ export default function OfficePage() {
         </p>
       </section>
 
-      <OfficeVisualizerEvidenceDrawer terminalResult={nasKeeperGuardedFailureStateResult}>
       <NasKeeperDurableQueueGuardedOperatorReadinessPanel readiness={nasKeeperDurableQueueGuardedOperatorReadiness} />
 
+      <OfficeVisualizerEvidenceDrawer terminalResult={nasKeeperGuardedFailureStateResult}>
       <NasKeeperLiveOperatorLanePanel
         queueSurface={nasKeeperQueueManualEvidenceReviewSurface}
         queueReadback={nasKeeperQueueReadback}
