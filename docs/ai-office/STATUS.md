@@ -1,3 +1,20 @@
+## Current status — AI Office legacy top shell absorbed into RPG visualizer tabs (2026-05-28)
+
+Scope completed locally before deploy:
+- Fixed the remaining unabsorbed `/office` top shell identified by screenshot: the old `Hermes AI 오피스` hero, focus filter row, right-side `보조 진단 HUD`, and standalone `LIVE OPERATIONS LAYER` card no longer render as a competing top-level surface.
+- Added a default-closed `operations` RPG visualizer tab that contains the absorbed focus filters, diagnostics metadata, safe HUD summary, and live operations cues.
+- Kept the unified workbench/RPG visualizer as the canonical first surface; this is a frontend-only/read-only consolidation patch.
+
+Safety boundaries preserved:
+- UI/read-only consolidation only.
+- No real NAS production write or replacement write.
+- No direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway restart, raw markdown/path/secret/write-payload echo, or executable action-button UI.
+
+Verification before deploy:
+- RED observed: focused RPG source test failed while the old hero remained outside the RPG visualizer drawer.
+- GREEN: focused RED test passed after moving the legacy operations/HUD surface into the default-closed RPG operations tab.
+- Focused frontend Office tests passed 408/408; `npm run build` passed; `git diff --check` passed.
+
 ## Current status — AI Office unified workbench consolidation polish deployed locally (2026-05-28)
 
 Scope completed locally before deploy:

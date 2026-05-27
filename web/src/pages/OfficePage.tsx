@@ -12372,7 +12372,7 @@ export default function OfficePage() {
   const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
   const [latestDelta, setLatestDelta] = useState<OfficeStateDelta>(EMPTY_STATE_DELTA);
   const [recentChanges, setRecentChanges] = useState<OfficeRecentChange[]>([]);
-  const [liveTracking, setLiveTracking] = useState(false);
+  const [liveTracking] = useState(false);
   const [densityMode, setDensityMode] = useState<OfficeMapDensityMode>("standard");
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [viewportWidth, setViewportWidth] = useState<number | undefined>(undefined);
@@ -15054,6 +15054,76 @@ export default function OfficePage() {
       </section>
 
       <OfficeRpgVisualizerTabsDrawer>
+        <details id="office-rpg-tab-operations" role="tabpanel" data-office-rpg-tab="operations" data-office-rpg-tab-panel="operations" data-office-rpg-tab-panel-default-open="false" data-office-legacy-operations-absorbed="true" className="grid gap-4 scroll-mt-24 border border-emerald-300/10 bg-black/10 p-3">
+          <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.16em] text-emerald-100">Absorbed live operations HUD</summary>
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="border border-current/15 bg-black/15 p-3">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-midground/55">Focus filters absorbed</div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {FOCUS_OPTIONS.map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => setFocus(option)}
+                    className={`border px-3 py-1 text-xs uppercase tracking-[0.16em] ${focus === option ? "border-emerald-400/50 text-emerald-300" : "border-current/20 text-midground/70 hover:text-foreground"}`}
+                    data-office-legacy-focus-filter={option}
+                  >
+                    {FOCUS_LABEL[option]}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <details className="border border-current/15 bg-black/15 p-3 text-xs text-midground/70" data-office-diagnostics-drawer="true">
+              <summary className="flex cursor-pointer items-center gap-2 text-foreground">
+                <Lock className="h-4 w-4 text-emerald-300" /> 보조 진단 HUD · absorbed
+              </summary>
+              <div className="mt-2 grid gap-1">
+                <div>생성 시각: {fmt(state.generated_at)}</div>
+                <div data-office-time-display-policy="browser-local">{timeDisplayPolicy.label}: {timeDisplayPolicy.value}</div>
+                <div className="text-midground/50">{timeDisplayPolicy.detail}</div>
+                <div>표시 모드: {state.display_mode}</div>
+                <div>원격 모드: {state.capabilities.remote_mode}</div>
+                <div>변경 기능: {state.capabilities.mutations_enabled ? "검토 게이트" : "없음"}</div>
+                <div>새로고침 상태: {refreshing ? "읽는 중" : "대기"}</div>
+                <div>브라우저 폴링: {liveTracking ? `${OFFICE_LIVE_TRACKING_BASE_INTERVAL_MS / 1000}초 간격` : "꺼짐"}</div>
+              </div>
+              <div className="mt-3 grid gap-1 text-[10px] text-midground/55" data-office-absorbed-hud-safety-summary="true">
+                <div>{mutationControlReadiness.stageLabel}: {mutationControlReadiness.status}</div>
+                <div>{safeMissionClock.stageLabel}: {safeMissionClock.headline}</div>
+                <div>{safeCommandDeck.stageLabel}: {safeCommandDeck.headline}</div>
+                <div>{safeHudHierarchy.stageLabel}: {safeHudHierarchy.summary}</div>
+              </div>
+            </details>
+          </div>
+          <div className="border border-emerald-300/20 bg-emerald-950/10 p-3" data-office-live-operations-layer="true">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-200">
+                  <Activity className="h-4 w-4" /> {liveOperationsLayer.stageLabel}
+                </div>
+                <div className="mt-1 text-sm text-midground/75" data-office-live-operations-summary="true">{liveOperationsLayer.summary}</div>
+              </div>
+              <div className="text-xs text-midground/55">{liveOperationsLayer.redactionNote}</div>
+            </div>
+            {liveOperationsLayer.cues.length > 0 ? (
+              <div className="mt-3 flex flex-wrap gap-2" aria-hidden="true">
+                {liveOperationsLayer.cues.map((cue) => (
+                  <span
+                    key={cue.id}
+                    className={`border px-2 py-1 text-xs ${safePulseToneClass(cue.tone)}`}
+                    title={cue.detail}
+                    aria-hidden={cue.ariaHidden}
+                    data-office-live-operations-cue={cue.id}
+                  >
+                    {cue.label} {cue.count}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-3 text-xs text-midground/55" data-office-live-operations-empty="true">현재 표시할 운영 cue가 없습니다. 빈 상태도 안전한 read-only 투영입니다.</div>
+            )}
+          </div>
+        </details>
         <details id="office-rpg-tab-nas-keeper" role="tabpanel" data-office-rpg-tab-panel="nas-keeper" data-office-rpg-tab-panel-default-open="false" className="grid gap-4 scroll-mt-24 border border-emerald-300/10 bg-black/10 p-3">
           <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.16em] text-emerald-100">NAS Keeper read-only receipts</summary>
           <NasKeeperStep11ReadOnlyRenderingStatusPanel status={nasKeeperStep11ReadOnlyRenderingStatus} />
@@ -16076,254 +16146,6 @@ export default function OfficePage() {
       ) : null}
         </>
       ) : null}
-
-      <div className="border border-current/20 bg-gradient-to-br from-black/35 to-black/10 p-5">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-          <div className="max-w-3xl">
-            <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.22em] text-emerald-300">
-              <ShieldCheck className="h-4 w-4" /> 읽기 전용 MVP · 비공개 접근 우선
-            </div>
-            <h1 className="mt-3 text-3xl font-semibold uppercase tracking-wide text-foreground md:text-4xl">Hermes AI 오피스</h1>
-            <p className="mt-3 text-sm leading-6 text-midground/80">
-              이 Hermes 인스턴스의 상태를 가려서 보여주는 운영 지도입니다. 원문 세션, 프롬프트, 로그, 비밀값을 노출하지 않고 상태·건강도·출처 공백만 보여줍니다.
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {FOCUS_OPTIONS.map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => setFocus(option)}
-                  className={`border px-3 py-1 text-xs uppercase tracking-[0.16em] ${focus === option ? "border-emerald-400/50 text-emerald-300" : "border-current/20 text-midground/70 hover:text-foreground"}`}
-                >
-                  {FOCUS_LABEL[option]}
-                </button>
-              ))}
-            </div>
-          </div>
-          <details className="min-w-64 border border-current/15 bg-black/20 p-3 text-xs text-midground/70" data-office-diagnostics-drawer="true">
-            <summary className="flex cursor-pointer items-center gap-2 text-foreground">
-              <Lock className="h-4 w-4 text-emerald-300" /> 보조 진단 HUD
-            </summary>
-            <div className="mt-2 grid gap-1">
-              <div>생성 시각: {fmt(state.generated_at)}</div>
-              <div data-office-time-display-policy="browser-local">{timeDisplayPolicy.label}: {timeDisplayPolicy.value}</div>
-              <div className="text-midground/50">{timeDisplayPolicy.detail}</div>
-              <div>표시 모드: {state.display_mode}</div>
-              <div>원격 모드: {state.capabilities.remote_mode}</div>
-              <div>변경 기능: {state.capabilities.mutations_enabled ? "검토 게이트" : "없음"}</div>
-            </div>
-            <div
-              className="mt-3 border border-amber-300/20 bg-amber-950/10 p-3"
-              data-office-mutation-control-readiness="true"
-              data-office-mutation-control-status={mutationControlReadiness.status}
-            >
-              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-100">{mutationControlReadiness.stageLabel}</div>
-              <div className="mt-1 text-[11px] leading-4 text-midground/70" data-office-mutation-control-summary="true">{mutationControlReadiness.summary}</div>
-              <div className="mt-2 grid gap-1" data-office-mutation-control-gates="true">
-                {mutationControlReadiness.gates.map((gate) => (
-                  <div
-                    key={gate.id}
-                    className="flex items-center justify-between gap-2 border border-amber-200/10 bg-black/10 px-2 py-1 text-[10px] text-midground/60"
-                    data-office-mutation-control-gate={gate.id}
-                    data-office-mutation-control-gate-satisfied={gate.satisfied ? "true" : "false"}
-                    title={gate.detail}
-                  >
-                    <span>{gate.label}</span>
-                    <span className="uppercase tracking-[0.14em]">required</span>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-2 grid gap-1">
-                {mutationControlReadiness.controls.map((control) => (
-                  <button
-                    key={control.id}
-                    type="button"
-                    disabled
-                    className="flex cursor-not-allowed items-center justify-between gap-2 border border-current/15 bg-black/15 px-2 py-1 text-left text-[10px] text-midground/60"
-                    data-office-mutation-control-item={control.id}
-                    data-office-mutation-control-enabled={control.enabled ? "true" : "false"}
-                    data-office-mutation-control-risk={control.risk}
-                    data-office-mutation-control-dry-run-only={control.dryRunOnly ? "true" : "false"}
-                    title={`${control.detail} · ${control.requires.join(" · ")}`}
-                  >
-                    <span>{control.recommendedOrder}. {control.label}</span>
-                    <span className="uppercase tracking-[0.14em]">{control.risk} · {control.posture}</span>
-                  </button>
-                ))}
-              </div>
-              <div className="mt-2 text-[10px] leading-4 text-midground/45">{mutationControlReadiness.safetyNote}</div>
-            </div>
-            <div className={`office-safe-mission-clock mt-3 ${safePulseToneClass(safeMissionClock.tone)}`} aria-label="Stage 14-L 안전 mission clock" data-office-safe-mission-clock="true">
-              <div className="office-safe-mission-clock__header">
-                <span className="office-safe-mission-clock__title">{safeMissionClock.stageLabel}</span>
-                <span className="office-safe-mission-clock__headline" data-office-safe-mission-clock-headline="true">{safeMissionClock.headline}</span>
-              </div>
-              <div className="office-safe-mission-clock__grid" aria-hidden="true">
-                {safeMissionClock.items.map((item) => (
-                  <span
-                    key={`mission-clock-${item.id}`}
-                    className={`office-safe-mission-clock__item ${safePulseToneClass(item.tone)}`}
-                    title={`${item.detail} · ${safeMissionClock.detail}`}
-                    aria-hidden={item.ariaHidden}
-                    data-office-safe-mission-clock-item={item.id}
-                  >
-                    <span>{item.label}</span>
-                    <span>{item.detail}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className={`office-safe-command-deck mt-3 ${safePulseToneClass(safeCommandDeck.tone)}`} aria-label="Stage 14-M 안전 command deck" data-office-safe-command-deck="true">
-              <div className="office-safe-command-deck__header">
-                <span className="office-safe-command-deck__title">{safeCommandDeck.stageLabel}</span>
-                <span className="office-safe-command-deck__headline" data-office-safe-command-deck-headline="true">{safeCommandDeck.headline}</span>
-              </div>
-              <div className="office-safe-command-deck__grid" aria-hidden="true">
-                {safeCommandDeck.cards.map((card) => (
-                  <span
-                    key={`command-deck-${card.id}`}
-                    className={`office-safe-command-deck__card ${safePulseToneClass(card.tone)}`}
-                    title={`${card.detail} · ${safeCommandDeck.detail}`}
-                    aria-hidden={card.ariaHidden}
-                    data-office-safe-command-deck-card={card.id}
-                  >
-                    <span>{card.label}</span>
-                    <span>{card.detail}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className={`office-safe-hud-hierarchy mt-3 ${safePulseToneClass(safeHudHierarchy.tone)}`} aria-label="Stage 15-A 안전 HUD hierarchy" data-office-safe-hud-hierarchy="true">
-              <div className="office-safe-hud-hierarchy__header">
-                <span className="office-safe-hud-hierarchy__title">{safeHudHierarchy.stageLabel}</span>
-                <span className="office-safe-hud-hierarchy__headline" data-office-safe-hud-hierarchy-headline="true">{safeHudHierarchy.headline}</span>
-              </div>
-              <div className="office-safe-hud-hierarchy__summary" data-office-safe-hud-hierarchy-summary="true">{safeHudHierarchy.summary}</div>
-              <div className="office-safe-hud-hierarchy__grid" aria-hidden="true">
-                {safeHudHierarchy.sections.map((section) => (
-                  <span
-                    key={`hud-hierarchy-${section.id}`}
-                    className={`office-safe-hud-hierarchy__section ${safePulseToneClass(section.tone)}`}
-                    title={`${section.detail} · ${safeHudHierarchy.detail}`}
-                    aria-hidden={section.ariaHidden}
-                    data-office-safe-hud-hierarchy-section={section.id}
-                  >
-                    <span>{section.label}</span>
-                    <span>{section.detail}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className={`office-safe-status-snapshot mt-3 ${safePulseToneClass(safeStatusSnapshot.tone)}`} aria-label="Stage 14-O 안전 status snapshot" data-office-safe-status-snapshot="true">
-              <div className="office-safe-status-snapshot__header">
-                <span className="office-safe-status-snapshot__title">{safeStatusSnapshot.stageLabel}</span>
-                <span className="office-safe-status-snapshot__headline" data-office-safe-status-snapshot-headline="true">{safeStatusSnapshot.headline}</span>
-              </div>
-              <div className="office-safe-status-snapshot__grid" aria-hidden="true">
-                {safeStatusSnapshot.items.map((item) => (
-                  <span
-                    key={`status-snapshot-${item.id}`}
-                    className={`office-safe-status-snapshot__item ${safePulseToneClass(item.tone)}`}
-                    title={`${item.detail} · ${safeStatusSnapshot.detail}`}
-                    aria-hidden={item.ariaHidden}
-                    data-office-safe-status-snapshot-item={item.id}
-                  >
-                    <span>{item.label}</span>
-                    <span>{item.detail}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className={`office-safe-scan-index mt-3 ${safePulseToneClass(safeScanIndex.tone)}`} aria-label="Stage 14-P 안전 scan index" data-office-safe-scan-index="true">
-              <div className="office-safe-scan-index__header">
-                <span className="office-safe-scan-index__title">{safeScanIndex.stageLabel}</span>
-                <span className="office-safe-scan-index__headline" data-office-safe-scan-index-headline="true">{safeScanIndex.headline}</span>
-              </div>
-              <div className="office-safe-scan-index__grid" aria-hidden="true">
-                {safeScanIndex.items.map((item) => (
-                  <span
-                    key={`scan-index-${item.id}`}
-                    className={`office-safe-scan-index__item ${safePulseToneClass(item.tone)}`}
-                    title={`${item.detail} · ${safeScanIndex.detail}`}
-                    aria-hidden={item.ariaHidden}
-                    data-office-safe-scan-index-item={item.id}
-                  >
-                    <span>{item.label}</span>
-                    <span>{item.detail}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className={`office-safe-hud-readability mt-3 ${safePulseToneClass(safeHudReadability.tone)}`} aria-label="Stage 14-Q 안전 HUD readability" data-office-safe-hud-readability="true">
-              <div className="office-safe-hud-readability__header">
-                <span className="office-safe-hud-readability__title">{safeHudReadability.stageLabel}</span>
-                <span className="office-safe-hud-readability__summary" data-office-safe-hud-readability-summary="true">{safeHudReadability.summary}</span>
-              </div>
-              <div className="office-safe-hud-readability__grid" aria-hidden="true">
-                {safeHudReadability.items.map((item) => (
-                  <span
-                    key={`hud-readability-${item.id}`}
-                    className={`office-safe-hud-readability__item ${safePulseToneClass(item.tone)}`}
-                    title={`${item.detail} · ${safeHudReadability.detail}`}
-                    aria-hidden={item.ariaHidden}
-                    data-office-safe-hud-readability-item={item.id}
-                  >
-                    <span>{item.label}</span>
-                    <span>{item.detail}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-            <Button onClick={load} className="mt-4 w-full gap-2 uppercase" disabled={refreshing}>
-              <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} /> 새로고침
-            </Button>
-            <button
-              type="button"
-              onClick={() => {
-                liveFailureCountRef.current = 0;
-                setLiveFailureCount(0);
-                setLiveTracking((value) => !value);
-              }}
-              className="mt-2 flex w-full items-center justify-center gap-2 border border-current/20 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-midground/80 hover:text-foreground"
-            >
-              <Activity className={`h-4 w-4 ${liveTracking ? "text-emerald-300" : "text-midground/60"}`} /> {liveTracking ? "실시간 추적 일시정지" : "실시간 추적 켜기"}
-            </button>
-            <div className="mt-2 text-[10px] leading-4 text-midground/50">
-              {liveTracking
-                ? `브라우저에서만 ${OFFICE_LIVE_TRACKING_BASE_INTERVAL_MS / 1000}초마다 안전 DTO를 다시 읽습니다. 탭이 숨겨지거나 실패가 반복되면 60–120초로 늦춥니다. cron/gateway/backend 작업은 건드리지 않습니다.`
-                : "기본은 수동 새로고침입니다. 실시간 추적은 이 브라우저 탭에서만 켜집니다."}
-            </div>
-          </details>
-        </div>
-        <div className="mt-4 border border-emerald-300/20 bg-emerald-950/10 p-3" data-office-live-operations-layer="true">
-          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-200">
-                <Activity className="h-4 w-4" /> {liveOperationsLayer.stageLabel}
-              </div>
-              <div className="mt-1 text-sm text-midground/75" data-office-live-operations-summary="true">{liveOperationsLayer.summary}</div>
-            </div>
-            <div className="text-xs text-midground/55">{liveOperationsLayer.redactionNote}</div>
-          </div>
-          {liveOperationsLayer.cues.length > 0 ? (
-            <div className="mt-3 flex flex-wrap gap-2" aria-hidden="true">
-              {liveOperationsLayer.cues.map((cue) => (
-                <span
-                  key={cue.id}
-                  className={`border px-2 py-1 text-xs ${safePulseToneClass(cue.tone)}`}
-                  title={cue.detail}
-                  aria-hidden={cue.ariaHidden}
-                  data-office-live-operations-cue={cue.id}
-                >
-                  {cue.label} {cue.count}
-                </span>
-              ))}
-            </div>
-          ) : (
-            <div className="mt-3 text-xs text-midground/55" data-office-live-operations-empty="true">현재 표시할 운영 cue가 없습니다. 빈 상태도 안전한 read-only 투영입니다.</div>
-          )}
-        </div>
-      </div>
 
       <div className="grid gap-3 md:grid-cols-4">
         <StatCard label="진행 중 작업" value={state.summary.active_work_count ?? 0} detail="승인된 어댑터가 보여준 열린 작업" />

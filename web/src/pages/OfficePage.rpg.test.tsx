@@ -137,6 +137,29 @@ describe("Office controlled-mutation runtime status panel placement", () => {
     }
   });
 
+  it("absorbs the old hero focus controls, diagnostics HUD, and live operations layer into the RPG tabs drawer", () => {
+    const source = officePageSource;
+    const drawerIndex = source.indexOf("<OfficeRpgVisualizerTabsDrawer>");
+    const drawerCloseIndex = source.indexOf("</OfficeRpgVisualizerTabsDrawer>");
+    const oldHeroIndex = source.indexOf("<h1 className=\"mt-3 text-3xl font-semibold uppercase tracking-wide text-foreground md:text-4xl\">Hermes AI 오피스</h1>");
+    const focusButtonIndex = source.indexOf("data-office-legacy-focus-filter");
+    const diagnosticsIndex = source.indexOf("data-office-diagnostics-drawer=\"true\"");
+    const liveOpsIndex = source.indexOf("data-office-live-operations-layer=\"true\"");
+
+    expect(drawerIndex).toBeGreaterThan(0);
+    expect(drawerCloseIndex).toBeGreaterThan(drawerIndex);
+    expect(oldHeroIndex).toBe(-1);
+    expect(source).toContain('data-office-rpg-tab="operations"');
+    expect(source).toContain('data-office-rpg-tab-panel="operations"');
+    expect(source).toContain('data-office-legacy-operations-absorbed="true"');
+    expect(focusButtonIndex).toBeGreaterThan(drawerIndex);
+    expect(focusButtonIndex).toBeLessThan(drawerCloseIndex);
+    expect(diagnosticsIndex).toBeGreaterThan(drawerIndex);
+    expect(diagnosticsIndex).toBeLessThan(drawerCloseIndex);
+    expect(liveOpsIndex).toBeGreaterThan(drawerIndex);
+    expect(liveOpsIndex).toBeLessThan(drawerCloseIndex);
+  });
+
   it("keeps graduated status panels available outside legacy diagnostic lanes for smoke hooks", () => {
     const source = officePageSource;
     const legacyIndex = source.indexOf("{SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES ?");
