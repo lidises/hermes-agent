@@ -1,3 +1,36 @@
+## Current status — NAS Keeper cleanup execution gate metadata rung completed (2026-05-27T08:37Z)
+
+Scope completed:
+- Added an explicit cleanup execution gate contract after the artifact retention plan rung.
+- This rung verifies an exact retention-plan checksum and records a metadata-only cleanup gate record; it does not open cleanup execution.
+- The gate keeps actual NAS delete/move/archive/write disabled and requires a separate exact cleanup execution approval before any destructive or archival operation.
+- Synced both VPS worktrees and restarted the two dashboard/core services only; gateway remained active and was not restarted.
+
+Evidence captured:
+- New route: `POST/GET /api/office/controlled-mutation/nas-runtime/nas-keeper-cleanup-execution-gate`.
+- New helpers: `append_office_controlled_mutation_nas_keeper_cleanup_execution_gate` and `list_office_controlled_mutation_nas_keeper_cleanup_execution_gate_records`.
+- Existing retention-plan readback now exposes a stable metadata checksum for exact gate matching.
+- Protected API smoke wrote one metadata-only cleanup gate record: `cleanupgate-20260527-artifact-retention-1`.
+- Protected API results: unauthenticated POST returned 401; authenticated POST stored the gate; duplicate POST returned idempotent replay; readback count for the cleanup gate ref is 1.
+- API/DOM leak checks found no raw filesystem root/path, raw markdown body, secret token, or raw write payload echo for the cleanup gate response.
+- Focused tests passed: artifact retention plan + cleanup execution gate + execution-from-preview + execution-payload preview + NAS runtime write = 23/23.
+- `py_compile` and `git diff --check` passed.
+
+Safety boundaries preserved:
+- Real NAS production write: false.
+- Actual NAS delete/move/archive cleanup: false.
+- Cleanup execution opened: false.
+- Direct VPS NAS authority: false.
+- watcher/cron/dispatcher/authority-adapter: false.
+- public exposure change: false.
+- gateway restart: false.
+- raw filesystem root/path, raw markdown body, secret, or raw write payload echo: false.
+
+Readiness/result note:
+- Write-readiness remains 100%.
+- Operational readiness increased: retention plan -> checksum-verified cleanup gate is now implemented and smoked.
+- Next shortest safe rung is an explicit cleanup execution dry-run/hold contract, still metadata-only, unless the user separately approves actual cleanup execution or a fresh exact NAS write.
+
 ## Current status — NAS Keeper fresh approved Mac relay write completed (2026-05-27T08:03Z)
 
 Scope completed:

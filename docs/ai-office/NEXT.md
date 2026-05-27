@@ -1,3 +1,29 @@
+## NEXT — after NAS Keeper cleanup execution gate metadata rung (2026-05-27T08:37Z)
+
+Current next stage:
+- The artifact retention plan has a checksum-verified metadata-only cleanup gate record: `cleanupgate-20260527-artifact-retention-1`.
+- Cleanup execution is still closed; no NAS delete/move/archive/write was performed or enabled.
+- Write-readiness is 100%; the useful next safe movement is operational-readiness through a cleanup execution dry-run/hold contract, or a separately approved fresh exact NAS write.
+
+Recommended next rung:
+- Add a cleanup execution dry-run/hold contract that consumes the cleanup gate ref, proves terminal/idempotency behavior, returns the exact safe candidate refs/actions, and still leaves actual delete/move/archive/write disabled.
+- Keep it metadata-only unless the user explicitly approves actual cleanup execution.
+
+Still forbidden unless separately and explicitly approved:
+- additional real NAS production writes beyond a fresh exact approved target/content boundary
+- actual NAS delete/move/archive cleanup
+- direct VPS NAS authority, NAS mount credentials, or direct VPS NAS file write
+- watcher/cron/dispatcher/authority-adapter activation
+- public exposure
+- gateway restart
+- raw markdown/body/path/secret/raw write payload echo
+
+Required first checks next time:
+1. Read `docs/ai-office/STATUS.md` and this file.
+2. Confirm local/VPS git, service health, durable queue count/status, artifact retention plan record count, and cleanup gate record count.
+3. Treat all durable, fresh, retention-plan, and cleanup-gate refs as terminal/non-replayable except for explicit metadata-only idempotent replay responses.
+4. Require fresh exact approval before any additional real NAS write, actual cleanup execution, watcher/cron/dispatcher/authority-adapter, or VPS NAS authority change.
+
 ## NEXT — after NAS Keeper fresh approved Mac relay write (2026-05-27T08:03Z)
 
 Current next stage:
