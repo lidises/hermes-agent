@@ -2453,7 +2453,8 @@ export type OfficeNasKeeperStep11LadderStepId =
   | "disabled_run"
   | "summary_receipt"
   | "closure_receipt"
-  | "step10_completion";
+  | "step10_completion"
+  | "step11_hydration_receipt";
 
 export type OfficeNasKeeperStep11ReadOnlyRenderingInput = {
   latestStep10Record?: Record<string, unknown> | null;
@@ -6021,6 +6022,7 @@ const OFFICE_NAS_KEEPER_STEP11_LADDER_LABELS: Record<OfficeNasKeeperStep11Ladder
   summary_receipt: "Summary/export receipt",
   closure_receipt: "Closure/no-authority receipt",
   step10_completion: "Step 10 completion receipt",
+  step11_hydration_receipt: "Step 11 hydration receipt",
 };
 
 function stringRecordField(record: Record<string, unknown> | null | undefined, key: string, fallback = "not_recorded"): string {

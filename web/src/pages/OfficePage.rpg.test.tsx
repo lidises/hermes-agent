@@ -6041,6 +6041,7 @@ describe("NasKeeperExecutionOperatorActionPanel", () => {
       "summary_receipt",
       "closure_receipt",
       "step10_completion",
+      "step11_hydration_receipt",
     ]);
     expect(JSON.stringify(status)).not.toMatch(/write_payload|raw markdown body|\/Users\/lidises|\/home\/hermes|token-shaped-operator|private-operator-provider/i);
   });

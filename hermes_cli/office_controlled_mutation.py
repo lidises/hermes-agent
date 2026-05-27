@@ -10289,6 +10289,19 @@ _NAS_KEEPER_TMP_ROOT_STEP10_COMPLETION_RECEIPT_FIELDS = {
     "next_stage",
     "evidence_refs",
 }
+_NAS_KEEPER_STEP11_HYDRATION_RECEIPT_FIELDS = {
+    "step11_hydration_receipt_ref",
+    "latest_step10_completion_ref",
+    "latest_step10_completion_sha256",
+    "aggregate_sha256",
+    "hydrated_status_surface",
+    "readiness_percent",
+    "hydrated_by",
+    "hydrated_at",
+    "operator_confirmation",
+    "next_stage",
+    "evidence_refs",
+}
 _NAS_KEEPER_CLEANUP_HOLD_ACTIONS = {"hold_cleanup_candidate", "retain_for_manual_review"}
 _NAS_KEEPER_CLEANUP_PACKAGE_ACTIONS = {"retain_for_manual_cleanup_receipt", "archive_candidate_after_manual_approval"}
 
@@ -10331,6 +10344,10 @@ def _default_nas_keeper_cleanup_closure_receipt_store_path() -> Path:
 
 def _default_nas_keeper_tmp_root_step10_completion_receipt_store_path() -> Path:
     return get_hermes_home() / "office" / "controlled-mutation" / "nas_keeper_tmp_root_step10_completion_receipt_records.jsonl"
+
+
+def _default_nas_keeper_step11_hydration_receipt_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "nas_keeper_step11_hydration_receipt_records.jsonl"
 
 
 def _stable_metadata_sha256(value: Mapping[str, object]) -> str:
@@ -12553,6 +12570,214 @@ def list_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receip
     }
 
 
+def _normalize_nas_keeper_step11_hydration_receipt_record(value: object) -> dict[str, object] | None:
+    if not isinstance(value, Mapping):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(value.get("step11_hydration_receipt_ref"), "step11hydration-"):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(value.get("latest_step10_completion_ref"), "tmpcompletion-"):
+        return None
+    latest_step10_sha = value.get("latest_step10_completion_sha256")
+    aggregate_sha = value.get("aggregate_sha256")
+    if not (isinstance(latest_step10_sha, str) and re.fullmatch(r"[a-f0-9]{64}", latest_step10_sha)):
+        return None
+    if not (isinstance(aggregate_sha, str) and re.fullmatch(r"[a-f0-9]{64}", aggregate_sha)):
+        return None
+    if value.get("hydrated_status_surface") != "read_only_rendering":
+        return None
+    if value.get("readiness_percent") != 100:
+        return None
+    if not _is_opaque_id(value.get("hydrated_by")):
+        return None
+    if not (isinstance(value.get("hydrated_at"), str) and _ISO_UTC_RE.fullmatch(str(value.get("hydrated_at")))):
+        return None
+    if value.get("operator_confirmation") != "step11-read-only-status-aggregate-hydrated":
+        return None
+    if value.get("next_stage") != "step11_hydration_receipt_recorded":
+        return None
+    if not _validate_evidence_refs(value.get("evidence_refs")):
+        return None
+    return {
+        "step11_hydration_receipt_ref": value["step11_hydration_receipt_ref"],
+        "latest_step10_completion_ref": value["latest_step10_completion_ref"],
+        "latest_step10_completion_sha256": latest_step10_sha,
+        "aggregate_sha256": aggregate_sha,
+        "hydrated_status_surface": "read_only_rendering",
+        "readiness_percent": 100,
+        "hydrated_by": value["hydrated_by"],
+        "hydrated_at": value["hydrated_at"],
+        "operator_confirmation": value["operator_confirmation"],
+        "next_stage": value["next_stage"],
+        "evidence_refs": list(cast(Sequence[object], value["evidence_refs"])),
+    }
+
+
+def _read_nas_keeper_step11_hydration_receipt_records(path: Path) -> tuple[list[dict[str, object]], int]:
+    records: list[dict[str, object]] = []
+    skipped_count = 0
+    if not path.exists():
+        return records, skipped_count
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            if not line.strip():
+                continue
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped_count += 1
+                continue
+            normalized = _normalize_nas_keeper_step11_hydration_receipt_record(item)
+            if normalized is None:
+                skipped_count += 1
+                continue
+            records.append(normalized)
+    return records, skipped_count
+
+
+def _step11_hydration_receipt_dto(record: Mapping[str, object], *, idempotent_replay: bool = False) -> dict[str, object]:
+    return {
+        "schema_version": 1,
+        "mode": "nas_keeper_step11_hydration_receipt_recorded",
+        "step11_hydration_receipt_ref": record["step11_hydration_receipt_ref"],
+        "step11_hydration_receipt_sha256": _stable_metadata_sha256(record),
+        "latest_step10_completion_ref": record["latest_step10_completion_ref"],
+        "latest_step10_completion_sha256": record["latest_step10_completion_sha256"],
+        "aggregate_sha256": record["aggregate_sha256"],
+        "hydrated_status_surface": "read_only_rendering",
+        "readiness_percent": 100,
+        "write_readiness_percent": 100,
+        "hydrated_by": record["hydrated_by"],
+        "hydrated_at": record["hydrated_at"],
+        "evidence_refs": record["evidence_refs"],
+        "idempotent_replay": idempotent_replay,
+        "metadata_only_record_write": True,
+        "read_only_rendering_hydrated": True,
+        "replay_idempotency_metadata": {"duplicate_safe_response": True, "receipt_ref_terminal": True},
+        "cleanup_execution_opened": False,
+        "execution_authority_created": False,
+        "real_nas_production_write_enabled": False,
+        "real_nas_production_write_executed": False,
+        "direct_vps_nas_write_enabled": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "public_exposure_enabled": False,
+        "gateway_restart_required": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "next_required_boundary": "real_nas_production_write_requires_exact_approval",
+    }
+
+
+def list_office_controlled_mutation_nas_keeper_step11_hydration_receipt_records(
+    *, hydration_receipt_store_path: Path | None = None, limit: int = 50, step11_hydration_receipt_ref: object = None
+) -> dict[str, object]:
+    errors: list[dict[str, str]] = []
+    safe_ref = None
+    if step11_hydration_receipt_ref is not None:
+        if _office_disabled_runtime_dispatch_valid_prefixed_ref(step11_hydration_receipt_ref, "step11hydration-"):
+            safe_ref = str(step11_hydration_receipt_ref)
+        else:
+            errors.append(_error("step11_hydration_receipt_ref", "unsupported_ref_shape"))
+    path = hydration_receipt_store_path or _default_nas_keeper_step11_hydration_receipt_store_path()
+    records, skipped_count = _read_nas_keeper_step11_hydration_receipt_records(path)
+    if safe_ref:
+        records = [record for record in records if record.get("step11_hydration_receipt_ref") == safe_ref]
+    if errors:
+        records = []
+    max_items = max(0, min(limit, 200)) if isinstance(limit, int) else 50
+    records = records[-max_items:] if max_items else []
+    return {
+        "found": bool(records),
+        "errors": errors,
+        "dto": {
+            "schema_version": 1,
+            "mode": "nas_keeper_step11_hydration_receipt_records_readback",
+            "record_count": len(records),
+            "limit": max_items,
+            "skipped_count": skipped_count,
+            "records": records,
+            "latest_record": records[-1] if records else None,
+            "metadata_only_record_write": True,
+            "readiness_percent": 100 if records else 0,
+            "real_nas_production_write_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "next_required_boundary": "real_nas_production_write_requires_exact_approval" if records else "step11_hydration_receipt",
+        },
+    }
+
+
+def append_office_controlled_mutation_nas_keeper_step11_hydration_receipt(
+    payload: object, *, completion_store_path: Path | None = None, hydration_receipt_store_path: Path | None = None
+) -> dict[str, object]:
+    if not isinstance(payload, Mapping):
+        return {"stored": False, "idempotent_replay": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    errors: list[dict[str, str]] = []
+    if set(payload) - _NAS_KEEPER_STEP11_HYDRATION_RECEIPT_FIELDS:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+    for field in sorted(_NAS_KEEPER_STEP11_HYDRATION_RECEIPT_FIELDS):
+        if field not in payload:
+            errors.append(_error(field, "missing_field"))
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("step11_hydration_receipt_ref"), "step11hydration-"):
+        errors.append(_error("step11_hydration_receipt_ref", "invalid_step11_hydration_receipt_ref"))
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("latest_step10_completion_ref"), "tmpcompletion-"):
+        errors.append(_error("latest_step10_completion_ref", "invalid_latest_step10_completion_ref"))
+    for field in ("latest_step10_completion_sha256", "aggregate_sha256"):
+        if not (isinstance(payload.get(field), str) and re.fullmatch(r"[a-f0-9]{64}", str(payload.get(field)))):
+            errors.append(_error(field, "invalid_sha256"))
+    if payload.get("hydrated_status_surface") != "read_only_rendering":
+        errors.append(_error("hydrated_status_surface", "invalid_status_surface"))
+    if payload.get("readiness_percent") != 100:
+        errors.append(_error("readiness_percent", "invalid_readiness_percent"))
+    if not _is_opaque_id(payload.get("hydrated_by")):
+        errors.append(_error("hydrated_by", "invalid_opaque_id"))
+    if not (isinstance(payload.get("hydrated_at"), str) and _ISO_UTC_RE.fullmatch(str(payload.get("hydrated_at")))):
+        errors.append(_error("hydrated_at", "invalid_timestamp"))
+    if payload.get("operator_confirmation") != "step11-read-only-status-aggregate-hydrated":
+        errors.append(_error("operator_confirmation", "invalid_confirmation"))
+    if payload.get("next_stage") != "step11_hydration_receipt_recorded":
+        errors.append(_error("next_stage", "invalid_next_stage"))
+    if not _validate_evidence_refs(payload.get("evidence_refs")):
+        errors.append(_error("evidence_refs", "invalid_evidence_refs"))
+
+    completion_path = completion_store_path or _default_nas_keeper_tmp_root_step10_completion_receipt_store_path()
+    aggregate = build_office_controlled_mutation_nas_keeper_step11_read_only_status_aggregate(store_paths={"step10_completion": completion_path})
+    aggregate_dto = aggregate.get("dto") if isinstance(aggregate, Mapping) else None
+    if not isinstance(aggregate_dto, Mapping) or aggregate_dto.get("ready_for_read_only_rendering") is not True:
+        errors.append(_error("latest_step10_completion_ref", "step10_completion_not_found"))
+    else:
+        if payload.get("latest_step10_completion_ref") != aggregate_dto.get("latest_step10_completion_ref"):
+            errors.append(_error("latest_step10_completion_ref", "step10_completion_ref_mismatch"))
+        if payload.get("latest_step10_completion_sha256") != aggregate_dto.get("latest_step10_completion_sha256"):
+            errors.append(_error("latest_step10_completion_sha256", "step10_completion_checksum_mismatch"))
+        if payload.get("aggregate_sha256") != aggregate_dto.get("aggregate_sha256"):
+            errors.append(_error("aggregate_sha256", "aggregate_checksum_mismatch"))
+
+    record = {field: payload.get(field) for field in _NAS_KEEPER_STEP11_HYDRATION_RECEIPT_FIELDS}
+    normalized = _normalize_nas_keeper_step11_hydration_receipt_record(record)
+    if normalized is None:
+        errors.append(_error("step11_hydration_receipt", "invalid_step11_hydration_receipt"))
+    if errors:
+        return {"stored": False, "idempotent_replay": False, "errors": sorted(errors, key=lambda item: (item["field"], item["code"])), "dto": None}
+
+    path = hydration_receipt_store_path or _default_nas_keeper_step11_hydration_receipt_store_path()
+    records, _skipped = _read_nas_keeper_step11_hydration_receipt_records(path)
+    for existing in records:
+        if existing.get("step11_hydration_receipt_ref") == normalized["step11_hydration_receipt_ref"]:
+            return {"stored": False, "idempotent_replay": True, "errors": [], "dto": _step11_hydration_receipt_dto(existing, idempotent_replay=True)}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(normalized, sort_keys=True, ensure_ascii=False) + "\n")
+    return {"stored": True, "idempotent_replay": False, "errors": [], "dto": _step11_hydration_receipt_dto(normalized)}
+
+
 _NAS_KEEPER_STEP11_LADDER_READERS: tuple[tuple[str, str, Callable[[Path], tuple[list[dict[str, object]], int]], Callable[[], Path]], ...] = (
     ("retention_plan", "Retention plan", _read_nas_keeper_artifact_retention_plan_records, _default_nas_keeper_artifact_retention_plan_store_path),
     ("cleanup_gate", "Cleanup gate", _read_nas_keeper_cleanup_execution_gate_records, _default_nas_keeper_cleanup_execution_gate_store_path),
@@ -12564,6 +12789,7 @@ _NAS_KEEPER_STEP11_LADDER_READERS: tuple[tuple[str, str, Callable[[Path], tuple[
     ("summary_receipt", "Summary receipt", _read_nas_keeper_cleanup_execution_summary_receipt_records, _default_nas_keeper_cleanup_execution_summary_receipt_store_path),
     ("closure_receipt", "Closure receipt", _read_nas_keeper_cleanup_closure_receipt_records, _default_nas_keeper_cleanup_closure_receipt_store_path),
     ("step10_completion", "Step 10 completion", _read_nas_keeper_tmp_root_step10_completion_receipt_records, _default_nas_keeper_tmp_root_step10_completion_receipt_store_path),
+    ("step11_hydration_receipt", "Step 11 hydration receipt", _read_nas_keeper_step11_hydration_receipt_records, _default_nas_keeper_step11_hydration_receipt_store_path),
 )
 
 
@@ -12575,6 +12801,7 @@ def build_office_controlled_mutation_nas_keeper_step11_read_only_status_aggregat
     skipped_counts: dict[str, int] = {}
     ladder_steps: list[dict[str, object]] = []
     latest_completion: dict[str, object] | None = None
+    latest_hydration_receipt: dict[str, object] | None = None
 
     for step_id, label, reader, default_path_factory in _NAS_KEEPER_STEP11_LADDER_READERS:
         path = supplied_paths.get(step_id) or default_path_factory()
@@ -12585,48 +12812,40 @@ def build_office_controlled_mutation_nas_keeper_step11_read_only_status_aggregat
         ladder_steps.append({"id": step_id, "label": label, "record_count": record_count, "complete": record_count > 0})
         if step_id == "step10_completion" and records:
             latest_completion = records[-1]
+        if step_id == "step11_hydration_receipt" and records:
+            latest_hydration_receipt = records[-1]
 
     ready = latest_completion is not None
     latest_sha256 = _stable_metadata_sha256(latest_completion) if latest_completion else None
-    return {
-        "found": ready,
-        "errors": [],
-        "dto": {
-            "schema_version": 1,
-            "mode": "nas_keeper_step11_read_only_status_aggregate",
-            "status_surface": "read_only_rendering",
-            "metadata_only_record_write": True,
-            "read_only_rendering_hydrated": True,
-            "ready_for_read_only_rendering": ready,
-            "readiness_percent": 100 if ready else 0,
-            "write_readiness_percent": 100 if ready else 0,
-            "record_counts": record_counts,
-            "skipped_counts": skipped_counts,
-            "ladder_steps": ladder_steps,
-            "latest_step10_completion_ref": latest_completion.get("tmp_root_completion_ref") if latest_completion else None,
-            "latest_step10_completion_sha256": latest_sha256,
-            "latest_cleanup_closure_ref": latest_completion.get("cleanup_closure_ref") if latest_completion else None,
-            "latest_cleanup_closure_sha256": latest_completion.get("cleanup_closure_sha256") if latest_completion else None,
-            "safe_display_path": latest_completion.get("safe_display_path") if latest_completion else None,
-            "readback_sha256": latest_completion.get("readback_sha256") if latest_completion else None,
-            "tmp_root_write_smoke_completed": ready,
-            "idempotency_replay_metadata": {"latest_step10_completion_ref_terminal": ready, "duplicate_safe_response": True},
-            "capability_flags": {
-                "cleanup_execution_opened": False,
-                "execution_authority_created": False,
-                "real_nas_production_write_enabled": False,
-                "direct_vps_nas_write_enabled": False,
-                "watcher_enabled": False,
-                "cron_enabled": False,
-                "dispatch_enabled": False,
-                "authority_adapter_binding_enabled": False,
-                "public_exposure_enabled": False,
-                "gateway_restart_required": False,
-            },
+    next_boundary = "tmp_root_step10_completion_receipt"
+    if ready:
+        next_boundary = "real_nas_production_write_requires_exact_approval" if latest_hydration_receipt else "read_only_status_rendering_hydrated"
+    dto: dict[str, object] = {
+        "schema_version": 1,
+        "mode": "nas_keeper_step11_read_only_status_aggregate",
+        "status_surface": "read_only_rendering",
+        "metadata_only_record_write": True,
+        "read_only_rendering_hydrated": True,
+        "ready_for_read_only_rendering": ready,
+        "readiness_percent": 100 if ready else 0,
+        "write_readiness_percent": 100 if ready else 0,
+        "record_counts": record_counts,
+        "skipped_counts": skipped_counts,
+        "ladder_steps": ladder_steps,
+        "latest_step10_completion_ref": latest_completion.get("tmp_root_completion_ref") if latest_completion else None,
+        "latest_step10_completion_sha256": latest_sha256,
+        "latest_step11_hydration_receipt_ref": latest_hydration_receipt.get("step11_hydration_receipt_ref") if latest_hydration_receipt else None,
+        "latest_step11_hydration_receipt_sha256": _stable_metadata_sha256(latest_hydration_receipt) if latest_hydration_receipt else None,
+        "latest_cleanup_closure_ref": latest_completion.get("cleanup_closure_ref") if latest_completion else None,
+        "latest_cleanup_closure_sha256": latest_completion.get("cleanup_closure_sha256") if latest_completion else None,
+        "safe_display_path": latest_completion.get("safe_display_path") if latest_completion else None,
+        "readback_sha256": latest_completion.get("readback_sha256") if latest_completion else None,
+        "tmp_root_write_smoke_completed": ready,
+        "idempotency_replay_metadata": {"latest_step10_completion_ref_terminal": ready, "step11_hydration_receipt_terminal": latest_hydration_receipt is not None, "duplicate_safe_response": True},
+        "capability_flags": {
             "cleanup_execution_opened": False,
             "execution_authority_created": False,
             "real_nas_production_write_enabled": False,
-            "real_nas_production_write_executed": False,
             "direct_vps_nas_write_enabled": False,
             "watcher_enabled": False,
             "cron_enabled": False,
@@ -12634,13 +12853,26 @@ def build_office_controlled_mutation_nas_keeper_step11_read_only_status_aggregat
             "authority_adapter_binding_enabled": False,
             "public_exposure_enabled": False,
             "gateway_restart_required": False,
-            "markdown_body_included": False,
-            "write_payload_included": False,
-            "raw_root_path_included": False,
-            "credential_value_included": False,
-            "next_required_boundary": "read_only_status_rendering_hydrated" if ready else "tmp_root_step10_completion_receipt",
         },
+        "cleanup_execution_opened": False,
+        "execution_authority_created": False,
+        "real_nas_production_write_enabled": False,
+        "real_nas_production_write_executed": False,
+        "direct_vps_nas_write_enabled": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "public_exposure_enabled": False,
+        "gateway_restart_required": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "next_required_boundary": next_boundary,
     }
+    dto["aggregate_sha256"] = _stable_metadata_sha256(dto)
+    return {"found": ready, "errors": [], "dto": dto}
 
 
 def append_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt(
