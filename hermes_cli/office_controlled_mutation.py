@@ -10252,6 +10252,17 @@ _NAS_KEEPER_CLEANUP_DISABLED_RUN_RECEIPT_FIELDS = {
     "disabled_reason",
     "evidence_refs",
 }
+_NAS_KEEPER_CLEANUP_EXECUTION_SUMMARY_RECEIPT_FIELDS = {
+    "cleanup_summary_ref",
+    "cleanup_disabled_run_ref",
+    "cleanup_disabled_run_sha256",
+    "exported_by",
+    "exported_at",
+    "operator_confirmation",
+    "summary_scope",
+    "included_refs",
+    "evidence_refs",
+}
 _NAS_KEEPER_CLEANUP_HOLD_ACTIONS = {"hold_cleanup_candidate", "retain_for_manual_review"}
 _NAS_KEEPER_CLEANUP_PACKAGE_ACTIONS = {"retain_for_manual_cleanup_receipt", "archive_candidate_after_manual_approval"}
 
@@ -10282,6 +10293,10 @@ def _default_nas_keeper_cleanup_execution_package_receipt_store_path() -> Path:
 
 def _default_nas_keeper_cleanup_disabled_run_receipt_store_path() -> Path:
     return get_hermes_home() / "office" / "controlled-mutation" / "nas_keeper_cleanup_disabled_run_receipt_records.jsonl"
+
+
+def _default_nas_keeper_cleanup_execution_summary_receipt_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "nas_keeper_cleanup_execution_summary_receipt_records.jsonl"
 
 
 def _stable_metadata_sha256(value: Mapping[str, object]) -> str:
@@ -11861,6 +11876,241 @@ def append_office_controlled_mutation_nas_keeper_cleanup_disabled_run_receipt(
     with path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(normalized, sort_keys=True, ensure_ascii=False) + "\n")
     return {"stored": True, "idempotent_replay": False, "errors": [], "dto": _cleanup_disabled_run_receipt_dto(normalized)}
+
+
+def _validate_summary_included_refs(value: object) -> bool:
+    if not isinstance(value, Sequence) or isinstance(value, (str, bytes)) or not value:
+        return False
+    if len(value) > 24:
+        return False
+    return all(isinstance(item, str) and _OPAQUE_ID_RE.fullmatch(item) and not _has_raw_marker(item) for item in value)
+
+
+def _normalize_nas_keeper_cleanup_execution_summary_receipt_record(value: object) -> dict[str, object] | None:
+    if not isinstance(value, Mapping):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(value.get("cleanup_summary_ref"), "cleanupsummary-"):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(value.get("cleanup_disabled_run_ref"), "cleanupdisabled-"):
+        return None
+    checksum = value.get("cleanup_disabled_run_sha256")
+    if not (isinstance(checksum, str) and re.fullmatch(r"[a-f0-9]{64}", checksum)):
+        return None
+    if not _is_opaque_id(value.get("exported_by")):
+        return None
+    if not (isinstance(value.get("exported_at"), str) and _ISO_UTC_RE.fullmatch(str(value.get("exported_at")))):
+        return None
+    if value.get("operator_confirmation") != "metadata-only-execution-summary-no-delete-no-move-no-write":
+        return None
+    if value.get("summary_scope") != "operator_facing_refs_checksums_capabilities_only":
+        return None
+    if not _validate_summary_included_refs(value.get("included_refs")):
+        return None
+    if not _validate_evidence_refs(value.get("evidence_refs")):
+        return None
+    return {
+        "cleanup_summary_ref": value["cleanup_summary_ref"],
+        "cleanup_disabled_run_ref": value["cleanup_disabled_run_ref"],
+        "cleanup_disabled_run_sha256": checksum,
+        "exported_by": value["exported_by"],
+        "exported_at": value["exported_at"],
+        "operator_confirmation": value["operator_confirmation"],
+        "summary_scope": value["summary_scope"],
+        "included_refs": list(cast(Sequence[object], value["included_refs"])),
+        "evidence_refs": list(cast(Sequence[object], value["evidence_refs"])),
+    }
+
+
+def _read_nas_keeper_cleanup_execution_summary_receipt_records(path: Path) -> tuple[list[dict[str, object]], int]:
+    records: list[dict[str, object]] = []
+    skipped_count = 0
+    if not path.exists():
+        return records, skipped_count
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            if not line.strip():
+                continue
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped_count += 1
+                continue
+            normalized = _normalize_nas_keeper_cleanup_execution_summary_receipt_record(item)
+            if normalized is None:
+                skipped_count += 1
+                continue
+            records.append(normalized)
+    return records, skipped_count
+
+
+def _cleanup_execution_summary_receipt_dto(
+    record: Mapping[str, object], *, idempotent_replay: bool = False
+) -> dict[str, object]:
+    cleanup_summary_sha256 = _stable_metadata_sha256(record)
+    return {
+        "schema_version": 1,
+        "mode": "nas_keeper_cleanup_execution_summary_receipt_recorded",
+        "cleanup_summary_ref": record["cleanup_summary_ref"],
+        "cleanup_summary_sha256": cleanup_summary_sha256,
+        "cleanup_disabled_run_ref": record["cleanup_disabled_run_ref"],
+        "cleanup_disabled_run_sha256": record["cleanup_disabled_run_sha256"],
+        "exported_by": record["exported_by"],
+        "exported_at": record["exported_at"],
+        "summary_scope": record["summary_scope"],
+        "included_refs": record["included_refs"],
+        "included_ref_count": len(cast(Sequence[object], record["included_refs"])),
+        "evidence_refs": record["evidence_refs"],
+        "idempotent_replay": idempotent_replay,
+        "metadata_only_record_write": True,
+        "disabled_run_checksum_matched": True,
+        "operator_facing_export": True,
+        "refs_only_export": True,
+        "execution_authority_created": False,
+        "cleanup_execution_opened": False,
+        "actual_nas_delete_enabled": False,
+        "actual_nas_move_enabled": False,
+        "actual_nas_archive_enabled": False,
+        "actual_nas_write_enabled": False,
+        "direct_vps_nas_write_enabled": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "summary_export_path": [
+            "disabled_run_checksum_verified",
+            "refs_checksums_capabilities_exported",
+            "operator_facing_receipt_recorded",
+            "execution_authority_still_absent",
+        ],
+        "next_required_boundary": "separate_exact_cleanup_execution_approval",
+    }
+
+
+def list_office_controlled_mutation_nas_keeper_cleanup_execution_summary_receipt_records(
+    *, summary_store_path: Path | None = None, limit: int = 50, cleanup_summary_ref: object = None
+) -> dict[str, object]:
+    errors: list[dict[str, str]] = []
+    safe_ref = None
+    if cleanup_summary_ref is not None:
+        if _office_disabled_runtime_dispatch_valid_prefixed_ref(cleanup_summary_ref, "cleanupsummary-"):
+            safe_ref = str(cleanup_summary_ref)
+        else:
+            errors.append(_error("cleanup_summary_ref", "unsupported_ref_shape"))
+    path = summary_store_path or _default_nas_keeper_cleanup_execution_summary_receipt_store_path()
+    records, skipped_count = _read_nas_keeper_cleanup_execution_summary_receipt_records(path)
+    if safe_ref:
+        records = [record for record in records if record.get("cleanup_summary_ref") == safe_ref]
+    if errors:
+        records = []
+    max_items = max(0, min(limit, 200)) if isinstance(limit, int) else 50
+    records = records[-max_items:] if max_items else []
+    return {
+        "found": bool(records),
+        "errors": errors,
+        "dto": {
+            "schema_version": 1,
+            "mode": "nas_keeper_cleanup_execution_summary_receipt_records_readback",
+            "record_count": len(records),
+            "limit": max_items,
+            "skipped_count": skipped_count,
+            "records": records,
+            "latest_record": records[-1] if records else None,
+            "metadata_only_record_write": True,
+            "operator_facing_export": bool(records),
+            "refs_only_export": True,
+            "execution_authority_created": False,
+            "cleanup_execution_opened": False,
+            "actual_nas_delete_enabled": False,
+            "actual_nas_move_enabled": False,
+            "actual_nas_archive_enabled": False,
+            "actual_nas_write_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "next_required_boundary": "separate_exact_cleanup_execution_approval" if records else "cleanup_execution_summary_receipt",
+        },
+    }
+
+
+def append_office_controlled_mutation_nas_keeper_cleanup_execution_summary_receipt(
+    payload: object, *, disabled_store_path: Path | None = None, summary_store_path: Path | None = None
+) -> dict[str, object]:
+    if not isinstance(payload, Mapping):
+        return {"stored": False, "idempotent_replay": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    errors: list[dict[str, str]] = []
+    if set(payload) - _NAS_KEEPER_CLEANUP_EXECUTION_SUMMARY_RECEIPT_FIELDS:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+    for field in sorted(_NAS_KEEPER_CLEANUP_EXECUTION_SUMMARY_RECEIPT_FIELDS):
+        if field not in payload:
+            errors.append(_error(field, "missing_field"))
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("cleanup_summary_ref"), "cleanupsummary-"):
+        errors.append(_error("cleanup_summary_ref", "invalid_cleanup_summary_ref"))
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("cleanup_disabled_run_ref"), "cleanupdisabled-"):
+        errors.append(_error("cleanup_disabled_run_ref", "invalid_cleanup_disabled_run_ref"))
+    if not (isinstance(payload.get("cleanup_disabled_run_sha256"), str) and re.fullmatch(r"[a-f0-9]{64}", str(payload.get("cleanup_disabled_run_sha256")))):
+        errors.append(_error("cleanup_disabled_run_sha256", "invalid_cleanup_disabled_run_sha256"))
+    if not _is_opaque_id(payload.get("exported_by")):
+        errors.append(_error("exported_by", "invalid_opaque_id"))
+    if not (isinstance(payload.get("exported_at"), str) and _ISO_UTC_RE.fullmatch(str(payload.get("exported_at")))):
+        errors.append(_error("exported_at", "invalid_timestamp"))
+    if payload.get("operator_confirmation") != "metadata-only-execution-summary-no-delete-no-move-no-write":
+        errors.append(_error("operator_confirmation", "invalid_confirmation"))
+    if payload.get("summary_scope") != "operator_facing_refs_checksums_capabilities_only":
+        errors.append(_error("summary_scope", "invalid_summary_scope"))
+    if not _validate_summary_included_refs(payload.get("included_refs")):
+        errors.append(_error("included_refs", "invalid_included_refs"))
+    if not _validate_evidence_refs(payload.get("evidence_refs")):
+        errors.append(_error("evidence_refs", "invalid_evidence_refs"))
+
+    disabled_path = disabled_store_path or _default_nas_keeper_cleanup_disabled_run_receipt_store_path()
+    disabled_records, _disabled_skipped = _read_nas_keeper_cleanup_disabled_run_receipt_records(disabled_path)
+    matched_disabled = next((record for record in disabled_records if record.get("cleanup_disabled_run_ref") == payload.get("cleanup_disabled_run_ref")), None)
+    if matched_disabled is None:
+        errors.append(_error("cleanup_disabled_run_ref", "cleanup_disabled_run_not_found"))
+    elif isinstance(payload.get("cleanup_disabled_run_sha256"), str) and payload.get("cleanup_disabled_run_sha256") != _stable_metadata_sha256(matched_disabled):
+        errors.append(_error("cleanup_disabled_run_sha256", "cleanup_disabled_run_checksum_mismatch"))
+
+    record = {
+        "cleanup_summary_ref": payload.get("cleanup_summary_ref"),
+        "cleanup_disabled_run_ref": payload.get("cleanup_disabled_run_ref"),
+        "cleanup_disabled_run_sha256": payload.get("cleanup_disabled_run_sha256"),
+        "exported_by": payload.get("exported_by"),
+        "exported_at": payload.get("exported_at"),
+        "operator_confirmation": payload.get("operator_confirmation"),
+        "summary_scope": payload.get("summary_scope"),
+        "included_refs": payload.get("included_refs"),
+        "evidence_refs": payload.get("evidence_refs"),
+    }
+    normalized = _normalize_nas_keeper_cleanup_execution_summary_receipt_record(record)
+    if normalized is None:
+        errors.append(_error("cleanup_execution_summary_receipt", "invalid_cleanup_execution_summary_receipt"))
+    if errors:
+        return {
+            "stored": False,
+            "idempotent_replay": False,
+            "errors": sorted(errors, key=lambda item: (item["field"], item["code"])),
+            "dto": None,
+        }
+    path = summary_store_path or _default_nas_keeper_cleanup_execution_summary_receipt_store_path()
+    records, _skipped = _read_nas_keeper_cleanup_execution_summary_receipt_records(path)
+    for existing in records:
+        if existing.get("cleanup_summary_ref") == normalized["cleanup_summary_ref"]:
+            return {
+                "stored": False,
+                "idempotent_replay": True,
+                "errors": [],
+                "dto": _cleanup_execution_summary_receipt_dto(existing, idempotent_replay=True),
+            }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(normalized, sort_keys=True, ensure_ascii=False) + "\n")
+    return {"stored": True, "idempotent_replay": False, "errors": [], "dto": _cleanup_execution_summary_receipt_dto(normalized)}
 
 
 def build_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_request(

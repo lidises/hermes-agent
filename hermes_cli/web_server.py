@@ -126,6 +126,8 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_nas_keeper_cleanup_execution_package_receipt_records,
     append_office_controlled_mutation_nas_keeper_cleanup_disabled_run_receipt,
     list_office_controlled_mutation_nas_keeper_cleanup_disabled_run_receipt_records,
+    append_office_controlled_mutation_nas_keeper_cleanup_execution_summary_receipt,
+    list_office_controlled_mutation_nas_keeper_cleanup_execution_summary_receipt_records,
     build_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_request,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_readback,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_export_selection_review,
@@ -1069,6 +1071,24 @@ async def list_office_controlled_mutation_nas_keeper_cleanup_disabled_run_receip
 async def append_office_controlled_mutation_nas_keeper_cleanup_disabled_run_receipt_route(payload: Any = Body(None)):
     """Append a metadata-only disabled cleanup-run receipt; execution remains closed."""
     return append_office_controlled_mutation_nas_keeper_cleanup_disabled_run_receipt(payload)
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-cleanup-execution-summary-receipt")
+async def list_office_controlled_mutation_nas_keeper_cleanup_execution_summary_receipt_records_route(
+    cleanup_summary_ref: Optional[str] = None,
+    limit: Optional[int] = None,
+):
+    """Read metadata-only operator-facing cleanup execution summary receipt records."""
+    return list_office_controlled_mutation_nas_keeper_cleanup_execution_summary_receipt_records(
+        cleanup_summary_ref=cleanup_summary_ref,
+        limit=limit or 50,
+    )
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-cleanup-execution-summary-receipt")
+async def append_office_controlled_mutation_nas_keeper_cleanup_execution_summary_receipt_route(payload: Any = Body(None)):
+    """Append a refs/checksums/capability-only cleanup execution summary receipt."""
+    return append_office_controlled_mutation_nas_keeper_cleanup_execution_summary_receipt(payload)
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-one-shot-request-builder")
