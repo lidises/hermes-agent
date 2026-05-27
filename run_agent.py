@@ -69,6 +69,24 @@ def _load_openai_cls() -> type:
     if _OPENAI_CLS_CACHE is None:
         from openai import OpenAI as _cls
         _OPENAI_CLS_CACHE = _cls
+        try:
+            import openai.lib._parsing._responses as _parsing_responses
+            old_parse_response = _parsing_responses.parse_response
+
+            def new_parse_response(*args, **kwargs):
+                response = kwargs.get("response") or (args[2] if len(args) > 2 else None)
+                if response is not None:
+                    if getattr(response, "output", None) is None:
+                        try:
+                            response.output = []
+                        except Exception:
+                            pass
+                return old_parse_response(*args, **kwargs)
+
+            _parsing_responses.parse_response = new_parse_response
+            logging.getLogger(__name__).debug("Applied OpenAI SDK Responses parse_response monkeypatch successfully")
+        except Exception as _patch_exc:
+            logging.getLogger(__name__).debug("Failed to apply OpenAI SDK Responses parse_response monkeypatch: %s", _patch_exc)
     return _OPENAI_CLS_CACHE
 
 
