@@ -5919,7 +5919,7 @@ export function buildOfficeNasKeeperDurableQueueGuardedOperatorReadiness(action:
     markdownBodyProjected: false,
     writePayloadProjected: false,
     rawExcluded: true,
-    safeSummary: "Existing durable authorized queue item만 대상으로 하며, approval checkbox는 기본 미승인이고 execute button은 기본 disabled입니다. Browser/API는 safe refs와 preview/record metadata만 다루며 markdown body, write_payload, raw path, secrets는 투영하지 않습니다.",
+    safeSummary: "Existing durable authorized queue item만 대상으로 하며, approval checkbox는 기본 미승인이고 execute button은 기본 disabled입니다. Browser/API는 safe refs와 preview/record metadata만 다루며 markdown content, write payload, raw path, secrets는 투영하지 않습니다.",
   };
 }
 

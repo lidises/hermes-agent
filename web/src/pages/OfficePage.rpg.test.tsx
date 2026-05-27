@@ -5912,7 +5912,7 @@ describe("NasKeeperExecutionOperatorActionPanel", () => {
     expect(readiness.writePayloadProjected).toBe(false);
     expect(readiness.rawExcluded).toBe(true);
     expect(readiness.safeFields).toEqual(operatorAction.safeFields);
-    expect(JSON.stringify(readiness)).not.toMatch(/raw markdown body|Traceback|\/Users\/lidises|token-shaped-operator|private-operator-provider/i);
+    expect(JSON.stringify(readiness)).not.toMatch(/raw markdown body|write_payload|Traceback|\/Users\/lidises|token-shaped-operator|private-operator-provider/i);
   });
 
   it("renders durable queue guarded operator readiness as default-disabled DOM evidence", () => {
@@ -5937,7 +5937,7 @@ describe("NasKeeperExecutionOperatorActionPanel", () => {
     expect(markup).toContain('data-office-nas-keeper-durable-queue-guarded-operator-write-payload-projected="false"');
     expect(markup).not.toContain("<button");
     expect(markup).not.toContain("<input");
-    expect(markup).not.toMatch(/raw markdown body|Traceback|\/Users\/lidises|token-shaped-operator|private-operator-provider/i);
+    expect(markup).not.toMatch(/raw markdown body|write_payload|Traceback|\/Users\/lidises|token-shaped-operator|private-operator-provider/i);
   });
 
   it("renders the live NAS Keeper queue and operator lane outside legacy diagnostics", () => {
