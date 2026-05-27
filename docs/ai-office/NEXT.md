@@ -1,3 +1,31 @@
+## NEXT — after NAS Keeper cleanup disabled-run receipt + tmp-root write smoke (2026-05-27T11:12Z)
+
+Current next stage:
+- Cleanup package receipt `cleanuppackage-20260527-artifact-retention-1` now has a metadata-only disabled-run receipt: `cleanupdisabled-20260527-artifact-retention-1`.
+- The disabled-run receipt verifies the exact package checksum, records a terminal disabled-execution/no-op boundary, and proves idempotent replay.
+- Cleanup execution is still closed; no production NAS delete/move/archive/write was performed or enabled.
+- A non-repetitive tmp-root-only Mac relay write smoke succeeded after write-readiness reached 100%, using an isolated temporary local root/queue and no production NAS path.
+- Write-readiness is 100%.
+
+Recommended next rung:
+- Stop before actual cleanup unless the user gives a new exact approval boundary.
+- If continuing without actual cleanup, the shortest safe write-readiness rung is a metadata-only operator-facing execution-summary/export receipt that consumes the disabled-run ref, emits only refs/checksums/capability flags, proves idempotent replay, and creates no execution authority.
+
+Still forbidden unless separately and explicitly approved:
+- real NAS production write beyond a fresh exact approved target/content boundary
+- actual NAS delete/move/archive cleanup
+- direct VPS NAS authority, NAS mount credentials, or direct VPS NAS file write
+- watcher/cron/dispatcher/authority-adapter activation
+- public exposure
+- gateway restart
+- raw markdown/body/path/secret/raw write payload echo
+
+Required first checks next time:
+1. Read `docs/ai-office/STATUS.md` and this file.
+2. Confirm local/VPS git, service health, durable queue count/status, artifact retention plan count, cleanup gate count, cleanup hold count, cleanup manifest count, cleanup final approval count, cleanup package receipt count, and cleanup disabled-run receipt count.
+3. Treat all durable, fresh, retention-plan, cleanup-gate, cleanup-hold, cleanup-manifest, cleanup-final, cleanup-package, and cleanup-disabled refs as terminal/non-replayable except explicit metadata-only idempotent replay responses.
+4. Require fresh exact approval before any additional real NAS production write, actual cleanup execution, watcher/cron/dispatcher/authority-adapter, public exposure, gateway restart, or VPS NAS authority change.
+
 ## NEXT — after NAS Keeper cleanup package receipt + tmp-root write smoke (2026-05-27T10:55Z)
 
 Current next stage:
