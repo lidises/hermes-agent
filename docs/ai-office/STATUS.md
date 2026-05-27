@@ -1,3 +1,34 @@
+## Current status — NAS Keeper selected tmp-root approval token deployed (2026-05-27T05:31Z)
+
+Scope completed:
+- Added and deployed metadata-only Mac relay approval-token records sourced only from selected tmp-root real-write-gate records.
+- The approval-token rung verifies real-write-gate ref/checksum plus final-preflight, precommit-manifest, precommit-metadata, replay-metadata, selected-contract, tmp-root-smoke, and idempotency checksum continuity before appending metadata.
+- Duplicate approval-token attempts append no second record and return the existing safe record with duplicate-write skipped.
+- The durable guarded operator UI and compact Office summary now expose display-only approval-token readiness/endpoint markers and 100% write-readiness, with no controls and no materialized token value.
+
+Evidence captured:
+- Commit deployed: `738b1d0ae`.
+- RED observed first: approval-token test failed on missing backend functions/routes.
+- GREEN after implementation: selected tmp-root smoke/replay/precommit/manifest/final-preflight/real-write-gate/approval-token tests passed; combined selected/preview/from-preview focused tests = 31/31 passed.
+- Frontend Office tests: `OfficePage.test.ts` + `OfficePage.rpg.test.tsx` = 348/348 passed.
+- `py_compile`, `git diff --check`, `npm run lint` (0 errors, existing warnings only), and `npm run build` passed.
+- VPS core/dashboard synced to `origin/main`; `web_dist` rsynced; dashboard and core dashboard restarted and healthy; gateway stayed active and was not restarted.
+- Protected VPS API/DOM smoke: `/office` loaded; approval-token readiness marker present with 100%; compact summary shows no controls and closed archive; unauth approval-token route=401; authenticated route=200 fail-closed without source real-write gate, recorded=false.
+- Local Mac relay isolated tmp-root chain: contract recorded, tmp-root write smoke written/read back, replay metadata recorded, precommit metadata recorded, manifest recorded, final preflight recorded, real-write gate recorded, approval token recorded, duplicate approval token idempotent, readback found one latest record, raw leak probe=false.
+
+Safety boundaries preserved:
+- Real NAS production write: false.
+- Materialized approval-token value: absent.
+- VPS direct NAS authority: false.
+- watcher/cron/dispatcher/authority-adapter: false.
+- public exposure change: false.
+- gateway restart: false.
+- raw filesystem root/path, raw markdown body, secret, or raw write payload echo: false.
+
+Readiness note:
+- 100% write-readiness reached for the approved metadata-only pre-production ladder: selected tmp-root chain through approval-token boundary is complete while production write authority remains closed.
+- This 100% does not execute real NAS production write and does not grant VPS NAS authority; those remain separate explicit-approval boundaries.
+
 ## Current status — NAS Keeper selected tmp-root real-write gate deployed (2026-05-27T05:09Z)
 
 Scope completed:

@@ -1,3 +1,24 @@
+## NEXT — after NAS Keeper selected tmp-root approval token (2026-05-27T05:31Z)
+
+Current next stage:
+- The approved metadata-only write-readiness ladder is complete through the Mac relay approval-token boundary and reports 100% write-readiness.
+- Stop adding more pre-production write-readiness rungs unless the user asks for a new boundary; the next meaningful boundary is separate exact approval for real NAS production write, which remains forbidden in the current scope.
+- If continuing later, first recheck STATUS/local/VPS git/service health, then require exact approval before any real NAS production write, VPS direct NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, or gateway restart.
+
+Still forbidden unless separately and explicitly approved:
+- real NAS production write
+- VPS direct NAS authority, NAS mount credentials, or direct VPS file write
+- watcher/cron/dispatcher/authority-adapter activation
+- public exposure
+- gateway restart
+- raw markdown/body/path/secret/raw write payload echo
+
+Required first checks next time:
+1. Read `docs/ai-office/STATUS.md` and this file.
+2. Confirm local/VPS git, `web_dist`, and service health before deploy/runtime work.
+3. Treat approval-token readiness as 100% metadata-only pre-production readiness, not as execution authority.
+4. Do not proceed into real production NAS write without a new exact approval naming that boundary.
+
 ## NEXT — after NAS Keeper selected tmp-root real-write gate (2026-05-27T05:09Z)
 
 Current next stage:
