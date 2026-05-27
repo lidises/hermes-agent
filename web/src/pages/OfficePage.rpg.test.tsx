@@ -5912,6 +5912,9 @@ describe("NasKeeperExecutionOperatorActionPanel", () => {
     expect(readiness.macRelayFinalPreflightEndpoint).toBe("/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-final-preflight");
     expect(readiness.macRelayRealWriteGateReady).toBe(true);
     expect(readiness.macRelayRealWriteGateEndpoint).toBe("/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-real-write-gate");
+    expect(readiness.macRelayApprovalTokenReady).toBe(true);
+    expect(readiness.macRelayApprovalTokenEndpoint).toBe("/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-approval-token");
+    expect(readiness.macRelayApprovalTokenWriteReadinessPercent).toBe(100);
     expect(readiness.payloadPreviewRequiredBeforeExecution).toBe(true);
     expect(readiness.realNasProductionWriteEnabled).toBe(false);
     expect(readiness.vpsNasAuthorityEnabled).toBe(false);
@@ -5951,6 +5954,9 @@ describe("NasKeeperExecutionOperatorActionPanel", () => {
     expect(markup).toContain('data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-final-preflight-endpoint="/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-final-preflight"');
     expect(markup).toContain('data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-real-write-gate-ready="true"');
     expect(markup).toContain('data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-real-write-gate-endpoint="/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-real-write-gate"');
+    expect(markup).toContain('data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-approval-token-ready="true"');
+    expect(markup).toContain('data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-approval-token-endpoint="/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-approval-token"');
+    expect(markup).toContain('data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-approval-token-write-readiness-percent="100"');
     expect(markup).toContain('data-office-nas-keeper-durable-queue-guarded-operator-real-nas-production-write-enabled="false"');
     expect(markup).toContain('data-office-nas-keeper-durable-queue-guarded-operator-vps-nas-authority-enabled="false"');
     expect(markup).toContain('data-office-nas-keeper-durable-queue-guarded-operator-watcher-cron-daemon-enabled="false"');

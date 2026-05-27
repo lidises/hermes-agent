@@ -4413,6 +4413,9 @@ export function NasKeeperDurableQueueGuardedOperatorReadinessPanel({ readiness }
       data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-final-preflight-endpoint={readiness.macRelayFinalPreflightEndpoint}
       data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-real-write-gate-ready={String(readiness.macRelayRealWriteGateReady)}
       data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-real-write-gate-endpoint={readiness.macRelayRealWriteGateEndpoint}
+      data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-approval-token-ready={String(readiness.macRelayApprovalTokenReady)}
+      data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-approval-token-endpoint={readiness.macRelayApprovalTokenEndpoint}
+      data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-approval-token-write-readiness-percent={String(readiness.macRelayApprovalTokenWriteReadinessPercent)}
       data-office-nas-keeper-durable-queue-guarded-operator-payload-preview-required={String(readiness.payloadPreviewRequiredBeforeExecution)}
       data-office-nas-keeper-durable-queue-guarded-operator-real-nas-production-write-enabled={String(readiness.realNasProductionWriteEnabled)}
       data-office-nas-keeper-durable-queue-guarded-operator-vps-nas-authority-enabled={String(readiness.vpsNasAuthorityEnabled)}
@@ -4439,6 +4442,7 @@ export function NasKeeperDurableQueueGuardedOperatorReadinessPanel({ readiness }
             <span>Mac relay precommit manifest ready {String(readiness.macRelayPrecommitManifestReady)}</span>
             <span>Mac relay final preflight ready {String(readiness.macRelayFinalPreflightReady)}</span>
             <span>Mac relay real-write gate ready {String(readiness.macRelayRealWriteGateReady)}</span>
+            <span>Mac relay approval token ready {String(readiness.macRelayApprovalTokenReady)} · {readiness.macRelayApprovalTokenWriteReadinessPercent}%</span>
             <span>preview required {String(readiness.payloadPreviewRequiredBeforeExecution)}</span>
           </div>
         </div>
@@ -6890,7 +6894,7 @@ export function OfficeControlledMutationCompactDashboardPanel({
       data-office-controlled-mutation-compact-dashboard-mac-relay-real-write-gate-runtime-open={String(blockedRuntime)}
       data-office-controlled-mutation-compact-dashboard-mac-relay-real-write-gate-payload-echo={String(realWriteGatePayloadEcho)}
       data-office-controlled-mutation-compact-dashboard-mac-relay-approval-token-ready={String(Boolean(dto?.mac_relay_approval_token_ready))}
-      data-office-controlled-mutation-compact-dashboard-mac-relay-approval-token-source-verified={String(Boolean(dto?.source_mac_relay_real_write_gate_verified) && Boolean(dto?.source_real_write_gate_checklist_verified) && Boolean(dto?.approval_token_contract_verified) && Boolean(dto?.safe_ref_chain_verified))}
+      data-office-controlled-mutation-compact-dashboard-mac-relay-approval-token-source-verified={String(Boolean(dto?.source_mac_relay_real_write_gate_verified) && Boolean(dto?.source_real_write_gate_checklist_verified) && (Boolean(dto?.approval_token_checklist_verified) || Boolean(dto?.approval_token_contract_verified)) && Boolean(dto?.safe_ref_chain_verified))}
       data-office-controlled-mutation-compact-dashboard-mac-relay-approval-token-replay-store-write={String(replayStoreWrite)}
       data-office-controlled-mutation-compact-dashboard-mac-relay-approval-token-real-write={String(realWrite)}
       data-office-controlled-mutation-compact-dashboard-mac-relay-approval-token-vps-authority={String(vpsAuthority)}

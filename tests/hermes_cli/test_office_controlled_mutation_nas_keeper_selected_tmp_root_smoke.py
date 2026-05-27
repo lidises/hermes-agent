@@ -902,3 +902,164 @@ def test_selected_tmp_root_real_write_gate_api_requires_session_token(tmp_path, 
     assert readback.status_code == 200
     assert readback.json()["found"] is True
     assert readback.json()["latest"]["mac_relay_final_preflight_ref"] == final["dto"]["mac_relay_final_preflight_ref"]
+
+
+def selected_approval_token_payload(gate_dto, **overrides):
+    payload = {
+        "mac_relay_approval_token_ref": "approval_ref_tmp_root_20260527",
+        "mac_relay_approval_token_sha256": "5" * 64,
+        "mac_relay_real_write_gate_ref": gate_dto["mac_relay_real_write_gate_ref"],
+        "mac_relay_real_write_gate_record_sha256": gate_dto["mac_relay_real_write_gate_record_sha256"],
+        "mac_relay_final_preflight_ref": gate_dto["mac_relay_final_preflight_ref"],
+        "mac_relay_final_preflight_record_sha256": gate_dto["mac_relay_final_preflight_record_sha256"],
+        "mac_relay_precommit_manifest_ref": gate_dto["mac_relay_precommit_manifest_ref"],
+        "mac_relay_precommit_manifest_record_sha256": gate_dto["mac_relay_precommit_manifest_record_sha256"],
+        "mac_relay_precommit_ref": gate_dto["mac_relay_precommit_ref"],
+        "mac_relay_precommit_metadata_record_sha256": gate_dto["mac_relay_precommit_metadata_record_sha256"],
+        "replay_metadata_ref": gate_dto["replay_metadata_ref"],
+        "selected_contract_ref": gate_dto["selected_contract_ref"],
+        "tmp_root_smoke_ref": gate_dto["tmp_root_smoke_ref"],
+        "idempotency_key_sha256": gate_dto["idempotency_key_sha256"],
+        "recorded_by": "pytest",
+        "recorded_at": "2026-05-27T05:20:00Z",
+    }
+    payload.update(overrides)
+    return payload
+
+
+def _record_selected_real_write_gate(tmp_path):
+    from hermes_cli.office_controlled_mutation import append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_real_write_gate
+
+    final_dto, final_store = _record_selected_final_preflight(tmp_path)
+    gate_store = tmp_path / "selected-real-write-gate.jsonl"
+    gate = append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_real_write_gate(
+        selected_real_write_gate_payload(final_dto),
+        final_preflight_store_path=final_store,
+        real_write_gate_store_path=gate_store,
+    )
+    assert gate["recorded"] is True
+    return gate["dto"], gate_store
+
+
+def test_selected_tmp_root_approval_token_records_safe_source_and_replays(tmp_path):
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_approval_token,
+        get_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_approval_token_readback,
+    )
+
+    gate_dto, gate_store = _record_selected_real_write_gate(tmp_path)
+    token_store = tmp_path / "selected-approval-token.jsonl"
+
+    result = append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_approval_token(
+        selected_approval_token_payload(gate_dto),
+        real_write_gate_store_path=gate_store,
+        approval_token_store_path=token_store,
+    )
+    replay = append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_approval_token(
+        selected_approval_token_payload(gate_dto),
+        real_write_gate_store_path=gate_store,
+        approval_token_store_path=token_store,
+    )
+    readback = get_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_approval_token_readback(
+        store_path=token_store
+    )
+
+    assert result["recorded"] is True
+    assert result["idempotent_replay"] is False
+    assert replay["recorded"] is False
+    assert replay["idempotent_replay"] is True
+    dto = result["dto"]
+    assert dto["mode"] == "nas_keeper_selected_tmp_root_mac_relay_approval_token"
+    assert dto["mac_relay_approval_token_ready"] is True
+    assert dto["source_mac_relay_real_write_gate_verified"] is True
+    assert dto["source_real_write_gate_record_sha256_verified"] is True
+    assert dto["approval_token_checklist_verified"] is True
+    assert dto["safe_ref_chain_verified"] is True
+    assert dto["write_readiness_stage"] == "mac_relay_approval_token_after_real_write_gate"
+    assert dto["write_readiness_percent"] == 100
+    assert dto["approval_token_materialized_value_included"] is False
+    assert dto["approval_token_includes_payload_body"] is False
+    assert dto["approval_token_includes_write_payload"] is False
+    assert dto["approval_token_includes_raw_root_path"] is False
+    assert dto["approval_token_includes_secret_value"] is False
+    assert dto["real_nas_production_write_enabled"] is False
+    assert dto["real_nas_production_write_executed"] is False
+    assert dto["vps_direct_nas_authority_enabled"] is False
+    assert dto["watcher_cron_dispatcher_enabled"] is False
+    assert dto["authority_adapter_binding_enabled"] is False
+    assert dto["public_exposure_enabled"] is False
+    assert dto["gateway_restart_required"] is False
+    assert len(dto["mac_relay_approval_token_record_sha256"]) == 64
+    assert len(dto["mac_relay_approval_token_sha256"]) == 64
+    assert "mac_relay_approval_token_value" not in dto
+    assert replay["dto"]["approval_token_duplicate_write_skipped"] is True
+    assert replay["dto"]["mac_relay_approval_token_record_sha256"] == dto["mac_relay_approval_token_record_sha256"]
+    assert readback["found"] is True
+    assert readback["latest"]["mac_relay_approval_token_ref"] == "approval_ref_tmp_root_20260527"
+    assert len(token_store.read_text(encoding="utf-8").splitlines()) == 1
+    serialized = json.dumps({"result": result, "replay": replay, "readback": readback}, sort_keys=True).lower()
+    assert "this safe " + "note is ready" not in serialized
+    assert "markdown_body" + '\":' not in serialized
+    assert '"write_' + 'payload":' not in serialized
+    assert "/users" + "/lidises" not in serialized
+    assert "/home" + "/hermes" not in serialized
+    assert "sk" + "-" not in serialized
+
+
+def test_selected_tmp_root_approval_token_rejects_cross_source_real_write_gate(tmp_path):
+    from hermes_cli.office_controlled_mutation import append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_approval_token
+
+    gate_dto, gate_store = _record_selected_real_write_gate(tmp_path)
+    bad_ref = append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_approval_token(
+        selected_approval_token_payload(gate_dto, mac_relay_real_write_gate_ref="different_real_write_gate_ref"),
+        real_write_gate_store_path=gate_store,
+        approval_token_store_path=tmp_path / "approval-token.jsonl",
+    )
+    bad_sha = append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_approval_token(
+        selected_approval_token_payload(gate_dto, mac_relay_real_write_gate_record_sha256="0" * 64),
+        real_write_gate_store_path=gate_store,
+        approval_token_store_path=tmp_path / "approval-token.jsonl",
+    )
+
+    assert bad_ref["recorded"] is False
+    assert bad_ref["errors"] == [{"field": "mac_relay_real_write_gate_ref", "code": "source_real_write_gate_not_found"}]
+    assert bad_sha["recorded"] is False
+    assert bad_sha["errors"] == [{"field": "mac_relay_real_write_gate_record_sha256", "code": "checksum_mismatch"}]
+
+
+def test_selected_tmp_root_approval_token_api_requires_session_token(tmp_path, monkeypatch):
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
+    monkeypatch.setenv("HERMES_AI_OFFICE_MAC_RELAY_TMP_ROOT", str(tmp_path / "tmp-root"))
+    from hermes_cli.office_controlled_mutation import (
+        record_office_controlled_mutation_nas_keeper_selected_durable_item_preview_contract,
+        execute_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_write_smoke,
+        append_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_replay_idempotency_metadata,
+        append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_metadata,
+        append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_manifest,
+        append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_final_preflight,
+        append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_real_write_gate,
+    )
+    from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+
+    queue_dir = tmp_path / "hermes" / "ai-office" / "nas-keeper-handoff"
+    prepare_authorized_handoff(queue_dir)
+    record_office_controlled_mutation_nas_keeper_selected_durable_item_preview_contract(selected_contract_payload())
+    smoke = execute_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_write_smoke(tmp_root_smoke_payload(), root_path=tmp_path / "tmp-root")
+    replay = append_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_replay_idempotency_metadata(replay_metadata_payload(smoke["dto"]))
+    precommit = append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_metadata(selected_precommit_payload(replay["dto"]))
+    manifest = append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_manifest(selected_precommit_manifest_payload(precommit["dto"]))
+    final = append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_final_preflight(selected_final_preflight_payload(manifest["dto"]))
+    gate = append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_real_write_gate(selected_real_write_gate_payload(final["dto"]))
+    route = "/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-approval-token"
+    client = TestClient(app)
+
+    unauthenticated = client.post(route, json=selected_approval_token_payload(gate["dto"]))
+    assert unauthenticated.status_code == 401
+    recorded = client.post(route, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN}, json=selected_approval_token_payload(gate["dto"]))
+    assert recorded.status_code == 200
+    assert recorded.json()["recorded"] is True
+    assert recorded.json()["dto"]["write_readiness_percent"] == 100
+    readback = client.get(route, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN})
+    assert readback.status_code == 200
+    assert readback.json()["found"] is True
+    assert readback.json()["latest"]["mac_relay_real_write_gate_ref"] == gate["dto"]["mac_relay_real_write_gate_ref"]
