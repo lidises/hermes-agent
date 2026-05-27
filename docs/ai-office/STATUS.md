@@ -15,8 +15,13 @@ Evidence captured:
 Verification:
 - RED observed first: new durable queue rehearsal test initially failed on missing import.
 - Focused GREEN: `.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_keeper_durable_queue_rehearsal.py -q -o 'addopts='` → 4 passed.
-- Combined NAS Keeper queue/authorization/readback/payload-preview tests: 13 passed.
+- Combined NAS Keeper queue/authorization/readback/payload-preview tests: 14 passed.
 - `py_compile` for `hermes_cli/office_controlled_mutation.py` and `hermes_cli/web_server.py` passed.
+- Frontend production build from `web/` passed; `hermes_cli/web_dist/` was rsynced to both VPS worktrees.
+- Commit `4950468a8 feat(office): rehearse durable nas queue` pushed and synced to VPS core/dashboard worktrees; both worktrees dirty=0.
+- Dashboard and core dashboard services restarted and active; gateway remained active and was not restarted.
+- Protected VPS API smoke for the new route: unauth=401, auth=200, queued=true, authorized=true, previewed=true, executed=false, written=false, raw leak probe=false.
+- `/office` DOM smoke loaded the AI Office page with no console errors; raw path/body leak probe=false, and secret-like matches were safe RPG DOM ids rather than credentials.
 
 Safety boundaries preserved:
 - Real NAS production write: false.
