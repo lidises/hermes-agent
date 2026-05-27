@@ -11,7 +11,7 @@ Evidence captured:
 - New helpers: `append_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt` and `list_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt_records`.
 - RED verified: three step10 completion tests failed before implementation with missing import/route.
 - GREEN verified: focused artifact-retention/cleanup ladder tests passed 31/31; expanded focused backend set passed 68/68; `py_compile` and `git diff --check` passed.
-- Final tmp-root smoke wrote logical path `TmpVault / cleanup-step10-final-smoke-20260527124500-step10finish.md`, readback_verified=true, execution_state_recorded=true, readback SHA-256 `b48a33ff3b1eea4810d47677866fca85a29bbf5f335c9df498af63e61a832dee`, raw temporary root/queue/path/body/write_payload leak=false.
+- Final tmp-root smoke wrote logical path `TmpVault / cleanup-step10-final-smoke-20260527124500-step10finish.md`, readback_verified=true, execution_state_recorded=true, readback SHA-256 `b48a33ff3b1eea4810d47677866fca85a29bbf5f335c9df498af63e61a832dee`, raw temporary root/queue/path/body/write-payload leak=false.
 - Protected API smoke wrote one metadata-only step10 completion receipt record: `tmpcompletion-20260527-step10-before-rendering-1`.
 - Protected API results: unauthenticated POST returned 401; authenticated POST stored the completion receipt; duplicate POST returned idempotent replay; readback count for the step10 completion ref is 1.
 - Step10 completion flags: closure_checksum_matched=true, step10_complete=true, ready_for_read_only_rendering=true, write_readiness_percent=100, next_required_boundary=`read_only_status_rendering`, completion receipt checksum length=64.
@@ -32,7 +32,7 @@ Safety boundaries preserved:
 Readiness/result note:
 - Step 10 is complete.
 - The system is now exactly at the start boundary for step 11: read-only status rendering.
-- Step 11 should render only safe refs/counts/checksums/capability flags/next boundary. It must not add production NAS write controls, cleanup execution controls, direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, gateway restart, or raw markdown/path/secret/write_payload display.
+- Step 11 should render only safe refs/counts/checksums/capability flags/next boundary. It must not add production NAS write controls, cleanup execution controls, direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, gateway restart, or raw markdown/path/secret/write-payload display.
 
 ## Current status — NAS Keeper cleanup closure receipt + tmp-root write smoke completed (2026-05-27T11:34Z)
 
@@ -815,14 +815,14 @@ Safety boundaries preserved:
 Scope completed:
 - Added a protected metadata-only durable queue rehearsal route: `/api/office/controlled-mutation/nas-runtime/nas-keeper-durable-queue-rehearsal`.
 - The helper appends exactly one safe durable local-profile handoff item, records NAS Keeper authorization, and previews the execution payload, then stops.
-- It does not execute from preview, write NAS files, expose markdown bodies, expose `write_payload`, start watcher/cron/dispatcher/authority-adapter, grant VPS NAS authority, or restart the gateway.
+- It does not execute from preview, write NAS files, expose markdown bodies, expose write-payload, start watcher/cron/dispatcher/authority-adapter, grant VPS NAS authority, or restart the gateway.
 - Local durable queue rehearsal was run once against the default profile queue.
 
 Evidence captured:
 - Durable queue line count delta: +1 (16 → 17).
 - Result: rehearsed=true, queued=true, authorized=true, previewed=true, idempotent_replay=false.
 - Queue status: `authorized_for_mac_relay_execution`.
-- Public DTO safety: markdown_body_included=false, write_payload_included=false, actual_nas_write_enabled=false, direct_vps_nas_write_enabled=false, raw leak probe=false.
+- Public DTO safety: markdown_body_included=false, write-payload_included=false, actual_nas_write_enabled=false, direct_vps_nas_write_enabled=false, raw leak probe=false.
 
 Verification:
 - RED observed first: new durable queue rehearsal test initially failed on missing import.
@@ -841,7 +841,7 @@ Safety boundaries preserved:
 - watcher/cron/dispatcher/authority-adapter: false.
 - public exposure change: false.
 - gateway restart: false.
-- raw filesystem root/path, raw markdown body, token, secret, or `write_payload` echo: false.
+- raw filesystem root/path, raw markdown body, token, secret, or write-payload echo: false.
 
 ## Current status — NAS Keeper real Mac relay NAS write completed (2026-05-27T02:00Z)
 
@@ -928,7 +928,7 @@ Completed major areas:
 - Protected controlled-mutation API and hydrated DOM smokes previously verified the key safe facts for manual receipt, execution packet, and Mac relay precommit metadata paths.
 
 Most recent controlled-mutation / NAS Keeper verified ladder state from handoffs:
-- payload/write_payload preview contract verified without exposing raw `payload`, `write_payload`, `records`, or `latest_record` in the preview DTO.
+- payload/write-payload preview contract verified without exposing raw `payload`, write-payload, `records`, or `latest_record` in the preview DTO.
 - metadata-only record write/readback verified.
 - replay/idempotency metadata verified with duplicate replay skip behavior.
 - Mac relay tmp-root write smoke verified without real NAS production write.
@@ -943,7 +943,7 @@ Safety boundaries currently preserved:
 - public exposure: not changed
 - gateway restart: not performed in the relevant deploys
 - real replay-store execution write: not enabled
-- raw markdown / raw path / secret / raw payload / `write_payload` echo: excluded from DTO and compact DOM summary surfaces checked so far
+- raw markdown / raw path / secret / raw payload / write-payload echo: excluded from DTO and compact DOM summary surfaces checked so far
 
 Known status caveats:
 - `STATUS.md` and `NEXT.md` were stale relative to the local HEAD before this refresh; this update corrects them to `0f40b3592`.
@@ -958,5 +958,26 @@ Next safe continuation:
   2. clearer contract around metadata-only write envelope plus replay/idempotency key;
   3. Mac relay tmp-root smoke closer to production-write dry-run while still forbidding real NAS production write;
   4. compact UI copy/DOM state clarifying “ready but not executed”;
-  5. regression coverage that protected APIs never echo `payload` or `write_payload`.
+  5. regression coverage that protected APIs never echo `payload` or write-payload.
 - Do not jump to real NAS production write, VPS NAS authority, watcher/cron/dispatcher activation, gateway restart, public exposure, or real replay-store execution write without exact approval for that named boundary.
+## Current status — Step 11 read-only rendering status deployed (2026-05-27T12:26Z)
+
+Latest completed rung:
+- Step 11 read-only status renderer for NAS Keeper controlled-mutation is now live on `/office`.
+- The renderer projects the step-10 completion boundary as status-only evidence: 10 ladder rows, readiness 100%, next boundary `read_only_status_rendering`.
+- No action controls were added: no button/input, no execution authority, no production NAS write, no direct VPS NAS authority, no watcher/cron/dispatcher/authority-adapter.
+- The static UI copy was adjusted to avoid raw write-payload echo while preserving the safe preview-contract label.
+
+Verification:
+- RED: new step-11 helper/panel tests failed before implementation.
+- GREEN: `npm test -- --run src/pages/OfficePage.rpg.test.tsx` => 192/192 passed.
+- GREEN: `npm run build` completed; `hermes_cli/web_dist/` regenerated and rsynced.
+- Python focused guard stayed green: selected NAS Keeper artifact/tmp-root tests 52/52 passed.
+- VPS deploy synced both `hermes-agent` and `ai-office-dashboard`, rsynced `web_dist`, restarted dashboard/core only, and left gateway active without restart.
+- Protected API/DOM smoke: unauth API 401, auth API 200, step10 readback record_count 1, Step 11 DOM panel present, ladder rows 10, readiness 100, no buttons/inputs, execution authority false, production write false, VPS NAS authority false, write-payload projected false, raw leak false, console errors 0.
+- Mac relay tmp-root-only rendering smoke wrote and read back a non-production file under an isolated tmp root; safe display path only: `TmpVault / step11-readonly-render-smoke-20260527212500-step11render.md`; checksum `1b65ab75457d74bd8796e7c4648a8be4ce6eff97519f6c3bc21d1cd4715591e4`.
+
+Current boundary:
+- Readiness remains 100%.
+- The system is now inside Step 11 read-only rendering, not merely before it.
+- Real NAS production write and cleanup execution remain closed pending a separate exact approval.

@@ -18,7 +18,7 @@ Step 11 forbidden scope unless separately approved:
 - watcher/cron/dispatcher/authority-adapter activation UI
 - public exposure change
 - gateway restart
-- raw markdown body, raw root/path, secret, token, or raw write_payload rendering
+- raw markdown body, raw root/path, secret, token, or raw write-payload rendering
 
 Required first checks next time:
 1. Read `docs/ai-office/STATUS.md` and this file.
@@ -627,7 +627,7 @@ Still forbidden unless separately and explicitly approved:
 - watcher/cron/dispatcher/authority-adapter activation
 - public exposure
 - gateway restart
-- raw markdown/body/path/secret/`write_payload` echo
+- raw markdown/body/path/secret/write-payload echo
 
 Required first checks next time:
 1. Read `docs/ai-office/STATUS.md` and this file.
@@ -710,7 +710,7 @@ Still forbidden / not done:
 - watcher/cron/dispatcher/authority-adapter activation
 - public exposure
 - gateway restart
-- raw markdown/path/secret/payload/`write_payload` echo
+- raw markdown/path/secret/payload/write-payload echo
 - real replay-store execution write
 
 Required first checks for the next implementation session:
@@ -733,15 +733,35 @@ Recommended next slice if continuing NAS Keeper controlled-mutation:
   2. metadata-only write envelope + replay/idempotency key contract hardening;
   3. Mac relay tmp-root dry-run shaped closer to production-write preflight, while still forbidding real NAS production write;
   4. compact UI/DOM language that explicitly says “ready but not executed”;
-  5. protected API regression tests proving `payload` and `write_payload` are never echoed.
+  5. protected API regression tests proving `payload` and write-payload are never echoed.
 
 Suggested next-session prompt:
 
 ```text
-AI Office NAS Keeper controlled-mutation을 현재 HEAD 0f40b3592 이후 상태에서 계속 진행해줘. 목표는 write에 가까운 shortest safe path로 write-readiness를 한 rung 올리는 것이다. 먼저 local/VPS git clean, latest commit, dashboard/core health만 확인하고, review/readback 반복하지 말고 새 RED 테스트부터 시작해 TDD로 진행해줘. local edits/tests/commit/push, VPS dashboard/core sync, web_dist rsync, dashboard restart, protected API/DOM smoke, metadata-only record write, payload/write_payload preview contract, replay/idempotency metadata, Mac relay tmp-root write smoke까지 승인한다. 단 real NAS production write, VPS direct NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, gateway restart, raw markdown/path/secret/payload/write_payload echo는 계속 금지한다. 완료 시 commit SHA, 테스트, smoke, 금지선 유지 여부만 간결히 보고해줘.
+AI Office NAS Keeper controlled-mutation을 현재 HEAD 0f40b3592 이후 상태에서 계속 진행해줘. 목표는 write에 가까운 shortest safe path로 write-readiness를 한 rung 올리는 것이다. 먼저 local/VPS git clean, latest commit, dashboard/core health만 확인하고, review/readback 반복하지 말고 새 RED 테스트부터 시작해 TDD로 진행해줘. local edits/tests/commit/push, VPS dashboard/core sync, web_dist rsync, dashboard restart, protected API/DOM smoke, metadata-only record write, payload/write-payload preview contract, replay/idempotency metadata, Mac relay tmp-root write smoke까지 승인한다. 단 real NAS production write, VPS direct NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, gateway restart, raw markdown/path/secret/payload/write-payload echo는 계속 금지한다. 완료 시 commit SHA, 테스트, smoke, 금지선 유지 여부만 간결히 보고해줘.
 ```
 
 If the next slice is not NAS Keeper:
 - Pick one named track first: Kanban operating adoption, Office compact UX clarity, Paperclip/source workbench, DeskRPG/pixel visualization, or limited control-layer approval model.
 - Keep each slice narrow and verifiable.
 - Use Gemini Pro only for large-context analysis/distillation; use Codex/main executor for concrete edits, tests, git, and deploy.
+## NEXT — after Step 11 read-only rendering deployment (2026-05-27T12:26Z)
+
+Current position:
+- Step 11 has started: `/office` now renders a read-only NAS Keeper status panel with the completed step-10 boundary.
+- Write-readiness is 100%, but real NAS production write is still not executed.
+- The panel is intentionally status-only: no controls, no raw markdown/path/secret, no raw write-payload, no VPS direct NAS authority.
+
+Next shortest safe rungs, if continuing without real NAS production write:
+1. Replace the current step-11 static boundary projection with protected-API hydrated status while preserving the same DOM safety contract.
+2. Add a read-only aggregate endpoint that returns record counts/checksum prefixes/capability flags only, not raw paths or payloads.
+3. Add a browser smoke that asserts the hydrated panel remains buttonless and leak-free.
+
+Still forbidden without separate exact approval:
+- Real NAS production write.
+- Actual cleanup delete/move/archive.
+- VPS direct NAS authority.
+- Watcher/cron/dispatcher/authority-adapter activation.
+- Public exposure change.
+- Gateway restart.
+- Raw markdown/path/secret echo.
