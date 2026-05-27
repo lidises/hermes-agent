@@ -1,3 +1,40 @@
+## Current status — NAS Keeper fresh approved Mac relay write completed (2026-05-27T08:03Z)
+
+Scope completed:
+- After explicit fresh-write approval, executed one additional harmless NAS Keeper -> Mac relay -> real NAS write using a temporary isolated queue.
+- The run created a new safe logical target, then replaced the same logical target to prove rollback-before-replace and final readback.
+- Durable production queue was not mutated; previous terminal durable/fresh refs and the artifact retention plan were not replayed.
+- This was a bounded Mac relay write only: watcher/cron/dispatcher/authority-adapter stayed closed, VPS direct NAS authority stayed closed, public exposure stayed unchanged, and gateway was not restarted.
+
+Evidence captured:
+- Safe logical target: `Inbox::ai-office-nas-keeper-fresh-write-20260527075949.md`.
+- Create refs: handoff `handoff_fresh_20260527075949_1`, write `write_fresh_20260527075949_1`, relay execution `relay_execution_fresh_20260527075949_1`, execution record `exec_record_fresh_20260527075949_1`.
+- Replace refs: handoff `handoff_fresh_20260527075949_2`, write `write_fresh_20260527075949_2`, relay execution `relay_execution_fresh_20260527075949_2`, execution record `exec_record_fresh_20260527075949_2`.
+- Create: queued=true, authorized=true, previewed=true, executed=true, written=true, recorded=true, readback_verified=true, audit_written=true, rollback_created=false.
+- Replace: queued=true, authorized=true, previewed=true, executed=true, written=true, recorded=true, readback_verified=true, audit_written=true, rollback_created=true, rollback ref `rollback_write_fresh_20260527075949_2`.
+- Create readback SHA-256: `fef19d54d27942ef8f40f2568cea9e70c58e4f9fe612533e1077d4ae03fa3213`.
+- Final replacement readback SHA-256: `f44348a4162ba2b644f4eb2cc153d9d40629a5bb4651b3b1e250349c16be30e0`.
+- Rollback artifact readback matched the create SHA-256.
+- Temporary queue only: durable queue line count remained 17.
+- Raw leak probe over public/result DTOs: false for raw markdown body, raw root path, temp queue path, token-like strings, and raw write payload.
+- Focused regression tests: execution-from-preview + execution-state-record + NAS runtime write + execution-payload preview + artifact retention plan = 24/24 passed.
+- `py_compile` and `git diff --check` passed.
+- VPS protected execution route remained fail-closed: unauth=401, auth=200, error=`mac_relay_root_not_configured`, executed=false, written=false.
+- DOM smoke: controlled-mutation office view present, raw path/body/payload leak=false, browser console errors=0.
+
+Safety boundaries preserved:
+- Direct VPS NAS authority: false.
+- Durable production queue mutation for this fresh write: false.
+- Actual cleanup/delete/move/archive: false.
+- watcher/cron/dispatcher/authority-adapter: false.
+- public exposure change: false.
+- gateway restart: false.
+- raw markdown body/path/secret/write payload echo: false.
+
+Readiness/result note:
+- Write-readiness remains 100%; this was a separately approved fresh exact target/content write boundary.
+- Treat all refs above as terminal/non-replayable. Any additional write or cleanup execution requires another fresh exact approval.
+
 ## Current status — NAS Keeper artifact retention plan metadata rung implemented (2026-05-27T07:31Z)
 
 Deployment/update (2026-05-27T07:38Z):
