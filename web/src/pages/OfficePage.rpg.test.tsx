@@ -5968,6 +5968,16 @@ describe("NasKeeperExecutionOperatorActionPanel", () => {
   });
 
 
+
+  it("hydrates the step 11 NAS Keeper read-only renderer from the protected aggregate API without adding controls", () => {
+    const source = officePageSource;
+    expect(source).toContain("getOfficeControlledMutationNasKeeperStep11ReadOnlyStatus");
+    expect(source).toContain("buildOfficeNasKeeperStep11ReadOnlyRenderingStatusFromAggregate");
+    expect(source).toContain("nasKeeperStep11ReadOnlyRenderingStatusHydrated");
+    expect(source).toContain('data-office-nas-keeper-step11-readonly-status="true"');
+    expect(source).not.toMatch(/<NasKeeperStep11ReadOnlyRenderingStatusPanel[^>]*(onClick|onSubmit)|data-office-nas-keeper-step11-execute/i);
+  });
+
   it("builds step 11 NAS Keeper read-only rendering status from step 10 completion without opening execution authority", () => {
     const status = OfficeView.buildOfficeNasKeeperStep11ReadOnlyRenderingStatus({
       latestStep10Record: {

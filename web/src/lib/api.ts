@@ -170,6 +170,50 @@ export interface OfficeNasKeeperHandoffQueueReadbackParams {
 }
 
 
+
+export interface OfficeNasKeeperStep11ReadOnlyStatusAggregate {
+  found: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: null | {
+    schema_version: number;
+    mode: "nas_keeper_step11_read_only_status_aggregate";
+    status_surface: "read_only_rendering";
+    metadata_only_record_write?: boolean;
+    read_only_rendering_hydrated?: boolean;
+    ready_for_read_only_rendering: boolean;
+    readiness_percent: number;
+    write_readiness_percent?: number;
+    record_counts: Record<string, number>;
+    skipped_counts?: Record<string, number>;
+    ladder_steps: Array<{ id: string; label: string; record_count: number; complete: boolean }>;
+    latest_step10_completion_ref?: string | null;
+    latest_step10_completion_sha256?: string | null;
+    latest_cleanup_closure_ref?: string | null;
+    latest_cleanup_closure_sha256?: string | null;
+    safe_display_path?: string | null;
+    readback_sha256?: string | null;
+    tmp_root_write_smoke_completed?: boolean;
+    idempotency_replay_metadata?: Record<string, boolean>;
+    capability_flags?: Record<string, boolean>;
+    cleanup_execution_opened: false;
+    execution_authority_created: false;
+    real_nas_production_write_enabled: false;
+    real_nas_production_write_executed?: false;
+    direct_vps_nas_write_enabled: false;
+    watcher_enabled: false;
+    cron_enabled: false;
+    dispatch_enabled: false;
+    authority_adapter_binding_enabled: false;
+    public_exposure_enabled: false;
+    gateway_restart_required: false;
+    markdown_body_included: false;
+    write_payload_included: false;
+    raw_root_path_included: false;
+    credential_value_included?: false;
+    next_required_boundary: string;
+  };
+}
+
 export interface OfficeNasKeeperHandoffClaimDryRunPayload {
   handoff_ref: string;
   claim_ref: string;
@@ -4514,6 +4558,9 @@ export const api = {
     const suffix = qs.toString() ? `?${qs.toString()}` : "";
     return fetchJSON<OfficeNasKeeperHandoffQueueReadback>(`/api/office/controlled-mutation/nas-runtime/nas-keeper-handoff-queue${suffix}`);
   },
+
+  getOfficeControlledMutationNasKeeperStep11ReadOnlyStatus: () =>
+    fetchJSON<OfficeNasKeeperStep11ReadOnlyStatusAggregate>("/api/office/controlled-mutation/nas-runtime/nas-keeper-step11-read-only-status"),
 
   dryRunOfficeControlledMutationNasKeeperHandoffClaim: (body: OfficeNasKeeperHandoffClaimDryRunPayload) =>
     fetchJSON<OfficeNasKeeperHandoffClaimDryRunResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-handoff-claim-dry-run", {

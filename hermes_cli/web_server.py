@@ -132,6 +132,7 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_nas_keeper_cleanup_closure_receipt_records,
     append_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt,
     list_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt_records,
+    build_office_controlled_mutation_nas_keeper_step11_read_only_status_aggregate,
     build_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_request,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_readback,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_export_selection_review,
@@ -1129,6 +1130,12 @@ async def list_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_
 async def append_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt_route(payload: Any = Body(None)):
     """Append a metadata-only tmp-root write-smoke completion receipt; rendering is the next boundary."""
     return append_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt(payload)
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-step11-read-only-status")
+async def get_office_controlled_mutation_nas_keeper_step11_read_only_status_route():
+    """Return a hydrated read-only NAS Keeper step-11 status aggregate without raw records."""
+    return build_office_controlled_mutation_nas_keeper_step11_read_only_status_aggregate()
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-one-shot-request-builder")

@@ -43,6 +43,60 @@ describe("fetchJSON", () => {
     await expect(fetchJSON("/api/office/events")).rejects.not.toThrow(/\/home\/hermes|token=secret|ECONNRESET/i);
   });
 
+
+  it("reads NAS Keeper step 11 read-only status aggregate through protected route", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        __HERMES_SESSION_TOKEN__: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        found: true,
+        errors: [],
+        dto: {
+          schema_version: 1,
+          mode: "nas_keeper_step11_read_only_status_aggregate",
+          status_surface: "read_only_rendering",
+          ready_for_read_only_rendering: true,
+          readiness_percent: 100,
+          record_counts: { step10_completion: 1 },
+          ladder_steps: [{ id: "step10_completion", label: "Step 10 completion", record_count: 1, complete: true }],
+          latest_step10_completion_ref: "tmpcompletion-20260527-step10-before-rendering-1",
+          latest_step10_completion_sha256: "a".repeat(64),
+          cleanup_execution_opened: false,
+          execution_authority_created: false,
+          real_nas_production_write_enabled: false,
+          direct_vps_nas_write_enabled: false,
+          watcher_enabled: false,
+          cron_enabled: false,
+          dispatch_enabled: false,
+          authority_adapter_binding_enabled: false,
+          public_exposure_enabled: false,
+          gateway_restart_required: false,
+          markdown_body_included: false,
+          write_payload_included: false,
+          raw_root_path_included: false,
+          next_required_boundary: "read_only_status_rendering_hydrated",
+        },
+      }),
+    } as Response);
+
+    const result = await api.getOfficeControlledMutationNasKeeperStep11ReadOnlyStatus();
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/office/controlled-mutation/nas-runtime/nas-keeper-step11-read-only-status",
+      expect.objectContaining({ headers: expect.any(Headers) }),
+    );
+    expect(result.dto?.readiness_percent).toBe(100);
+    expect(result.dto?.real_nas_production_write_enabled).toBe(false);
+    expect(result.dto?.direct_vps_nas_write_enabled).toBe(false);
+    expect(JSON.stringify(result)).not.toMatch(/records|latest_record|\/Users\/lidises|\/home\/hermes|sk-[A-Za-z0-9]/i);
+  });
+
   it("reads payload materialization summary review gate readback-review-record readback through protected route", async () => {
     Object.defineProperty(globalThis, "window", {
       configurable: true,

@@ -13,7 +13,7 @@ import json
 import os
 import re
 import uuid
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, cast
@@ -12549,6 +12549,96 @@ def list_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receip
             "dispatch_enabled": False,
             "authority_adapter_binding_enabled": False,
             "next_required_boundary": "read_only_status_rendering" if records else "tmp_root_step10_completion_receipt",
+        },
+    }
+
+
+_NAS_KEEPER_STEP11_LADDER_READERS: tuple[tuple[str, str, Callable[[Path], tuple[list[dict[str, object]], int]], Callable[[], Path]], ...] = (
+    ("retention_plan", "Retention plan", _read_nas_keeper_artifact_retention_plan_records, _default_nas_keeper_artifact_retention_plan_store_path),
+    ("cleanup_gate", "Cleanup gate", _read_nas_keeper_cleanup_execution_gate_records, _default_nas_keeper_cleanup_execution_gate_store_path),
+    ("cleanup_hold", "Cleanup hold", _read_nas_keeper_cleanup_execution_hold_records, _default_nas_keeper_cleanup_execution_hold_store_path),
+    ("manifest_preflight", "Manifest preflight", _read_nas_keeper_cleanup_execution_manifest_preflight_records, _default_nas_keeper_cleanup_execution_manifest_preflight_store_path),
+    ("final_approval", "Final approval", _read_nas_keeper_cleanup_final_approval_records, _default_nas_keeper_cleanup_final_approval_store_path),
+    ("package_receipt", "Package receipt", _read_nas_keeper_cleanup_execution_package_receipt_records, _default_nas_keeper_cleanup_execution_package_receipt_store_path),
+    ("disabled_run", "Disabled-run receipt", _read_nas_keeper_cleanup_disabled_run_receipt_records, _default_nas_keeper_cleanup_disabled_run_receipt_store_path),
+    ("summary_receipt", "Summary receipt", _read_nas_keeper_cleanup_execution_summary_receipt_records, _default_nas_keeper_cleanup_execution_summary_receipt_store_path),
+    ("closure_receipt", "Closure receipt", _read_nas_keeper_cleanup_closure_receipt_records, _default_nas_keeper_cleanup_closure_receipt_store_path),
+    ("step10_completion", "Step 10 completion", _read_nas_keeper_tmp_root_step10_completion_receipt_records, _default_nas_keeper_tmp_root_step10_completion_receipt_store_path),
+)
+
+
+def build_office_controlled_mutation_nas_keeper_step11_read_only_status_aggregate(
+    *, store_paths: Mapping[str, Path] | None = None
+) -> dict[str, object]:
+    supplied_paths = dict(store_paths or {})
+    record_counts: dict[str, int] = {}
+    skipped_counts: dict[str, int] = {}
+    ladder_steps: list[dict[str, object]] = []
+    latest_completion: dict[str, object] | None = None
+
+    for step_id, label, reader, default_path_factory in _NAS_KEEPER_STEP11_LADDER_READERS:
+        path = supplied_paths.get(step_id) or default_path_factory()
+        records, skipped_count = reader(path)
+        record_count = len(records)
+        record_counts[step_id] = record_count
+        skipped_counts[step_id] = skipped_count
+        ladder_steps.append({"id": step_id, "label": label, "record_count": record_count, "complete": record_count > 0})
+        if step_id == "step10_completion" and records:
+            latest_completion = records[-1]
+
+    ready = latest_completion is not None
+    latest_sha256 = _stable_metadata_sha256(latest_completion) if latest_completion else None
+    return {
+        "found": ready,
+        "errors": [],
+        "dto": {
+            "schema_version": 1,
+            "mode": "nas_keeper_step11_read_only_status_aggregate",
+            "status_surface": "read_only_rendering",
+            "metadata_only_record_write": True,
+            "read_only_rendering_hydrated": True,
+            "ready_for_read_only_rendering": ready,
+            "readiness_percent": 100 if ready else 0,
+            "write_readiness_percent": 100 if ready else 0,
+            "record_counts": record_counts,
+            "skipped_counts": skipped_counts,
+            "ladder_steps": ladder_steps,
+            "latest_step10_completion_ref": latest_completion.get("tmp_root_completion_ref") if latest_completion else None,
+            "latest_step10_completion_sha256": latest_sha256,
+            "latest_cleanup_closure_ref": latest_completion.get("cleanup_closure_ref") if latest_completion else None,
+            "latest_cleanup_closure_sha256": latest_completion.get("cleanup_closure_sha256") if latest_completion else None,
+            "safe_display_path": latest_completion.get("safe_display_path") if latest_completion else None,
+            "readback_sha256": latest_completion.get("readback_sha256") if latest_completion else None,
+            "tmp_root_write_smoke_completed": ready,
+            "idempotency_replay_metadata": {"latest_step10_completion_ref_terminal": ready, "duplicate_safe_response": True},
+            "capability_flags": {
+                "cleanup_execution_opened": False,
+                "execution_authority_created": False,
+                "real_nas_production_write_enabled": False,
+                "direct_vps_nas_write_enabled": False,
+                "watcher_enabled": False,
+                "cron_enabled": False,
+                "dispatch_enabled": False,
+                "authority_adapter_binding_enabled": False,
+                "public_exposure_enabled": False,
+                "gateway_restart_required": False,
+            },
+            "cleanup_execution_opened": False,
+            "execution_authority_created": False,
+            "real_nas_production_write_enabled": False,
+            "real_nas_production_write_executed": False,
+            "direct_vps_nas_write_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "public_exposure_enabled": False,
+            "gateway_restart_required": False,
+            "markdown_body_included": False,
+            "write_payload_included": False,
+            "raw_root_path_included": False,
+            "credential_value_included": False,
+            "next_required_boundary": "read_only_status_rendering_hydrated" if ready else "tmp_root_step10_completion_receipt",
         },
     }
 

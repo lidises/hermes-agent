@@ -1470,3 +1470,135 @@ def test_tmp_root_step10_completion_api_requires_session_and_stays_before_render
     readback = client.get(route, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN})
     assert readback.status_code == 200
     assert readback.json()["dto"]["record_count"] == 1
+
+
+def seed_step10_completion_receipt(tmp_path):
+    from hermes_cli.office_controlled_mutation import append_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt
+
+    closure_path, closure = seed_cleanup_closure_receipt(tmp_path)
+    completion_path = tmp_path / "tmp-root-step10-completion.jsonl"
+    completion = append_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt(
+        step10_tmp_root_completion_payload(closure["dto"]["cleanup_closure_sha256"]),
+        closure_store_path=closure_path,
+        completion_store_path=completion_path,
+    )
+    return completion_path, completion
+
+
+def test_step11_read_only_status_aggregate_returns_counts_and_safe_capabilities_without_raw_records(tmp_path):
+    from hermes_cli.office_controlled_mutation import build_office_controlled_mutation_nas_keeper_step11_read_only_status_aggregate
+
+    completion_path, completion = seed_step10_completion_receipt(tmp_path)
+    result = build_office_controlled_mutation_nas_keeper_step11_read_only_status_aggregate(
+        store_paths={"step10_completion": completion_path}
+    )
+
+    assert result["found"] is True
+    assert result["errors"] == []
+    dto = result["dto"]
+    assert dto["mode"] == "nas_keeper_step11_read_only_status_aggregate"
+    assert dto["status_surface"] == "read_only_rendering"
+    assert dto["readiness_percent"] == 100
+    assert dto["ready_for_read_only_rendering"] is True
+    assert dto["latest_step10_completion_ref"] == completion["dto"]["tmp_root_completion_ref"]
+    assert dto["latest_step10_completion_sha256"] == completion["dto"]["tmp_root_completion_sha256"]
+    assert dto["record_counts"]["step10_completion"] == 1
+    assert dto["record_counts"]["retention_plan"] == 0
+    assert dto["ladder_steps"][-1] == {"id": "step10_completion", "label": "Step 10 completion", "record_count": 1, "complete": True}
+    assert dto["cleanup_execution_opened"] is False
+    assert dto["execution_authority_created"] is False
+    assert dto["real_nas_production_write_enabled"] is False
+    assert dto["direct_vps_nas_write_enabled"] is False
+    assert dto["watcher_enabled"] is False
+    assert dto["cron_enabled"] is False
+    assert dto["dispatch_enabled"] is False
+    assert dto["authority_adapter_binding_enabled"] is False
+    assert dto["public_exposure_enabled"] is False
+    assert dto["gateway_restart_required"] is False
+    assert dto["markdown_body_included"] is False
+    assert dto["write_payload_included"] is False
+    assert dto["raw_root_path_included"] is False
+    assert "records" not in dto
+    assert "latest_record" not in dto
+    serialized = json.dumps(result, sort_keys=True).lower()
+    assert "/users/lidises" not in serialized
+    assert "/home/hermes" not in serialized
+    assert '"markdown_body":' not in serialized
+    assert '"write_payload":' not in serialized
+    assert "sk-" not in serialized
+
+
+def test_step11_read_only_status_aggregate_api_requires_session_and_hides_records(tmp_path, monkeypatch):
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_nas_keeper_artifact_retention_plan,
+        append_office_controlled_mutation_nas_keeper_cleanup_execution_gate,
+        append_office_controlled_mutation_nas_keeper_cleanup_execution_hold,
+        append_office_controlled_mutation_nas_keeper_cleanup_execution_manifest_preflight,
+        append_office_controlled_mutation_nas_keeper_cleanup_final_approval,
+        append_office_controlled_mutation_nas_keeper_cleanup_execution_package_receipt,
+        append_office_controlled_mutation_nas_keeper_cleanup_disabled_run_receipt,
+        append_office_controlled_mutation_nas_keeper_cleanup_execution_summary_receipt,
+        append_office_controlled_mutation_nas_keeper_cleanup_closure_receipt,
+        append_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt,
+    )
+    from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+
+    plan = append_office_controlled_mutation_nas_keeper_artifact_retention_plan(safe_plan_payload())
+    append_office_controlled_mutation_nas_keeper_cleanup_execution_gate(cleanup_gate_payload(plan["dto"]["retention_plan_sha256"]))
+    append_office_controlled_mutation_nas_keeper_cleanup_execution_hold(cleanup_hold_payload())
+    manifest = append_office_controlled_mutation_nas_keeper_cleanup_execution_manifest_preflight(cleanup_manifest_payload())
+    final = append_office_controlled_mutation_nas_keeper_cleanup_final_approval(
+        cleanup_final_approval_payload(manifest["dto"]["cleanup_manifest_sha256"])
+    )
+    package = append_office_controlled_mutation_nas_keeper_cleanup_execution_package_receipt(
+        cleanup_package_receipt_payload(final["dto"]["cleanup_final_approval_sha256"])
+    )
+    disabled = append_office_controlled_mutation_nas_keeper_cleanup_disabled_run_receipt(
+        cleanup_disabled_run_receipt_payload(package["dto"]["cleanup_package_sha256"])
+    )
+    summary = append_office_controlled_mutation_nas_keeper_cleanup_execution_summary_receipt(
+        cleanup_execution_summary_receipt_payload(disabled["dto"]["cleanup_disabled_run_sha256"])
+    )
+    closure = append_office_controlled_mutation_nas_keeper_cleanup_closure_receipt(
+        cleanup_closure_receipt_payload(summary["dto"]["cleanup_summary_sha256"])
+    )
+    append_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt(
+        step10_tmp_root_completion_payload(closure["dto"]["cleanup_closure_sha256"])
+    )
+
+    client = TestClient(app)
+    route = "/api/office/controlled-mutation/nas-runtime/nas-keeper-step11-read-only-status"
+    unauthenticated = client.get(route)
+    assert unauthenticated.status_code == 401
+
+    response = client.get(route, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["found"] is True
+    dto = body["dto"]
+    assert dto["record_counts"] == {
+        "retention_plan": 1,
+        "cleanup_gate": 1,
+        "cleanup_hold": 1,
+        "manifest_preflight": 1,
+        "final_approval": 1,
+        "package_receipt": 1,
+        "disabled_run": 1,
+        "summary_receipt": 1,
+        "closure_receipt": 1,
+        "step10_completion": 1,
+    }
+    assert dto["readiness_percent"] == 100
+    assert dto["next_required_boundary"] == "read_only_status_rendering_hydrated"
+    assert dto["execution_authority_created"] is False
+    assert dto["real_nas_production_write_enabled"] is False
+    assert dto["direct_vps_nas_write_enabled"] is False
+    assert "records" not in dto
+    assert "latest_record" not in dto
+    serialized = json.dumps(body, sort_keys=True).lower()
+    assert "/users/lidises" not in serialized
+    assert "/home/hermes" not in serialized
+    assert '"markdown_body":' not in serialized
+    assert '"write_payload":' not in serialized
+    assert "sk-" not in serialized

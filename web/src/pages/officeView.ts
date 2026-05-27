@@ -6094,6 +6094,35 @@ export function buildOfficeNasKeeperStep11ReadOnlyRenderingStatus(input: OfficeN
   };
 }
 
+
+export function buildOfficeNasKeeperStep11ReadOnlyRenderingStatusFromAggregate(aggregate: { dto?: Record<string, unknown> | null }): OfficeNasKeeperStep11ReadOnlyRenderingStatus | null {
+  const dto = aggregate.dto;
+  if (!dto || dto.mode !== "nas_keeper_step11_read_only_status_aggregate") return null;
+  return buildOfficeNasKeeperStep11ReadOnlyRenderingStatus({
+    latestStep10Record: {
+      tmp_root_completion_ref: typeof dto.latest_step10_completion_ref === "string" ? dto.latest_step10_completion_ref : null,
+      cleanup_closure_ref: typeof dto.latest_cleanup_closure_ref === "string" ? dto.latest_cleanup_closure_ref : null,
+      closure_sha256: typeof dto.latest_cleanup_closure_sha256 === "string" ? dto.latest_cleanup_closure_sha256 : null,
+      ready_for_read_only_rendering: dto.ready_for_read_only_rendering === true,
+      step10_complete: dto.tmp_root_write_smoke_completed === true,
+      write_readiness_percent: typeof dto.readiness_percent === "number" ? dto.readiness_percent : 0,
+      next_required_boundary: typeof dto.next_required_boundary === "string" ? dto.next_required_boundary : "read_only_status_rendering_hydrated",
+      safe_tmp_root_display_path: typeof dto.safe_display_path === "string" ? dto.safe_display_path : null,
+      tmp_root_write_verified: dto.tmp_root_write_smoke_completed === true,
+      replay_idempotency_metadata: dto.idempotency_replay_metadata && typeof dto.idempotency_replay_metadata === "object" ? dto.idempotency_replay_metadata : null,
+      real_nas_production_write: false,
+      vps_direct_nas_authority: false,
+      watcher_cron_dispatcher_authority_adapter: false,
+      public_exposure_changed: false,
+      gateway_restarted: false,
+      raw_path_projected: false,
+      markdown_body_projected: false,
+      write_payload_projected: false,
+    },
+    recordCounts: dto.record_counts && typeof dto.record_counts === "object" ? dto.record_counts as Record<string, number> : {},
+  });
+}
+
 export function buildOfficeDeskRpgReadOnlyChainCompletionReview(rollback: OfficeNasKeeperRollbackEvidencePreview): OfficeDeskRpgReadOnlyChainCompletionReview {
   const reviewCards: OfficeDeskRpgReadOnlyChainCompletionReviewCard[] = [
     {
