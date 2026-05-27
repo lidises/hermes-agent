@@ -1,3 +1,38 @@
+## Current status — NAS Keeper cleanup manifest preflight + tmp-root write smoke completed (2026-05-27T09:07Z)
+
+Scope completed:
+- Added a cleanup execution manifest/preflight contract after the cleanup dry-run hold rung.
+- The new manifest preflight consumes an existing cleanup hold ref, computes exact candidate-action checksums, records metadata-only preflight state, proves idempotent replay, and still leaves cleanup execution closed.
+- Per current approval, ran a Mac relay tmp-root-only write smoke after write-readiness was already 100%; this was not a real NAS production write and used an isolated temporary local root/queue.
+- Synced both VPS worktrees and restarted dashboard/core services only; gateway remained active and was not restarted.
+
+Evidence captured:
+- New route: `POST/GET /api/office/controlled-mutation/nas-runtime/nas-keeper-cleanup-execution-manifest-preflight`.
+- New helpers: `append_office_controlled_mutation_nas_keeper_cleanup_execution_manifest_preflight` and `list_office_controlled_mutation_nas_keeper_cleanup_execution_manifest_preflight_records`.
+- Protected API smoke wrote one metadata-only cleanup manifest record: `cleanupmanifest-20260527-artifact-retention-1`.
+- Protected API results: unauthenticated POST returned 401; authenticated POST stored the manifest; duplicate POST returned idempotent replay; readback count for the cleanup manifest ref is 1.
+- Cleanup manifest flags: preflight_passed=true, cleanup_execution_opened=false, actual_nas_delete=false, actual_nas_move=false, actual_nas_write=false.
+- Candidate-action checksum count is 1 and the checksum length is 64 hex chars.
+- Tmp-root-only Mac relay write smoke executed against `local_tmp_root_only`, wrote `TmpVault / cleanup-manifest-tmp-smoke-20260527090500-mansmoke1.md`, readback_verified=true, execution_state_recorded=true, readback SHA-256 `40fa0544ad97ce7c92de38bcd46e213097fa53bacfe21c4ec6d70efc281736df`.
+- API/DOM/tmp-smoke leak checks found no raw filesystem root/path, raw markdown body, secret token, raw temporary root/queue path, or raw write payload echo.
+- Focused tests passed: artifact retention plan + cleanup gate + cleanup hold + cleanup manifest + execution-from-preview + execution-payload preview + NAS runtime write = 29/29.
+- `py_compile` and `git diff --check` passed.
+
+Safety boundaries preserved:
+- Real NAS production write: false.
+- Actual NAS delete/move/archive cleanup: false.
+- Cleanup execution opened: false.
+- Direct VPS NAS authority: false.
+- watcher/cron/dispatcher/authority-adapter: false.
+- public exposure change: false.
+- gateway restart: false.
+- raw filesystem root/path, raw markdown body, secret, or raw write payload echo: false.
+
+Readiness/result note:
+- Write-readiness is 100%.
+- This rung added non-repetitive operational-readiness: cleanup gate -> dry-run hold -> manifest/preflight with candidate-action checksums -> isolated tmp-root write proof, without touching production NAS.
+- Next shortest safe rung is a cleanup execution approval-token/final gate that remains metadata-only, unless the user separately approves actual cleanup execution or a fresh exact NAS production write.
+
 ## Current status — NAS Keeper cleanup dry-run hold + tmp-root write smoke completed (2026-05-27T08:53Z)
 
 Scope completed:
