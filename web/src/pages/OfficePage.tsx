@@ -156,6 +156,7 @@ import {
   buildOfficeNasKeeperQueueEvidenceConsolidation,
   buildOfficeNasKeeperQueueReviewChecklist,
   buildOfficeNasKeeperExecutionOperatorAction,
+  buildOfficeNasKeeperDurableQueueGuardedOperatorReadiness,
   buildOfficeDeskRpgReadOnlyChainCompletionReview,
   buildOfficeEventDrivenCharacterStateProjection,
   buildOfficeCharacterStateRoomOverlay,
@@ -209,6 +210,7 @@ import {
   type OfficeNasRuntimeSingleFileWriteApprovalAction,
   type OfficeNasKeeperQueueManualEvidenceReviewSurface,
   type OfficeNasKeeperExecutionOperatorAction,
+  type OfficeNasKeeperDurableQueueGuardedOperatorReadiness,
   type OfficeDeskRpgReadOnlyChainCompletionReview,
   type OfficeControlledMutationContractPostureProjection,
   type OfficeControlledMutationContractPosturePolish,
@@ -4388,6 +4390,42 @@ export function NasKeeperExecutionOperatorActionPanel({
               recorded {String(stateResult.recorded)} · {stateResult.dto?.queue_status_after ?? "state_not_recorded"}
             </div>
           ) : null}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function NasKeeperDurableQueueGuardedOperatorReadinessPanel({ readiness }: { readiness: OfficeNasKeeperDurableQueueGuardedOperatorReadiness }) {
+  return (
+    <Card
+      data-office-nas-keeper-durable-queue-guarded-operator-readiness="true"
+      data-office-nas-keeper-durable-queue-guarded-operator-approval-default={String(readiness.executionApprovalDefault)}
+      data-office-nas-keeper-durable-queue-guarded-operator-execution-disabled-default={String(readiness.executionDisabledByDefault)}
+      data-office-nas-keeper-durable-queue-guarded-operator-metadata-only-record-write-ready={String(readiness.metadataOnlyRecordWriteReady)}
+      data-office-nas-keeper-durable-queue-guarded-operator-payload-preview-required={String(readiness.payloadPreviewRequiredBeforeExecution)}
+      data-office-nas-keeper-durable-queue-guarded-operator-real-nas-production-write-enabled={String(readiness.realNasProductionWriteEnabled)}
+      data-office-nas-keeper-durable-queue-guarded-operator-vps-nas-authority-enabled={String(readiness.vpsNasAuthorityEnabled)}
+      data-office-nas-keeper-durable-queue-guarded-operator-watcher-cron-daemon-enabled={String(readiness.watcherCronDaemonEnabled)}
+      data-office-nas-keeper-durable-queue-guarded-operator-relay-dispatch-enabled={String(readiness.relayDispatchEnabled)}
+      data-office-nas-keeper-durable-queue-guarded-operator-authority-adapter-binding-enabled={String(readiness.authorityAdapterBindingEnabled)}
+      data-office-nas-keeper-durable-queue-guarded-operator-markdown-body-projected={String(readiness.markdownBodyProjected)}
+      data-office-nas-keeper-durable-queue-guarded-operator-write-payload-projected={String(readiness.writePayloadProjected)}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4 text-emerald-300" /> {readiness.title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2 text-xs text-midground/75">
+          <div>{readiness.safeSummary}</div>
+          <div className="grid gap-1 font-mono text-[10px] text-emerald-100/70">
+            <span>execution approval default {String(readiness.executionApprovalDefault)}</span>
+            <span>execution disabled default {String(readiness.executionDisabledByDefault)}</span>
+            <span>metadata-only record write ready {String(readiness.metadataOnlyRecordWriteReady)}</span>
+            <span>preview required {String(readiness.payloadPreviewRequiredBeforeExecution)}</span>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -14447,6 +14485,10 @@ export default function OfficePage() {
     () => buildOfficeNasKeeperExecutionOperatorAction(nasKeeperQueueManualEvidenceReviewSurface),
     [nasKeeperQueueManualEvidenceReviewSurface],
   );
+  const nasKeeperDurableQueueGuardedOperatorReadiness = useMemo(
+    () => buildOfficeNasKeeperDurableQueueGuardedOperatorReadiness(nasKeeperExecutionOperatorAction),
+    [nasKeeperExecutionOperatorAction],
+  );
   const deskRpgReadOnlyChainCompletionReview = useMemo(
     () => buildOfficeDeskRpgReadOnlyChainCompletionReview(nasKeeperRollbackEvidencePreview),
     [nasKeeperRollbackEvidencePreview],
@@ -14810,6 +14852,8 @@ export default function OfficePage() {
       </section>
 
       <OfficeVisualizerEvidenceDrawer terminalResult={nasKeeperGuardedFailureStateResult}>
+      <NasKeeperDurableQueueGuardedOperatorReadinessPanel readiness={nasKeeperDurableQueueGuardedOperatorReadiness} />
+
       <NasKeeperLiveOperatorLanePanel
         queueSurface={nasKeeperQueueManualEvidenceReviewSurface}
         queueReadback={nasKeeperQueueReadback}

@@ -2405,6 +2405,30 @@ export type OfficeNasKeeperExecutionOperatorAction = {
   safeSummary: string;
 };
 
+export type OfficeNasKeeperDurableQueueGuardedOperatorReadiness = {
+  stageLabel: "NAS Keeper Durable Queue Guarded Operator Readiness 1";
+  title: string;
+  detailKind: "nas_keeper_durable_queue_guarded_operator_readiness";
+  sourceDetailKind: OfficeNasKeeperExecutionOperatorAction["detailKind"];
+  durableQueueItemRequired: true;
+  executionApprovalDefault: false;
+  executionDisabledByDefault: true;
+  metadataOnlyRecordWriteReady: true;
+  payloadPreviewRequiredBeforeExecution: true;
+  executionEndpoint: OfficeNasKeeperExecutionOperatorAction["executionEndpoint"];
+  executionStateEndpoint: OfficeNasKeeperExecutionOperatorAction["executionStateEndpoint"];
+  safeFields: OfficeNasKeeperExecutionOperatorAction["safeFields"];
+  realNasProductionWriteEnabled: false;
+  vpsNasAuthorityEnabled: false;
+  watcherCronDaemonEnabled: false;
+  relayDispatchEnabled: false;
+  authorityAdapterBindingEnabled: false;
+  markdownBodyProjected: false;
+  writePayloadProjected: false;
+  rawExcluded: true;
+  safeSummary: string;
+};
+
 export type OfficeDeskRpgReadOnlyChainCompletionReviewCard = {
   id: "request_to_orchestrator" | "evidence_to_review" | "approval_to_nas_keeper" | "next_projection_gap";
   label: string;
@@ -5870,6 +5894,32 @@ export function buildOfficeNasKeeperExecutionOperatorAction(surface: OfficeNasKe
     gatewayRestartEnabled: false,
     rawExcluded: true,
     safeSummary: "Authorized queue item을 다시 preview 검증한 뒤 Mac relay execution-from-preview route로 실행하고, 별도 버튼으로 safe execution-state만 기록합니다. Markdown body/raw path/credential은 브라우저에 투영하지 않습니다.",
+  };
+}
+
+export function buildOfficeNasKeeperDurableQueueGuardedOperatorReadiness(action: OfficeNasKeeperExecutionOperatorAction): OfficeNasKeeperDurableQueueGuardedOperatorReadiness {
+  return {
+    stageLabel: "NAS Keeper Durable Queue Guarded Operator Readiness 1",
+    title: "Durable queue guarded operator readiness",
+    detailKind: "nas_keeper_durable_queue_guarded_operator_readiness",
+    sourceDetailKind: action.detailKind,
+    durableQueueItemRequired: true,
+    executionApprovalDefault: false,
+    executionDisabledByDefault: true,
+    metadataOnlyRecordWriteReady: true,
+    payloadPreviewRequiredBeforeExecution: true,
+    executionEndpoint: action.executionEndpoint,
+    executionStateEndpoint: action.executionStateEndpoint,
+    safeFields: action.safeFields,
+    realNasProductionWriteEnabled: false,
+    vpsNasAuthorityEnabled: false,
+    watcherCronDaemonEnabled: false,
+    relayDispatchEnabled: false,
+    authorityAdapterBindingEnabled: false,
+    markdownBodyProjected: false,
+    writePayloadProjected: false,
+    rawExcluded: true,
+    safeSummary: "Existing durable authorized queue item만 대상으로 하며, approval checkbox는 기본 미승인이고 execute button은 기본 disabled입니다. Browser/API는 safe refs와 preview/record metadata만 다루며 markdown body, write_payload, raw path, secrets는 투영하지 않습니다.",
   };
 }
 
