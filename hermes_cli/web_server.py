@@ -124,6 +124,8 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_nas_keeper_cleanup_final_approval_records,
     append_office_controlled_mutation_nas_keeper_cleanup_execution_package_receipt,
     list_office_controlled_mutation_nas_keeper_cleanup_execution_package_receipt_records,
+    append_office_controlled_mutation_nas_keeper_cleanup_disabled_run_receipt,
+    list_office_controlled_mutation_nas_keeper_cleanup_disabled_run_receipt_records,
     build_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_request,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_readback,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_export_selection_review,
@@ -1049,6 +1051,24 @@ async def list_office_controlled_mutation_nas_keeper_cleanup_execution_package_r
 async def append_office_controlled_mutation_nas_keeper_cleanup_execution_package_receipt_route(payload: Any = Body(None)):
     """Append a metadata-only cleanup execution package receipt; execution remains closed."""
     return append_office_controlled_mutation_nas_keeper_cleanup_execution_package_receipt(payload)
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-cleanup-disabled-run-receipt")
+async def list_office_controlled_mutation_nas_keeper_cleanup_disabled_run_receipt_records_route(
+    cleanup_disabled_run_ref: Optional[str] = None,
+    limit: Optional[int] = None,
+):
+    """Read metadata-only disabled cleanup-run receipt records without NAS writes/deletes/moves."""
+    return list_office_controlled_mutation_nas_keeper_cleanup_disabled_run_receipt_records(
+        cleanup_disabled_run_ref=cleanup_disabled_run_ref,
+        limit=limit or 50,
+    )
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-cleanup-disabled-run-receipt")
+async def append_office_controlled_mutation_nas_keeper_cleanup_disabled_run_receipt_route(payload: Any = Body(None)):
+    """Append a metadata-only disabled cleanup-run receipt; execution remains closed."""
+    return append_office_controlled_mutation_nas_keeper_cleanup_disabled_run_receipt(payload)
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-one-shot-request-builder")
