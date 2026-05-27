@@ -6042,8 +6042,51 @@ describe("NasKeeperExecutionOperatorActionPanel", () => {
       "closure_receipt",
       "step10_completion",
       "step11_hydration_receipt",
+      "completed_real_write_receipt",
     ]);
     expect(JSON.stringify(status)).not.toMatch(/write_payload|raw markdown body|\/Users\/lidises|\/home\/hermes|token-shaped-operator|private-operator-provider/i);
+  });
+
+  it("projects completed real NAS write receipt metadata in the step 11 read-only status without enabling another write", () => {
+    const status = OfficeView.buildOfficeNasKeeperStep11ReadOnlyRenderingStatus({
+      latestStep10Record: {
+        tmp_root_completion_ref: "tmpcompletion-20260527-step10-before-rendering-1",
+        cleanup_closure_ref: "closure-20260527-no-authority-1",
+        closure_sha256: "d".repeat(64),
+        ready_for_read_only_rendering: true,
+        step10_complete: true,
+        write_readiness_percent: 100,
+        safe_tmp_root_display_path: "TmpVault / cleanup-step10-final-smoke-20260527124500-step10finish.md",
+        tmp_root_write_verified: true,
+        replay_idempotency_metadata: { replay_safe: true },
+      },
+      latestCompletedRealWriteReceipt: {
+        completed_write_receipt_ref: "realwrite-20260527-001",
+        safe_logical_path: "ai_office_controlled_mutation::nas-keeper-controlled-mutation-real-write-20260527.md",
+        readback_sha256: "14ca76decb988b26502680578f560e96a36eab0778fbc8112818ccfa59f75901",
+        repeat_write_requires_new_explicit_approval: true,
+        replacement_write_requires_new_explicit_approval: true,
+      },
+      recordCounts: { step10_completion: 1, step11_hydration_receipt: 1, completed_real_write_receipt: 1 },
+    });
+
+    expect(status.completedRealWriteReceiptFound).toBe(true);
+    expect(status.completedRealWriteReceiptRef).toBe("realwrite-20260527-001");
+    expect(status.completedRealWriteChecksumPrefix).toBe("14ca76decb98");
+    expect(status.repeatWriteRequiresNewExplicitApproval).toBe(true);
+    expect(status.replacementWriteRequiresNewExplicitApproval).toBe(true);
+    expect(status.realNasProductionWriteEnabled).toBe(false);
+    expect(status.ladderSteps.map((step) => step.id)).toContain("completed_real_write_receipt");
+    expect(JSON.stringify(status)).not.toMatch(/markdown_body|write_payload|\/Users\/lidises|\/home\/hermes|sk-[A-Za-z0-9]/i);
+  });
+
+  it("wires completed real-write receipt readback into the Office step 11 read-only projection source", () => {
+    const source = officePageSource;
+    expect(source).toContain("getOfficeControlledMutationNasKeeperCompletedRealWriteReceipt");
+    expect(source).toContain("setNasKeeperCompletedRealWriteReceiptReadback");
+    expect(source).toContain("nasKeeperCompletedRealWriteReceiptReadback");
+    expect(source).toContain("data-office-nas-keeper-step11-completed-real-write-receipt");
+    expect(source).not.toMatch(/completed-real-write-receipt[^\n]*(method:\s*"POST"|<button|onClick|onSubmit)/i);
   });
 
   it("renders step 11 NAS Keeper read-only status without action controls or raw payload/path projection", () => {

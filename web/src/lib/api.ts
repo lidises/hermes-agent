@@ -214,6 +214,29 @@ export interface OfficeNasKeeperStep11ReadOnlyStatusAggregate {
   };
 }
 
+export interface OfficeNasKeeperCompletedRealWriteReceiptReadback {
+  listed: boolean;
+  errors: Array<{ field: string; code: string }>;
+  dto: null | {
+    schema_version: number;
+    mode: "nas_keeper_completed_real_write_receipt_records_readback";
+    count: number;
+    returned_count?: number;
+    skipped_count?: number;
+    latest_completed_write_receipt_ref?: string | null;
+    latest_completed_write_receipt_sha256?: string | null;
+    latest_safe_logical_path?: string | null;
+    latest_readback_sha256?: string | null;
+    markdown_body_included: false;
+    write_payload_included: false;
+    raw_root_path_included: false;
+    repeat_write_requires_new_explicit_approval: boolean;
+    replacement_write_requires_new_explicit_approval: boolean;
+    capabilities: Record<string, boolean>;
+    next_required_boundary: string;
+  };
+}
+
 export interface OfficeNasKeeperHandoffClaimDryRunPayload {
   handoff_ref: string;
   claim_ref: string;
@@ -4561,6 +4584,9 @@ export const api = {
 
   getOfficeControlledMutationNasKeeperStep11ReadOnlyStatus: () =>
     fetchJSON<OfficeNasKeeperStep11ReadOnlyStatusAggregate>("/api/office/controlled-mutation/nas-runtime/nas-keeper-step11-read-only-status"),
+
+  getOfficeControlledMutationNasKeeperCompletedRealWriteReceipt: () =>
+    fetchJSON<OfficeNasKeeperCompletedRealWriteReceiptReadback>("/api/office/controlled-mutation/nas-runtime/nas-keeper-completed-real-write-receipt"),
 
   dryRunOfficeControlledMutationNasKeeperHandoffClaim: (body: OfficeNasKeeperHandoffClaimDryRunPayload) =>
     fetchJSON<OfficeNasKeeperHandoffClaimDryRunResult>("/api/office/controlled-mutation/nas-runtime/nas-keeper-handoff-claim-dry-run", {

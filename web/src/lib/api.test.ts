@@ -97,6 +97,50 @@ describe("fetchJSON", () => {
     expect(JSON.stringify(result)).not.toMatch(/records|latest_record|\/Users\/lidises|\/home\/hermes|sk-[A-Za-z0-9]/i);
   });
 
+  it("reads completed real-write receipt metadata through protected route without mutation body", async () => {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        __HERMES_SESSION_TOKEN__: "session-token-for-header-only",
+        __HERMES_BASE_PATH__: "",
+      },
+    });
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        listed: true,
+        errors: [],
+        dto: {
+          schema_version: 1,
+          mode: "nas_keeper_completed_real_write_receipt_records_readback",
+          count: 1,
+          latest_completed_write_receipt_ref: "realwrite-20260527-001",
+          latest_safe_logical_path: "ai_office_controlled_mutation::nas-keeper-controlled-mutation-real-write-20260527.md",
+          latest_readback_sha256: "14ca76decb988b26502680578f560e96a36eab0778fbc8112818ccfa59f75901",
+          markdown_body_included: false,
+          write_payload_included: false,
+          raw_root_path_included: false,
+          repeat_write_requires_new_explicit_approval: true,
+          replacement_write_requires_new_explicit_approval: true,
+          capabilities: { actual_nas_write_enabled: false, direct_vps_nas_write_enabled: false },
+          next_required_boundary: "new_explicit_approval_required_for_additional_real_write",
+        },
+      }),
+    } as Response);
+
+    const result = await api.getOfficeControlledMutationNasKeeperCompletedRealWriteReceipt();
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/office/controlled-mutation/nas-runtime/nas-keeper-completed-real-write-receipt",
+      expect.objectContaining({ headers: expect.any(Headers) }),
+    );
+    const headers = fetchMock.mock.calls[0]?.[1]?.headers as Headers;
+    expect(headers.get("X-Hermes-Session-Token")).toBe("session-token-for-header-only");
+    expect(result.dto?.count).toBe(1);
+    expect(result.dto?.capabilities.actual_nas_write_enabled).toBe(false);
+    expect(JSON.stringify(fetchMock.mock.calls[0]?.[1])).not.toMatch(/method|body|raw markdown body|write_payload|sk-/i);
+  });
+
   it("reads payload materialization summary review gate readback-review-record readback through protected route", async () => {
     Object.defineProperty(globalThis, "window", {
       configurable: true,

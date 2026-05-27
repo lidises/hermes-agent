@@ -2454,10 +2454,12 @@ export type OfficeNasKeeperStep11LadderStepId =
   | "summary_receipt"
   | "closure_receipt"
   | "step10_completion"
-  | "step11_hydration_receipt";
+  | "step11_hydration_receipt"
+  | "completed_real_write_receipt";
 
 export type OfficeNasKeeperStep11ReadOnlyRenderingInput = {
   latestStep10Record?: Record<string, unknown> | null;
+  latestCompletedRealWriteReceipt?: Record<string, unknown> | null;
   recordCounts?: Partial<Record<OfficeNasKeeperStep11LadderStepId, number>>;
 };
 
@@ -2486,6 +2488,12 @@ export type OfficeNasKeeperStep11ReadOnlyRenderingStatus = {
   ladderSteps: OfficeNasKeeperStep11ReadOnlyRenderingLadderStep[];
   tmpRootWriteVerified: boolean;
   replayIdempotencyMetadataReady: boolean;
+  completedRealWriteReceiptFound: boolean;
+  completedRealWriteReceiptRef: string;
+  completedRealWriteSafeLogicalPath: string;
+  completedRealWriteChecksumPrefix: string;
+  repeatWriteRequiresNewExplicitApproval: boolean;
+  replacementWriteRequiresNewExplicitApproval: boolean;
   cleanupExecutionOpened: false;
   executionAuthorityCreated: false;
   realNasProductionWriteEnabled: false;
@@ -6023,6 +6031,7 @@ const OFFICE_NAS_KEEPER_STEP11_LADDER_LABELS: Record<OfficeNasKeeperStep11Ladder
   closure_receipt: "Closure/no-authority receipt",
   step10_completion: "Step 10 completion receipt",
   step11_hydration_receipt: "Step 11 hydration receipt",
+  completed_real_write_receipt: "Completed real-write receipt",
 };
 
 function stringRecordField(record: Record<string, unknown> | null | undefined, key: string, fallback = "not_recorded"): string {
@@ -6042,6 +6051,7 @@ function numberRecordField(record: Record<string, unknown> | null | undefined, k
 
 export function buildOfficeNasKeeperStep11ReadOnlyRenderingStatus(input: OfficeNasKeeperStep11ReadOnlyRenderingInput = {}): OfficeNasKeeperStep11ReadOnlyRenderingStatus {
   const record = input.latestStep10Record ?? null;
+  const completedReceipt = input.latestCompletedRealWriteReceipt ?? null;
   const recordCounts = input.recordCounts ?? {};
   const ladderSteps = (Object.keys(OFFICE_NAS_KEEPER_STEP11_LADDER_LABELS) as OfficeNasKeeperStep11LadderStepId[]).map((id) => {
     const recordCount = Math.max(0, Math.floor(recordCounts[id] ?? 0));
@@ -6060,6 +6070,12 @@ export function buildOfficeNasKeeperStep11ReadOnlyRenderingStatus(input: OfficeN
   const safeTmpRootDisplayPath = stringRecordField(record, "safe_tmp_root_display_path", "tmp-root write proof not recorded");
   const replayMetadata = record?.replay_idempotency_metadata;
   const replayIdempotencyMetadataReady = typeof replayMetadata === "object" && replayMetadata !== null;
+  const completedRealWriteReceiptFound = Boolean(completedReceipt);
+  const completedRealWriteReceiptRef = stringRecordField(completedReceipt, "completed_write_receipt_ref");
+  const completedRealWriteSafeLogicalPath = stringRecordField(completedReceipt, "safe_logical_path");
+  const completedRealWriteChecksumPrefix = stringRecordField(completedReceipt, "readback_sha256").slice(0, 12);
+  const repeatWriteRequiresNewExplicitApproval = booleanRecordField(completedReceipt, "repeat_write_requires_new_explicit_approval", completedRealWriteReceiptFound);
+  const replacementWriteRequiresNewExplicitApproval = booleanRecordField(completedReceipt, "replacement_write_requires_new_explicit_approval", completedRealWriteReceiptFound);
   const nextRequiredBoundary = readyForReadOnlyRendering && step10Complete && writeReadinessPercent === 100 ? "read_only_status_rendering" : "step10_completion_receipt_required";
   return {
     stageLabel: "NAS Keeper Step 11 Read-only Rendering Status 1",
@@ -6078,6 +6094,12 @@ export function buildOfficeNasKeeperStep11ReadOnlyRenderingStatus(input: OfficeN
     ladderSteps,
     tmpRootWriteVerified: booleanRecordField(record, "tmp_root_write_verified"),
     replayIdempotencyMetadataReady,
+    completedRealWriteReceiptFound,
+    completedRealWriteReceiptRef,
+    completedRealWriteSafeLogicalPath,
+    completedRealWriteChecksumPrefix,
+    repeatWriteRequiresNewExplicitApproval,
+    replacementWriteRequiresNewExplicitApproval,
     cleanupExecutionOpened: false,
     executionAuthorityCreated: false,
     realNasProductionWriteEnabled: false,
@@ -6097,7 +6119,7 @@ export function buildOfficeNasKeeperStep11ReadOnlyRenderingStatus(input: OfficeN
 }
 
 
-export function buildOfficeNasKeeperStep11ReadOnlyRenderingStatusFromAggregate(aggregate: { dto?: Record<string, unknown> | null }): OfficeNasKeeperStep11ReadOnlyRenderingStatus | null {
+export function buildOfficeNasKeeperStep11ReadOnlyRenderingStatusFromAggregate(aggregate: { dto?: Record<string, unknown> | null }, completedReceiptReadback: { dto?: Record<string, unknown> | null } | null = null): OfficeNasKeeperStep11ReadOnlyRenderingStatus | null {
   const dto = aggregate.dto;
   if (!dto || dto.mode !== "nas_keeper_step11_read_only_status_aggregate") return null;
   return buildOfficeNasKeeperStep11ReadOnlyRenderingStatus({
@@ -6121,7 +6143,17 @@ export function buildOfficeNasKeeperStep11ReadOnlyRenderingStatusFromAggregate(a
       markdown_body_projected: false,
       write_payload_projected: false,
     },
-    recordCounts: dto.record_counts && typeof dto.record_counts === "object" ? dto.record_counts as Record<string, number> : {},
+    recordCounts: {
+      ...(dto.record_counts && typeof dto.record_counts === "object" ? dto.record_counts as Record<string, number> : {}),
+      completed_real_write_receipt: typeof completedReceiptReadback?.dto?.count === "number" ? completedReceiptReadback.dto.count : 0,
+    },
+    latestCompletedRealWriteReceipt: completedReceiptReadback?.dto ? {
+      completed_write_receipt_ref: completedReceiptReadback.dto.latest_completed_write_receipt_ref,
+      safe_logical_path: completedReceiptReadback.dto.latest_safe_logical_path,
+      readback_sha256: completedReceiptReadback.dto.latest_readback_sha256,
+      repeat_write_requires_new_explicit_approval: completedReceiptReadback.dto.repeat_write_requires_new_explicit_approval,
+      replacement_write_requires_new_explicit_approval: completedReceiptReadback.dto.replacement_write_requires_new_explicit_approval,
+    } : null,
   });
 }
 
