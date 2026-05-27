@@ -100,6 +100,34 @@ describe("Office controlled-mutation runtime status panel placement", () => {
     }
   });
 
+  it("collapses office-like status pages into RPG visualizer tabs instead of leaving them in the main feed", () => {
+    const source = officePageSource;
+    const mapIndex = source.indexOf("<OfficeRpgMap");
+    const drawerIndex = source.indexOf("<OfficeRpgVisualizerTabsDrawer");
+    const drawerCloseIndex = source.indexOf("</OfficeRpgVisualizerTabsDrawer>");
+    expect(mapIndex).toBeGreaterThan(0);
+    expect(drawerIndex).toBeGreaterThan(mapIndex);
+    expect(drawerCloseIndex).toBeGreaterThan(drawerIndex);
+    expect(source).toContain('data-office-rpg-visualizer-tabs-drawer="true"');
+    expect(source).toContain('data-office-rpg-visualizer-tabs-default-open="false"');
+    expect(source).toContain('data-office-rpg-tab="nas-keeper"');
+    expect(source).toContain('data-office-rpg-tab="controlled-mutation"');
+    expect(source).toContain('data-office-rpg-tab="evidence"');
+    expect(source).toContain('data-office-rpg-tab-panel-default-open="false"');
+    expect(source).toContain("RPG visualizer 중심으로 통합");
+
+    for (const panel of [
+      "<NasKeeperStep11ReadOnlyRenderingStatusPanel",
+      "<NasKeeperDurableQueueGuardedOperatorReadinessPanel",
+      "<OfficeVisualizerEvidenceDrawer",
+      "<OfficeControlledMutationCompactDashboardPanel",
+    ]) {
+      const panelIndex = source.indexOf(panel);
+      expect(panelIndex).toBeGreaterThan(drawerIndex);
+      expect(panelIndex).toBeLessThan(drawerCloseIndex);
+    }
+  });
+
   it("keeps graduated status panels available outside legacy diagnostic lanes for smoke hooks", () => {
     const source = officePageSource;
     const legacyIndex = source.indexOf("{SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES ?");

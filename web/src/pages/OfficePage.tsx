@@ -6824,6 +6824,33 @@ export function OfficeVisualizerEvidenceDrawer({
 }
 
 
+export function OfficeRpgVisualizerTabsDrawer({ children }: { children: ReactNode }) {
+  return (
+    <details
+      className="border border-emerald-300/20 bg-black/20 p-4 text-sm text-midground/75"
+      data-office-rpg-visualizer-tabs-drawer="true"
+      data-office-rpg-visualizer-tabs-default-open="false"
+      data-office-rpg-visualizer-tabs-mode="collapsed-by-default"
+    >
+      <summary className="cursor-pointer list-none text-sm font-semibold text-foreground" data-office-rpg-visualizer-tabs-summary="true">
+        RPG visualizer 중심으로 통합 · NAS Keeper / controlled-mutation / 기술 증거 탭 열기
+      </summary>
+      <p className="mt-2 max-w-3xl text-xs leading-5 text-midground/65">
+        기본 화면은 통합 운영실과 RPG 지도만 남기고, 유사 Office 상태 페이지는 필요한 때 여는 탭형 세부 영역으로 접었습니다. 이 영역도 읽기 전용이며 raw 본문, 비밀값, 실제 write 버튼을 추가하지 않습니다.
+      </p>
+      <nav className="mt-3 flex flex-wrap gap-2 text-xs" role="tablist" aria-label="AI Office RPG visualizer detail tabs">
+        <a href="#office-rpg-tab-nas-keeper" className="border border-emerald-300/25 bg-emerald-950/20 px-3 py-1 text-emerald-100" role="tab" data-office-rpg-tab="nas-keeper">NAS Keeper</a>
+        <a href="#office-rpg-tab-controlled-mutation" className="border border-sky-300/25 bg-sky-950/20 px-3 py-1 text-sky-100" role="tab" data-office-rpg-tab="controlled-mutation">Controlled mutation</a>
+        <a href="#office-rpg-tab-evidence" className="border border-violet-300/25 bg-violet-950/20 px-3 py-1 text-violet-100" role="tab" data-office-rpg-tab="evidence">Evidence</a>
+      </nav>
+      <div className="mt-4 grid gap-4" data-office-rpg-visualizer-tabs-content="true">
+        {children}
+      </div>
+    </details>
+  );
+}
+
+
 export function OfficeControlledMutationCompactDashboardPanel({
   latestApproval,
   latestPreflight,
@@ -14971,8 +14998,6 @@ export default function OfficePage() {
         </div>
       </section>
 
-      <NasKeeperStep11ReadOnlyRenderingStatusPanel status={nasKeeperStep11ReadOnlyRenderingStatus} />
-
       {showOverview ? (
         <OfficeRpgMap
           scene={rpgScene}
@@ -14994,21 +15019,27 @@ export default function OfficePage() {
         />
       ) : null}
 
-      <section
-        className="border border-emerald-300/20 bg-black/20 p-4 text-sm text-midground/75"
-        data-office-nas-keeper-heavy-ladders-suppressed="true"
-        data-office-nas-keeper-heavy-ladders-dom-rendered="false"
-      >
-        <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">NAS Keeper 실행 준비 요약</div>
-        <h2 className="mt-1 text-lg font-semibold text-foreground">긴 사다리 패널은 화면에서 제거됨</h2>
-        <p className="mt-2 max-w-3xl text-xs leading-5 text-midground/65">
-          Mac relay, payload/write-payload preview, replay/idempotency, execution packet 등 세부 증거는 protected API와 handoff 문서에서 확인합니다. /office 기본 화면은 요약 카드와 RPG 운영실 중심으로 유지합니다.
-        </p>
-      </section>
+      <OfficeRpgVisualizerTabsDrawer>
+        <details id="office-rpg-tab-nas-keeper" role="tabpanel" data-office-rpg-tab-panel="nas-keeper" data-office-rpg-tab-panel-default-open="false" className="grid gap-4 scroll-mt-24 border border-emerald-300/10 bg-black/10 p-3">
+          <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.16em] text-emerald-100">NAS Keeper read-only receipts</summary>
+          <NasKeeperStep11ReadOnlyRenderingStatusPanel status={nasKeeperStep11ReadOnlyRenderingStatus} />
+          <section
+            className="border border-emerald-300/20 bg-black/20 p-4 text-sm text-midground/75"
+            data-office-nas-keeper-heavy-ladders-suppressed="true"
+            data-office-nas-keeper-heavy-ladders-dom-rendered="false"
+          >
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">NAS Keeper 실행 준비 요약</div>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">긴 사다리 패널은 화면에서 제거됨</h2>
+            <p className="mt-2 max-w-3xl text-xs leading-5 text-midground/65">
+              Mac relay, payload/write-payload preview, replay/idempotency, execution packet 등 세부 증거는 protected API와 handoff 문서에서 확인합니다. /office 기본 화면은 RPG 운영실 중심으로 유지합니다.
+            </p>
+          </section>
+          <NasKeeperDurableQueueGuardedOperatorReadinessPanel readiness={nasKeeperDurableQueueGuardedOperatorReadiness} />
+        </details>
 
-      <NasKeeperDurableQueueGuardedOperatorReadinessPanel readiness={nasKeeperDurableQueueGuardedOperatorReadiness} />
-
-      <OfficeVisualizerEvidenceDrawer terminalResult={nasKeeperGuardedFailureStateResult}>
+        <details id="office-rpg-tab-evidence" role="tabpanel" data-office-rpg-tab-panel="evidence" data-office-rpg-tab-panel-default-open="false" className="grid gap-4 scroll-mt-24 border border-violet-300/10 bg-black/10 p-3">
+          <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.16em] text-violet-100">Technical evidence drawer</summary>
+          <OfficeVisualizerEvidenceDrawer terminalResult={nasKeeperGuardedFailureStateResult}>
       <NasKeeperLiveOperatorLanePanel
         queueSurface={nasKeeperQueueManualEvidenceReviewSurface}
         queueReadback={nasKeeperQueueReadback}
@@ -15067,13 +15098,18 @@ export default function OfficePage() {
       <NasKeeperExecutionFromPreviewGuardedFailureStatusPanel result={nasKeeperExecutionGuardResult} error={nasKeeperExecutionGuardError} />
       <NasKeeperGuardedFailureExecutionStateRecordStatusPanel result={nasKeeperGuardedFailureStateResult} error={nasKeeperGuardedFailureStateError} />
       <NasKeeperTerminalExecutionStateCompletionReviewPanel result={nasKeeperGuardedFailureStateResult} error={nasKeeperGuardedFailureStateError} />
-      </OfficeVisualizerEvidenceDrawer>
+          </OfficeVisualizerEvidenceDrawer>
+        </details>
 
-      <OfficeControlledMutationCompactDashboardPanel latestApproval={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult} latestPreflight={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightResult} latestPacket={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPacketResult} latestManualOperatorExecution={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteManualOperatorExecutionResult} latestManualOperatorReceipt={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteManualOperatorReceiptResult} latestTmpRootWriteSmoke={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayTmpRootWriteSmokeResult} latestReplayIdempotencyMetadata={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayIdempotencyMetadataResult} latestPrecommitMetadata={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataResult} latestPrecommitManifest={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifestResult} latestFinalPreflight={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayFinalPreflightResult} latestRealWriteGate={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealWriteGateResult} latestApprovalToken={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayApprovalTokenResult} latestProductionApproval={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayProductionWriteApprovalResult} latestDryRunSeal={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteDryRunSealResult} latestExecutionEnvelope={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionEnvelopeResult} latestExecutionRecord={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordResult} latestFinalExecutionGate={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteFinalExecutionGateResult} detailCount={26}>
+        <details id="office-rpg-tab-controlled-mutation" role="tabpanel" data-office-rpg-tab-panel="controlled-mutation" data-office-rpg-tab-panel-default-open="false" className="grid gap-4 scroll-mt-24 border border-sky-300/10 bg-black/10 p-3">
+          <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.16em] text-sky-100">Controlled-mutation archive</summary>
+          <OfficeControlledMutationCompactDashboardPanel latestApproval={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionSeparateRealNasProductionWriteApprovalResult} latestPreflight={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPreflightResult} latestPacket={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteExecutionPacketResult} latestManualOperatorExecution={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteManualOperatorExecutionResult} latestManualOperatorReceipt={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionRealNasProductionWriteManualOperatorReceiptResult} latestTmpRootWriteSmoke={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayTmpRootWriteSmokeResult} latestReplayIdempotencyMetadata={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionReplayIdempotencyMetadataResult} latestPrecommitMetadata={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitMetadataResult} latestPrecommitManifest={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayPrecommitManifestResult} latestFinalPreflight={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayFinalPreflightResult} latestRealWriteGate={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealWriteGateResult} latestApprovalToken={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayApprovalTokenResult} latestProductionApproval={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayProductionWriteApprovalResult} latestDryRunSeal={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteDryRunSealResult} latestExecutionEnvelope={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionEnvelopeResult} latestExecutionRecord={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteExecutionRecordResult} latestFinalExecutionGate={nasKeeperFreshRequestBuilderLedgerDownstreamConsumptionMacRelayRealNasWriteFinalExecutionGateResult} detailCount={26}>
         <div className="border border-current/15 bg-black/15 p-3" data-office-controlled-mutation-archive-placeholder="true">
           이전 controlled-mutation 사다리는 기본 화면에서 숨겼습니다. 필요한 회귀 검증은 protected API와 테스트에서 확인합니다.
         </div>
-      </OfficeControlledMutationCompactDashboardPanel>
+          </OfficeControlledMutationCompactDashboardPanel>
+        </details>
+      </OfficeRpgVisualizerTabsDrawer>
 
       {SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES ? (
         <>
