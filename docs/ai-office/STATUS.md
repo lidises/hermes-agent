@@ -981,3 +981,23 @@ Current boundary:
 - Readiness remains 100%.
 - The system is now inside Step 11 read-only rendering, not merely before it.
 - Real NAS production write and cleanup execution remain closed pending a separate exact approval.
+## Current status — Step 11 hydrated protected status deployed (2026-05-27T12:59Z)
+
+Latest completed rung:
+- Added a protected NAS Keeper Step 11 aggregate API and wired /office Step 11 rendering to hydrate from it when available, with a safe static fallback.
+- The aggregate is metadata-only: it returns counts, completion refs/checksum prefixes, capability booleans, replay/idempotency posture, and next boundary; it does not return raw records, raw markdown, raw root paths, or secret values.
+- Frontend panel remains display-only with zero controls. It shows readiness=100 and next_required_boundary=read_only_status_rendering_hydrated while keeping cleanup execution, real production write, direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, and gateway restart closed.
+
+Verification:
+- Python focused: 54/54 passed.
+- Web focused: 245/245 passed across OfficePage RPG and API tests.
+- Build: web production build passed.
+- VPS sync: hermes-agent and ai-office-dashboard reset to main; web_dist rsynced; dashboard/core services restarted; gateway remained active but was not restarted.
+- Protected smoke: unauth=401, auth=200, found=true, readiness=100, record_counts=10 ladder stores, no raw records key, all unsafe authority flags false.
+- DOM smoke: Step 11 panel present, readiness=100, controls=0, forbidden raw path/secret patterns absent.
+- Mac relay tmp-root-only write smoke: readback verified, checksum 4f8c7cf9fa60e863adbc8915f6db2ef196d24b845ae90988cfb8065f31f10fc3, safe display path only.
+
+Current boundary:
+- Readiness remains 100% for the approved pre-production controlled-mutation ladder.
+- Real NAS production write is still blocked pending exact separate approval.
+- Next shortest safe rung: add a metadata-only Step 11 hydration receipt record so replay/idempotency can prove the hydrated aggregate deployment without any production write.

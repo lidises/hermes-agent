@@ -765,3 +765,25 @@ Still forbidden without separate exact approval:
 - Public exposure change.
 - Gateway restart.
 - Raw markdown/path/secret echo.
+## NEXT — after Step 11 hydrated protected status deployment (2026-05-27T12:59Z)
+
+Current position:
+- Step 11 read-only rendering is now hydrated from a protected aggregate API, not only a static fallback.
+- Readiness is 100% for the approved pre-production ladder.
+- /office shows the Step 11 panel as display-only; no action controls were added.
+- The protected aggregate returns metadata-only counts/flags/refs/checksum prefixes and explicitly omits raw records, raw markdown, raw root paths, and secret values.
+
+Do next:
+1. TDD RED: require a metadata-only Step 11 hydration receipt append/readback pair.
+2. GREEN: append one idempotent hydration receipt using safe refs/checksums only.
+3. Expose the receipt through a protected metadata-only route and fold it into the existing aggregate count.
+4. Re-run local Python/web tests, commit/push, sync VPS/dashboard/core/web_dist, restart dashboard/core only, and smoke protected API/DOM.
+5. Keep Mac relay writes tmp-root-only unless exact separate production-write approval is provided.
+
+Do not do:
+- Do not perform real NAS production write.
+- Do not create direct VPS NAS authority.
+- Do not enable watcher/cron/dispatcher/authority-adapter.
+- Do not expose public endpoints.
+- Do not restart gateway.
+- Do not echo raw markdown, raw root paths, secret values, or raw write-payload values.
