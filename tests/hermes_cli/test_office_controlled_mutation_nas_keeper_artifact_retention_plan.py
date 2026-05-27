@@ -1296,3 +1296,177 @@ def test_cleanup_closure_receipt_api_requires_session_and_stays_no_authority(tmp
     readback = client.get(route, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN})
     assert readback.status_code == 200
     assert readback.json()["dto"]["record_count"] == 1
+
+
+def step10_tmp_root_completion_payload(closure_checksum: str, **overrides):
+    payload = {
+        "tmp_root_completion_ref": "tmpcompletion-20260527-step10-before-rendering-1",
+        "cleanup_closure_ref": "cleanupclosure-20260527-artifact-retention-1",
+        "cleanup_closure_sha256": closure_checksum,
+        "tmp_root_smoke_ref": "tmp-root-smoke-step10-20260527",
+        "safe_display_path": "TmpVault / cleanup-step10-final-smoke-20260527124500-step10finish.md",
+        "readback_sha256": "1" * 64,
+        "readback_verified": True,
+        "written": True,
+        "completed_by": "agent_nas_keeper",
+        "completed_at": "2026-05-27T12:45:00Z",
+        "operator_confirmation": "tmp-root-write-smoke-completed-before-read-only-rendering",
+        "next_stage": "read_only_status_rendering",
+        "evidence_refs": ["sha:fdd01554e34264a023efbf4c3ad1b76bf4dd73cb97db1a8190e43640a1f1111e"],
+    }
+    payload.update(overrides)
+    return payload
+
+
+def seed_cleanup_closure_receipt(tmp_path):
+    from hermes_cli.office_controlled_mutation import append_office_controlled_mutation_nas_keeper_cleanup_closure_receipt
+
+    summary_path, summary = seed_cleanup_summary_receipt(tmp_path)
+    closure_path = tmp_path / "cleanup-closure-receipts.jsonl"
+    closure = append_office_controlled_mutation_nas_keeper_cleanup_closure_receipt(
+        cleanup_closure_receipt_payload(summary["dto"]["cleanup_summary_sha256"]),
+        summary_store_path=summary_path,
+        closure_store_path=closure_path,
+    )
+    return closure_path, closure
+
+
+def test_tmp_root_step10_completion_records_safe_write_proof_and_is_idempotent(tmp_path):
+    from hermes_cli.office_controlled_mutation import append_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt
+
+    closure_path, closure = seed_cleanup_closure_receipt(tmp_path)
+    completion_path = tmp_path / "tmp-root-step10-completion.jsonl"
+    closure_checksum = closure["dto"]["cleanup_closure_sha256"]
+
+    first = append_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt(
+        step10_tmp_root_completion_payload(closure_checksum),
+        closure_store_path=closure_path,
+        completion_store_path=completion_path,
+    )
+    second = append_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt(
+        step10_tmp_root_completion_payload(closure_checksum),
+        closure_store_path=closure_path,
+        completion_store_path=completion_path,
+    )
+
+    assert first["stored"] is True
+    assert first["idempotent_replay"] is False
+    assert first["errors"] == []
+    dto = first["dto"]
+    assert dto["mode"] == "nas_keeper_tmp_root_step10_completion_receipt_recorded"
+    assert dto["metadata_only_record_write"] is True
+    assert dto["closure_checksum_matched"] is True
+    assert dto["tmp_root_write_smoke_completed"] is True
+    assert dto["step10_complete"] is True
+    assert dto["ready_for_read_only_rendering"] is True
+    assert dto["write_readiness_percent"] == 100
+    assert dto["next_stage"] == "read_only_status_rendering"
+    assert len(dto["tmp_root_completion_sha256"]) == 64
+    assert dto["real_nas_production_write_enabled"] is False
+    assert dto["real_nas_production_write_executed"] is False
+    assert dto["cleanup_execution_opened"] is False
+    assert dto["execution_authority_created"] is False
+    assert dto["actual_nas_delete_enabled"] is False
+    assert dto["actual_nas_move_enabled"] is False
+    assert dto["actual_nas_archive_enabled"] is False
+    assert dto["direct_vps_nas_write_enabled"] is False
+    assert dto["watcher_enabled"] is False
+    assert dto["cron_enabled"] is False
+    assert dto["dispatch_enabled"] is False
+    assert dto["authority_adapter_binding_enabled"] is False
+    assert second["stored"] is False
+    assert second["idempotent_replay"] is True
+    serialized = json.dumps(first, sort_keys=True).lower()
+    assert "/users/lidises" not in serialized
+    assert "/home/hermes" not in serialized
+    assert "fresh approved" not in serialized
+    assert '"markdown_body":' not in serialized
+    assert '"write_payload":' not in serialized
+    assert "sk-" not in serialized
+    assert len(completion_path.read_text(encoding="utf-8").splitlines()) == 1
+
+
+def test_tmp_root_step10_completion_requires_exact_closure_checksum_and_rejects_raw_fields_without_echo(tmp_path):
+    from hermes_cli.office_controlled_mutation import append_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt
+
+    closure_path, closure = seed_cleanup_closure_receipt(tmp_path)
+    completion_path = tmp_path / "tmp-root-step10-completion.jsonl"
+
+    mismatch = append_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt(
+        step10_tmp_root_completion_payload("0" * 64),
+        closure_store_path=closure_path,
+        completion_store_path=completion_path,
+    )
+    assert mismatch["stored"] is False
+    assert mismatch["dto"] is None
+    assert mismatch["errors"] == [{"field": "cleanup_closure_sha256", "code": "cleanup_closure_checksum_mismatch"}]
+
+    raw = append_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt(
+        step10_tmp_root_completion_payload(closure["dto"]["cleanup_closure_sha256"], raw_root_path="/" + "Users/lidises/private"),
+        closure_store_path=closure_path,
+        completion_store_path=completion_path,
+    )
+    assert raw["stored"] is False
+    assert {item["code"] for item in raw["errors"]} >= {"unsupported_field"}
+    assert "/users/lidises" not in json.dumps(raw, sort_keys=True).lower()
+
+
+def test_tmp_root_step10_completion_api_requires_session_and_stays_before_rendering(tmp_path, monkeypatch):
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_nas_keeper_artifact_retention_plan,
+        append_office_controlled_mutation_nas_keeper_cleanup_execution_gate,
+        append_office_controlled_mutation_nas_keeper_cleanup_execution_hold,
+        append_office_controlled_mutation_nas_keeper_cleanup_execution_manifest_preflight,
+        append_office_controlled_mutation_nas_keeper_cleanup_final_approval,
+        append_office_controlled_mutation_nas_keeper_cleanup_execution_package_receipt,
+        append_office_controlled_mutation_nas_keeper_cleanup_disabled_run_receipt,
+        append_office_controlled_mutation_nas_keeper_cleanup_execution_summary_receipt,
+        append_office_controlled_mutation_nas_keeper_cleanup_closure_receipt,
+    )
+    from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+
+    plan = append_office_controlled_mutation_nas_keeper_artifact_retention_plan(safe_plan_payload())
+    append_office_controlled_mutation_nas_keeper_cleanup_execution_gate(cleanup_gate_payload(plan["dto"]["retention_plan_sha256"]))
+    append_office_controlled_mutation_nas_keeper_cleanup_execution_hold(cleanup_hold_payload())
+    manifest = append_office_controlled_mutation_nas_keeper_cleanup_execution_manifest_preflight(cleanup_manifest_payload())
+    final = append_office_controlled_mutation_nas_keeper_cleanup_final_approval(
+        cleanup_final_approval_payload(manifest["dto"]["cleanup_manifest_sha256"])
+    )
+    package = append_office_controlled_mutation_nas_keeper_cleanup_execution_package_receipt(
+        cleanup_package_receipt_payload(final["dto"]["cleanup_final_approval_sha256"])
+    )
+    disabled = append_office_controlled_mutation_nas_keeper_cleanup_disabled_run_receipt(
+        cleanup_disabled_run_receipt_payload(package["dto"]["cleanup_package_sha256"])
+    )
+    summary = append_office_controlled_mutation_nas_keeper_cleanup_execution_summary_receipt(
+        cleanup_execution_summary_receipt_payload(disabled["dto"]["cleanup_disabled_run_sha256"])
+    )
+    closure = append_office_controlled_mutation_nas_keeper_cleanup_closure_receipt(
+        cleanup_closure_receipt_payload(summary["dto"]["cleanup_summary_sha256"])
+    )
+    client = TestClient(app)
+    route = "/api/office/controlled-mutation/nas-runtime/nas-keeper-tmp-root-step10-completion-receipt"
+    payload = step10_tmp_root_completion_payload(closure["dto"]["cleanup_closure_sha256"])
+
+    unauthenticated = client.post(route, json=payload)
+    assert unauthenticated.status_code == 401
+
+    recorded = client.post(route, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN}, json=payload)
+    assert recorded.status_code == 200
+    body = recorded.json()
+    assert body["stored"] is True
+    assert body["dto"]["metadata_only_record_write"] is True
+    assert body["dto"]["step10_complete"] is True
+    assert body["dto"]["ready_for_read_only_rendering"] is True
+    assert body["dto"]["real_nas_production_write_enabled"] is False
+    assert body["dto"]["cleanup_execution_opened"] is False
+    assert body["dto"]["execution_authority_created"] is False
+
+    duplicate = client.post(route, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN}, json=payload)
+    assert duplicate.status_code == 200
+    assert duplicate.json()["idempotent_replay"] is True
+
+    readback = client.get(route, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN})
+    assert readback.status_code == 200
+    assert readback.json()["dto"]["record_count"] == 1

@@ -10274,6 +10274,21 @@ _NAS_KEEPER_CLEANUP_CLOSURE_RECEIPT_FIELDS = {
     "required_next_approval",
     "evidence_refs",
 }
+_NAS_KEEPER_TMP_ROOT_STEP10_COMPLETION_RECEIPT_FIELDS = {
+    "tmp_root_completion_ref",
+    "cleanup_closure_ref",
+    "cleanup_closure_sha256",
+    "tmp_root_smoke_ref",
+    "safe_display_path",
+    "readback_sha256",
+    "readback_verified",
+    "written",
+    "completed_by",
+    "completed_at",
+    "operator_confirmation",
+    "next_stage",
+    "evidence_refs",
+}
 _NAS_KEEPER_CLEANUP_HOLD_ACTIONS = {"hold_cleanup_candidate", "retain_for_manual_review"}
 _NAS_KEEPER_CLEANUP_PACKAGE_ACTIONS = {"retain_for_manual_cleanup_receipt", "archive_candidate_after_manual_approval"}
 
@@ -10312,6 +10327,10 @@ def _default_nas_keeper_cleanup_execution_summary_receipt_store_path() -> Path:
 
 def _default_nas_keeper_cleanup_closure_receipt_store_path() -> Path:
     return get_hermes_home() / "office" / "controlled-mutation" / "nas_keeper_cleanup_closure_receipt_records.jsonl"
+
+
+def _default_nas_keeper_tmp_root_step10_completion_receipt_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "nas_keeper_tmp_root_step10_completion_receipt_records.jsonl"
 
 
 def _stable_metadata_sha256(value: Mapping[str, object]) -> str:
@@ -12353,6 +12372,258 @@ def append_office_controlled_mutation_nas_keeper_cleanup_closure_receipt(
     with path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(normalized, sort_keys=True, ensure_ascii=False) + "\n")
     return {"stored": True, "idempotent_replay": False, "errors": [], "dto": _cleanup_closure_receipt_dto(normalized)}
+
+
+def _safe_tmp_root_display_path(value: object) -> bool:
+    if not isinstance(value, str):
+        return False
+    if len(value) < 8 or len(value) > 160:
+        return False
+    if _has_raw_marker(value):
+        return False
+    return bool(re.fullmatch(r"[A-Za-z0-9 _./:-]+", value)) and ".." not in value and not value.startswith("/")
+
+
+def _normalize_nas_keeper_tmp_root_step10_completion_receipt_record(value: object) -> dict[str, object] | None:
+    if not isinstance(value, Mapping):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(value.get("tmp_root_completion_ref"), "tmpcompletion-"):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(value.get("cleanup_closure_ref"), "cleanupclosure-"):
+        return None
+    closure_checksum = value.get("cleanup_closure_sha256")
+    readback_checksum = value.get("readback_sha256")
+    if not (isinstance(closure_checksum, str) and re.fullmatch(r"[a-f0-9]{64}", closure_checksum)):
+        return None
+    if not _is_opaque_id(value.get("tmp_root_smoke_ref")):
+        return None
+    if not _safe_tmp_root_display_path(value.get("safe_display_path")):
+        return None
+    if not (isinstance(readback_checksum, str) and re.fullmatch(r"[a-f0-9]{64}", readback_checksum)):
+        return None
+    if value.get("readback_verified") is not True or value.get("written") is not True:
+        return None
+    if not _is_opaque_id(value.get("completed_by")):
+        return None
+    if not (isinstance(value.get("completed_at"), str) and _ISO_UTC_RE.fullmatch(str(value.get("completed_at")))):
+        return None
+    if value.get("operator_confirmation") != "tmp-root-write-smoke-completed-before-read-only-rendering":
+        return None
+    if value.get("next_stage") != "read_only_status_rendering":
+        return None
+    if not _validate_evidence_refs(value.get("evidence_refs")):
+        return None
+    return {
+        "tmp_root_completion_ref": value["tmp_root_completion_ref"],
+        "cleanup_closure_ref": value["cleanup_closure_ref"],
+        "cleanup_closure_sha256": closure_checksum,
+        "tmp_root_smoke_ref": value["tmp_root_smoke_ref"],
+        "safe_display_path": value["safe_display_path"],
+        "readback_sha256": readback_checksum,
+        "readback_verified": True,
+        "written": True,
+        "completed_by": value["completed_by"],
+        "completed_at": value["completed_at"],
+        "operator_confirmation": value["operator_confirmation"],
+        "next_stage": value["next_stage"],
+        "evidence_refs": list(cast(Sequence[object], value["evidence_refs"])),
+    }
+
+
+def _read_nas_keeper_tmp_root_step10_completion_receipt_records(path: Path) -> tuple[list[dict[str, object]], int]:
+    records: list[dict[str, object]] = []
+    skipped_count = 0
+    if not path.exists():
+        return records, skipped_count
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            if not line.strip():
+                continue
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped_count += 1
+                continue
+            normalized = _normalize_nas_keeper_tmp_root_step10_completion_receipt_record(item)
+            if normalized is None:
+                skipped_count += 1
+                continue
+            records.append(normalized)
+    return records, skipped_count
+
+
+def _tmp_root_step10_completion_receipt_dto(record: Mapping[str, object], *, idempotent_replay: bool = False) -> dict[str, object]:
+    tmp_root_completion_sha256 = _stable_metadata_sha256(record)
+    return {
+        "schema_version": 1,
+        "mode": "nas_keeper_tmp_root_step10_completion_receipt_recorded",
+        "tmp_root_completion_ref": record["tmp_root_completion_ref"],
+        "tmp_root_completion_sha256": tmp_root_completion_sha256,
+        "cleanup_closure_ref": record["cleanup_closure_ref"],
+        "cleanup_closure_sha256": record["cleanup_closure_sha256"],
+        "tmp_root_smoke_ref": record["tmp_root_smoke_ref"],
+        "safe_display_path": record["safe_display_path"],
+        "readback_sha256": record["readback_sha256"],
+        "readback_verified": True,
+        "written": True,
+        "completed_by": record["completed_by"],
+        "completed_at": record["completed_at"],
+        "next_stage": record["next_stage"],
+        "evidence_refs": record["evidence_refs"],
+        "idempotent_replay": idempotent_replay,
+        "metadata_only_record_write": True,
+        "closure_checksum_matched": True,
+        "tmp_root_write_smoke_completed": True,
+        "step10_complete": True,
+        "ready_for_read_only_rendering": True,
+        "write_readiness_stage": "step10_tmp_root_completion_before_read_only_rendering",
+        "write_readiness_percent": 100,
+        "real_nas_production_write_enabled": False,
+        "real_nas_production_write_executed": False,
+        "cleanup_execution_opened": False,
+        "execution_authority_created": False,
+        "actual_nas_delete_enabled": False,
+        "actual_nas_move_enabled": False,
+        "actual_nas_archive_enabled": False,
+        "direct_vps_nas_write_enabled": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "public_exposure_enabled": False,
+        "gateway_restart_required": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "completion_path": [
+            "closure_checksum_verified",
+            "tmp_root_write_smoke_proof_recorded",
+            "step10_completed",
+            "read_only_status_rendering_next",
+        ],
+        "next_required_boundary": "read_only_status_rendering",
+    }
+
+
+def list_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt_records(
+    *, completion_store_path: Path | None = None, limit: int = 50, tmp_root_completion_ref: object = None
+) -> dict[str, object]:
+    errors: list[dict[str, str]] = []
+    safe_ref = None
+    if tmp_root_completion_ref is not None:
+        if _office_disabled_runtime_dispatch_valid_prefixed_ref(tmp_root_completion_ref, "tmpcompletion-"):
+            safe_ref = str(tmp_root_completion_ref)
+        else:
+            errors.append(_error("tmp_root_completion_ref", "unsupported_ref_shape"))
+    path = completion_store_path or _default_nas_keeper_tmp_root_step10_completion_receipt_store_path()
+    records, skipped_count = _read_nas_keeper_tmp_root_step10_completion_receipt_records(path)
+    if safe_ref:
+        records = [record for record in records if record.get("tmp_root_completion_ref") == safe_ref]
+    if errors:
+        records = []
+    max_items = max(0, min(limit, 200)) if isinstance(limit, int) else 50
+    records = records[-max_items:] if max_items else []
+    return {
+        "found": bool(records),
+        "errors": errors,
+        "dto": {
+            "schema_version": 1,
+            "mode": "nas_keeper_tmp_root_step10_completion_receipt_records_readback",
+            "record_count": len(records),
+            "limit": max_items,
+            "skipped_count": skipped_count,
+            "records": records,
+            "latest_record": records[-1] if records else None,
+            "metadata_only_record_write": True,
+            "step10_complete": bool(records),
+            "ready_for_read_only_rendering": bool(records),
+            "write_readiness_percent": 100 if records else 0,
+            "real_nas_production_write_enabled": False,
+            "real_nas_production_write_executed": False,
+            "cleanup_execution_opened": False,
+            "execution_authority_created": False,
+            "direct_vps_nas_write_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "next_required_boundary": "read_only_status_rendering" if records else "tmp_root_step10_completion_receipt",
+        },
+    }
+
+
+def append_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt(
+    payload: object, *, closure_store_path: Path | None = None, completion_store_path: Path | None = None
+) -> dict[str, object]:
+    if not isinstance(payload, Mapping):
+        return {"stored": False, "idempotent_replay": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    errors: list[dict[str, str]] = []
+    if set(payload) - _NAS_KEEPER_TMP_ROOT_STEP10_COMPLETION_RECEIPT_FIELDS:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+    for field in sorted(_NAS_KEEPER_TMP_ROOT_STEP10_COMPLETION_RECEIPT_FIELDS):
+        if field not in payload:
+            errors.append(_error(field, "missing_field"))
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("tmp_root_completion_ref"), "tmpcompletion-"):
+        errors.append(_error("tmp_root_completion_ref", "invalid_tmp_root_completion_ref"))
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("cleanup_closure_ref"), "cleanupclosure-"):
+        errors.append(_error("cleanup_closure_ref", "invalid_cleanup_closure_ref"))
+    if not (isinstance(payload.get("cleanup_closure_sha256"), str) and re.fullmatch(r"[a-f0-9]{64}", str(payload.get("cleanup_closure_sha256")))):
+        errors.append(_error("cleanup_closure_sha256", "invalid_cleanup_closure_sha256"))
+    if not _is_opaque_id(payload.get("tmp_root_smoke_ref")):
+        errors.append(_error("tmp_root_smoke_ref", "invalid_opaque_id"))
+    if not _safe_tmp_root_display_path(payload.get("safe_display_path")):
+        errors.append(_error("safe_display_path", "invalid_safe_display_path"))
+    if not (isinstance(payload.get("readback_sha256"), str) and re.fullmatch(r"[a-f0-9]{64}", str(payload.get("readback_sha256")))):
+        errors.append(_error("readback_sha256", "invalid_readback_sha256"))
+    if payload.get("readback_verified") is not True:
+        errors.append(_error("readback_verified", "not_verified"))
+    if payload.get("written") is not True:
+        errors.append(_error("written", "not_written"))
+    if not _is_opaque_id(payload.get("completed_by")):
+        errors.append(_error("completed_by", "invalid_opaque_id"))
+    if not (isinstance(payload.get("completed_at"), str) and _ISO_UTC_RE.fullmatch(str(payload.get("completed_at")))):
+        errors.append(_error("completed_at", "invalid_timestamp"))
+    if payload.get("operator_confirmation") != "tmp-root-write-smoke-completed-before-read-only-rendering":
+        errors.append(_error("operator_confirmation", "invalid_confirmation"))
+    if payload.get("next_stage") != "read_only_status_rendering":
+        errors.append(_error("next_stage", "invalid_next_stage"))
+    if not _validate_evidence_refs(payload.get("evidence_refs")):
+        errors.append(_error("evidence_refs", "invalid_evidence_refs"))
+
+    closure_path = closure_store_path or _default_nas_keeper_cleanup_closure_receipt_store_path()
+    closure_records, _closure_skipped = _read_nas_keeper_cleanup_closure_receipt_records(closure_path)
+    matched_closure = next((record for record in closure_records if record.get("cleanup_closure_ref") == payload.get("cleanup_closure_ref")), None)
+    if matched_closure is None:
+        errors.append(_error("cleanup_closure_ref", "cleanup_closure_not_found"))
+    elif isinstance(payload.get("cleanup_closure_sha256"), str) and payload.get("cleanup_closure_sha256") != _stable_metadata_sha256(matched_closure):
+        errors.append(_error("cleanup_closure_sha256", "cleanup_closure_checksum_mismatch"))
+
+    record = {field: payload.get(field) for field in _NAS_KEEPER_TMP_ROOT_STEP10_COMPLETION_RECEIPT_FIELDS}
+    normalized = _normalize_nas_keeper_tmp_root_step10_completion_receipt_record(record)
+    if normalized is None:
+        errors.append(_error("tmp_root_step10_completion_receipt", "invalid_tmp_root_step10_completion_receipt"))
+    if errors:
+        return {
+            "stored": False,
+            "idempotent_replay": False,
+            "errors": sorted(errors, key=lambda item: (item["field"], item["code"])),
+            "dto": None,
+        }
+    path = completion_store_path or _default_nas_keeper_tmp_root_step10_completion_receipt_store_path()
+    records, _skipped = _read_nas_keeper_tmp_root_step10_completion_receipt_records(path)
+    for existing in records:
+        if existing.get("tmp_root_completion_ref") == normalized["tmp_root_completion_ref"]:
+            return {
+                "stored": False,
+                "idempotent_replay": True,
+                "errors": [],
+                "dto": _tmp_root_step10_completion_receipt_dto(existing, idempotent_replay=True),
+            }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(normalized, sort_keys=True, ensure_ascii=False) + "\n")
+    return {"stored": True, "idempotent_replay": False, "errors": [], "dto": _tmp_root_step10_completion_receipt_dto(normalized)}
 
 
 def build_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_request(

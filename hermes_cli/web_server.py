@@ -130,6 +130,8 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_nas_keeper_cleanup_execution_summary_receipt_records,
     append_office_controlled_mutation_nas_keeper_cleanup_closure_receipt,
     list_office_controlled_mutation_nas_keeper_cleanup_closure_receipt_records,
+    append_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt,
+    list_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt_records,
     build_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_request,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_readback,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_export_selection_review,
@@ -1109,6 +1111,24 @@ async def list_office_controlled_mutation_nas_keeper_cleanup_closure_receipt_rec
 async def append_office_controlled_mutation_nas_keeper_cleanup_closure_receipt_route(payload: Any = Body(None)):
     """Append a metadata-only cleanup closure/no-authority checkpoint receipt."""
     return append_office_controlled_mutation_nas_keeper_cleanup_closure_receipt(payload)
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-tmp-root-step10-completion-receipt")
+async def list_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt_records_route(
+    tmp_root_completion_ref: Optional[str] = None,
+    limit: Optional[int] = None,
+):
+    """Read metadata-only tmp-root step-10 completion receipts before rendering."""
+    return list_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt_records(
+        tmp_root_completion_ref=tmp_root_completion_ref,
+        limit=limit or 50,
+    )
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-tmp-root-step10-completion-receipt")
+async def append_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt_route(payload: Any = Body(None)):
+    """Append a metadata-only tmp-root write-smoke completion receipt; rendering is the next boundary."""
+    return append_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt(payload)
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-one-shot-request-builder")
