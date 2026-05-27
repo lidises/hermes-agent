@@ -10302,6 +10302,13 @@ _NAS_KEEPER_STEP11_HYDRATION_RECEIPT_FIELDS = {
     "next_stage",
     "evidence_refs",
 }
+_NAS_KEEPER_STEP11_HYDRATION_REPLAY_PROBE_FIELDS = {
+    "step11_hydration_receipt_ref",
+    "expected_step11_hydration_receipt_sha256",
+    "probe_ref",
+    "probed_by",
+    "probed_at",
+}
 _NAS_KEEPER_CLEANUP_HOLD_ACTIONS = {"hold_cleanup_candidate", "retain_for_manual_review"}
 _NAS_KEEPER_CLEANUP_PACKAGE_ACTIONS = {"retain_for_manual_cleanup_receipt", "archive_candidate_after_manual_approval"}
 
@@ -12776,6 +12783,79 @@ def append_office_controlled_mutation_nas_keeper_step11_hydration_receipt(
     with path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(normalized, sort_keys=True, ensure_ascii=False) + "\n")
     return {"stored": True, "idempotent_replay": False, "errors": [], "dto": _step11_hydration_receipt_dto(normalized)}
+
+
+def build_office_controlled_mutation_nas_keeper_step11_hydration_replay_probe(
+    payload: object, *, hydration_receipt_store_path: Path | None = None
+) -> dict[str, object]:
+    if not isinstance(payload, Mapping):
+        return {"found": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    errors: list[dict[str, str]] = []
+    if set(payload) - _NAS_KEEPER_STEP11_HYDRATION_REPLAY_PROBE_FIELDS:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+    for field in sorted(_NAS_KEEPER_STEP11_HYDRATION_REPLAY_PROBE_FIELDS):
+        if field not in payload:
+            errors.append(_error(field, "missing_field"))
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("step11_hydration_receipt_ref"), "step11hydration-"):
+        errors.append(_error("step11_hydration_receipt_ref", "invalid_step11_hydration_receipt_ref"))
+    expected_sha = payload.get("expected_step11_hydration_receipt_sha256")
+    if not (isinstance(expected_sha, str) and re.fullmatch(r"[a-f0-9]{64}", expected_sha)):
+        errors.append(_error("expected_step11_hydration_receipt_sha256", "invalid_sha256"))
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("probe_ref"), "step11probe-"):
+        errors.append(_error("probe_ref", "invalid_probe_ref"))
+    if not _is_opaque_id(payload.get("probed_by")):
+        errors.append(_error("probed_by", "invalid_opaque_id"))
+    if not (isinstance(payload.get("probed_at"), str) and _ISO_UTC_RE.fullmatch(str(payload.get("probed_at")))):
+        errors.append(_error("probed_at", "invalid_timestamp"))
+    if errors:
+        return {"found": False, "errors": sorted(errors, key=lambda item: (item["field"], item["code"])), "dto": None}
+
+    path = hydration_receipt_store_path or _default_nas_keeper_step11_hydration_receipt_store_path()
+    records, skipped_count = _read_nas_keeper_step11_hydration_receipt_records(path)
+    receipt_ref = str(payload["step11_hydration_receipt_ref"])
+    matched = next((record for record in records if record.get("step11_hydration_receipt_ref") == receipt_ref), None)
+    if matched is None:
+        return {"found": False, "errors": [_error("step11_hydration_receipt_ref", "receipt_not_found")], "dto": None}
+    receipt_sha = _stable_metadata_sha256(matched)
+    if receipt_sha != expected_sha:
+        return {"found": False, "errors": [_error("expected_step11_hydration_receipt_sha256", "receipt_checksum_mismatch")], "dto": None}
+    return {
+        "found": True,
+        "errors": [],
+        "dto": {
+            "schema_version": 1,
+            "mode": "nas_keeper_step11_hydration_replay_probe",
+            "probe_ref": payload["probe_ref"],
+            "probed_by": payload["probed_by"],
+            "probed_at": payload["probed_at"],
+            "step11_hydration_receipt_ref": receipt_ref,
+            "step11_hydration_receipt_sha256": receipt_sha,
+            "noop_replay_probe": True,
+            "would_be_idempotent_replay": True,
+            "metadata_record_written": False,
+            "queue_mutation_enabled": False,
+            "readiness_percent": 100,
+            "write_readiness_percent": 100,
+            "skipped_count": skipped_count,
+            "receipt_ref_terminal": True,
+            "duplicate_safe_response": True,
+            "actual_nas_write_enabled": False,
+            "real_nas_production_write_enabled": False,
+            "real_nas_production_write_executed": False,
+            "direct_vps_nas_write_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "public_exposure_enabled": False,
+            "gateway_restart_required": False,
+            "markdown_body_included": False,
+            "write_payload_included": False,
+            "raw_root_path_included": False,
+            "credential_value_included": False,
+            "next_required_boundary": "real_nas_production_write_requires_exact_approval",
+        },
+    }
 
 
 _NAS_KEEPER_STEP11_LADDER_READERS: tuple[tuple[str, str, Callable[[Path], tuple[list[dict[str, object]], int]], Callable[[], Path]], ...] = (

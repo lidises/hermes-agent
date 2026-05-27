@@ -1743,3 +1743,115 @@ def test_step11_hydration_receipt_api_requires_session_and_folds_into_aggregate(
     assert dto["record_counts"]["step11_hydration_receipt"] == 1
     assert dto["next_required_boundary"] == "real_nas_production_write_requires_exact_approval"
     assert "records" not in dto
+
+
+def test_step11_hydration_replay_probe_is_noop_and_safe(tmp_path):
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_nas_keeper_step11_hydration_receipt,
+        build_office_controlled_mutation_nas_keeper_step11_hydration_replay_probe,
+        build_office_controlled_mutation_nas_keeper_step11_read_only_status_aggregate,
+    )
+
+    completion_path, completion = seed_step10_completion_receipt(tmp_path)
+    aggregate = build_office_controlled_mutation_nas_keeper_step11_read_only_status_aggregate(store_paths={"step10_completion": completion_path})
+    payload = step11_hydration_receipt_payload(
+        completion["dto"]["tmp_root_completion_ref"],
+        completion["dto"]["tmp_root_completion_sha256"],
+        aggregate["dto"]["aggregate_sha256"],
+    )
+    receipt_path = tmp_path / "step11-hydration-receipts.jsonl"
+    stored = append_office_controlled_mutation_nas_keeper_step11_hydration_receipt(
+        payload,
+        completion_store_path=completion_path,
+        hydration_receipt_store_path=receipt_path,
+    )
+    before_bytes = receipt_path.read_bytes()
+
+    probe = build_office_controlled_mutation_nas_keeper_step11_hydration_replay_probe(
+        {
+            "step11_hydration_receipt_ref": stored["dto"]["step11_hydration_receipt_ref"],
+            "expected_step11_hydration_receipt_sha256": stored["dto"]["step11_hydration_receipt_sha256"],
+            "probe_ref": "step11probe-20260527-noop-replay-1",
+            "probed_by": "operator-step11-replay-probe",
+            "probed_at": "2026-05-27T13:33:00Z",
+        },
+        hydration_receipt_store_path=receipt_path,
+    )
+
+    assert receipt_path.read_bytes() == before_bytes
+    assert probe["found"] is True
+    assert probe["errors"] == []
+    dto = probe["dto"]
+    assert dto["mode"] == "nas_keeper_step11_hydration_replay_probe"
+    assert dto["noop_replay_probe"] is True
+    assert dto["would_be_idempotent_replay"] is True
+    assert dto["queue_mutation_enabled"] is False
+    assert dto["metadata_record_written"] is False
+    assert dto["real_nas_production_write_enabled"] is False
+    assert dto["direct_vps_nas_write_enabled"] is False
+    assert dto["watcher_enabled"] is False
+    assert dto["cron_enabled"] is False
+    assert dto["dispatch_enabled"] is False
+    assert dto["authority_adapter_binding_enabled"] is False
+    assert dto["markdown_body_included"] is False
+    assert dto["write_payload_included"] is False
+    assert dto["raw_root_path_included"] is False
+    assert dto["next_required_boundary"] == "real_nas_production_write_requires_exact_approval"
+    serialized = json.dumps(probe, sort_keys=True)
+    assert "records" not in dto
+    assert '"markdown_body":' not in serialized
+    assert '"write_payload":' not in serialized
+
+
+def test_step11_hydration_replay_probe_api_requires_session_and_no_raw_echo(tmp_path, monkeypatch):
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt,
+        append_office_controlled_mutation_nas_keeper_step11_hydration_receipt,
+        build_office_controlled_mutation_nas_keeper_step11_read_only_status_aggregate,
+    )
+    from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+
+    closure_path, closure = seed_cleanup_closure_receipt(tmp_path)
+    completion = append_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt(
+        step10_tmp_root_completion_payload(closure["dto"]["cleanup_closure_sha256"]),
+        closure_store_path=closure_path,
+    )
+    aggregate = build_office_controlled_mutation_nas_keeper_step11_read_only_status_aggregate()
+    receipt = append_office_controlled_mutation_nas_keeper_step11_hydration_receipt(
+        step11_hydration_receipt_payload(
+            completion["dto"]["tmp_root_completion_ref"],
+            completion["dto"]["tmp_root_completion_sha256"],
+            aggregate["dto"]["aggregate_sha256"],
+        )
+    )
+
+    route = "/api/office/controlled-mutation/nas-runtime/nas-keeper-step11-hydration-replay-probe"
+    payload = {
+        "step11_hydration_receipt_ref": receipt["dto"]["step11_hydration_receipt_ref"],
+        "expected_step11_hydration_receipt_sha256": receipt["dto"]["step11_hydration_receipt_sha256"],
+        "probe_ref": "step11probe-20260527-api-noop-replay-1",
+        "probed_by": "operator-step11-replay-probe",
+        "probed_at": "2026-05-27T13:34:00Z",
+    }
+    client = TestClient(app)
+    assert client.post(route, json=payload).status_code == 401
+    response = client.post(route, json=payload, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["found"] is True
+    assert body["dto"]["would_be_idempotent_replay"] is True
+    assert body["dto"]["metadata_record_written"] is False
+    assert body["dto"]["actual_nas_write_enabled"] is False
+    assert body["dto"]["next_required_boundary"] == "real_nas_production_write_requires_exact_approval"
+
+    private_path = "/" + "Users" + "/" + "lidises" + "/private"
+    bad = dict(payload)
+    bad["raw_path"] = private_path
+    bad_response = client.post(route, json=bad, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN})
+    bad_body = bad_response.json()
+    assert bad_response.status_code == 200
+    assert bad_body["found"] is False
+    serialized = json.dumps(bad_body, sort_keys=True)
+    assert private_path not in serialized
+    assert "raw_path" not in serialized

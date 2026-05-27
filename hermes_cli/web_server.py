@@ -134,6 +134,7 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt_records,
     append_office_controlled_mutation_nas_keeper_step11_hydration_receipt,
     list_office_controlled_mutation_nas_keeper_step11_hydration_receipt_records,
+    build_office_controlled_mutation_nas_keeper_step11_hydration_replay_probe,
     build_office_controlled_mutation_nas_keeper_step11_read_only_status_aggregate,
     build_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_request,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_readback,
@@ -1156,6 +1157,12 @@ async def list_office_controlled_mutation_nas_keeper_step11_hydration_receipt_re
 async def append_office_controlled_mutation_nas_keeper_step11_hydration_receipt_route(payload: Any = Body(None)):
     """Append a metadata-only Step 11 hydration receipt; production write remains separately gated."""
     return append_office_controlled_mutation_nas_keeper_step11_hydration_receipt(payload)
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-step11-hydration-replay-probe")
+async def build_office_controlled_mutation_nas_keeper_step11_hydration_replay_probe_route(payload: Any = Body(None)):
+    """Probe Step 11 hydration receipt idempotent replay without mutation or raw records."""
+    return build_office_controlled_mutation_nas_keeper_step11_hydration_replay_probe(payload)
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-one-shot-request-builder")
