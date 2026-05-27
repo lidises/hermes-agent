@@ -2416,6 +2416,8 @@ export type OfficeNasKeeperDurableQueueGuardedOperatorReadiness = {
   metadataOnlyRecordWriteReady: true;
   tmpRootReplayIdempotencyMetadataReady: true;
   tmpRootReplayIdempotencyMetadataEndpoint: "/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-durable-tmp-root-replay-idempotency-metadata";
+  macRelayPrecommitMetadataReady: true;
+  macRelayPrecommitMetadataEndpoint: "/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-precommit-metadata";
   payloadPreviewRequiredBeforeExecution: true;
   executionEndpoint: OfficeNasKeeperExecutionOperatorAction["executionEndpoint"];
   executionStateEndpoint: OfficeNasKeeperExecutionOperatorAction["executionStateEndpoint"];
@@ -5911,6 +5913,8 @@ export function buildOfficeNasKeeperDurableQueueGuardedOperatorReadiness(action:
     metadataOnlyRecordWriteReady: true,
     tmpRootReplayIdempotencyMetadataReady: true,
     tmpRootReplayIdempotencyMetadataEndpoint: "/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-durable-tmp-root-replay-idempotency-metadata",
+    macRelayPrecommitMetadataReady: true,
+    macRelayPrecommitMetadataEndpoint: "/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-precommit-metadata",
     payloadPreviewRequiredBeforeExecution: true,
     executionEndpoint: action.executionEndpoint,
     executionStateEndpoint: action.executionStateEndpoint,

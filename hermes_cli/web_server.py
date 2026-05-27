@@ -101,6 +101,8 @@ from hermes_cli.office_controlled_mutation import (
     get_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_write_smoke_readback,
     append_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_replay_idempotency_metadata,
     get_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_replay_idempotency_metadata_readback,
+    append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_metadata,
+    get_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_metadata_readback,
     get_office_controlled_mutation_nas_keeper_last_successful_mac_relay_write,
     build_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_request,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_readback,
@@ -844,6 +846,18 @@ async def get_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_re
 async def append_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_replay_idempotency_metadata_route(payload: Any = Body(None)):
     """Record selected tmp-root replay/idempotency metadata only; no filesystem write."""
     return append_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_replay_idempotency_metadata(payload)
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-precommit-metadata")
+async def get_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_metadata_route():
+    """Read selected tmp-root Mac relay precommit metadata without raw payload/path."""
+    return get_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_metadata_readback()
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-precommit-metadata")
+async def append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_metadata_route(payload: Any = Body(None)):
+    """Record metadata-only precommit readiness sourced from selected replay metadata."""
+    return append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_metadata(payload)
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-one-shot-write-payload-arm-review")

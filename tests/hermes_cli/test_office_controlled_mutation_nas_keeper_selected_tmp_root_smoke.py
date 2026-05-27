@@ -307,3 +307,137 @@ def test_selected_tmp_root_replay_metadata_api_requires_session_token(tmp_path, 
     assert readback.status_code == 200
     assert readback.json()["found"] is True
     assert readback.json()["latest"]["tmp_root_smoke_ref"] == smoke["dto"]["tmp_root_smoke_ref"]
+
+
+def selected_precommit_payload(replay_dto, **overrides):
+    payload = {
+        "mac_relay_precommit_ref": "precommit_selected_tmp_root_20260527",
+        "replay_metadata_ref": replay_dto["replay_metadata_ref"],
+        "replay_metadata_record_sha256": replay_dto["replay_metadata_record_sha256"],
+        "selected_contract_ref": replay_dto["selected_contract_ref"],
+        "tmp_root_smoke_ref": replay_dto["tmp_root_smoke_ref"],
+        "idempotency_key_sha256": replay_dto["idempotency_key_sha256"],
+        "recorded_by": "agent_nas_keeper",
+        "recorded_at": "2026-05-27T03:55:00Z",
+    }
+    payload.update(overrides)
+    return payload
+
+
+def _record_selected_replay_metadata(tmp_path):
+    from hermes_cli.office_controlled_mutation import append_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_replay_idempotency_metadata
+
+    smoke_dto, smoke_store = _record_selected_tmp_root_smoke(tmp_path)
+    replay_store = tmp_path / "selected-tmp-root-replay-metadata.jsonl"
+    replay = append_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_replay_idempotency_metadata(
+        replay_metadata_payload(smoke_dto), smoke_store_path=smoke_store, replay_store_path=replay_store
+    )
+    assert replay["recorded"] is True
+    return replay["dto"], replay_store
+
+
+def test_selected_tmp_root_precommit_metadata_records_safe_source_and_replays(tmp_path):
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_metadata,
+        get_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_metadata_readback,
+    )
+
+    replay_dto, replay_store = _record_selected_replay_metadata(tmp_path)
+    precommit_store = tmp_path / "selected-precommit-metadata.jsonl"
+
+    result = append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_metadata(
+        selected_precommit_payload(replay_dto), replay_store_path=replay_store, precommit_store_path=precommit_store
+    )
+    replay = append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_metadata(
+        selected_precommit_payload(replay_dto), replay_store_path=replay_store, precommit_store_path=precommit_store
+    )
+    readback = get_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_metadata_readback(
+        store_path=precommit_store
+    )
+
+    assert result["recorded"] is True
+    assert result["idempotent_replay"] is False
+    assert replay["recorded"] is False
+    assert replay["idempotent_replay"] is True
+    dto = result["dto"]
+    assert dto["mode"] == "nas_keeper_selected_tmp_root_mac_relay_precommit_metadata"
+    assert dto["mac_relay_precommit_metadata_ready"] is True
+    assert dto["source_replay_idempotency_metadata_verified"] is True
+    assert dto["source_selected_contract_ref_verified"] is True
+    assert dto["source_tmp_root_smoke_ref_verified"] is True
+    assert dto["source_replay_metadata_record_sha256_verified"] is True
+    assert dto["source_idempotency_key_verified"] is True
+    assert dto["metadata_record_written"] is True
+    assert dto["precommit_duplicate_write_skipped"] is False
+    assert dto["write_readiness_stage"] == "mac_relay_precommit_metadata_after_selected_tmp_root_replay_idempotency"
+    assert dto["write_readiness_percent"] == 88
+    assert dto["real_nas_production_write_enabled"] is False
+    assert dto["vps_direct_nas_authority_enabled"] is False
+    assert dto["watcher_cron_dispatcher_enabled"] is False
+    assert dto["authority_adapter_binding_enabled"] is False
+    assert dto["markdown_body_included"] is False
+    assert dto["write_payload_included"] is False
+    assert dto["raw_root_path_included"] is False
+    assert len(dto["mac_relay_precommit_metadata_record_sha256"]) == 64
+    assert replay["dto"]["precommit_duplicate_write_skipped"] is True
+    assert replay["dto"]["mac_relay_precommit_metadata_record_sha256"] == dto["mac_relay_precommit_metadata_record_sha256"]
+    assert readback["found"] is True
+    assert readback["latest"]["mac_relay_precommit_ref"] == "precommit_selected_tmp_root_20260527"
+    assert len(precommit_store.read_text(encoding="utf-8").splitlines()) == 1
+    serialized = json.dumps({"result": result, "replay": replay, "readback": readback}, sort_keys=True).lower()
+    assert "this safe note is ready" not in serialized
+    assert "markdown_body\":" not in serialized
+    assert "write_payload\":" not in serialized
+    assert "/users/lidises" not in serialized
+    assert "/home/hermes" not in serialized
+    assert "sk-" not in serialized
+
+
+def test_selected_tmp_root_precommit_metadata_rejects_cross_source_replay(tmp_path):
+    from hermes_cli.office_controlled_mutation import append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_metadata
+
+    replay_dto, replay_store = _record_selected_replay_metadata(tmp_path)
+    bad_ref = append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_metadata(
+        selected_precommit_payload(replay_dto, replay_metadata_ref="different_replay_metadata_ref"),
+        replay_store_path=replay_store,
+        precommit_store_path=tmp_path / "precommit.jsonl",
+    )
+    bad_sha = append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_metadata(
+        selected_precommit_payload(replay_dto, replay_metadata_record_sha256="0" * 64),
+        replay_store_path=replay_store,
+        precommit_store_path=tmp_path / "precommit.jsonl",
+    )
+
+    assert bad_ref["recorded"] is False
+    assert bad_ref["errors"] == [{"field": "replay_metadata_ref", "code": "source_replay_metadata_not_found"}]
+    assert bad_sha["recorded"] is False
+    assert bad_sha["errors"] == [{"field": "replay_metadata_record_sha256", "code": "checksum_mismatch"}]
+
+
+def test_selected_tmp_root_precommit_metadata_api_requires_session_token(tmp_path, monkeypatch):
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
+    monkeypatch.setenv("HERMES_AI_OFFICE_MAC_RELAY_TMP_ROOT", str(tmp_path / "tmp-root"))
+    from hermes_cli.office_controlled_mutation import (
+        record_office_controlled_mutation_nas_keeper_selected_durable_item_preview_contract,
+        execute_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_write_smoke,
+        append_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_replay_idempotency_metadata,
+    )
+    from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+
+    queue_dir = tmp_path / "hermes" / "ai-office" / "nas-keeper-handoff"
+    prepare_authorized_handoff(queue_dir)
+    record_office_controlled_mutation_nas_keeper_selected_durable_item_preview_contract(selected_contract_payload())
+    smoke = execute_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_write_smoke(tmp_root_smoke_payload(), root_path=tmp_path / "tmp-root")
+    replay = append_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_replay_idempotency_metadata(replay_metadata_payload(smoke["dto"]))
+    route = "/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-precommit-metadata"
+    client = TestClient(app)
+
+    unauthenticated = client.post(route, json=selected_precommit_payload(replay["dto"]))
+    assert unauthenticated.status_code == 401
+    recorded = client.post(route, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN}, json=selected_precommit_payload(replay["dto"]))
+    assert recorded.status_code == 200
+    assert recorded.json()["recorded"] is True
+    readback = client.get(route, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN})
+    assert readback.status_code == 200
+    assert readback.json()["found"] is True
+    assert readback.json()["latest"]["replay_metadata_ref"] == replay["dto"]["replay_metadata_ref"]

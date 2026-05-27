@@ -364,6 +364,20 @@ _NAS_KEEPER_SELECTED_DURABLE_TMP_ROOT_REPLAY_METADATA_FIELDS = {
     "raw_root_path",
     "credential_value",
 }
+_NAS_KEEPER_SELECTED_TMP_ROOT_PRECOMMIT_METADATA_FIELDS = {
+    "mac_relay_precommit_ref",
+    "replay_metadata_ref",
+    "replay_metadata_record_sha256",
+    "selected_contract_ref",
+    "tmp_root_smoke_ref",
+    "idempotency_key_sha256",
+    "recorded_by",
+    "recorded_at",
+    "markdown_body",
+    "write_payload",
+    "raw_root_path",
+    "credential_value",
+}
 _NAS_KEEPER_FRESH_ONE_SHOT_OPERATOR_WRITE_FIELDS = (
     _NAS_KEEPER_HANDOFF_QUEUE_FIELDS
     | _NAS_KEEPER_HANDOFF_AUTHORIZE_FIELDS
@@ -7998,6 +8012,10 @@ def _default_nas_keeper_selected_durable_tmp_root_replay_metadata_store_path() -
     return get_hermes_home() / "office" / "controlled-mutation" / "nas_keeper_selected_durable_tmp_root_replay_idempotency_metadata_records.jsonl"
 
 
+def _default_nas_keeper_selected_tmp_root_precommit_metadata_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "nas_keeper_selected_tmp_root_mac_relay_precommit_metadata_records.jsonl"
+
+
 def rehearse_office_controlled_mutation_nas_keeper_durable_queue(
     payload: object, *, queue_dir: Path | str | None = None
 ) -> dict[str, object]:
@@ -8588,6 +8606,188 @@ def append_office_controlled_mutation_nas_keeper_selected_durable_tmp_root_repla
     }
     replay_path.parent.mkdir(parents=True, exist_ok=True)
     with replay_path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(dto, sort_keys=True, separators=(",", ":")) + "\n")
+    return {"recorded": True, "idempotent_replay": False, "errors": [], "dto": dto}
+
+
+def _read_nas_keeper_selected_tmp_root_precommit_metadata_records(path: Path) -> list[dict[str, object]]:
+    records: list[dict[str, object]] = []
+    if not path.exists():
+        return records
+    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        if not line.strip():
+            continue
+        try:
+            item = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(item, dict) and item.get("mode") == "nas_keeper_selected_tmp_root_mac_relay_precommit_metadata":
+            records.append(cast(dict[str, object], item))
+    return records
+
+
+def get_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_metadata_readback(
+    *, store_path: Path | str | None = None
+) -> dict[str, object]:
+    path = (
+        Path(store_path).expanduser()
+        if store_path is not None
+        else _default_nas_keeper_selected_tmp_root_precommit_metadata_store_path()
+    )
+    records = _read_nas_keeper_selected_tmp_root_precommit_metadata_records(path)
+    latest = records[-1] if records else None
+    return {"found": latest is not None, "record_count": len(records), "latest": latest}
+
+
+def append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_metadata(
+    payload: object,
+    *,
+    replay_store_path: Path | str | None = None,
+    precommit_store_path: Path | str | None = None,
+) -> dict[str, object]:
+    """Record metadata-only Mac relay precommit readiness sourced from selected replay metadata."""
+
+    if not isinstance(payload, Mapping):
+        return {"recorded": False, "idempotent_replay": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    errors: list[dict[str, str]] = []
+    if set(payload) - _NAS_KEEPER_SELECTED_TMP_ROOT_PRECOMMIT_METADATA_FIELDS:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+    required = {
+        "mac_relay_precommit_ref",
+        "replay_metadata_ref",
+        "replay_metadata_record_sha256",
+        "selected_contract_ref",
+        "tmp_root_smoke_ref",
+        "idempotency_key_sha256",
+        "recorded_by",
+        "recorded_at",
+    }
+    for field in sorted(required):
+        if field not in payload:
+            errors.append(_error(field, "missing_field"))
+    for forbidden in ("markdown_body", "write_payload", "raw_root_path", "credential_value"):
+        if forbidden in payload:
+            errors.append(_error(forbidden, "raw_value_not_allowed"))
+    for field in ("mac_relay_precommit_ref", "replay_metadata_ref", "selected_contract_ref", "tmp_root_smoke_ref", "recorded_by"):
+        if field in payload and not _is_opaque_id(payload.get(field)):
+            errors.append(_error(field, "invalid_opaque_id"))
+    for field in ("replay_metadata_record_sha256", "idempotency_key_sha256"):
+        if field in payload and not (isinstance(payload.get(field), str) and re.fullmatch(r"[0-9a-f]{64}", str(payload.get(field)))):
+            errors.append(_error(field, "invalid_sha256"))
+    if "recorded_at" in payload and not (isinstance(payload.get("recorded_at"), str) and _ISO_UTC_RE.fullmatch(str(payload.get("recorded_at")))):
+        errors.append(_error("recorded_at", "invalid_timestamp"))
+    if errors:
+        return {"recorded": False, "idempotent_replay": False, "errors": sorted(errors, key=lambda item: (item["field"], item["code"])), "dto": None}
+
+    replay_path = (
+        Path(replay_store_path).expanduser()
+        if replay_store_path is not None
+        else _default_nas_keeper_selected_durable_tmp_root_replay_metadata_store_path()
+    )
+    source: dict[str, object] | None = None
+    for record in reversed(_read_nas_keeper_selected_durable_tmp_root_replay_metadata_records(replay_path)):
+        if record.get("replay_metadata_ref") == payload.get("replay_metadata_ref"):
+            source = record
+            break
+    if source is None:
+        return {"recorded": False, "idempotent_replay": False, "errors": [_error("replay_metadata_ref", "source_replay_metadata_not_found")], "dto": None}
+    source_checks = (
+        ("replay_metadata_record_sha256", "replay_metadata_record_sha256", "checksum_mismatch"),
+        ("selected_contract_ref", "selected_contract_ref", "selected_contract_mismatch"),
+        ("tmp_root_smoke_ref", "tmp_root_smoke_ref", "tmp_root_smoke_mismatch"),
+        ("idempotency_key_sha256", "idempotency_key_sha256", "checksum_mismatch"),
+    )
+    for payload_field, source_field, code in source_checks:
+        if payload.get(payload_field) != source.get(source_field):
+            return {"recorded": False, "idempotent_replay": False, "errors": [_error(payload_field, code)], "dto": None}
+    if source.get("replay_idempotency_metadata_ready") is not True:
+        return {"recorded": False, "idempotent_replay": False, "errors": [_error("replay_idempotency_metadata_ready", "source_not_ready")], "dto": None}
+
+    precommit_path = (
+        Path(precommit_store_path).expanduser()
+        if precommit_store_path is not None
+        else _default_nas_keeper_selected_tmp_root_precommit_metadata_store_path()
+    )
+    existing = _read_nas_keeper_selected_tmp_root_precommit_metadata_records(precommit_path)
+    for record in existing:
+        same_ref = record.get("mac_relay_precommit_ref") == payload.get("mac_relay_precommit_ref")
+        same_source = (
+            record.get("replay_metadata_ref") == payload.get("replay_metadata_ref")
+            and record.get("selected_contract_ref") == payload.get("selected_contract_ref")
+            and record.get("tmp_root_smoke_ref") == payload.get("tmp_root_smoke_ref")
+            and record.get("idempotency_key_sha256") == payload.get("idempotency_key_sha256")
+        )
+        if same_ref or same_source:
+            replayed = dict(record)
+            replayed["precommit_duplicate_write_skipped"] = True
+            return {"recorded": False, "idempotent_replay": True, "errors": [], "dto": replayed}
+
+    capabilities = {
+        "selected_replay_metadata_read_enabled": True,
+        "precommit_metadata_recording_enabled": True,
+        "metadata_record_write_enabled": True,
+        "real_nas_production_write_enabled": False,
+        "real_nas_production_write_executed": False,
+        "vps_direct_nas_authority_enabled": False,
+        "vps_nas_mount_enabled": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "watcher_cron_dispatcher_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "public_exposure_enabled": False,
+        "gateway_restart_required": False,
+    }
+    record_material = {
+        "mac_relay_precommit_ref": payload.get("mac_relay_precommit_ref"),
+        "replay_metadata_ref": payload.get("replay_metadata_ref"),
+        "replay_metadata_record_sha256": payload.get("replay_metadata_record_sha256"),
+        "selected_contract_ref": payload.get("selected_contract_ref"),
+        "tmp_root_smoke_ref": payload.get("tmp_root_smoke_ref"),
+        "idempotency_key_sha256": payload.get("idempotency_key_sha256"),
+        "recorded_by": payload.get("recorded_by"),
+        "recorded_at": payload.get("recorded_at"),
+    }
+    record_sha = hashlib.sha256(json.dumps(record_material, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_selected_tmp_root_mac_relay_precommit_metadata",
+        "mac_relay_precommit_ref": payload.get("mac_relay_precommit_ref"),
+        "mac_relay_precommit_metadata_record_sha256": record_sha,
+        "mac_relay_precommit_metadata_ready": True,
+        "source_replay_idempotency_metadata_verified": True,
+        "replay_metadata_ref": payload.get("replay_metadata_ref"),
+        "replay_metadata_record_sha256": payload.get("replay_metadata_record_sha256"),
+        "source_replay_metadata_record_sha256_verified": True,
+        "selected_contract_ref": payload.get("selected_contract_ref"),
+        "source_selected_contract_ref_verified": True,
+        "tmp_root_smoke_ref": payload.get("tmp_root_smoke_ref"),
+        "source_tmp_root_smoke_ref_verified": True,
+        "idempotency_key_sha256": payload.get("idempotency_key_sha256"),
+        "source_idempotency_key_verified": True,
+        "metadata_record_written": True,
+        "precommit_duplicate_write_skipped": False,
+        "write_readiness_stage": "mac_relay_precommit_metadata_after_selected_tmp_root_replay_idempotency",
+        "write_readiness_percent": 88,
+        "real_nas_production_write_enabled": False,
+        "real_nas_production_write_executed": False,
+        "vps_direct_nas_authority_enabled": False,
+        "watcher_cron_dispatcher_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "markdown_body_included": False,
+        "execution_payload_included": False,
+        "write_payload_included": False,
+        "write_payload_materialized": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "secret_value_included": False,
+        "recorded_by": payload.get("recorded_by"),
+        "recorded_at": payload.get("recorded_at"),
+        "capabilities": capabilities,
+        "next_required_boundary": "selected_tmp_root_precommit_manifest_or_final_preflight_metadata",
+    }
+    precommit_path.parent.mkdir(parents=True, exist_ok=True)
+    with precommit_path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(dto, sort_keys=True, separators=(",", ":")) + "\n")
     return {"recorded": True, "idempotent_replay": False, "errors": [], "dto": dto}
 

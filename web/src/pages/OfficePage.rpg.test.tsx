@@ -5904,6 +5904,8 @@ describe("NasKeeperExecutionOperatorActionPanel", () => {
     expect(readiness.metadataOnlyRecordWriteReady).toBe(true);
     expect(readiness.tmpRootReplayIdempotencyMetadataReady).toBe(true);
     expect(readiness.tmpRootReplayIdempotencyMetadataEndpoint).toBe("/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-durable-tmp-root-replay-idempotency-metadata");
+    expect(readiness.macRelayPrecommitMetadataReady).toBe(true);
+    expect(readiness.macRelayPrecommitMetadataEndpoint).toBe("/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-precommit-metadata");
     expect(readiness.payloadPreviewRequiredBeforeExecution).toBe(true);
     expect(readiness.realNasProductionWriteEnabled).toBe(false);
     expect(readiness.vpsNasAuthorityEnabled).toBe(false);
@@ -5935,6 +5937,8 @@ describe("NasKeeperExecutionOperatorActionPanel", () => {
     expect(markup).toContain('data-office-nas-keeper-durable-queue-guarded-operator-metadata-only-record-write-ready="true"');
     expect(markup).toContain('data-office-nas-keeper-durable-queue-guarded-operator-tmp-root-replay-idempotency-metadata-ready="true"');
     expect(markup).toContain('data-office-nas-keeper-durable-queue-guarded-operator-tmp-root-replay-idempotency-metadata-endpoint="/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-durable-tmp-root-replay-idempotency-metadata"');
+    expect(markup).toContain('data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-precommit-metadata-ready="true"');
+    expect(markup).toContain('data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-precommit-metadata-endpoint="/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-precommit-metadata"');
     expect(markup).toContain('data-office-nas-keeper-durable-queue-guarded-operator-real-nas-production-write-enabled="false"');
     expect(markup).toContain('data-office-nas-keeper-durable-queue-guarded-operator-vps-nas-authority-enabled="false"');
     expect(markup).toContain('data-office-nas-keeper-durable-queue-guarded-operator-watcher-cron-daemon-enabled="false"');
