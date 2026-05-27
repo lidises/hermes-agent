@@ -1,3 +1,36 @@
+## Current status — NAS Keeper real Mac relay NAS write completed (2026-05-27T05:42Z)
+
+Scope completed:
+- After explicit production-write approval, executed the bounded Mac-local NAS Keeper write path through NAS Keeper -> Mac relay -> real NAS.
+- Used temporary handoff queues only; durable production queue, watcher/cron/dispatcher/authority-adapter, direct VPS NAS authority, public exposure, and gateway restart stayed closed.
+- Wrote one harmless logical target, then replaced the same logical target to prove rollback-before-replace and final readback.
+- Recorded safe execution-state metadata for both create and replace executions; no raw body/path/secret/write payload was echoed into API/browser/docs output.
+
+Evidence captured:
+- Safe logical target: `Inbox::ai-office-nas-keeper-real-write-smoke-20260527054036.md`.
+- Create write ref: `write_20260527054036_1`; replace write ref: `write_20260527054036_2`.
+- Create: executed=true, written=true, readback_verified=true, execution_state_recorded=true, audit_written=true.
+- Replace: executed=true, written=true, readback_verified=true, execution_state_recorded=true, audit_written=true, rollback_created=true.
+- Final readback sha256: `bf51f8820da44face4d2b3b6503ba5ede4aec32392c795a3e989229616de1f70`.
+- Rollback sha256: `65247f1a61ccc5fa6909ea155082f28d196976bc46b8b41849c8088fc7d3afc8`.
+- Raw leak probe over public result DTOs: false.
+- Focused regression tests: execution-from-preview + execution-payload-preview + NAS runtime write = 16/16 passed.
+- `py_compile` and `git diff --check` passed.
+- VPS protected API remains fail-closed: unauth execution-from-preview=401; authenticated execution-from-preview=200 with `mac_relay_root_not_configured`, executed=false, written=false.
+- VPS DOM smoke after local real write: approval-token readiness still 100%; compact summary controls=0; real write flag=false on VPS; VPS NAS authority=false; runtime open=false; raw leak=false; browser console errors=0.
+
+Safety boundaries preserved after the real Mac relay write:
+- Direct VPS NAS authority: false.
+- Durable production queue mutation: false.
+- watcher/cron/dispatcher/authority-adapter: false.
+- public exposure change: false.
+- gateway restart: false.
+- raw filesystem root/path, raw markdown body, secret, or raw write payload echo: false.
+
+Readiness/result note:
+- The approved bounded real NAS production write smoke is complete via Mac relay.
+- VPS protected API correctly still shows direct write execution disabled because the VPS has no NAS root by design; the real write happened only on the Mac relay path.
+
 ## Current status — NAS Keeper selected tmp-root approval token deployed (2026-05-27T05:31Z)
 
 Scope completed:

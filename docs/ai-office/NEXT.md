@@ -1,3 +1,25 @@
+## NEXT — after NAS Keeper real Mac relay NAS write (2026-05-27T05:42Z)
+
+Current next stage:
+- The bounded real Mac relay NAS write has completed: create, replace, readback verification, rollback evidence, audit evidence, and safe execution-state metadata are recorded.
+- Do not repeat the write unless the user asks for another exact target/content boundary.
+- The next safe operational stage, if requested, is a durable production-queue rehearsal/readback design or cleanup/retention decision for the smoke logical target; it is not watcher/cron/dispatcher automation.
+- VPS direct NAS authority remains intentionally closed; future writes should still route through NAS Keeper -> Mac relay unless the user separately designs a different authority model.
+
+Still forbidden unless separately and explicitly approved:
+- direct VPS NAS authority, NAS mount credentials, or direct VPS file write
+- watcher/cron/dispatcher/authority-adapter activation
+- public exposure
+- gateway restart
+- raw markdown/body/path/secret/raw write payload echo
+- additional real NAS writes beyond the completed bounded smoke target
+
+Required first checks next time:
+1. Read `docs/ai-office/STATUS.md` and this file.
+2. Confirm local/VPS git, service health, and whether the smoke logical target should be retained or cleaned up.
+3. Treat the successful real write as Mac relay evidence only, not VPS authority.
+4. Require exact target/content approval before any additional real NAS production write.
+
 ## NEXT — after NAS Keeper selected tmp-root approval token (2026-05-27T05:31Z)
 
 Current next stage:
