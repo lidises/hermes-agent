@@ -10232,7 +10232,18 @@ _NAS_KEEPER_CLEANUP_FINAL_APPROVAL_FIELDS = {
     "operator_confirmation",
     "evidence_refs",
 }
+_NAS_KEEPER_CLEANUP_EXECUTION_PACKAGE_RECEIPT_FIELDS = {
+    "cleanup_package_ref",
+    "cleanup_final_approval_ref",
+    "cleanup_final_approval_sha256",
+    "packaged_by",
+    "packaged_at",
+    "operator_confirmation",
+    "package_items",
+    "evidence_refs",
+}
 _NAS_KEEPER_CLEANUP_HOLD_ACTIONS = {"hold_cleanup_candidate", "retain_for_manual_review"}
+_NAS_KEEPER_CLEANUP_PACKAGE_ACTIONS = {"retain_for_manual_cleanup_receipt", "archive_candidate_after_manual_approval"}
 
 
 def _default_nas_keeper_artifact_retention_plan_store_path() -> Path:
@@ -10253,6 +10264,10 @@ def _default_nas_keeper_cleanup_execution_manifest_preflight_store_path() -> Pat
 
 def _default_nas_keeper_cleanup_final_approval_store_path() -> Path:
     return get_hermes_home() / "office" / "controlled-mutation" / "nas_keeper_cleanup_final_approval_records.jsonl"
+
+
+def _default_nas_keeper_cleanup_execution_package_receipt_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "nas_keeper_cleanup_execution_package_receipt_records.jsonl"
 
 
 def _stable_metadata_sha256(value: Mapping[str, object]) -> str:
@@ -11187,10 +11202,12 @@ def _read_nas_keeper_cleanup_final_approval_records(path: Path) -> tuple[list[di
 
 
 def _cleanup_final_approval_dto(record: Mapping[str, object], *, idempotent_replay: bool = False) -> dict[str, object]:
+    cleanup_final_approval_sha256 = _stable_metadata_sha256(record)
     return {
         "schema_version": 1,
         "mode": "nas_keeper_cleanup_final_approval_recorded",
         "cleanup_final_approval_ref": record["cleanup_final_approval_ref"],
+        "cleanup_final_approval_sha256": cleanup_final_approval_sha256,
         "cleanup_manifest_ref": record["cleanup_manifest_ref"],
         "cleanup_manifest_sha256": record["cleanup_manifest_sha256"],
         "approved_by": record["approved_by"],
@@ -11345,6 +11362,277 @@ def append_office_controlled_mutation_nas_keeper_cleanup_final_approval(
     with path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(normalized, sort_keys=True, ensure_ascii=False) + "\n")
     return {"stored": True, "idempotent_replay": False, "errors": [], "dto": _cleanup_final_approval_dto(normalized)}
+
+
+def _normalize_nas_keeper_cleanup_execution_package_receipt_record(value: object) -> dict[str, object] | None:
+    if not isinstance(value, Mapping):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(value.get("cleanup_package_ref"), "cleanuppackage-"):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(value.get("cleanup_final_approval_ref"), "cleanupfinal-"):
+        return None
+    checksum = value.get("cleanup_final_approval_sha256")
+    if not (isinstance(checksum, str) and re.fullmatch(r"[a-f0-9]{64}", checksum)):
+        return None
+    if not _is_opaque_id(value.get("packaged_by")):
+        return None
+    if not (isinstance(value.get("packaged_at"), str) and _ISO_UTC_RE.fullmatch(str(value.get("packaged_at")))):
+        return None
+    if value.get("operator_confirmation") != "metadata-only-cleanup-package-receipt-no-delete-no-move-no-write":
+        return None
+    package_items = value.get("package_items")
+    if not isinstance(package_items, Sequence) or isinstance(package_items, (str, bytes)):
+        return None
+    if len(package_items) < 1 or len(package_items) > 20:
+        return None
+    normalized_items: list[dict[str, object]] = []
+    for item in package_items:
+        if not isinstance(item, Mapping):
+            return None
+        package_item_ref = item.get("package_item_ref")
+        candidate_ref = item.get("candidate_ref")
+        artifact_ref = item.get("artifact_ref")
+        safe_logical_ref = item.get("safe_logical_ref")
+        intended_action = item.get("intended_action")
+        terminal_status = item.get("terminal_status")
+        if not _is_opaque_ref(package_item_ref):
+            return None
+        if not _is_opaque_ref(candidate_ref):
+            return None
+        if not _is_opaque_ref(artifact_ref):
+            return None
+        if not _is_safe_text(safe_logical_ref) or "/" in str(safe_logical_ref) or ".." in str(safe_logical_ref):
+            return None
+        if intended_action not in _NAS_KEEPER_CLEANUP_PACKAGE_ACTIONS:
+            return None
+        if not _is_safe_text(terminal_status):
+            return None
+        normalized_items.append(
+            {
+                "package_item_ref": package_item_ref,
+                "candidate_ref": candidate_ref,
+                "artifact_ref": artifact_ref,
+                "safe_logical_ref": safe_logical_ref,
+                "intended_action": intended_action,
+                "terminal_status": terminal_status,
+            }
+        )
+    if not _validate_evidence_refs(value.get("evidence_refs")):
+        return None
+    return {
+        "cleanup_package_ref": value["cleanup_package_ref"],
+        "cleanup_final_approval_ref": value["cleanup_final_approval_ref"],
+        "cleanup_final_approval_sha256": checksum,
+        "packaged_by": value["packaged_by"],
+        "packaged_at": value["packaged_at"],
+        "operator_confirmation": value["operator_confirmation"],
+        "package_items": normalized_items,
+        "package_item_count": len(normalized_items),
+        "evidence_refs": list(cast(Sequence[object], value["evidence_refs"])),
+    }
+
+
+def _read_nas_keeper_cleanup_execution_package_receipt_records(path: Path) -> tuple[list[dict[str, object]], int]:
+    records: list[dict[str, object]] = []
+    skipped_count = 0
+    if not path.exists():
+        return records, skipped_count
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            if not line.strip():
+                continue
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped_count += 1
+                continue
+            normalized = _normalize_nas_keeper_cleanup_execution_package_receipt_record(item)
+            if normalized is None:
+                skipped_count += 1
+                continue
+            records.append(normalized)
+    return records, skipped_count
+
+
+def _cleanup_execution_package_item_checksums(record: Mapping[str, object]) -> list[dict[str, object]]:
+    checksums: list[dict[str, object]] = []
+    for item in cast(Sequence[Mapping[str, object]], record.get("package_items") or []):
+        safe_item = {
+            "package_item_ref": item["package_item_ref"],
+            "candidate_ref": item["candidate_ref"],
+            "artifact_ref": item["artifact_ref"],
+            "safe_logical_ref": item["safe_logical_ref"],
+            "intended_action": item["intended_action"],
+            "terminal_status": item["terminal_status"],
+        }
+        checksums.append(
+            {
+                "package_item_ref": item["package_item_ref"],
+                "candidate_ref": item["candidate_ref"],
+                "artifact_ref": item["artifact_ref"],
+                "package_item_sha256": _stable_metadata_sha256(safe_item),
+            }
+        )
+    return checksums
+
+
+def _cleanup_execution_package_receipt_dto(
+    record: Mapping[str, object], *, idempotent_replay: bool = False
+) -> dict[str, object]:
+    cleanup_package_sha256 = _stable_metadata_sha256(record)
+    return {
+        "schema_version": 1,
+        "mode": "nas_keeper_cleanup_execution_package_receipt_recorded",
+        "cleanup_package_ref": record["cleanup_package_ref"],
+        "cleanup_package_sha256": cleanup_package_sha256,
+        "cleanup_final_approval_ref": record["cleanup_final_approval_ref"],
+        "cleanup_final_approval_sha256": record["cleanup_final_approval_sha256"],
+        "packaged_by": record["packaged_by"],
+        "packaged_at": record["packaged_at"],
+        "package_item_count": record["package_item_count"],
+        "package_item_checksums": _cleanup_execution_package_item_checksums(record),
+        "evidence_refs": record["evidence_refs"],
+        "idempotent_replay": idempotent_replay,
+        "metadata_only_record_write": True,
+        "final_approval_checksum_matched": True,
+        "receipt_terminal": True,
+        "cleanup_execution_opened": False,
+        "actual_nas_delete_enabled": False,
+        "actual_nas_move_enabled": False,
+        "actual_nas_archive_enabled": False,
+        "actual_nas_write_enabled": False,
+        "direct_vps_nas_write_enabled": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "package_receipt_path": [
+            "final_approval_checksum_verified",
+            "candidate_action_refs_packaged",
+            "metadata_only_receipt_recorded",
+            "execution_still_closed",
+        ],
+        "next_required_boundary": "separate_exact_cleanup_execution_approval",
+    }
+
+
+def list_office_controlled_mutation_nas_keeper_cleanup_execution_package_receipt_records(
+    *, package_store_path: Path | None = None, limit: int = 50, cleanup_package_ref: object = None
+) -> dict[str, object]:
+    errors: list[dict[str, str]] = []
+    safe_ref = None
+    if cleanup_package_ref is not None:
+        if _office_disabled_runtime_dispatch_valid_prefixed_ref(cleanup_package_ref, "cleanuppackage-"):
+            safe_ref = str(cleanup_package_ref)
+        else:
+            errors.append(_error("cleanup_package_ref", "unsupported_ref_shape"))
+    path = package_store_path or _default_nas_keeper_cleanup_execution_package_receipt_store_path()
+    records, skipped_count = _read_nas_keeper_cleanup_execution_package_receipt_records(path)
+    if safe_ref:
+        records = [record for record in records if record.get("cleanup_package_ref") == safe_ref]
+    if errors:
+        records = []
+    max_items = max(0, min(limit, 200)) if isinstance(limit, int) else 50
+    records = records[-max_items:] if max_items else []
+    return {
+        "found": bool(records),
+        "errors": errors,
+        "dto": {
+            "schema_version": 1,
+            "mode": "nas_keeper_cleanup_execution_package_receipt_records_readback",
+            "record_count": len(records),
+            "limit": max_items,
+            "skipped_count": skipped_count,
+            "records": records,
+            "latest_record": records[-1] if records else None,
+            "metadata_only_record_write": True,
+            "cleanup_execution_opened": False,
+            "actual_nas_delete_enabled": False,
+            "actual_nas_move_enabled": False,
+            "actual_nas_archive_enabled": False,
+            "actual_nas_write_enabled": False,
+            "direct_vps_nas_write_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "next_required_boundary": "separate_exact_cleanup_execution_approval" if records else "cleanup_execution_package_receipt",
+        },
+    }
+
+
+def append_office_controlled_mutation_nas_keeper_cleanup_execution_package_receipt(
+    payload: object, *, final_store_path: Path | None = None, package_store_path: Path | None = None
+) -> dict[str, object]:
+    if not isinstance(payload, Mapping):
+        return {"stored": False, "idempotent_replay": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    errors: list[dict[str, str]] = []
+    if set(payload) - _NAS_KEEPER_CLEANUP_EXECUTION_PACKAGE_RECEIPT_FIELDS:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+    for field in sorted(_NAS_KEEPER_CLEANUP_EXECUTION_PACKAGE_RECEIPT_FIELDS):
+        if field not in payload:
+            errors.append(_error(field, "missing_field"))
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("cleanup_package_ref"), "cleanuppackage-"):
+        errors.append(_error("cleanup_package_ref", "invalid_cleanup_package_ref"))
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(payload.get("cleanup_final_approval_ref"), "cleanupfinal-"):
+        errors.append(_error("cleanup_final_approval_ref", "invalid_cleanup_final_approval_ref"))
+    if not (isinstance(payload.get("cleanup_final_approval_sha256"), str) and re.fullmatch(r"[a-f0-9]{64}", str(payload.get("cleanup_final_approval_sha256")))):
+        errors.append(_error("cleanup_final_approval_sha256", "invalid_cleanup_final_approval_sha256"))
+    if not _is_opaque_id(payload.get("packaged_by")):
+        errors.append(_error("packaged_by", "invalid_opaque_id"))
+    if not (isinstance(payload.get("packaged_at"), str) and _ISO_UTC_RE.fullmatch(str(payload.get("packaged_at")))):
+        errors.append(_error("packaged_at", "invalid_timestamp"))
+    if payload.get("operator_confirmation") != "metadata-only-cleanup-package-receipt-no-delete-no-move-no-write":
+        errors.append(_error("operator_confirmation", "invalid_confirmation"))
+    if not _validate_evidence_refs(payload.get("evidence_refs")):
+        errors.append(_error("evidence_refs", "invalid_evidence_refs"))
+
+    final_path = final_store_path or _default_nas_keeper_cleanup_final_approval_store_path()
+    final_records, _final_skipped = _read_nas_keeper_cleanup_final_approval_records(final_path)
+    matched_final = next((record for record in final_records if record.get("cleanup_final_approval_ref") == payload.get("cleanup_final_approval_ref")), None)
+    if matched_final is None:
+        errors.append(_error("cleanup_final_approval_ref", "cleanup_final_approval_not_found"))
+    elif isinstance(payload.get("cleanup_final_approval_sha256"), str) and payload.get("cleanup_final_approval_sha256") != _stable_metadata_sha256(matched_final):
+        errors.append(_error("cleanup_final_approval_sha256", "cleanup_final_approval_checksum_mismatch"))
+
+    record = {
+        "cleanup_package_ref": payload.get("cleanup_package_ref"),
+        "cleanup_final_approval_ref": payload.get("cleanup_final_approval_ref"),
+        "cleanup_final_approval_sha256": payload.get("cleanup_final_approval_sha256"),
+        "packaged_by": payload.get("packaged_by"),
+        "packaged_at": payload.get("packaged_at"),
+        "operator_confirmation": payload.get("operator_confirmation"),
+        "package_items": payload.get("package_items"),
+        "evidence_refs": payload.get("evidence_refs"),
+    }
+    normalized = _normalize_nas_keeper_cleanup_execution_package_receipt_record(record)
+    if normalized is None:
+        errors.append(_error("cleanup_package_receipt", "invalid_cleanup_package_receipt"))
+    if errors:
+        return {
+            "stored": False,
+            "idempotent_replay": False,
+            "errors": sorted(errors, key=lambda item: (item["field"], item["code"])),
+            "dto": None,
+        }
+    path = package_store_path or _default_nas_keeper_cleanup_execution_package_receipt_store_path()
+    records, _skipped = _read_nas_keeper_cleanup_execution_package_receipt_records(path)
+    for existing in records:
+        if existing.get("cleanup_package_ref") == normalized["cleanup_package_ref"]:
+            return {
+                "stored": False,
+                "idempotent_replay": True,
+                "errors": [],
+                "dto": _cleanup_execution_package_receipt_dto(existing, idempotent_replay=True),
+            }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(normalized, sort_keys=True, ensure_ascii=False) + "\n")
+    return {"stored": True, "idempotent_replay": False, "errors": [], "dto": _cleanup_execution_package_receipt_dto(normalized)}
 
 
 def build_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_request(
