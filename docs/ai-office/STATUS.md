@@ -1097,3 +1097,7 @@ Still closed:
 - No public exposure change.
 - No gateway restart.
 - No raw markdown/path/secret/write-payload projection.
+## Current status — completed write receipt projected read-only in Office UI (2026-05-27T15:41Z)
+
+Latest completed rung:
+-...[truncated]
