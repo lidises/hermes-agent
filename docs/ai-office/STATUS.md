@@ -1,3 +1,37 @@
+## Current status — NAS Keeper cleanup package receipt + tmp-root write smoke completed (2026-05-27T10:55Z)
+
+Scope completed:
+- Added a metadata-only cleanup execution package/receipt contract after the cleanup final approval-token gate.
+- The new package receipt consumes an existing cleanup final approval ref, verifies the exact final approval checksum, packages safe candidate/action refs with per-item checksums, proves idempotent replay, and still leaves cleanup execution closed.
+- Per current approval, ran a Mac relay tmp-root-only write smoke after write-readiness was already 100%; this was not a real NAS production write and used an isolated temporary local root/queue.
+- Synced both VPS worktrees and restarted dashboard/core services only; gateway remained active and was not restarted.
+
+Evidence captured:
+- New route: `POST/GET /api/office/controlled-mutation/nas-runtime/nas-keeper-cleanup-execution-package-receipt`.
+- New helpers: `append_office_controlled_mutation_nas_keeper_cleanup_execution_package_receipt` and `list_office_controlled_mutation_nas_keeper_cleanup_execution_package_receipt_records`.
+- Protected API smoke wrote one metadata-only cleanup package receipt record: `cleanuppackage-20260527-artifact-retention-1`.
+- Protected API results: unauthenticated POST returned 401; authenticated POST stored the package receipt; duplicate POST returned idempotent replay; readback count for the cleanup package ref is 1.
+- Package receipt flags: final_approval_checksum_matched=true, package_item_count=1, package checksum length=64, package item checksum length=64, cleanup_execution_opened=false, actual_nas_delete=false, actual_nas_move=false, actual_nas_write=false.
+- Tmp-root-only Mac relay write smoke executed against `local_tmp_root_only`, wrote `TmpVault / cleanup-package-tmp-smoke-20260527094000-packagesmoke1.md`, readback_verified=true, execution_state_recorded=true, readback SHA-256 `d72484606d6305a3e9c604aa82ee96551f490d7918f5cff6628485210f7e3e7e`.
+- API/DOM/tmp-smoke leak checks found no raw filesystem root/path, raw markdown body, secret token, raw temporary root/queue path, or raw write payload echo.
+- Focused tests passed: artifact retention plan + cleanup gate + cleanup hold + cleanup manifest + cleanup final approval + cleanup package receipt + execution-from-preview + execution-payload preview + NAS runtime write = 35/35.
+- `py_compile` and `git diff --check` passed.
+
+Safety boundaries preserved:
+- Real NAS production write: false.
+- Actual NAS delete/move/archive cleanup: false.
+- Cleanup execution opened: false.
+- Direct VPS NAS authority: false.
+- watcher/cron/dispatcher/authority-adapter: false.
+- public exposure change: false.
+- gateway restart: false.
+- raw filesystem root/path, raw markdown body, secret, or raw write payload echo: false.
+
+Readiness/result note:
+- Write-readiness is 100%.
+- This rung added non-repetitive operational-readiness: cleanup gate -> dry-run hold -> manifest/preflight -> exact-checksum final approval token -> package/receipt -> isolated tmp-root write proof, without touching production NAS.
+- Next shortest safe rung is a metadata-only cleanup execution disabled-run receipt/final preflight contract, unless the user separately approves actual cleanup execution or a fresh exact NAS production write.
+
 ## Current status — NAS Keeper cleanup final approval gate + tmp-root write smoke completed (2026-05-27T09:25Z)
 
 Scope completed:
