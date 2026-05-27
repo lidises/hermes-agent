@@ -1,3 +1,32 @@
+## Current status — NAS Keeper selected tmp-root final preflight deployed (2026-05-27T04:49Z)
+
+Scope completed:
+- Added and deployed metadata-only Mac relay final preflight records sourced only from selected tmp-root precommit manifest records.
+- The final preflight verifies precommit manifest ref/checksum, precommit metadata ref/checksum, replay metadata ref, selected contract ref, tmp-root smoke ref, and idempotency checksum before appending metadata.
+- Duplicate final-preflight attempts append no second record and return the existing safe record with duplicate-write skipped.
+- The durable guarded operator UI now exposes a display-only final preflight endpoint/readiness marker with no controls.
+
+Evidence captured:
+- Commit deployed: `5a2c7f4ab`.
+- RED observed first: final preflight test failed on missing backend functions/routes.
+- GREEN after implementation: selected tmp-root smoke/replay/precommit/manifest/final-preflight tests passed; combined selected/preview/from-preview focused tests = 25/25 passed.
+- Frontend Office tests: `OfficePage.test.ts` + `OfficePage.rpg.test.tsx` = 348/348 passed.
+- `py_compile`, `git diff --check`, `npm run lint` (0 errors, existing warnings only), and `npm run build` passed.
+- VPS core/dashboard synced to `origin/main`; `web_dist` rsynced; dashboard and core dashboard restarted and healthy after retry; gateway stayed active and was not restarted.
+- Protected VPS API/DOM smoke: `/office` loaded; final preflight readiness marker present; controls=0; real write=false; VPS NAS authority=false; raw leak probe=false; unauth final-preflight route=401; authenticated route=200 fail-closed without source precommit manifest, recorded=false.
+- Local Mac relay isolated tmp-root chain: contract recorded, tmp-root write smoke written/read back, replay metadata recorded, precommit metadata recorded, manifest recorded, final preflight recorded, duplicate final preflight idempotent, readback found one latest record, raw leak probe=false.
+
+Safety boundaries preserved:
+- Real NAS production write: false.
+- VPS direct NAS authority: false.
+- watcher/cron/dispatcher/authority-adapter: false.
+- public exposure change: false.
+- gateway restart: false.
+- raw filesystem root/path, raw markdown body, token, secret, or raw write payload echo: false.
+
+Readiness note:
+- Not 100% yet: the chain is now ready through selected tmp-root final preflight with write_readiness_percent=97, but production NAS real-write gate/explicit approval readiness remains intentionally closed.
+
 ## Current status — NAS Keeper selected tmp-root precommit manifest deployed (2026-05-27T04:20Z)
 
 Scope completed:

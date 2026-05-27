@@ -1,3 +1,26 @@
+## NEXT — after NAS Keeper selected tmp-root final preflight (2026-05-27T04:49Z)
+
+Current next stage:
+- The safest newly closed rung is a metadata-only Mac relay final preflight sourced from selected tmp-root precommit manifest.
+- VPS remains fail-closed for final-preflight writes unless a matching source precommit manifest record exists; it has no production NAS authority and no tmp-root authority for this rung.
+- The next shortest safe rung is a metadata-only real-write gate sourced from final preflight. Despite the name, it must not execute production NAS writes; it should only prove the explicit approval boundary while all real write authority remains disabled.
+- Readiness is not 100% yet. Do not claim 100% until the metadata-only approval-token/real-write approval boundary is complete or real production NAS write approval/execution readiness is explicitly granted, while preserving no raw body/path/secret echo.
+
+Still forbidden unless separately and explicitly approved:
+- real NAS production write
+- VPS direct NAS authority, NAS mount credentials, or direct VPS file write
+- watcher/cron/dispatcher/authority-adapter activation
+- public exposure
+- gateway restart
+- raw markdown/body/path/secret/raw write payload echo
+
+Required first checks next time:
+1. Read `docs/ai-office/STATUS.md` and this file.
+2. Confirm local/VPS git, `web_dist`, and service health before deploy/runtime work.
+3. Start with RED tests and keep each rung bounded.
+4. Source the next metadata-only rung from the selected final preflight record; reject stale/cross-source refs and checksum mismatches.
+5. Keep production NAS/write authority closed unless the prompt explicitly approves that exact higher boundary.
+
 ## NEXT — after NAS Keeper selected tmp-root precommit manifest (2026-05-27T04:20Z)
 
 Current next stage:
