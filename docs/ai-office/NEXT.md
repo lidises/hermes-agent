@@ -1,3 +1,26 @@
+## NEXT — after NAS Keeper selected tmp-root precommit metadata (2026-05-27T04:03Z)
+
+Current next stage:
+- The safest newly closed rung is metadata-only Mac relay precommit readiness sourced from selected tmp-root replay/idempotency metadata.
+- VPS remains fail-closed for precommit metadata unless a matching source replay metadata record exists; it has no production NAS authority and no tmp-root authority for this rung.
+- The next shortest safe rung is a final metadata-only write-readiness manifest/attestation record sourced from the precommit record, verifying selected_contract_ref, tmp_root_smoke_ref, replay_metadata_ref, precommit ref, and record SHA chain without materializing production write payload.
+- Readiness is not 100% yet. Do not claim 100% until real production NAS write gate/approval/execution readiness is complete under explicit approval while preserving no raw body/path/secret echo.
+
+Still forbidden unless separately and explicitly approved:
+- real NAS production write
+- VPS direct NAS authority, NAS mount credentials, or direct VPS file write
+- watcher/cron/dispatcher/authority-adapter activation
+- public exposure
+- gateway restart
+- raw markdown/body/path/secret/raw write payload echo
+
+Required first checks next time:
+1. Read `docs/ai-office/STATUS.md` and this file.
+2. Confirm local/VPS git, `web_dist`, and service health before deploy/runtime work.
+3. Start with RED tests and keep each rung bounded.
+4. Source the next metadata-only rung from the selected precommit metadata record; reject stale/cross-source refs and checksum mismatches.
+5. Keep production NAS/write authority closed unless the prompt explicitly approves that exact higher boundary.
+
 ## NEXT — after NAS Keeper selected tmp-root replay metadata (2026-05-27T03:44Z)
 
 Current next stage:
