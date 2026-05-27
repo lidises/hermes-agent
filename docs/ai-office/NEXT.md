@@ -1,10 +1,14 @@
 ## NEXT — after NAS Keeper artifact retention plan metadata rung (2026-05-27T07:31Z)
 
 Current next stage:
-- Deploy and smoke the metadata-only artifact retention plan route, then record one bounded retention plan for completed smoke/fresh-write artifacts using safe logical refs only.
-- This is a metadata-only record write into AI Office state, not a NAS write/delete/move/archive.
+- The metadata-only artifact retention plan route has been deployed/smoked and one bounded retention plan record exists: `cleanupplan-20260527-artifact-retention-1`.
+- This was a metadata-only record write into AI Office state, not a NAS write/delete/move/archive.
 - Cleanup execution remains closed until separate explicit approval.
 - Write-readiness is already 100%; the useful next movement is operational-readiness: retention planning, cleanup execution gate, then explicit cleanup execution only if separately approved.
+
+Recommended next rung:
+- Add an explicit cleanup execution gate contract that proves the system can reject/hold cleanup execution unless the operator supplies an exact cleanup approval ref and matching retention-plan checksum.
+- Keep it metadata-only: no actual NAS delete/move/archive yet.
 
 Still forbidden unless separately and explicitly approved:
 - additional real NAS production writes beyond a fresh exact approved target/content boundary

@@ -1,5 +1,13 @@
 ## Current status — NAS Keeper artifact retention plan metadata rung implemented (2026-05-27T07:31Z)
 
+Deployment/update (2026-05-27T07:38Z):
+- Committed and pushed the retention-plan rung, synced both VPS worktrees to `origin/main`, and restarted the two dashboard/core services only.
+- Gateway remained active and was not restarted.
+- Protected API smoke wrote one metadata-only retention plan record: `cleanupplan-20260527-artifact-retention-1`.
+- Protected API results: unauthenticated POST returned 401; authenticated POST stored the record; duplicate POST returned idempotent replay; readback count for the cleanup plan ref is 1.
+- API/DOM leak checks found no raw filesystem root/path, raw markdown body, secret token, or raw write payload echo for the retention-plan response.
+- Actual NAS write/delete/move/archive remains disabled.
+
 Scope completed:
 - Added a metadata-only artifact retention/cleanup planning rung for completed NAS Keeper smoke/fresh-write artifacts.
 - This rung records safe logical artifact refs, retention decisions, evidence refs, and idempotency metadata only; it does not write, delete, move, archive, scan raw NAS paths, or expose raw markdown/write payloads.
