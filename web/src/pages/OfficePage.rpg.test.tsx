@@ -114,6 +114,9 @@ describe("Office controlled-mutation runtime status panel placement", () => {
     expect(source).toContain('data-office-rpg-tab="controlled-mutation"');
     expect(source).toContain('data-office-rpg-tab="evidence"');
     expect(source).toContain('data-office-rpg-tab-panel-default-open="false"');
+    expect(source).toContain('data-office-merged-project-aliases="true"');
+    expect(source).toContain('data-office-merged-project-alias={alias.layerId}');
+    expect(source).toContain("RPG visualizer 통합");
     expect(source).toContain("RPG visualizer 중심으로 통합");
 
     for (const panel of [

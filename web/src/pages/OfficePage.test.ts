@@ -3845,6 +3845,13 @@ describe("Desk RPG Projection ViewModel Helper 1", () => {
     expect(view.layers.find((layer) => layer.id === "rpgRoom")?.summary).toContain("RPG 운영실");
     expect(view.safetyPosture.approvalModel).toMatchObject({ status: "display-only", enabledControls: 0 });
     expect(view.renderOrder).toEqual(["operating-room-header", "rpg-room-map", "operating-board", "evidence-layer", "projection-cache", "safety-inspector"]);
+    expect(view.mergedProjectAliases).toEqual([
+      { label: "AI Office / VPS dashboard", layerId: "rpgRoom" },
+      { label: "VPS ai-office Kanban", layerId: "operatingBoard" },
+      { label: "Paperclip / sourceTags", layerId: "evidenceLayer" },
+      { label: "Projection Pipeline / safe cache", layerId: "projectionCache" },
+      { label: "DeskRPG / RPG Visualizer", layerId: "rpgRoom" },
+    ]);
     expect(JSON.stringify(view)).not.toMatch(/raw prompt|raw title|secret body|raw result|raw event|raw warning|private\.py|\/Users\/lidises|token/i);
   });
 

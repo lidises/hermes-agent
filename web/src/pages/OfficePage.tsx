@@ -14996,6 +14996,16 @@ export default function OfficePage() {
             </div>
           ))}
         </div>
+        <div className="mt-4 border border-emerald-300/15 bg-black/20 p-3" data-office-merged-project-aliases="true">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">통합된 AI Office 프로젝트</div>
+          <div className="mt-2 flex flex-wrap gap-2 text-xs text-midground/70">
+            {unifiedWorkbenchView.mergedProjectAliases.map((alias) => (
+              <span key={`${alias.layerId}:${alias.label}`} className="border border-current/15 bg-black/20 px-2 py-1" data-office-merged-project-alias={alias.layerId}>
+                {alias.label} → RPG visualizer 통합
+              </span>
+            ))}
+          </div>
+        </div>
       </section>
 
       {showOverview ? (

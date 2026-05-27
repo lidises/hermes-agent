@@ -498,11 +498,17 @@ export type OfficeUnifiedWorkbenchLayer = {
   tone: OfficeDeltaBadge["tone"];
 };
 
+export type OfficeUnifiedWorkbenchMergedProjectAlias = {
+  label: string;
+  layerId: OfficeUnifiedWorkbenchLayerId;
+};
+
 export type OfficeUnifiedWorkbenchView = {
   title: "AI Office 통합 운영실";
   subtitle: string;
   generatedAt: string;
   layers: OfficeUnifiedWorkbenchLayer[];
+  mergedProjectAliases: OfficeUnifiedWorkbenchMergedProjectAlias[];
   safetyPosture: {
     readOnly: boolean;
     privateOnly: boolean;
@@ -10247,6 +10253,13 @@ export function buildOfficeUnifiedWorkbenchView(state: OfficeState): OfficeUnifi
         count: rpgScene.rooms.length + rpgScene.entities.length,
         tone: mutationReadiness.status === "blocked-read-only" ? "neutral" : "warning",
       },
+    ],
+    mergedProjectAliases: [
+      { label: "AI Office / VPS dashboard", layerId: "rpgRoom" },
+      { label: "VPS ai-office Kanban", layerId: "operatingBoard" },
+      { label: "Paperclip / sourceTags", layerId: "evidenceLayer" },
+      { label: "Projection Pipeline / safe cache", layerId: "projectionCache" },
+      { label: "DeskRPG / RPG Visualizer", layerId: "rpgRoom" },
     ],
     safetyPosture: {
       readOnly: state.capabilities.read_only !== false,
