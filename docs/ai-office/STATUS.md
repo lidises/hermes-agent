@@ -1001,3 +1001,22 @@ Current boundary:
 - Readiness remains 100% for the approved pre-production controlled-mutation ladder.
 - Real NAS production write is still blocked pending exact separate approval.
 - Next shortest safe rung: add a metadata-only Step 11 hydration receipt record so replay/idempotency can prove the hydrated aggregate deployment without any production write.
+## Current status — Step 11 hydration receipt recorded (2026-05-27T13:20Z)
+
+Latest completed rung:
+- Added metadata-only Step 11 hydration receipt append/readback helpers and protected routes.
+- Folded the receipt store into the Step 11 protected aggregate as `step11_hydration_receipt` count and next-boundary posture.
+- Wrote one protected VPS metadata-only receipt record for the deployed hydrated status aggregate. This was not a NAS production write.
+
+Verification:
+- Python focused: 57/57 passed.
+- Web focused: 245/245 passed; OfficePage focused: 193/193 passed.
+- Build: web production build passed.
+- Protected smoke: unauth=401, receipt stored=true, receipt readback count=1, aggregate step11_hydration_receipt count=1, readiness=100, next_required_boundary=real_nas_production_write_requires_exact_approval.
+- DOM smoke: Step 11 panel present, controls=0, forbidden raw path/secret patterns absent.
+- Mac relay tmp-root-only write smoke: readback verified, checksum 72529fe857b01e2d961caea51b561fefb0dc3a8aacfac6e3b28c950cac4fb2a5, safe display path only.
+
+Current boundary:
+- Readiness is 100% for the approved pre-production controlled-mutation ladder.
+- Real NAS production write remains blocked pending exact separate approval.
+- All stronger gates remain closed: direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, gateway restart, raw markdown/path/secret/write-payload projection.

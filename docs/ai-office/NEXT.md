@@ -787,3 +787,27 @@ Do not do:
 - Do not expose public endpoints.
 - Do not restart gateway.
 - Do not echo raw markdown, raw root paths, secret values, or raw write-payload values.
+## NEXT — after Step 11 hydration receipt record (2026-05-27T13:20Z)
+
+Current position:
+- Step 11 read-only rendering is hydrated by protected aggregate API.
+- A metadata-only Step 11 hydration receipt has been recorded and folded into the aggregate.
+- Readiness is 100% for the approved pre-production ladder.
+- The next boundary is explicitly real_nas_production_write_requires_exact_approval.
+
+Do next only if exact approval is provided:
+1. Real NAS production write through NAS Keeper → Mac relay only; never direct VPS NAS authority.
+2. Keep it one-shot/non-repeating, with idempotency metadata and safe refs/checksums only.
+3. Return safe audit/readback metadata only; no raw root path, raw markdown, secrets, or raw write-payload values.
+
+If exact real-write approval is not provided:
+- Continue only with metadata-only replay/idempotency hardening, UI status/readiness projection, tests, docs, and tmp-root-only smoke.
+- Do not add watcher/cron/dispatcher/authority-adapter or any recurring execution path.
+
+Still forbidden without separate exact approval:
+- Real NAS production write.
+- VPS direct NAS authority.
+- Watcher/cron/dispatcher/authority-adapter activation.
+- Public exposure change.
+- Gateway restart.
+- Raw markdown/path/secret/write-payload echo.
