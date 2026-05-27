@@ -1,3 +1,39 @@
+## Current status — NAS Keeper step 10 completion receipt recorded; ready for read-only rendering (2026-05-27T12:00Z)
+
+Scope completed:
+- Finished step 10 before the read-only rendering stage by adding a metadata-only tmp-root step10 completion receipt.
+- The new receipt consumes the existing cleanup closure ref, verifies the exact cleanup closure checksum, records the final tmp-root Mac relay write smoke proof, and marks `next_required_boundary=read_only_status_rendering`.
+- Per the explicit write approval for finishing step 10, ran one final Mac relay tmp-root-only write smoke against an isolated local temporary root/queue. This was not a real NAS production write.
+- Deployed/synced code to both VPS worktrees, rsynced `web_dist`, restarted dashboard/core services only, and kept gateway active/untouched.
+
+Evidence captured:
+- New route: `POST/GET /api/office/controlled-mutation/nas-runtime/nas-keeper-tmp-root-step10-completion-receipt`.
+- New helpers: `append_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt` and `list_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt_records`.
+- RED verified: three step10 completion tests failed before implementation with missing import/route.
+- GREEN verified: focused artifact-retention/cleanup ladder tests passed 31/31; expanded focused backend set passed 68/68; `py_compile` and `git diff --check` passed.
+- Final tmp-root smoke wrote logical path `TmpVault / cleanup-step10-final-smoke-20260527124500-step10finish.md`, readback_verified=true, execution_state_recorded=true, readback SHA-256 `b48a33ff3b1eea4810d47677866fca85a29bbf5f335c9df498af63e61a832dee`, raw temporary root/queue/path/body/write_payload leak=false.
+- Protected API smoke wrote one metadata-only step10 completion receipt record: `tmpcompletion-20260527-step10-before-rendering-1`.
+- Protected API results: unauthenticated POST returned 401; authenticated POST stored the completion receipt; duplicate POST returned idempotent replay; readback count for the step10 completion ref is 1.
+- Step10 completion flags: closure_checksum_matched=true, step10_complete=true, ready_for_read_only_rendering=true, write_readiness_percent=100, next_required_boundary=`read_only_status_rendering`, completion receipt checksum length=64.
+- Browser console errors=0; API/DOM leak checks found no raw filesystem root/path, raw markdown body, secret token, raw temporary root/queue path, or raw write payload echo.
+
+Safety boundaries preserved:
+- Real NAS production write: false.
+- Real NAS production write executed: false.
+- Actual NAS delete/move/archive cleanup: false.
+- Cleanup execution opened: false.
+- Execution authority created: false.
+- Direct VPS NAS authority: false.
+- watcher/cron/dispatcher/authority-adapter: false.
+- public exposure change: false.
+- gateway restart: false.
+- raw filesystem root/path, raw markdown body, secret, or raw write payload echo: false.
+
+Readiness/result note:
+- Step 10 is complete.
+- The system is now exactly at the start boundary for step 11: read-only status rendering.
+- Step 11 should render only safe refs/counts/checksums/capability flags/next boundary. It must not add production NAS write controls, cleanup execution controls, direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, gateway restart, or raw markdown/path/secret/write_payload display.
+
 ## Current status — NAS Keeper cleanup closure receipt + tmp-root write smoke completed (2026-05-27T11:34Z)
 
 Scope completed:

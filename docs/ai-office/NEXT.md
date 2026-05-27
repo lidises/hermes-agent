@@ -1,3 +1,31 @@
+## NEXT — step 11 read-only rendering boundary (2026-05-27T12:00Z)
+
+Current next stage:
+- Step 10 is complete and recorded by metadata-only receipt `tmpcompletion-20260527-step10-before-rendering-1`.
+- The receipt consumed cleanup closure ref `cleanupclosure-20260527-artifact-retention-1`, verified the exact closure checksum, recorded final tmp-root write-smoke proof, and returned `next_required_boundary=read_only_status_rendering`.
+- The final tmp-root write smoke used an isolated local temporary root/queue only, wrote logical path `TmpVault / cleanup-step10-final-smoke-20260527124500-step10finish.md`, and verified readback SHA-256 `b48a33ff3b1eea4810d47677866fca85a29bbf5f335c9df498af63e61a832dee`.
+- Write-readiness is 100%; ready_for_read_only_rendering=true.
+- Real NAS production write/delete/move/archive remains false; cleanup execution remains closed; no execution authority exists.
+
+Step 11 allowed scope:
+- Add read-only `/office` status rendering only.
+- Render safe metadata only: stage names, record counts, refs, checksums, idempotency/replay flags, capability flags, `next_required_boundary`, `cleanup_execution_opened=false`, `execution_authority_created=false`, and readiness percent.
+- Add browser DOM smoke for stable hooks, safe text, raw leak=false, console errors=0.
+
+Step 11 forbidden scope unless separately approved:
+- production NAS write button or cleanup delete/move/archive button
+- direct VPS NAS authority/configuration UI
+- watcher/cron/dispatcher/authority-adapter activation UI
+- public exposure change
+- gateway restart
+- raw markdown body, raw root/path, secret, token, or raw write_payload rendering
+
+Required first checks next time:
+1. Read `docs/ai-office/STATUS.md` and this file.
+2. Confirm local/VPS git clean, dashboard/core/gateway status, `/office` health, and record counts for the full ladder including `nas_keeper_tmp_root_step10_completion_receipt_records.jsonl`.
+3. Treat the tmp-root step10 completion ref as terminal/non-replayable except explicit idempotent replay response.
+4. Start step 11 with TDD for a read-only renderer; do not add executable controls.
+
 ## NEXT — after NAS Keeper cleanup closure receipt + tmp-root write smoke (2026-05-27T11:34Z)
 
 Current next stage:
