@@ -522,3 +522,140 @@ def test_cleanup_execution_manifest_preflight_api_requires_session_and_stays_met
     readback = client.get(route, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN})
     assert readback.status_code == 200
     assert readback.json()["dto"]["record_count"] == 1
+
+
+def cleanup_final_approval_payload(manifest_checksum: str, **overrides):
+    payload = {
+        "cleanup_final_approval_ref": "cleanupfinal-20260527-artifact-retention-1",
+        "cleanup_manifest_ref": "cleanupmanifest-20260527-artifact-retention-1",
+        "cleanup_manifest_sha256": manifest_checksum,
+        "approved_by": "agent_nas_keeper",
+        "approved_at": "2026-05-27T09:20:00Z",
+        "approval_token_ref": "approvaltoken-cleanupmanifest-20260527-artifact-retention-1",
+        "operator_confirmation": "metadata-only-final-cleanup-approval-no-delete-no-move-no-write",
+        "evidence_refs": ["sha:fdd01554e34264a023efbf4c3ad1b76bf4dd73cb97db1a8190e43640a1f1111e"],
+    }
+    payload.update(overrides)
+    return payload
+
+
+def seed_cleanup_manifest(tmp_path):
+    from hermes_cli.office_controlled_mutation import append_office_controlled_mutation_nas_keeper_cleanup_execution_manifest_preflight
+
+    hold_path = seed_cleanup_hold(tmp_path)
+    manifest_path = tmp_path / "cleanup-manifests.jsonl"
+    manifest = append_office_controlled_mutation_nas_keeper_cleanup_execution_manifest_preflight(
+        cleanup_manifest_payload(), hold_store_path=hold_path, manifest_store_path=manifest_path
+    )
+    return manifest_path, manifest
+
+
+def test_cleanup_final_approval_records_token_and_exact_manifest_checksum_idempotently(tmp_path):
+    from hermes_cli.office_controlled_mutation import append_office_controlled_mutation_nas_keeper_cleanup_final_approval
+
+    manifest_path, manifest = seed_cleanup_manifest(tmp_path)
+    final_path = tmp_path / "cleanup-final-approvals.jsonl"
+    manifest_checksum = manifest["dto"]["cleanup_manifest_sha256"]
+
+    first = append_office_controlled_mutation_nas_keeper_cleanup_final_approval(
+        cleanup_final_approval_payload(manifest_checksum),
+        manifest_store_path=manifest_path,
+        final_store_path=final_path,
+    )
+    second = append_office_controlled_mutation_nas_keeper_cleanup_final_approval(
+        cleanup_final_approval_payload(manifest_checksum),
+        manifest_store_path=manifest_path,
+        final_store_path=final_path,
+    )
+
+    assert first["stored"] is True
+    assert first["idempotent_replay"] is False
+    assert first["errors"] == []
+    dto = first["dto"]
+    assert dto["mode"] == "nas_keeper_cleanup_final_approval_recorded"
+    assert dto["metadata_only_record_write"] is True
+    assert dto["manifest_checksum_matched"] is True
+    assert dto["approval_token_recorded"] is True
+    assert dto["cleanup_execution_opened"] is False
+    assert dto["actual_nas_delete_enabled"] is False
+    assert dto["actual_nas_move_enabled"] is False
+    assert dto["actual_nas_archive_enabled"] is False
+    assert dto["actual_nas_write_enabled"] is False
+    assert dto["direct_vps_nas_write_enabled"] is False
+    assert dto["watcher_enabled"] is False
+    assert dto["cron_enabled"] is False
+    assert dto["dispatch_enabled"] is False
+    assert dto["authority_adapter_binding_enabled"] is False
+    assert second["stored"] is False
+    assert second["idempotent_replay"] is True
+    serialized = json.dumps(first, sort_keys=True).lower()
+    assert "/users/lidises" not in serialized
+    assert "/home/hermes" not in serialized
+    assert "fresh approved" not in serialized
+    assert '"write_payload":' not in serialized
+    assert "sk-" not in serialized
+    assert len(final_path.read_text(encoding="utf-8").splitlines()) == 1
+
+
+def test_cleanup_final_approval_requires_exact_manifest_checksum_and_rejects_raw_fields_without_echo(tmp_path):
+    from hermes_cli.office_controlled_mutation import append_office_controlled_mutation_nas_keeper_cleanup_final_approval
+
+    manifest_path, manifest = seed_cleanup_manifest(tmp_path)
+    final_path = tmp_path / "cleanup-final-approvals.jsonl"
+
+    mismatch = append_office_controlled_mutation_nas_keeper_cleanup_final_approval(
+        cleanup_final_approval_payload("0" * 64), manifest_store_path=manifest_path, final_store_path=final_path
+    )
+    assert mismatch["stored"] is False
+    assert mismatch["dto"] is None
+    assert mismatch["errors"] == [{"field": "cleanup_manifest_sha256", "code": "cleanup_manifest_checksum_mismatch"}]
+
+    raw = append_office_controlled_mutation_nas_keeper_cleanup_final_approval(
+        cleanup_final_approval_payload(manifest["dto"]["cleanup_manifest_sha256"], raw_root_path="/" + "Users/lidises/private"),
+        manifest_store_path=manifest_path,
+        final_store_path=final_path,
+    )
+    assert raw["stored"] is False
+    assert {item["code"] for item in raw["errors"]} >= {"unsupported_field"}
+    assert "/users/lidises" not in json.dumps(raw, sort_keys=True).lower()
+
+
+def test_cleanup_final_approval_api_requires_session_and_stays_metadata_only(tmp_path, monkeypatch):
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_nas_keeper_artifact_retention_plan,
+        append_office_controlled_mutation_nas_keeper_cleanup_execution_gate,
+        append_office_controlled_mutation_nas_keeper_cleanup_execution_hold,
+        append_office_controlled_mutation_nas_keeper_cleanup_execution_manifest_preflight,
+    )
+    from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+
+    plan = append_office_controlled_mutation_nas_keeper_artifact_retention_plan(safe_plan_payload())
+    append_office_controlled_mutation_nas_keeper_cleanup_execution_gate(cleanup_gate_payload(plan["dto"]["retention_plan_sha256"]))
+    append_office_controlled_mutation_nas_keeper_cleanup_execution_hold(cleanup_hold_payload())
+    manifest = append_office_controlled_mutation_nas_keeper_cleanup_execution_manifest_preflight(cleanup_manifest_payload())
+    client = TestClient(app)
+    route = "/api/office/controlled-mutation/nas-runtime/nas-keeper-cleanup-final-approval"
+    payload = cleanup_final_approval_payload(manifest["dto"]["cleanup_manifest_sha256"])
+
+    unauthenticated = client.post(route, json=payload)
+    assert unauthenticated.status_code == 401
+
+    recorded = client.post(route, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN}, json=payload)
+    assert recorded.status_code == 200
+    body = recorded.json()
+    assert body["stored"] is True
+    assert body["dto"]["metadata_only_record_write"] is True
+    assert body["dto"]["approval_token_recorded"] is True
+    assert body["dto"]["cleanup_execution_opened"] is False
+    assert body["dto"]["actual_nas_delete_enabled"] is False
+    assert body["dto"]["actual_nas_move_enabled"] is False
+    assert body["dto"]["actual_nas_write_enabled"] is False
+
+    duplicate = client.post(route, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN}, json=payload)
+    assert duplicate.status_code == 200
+    assert duplicate.json()["idempotent_replay"] is True
+
+    readback = client.get(route, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN})
+    assert readback.status_code == 200
+    assert readback.json()["dto"]["record_count"] == 1
