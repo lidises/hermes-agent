@@ -1,3 +1,30 @@
+## NEXT — after NAS Keeper cleanup dry-run hold + tmp-root write smoke (2026-05-27T08:53Z)
+
+Current next stage:
+- Cleanup gate `cleanupgate-20260527-artifact-retention-1` now has a metadata-only dry-run hold record: `cleanuphold-20260527-artifact-retention-1`.
+- Cleanup execution is still closed; no production NAS delete/move/archive/write was performed or enabled.
+- A non-repetitive tmp-root-only Mac relay write smoke succeeded after write-readiness reached 100%, using an isolated temporary local root/queue and no production NAS path.
+- Write-readiness is 100%.
+
+Recommended next rung:
+- Add a cleanup execution manifest/preflight contract that consumes the cleanup hold ref, computes exact candidate-action checksums, proves terminal/idempotency metadata, and still leaves actual delete/move/archive/write disabled.
+- Keep it metadata-only unless the user explicitly approves actual cleanup execution.
+
+Still forbidden unless separately and explicitly approved:
+- real NAS production write beyond a fresh exact approved target/content boundary
+- actual NAS delete/move/archive cleanup
+- direct VPS NAS authority, NAS mount credentials, or direct VPS NAS file write
+- watcher/cron/dispatcher/authority-adapter activation
+- public exposure
+- gateway restart
+- raw markdown/body/path/secret/raw write payload echo
+
+Required first checks next time:
+1. Read `docs/ai-office/STATUS.md` and this file.
+2. Confirm local/VPS git, service health, durable queue count/status, artifact retention plan count, cleanup gate count, and cleanup hold count.
+3. Treat all durable, fresh, retention-plan, cleanup-gate, and cleanup-hold refs as terminal/non-replayable except explicit metadata-only idempotent replay responses.
+4. Require fresh exact approval before any additional real NAS production write, actual cleanup execution, watcher/cron/dispatcher/authority-adapter, public exposure, gateway restart, or VPS NAS authority change.
+
 ## NEXT — after NAS Keeper cleanup execution gate metadata rung (2026-05-27T08:37Z)
 
 Current next stage:
