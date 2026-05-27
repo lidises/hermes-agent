@@ -2422,6 +2422,8 @@ export type OfficeNasKeeperDurableQueueGuardedOperatorReadiness = {
   macRelayPrecommitManifestEndpoint: "/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-precommit-manifest";
   macRelayFinalPreflightReady: true;
   macRelayFinalPreflightEndpoint: "/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-final-preflight";
+  macRelayRealWriteGateReady: true;
+  macRelayRealWriteGateEndpoint: "/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-real-write-gate";
   payloadPreviewRequiredBeforeExecution: true;
   executionEndpoint: OfficeNasKeeperExecutionOperatorAction["executionEndpoint"];
   executionStateEndpoint: OfficeNasKeeperExecutionOperatorAction["executionStateEndpoint"];
@@ -5923,6 +5925,8 @@ export function buildOfficeNasKeeperDurableQueueGuardedOperatorReadiness(action:
     macRelayPrecommitManifestEndpoint: "/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-precommit-manifest",
     macRelayFinalPreflightReady: true,
     macRelayFinalPreflightEndpoint: "/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-final-preflight",
+    macRelayRealWriteGateReady: true,
+    macRelayRealWriteGateEndpoint: "/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-real-write-gate",
     payloadPreviewRequiredBeforeExecution: true,
     executionEndpoint: action.executionEndpoint,
     executionStateEndpoint: action.executionStateEndpoint,

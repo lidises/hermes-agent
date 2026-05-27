@@ -107,6 +107,8 @@ from hermes_cli.office_controlled_mutation import (
     get_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_precommit_manifest_readback,
     append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_final_preflight,
     get_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_final_preflight_readback,
+    append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_real_write_gate,
+    get_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_real_write_gate_readback,
     get_office_controlled_mutation_nas_keeper_last_successful_mac_relay_write,
     build_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_request,
     get_office_controlled_mutation_nas_keeper_fresh_request_builder_ledger_readback,
@@ -886,6 +888,18 @@ async def get_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_
 async def append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_final_preflight_route(payload: Any = Body(None)):
     """Record a metadata-only final preflight sourced from selected precommit manifest."""
     return append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_final_preflight(payload)
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-real-write-gate")
+async def get_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_real_write_gate_route():
+    """Read selected tmp-root Mac relay real-write gate without raw payload/path."""
+    return get_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_real_write_gate_readback()
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-real-write-gate")
+async def append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_real_write_gate_route(payload: Any = Body(None)):
+    """Record a metadata-only real-write gate sourced from selected final preflight."""
+    return append_office_controlled_mutation_nas_keeper_selected_tmp_root_mac_relay_real_write_gate(payload)
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-one-shot-write-payload-arm-review")

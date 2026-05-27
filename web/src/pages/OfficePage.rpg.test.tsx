@@ -5910,6 +5910,8 @@ describe("NasKeeperExecutionOperatorActionPanel", () => {
     expect(readiness.macRelayPrecommitManifestEndpoint).toBe("/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-precommit-manifest");
     expect(readiness.macRelayFinalPreflightReady).toBe(true);
     expect(readiness.macRelayFinalPreflightEndpoint).toBe("/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-final-preflight");
+    expect(readiness.macRelayRealWriteGateReady).toBe(true);
+    expect(readiness.macRelayRealWriteGateEndpoint).toBe("/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-real-write-gate");
     expect(readiness.payloadPreviewRequiredBeforeExecution).toBe(true);
     expect(readiness.realNasProductionWriteEnabled).toBe(false);
     expect(readiness.vpsNasAuthorityEnabled).toBe(false);
@@ -5947,6 +5949,8 @@ describe("NasKeeperExecutionOperatorActionPanel", () => {
     expect(markup).toContain('data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-precommit-manifest-endpoint="/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-precommit-manifest"');
     expect(markup).toContain('data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-final-preflight-ready="true"');
     expect(markup).toContain('data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-final-preflight-endpoint="/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-final-preflight"');
+    expect(markup).toContain('data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-real-write-gate-ready="true"');
+    expect(markup).toContain('data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-real-write-gate-endpoint="/api/office/controlled-mutation/nas-runtime/nas-keeper-selected-tmp-root-mac-relay-real-write-gate"');
     expect(markup).toContain('data-office-nas-keeper-durable-queue-guarded-operator-real-nas-production-write-enabled="false"');
     expect(markup).toContain('data-office-nas-keeper-durable-queue-guarded-operator-vps-nas-authority-enabled="false"');
     expect(markup).toContain('data-office-nas-keeper-durable-queue-guarded-operator-watcher-cron-daemon-enabled="false"');

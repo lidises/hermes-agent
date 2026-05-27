@@ -4411,6 +4411,8 @@ export function NasKeeperDurableQueueGuardedOperatorReadinessPanel({ readiness }
       data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-precommit-manifest-endpoint={readiness.macRelayPrecommitManifestEndpoint}
       data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-final-preflight-ready={String(readiness.macRelayFinalPreflightReady)}
       data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-final-preflight-endpoint={readiness.macRelayFinalPreflightEndpoint}
+      data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-real-write-gate-ready={String(readiness.macRelayRealWriteGateReady)}
+      data-office-nas-keeper-durable-queue-guarded-operator-mac-relay-real-write-gate-endpoint={readiness.macRelayRealWriteGateEndpoint}
       data-office-nas-keeper-durable-queue-guarded-operator-payload-preview-required={String(readiness.payloadPreviewRequiredBeforeExecution)}
       data-office-nas-keeper-durable-queue-guarded-operator-real-nas-production-write-enabled={String(readiness.realNasProductionWriteEnabled)}
       data-office-nas-keeper-durable-queue-guarded-operator-vps-nas-authority-enabled={String(readiness.vpsNasAuthorityEnabled)}
@@ -4436,6 +4438,7 @@ export function NasKeeperDurableQueueGuardedOperatorReadinessPanel({ readiness }
             <span>Mac relay precommit metadata ready {String(readiness.macRelayPrecommitMetadataReady)}</span>
             <span>Mac relay precommit manifest ready {String(readiness.macRelayPrecommitManifestReady)}</span>
             <span>Mac relay final preflight ready {String(readiness.macRelayFinalPreflightReady)}</span>
+            <span>Mac relay real-write gate ready {String(readiness.macRelayRealWriteGateReady)}</span>
             <span>preview required {String(readiness.payloadPreviewRequiredBeforeExecution)}</span>
           </div>
         </div>
