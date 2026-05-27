@@ -811,3 +811,22 @@ Still forbidden without separate exact approval:
 - Public exposure change.
 - Gateway restart.
 - Raw markdown/path/secret/write-payload echo.
+## NEXT — after Step 11 hydration replay probe (2026-05-27T13:38Z)
+
+Current position:
+- Step 11 hydration receipt exists and the protected replay probe confirms a duplicate would be idempotent without adding another record.
+- Readiness is 100% for the approved pre-production ladder.
+- The next boundary remains real_nas_production_write_requires_exact_approval.
+
+Allowed without exact real-write approval:
+- Metadata-only replay/idempotency hardening.
+- Read-only UI/status projection.
+- Tests/docs/tmp-root-only smoke.
+
+Not allowed without exact separate approval:
+- Real NAS production write.
+- VPS direct NAS authority.
+- Watcher/cron/dispatcher/authority-adapter activation.
+- Public exposure change.
+- Gateway restart.
+- Raw markdown/path/secret/write-payload echo.

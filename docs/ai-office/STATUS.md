@@ -1020,3 +1020,21 @@ Current boundary:
 - Readiness is 100% for the approved pre-production controlled-mutation ladder.
 - Real NAS production write remains blocked pending exact separate approval.
 - All stronger gates remain closed: direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, gateway restart, raw markdown/path/secret/write-payload projection.
+## Current status — Step 11 hydration replay probe deployed (2026-05-27T13:38Z)
+
+Latest completed rung:
+- Added a protected Step 11 hydration replay probe route/helper.
+- The probe proves a duplicate hydration receipt would be an idempotent replay without writing another receipt or mutating queue/state.
+- This raises write-readiness confidence while keeping the next boundary unchanged: exact real NAS production write approval is still required.
+
+Verification:
+- Python focused: 59/59 passed.
+- Web focused: 245/245 passed; build passed.
+- Protected smoke: unauth=401, probe found=true, would_be_idempotent_replay=true, metadata_record_written=false, receipt count unchanged 1→1, readiness=100.
+- DOM smoke: Step 11 panel present, controls=0, forbidden raw path/secret patterns absent.
+- Mac relay tmp-root-only write smoke: readback verified, checksum 2c64d8676b1c42ff6951afeae2a78e75c687985515db75ecd5b2d483e644db65, safe display path only.
+
+Current boundary:
+- Readiness remains 100% for the approved pre-production controlled-mutation ladder.
+- Real NAS production write remains blocked pending exact separate approval.
+- No direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, gateway restart, raw markdown/path/secret/write-payload projection.
