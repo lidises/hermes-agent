@@ -1,3 +1,22 @@
+## NEXT — after Stage 13 block-internal sprite patrol VPS deploy (2026-05-28T07:56Z)
+
+Current next stage:
+- Stay in Stage 13 until the user explicitly advances stages.
+- `/office` now has deployed bounded room-local sprite patrol: characters expose room-block/local-tile/patrol metadata, horizontal/vertical patrol axes, tile-step groups, and the in-map Korean cue `방 안 이동` while the DeskRPG block grid remains the primary visual surface.
+- Live deploy proof exists for dashboard/core sync, ignored `web_dist` rsync/hash, dashboard/core restart only under the restricted `hermes` user, protected API/DOM/visual smoke, summary/status/detail default-visible hooks 0, controls 0, raw leak false, console errors 0, and gateway untouched.
+
+Preferred next safe rung:
+1. `Stage 13 — mobile/small-screen room-block patrol readability`
+   - RED: extend `OfficePage.rpg.test.tsx` to require narrow-screen/readability hooks for room-local patrol/name/status cues inside the primary SVG map, while preserving block-grid hooks, patrol hooks, and zero controls.
+   - GREEN: make the smallest SVG/CSS/frontend-only/read-only change so sprites and labels remain legible within bounded rooms on smaller screens without adding renderer dependencies or external dashboard summaries.
+   - VERIFY: focused RPG test, combined Office tests, build/lint, `git diff --check`, static raw-leak/control scan, then commit/push.
+   - DEPLOY: dashboard/core sync, ignored `web_dist` rsync/hash, dashboard/core restart only, protected DOM/API/visual smoke; gateway untouched.
+
+Still forbidden unless separately and explicitly approved:
+- Additional real NAS production write or replacement write.
+- Force-replay of failed_guarded/succeeded queue items.
+- Actual NAS cleanup delete/move/archive/write, direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway service action, sensitive raw-value/payload echo, executable browser mutation controls, Kanban mutation controls, real chat/command input, or a new renderer/dependency.
+
 ## NEXT — after Stage 13 DeskRPG block-grid architecture VPS deploy (2026-05-28T07:31Z)
 
 Current next stage:

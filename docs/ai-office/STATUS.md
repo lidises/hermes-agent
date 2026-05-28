@@ -1,3 +1,35 @@
+## Current status — Stage 13 block-internal sprite patrol deployed to VPS (2026-05-28T07:56Z)
+
+Scope completed:
+- Deployed `dd09b6b0c feat(office): keep sprites patrolling inside rooms` to both VPS AI Office worktrees: dashboard and core/source.
+- Added SVG/CSS-only room-local sprite patrol metadata and stepped room-local animation so characters read as moving inside bounded DeskRPG/JRPG blocks instead of drifting globally.
+- Rsynced Mac-built ignored `hermes_cli/web_dist/` to both VPS worktrees and verified path-independent relative content hash match.
+- Restarted only `hermes-agent-dashboard.service` and `hermes-vps-core-dashboard.service` under the restricted `hermes` user systemd; `hermes-gateway.service` stayed active with unchanged MainPID/restart count.
+- Protected `/office` API/DOM/visual smoke confirmed the primary map renders live with bounded room-local patrol hooks.
+
+Evidence captured:
+- Local/VPS HEAD: dashboard=`dd09b6b0c`, core/source=`dd09b6b0c`; both VPS worktrees clean.
+- `web_dist` relative content hash: `bda91929f2c1e644621ac44b471f68eb5a50d07ab343bb41e2a4998a9b2ecc3d` on Mac, VPS dashboard, and VPS core/source; file_count=22.
+- Services after restart: dashboard=active, core=active, gateway=active; gateway MainPID stayed `1059692` and NRestarts stayed `1`.
+- Protected API smoke: `/api/status` 200 and `/api/office/state` 200 using the live in-page session token without printing the token.
+- Protected browser DOM smoke through a Host-header-preserving SSH tunnel/proxy: `data-office-rpg-primary-view="true"`=1, `data-office-rpg-visual-map="true"`=1, `data-office-deskrpg-block-grid="jrpg-room-blocks"`=1, `data-office-deskrpg-block-map="tile-block-architecture"`=1, room blocks=6, tile cells=87, corridor blocks=3, room-local patrol sprites=8, patrol axes=`horizontal, vertical`, tile-step groups=8, Korean cue `방 안 이동` present, summary/status/detail default-visible hooks=0, executable mutation controls inside the visual map=0, raw leak=false, console errors=0.
+- Browser visual smoke: the central primary rendered RPG map visually dominates the page; characters appear inside bounded CM/AGT/BRD/REV room blocks with room-local movement/readability cues rather than as free-floating dashboard markers; external summary/status/detail panels do not visually dominate above it.
+
+Verification before deploy:
+- RED: `npm test -- OfficePage.rpg.test.tsx --run` failed on missing room-local patrol hooks before implementation.
+- GREEN/focused: `npm test -- OfficePage.rpg.test.tsx --run` = 199 passed.
+- Combined Office tests: `npm test -- OfficePage.rpg.test.tsx OfficePage.test.ts --run` = 357 passed.
+- Build: `npm run build` passed; Vite large-chunk warning remains the existing known warning.
+- Lint: `npm run lint` exited 0 with existing warnings only.
+- Diff gates: `git diff --check` passed; added-line raw/control scan found no private paths, token-shaped secrets, sensitive payload echo, new executable HTML controls, mutation handlers, or gateway action.
+
+Safety boundaries preserved:
+- Frontend-only/read-only SVG/CSS/React slice plus dashboard/core deploy only.
+- No gateway restart, no backend/API/storage/runtime change, no state mutation, no Kanban mutation, no browser mutation controls, no NAS write, no dispatcher/authority activation, no public exposure, no sensitive raw-value/payload echo, and no new renderer/dependency.
+
+Next exact safe rung:
+- Stay in Stage 13 and improve `mobile/small-screen room-block patrol readability`: keep the same `/office` SVG/CSS/read-only surface, make room-local patrol/name/status cues less crowded on narrow screens, and prove map-first posture, summary/status/detail visible 0, controls 0, raw leak false, and gateway untouched.
+
 ## Current status — Stage 13 DeskRPG block-grid architecture baseline deployed to VPS (2026-05-28T07:31Z)
 
 Scope completed:
