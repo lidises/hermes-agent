@@ -1,3 +1,26 @@
+## Current status — Stage 13 sprite silhouette/walking clarity deployed to VPS (2026-05-28T06:07Z)
+
+Scope completed:
+- Deployed `8446018da feat(office): clarify rpg sprite silhouettes` plus cascade fix `7e727dee2 fix(office): preserve clarified footstep timing` to both VPS AI Office worktrees: dashboard and core/source.
+- Rsynced Mac-built ignored `hermes_cli/web_dist/` to both VPS worktrees and verified path-independent content hash matches.
+- Restarted only `hermes-agent-dashboard.service` and `hermes-vps-core-dashboard.service`; `hermes-gateway.service` stayed active and untouched.
+- Protected `/office` DOM, CSS computed style, timed footstep sample, and visual smoke confirmed the RPG Visualizer remains primary, sprites are clarified, and walking footstep animation remains active without refresh.
+
+Evidence captured:
+- VPS dashboard HEAD: `7e727dee2`; VPS core/source HEAD: `7e727dee2`.
+- `web_dist` relative content hash: `9f935a53d7dc69f4e26f1274f3dd2acf18629ad3b99dd23eea1f4903b104445e` on Mac, VPS dashboard, and VPS core/source; file_count=22.
+- Services after restart: dashboard=active, core=active, gateway=active.
+- Browser DOM smoke on `/office?silhouette=7e727dee2`: visualMap=1, primaryView=1, liveLayer=1, liveSprites=8, routeLayer=1, routePulse=2, routeSynced=8, silhouettes=8, readable heads=8, readable bodies=8, walking footsteps=8, Korean cue `걸음 실루엣 강화` present, headFilter drop-shadow present, footstep animationDuration=0.58s, footstep animationIterationCount=infinite, API resource=200, summary/status/detail default-visible hooks=0, controlsInsideVisual=0, rawLeak=false, console errors=0.
+- Timed browser footstep sample over 900ms changed transform matrix, proving no-refresh walking footstep animation remained active after the silhouette clarity cascade fix.
+- Browser visual smoke: the primary rendered RPG map remains dominant, character heads/bodies/feet are visibly clearer, route/path cues remain visible, and read-only posture remains intact.
+
+Safety boundaries preserved:
+- Dashboard/core deploy only; gateway restart was not performed.
+- No state mutation, no Kanban mutation, no browser mutation controls, no backend/API route change, no NAS write, no dispatcher/authority activation, no public exposure, no raw content/root/secret/token/write-payload echo, and no new renderer/dependency.
+
+Next exact safe rung:
+- Stay in Stage 13. Add the next real DeskRPG rendering polish, preferably room-to-room patrol readability or stronger in-map sprite/facility spatial clarity, via frontend-only/read-only TDD and no new renderer/dependency.
+
 ## Current status — Stage 13 sprite silhouette/walking clarity added locally (2026-05-28T05:59Z)
 
 Scope completed:
