@@ -1,3 +1,27 @@
+## Current status — Stage 13 actor/facility grouping cue deployed to VPS (2026-05-28T04:02Z)
+
+Scope completed:
+- Deployed `287021294 feat(office): add rpg actor facility grouping cues` to both VPS AI Office worktrees: dashboard and core/source.
+- Rsynced Mac-built ignored `hermes_cli/web_dist/` to the VPS dashboard and core/source worktrees and verified path-independent content hash matches.
+- Restarted only `hermes-agent-dashboard.service` and `hermes-vps-core-dashboard.service`; `hermes-gateway.service` stayed active and untouched.
+- Protected `/office` live DOM and visual smoke confirmed the RPG Visualizer remains the primary rendered map and the new actor/facility grouping hooks are hydrated inside the SVG map.
+
+Evidence captured:
+- VPS dashboard HEAD: `287021294`; VPS core/source HEAD: `287021294`.
+- `web_dist` relative content hash: `ef0c5753a5d917b8d5800e087fcfae6c398fc2c92b68678ef5b81925444dd405` on Mac, VPS dashboard, and VPS core/source; file_count=22.
+- Services after restart: dashboard=active, core=active, gateway=active.
+- Live dashboard `/office` API resource: 200 through protected Host-header proxy.
+- Browser DOM smoke on `/office?grouping=287021294`: visualMap=1, primaryView=1, actorGrouping=6, facilityZone=6, decisionZone=1, evidenceZone=1, groupingCue=6, groupingLabel=6, groupingText=true, controlsInsideVisual=0, summary/status/detail default-visible hooks=0, rawLeak=false, console errors=0.
+- Browser visual smoke: the main surface remains the AI Office RPG Visualizer map with Korean room/facility cues inside the rendered map rather than legacy summary/status/detail panels.
+
+Safety boundaries preserved:
+- Dashboard/core deploy only; gateway restart was not performed.
+- No additional real NAS write or replacement write.
+- No VPS direct NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, Kanban mutation, executable browser mutation controls, raw content/root/secret/token/write-payload echo, or new renderer/dependency.
+
+Next exact safe rung:
+- Continue Stage 13 frontend-only RPG visual depth with strict TDD, preferably one small map-internal actor/facility refinement; alternatively prepare Stage 14 only as metadata-only/safe-ref readiness with no execution authority and no production write.
+
 ## Current status — Stage 13 actor/facility grouping cue added locally (2026-05-28T03:58Z)
 
 Scope completed:

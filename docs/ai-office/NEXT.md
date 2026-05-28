@@ -1,3 +1,24 @@
+## NEXT — after Stage 13 actor/facility grouping cue VPS deploy (2026-05-28T04:02Z)
+
+Current next stage:
+- Stage 13 RPG Visualizer-first quality remains active and the actor/facility grouping cue slice is now live on the VPS dashboard.
+- `/office` live smoke proves the RPG Visualizer remains primary, all six room groups expose actor/facility grouping hooks, and legacy summary/status/detail default-visible hooks remain absent.
+- The one-shot Mac relay real NAS write approval remains consumed; additional/replacement real NAS writes require a fresh explicit approval and packet.
+
+Allowed work boundary if continuing:
+- Local repo edits, TDD tests, build, docs update, commit, and push.
+- If another frontend-only read-only visual slice is deployed: VPS dashboard/core sync, ignored `web_dist` rsync, dashboard/core restart, and protected DOM/API smoke.
+- Frontend-only/read-only Stage 13 map-internal polish, or Stage 14 metadata-only/safe-ref readiness with no execution authority and no production write.
+
+Still forbidden unless separately and explicitly approved:
+- Additional real NAS production write or replacement write.
+- Force-replay of failed_guarded/succeeded queue items.
+- Actual NAS cleanup delete/move/archive/write, direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway service action, raw content/root/secret/token/write-payload echo, executable browser mutation controls, Kanban mutation controls, or a new renderer/dependency.
+
+Preferred next safe rung:
+1. Add one final small map-internal actor/facility refinement if it improves comprehension without controls or external panels.
+2. Or prepare a Stage 14 metadata-only readiness artifact that records dashboard health/retention/replay posture using safe refs only, with no real NAS production write, no dispatcher/authority activation, and no raw payload echo.
+
 ## NEXT — after Stage 13 actor/facility grouping cue local slice (2026-05-28T03:58Z)
 
 Current next stage:
