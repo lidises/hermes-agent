@@ -1839,7 +1839,6 @@ code { font-size: 0.875rem; }
   filter: drop-shadow(0 0 4px rgba(248, 250, 252, 0.32));
 }
 .office-rpg-character-sprite[data-office-rpg-sprite-silhouette="clarified"] [data-office-rpg-sprite-footstep-clarity="walking"] {
-  animation-duration: 0.58s;
   stroke-linecap: round;
 }
 .office-rpg-character-sprite[data-office-rpg-sprite-live="no-refresh"] [data-office-rpg-sprite-arm-swing],
@@ -1847,6 +1846,9 @@ code { font-size: 0.875rem; }
   animation: office-rpg-sprite-walk-cycle 0.72s ease-in-out infinite alternate;
   transform-box: fill-box;
   transform-origin: center;
+}
+.office-rpg-character-sprite[data-office-rpg-sprite-silhouette="clarified"] [data-office-rpg-sprite-footstep-clarity="walking"] {
+  animation-duration: 0.58s;
 }
 @keyframes office-rpg-sprite-idle-patrol {
   0%, 100% { transform: translate(0, 0); }
