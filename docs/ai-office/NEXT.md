@@ -1,3 +1,24 @@
+## NEXT — after Stage 13 mobile RPG map VPS deploy (2026-05-28T03:07Z)
+
+Current next stage:
+- Stage 13 RPG Visualizer-first quality is active and the mobile/small-screen RPG map cue slice is now live on the VPS dashboard.
+- `/office` live smoke proves the RPG Visualizer remains primary with mobile hooks hydrated and legacy summary/status/detail default-visible hooks absent.
+- The one-shot Mac relay real NAS write approval remains consumed; additional/replacement real NAS writes require a fresh explicit approval and packet.
+
+Allowed work boundary if continuing:
+- Local repo edits, TDD tests, build, docs update, commit, and push.
+- If another frontend-only read-only visual slice is deployed: VPS dashboard/core sync, ignored `web_dist` rsync, dashboard/core restart, and protected DOM/API smoke.
+- Frontend-only/read-only Stage 13 map-internal polish: compact Korean facility copy, mobile label readability, room/entity hierarchy cues, or character/facility copy.
+
+Still forbidden unless separately and explicitly approved:
+- Additional real NAS production write or replacement write.
+- Force-replay of failed_guarded/succeeded queue items.
+- Actual NAS cleanup delete/move/archive/write, direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway service action, raw content/root/secret/token/write-payload echo, executable browser mutation controls, Kanban mutation controls, or a new renderer/dependency.
+
+Preferred next safe rung:
+1. Add compact Korean facility copy inside the SVG map with strict RED/GREEN tests, improving in-map comprehension without external summary panels.
+2. Or refine mobile label readability with another frontend-only map-internal TDD slice.
+
 ## NEXT — after Stage 13 mobile RPG map layout cues (2026-05-28T03:00Z)
 
 Current next stage:

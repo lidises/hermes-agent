@@ -1,3 +1,26 @@
+## Current status — Stage 13 mobile RPG map layout cues deployed to VPS (2026-05-28T03:07Z)
+
+Scope completed:
+- Deployed `bf1074e0b feat(office): add mobile rpg map cues` to both VPS AI Office worktrees: dashboard and core/source.
+- Rsynced Mac-built ignored `hermes_cli/web_dist/` to the VPS dashboard worktree and verified a path-independent content hash match.
+- Restarted only `hermes-agent-dashboard.service` and `hermes-vps-core-dashboard.service`; `hermes-gateway.service` stayed active and untouched.
+- Protected `/office` live DOM smoke confirmed the RPG Visualizer remains primary and the new mobile/small-screen hooks are hydrated.
+
+Evidence captured:
+- VPS dashboard HEAD: `bf1074e0b`; VPS core/source HEAD: `bf1074e0b`.
+- `web_dist` relative content hash: `33d42579e4b41bb7d06ea5854690c7c47cd0fedf1574464bbb6cfd2c06f9edd9` on both Mac and VPS; file_count=22.
+- Services after restart: dashboard=active, core=active, gateway=active.
+- Live dashboard `/office` HTTP: 200 on the dashboard service.
+- Browser DOM smoke on `/office?mobile-rpg=bf1074e0b`: visualMap=1, primary=1, mapSvg=1, responsiveSvg=1, mobileLayout=1, mobileCue=1, rooms=6, sprites=8, bubbles=8, fallbackRows=8, controlsInsideVisual=0, summary/status/detail default-visible hooks=0, rawLeak=false, console errors=0.
+
+Safety boundaries preserved:
+- Dashboard/core deploy only; gateway restart was not performed.
+- No additional real NAS write or replacement write.
+- No VPS direct NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, Kanban mutation, executable browser mutation controls, raw content/root/secret/token/write-payload echo, or new renderer/dependency.
+
+Next exact safe rung:
+- Continue Stage 13 frontend-only RPG visual depth with strict TDD, preferably compact Korean facility copy inside the SVG map or mobile label readability polish; keep backend/NAS/Kanban/runtime/public/gateway boundaries closed unless explicitly approved.
+
 ## Current status — Stage 13 mobile RPG map layout cues added (2026-05-28T03:00Z)
 
 Scope completed:
