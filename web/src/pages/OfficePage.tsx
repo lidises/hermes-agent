@@ -2508,6 +2508,122 @@ export function RpgApprovalEventEnvelopeDetailPanel({ detail }: { detail: Office
   );
 }
 
+function OfficeDeskRpgCanvasShell({
+  scene,
+  entities,
+}: {
+  scene: OfficeRpgScene;
+  entities: ReturnType<typeof rpgVisualEntities>;
+}) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const context = canvas.getContext("2d");
+    if (!context) return;
+
+    const width = 800;
+    const height = 360;
+    context.clearRect(0, 0, width, height);
+    context.fillStyle = "#020617";
+    context.fillRect(0, 0, width, height);
+
+    context.fillStyle = "#3f220f";
+    context.fillRect(12, 12, 776, 336);
+    context.strokeStyle = "rgba(253,230,138,0.16)";
+    context.lineWidth = 1;
+    for (let x = 12; x <= 788; x += 18) {
+      context.beginPath();
+      context.moveTo(x, 12);
+      context.lineTo(x, 348);
+      context.stroke();
+    }
+    for (let y = 12; y <= 348; y += 18) {
+      context.beginPath();
+      context.moveTo(12, y);
+      context.lineTo(788, y);
+      context.stroke();
+    }
+
+    context.strokeStyle = "rgba(167,243,208,0.32)";
+    context.lineWidth = 10;
+    context.lineCap = "round";
+    [[214, 88, 252, 88], [480, 88, 520, 88], [392, 146, 392, 198], [580, 260, 624, 260]].forEach(([x1, y1, x2, y2]) => {
+      context.beginPath();
+      context.moveTo(x1, y1);
+      context.lineTo(x2, y2);
+      context.stroke();
+    });
+
+    (Object.entries(RPG_ROOM_LAYOUT) as Array<[OfficeRpgRoomId, (typeof RPG_ROOM_LAYOUT)[OfficeRpgRoomId]]>).forEach(([roomId, layout]) => {
+      const room = scene.rooms.find((candidate) => candidate.id === roomId);
+      context.fillStyle = "rgba(5,46,43,0.92)";
+      context.strokeStyle = room ? RPG_STATUS_STROKE[room.severity] : "#34d399";
+      context.lineWidth = 2;
+      context.beginPath();
+      context.roundRect(layout.x, layout.y, layout.w, layout.h, 12);
+      context.fill();
+      context.stroke();
+      context.fillStyle = "rgba(209,250,229,0.88)";
+      context.font = "700 12px system-ui, sans-serif";
+      context.fillText(RPG_ROOM_KOREAN_LABEL[roomId], layout.x + 14, layout.y + 24);
+      rpgRoomTileCells(roomId).slice(0, 12).forEach((cell) => {
+        context.strokeStyle = "rgba(253,230,138,0.14)";
+        context.strokeRect(cell.x, cell.y, cell.w - 2, cell.h - 2);
+      });
+    });
+
+    entities.forEach(({ entity, position }) => {
+      const fill = RPG_STATUS_FILL[entity.severity];
+      const stroke = RPG_STATUS_STROKE[entity.severity];
+      context.fillStyle = "rgba(0,0,0,0.34)";
+      context.beginPath();
+      context.ellipse(position.x, position.y + 17, 12, 4, 0, 0, Math.PI * 2);
+      context.fill();
+      context.fillStyle = fill;
+      context.strokeStyle = stroke;
+      context.lineWidth = 2;
+      context.beginPath();
+      context.roundRect(position.x - 9, position.y + 1, 18, 18, 5);
+      context.fill();
+      context.stroke();
+      context.beginPath();
+      context.arc(position.x, position.y - 7, 8, 0, Math.PI * 2);
+      context.fill();
+      context.stroke();
+    });
+  }, [entities, scene.rooms]);
+
+  return (
+    <div
+      className="office-deskrpg-canvas-shell"
+      data-office-deskrpg-renderer="canvas"
+      data-office-deskrpg-canvas-shell="native-2d"
+      data-office-deskrpg-canvas-layer="tile-room-actors"
+      data-office-deskrpg-canvas-fallback="svg-retained"
+      data-office-deskrpg-canvas-mode="read-only"
+      data-office-deskrpg-canvas-mutation-capability="false"
+      data-office-deskrpg-canvas-realtime-capability="false"
+      data-office-deskrpg-canvas-actor-count={entities.length}
+      aria-label="Canvas 기반 DeskRPG 지도 shell · 읽기 전용"
+    >
+      <canvas
+        ref={canvasRef}
+        className="office-deskrpg-canvas-shell__canvas"
+        width={800}
+        height={360}
+        role="img"
+        aria-label="읽기 전용 Canvas DeskRPG 타일 지도와 placeholder actors"
+        data-office-deskrpg-canvas="true"
+      />
+      <div className="office-deskrpg-canvas-shell__caption" data-office-deskrpg-canvas-caption="read-only-fallback-retained">
+        Canvas shell · read-only · SVG fallback retained
+      </div>
+    </div>
+  );
+}
+
 export function OfficeRpgMap({
   scene,
   selectedEntityId,
@@ -2591,6 +2707,7 @@ export function OfficeRpgMap({
           <p className="sr-only" id="office-rpg-keyboard-help" data-office-rpg-keyboard-help="true">
             캐릭터 스프라이트는 Enter/Space로 안전 검사 패널에 연결됩니다. 저장, 배포, 상태 전환은 실행하지 않습니다.
           </p>
+          <OfficeDeskRpgCanvasShell scene={scene} entities={visualEntities} />
           <svg
             className="office-rpg-visual-map__svg"
             viewBox="0 0 800 360"

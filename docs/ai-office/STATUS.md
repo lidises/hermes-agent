@@ -1,21 +1,26 @@
-## Current status — DeskRPG Canvas/realtime/write-capable pivot plan recorded (2026-05-28)
+## Current status — Stage 13 DeskRPG Canvas Phase A verified locally (2026-05-28T09:23Z)
 
 Scope completed:
-- The user clarified the desired target: closer to original DeskRPG with Canvas, sprite sheets, realtime feel, and some direct operator write capability rather than continuing only SVG/CSS read-only polish.
-- Recorded the architecture pivot plan at `docs/ai-office/plans/2026-05-28-deskrpg-canvas-realtime-write-pivot.md`.
-- The plan splits the pivot into approval-gated phases: native Canvas read-only shell, tile/sprite contract, private realtime presence, operator presence/movement, bounded browser write-intent UI, and later domain-specific approved execution.
+- Started the approved original-DeskRPG pivot with `Phase A — native Canvas renderer shell, read-only`.
+- Added a native Canvas 2D shell inside the primary `/office` RPG visual map: `data-office-deskrpg-renderer="canvas"`, tiled floor/grid, bounded rooms, safe Korean room labels, corridor strokes, and placeholder actor drawing from the existing sanitized scene projection.
+- Preserved the existing SVG map as fallback immediately after the Canvas shell: `data-office-deskrpg-canvas-fallback="svg-retained"` and `data-office-rpg-map-svg="true"` remain present.
 
 Safety posture:
-- This was docs/planning only. No frontend/runtime/backend service code changed.
-- No new dependency, no websocket endpoint, no browser mutation UI, no Kanban/NAS/runtime execution, no public exposure, no gateway service action, no raw secret/path/payload echo, and no DeskRPG code/assets were copied.
-- The next recommended implementation rung is `Phase A — native Canvas renderer shell, read-only`, with SVG fallback preserved.
+- Frontend-only/read-only React/Canvas/CSS slice.
+- No new dependency, no websocket/SSE/realtime endpoint, no browser write UI, no backend/API/storage/runtime authority change, no Kanban/NAS execution, no public exposure, no gateway service action, no raw secret/path/payload echo, and no DeskRPG code/assets copied.
+- Canvas explicitly declares mutation/realtime capabilities false.
 
 Verification:
-- Live repo state was inspected before planning: local branch `main` at `09733795a`, clean against `origin/main`.
-- Current handoff docs were read before writing the pivot plan.
+- RED: `npm test -- OfficePage.rpg.test.tsx --run` failed before implementation on missing Canvas renderer hooks.
+- GREEN/focused: `npm test -- OfficePage.rpg.test.tsx --run` = 199 passed.
+- Combined Office tests: `npm test -- OfficePage.rpg.test.tsx OfficePage.test.ts --run` = 357 passed.
+- Build: `npm run build` passed; existing Vite large-chunk warning unchanged.
+- Lint: `npm run lint` exited 0 with existing warnings only.
+- Diff/static gates: `git diff --check` passed; static diff scan found no token/secret/password/write-payload/raw-markdown leak, no websocket/EventSource addition, and no DeskRPG executable controls.
 
 Next exact safe rung:
-- Start Phase A with strict TDD: add RED tests for Canvas renderer shell + SVG fallback + zero controls/raw leak, then implement the smallest native Canvas 2D read-only tiled office shell. Do not add realtime, write UI, backend mutation, renderer dependency, or assets in the same rung.
+- Commit/push and deploy Phase A: dashboard/core sync, ignored Mac-built `web_dist` rsync with relative hash + mtime freshness, restart only dashboard/core services, protected API/DOM/visual smoke proving Canvas renderer shell exists, SVG fallback remains, summary/status/detail visible hooks 0, controls 0, raw leak false, and gateway untouched.
+
 
 ## Current status — Stage 13 mobile room-local patrol readability deployed to VPS (2026-05-28T08:58Z)
 

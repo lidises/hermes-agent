@@ -1,20 +1,20 @@
-## NEXT — after DeskRPG Canvas/realtime/write-capable pivot plan (2026-05-28)
+## NEXT — after Stage 13 DeskRPG Canvas Phase A local verification (2026-05-28T09:23Z)
 
 Current next stage:
-- The user clarified that the desired target is closer to the original DeskRPG, not only a safe SVG/CSS diorama.
-- A new architecture pivot plan exists at `docs/ai-office/plans/2026-05-28-deskrpg-canvas-realtime-write-pivot.md`.
-- The new direction intentionally reopens three previously closed decisions, but one at a time: Canvas renderer, private realtime presence, and bounded browser write-intent UI.
+- Stay in Stage 13, now in the original-DeskRPG pivot ladder.
+- Phase A has local RED/GREEN proof for a native Canvas 2D read-only shell inside the primary `/office` RPG visual map while retaining the SVG fallback.
+- The Canvas shell is still primitive placeholder rendering only: no sprite assets, no renderer dependency, no realtime transport, no write-intent UI, and no backend mutation.
 
 Preferred next safe rung:
-1. `Phase A — native Canvas renderer shell, read-only`
-   - RED: extend Office RPG tests to require a Canvas DeskRPG renderer shell behind a safe mode/feature gate, while preserving primary map posture, SVG fallback, summary/status/detail default-visible hooks 0, controls 0, and raw leak false.
-   - GREEN: add the smallest native Canvas 2D component that draws a tiled office shell and placeholder actors from existing safe scene data; no dependency, no websocket, no write UI, no backend mutation.
-   - VERIFY: focused RPG test, combined Office tests, build/lint, `git diff --check`, static raw-leak/control/new-dependency scan, browser smoke proving Canvas actually rendered.
-   - DEPLOY only after local proof: dashboard/core sync, ignored `web_dist` rsync/hash/mtime freshness, dashboard/core restart only, protected DOM/API/visual smoke; gateway untouched.
+1. `Deploy Phase A — native Canvas renderer shell, read-only`
+   - SYNC: push/fast-forward dashboard/core worktrees only and rsync ignored Mac-built `hermes_cli/web_dist/`.
+   - VERIFY ASSETS: compare path-independent relative content hashes and ensure `web_dist` mtime/sentinel freshness so the VPS does not try a local frontend build.
+   - RESTART: restart only `hermes-agent-dashboard.service` and `hermes-vps-core-dashboard.service`; keep gateway untouched.
+   - SMOKE: protected API/DOM/visual smoke must show Canvas renderer shell, SVG fallback retained, primary RPG map visible, summary/status/detail default-visible hooks 0, executable mutation controls 0, raw leak false, console errors 0.
+   - HANDOFF: record deploy evidence in `STATUS.md`/`STAGE-MAP.md` after smoke.
 
 Still forbidden unless separately and explicitly approved:
-- Production NAS write or replacement write; direct VPS NAS authority; watcher/cron/dispatcher/authority-adapter activation; public exposure; gateway service action; sensitive raw-value/payload echo; arbitrary browser execution controls; Kanban mutation execution; unreviewed DeskRPG code/asset copying.
-- Later phases need separate approvals: sprite/tile asset pipeline, renderer dependency such as Phaser/PixiJS, realtime SSE/WebSocket endpoint, operator movement broadcast, browser write-intent creation, and domain-specific execution.
+- Production NAS write or replacement write; direct VPS NAS authority; watcher/cron/dispatcher/authority-adapter activation; public exposure; gateway service action; sensitive raw-value/payload echo; arbitrary browser execution controls; Kanban mutation execution; websocket/SSE/realtime endpoint; renderer dependency such as Phaser/PixiJS; external sprite/tile assets; write-intent UI.
 
 ## NEXT — after Stage 13 mobile room-local patrol readability VPS deploy (2026-05-28T08:58Z)
 
