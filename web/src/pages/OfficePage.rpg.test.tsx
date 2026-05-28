@@ -469,6 +469,12 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("data-office-rpg-sprite-route-target=\"command-to-task-board\"");
     expect(markup).toContain("data-office-rpg-sprite-route-target=\"task-board-to-review\"");
     expect(markup).toContain("data-office-rpg-motion-shadow=\"route-aligned\"");
+    expect(markup).toContain("data-office-rpg-sprite-silhouette=\"clarified\"");
+    expect(markup).toContain("data-office-rpg-sprite-head-highlight=\"readable\"");
+    expect(markup).toContain("data-office-rpg-sprite-body-core=\"readable\"");
+    expect(markup).toContain("data-office-rpg-sprite-footstep-clarity=\"walking\"");
+    expect(markup).toContain("data-office-rpg-sprite-silhouette-label=\"true\"");
+    expect(markup).toContain("걸음 실루엣 강화");
     expect(markup).toContain("캐릭터 이동 경로");
     expect(markup).toContain("동선 맞춤 이동");
     expect(markup).toContain("캐릭터 이동 중");

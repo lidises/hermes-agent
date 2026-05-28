@@ -1,3 +1,27 @@
+## Current status — Stage 13 sprite silhouette/walking clarity added locally (2026-05-28T05:59Z)
+
+Scope completed:
+- Continued Stage 13 only: visual clarity polish inside the primary DeskRPG map.
+- Added per-sprite silhouette marker `data-office-rpg-sprite-silhouette="clarified"`.
+- Added readable head/body/footstep hooks: `data-office-rpg-sprite-head-highlight="readable"`, `data-office-rpg-sprite-body-core="readable"`, and `data-office-rpg-sprite-footstep-clarity="walking"`.
+- Added an in-map Korean cue `걸음 실루엣 강화`.
+- Added CSS-only silhouette clarity rules for paint order, head/body drop-shadow, and clearer walking footstep timing.
+- No new renderer/dependency; no backend/API/storage/runtime changes.
+
+Evidence captured:
+- RED: focused RPG test failed on missing silhouette/head/body/footstep hooks and Korean cue.
+- GREEN/focused: `npm test -- --run OfficePage.rpg.test.tsx -t "renders the read-only RPG room map"` passed after implementation.
+- Full Office frontend: `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx` = 357 passed.
+- Lint/build: `npx eslint src/pages/OfficePage.tsx src/pages/OfficePage.rpg.test.tsx src/index.css` = existing warnings only; `npm run build` passed.
+- Diff gates: `git diff --check` passed; diff scan found new_controls=0, raw_leak=0, forbidden_runtime=0; CSS checks found silhouette selector, head/body filter, footstep clarity timing, and existing route-shadow animation.
+
+Safety boundaries preserved:
+- Frontend-only/read-only visual clarity slice.
+- No state mutation, no Kanban mutation, no browser mutation controls, no backend/API route change, no NAS write, no dispatcher/authority activation, no public exposure, no gateway action, no raw content/root/secret/token/write-payload echo, and no new renderer/dependency.
+
+Next exact safe rung:
+- Commit/push and deploy/smoke this Stage 13 sprite silhouette/walking clarity polish to VPS dashboard/core with dashboard/core restart only and protected DOM/visual smoke; gateway remains untouched.
+
 ## Current status — Stage 13 route-aligned sprite phase deployed to VPS (2026-05-28T05:46Z)
 
 Scope completed:

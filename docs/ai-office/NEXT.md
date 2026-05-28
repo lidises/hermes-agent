@@ -1,3 +1,24 @@
+## NEXT — after Stage 13 sprite silhouette/walking clarity local slice (2026-05-28T05:59Z)
+
+Current next stage:
+- Stay in Stage 13 until the user explicitly advances stages.
+- `/office` now has a local DeskRPG sprite silhouette/walking clarity slice: primary RPG map, visible character sprites, no-refresh sprite motion, pulsing walking routes, route-synced sprite phase/shadow cues, and clearer head/body/footstep silhouette hooks.
+- VPS deploy/smoke is the next in-order step for this sprite silhouette/walking clarity polish.
+- The one-shot Mac relay real NAS write approval remains consumed; additional/replacement real NAS writes require a fresh explicit approval and packet.
+
+Allowed work boundary if continuing:
+- VPS dashboard/core sync, ignored `web_dist` rsync, dashboard/core restart, and protected DOM/API/visual smoke for this read-only visual clarity slice.
+- Local repo edits, TDD tests, build, docs update, commit, and push for further Stage 13 map/sprite rendering polish.
+
+Still forbidden unless separately and explicitly approved:
+- Additional real NAS production write or replacement write.
+- Force-replay of failed_guarded/succeeded queue items.
+- Actual NAS cleanup delete/move/archive/write, direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway service action, raw content/root/secret/token/write-payload echo, executable browser mutation controls, Kanban mutation controls, or a new renderer/dependency.
+
+Preferred next safe rung:
+1. Deploy/smoke the sprite silhouette/walking clarity polish to VPS dashboard/core: prove silhouette hooks, readable head/body/footstep hooks, Korean cue, CSS clarity rules, primary RPG map visibility, route pulse, live sprite layer, summary/status/detail hidden state, controls inside visual map 0, raw leak false, console errors 0.
+2. After deploy proof, continue Stage 13 only with room-to-room patrol readability or stronger in-map sprite/facility spatial clarity, all frontend-only/read-only.
+
 ## NEXT — after Stage 13 route-aligned sprite phase VPS deploy (2026-05-28T05:46Z)
 
 Current next stage:
