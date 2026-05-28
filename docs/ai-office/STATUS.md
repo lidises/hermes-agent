@@ -1,3 +1,25 @@
+## Current status — Stage 13 DeskRPG pixel-office density baseline deployed to VPS (2026-05-28T06:50Z)
+
+Scope completed:
+- Deployed `f61e0864b feat(office): add deskrpg pixel office density` to both VPS AI Office worktrees: dashboard and core/source.
+- Rsynced Mac-built ignored `hermes_cli/web_dist/` to both VPS worktrees and verified path-independent relative content hash match.
+- Restarted only `hermes-agent-dashboard.service` and `hermes-vps-core-dashboard.service`; `hermes-gateway.service` stayed active and untouched.
+- Protected `/office` API/DOM/visual smoke confirmed the primary DeskRPG map now renders the pixel-office density baseline live.
+
+Evidence captured:
+- VPS dashboard HEAD: `f61e0864b`; VPS core/source HEAD: `f61e0864b`; both clean.
+- `web_dist` relative content hash: `58033476d0aa7bd3818722060ac45c265a64f5b54f51391ba3a28231751621e8` on Mac, VPS dashboard, and VPS core/source; file_count=22.
+- Services after restart: dashboard=active pid 1173159, core=active pid 1173155, gateway=active pid 1059692.
+- Protected browser/API smoke via task-scoped SSH Host-header proxy: `/api/office/state` 200, `/api/status` 200, visualMap=1, primary=1, density=1, wood-tile floor=1, furnitureLayer=1, furniturePieces=20 in live DOM, furnitureKinds=`bookcase, chair, desk, meeting-table, monitor, plant, sofa, whiteboard`, spriteWorldContext=8, liveSprites=8, routeLayer=1, Korean cue `픽셀 오피스 생활감` present, summary/status/detail default-visible hooks=0, executable mutation controls inside visual map=0, raw leak=false, console errors=0.
+- Browser visual smoke: the map is visually primary and now reads more like a DeskRPG office world with floor/furniture density and small agent sprites embedded among office objects; remaining visual issue is label/edge crowding, which should be handled by the next in-map identity/status bubble/readability slice.
+
+Safety boundaries preserved:
+- Dashboard/core deploy only; gateway restart was not performed.
+- No backend/API/storage/runtime change, no state mutation, no Kanban mutation, no browser mutation controls, no NAS write, no dispatcher/authority activation, no public exposure, no sensitive raw-value/payload echo, and no new renderer/dependency.
+
+Next exact safe rung:
+- Stay in Stage 13. Add `agent identity/status bubble baseline`: compact read-only name/status/speech bubbles attached to sprites and furniture context, with tests proving map-first posture, zero executable controls, summary/status/detail default-visible hooks 0, and no raw leak.
+
 ## Current status — Stage 13 DeskRPG pixel-office density baseline added locally (2026-05-28T06:36Z)
 
 Scope completed:

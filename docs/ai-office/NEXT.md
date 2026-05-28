@@ -1,3 +1,22 @@
+## NEXT — after Stage 13 DeskRPG pixel-office density baseline VPS deploy (2026-05-28T06:50Z)
+
+Current next stage:
+- Stay in Stage 13 until the user explicitly advances stages.
+- `/office` now has the DeskRPG Office World density baseline deployed live: primary SVG map, wood-tile floor, dedicated furniture layer, live furniture kinds, small sprite world-context hooks, and `픽셀 오피스 생활감` in-map cue.
+- The live visual smoke confirmed the page reads as a DeskRPG-style office world rather than external summary/status panels, but label/edge crowding remains visible.
+
+Preferred next safe rung:
+1. `Stage 13 — agent identity/status bubble baseline`
+   - RED: extend `OfficePage.rpg.test.tsx` to require compact read-only sprite-attached name/status/speech bubble hooks, Korean short activity cues, furniture-context attachment, primary map posture, summary/status/detail hidden defaults, and zero executable controls.
+   - GREEN: SVG/CSS/frontend-only bubble/nameplate polish using existing sprite data; no backend/API/storage/runtime change.
+   - VERIFY: focused RPG test, combined Office tests, lint/build, `git diff --check`, static raw-leak/control scan, commit/push.
+   - DEPLOY if appropriate: dashboard/core sync, ignored `web_dist` rsync/hash, dashboard/core restart only, protected DOM/API/visual smoke; gateway untouched.
+
+Still forbidden unless separately and explicitly approved:
+- Additional real NAS production write or replacement write.
+- Force-replay of failed_guarded/succeeded queue items.
+- Actual NAS cleanup delete/move/archive/write, direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway service action, sensitive raw-value/payload echo, executable browser mutation controls, Kanban mutation controls, real chat/command input, or a new renderer/dependency.
+
 ## NEXT — after Stage 13 DeskRPG pixel-office density baseline local slice (2026-05-28T06:36Z)
 
 Current next stage:
