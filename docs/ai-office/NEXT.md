@@ -1,3 +1,23 @@
+## NEXT — after Stage 13 live sprite movement VPS deploy (2026-05-28T04:24Z)
+
+Current next stage:
+- Stay in Stage 13 until the user explicitly advances stages.
+- `/office` now has a deployed DeskRPG-style live movement baseline: primary RPG map, visible character sprites, CSS no-refresh idle/patrol motion, and timed browser proof that a sprite position changes without refresh.
+- The one-shot Mac relay real NAS write approval remains consumed; additional/replacement real NAS writes require a fresh explicit approval and packet.
+
+Allowed work boundary if continuing:
+- Local repo edits, TDD tests, build, docs update, commit, and push for Stage 13 map/sprite rendering polish.
+- If deployed: VPS dashboard/core sync, ignored `web_dist` rsync, dashboard/core restart, and protected DOM/API/visual smoke.
+
+Still forbidden unless separately and explicitly approved:
+- Additional real NAS production write or replacement write.
+- Force-replay of failed_guarded/succeeded queue items.
+- Actual NAS cleanup delete/move/archive/write, direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway service action, raw content/root/secret/token/write-payload echo, executable browser mutation controls, Kanban mutation controls, or a new renderer/dependency.
+
+Preferred next safe rung:
+1. Add Stage 13 visible walking-route polish: a map-internal route/path highlight that aligns with moving sprites and is CSS-animated/read-only, with timed DOM/CSS smoke.
+2. Or improve sprite silhouette/walking clarity using existing SVG parts and CSS only. Do not add a renderer/dependency or any controls.
+
 ## NEXT — after Stage 13 live sprite movement local slice (2026-05-28T04:20Z)
 
 Current next stage:

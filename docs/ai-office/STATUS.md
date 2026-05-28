@@ -1,3 +1,26 @@
+## Current status — Stage 13 live sprite movement baseline deployed to VPS (2026-05-28T04:24Z)
+
+Scope completed:
+- Deployed `fd45e834e feat(office): animate rpg sprites in visual map` to both VPS AI Office worktrees: dashboard and core/source.
+- Rsynced Mac-built ignored `hermes_cli/web_dist/` to both VPS worktrees and verified path-independent content hash matches.
+- Restarted only `hermes-agent-dashboard.service` and `hermes-vps-core-dashboard.service`; `hermes-gateway.service` stayed active and untouched.
+- Protected `/office` DOM, CSS animation, timed motion, and visual smoke confirmed the RPG Visualizer remains primary and character sprites move live without refresh.
+
+Evidence captured:
+- VPS dashboard HEAD: `fd45e834e`; VPS core/source HEAD: `fd45e834e`.
+- `web_dist` relative content hash: `5dbb6b07d202f55ccaa560e1a5536b43104595c14d907436c2cc9eb171d6c4f1` on Mac, VPS dashboard, and VPS core/source; file_count=22.
+- Services after restart: dashboard=active, core=active, gateway=active.
+- Browser DOM smoke on `/office?sprite-motion=fd45e834e`: visualMap=1, primaryView=1, liveLayer=1, liveSprites=8, motionSprites=8, walkCycles=8, armSwing=8, stepCycle=8, CSS animationName=`office-rpg-sprite-idle-patrol`, animationDuration=2.8s, animationIterationCount=infinite, API resource=200, summary/status/detail default-visible hooks=0, controlsInsideVisual=0, rawLeak=false, console errors=0.
+- Timed browser motion sample over 900ms changed sprite bounding box position, proving no-refresh live movement: delta approximately x=-0.807, y=-2.7.
+- Browser visual smoke: the primary rendered RPG map remains dominant and shows small RPG-like character sprites with status bubbles on the map.
+
+Safety boundaries preserved:
+- Dashboard/core deploy only; gateway restart was not performed.
+- No state mutation, no Kanban mutation, no browser mutation controls, no backend/API route change, no NAS write, no dispatcher/authority activation, no public exposure, no raw content/root/secret/token/write-payload echo, and no new renderer/dependency.
+
+Next exact safe rung:
+- Stay in Stage 13. Add the next real DeskRPG rendering polish, preferably visible route/path movement or sprite silhouette/walking-route clarity, via frontend-only/read-only TDD and no new renderer/dependency.
+
 ## Current status — Stage 13 live sprite movement baseline added locally (2026-05-28T04:20Z)
 
 Scope completed:
