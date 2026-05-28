@@ -1,3 +1,20 @@
+## NEXT — after Stage 13 DeskRPG Canvas Phase B8 VPS deploy (2026-05-28T15:43Z)
+
+Current next stage:
+- Stay in Stage 13, continuing the original-DeskRPG Canvas fidelity ladder.
+- Phase B8 is deployed: the Canvas renderer consumes read-only small-screen route/cue viewport descriptors in addition to B7 route/room focus, B6 sprite motion, B5 cue layout/readability, B4 room-local furniture/facility cues, and B3 layer/depth contracts.
+- The Canvas shell remains placeholder/read-only: no sprite assets, no renderer dependency, no realtime transport, no browser storage, no write-intent UI, and no backend mutation.
+
+Preferred next safe rung:
+1. `Phase B9 — read-only Canvas viewport legend/frame affordance`
+   - RED: require Canvas-side viewport frame/legend contract hooks while preserving B8 viewport/readability, B7 route/room focus, B6 sprite motion affordance, B5 cue layout/readability, B4 cue contracts, primary map posture, SVG fallback, summary/status/detail default-visible hooks 0, controls 0, raw leak false, and Canvas mutation/realtime false.
+   - GREEN: add the smallest typed descriptor expansion consumed by the native Canvas renderer so the small-screen route/cue padding and visibility rules are visible/explainable without realtime, sockets, browser storage, controls, external assets, or dependencies.
+   - VERIFY: focused RPG tests, combined Office tests, build/lint, `git diff --check`, static raw-leak/control/socket/dependency scan, then commit/push.
+   - DEPLOY if verification stays clean: dashboard/core sync, ignored `web_dist` rsync/hash, dashboard/core restart only, protected DOM/API/visual smoke; gateway untouched.
+
+Still forbidden unless separately and explicitly approved:
+- Production NAS write or replacement write; direct VPS NAS authority; watcher/cron/dispatcher/authority-adapter activation; public exposure; gateway service action; sensitive raw-value/payload echo; arbitrary browser execution controls; Kanban mutation execution; websocket/SSE/realtime endpoint; renderer dependency such as Phaser/PixiJS; external sprite/tile assets; write-intent UI.
+
 ## NEXT — after Stage 13 DeskRPG Canvas Phase B7 VPS deploy (2026-05-28T15:03Z)
 
 Current next stage:

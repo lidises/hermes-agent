@@ -17,10 +17,15 @@ Current corrected target:
 - Reference calibration comes from the two user-provided DeskRPG/OpenClaw videos reviewed on 2026-05-28.
 
 Current live position:
-- Overall stage: Stage 13 visual polish is complete enough to reveal a product-target mismatch: the user wants closer original DeskRPG behavior, not just SVG/CSS diorama polish. The Canvas/realtime/write-capable pivot is proceeding phase-by-phase; Phase B3 is deployed with read-only Canvas floor/room depth layering.
+- Overall stage: Stage 13 remains active; the original-DeskRPG Canvas pivot is proceeding phase-by-phase as a read-only frontend surface. Phase B8 is deployed with read-only Canvas small-screen route/cue viewport descriptors.
 - Stage 14 remains closed for production NAS/write/automation authority; the Canvas pivot does not grant direct NAS/VPS/gateway/public authority.
-- Latest completed/deployed rung: Stage 13 DeskRPG Canvas Phase B3 is deployed/smoked on the VPS dashboard/core from `f7169773b`: the Canvas renderer declares and consumes typed z-ordered layer descriptors with layer count 9, layer stack `floor,corridor,room,tile-detail,furniture,door,sprite-shadow,sprite-body,sprite-label`, depth model `z-ordered-readonly`, contract version `phase-b3-readonly`, mutation/realtime capability false, SVG fallback retained, summary/status/detail default-visible hooks 0, executable controls 0, raw leak false, API 200, visible floor/room depth layering, and gateway unchanged.
-- Latest completed/deployed rung: Stage 13 DeskRPG Canvas Phase B2 is deployed/smoked on the VPS dashboard/core from `0b3a3b5ab`: the Canvas renderer declares and consumes typed silhouette/nameplate/status-dot descriptors with live silhouette/nameplate/status cue counts 8, sprite detail level `silhouette-nameplate`, contract version `phase-b2-readonly`, mutation/realtime capability false, SVG fallback retained, summary/status/detail default-visible hooks 0, executable controls 0, raw leak false, API 200, readable character silhouettes/nameplates/status-dot cues visible, and gateway unchanged.
+- Latest completed/deployed rung: Stage 13 DeskRPG Canvas Phase B8 is deployed/smoked on the VPS dashboard/core from `637fb7d39`: the Canvas renderer declares and consumes small-screen route/cue viewport descriptors with viewport contract `small-screen-route-cue-viewport`, viewport mode `compact-readable`, compact route scale `0.86`, cue viewport lane `mobile-edge-safe-cues`, mobile route visibility `persistent-readable-routes`, mobile viewport padding `24`, minimum cue legibility `8px-bold`, contract version `phase-b8-readonly`, mutation/realtime capability false, SVG fallback retained, summary/status/detail default-visible hooks 0, executable controls 0, raw leak false, API 200, readable route/cue viewport posture visible, and gateway unchanged.
+- Prior deployed rung: Stage 13 DeskRPG Canvas Phase B7 is deployed/smoked on the VPS dashboard/core from `1672d5840`: the Canvas renderer declares and consumes route/room focus descriptors with route focus count 4, room focus count 6, route emphasis `read-only-corridor-glow`, room focus mode `active-room-halo`, contract version `phase-b7-readonly`, mutation/realtime capability false, SVG fallback retained, summary/status/detail default-visible hooks 0, executable controls 0, raw leak false, API 200, visible route/room focus, and gateway unchanged.
+- Prior deployed rung: Stage 13 DeskRPG Canvas Phase B6 is deployed/smoked on the VPS dashboard/core from `eab3d0e26`: the Canvas renderer declares and consumes read-only sprite step/route/focus affordance descriptors with motion affordance `read-only-ghost-steps`, mutation/realtime capability false, SVG fallback retained, summary/status/detail default-visible hooks 0, executable controls 0, raw leak false, API 200, and gateway unchanged.
+- Prior deployed rung: Stage 13 DeskRPG Canvas Phase B5 is deployed/smoked on the VPS dashboard/core from `79a5d906a`: the Canvas renderer declares and consumes collision-aware/mobile cue offset descriptors with cue layout contract `collision-aware-mobile-offsets`, cue density `crowded-room-cue-density`, cue max overlap 0, mutation/realtime capability false, SVG fallback retained, controls 0, raw leak false, and gateway unchanged.
+- Prior deployed rung: Stage 13 DeskRPG Canvas Phase B4 is deployed/smoked on the VPS dashboard/core from `fe491cd18`: the Canvas renderer declares and consumes compact Korean room-local furniture/facility cue descriptors while preserving B3 layer/depth and read-only posture.
+- Prior deployed rung: Stage 13 DeskRPG Canvas Phase B3 is deployed/smoked on the VPS dashboard/core from `f7169773b`: the Canvas renderer declares and consumes typed z-ordered layer descriptors with layer count 9, layer stack `floor,corridor,room,tile-detail,furniture,door,sprite-shadow,sprite-body,sprite-label`, depth model `z-ordered-readonly`, mutation/realtime capability false, SVG fallback retained, controls 0, raw leak false, and gateway unchanged.
+- Prior deployed rung: Stage 13 DeskRPG Canvas Phase B2 is deployed/smoked on the VPS dashboard/core from `0b3a3b5ab`: the Canvas renderer declares and consumes typed silhouette/nameplate/status-dot descriptors with live silhouette/nameplate/status cue counts 8, sprite detail level `silhouette-nameplate`, contract version `phase-b2-readonly`, mutation/realtime capability false, SVG fallback retained, summary/status/detail default-visible hooks 0, executable controls 0, raw leak false, API 200, readable character silhouettes/nameplates/status-dot cues visible, and gateway unchanged.
 - Prior deployed rung: Stage 13 DeskRPG Canvas Phase B1 is deployed/smoked on the VPS dashboard/core from `51a42da55`: the Canvas renderer declares and consumes typed furniture, door, and corridor descriptors with furniture count 20, door count 3, corridor count 4, contract version `phase-b1-readonly`, mutation/realtime capability false, SVG fallback retained, summary/status/detail default-visible hooks 0, executable controls 0, raw leak false, API 200, visual furniture/door/corridor density visible, and gateway unchanged.
 - Prior deployed rung: Stage 13 DeskRPG Canvas Phase B0 is deployed/smoked on the VPS dashboard/core from `4dfb59bd1`: the Canvas renderer declares and consumes `data-office-deskrpg-canvas-projection="tile-sprite-contract"`, projection source `sanitized-scene`, tile grid `room-local-coordinates`, tile count 87, room count 6, live sprite count 8, contract version `phase-b0-readonly`, mutation/realtime capability false, SVG fallback retained, summary/status/detail default-visible hooks 0, executable controls 0, raw leak false, API 200, and gateway unchanged.
 - Prior deployed rung: Stage 13 DeskRPG Canvas Phase A is deployed/smoked on the VPS dashboard/core from `1303e6194`: the primary RPG visual map now includes `data-office-deskrpg-renderer="canvas"`, a native Canvas tiled office shell, safe Korean room labels, placeholder actor drawing from sanitized scene data, retained SVG fallback, Canvas mutation/realtime capability false, summary/status/detail default-visible hooks 0, executable mutation controls 0, raw leak false, API 200, and gateway unchanged.
@@ -39,7 +44,7 @@ Current live position:
 - Prior RPG rung: mobile/small-screen RPG map layout cues added to the primary SVG RPG map: scroll-snap layout hook, pinch/pan cue, responsive SVG hook, and narrow-screen CSS.
 - Prior write rung: exact-approved one-shot Mac relay production write completed from a fresh packet; one markdown file plus one audit sidecar were written through the Mac relay, readback verified, and a metadata-only completed-write receipt recorded.
 - Prior RPG rung: Stage 13 Korean room labels and room/entity visual hierarchy cues were added inside the primary SVG RPG map.
-- Current requested rung: pivot from further SVG/CSS label polish toward original DeskRPG-like implementation. Next exact safe implementation is `Phase A — native Canvas renderer shell, read-only`: Canvas tiled office + placeholder actors from safe scene data, SVG fallback preserved, no dependency/realtime/write UI/backend mutation in that rung.
+- Current requested rung: continue Stage 13 with one bounded read-only Canvas fidelity improvement at a time; after Phase B8, the next exact safe rung is `Phase B9 — read-only Canvas viewport legend/frame affordance`, preserving all B8/B7/B6/B5/B4/B3 invariants and avoiding controls/storage/sockets/dependencies/backend mutation.
 
 ## Stage 0 — Project charter and operating protocol
 
@@ -235,12 +240,12 @@ Acceptance criteria:
 
 ## Stage 13 — RPG operating experience depth
 
-Status: active; DeskRPG Canvas Phase B6 deployed to VPS.
+Status: active; DeskRPG Canvas Phase B8 deployed to VPS.
 
 Completed rungs:
 1. Added read-only room/entity hierarchy cues inside the primary SVG map: room tiers (`control`, `execution`, `evidence`), visible actor count bars/labels, and priority dots.
-2. Pivoted `/office` toward native Canvas DeskRPG fidelity while retaining the SVG fallback and read-only posture: Canvas shell, tile/sprite projection, furniture/door/corridor descriptors, sprite silhouettes/nameplates/status dots, z-ordered floor/room depth layers, compact Korean room-local furniture/facility cue descriptors, and collision-aware/mobile cue offset descriptors, and read-only sprite step/route/focus affordance descriptors are deployed through Phase B6.
-3. Latest deploy proof: `eab3d0e26` on dashboard/core, `web_dist` hash `2f9fcd392988d070302aa9403a2b12d507e8fd58f2591d72729129cfc444b057` file_count=22, protected DOM/API/visual smoke passed, and gateway remained untouched.
+2. Pivoted `/office` toward native Canvas DeskRPG fidelity while retaining the SVG fallback and read-only posture: Canvas shell, tile/sprite projection, furniture/door/corridor descriptors, sprite silhouettes/nameplates/status dots, z-ordered floor/room depth layers, compact Korean room-local furniture/facility cue descriptors, collision-aware/mobile cue offset descriptors, read-only sprite step/route/focus affordance descriptors, route/room focus descriptors, and small-screen route/cue viewport descriptors are deployed through Phase B8.
+3. Latest deploy proof: `637fb7d39` on dashboard/core, `web_dist` hash `5a9ae2ab1377da313e5a94172ad1fd385f03c88155005c1123ac54b5440ca183` file_count=22, protected DOM/API/visual smoke passed, and gateway remained untouched.
 
 Purpose:
 - Make the RPG Visualizer itself richer and more useful without reintroducing dashboard clutter.
@@ -283,11 +288,11 @@ Hard gates:
 
 ## Current recommended next step
 
-Start Stage 13 with one visual/read-only RPG-internal improvement:
-1. Pick exactly one small rung: room/entity hierarchy, Korean labels/copy, compact in-map cues, character/facility copy, or mobile/small-screen layout.
-2. Add RED helper/component tests first.
-3. Implement only the frontend/read-only visual change; do not add external summaries.
-4. Verify focused RPG tests, full Office frontend tests, build, `git diff --check`, raw-leak/control scan, and DOM smoke.
+Continue Stage 13 with one read-only Canvas fidelity rung:
+1. Next exact safe rung: `Phase B9 — read-only Canvas viewport legend/frame affordance`.
+2. Add RED Canvas DOM contract tests first, preserving B8/B7/B6/B5/B4/B3 invariants.
+3. Implement only the frontend/read-only typed descriptor and Canvas drawing change; do not add external summaries, controls, storage, sockets, dependencies, or backend mutation.
+4. Verify focused RPG tests, combined Office frontend tests, build/lint, `git diff --check`, static raw-leak/control/socket/dependency scan, and DOM/visual smoke.
 5. If deploying, sync dashboard/core assets and restart only dashboard/core services; do not restart gateway.
 
 ## Approval gates

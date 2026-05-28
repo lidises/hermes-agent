@@ -1,3 +1,32 @@
+## Current status — Stage 13 DeskRPG Canvas Phase B8 deployed to VPS (2026-05-28T15:43Z)
+
+Scope completed:
+- Deployed `637fb7d39 feat(office): add canvas viewport readability contract` to both VPS AI Office worktrees: dashboard and core/source.
+- Implemented `Phase B8 — read-only Canvas small-screen route/cue viewport contract` on top of deployed Phase B7.
+- Expanded the Canvas projection contract with read-only small-screen viewport/readability hooks: viewport contract `small-screen-route-cue-viewport`, viewport mode `compact-readable`, compact route scale `0.86`, cue viewport lane `mobile-edge-safe-cues`, mobile route visibility `persistent-readable-routes`, mobile viewport padding `24`, minimum cue legibility `8px-bold`, and contract version `phase-b8-readonly`.
+- The native Canvas renderer now consumes the viewport descriptors by scaling route focus strokes and clamping furniture/facility cue labels inside a deterministic viewport padding while preserving Phase B7 route/room focus, Phase B6 sprite motion affordance, Phase B5 cue layout/readability, Phase B4 furniture/facility cues, Phase B3 layer/depth stack, typed tile/sprite/furniture/door/corridor/silhouette/nameplate/status cue descriptors, and SVG fallback.
+- Rsynced Mac-built ignored `hermes_cli/web_dist/` to both VPS worktrees and verified path-independent relative content hash match: `5a9ae2ab1377da313e5a94172ad1fd385f03c88155005c1123ac54b5440ca183`, file_count=22.
+- Restarted only `hermes-agent-dashboard.service` and `hermes-vps-core-dashboard.service`; `hermes-gateway.service` stayed active.
+
+Safety posture:
+- Frontend-only/read-only TypeScript/React/Canvas change plus dashboard/core deploy only.
+- No new dependency, no external sprite/tile asset, no websocket/SSE/realtime endpoint, no write-intent UI, no backend/API/storage/runtime authority change, no Kanban/NAS execution, no public exposure, no gateway service action, no sensitive raw-value/path/payload echo, and no DeskRPG code/assets copied.
+- Canvas mutation/realtime capability stays explicitly false.
+
+Verification:
+- RED: `npm test -- OfficePage.rpg.test.tsx --run` failed before implementation on missing Canvas viewport/mobile route/cue hooks.
+- GREEN/focused: `npm test -- OfficePage.rpg.test.tsx --run` = 199 passed.
+- Combined Office tests: `npm test -- OfficePage.rpg.test.tsx OfficePage.test.ts --run` = 357 passed.
+- Build: `npm run build` passed; existing Vite large-chunk warning unchanged.
+- Lint: `npm run lint` exited 0 with existing warnings only.
+- Diff/static gates: `git diff --check` passed; diff-scoped static scan found no token-shaped credential/raw path/write_payload leak, no new socket/realtime code, no browser storage, no DeskRPG executable controls, and no renderer dependency.
+- Protected API smoke: `/api/status` 200 and `/api/office/state` 200 using the live in-page session token without printing the token.
+- Protected browser DOM smoke: primary view=1, RPG map=1, Canvas renderer=1, Canvas element=1, Canvas contract version `phase-b8-readonly`, viewport contract `small-screen-route-cue-viewport`, viewport mode `compact-readable`, compact route scale `0.86`, cue viewport lane `mobile-edge-safe-cues`, mobile route visibility `persistent-readable-routes`, mobile viewport padding `24`, minimum cue legibility `8px-bold`, B7 route focus contract `corridor-room-focus-descriptors`, route focus count=4, room focus count=6, B6 motion affordance `read-only-ghost-steps`, B5 cue layout `collision-aware-mobile-offsets`, SVG fallback retained=1, summary/status/detail default-visible hooks=0, executable controls=0, Canvas mutation capability=`false`, Canvas realtime capability=`false`, raw leak=false, console errors=0.
+- Protected visual smoke: `/office` still shows the primary AI Office RPG Visualizer with the Canvas/DeskRPG office map near the top; route/cue elements and Korean map labels are readable, with no obvious write/mutation controls or raw payload/path leaks.
+
+Next exact safe rung:
+- Stay in Stage 13 and improve native Canvas readability without adding authority: `Phase B9 — read-only Canvas viewport legend/frame affordance`, adding a tiny non-interactive Canvas-side viewport frame/legend descriptor so small-screen route/cue padding is visible and explainable while preserving B8/B7/B6/B5/B4/B3 invariants, SVG fallback, summary/status/detail default-visible hooks 0, controls 0, raw leak false, and Canvas mutation/realtime false.
+
 ## Current status — Stage 13 DeskRPG Canvas Phase B7 deployed to VPS (2026-05-28T15:03Z)
 
 Scope completed:
