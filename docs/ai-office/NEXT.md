@@ -1,3 +1,20 @@
+## NEXT — after Stage 13 DeskRPG Canvas Phase B6 VPS deploy (2026-05-28T14:49Z)
+
+Current next stage:
+- Stay in Stage 13, continuing the original-DeskRPG Canvas fidelity ladder.
+- Phase B6 is deployed: the Canvas renderer consumes deterministic sprite step/route/focus affordance descriptors in addition to the Phase B5 cue layout/readability contracts, Phase B4 room-local furniture/facility cues, and Phase B3 layer/depth contracts.
+- The Canvas shell remains placeholder/read-only: no sprite assets, no renderer dependency, no realtime transport, no write-intent UI, and no backend mutation.
+
+Preferred next safe rung:
+1. `Phase B7 — read-only Canvas route/room focus polish`
+   - RED: require Canvas-side corridor/room focus or route emphasis descriptors while preserving B6 sprite motion affordance, B5 cue layout/readability, B4 cue contracts, primary map posture, SVG fallback, summary/status/detail default-visible hooks 0, controls 0, raw leak false, and Canvas mutation/realtime false.
+   - GREEN: add the smallest typed descriptor expansion consumed by the native Canvas renderer so room-to-room movement/focus reads more like a DeskRPG map without realtime, sockets, browser storage, controls, external assets, or dependencies.
+   - VERIFY: focused RPG tests, combined Office tests, build/lint, `git diff --check`, static raw-leak/control/socket/dependency scan, then commit/push.
+   - DEPLOY if verification stays clean: dashboard/core sync, ignored `web_dist` rsync/hash, dashboard/core restart only, protected DOM/API/visual smoke; gateway untouched.
+
+Still forbidden unless separately and explicitly approved:
+- Production NAS write or replacement write; direct VPS NAS authority; watcher/cron/dispatcher/authority-adapter activation; public exposure; gateway service action; sensitive raw-value/payload echo; arbitrary browser execution controls; Kanban mutation execution; websocket/SSE/realtime endpoint; renderer dependency such as Phaser/PixiJS; external sprite/tile assets; write-intent UI.
+
 ## NEXT — after Stage 13 DeskRPG Canvas Phase B5 VPS deploy (2026-05-28T13:43Z)
 
 Current next stage:

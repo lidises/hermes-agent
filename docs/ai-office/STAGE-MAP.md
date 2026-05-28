@@ -235,12 +235,12 @@ Acceptance criteria:
 
 ## Stage 13 — RPG operating experience depth
 
-Status: active; DeskRPG Canvas Phase B5 deployed to VPS.
+Status: active; DeskRPG Canvas Phase B6 deployed to VPS.
 
 Completed rungs:
 1. Added read-only room/entity hierarchy cues inside the primary SVG map: room tiers (`control`, `execution`, `evidence`), visible actor count bars/labels, and priority dots.
-2. Pivoted `/office` toward native Canvas DeskRPG fidelity while retaining the SVG fallback and read-only posture: Canvas shell, tile/sprite projection, furniture/door/corridor descriptors, sprite silhouettes/nameplates/status dots, z-ordered floor/room depth layers, compact Korean room-local furniture/facility cue descriptors, and collision-aware/mobile cue offset descriptors are deployed through Phase B5.
-3. Latest deploy proof: `79a5d906a` on dashboard/core, `web_dist` hash `23fef02068078f58f6fe502d6e007afb30532ca0ebc0bab4493a254181ec5515` file_count=22, protected DOM/API/visual smoke passed, and gateway remained untouched.
+2. Pivoted `/office` toward native Canvas DeskRPG fidelity while retaining the SVG fallback and read-only posture: Canvas shell, tile/sprite projection, furniture/door/corridor descriptors, sprite silhouettes/nameplates/status dots, z-ordered floor/room depth layers, compact Korean room-local furniture/facility cue descriptors, and collision-aware/mobile cue offset descriptors, and read-only sprite step/route/focus affordance descriptors are deployed through Phase B6.
+3. Latest deploy proof: `eab3d0e26` on dashboard/core, `web_dist` hash `2f9fcd392988d070302aa9403a2b12d507e8fd58f2591d72729129cfc444b057` file_count=22, protected DOM/API/visual smoke passed, and gateway remained untouched.
 
 Purpose:
 - Make the RPG Visualizer itself richer and more useful without reintroducing dashboard clutter.
