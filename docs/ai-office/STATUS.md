@@ -1,3 +1,50 @@
+## Context hygiene — canonical live-state sources
+
+Do not rely on auto-injected profile memory (`USER.md` / `MEMORY.md`) for the
+current AI Office / DeskRPG live state. Those files should stay limited to stable
+preferences and broad topology facts, not volatile stage, authority, service, or
+task-progress details. Before reporting or acting on live state, re-check:
+
+- `docs/ai-office/NEXT.md` for the active continuation target.
+- `docs/ai-office/STATUS.md` for the latest recorded verification and safety
+  posture.
+- The relevant `hermes-agent` skill references for workflow-specific constraints.
+- Current session context plus Kanban task/comments for approvals, blockers,
+  reviewer handoffs, and the human's latest instruction.
+
+If any source conflicts with injected memory, treat the canonical sources above
+as authoritative and refresh the handoff rather than writing volatile state into
+`USER.md` / `MEMORY.md`.
+
+## Current status — Stage 13 DeskRPG Canvas Phase B10 deployed to VPS (2026-05-28T23:51Z)
+
+Scope completed:
+- Deployed `d547ec01f feat(office): add canvas legend swatch affordance` to both VPS AI Office worktrees: dashboard and core/source.
+- Implemented `Phase B10 — read-only Canvas viewport legend swatch/contrast affordance` on top of deployed Phase B9.
+- Expanded the Canvas projection contract with read-only legend swatch hooks: legend swatch contract `route-cue-padding-swatch-descriptors`, swatch count `3`, swatch labels `동선,단서,여백`, contrast mode `high-contrast-mini-swatches`, route swatch `corridor-glow-blue`, cue swatch `label-chip-amber`, padding swatch `safe-frame-dash`, and contract version `phase-b10-readonly`.
+- The native Canvas renderer now consumes the swatch descriptors by drawing tiny static route/cue/padding swatches inside the existing viewport legend while preserving Phase B9 viewport frame/legend, Phase B8 viewport/readability hooks, Phase B7 route/room focus, Phase B6 sprite motion affordance, Phase B5 cue layout/readability, Phase B4 furniture/facility cues, Phase B3 layer/depth stack, typed tile/sprite/furniture/door/corridor/silhouette/nameplate/status cue descriptors, and SVG fallback.
+- Rsynced Mac-built ignored `hermes_cli/web_dist/` to both VPS worktrees and verified path-independent relative content hash match: `a5a5679a23de8809773b2e97c83b93a7c0cdd4feb382cfffeb4a4023b32b365f`, file_count=22.
+- Restarted only `hermes-agent-dashboard.service` and `hermes-vps-core-dashboard.service`; `hermes-gateway.service` stayed active and was not restarted.
+
+Safety posture:
+- Frontend-only/read-only TypeScript/React/Canvas change plus dashboard/core deploy only.
+- No new dependency, no external sprite/tile asset, no websocket/SSE/realtime endpoint, no write-intent UI, no backend/API/storage/runtime authority change, no Kanban/NAS execution, no public exposure, no gateway service action, no sensitive raw-value/path/payload/token echo, and no DeskRPG code/assets copied.
+- Canvas mutation/realtime capability stays explicitly false.
+
+Verification:
+- RED: `npm test -- OfficePage.rpg.test.tsx --run` failed before implementation on missing Canvas legend swatch/contrast hooks.
+- GREEN/focused: `npm test -- OfficePage.rpg.test.tsx --run` = 199 passed.
+- Combined Office tests: `npm test -- OfficePage.rpg.test.tsx OfficePage.test.ts --run` = 357 passed.
+- Build: `npm run build` passed; existing Vite large-chunk warning unchanged.
+- Lint: `npm run lint` exited 0 with existing warnings only.
+- Diff/static gates: `git diff --check` passed; diff-scoped static scan found no token-shaped credential/raw path/write_payload leak, no new socket/realtime code, no browser storage, no DeskRPG executable controls, and no renderer dependency.
+- Protected API smoke: `/office` 200, unauthenticated `/api/office/state` 401, `/api/status` 200, and authenticated `/api/office/state` 200 using the live in-page session token without printing the token.
+- Protected browser DOM smoke: Canvas element present, Canvas contract version `phase-b10-readonly`, legend swatch contract `route-cue-padding-swatch-descriptors`, swatch count=3, swatch labels `동선,단서,여백`, contrast mode `high-contrast-mini-swatches`, route swatch `corridor-glow-blue`, cue swatch `label-chip-amber`, padding swatch `safe-frame-dash`, B9 viewport frame/legend hooks retained, B8/B7/B6/B5/B4/B3 hooks retained, summary/status/detail default-visible hooks=0, executable controls inside Canvas=0, Canvas mutation capability=`false`, Canvas realtime capability=`false`, raw leak=false, console errors=0.
+- Protected visual smoke: `/office` shows the AI Office RPG Visualizer with the Canvas/JRPG block office map, rooms/corridors/sprites/labels and read-only Canvas shell visible; no error page and no visible write/deploy/edit/delete controls inside the Canvas map.
+
+Next exact safe rung:
+- Stay in Stage 13 and improve native Canvas readability without adding authority: `Phase B11 — read-only Canvas compact legend placement/responsive wrapping affordance`, making the B10 route/cue/padding swatches remain legible at narrow widths while preserving B10/B9/B8/B7/B6/B5/B4/B3 invariants, SVG fallback, summary/status/detail default-visible hooks 0, controls 0, raw leak false, no renderer dependency, and Canvas mutation/realtime false.
+
 ## Current status — Stage 13 DeskRPG Canvas Phase B9 deployed to VPS (2026-05-28T16:08Z)
 
 Scope completed:

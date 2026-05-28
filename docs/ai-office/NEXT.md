@@ -1,3 +1,40 @@
+## Context hygiene — verify live state before continuing
+
+Future AI Office / DeskRPG workers must not treat auto-injected profile memory
+(`USER.md` / `MEMORY.md`) as canonical live state. Use profile memory only for
+stable preferences and topology hints. Before choosing a stage, authority level,
+or continuation target, verify the current live state from these canonical
+sources instead:
+
+- `docs/ai-office/NEXT.md` for the current handoff and next safe rung.
+- `docs/ai-office/STATUS.md` for the most recent documented verification and
+  safety posture.
+- The loaded `hermes-agent` skill references for the relevant AI Office / VPS /
+  DeskRPG workflow constraints and known pitfalls.
+- The current session and Kanban task/comment state for the active human request,
+  approvals, blockers, and reviewer handoffs.
+
+Keep volatile stage/authority details, service state, task progress, private
+transcripts, and other live operational facts out of durable `USER.md` /
+`MEMORY.md`; update docs, skill references, plans, or Kanban handoffs instead.
+
+## NEXT — after Stage 13 DeskRPG Canvas Phase B10 VPS deploy (2026-05-28T23:51Z)
+
+Current next stage:
+- Stay in Stage 13, continuing the original-DeskRPG Canvas fidelity ladder.
+- Phase B10 is deployed: the Canvas renderer consumes read-only route/cue/padding legend swatch descriptors in addition to B9 viewport frame/legend descriptors, B8 small-screen route/cue viewport descriptors, B7 route/room focus, B6 sprite motion, B5 cue layout/readability, B4 room-local furniture/facility cues, and B3 layer/depth contracts.
+- The Canvas shell remains placeholder/read-only: no sprite assets, no renderer dependency, no realtime transport, no browser storage, no write-intent UI, and no backend mutation.
+
+Preferred next safe rung:
+1. `Phase B11 — read-only Canvas compact legend placement/responsive wrapping affordance`
+   - RED: require Canvas-side compact legend placement/wrapping contract hooks while preserving B10 legend swatches, B9 viewport frame/legend, B8 viewport/readability, B7 route/room focus, B6 sprite motion affordance, B5 cue layout/readability, B4 cue contracts, primary map posture, SVG fallback, summary/status/detail default-visible hooks 0, controls 0, raw leak false, and Canvas mutation/realtime false.
+   - GREEN: add the smallest typed descriptor expansion consumed by the native Canvas renderer so the existing legend and swatches remain readable on compact widths without realtime, sockets, browser storage, controls, external assets, or dependencies.
+   - VERIFY: focused RPG tests, combined Office tests, build/lint, `git diff --check`, static raw-leak/control/socket/dependency scan, then commit/push.
+   - DEPLOY if verification stays clean: dashboard/core sync, ignored `web_dist` rsync/hash, dashboard/core restart only, protected DOM/API/visual smoke; gateway untouched.
+
+Still forbidden unless separately and explicitly approved:
+- Production NAS write or replacement write; direct VPS NAS authority; watcher/cron/dispatcher/authority-adapter activation; public exposure; gateway service action; sensitive raw-value/payload/token echo; arbitrary browser execution controls; Kanban mutation execution; websocket/SSE/realtime endpoint; renderer dependency such as Phaser/PixiJS; external sprite/tile assets; write-intent UI.
+
 ## NEXT — after Stage 13 DeskRPG Canvas Phase B9 VPS deploy (2026-05-28T16:08Z)
 
 Current next stage:
