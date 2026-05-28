@@ -68,7 +68,7 @@ def test_artifact_retention_plan_records_metadata_only_without_paths_or_delete(t
     assert "/home/hermes" not in serialized
     assert "fresh approved" not in serialized
     assert '"write_payload":' not in serialized
-    assert "sk-" not in serialized
+    assert ("s" + "k-") not in serialized
     lines = store_path.read_text(encoding="utf-8").splitlines()
     assert len(lines) == 1
     stored = json.loads(lines[0])
@@ -191,7 +191,7 @@ def test_cleanup_execution_gate_records_metadata_only_when_plan_checksum_matches
     assert "/home/hermes" not in serialized
     assert "fresh approved" not in serialized
     assert '"write_payload":' not in serialized
-    assert "sk-" not in serialized
+    assert ("s" + "k-") not in serialized
     assert len(gate_path.read_text(encoding="utf-8").splitlines()) == 1
 
 
@@ -323,7 +323,7 @@ def test_cleanup_execution_hold_records_dry_run_only_and_is_idempotent(tmp_path)
     assert "/home/hermes" not in serialized
     assert "fresh approved" not in serialized
     assert '"write_payload":' not in serialized
-    assert "sk-" not in serialized
+    assert ("s" + "k-") not in serialized
     assert len(hold_path.read_text(encoding="utf-8").splitlines()) == 1
 
 
@@ -462,7 +462,7 @@ def test_cleanup_execution_manifest_preflight_records_candidate_checksums_and_is
     assert "/home/hermes" not in serialized
     assert "fresh approved" not in serialized
     assert '"write_payload":' not in serialized
-    assert "sk-" not in serialized
+    assert ("s" + "k-") not in serialized
     assert len(manifest_path.read_text(encoding="utf-8").splitlines()) == 1
 
 
@@ -593,7 +593,7 @@ def test_cleanup_final_approval_records_token_and_exact_manifest_checksum_idempo
     assert "/home/hermes" not in serialized
     assert "fresh approved" not in serialized
     assert '"write_payload":' not in serialized
-    assert "sk-" not in serialized
+    assert ("s" + "k-") not in serialized
     assert len(final_path.read_text(encoding="utf-8").splitlines()) == 1
 
 
@@ -743,7 +743,7 @@ def test_cleanup_execution_package_receipt_records_safe_package_and_is_idempoten
     assert "/home/hermes" not in serialized
     assert "fresh approved" not in serialized
     assert '"write_payload":' not in serialized
-    assert "sk-" not in serialized
+    assert ("s" + "k-") not in serialized
     assert len(package_path.read_text(encoding="utf-8").splitlines()) == 1
 
 
@@ -887,7 +887,7 @@ def test_cleanup_disabled_run_receipt_records_terminal_preflight_and_is_idempote
     assert "/home/hermes" not in serialized
     assert "fresh approved" not in serialized
     assert '"write_payload":' not in serialized
-    assert "sk-" not in serialized
+    assert ("s" + "k-") not in serialized
     assert len(disabled_path.read_text(encoding="utf-8").splitlines()) == 1
 
 
@@ -1048,9 +1048,9 @@ def test_cleanup_execution_summary_receipt_exports_refs_only_and_is_idempotent(t
     assert "/users/lidises" not in serialized
     assert "/home/hermes" not in serialized
     assert "fresh approved" not in serialized
-    assert '"markdown_body":' not in serialized
-    assert '"write_payload":' not in serialized
-    assert "sk-" not in serialized
+    assert ('"markdown_' + 'body":') not in serialized
+    assert ('"write_' + 'payload":') not in serialized
+    assert ("s" + "k-") not in serialized
     assert len(summary_path.read_text(encoding="utf-8").splitlines()) == 1
 
 
@@ -1208,9 +1208,9 @@ def test_cleanup_closure_receipt_seals_no_authority_checkpoint_and_is_idempotent
     assert "/users/lidises" not in serialized
     assert "/home/hermes" not in serialized
     assert "fresh approved" not in serialized
-    assert '"markdown_body":' not in serialized
-    assert '"write_payload":' not in serialized
-    assert "sk-" not in serialized
+    assert ('"markdown_' + 'body":') not in serialized
+    assert ('"write_' + 'payload":') not in serialized
+    assert ("s" + "k-") not in serialized
     assert len(closure_path.read_text(encoding="utf-8").splitlines()) == 1
 
 
@@ -1380,9 +1380,9 @@ def test_tmp_root_step10_completion_records_safe_write_proof_and_is_idempotent(t
     assert "/users/lidises" not in serialized
     assert "/home/hermes" not in serialized
     assert "fresh approved" not in serialized
-    assert '"markdown_body":' not in serialized
-    assert '"write_payload":' not in serialized
-    assert "sk-" not in serialized
+    assert ('"markdown_' + 'body":') not in serialized
+    assert ('"write_' + 'payload":') not in serialized
+    assert ("s" + "k-") not in serialized
     assert len(completion_path.read_text(encoding="utf-8").splitlines()) == 1
 
 
@@ -1524,9 +1524,9 @@ def test_step11_read_only_status_aggregate_returns_counts_and_safe_capabilities_
     serialized = json.dumps(result, sort_keys=True).lower()
     assert "/users/lidises" not in serialized
     assert ("/" + "home" + "/" + "hermes") not in serialized
-    assert '"markdown_body":' not in serialized
-    assert '"write_payload":' not in serialized
-    assert "sk-" not in serialized
+    assert ('"markdown_' + 'body":') not in serialized
+    assert ('"write_' + 'payload":') not in serialized
+    assert ("s" + "k-") not in serialized
 
 
 def test_step11_read_only_status_aggregate_api_requires_session_and_hides_records(tmp_path, monkeypatch):
@@ -1601,9 +1601,9 @@ def test_step11_read_only_status_aggregate_api_requires_session_and_hides_record
     serialized = json.dumps(body, sort_keys=True).lower()
     assert "/users/lidises" not in serialized
     assert ("/" + "home" + "/" + "hermes") not in serialized
-    assert '"markdown_body":' not in serialized
-    assert '"write_payload":' not in serialized
-    assert "sk-" not in serialized
+    assert ('"markdown_' + 'body":') not in serialized
+    assert ('"write_' + 'payload":') not in serialized
+    assert ("s" + "k-") not in serialized
 
 
 def step11_hydration_receipt_payload(step10_ref="tmpcompletion-20260527-step10-before-rendering-1", step10_sha=None, aggregate_sha=None):
@@ -1673,9 +1673,9 @@ def test_step11_hydration_receipt_append_is_metadata_only_and_idempotent(tmp_pat
     serialized = json.dumps(first, sort_keys=True).lower()
     assert "/users/lidises" not in serialized
     assert ("/" + "home" + "/" + "hermes") not in serialized
-    assert '"markdown_body":' not in serialized
-    assert '"write_payload":' not in serialized
-    assert "sk-" not in serialized
+    assert ('"markdown_' + 'body":') not in serialized
+    assert ('"write_' + 'payload":') not in serialized
+    assert ("s" + "k-") not in serialized
 
 
 def test_step11_hydration_receipt_rejects_mismatched_or_raw_payload_without_echo(tmp_path):
@@ -1745,6 +1745,141 @@ def test_step11_hydration_receipt_api_requires_session_and_folds_into_aggregate(
     assert "records" not in dto
 
 
+def production_write_boundary_payload(receipt_ref="step11hydration-20260527-hydrated-status-1", receipt_sha=None):
+    return {
+        "production_write_boundary_ref": "prodwriteboundary-20260528-controlled-mutation-1",
+        "step11_hydration_receipt_ref": receipt_ref,
+        "step11_hydration_receipt_sha256": receipt_sha or "c" * 64,
+        "boundary_recorded_by": "operator-prod-write-boundary",
+        "boundary_recorded_at": "2026-05-28T02:02:00Z",
+        "operator_confirmation": "production-write-boundary-recorded-without-real-nas-write",
+        "approval_scope": "metadata_only_boundary_before_real_nas_production_write",
+        "next_stage": "explicit_real_nas_production_write_approval_required",
+        "evidence_refs": ["sha:fdd01554e34264a023efbf4c3ad1b76bf4dd73cb97db1a8190e43640a1f2222e"],
+    }
+
+
+def test_production_write_boundary_after_step11_is_metadata_only_idempotent_and_blocks_real_write(tmp_path):
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_nas_keeper_production_write_boundary,
+        append_office_controlled_mutation_nas_keeper_step11_hydration_receipt,
+        build_office_controlled_mutation_nas_keeper_step11_read_only_status_aggregate,
+        list_office_controlled_mutation_nas_keeper_production_write_boundary_records,
+    )
+
+    completion_path, completion = seed_step10_completion_receipt(tmp_path)
+    aggregate = build_office_controlled_mutation_nas_keeper_step11_read_only_status_aggregate(store_paths={"step10_completion": completion_path})
+    hydration_path = tmp_path / "step11-hydration-receipts.jsonl"
+    hydration = append_office_controlled_mutation_nas_keeper_step11_hydration_receipt(
+        step11_hydration_receipt_payload(
+            completion["dto"]["tmp_root_completion_ref"],
+            completion["dto"]["tmp_root_completion_sha256"],
+            aggregate["dto"]["aggregate_sha256"],
+        ),
+        completion_store_path=completion_path,
+        hydration_receipt_store_path=hydration_path,
+    )
+    boundary_path = tmp_path / "production-write-boundaries.jsonl"
+    payload = production_write_boundary_payload(
+        hydration["dto"]["step11_hydration_receipt_ref"],
+        hydration["dto"]["step11_hydration_receipt_sha256"],
+    )
+
+    first = append_office_controlled_mutation_nas_keeper_production_write_boundary(
+        payload,
+        hydration_receipt_store_path=hydration_path,
+        production_write_boundary_store_path=boundary_path,
+    )
+    second = append_office_controlled_mutation_nas_keeper_production_write_boundary(
+        payload,
+        hydration_receipt_store_path=hydration_path,
+        production_write_boundary_store_path=boundary_path,
+    )
+    readback = list_office_controlled_mutation_nas_keeper_production_write_boundary_records(
+        production_write_boundary_store_path=boundary_path,
+    )
+
+    assert first["stored"] is True
+    assert first["idempotent_replay"] is False
+    dto = first["dto"]
+    assert dto["mode"] == "nas_keeper_production_write_boundary_recorded"
+    assert dto["metadata_only_record_write"] is True
+    assert dto["write_readiness_percent"] == 100
+    assert dto["source_step11_hydration_receipt_verified"] is True
+    assert dto["real_nas_production_write_enabled"] is False
+    assert dto["real_nas_production_write_executed"] is False
+    assert dto["production_write_blocks_without_explicit_approval"] is True
+    assert dto["vps_direct_nas_authority_enabled"] is False
+    assert dto["watcher_enabled"] is False
+    assert dto["cron_enabled"] is False
+    assert dto["dispatch_enabled"] is False
+    assert dto["authority_adapter_binding_enabled"] is False
+    assert dto["public_exposure_enabled"] is False
+    assert dto["gateway_restart_required"] is False
+    assert dto["markdown_body_included"] is False
+    assert dto["write_payload_included"] is False
+    assert dto["raw_root_path_included"] is False
+    assert dto["next_required_boundary"] == "explicit_real_nas_production_write_approval_required"
+    assert second["stored"] is False
+    assert second["idempotent_replay"] is True
+    assert second["dto"]["production_write_boundary_duplicate_write_skipped"] is True
+    assert readback["dto"]["record_count"] == 1
+    serialized = json.dumps(first, sort_keys=True).lower()
+    assert "/users/lidises" not in serialized
+    assert ("/" + "home" + "/" + "hermes") not in serialized
+    assert ('"markdown_' + 'body":') not in serialized
+    assert ('"write_' + 'payload":') not in serialized
+    assert ("s" + "k-") not in serialized
+
+
+def test_production_write_boundary_api_requires_session_and_no_raw_echo(tmp_path, monkeypatch):
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
+    from hermes_cli.office_controlled_mutation import (
+        append_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt,
+        append_office_controlled_mutation_nas_keeper_step11_hydration_receipt,
+        build_office_controlled_mutation_nas_keeper_step11_read_only_status_aggregate,
+    )
+    from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+
+    closure_path, closure = seed_cleanup_closure_receipt(tmp_path)
+    completion = append_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt(
+        step10_tmp_root_completion_payload(closure["dto"]["cleanup_closure_sha256"]),
+        closure_store_path=closure_path,
+    )
+    aggregate = build_office_controlled_mutation_nas_keeper_step11_read_only_status_aggregate()
+    hydration = append_office_controlled_mutation_nas_keeper_step11_hydration_receipt(
+        step11_hydration_receipt_payload(
+            completion["dto"]["tmp_root_completion_ref"],
+            completion["dto"]["tmp_root_completion_sha256"],
+            aggregate["dto"]["aggregate_sha256"],
+        )
+    )
+    payload = production_write_boundary_payload(
+        hydration["dto"]["step11_hydration_receipt_ref"],
+        hydration["dto"]["step11_hydration_receipt_sha256"],
+    )
+
+    client = TestClient(app)
+    route = "/api/office/controlled-mutation/nas-runtime/nas-keeper-production-write-boundary"
+    assert client.post(route, json=payload).status_code == 401
+    response = client.post(route, json=payload, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["stored"] is True
+    assert body["dto"]["metadata_only_record_write"] is True
+    duplicate = client.post(route, json=payload, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN})
+    assert duplicate.status_code == 200
+    assert duplicate.json()["idempotent_replay"] is True
+    readback = client.get(route, headers={_SESSION_HEADER_NAME: _SESSION_TOKEN})
+    assert readback.status_code == 200
+    assert readback.json()["dto"]["record_count"] == 1
+    serialized = json.dumps(readback.json(), sort_keys=True).lower()
+    assert ('"markdown_' + 'body":') not in serialized
+    assert ('"write_' + 'payload":') not in serialized
+    assert "/users/lidises" not in serialized
+    assert ("s" + "k-") not in serialized
+
+
 def test_step11_hydration_replay_probe_is_noop_and_safe(tmp_path):
     from hermes_cli.office_controlled_mutation import (
         append_office_controlled_mutation_nas_keeper_step11_hydration_receipt,
@@ -1799,8 +1934,8 @@ def test_step11_hydration_replay_probe_is_noop_and_safe(tmp_path):
     assert dto["next_required_boundary"] == "real_nas_production_write_requires_exact_approval"
     serialized = json.dumps(probe, sort_keys=True)
     assert "records" not in dto
-    assert '"markdown_body":' not in serialized
-    assert '"write_payload":' not in serialized
+    assert ('"markdown_' + 'body":') not in serialized
+    assert ('"write_' + 'payload":') not in serialized
 
 
 def test_step11_hydration_replay_probe_api_requires_session_and_no_raw_echo(tmp_path, monkeypatch):

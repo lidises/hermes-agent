@@ -10524,6 +10524,17 @@ _NAS_KEEPER_STEP11_HYDRATION_REPLAY_PROBE_FIELDS = {
     "probed_by",
     "probed_at",
 }
+_NAS_KEEPER_PRODUCTION_WRITE_BOUNDARY_FIELDS = {
+    "production_write_boundary_ref",
+    "step11_hydration_receipt_ref",
+    "step11_hydration_receipt_sha256",
+    "boundary_recorded_by",
+    "boundary_recorded_at",
+    "operator_confirmation",
+    "approval_scope",
+    "next_stage",
+    "evidence_refs",
+}
 _NAS_KEEPER_CLEANUP_HOLD_ACTIONS = {"hold_cleanup_candidate", "retain_for_manual_review"}
 _NAS_KEEPER_CLEANUP_PACKAGE_ACTIONS = {"retain_for_manual_cleanup_receipt", "archive_candidate_after_manual_approval"}
 
@@ -10570,6 +10581,10 @@ def _default_nas_keeper_tmp_root_step10_completion_receipt_store_path() -> Path:
 
 def _default_nas_keeper_step11_hydration_receipt_store_path() -> Path:
     return get_hermes_home() / "office" / "controlled-mutation" / "nas_keeper_step11_hydration_receipt_records.jsonl"
+
+
+def _default_nas_keeper_production_write_boundary_store_path() -> Path:
+    return get_hermes_home() / "office" / "controlled-mutation" / "nas_keeper_production_write_boundary_records.jsonl"
 
 
 def _stable_metadata_sha256(value: Mapping[str, object]) -> str:
@@ -12934,6 +12949,192 @@ def list_office_controlled_mutation_nas_keeper_step11_hydration_receipt_records(
             "next_required_boundary": "real_nas_production_write_requires_exact_approval" if records else "step11_hydration_receipt",
         },
     }
+
+
+def _normalize_nas_keeper_production_write_boundary_record(value: object) -> dict[str, object] | None:
+    if not isinstance(value, Mapping):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(value.get("production_write_boundary_ref"), "prodwriteboundary-"):
+        return None
+    if not _office_disabled_runtime_dispatch_valid_prefixed_ref(value.get("step11_hydration_receipt_ref"), "step11hydration-"):
+        return None
+    receipt_sha = value.get("step11_hydration_receipt_sha256")
+    if not (isinstance(receipt_sha, str) and re.fullmatch(r"[a-f0-9]{64}", receipt_sha)):
+        return None
+    if not _is_opaque_id(value.get("boundary_recorded_by")):
+        return None
+    if not (isinstance(value.get("boundary_recorded_at"), str) and _ISO_UTC_RE.fullmatch(str(value.get("boundary_recorded_at")))):
+        return None
+    if value.get("operator_confirmation") != "production-write-boundary-recorded-without-real-nas-write":
+        return None
+    if value.get("approval_scope") != "metadata_only_boundary_before_real_nas_production_write":
+        return None
+    if value.get("next_stage") != "explicit_real_nas_production_write_approval_required":
+        return None
+    if not _validate_evidence_refs(value.get("evidence_refs")):
+        return None
+    return {
+        "production_write_boundary_ref": value["production_write_boundary_ref"],
+        "step11_hydration_receipt_ref": value["step11_hydration_receipt_ref"],
+        "step11_hydration_receipt_sha256": receipt_sha,
+        "boundary_recorded_by": value["boundary_recorded_by"],
+        "boundary_recorded_at": value["boundary_recorded_at"],
+        "operator_confirmation": value["operator_confirmation"],
+        "approval_scope": value["approval_scope"],
+        "next_stage": value["next_stage"],
+        "evidence_refs": list(cast(Sequence[object], value["evidence_refs"])),
+    }
+
+
+def _read_nas_keeper_production_write_boundary_records(path: Path) -> tuple[list[dict[str, object]], int]:
+    records: list[dict[str, object]] = []
+    skipped_count = 0
+    if not path.exists():
+        return records, skipped_count
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            if not line.strip():
+                continue
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                skipped_count += 1
+                continue
+            normalized = _normalize_nas_keeper_production_write_boundary_record(item)
+            if normalized is None:
+                skipped_count += 1
+                continue
+            records.append(normalized)
+    return records, skipped_count
+
+
+def _production_write_boundary_dto(record: Mapping[str, object], *, idempotent_replay: bool = False) -> dict[str, object]:
+    dto = {
+        "schema_version": 1,
+        "mode": "nas_keeper_production_write_boundary_recorded",
+        "production_write_boundary_ref": record["production_write_boundary_ref"],
+        "production_write_boundary_sha256": _stable_metadata_sha256(record),
+        "step11_hydration_receipt_ref": record["step11_hydration_receipt_ref"],
+        "step11_hydration_receipt_sha256": record["step11_hydration_receipt_sha256"],
+        "boundary_recorded_by": record["boundary_recorded_by"],
+        "boundary_recorded_at": record["boundary_recorded_at"],
+        "approval_scope": record["approval_scope"],
+        "evidence_refs": record["evidence_refs"],
+        "idempotent_replay": idempotent_replay,
+        "metadata_only_record_write": True,
+        "write_readiness_percent": 100,
+        "readiness_percent": 100,
+        "source_step11_hydration_receipt_verified": True,
+        "production_write_boundary_duplicate_write_skipped": idempotent_replay,
+        "production_write_blocks_without_explicit_approval": True,
+        "explicit_real_nas_production_approval_present": False,
+        "real_nas_production_write_enabled": False,
+        "real_nas_production_write_executed": False,
+        "actual_nas_write_enabled": False,
+        "cleanup_execution_opened": False,
+        "execution_authority_created": False,
+        "vps_direct_nas_authority_enabled": False,
+        "direct_vps_nas_write_enabled": False,
+        "watcher_enabled": False,
+        "cron_enabled": False,
+        "dispatch_enabled": False,
+        "authority_adapter_binding_enabled": False,
+        "public_exposure_enabled": False,
+        "gateway_restart_required": False,
+        "markdown_body_included": False,
+        "write_payload_included": False,
+        "raw_root_path_included": False,
+        "credential_value_included": False,
+        "secret_value_included": False,
+        "next_required_boundary": "explicit_real_nas_production_write_approval_required",
+    }
+    return dto
+
+
+def list_office_controlled_mutation_nas_keeper_production_write_boundary_records(
+    *, production_write_boundary_store_path: Path | None = None, limit: int = 50, production_write_boundary_ref: object = None
+) -> dict[str, object]:
+    errors: list[dict[str, str]] = []
+    safe_ref = None
+    if production_write_boundary_ref is not None:
+        if _office_disabled_runtime_dispatch_valid_prefixed_ref(production_write_boundary_ref, "prodwriteboundary-"):
+            safe_ref = str(production_write_boundary_ref)
+        else:
+            errors.append(_error("production_write_boundary_ref", "unsupported_ref_shape"))
+    path = production_write_boundary_store_path or _default_nas_keeper_production_write_boundary_store_path()
+    records, skipped_count = _read_nas_keeper_production_write_boundary_records(path)
+    if safe_ref:
+        records = [record for record in records if record.get("production_write_boundary_ref") == safe_ref]
+    if errors:
+        records = []
+    max_items = max(0, min(limit, 200)) if isinstance(limit, int) else 50
+    records = records[-max_items:] if max_items else []
+    return {
+        "found": bool(records),
+        "errors": errors,
+        "dto": {
+            "schema_version": 1,
+            "mode": "nas_keeper_production_write_boundary_records_readback",
+            "record_count": len(records),
+            "limit": max_items,
+            "skipped_count": skipped_count,
+            "records": records,
+            "latest_record": records[-1] if records else None,
+            "metadata_only_record_write": True,
+            "write_readiness_percent": 100 if records else 0,
+            "real_nas_production_write_enabled": False,
+            "real_nas_production_write_executed": False,
+            "vps_direct_nas_authority_enabled": False,
+            "watcher_enabled": False,
+            "cron_enabled": False,
+            "dispatch_enabled": False,
+            "authority_adapter_binding_enabled": False,
+            "public_exposure_enabled": False,
+            "gateway_restart_required": False,
+            "next_required_boundary": "explicit_real_nas_production_write_approval_required" if records else "production_write_boundary_recording",
+        },
+    }
+
+
+def append_office_controlled_mutation_nas_keeper_production_write_boundary(
+    payload: object,
+    *,
+    hydration_receipt_store_path: Path | None = None,
+    production_write_boundary_store_path: Path | None = None,
+) -> dict[str, object]:
+    if not isinstance(payload, Mapping):
+        return {"stored": False, "idempotent_replay": False, "errors": [_error("payload", "invalid_payload_type")], "dto": None}
+    errors: list[dict[str, str]] = []
+    if set(payload) - _NAS_KEEPER_PRODUCTION_WRITE_BOUNDARY_FIELDS:
+        errors.append(_error("unsupported_fields", "unsupported_field"))
+    for field in sorted(_NAS_KEEPER_PRODUCTION_WRITE_BOUNDARY_FIELDS):
+        if field not in payload:
+            errors.append(_error(field, "missing_field"))
+    record = {field: payload.get(field) for field in _NAS_KEEPER_PRODUCTION_WRITE_BOUNDARY_FIELDS}
+    normalized = _normalize_nas_keeper_production_write_boundary_record(record)
+    if normalized is None:
+        errors.append(_error("production_write_boundary", "invalid_production_write_boundary"))
+
+    hydration_path = hydration_receipt_store_path or _default_nas_keeper_step11_hydration_receipt_store_path()
+    hydration_records, _hydration_skipped = _read_nas_keeper_step11_hydration_receipt_records(hydration_path)
+    matched_hydration = next((record for record in hydration_records if record.get("step11_hydration_receipt_ref") == payload.get("step11_hydration_receipt_ref")), None)
+    if matched_hydration is None:
+        errors.append(_error("step11_hydration_receipt_ref", "step11_hydration_receipt_not_found"))
+    elif isinstance(payload.get("step11_hydration_receipt_sha256"), str) and payload.get("step11_hydration_receipt_sha256") != _stable_metadata_sha256(matched_hydration):
+        errors.append(_error("step11_hydration_receipt_sha256", "step11_hydration_receipt_checksum_mismatch"))
+
+    if errors:
+        return {"stored": False, "idempotent_replay": False, "errors": sorted(errors, key=lambda item: (item["field"], item["code"])), "dto": None}
+    assert normalized is not None
+    path = production_write_boundary_store_path or _default_nas_keeper_production_write_boundary_store_path()
+    records, _skipped = _read_nas_keeper_production_write_boundary_records(path)
+    for existing in records:
+        if existing.get("production_write_boundary_ref") == normalized["production_write_boundary_ref"]:
+            return {"stored": False, "idempotent_replay": True, "errors": [], "dto": _production_write_boundary_dto(existing, idempotent_replay=True)}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(normalized, sort_keys=True, ensure_ascii=False) + "\n")
+    return {"stored": True, "idempotent_replay": False, "errors": [], "dto": _production_write_boundary_dto(normalized)}
 
 
 def append_office_controlled_mutation_nas_keeper_step11_hydration_receipt(

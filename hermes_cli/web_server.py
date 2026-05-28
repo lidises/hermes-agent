@@ -136,6 +136,8 @@ from hermes_cli.office_controlled_mutation import (
     list_office_controlled_mutation_nas_keeper_tmp_root_step10_completion_receipt_records,
     append_office_controlled_mutation_nas_keeper_step11_hydration_receipt,
     list_office_controlled_mutation_nas_keeper_step11_hydration_receipt_records,
+    append_office_controlled_mutation_nas_keeper_production_write_boundary,
+    list_office_controlled_mutation_nas_keeper_production_write_boundary_records,
     build_office_controlled_mutation_nas_keeper_step11_hydration_replay_probe,
     build_office_controlled_mutation_nas_keeper_step11_read_only_status_aggregate,
     build_office_controlled_mutation_nas_keeper_fresh_one_shot_operator_request,
@@ -1177,6 +1179,24 @@ async def append_office_controlled_mutation_nas_keeper_step11_hydration_receipt_
 async def build_office_controlled_mutation_nas_keeper_step11_hydration_replay_probe_route(payload: Any = Body(None)):
     """Probe Step 11 hydration receipt idempotent replay without mutation or raw records."""
     return build_office_controlled_mutation_nas_keeper_step11_hydration_replay_probe(payload)
+
+
+@app.get("/api/office/controlled-mutation/nas-runtime/nas-keeper-production-write-boundary")
+async def list_office_controlled_mutation_nas_keeper_production_write_boundary_records_route(
+    production_write_boundary_ref: Optional[str] = None,
+    limit: Optional[int] = None,
+):
+    """Read metadata-only production-write boundary records; real NAS write remains closed."""
+    return list_office_controlled_mutation_nas_keeper_production_write_boundary_records(
+        production_write_boundary_ref=production_write_boundary_ref,
+        limit=limit or 50,
+    )
+
+
+@app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-production-write-boundary")
+async def append_office_controlled_mutation_nas_keeper_production_write_boundary_route(payload: Any = Body(None)):
+    """Append a metadata-only boundary proving production write still requires exact approval."""
+    return append_office_controlled_mutation_nas_keeper_production_write_boundary(payload)
 
 
 @app.post("/api/office/controlled-mutation/nas-runtime/nas-keeper-fresh-one-shot-request-builder")
