@@ -1,3 +1,20 @@
+## NEXT — after NAS Keeper production-write boundary (2026-05-28T02:00Z)
+
+Current next stage:
+- NAS Keeper controlled-mutation write-readiness is 100% with a protected metadata-only production-write boundary recorded on VPS.
+- The boundary proves the source Step 11 hydration receipt, stores safe refs/checksums only, and blocks real NAS production write without a fresh exact approval.
+- Real NAS production write, direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, gateway restart, and raw markdown/path/root/secret/token/write_payload echo remain closed.
+
+Approved task-scoped work if continuing:
+- Local repo edits, TDD tests, build, docs update, commit, and push.
+- VPS dashboard/core sync, ignored `web_dist` rsync, dashboard/core restart, and protected API/DOM smoke.
+- Metadata-only safe-ref JSONL record write/readback, payload/write_payload preview contract, replay/idempotency metadata, and Mac relay isolated tmp-root write smoke remain allowed only within safe metadata/tmp-root boundaries.
+
+Preferred next safe rung:
+1. Do not repeat the same production-write boundary record; it is terminal/idempotent.
+2. If no fresh real-production approval is given, continue only with a non-duplicative no-authority metadata checkpoint or return to Stage 13 RPG Visualizer-first visual/read-only quality.
+3. If the user later grants a real NAS production write, require an exact target/content boundary first and keep VPS direct NAS authority/automation/public/gateway still closed unless separately approved.
+
 ## NEXT — after Stage 13 room/entity hierarchy cue (2026-05-28T01:39Z)
 
 Current next stage:

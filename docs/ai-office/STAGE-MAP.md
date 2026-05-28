@@ -10,9 +10,10 @@ Current canonical product surface:
 - Kanban, NAS Keeper, Paperclip, Projection Cache, controlled-mutation, diagnostics, and legacy Office shells are supporting layers/tabs/drawers, not competing top-level products.
 
 Current live position:
-- Overall stage: Stage 13 active.
-- Latest completed rung: Stage 13 room/entity visual hierarchy cue added to the primary SVG RPG map and locally smoked.
-- Current requested rung: continue one small visual/read-only RPG-internal depth improvement or deploy/smoke the hierarchy cue to VPS dashboard/core.
+- Overall stage: Stage 13 active; Stage 14 safety boundary remains closed except metadata-only/readiness artifacts.
+- Latest completed rung: NAS Keeper metadata-only production-write boundary recorded and deployed/smoked on VPS; write-readiness is 100%, but real NAS production write still requires a fresh exact approval.
+- Prior RPG rung: Stage 13 room/entity visual hierarchy cue added to the primary SVG RPG map and locally smoked.
+- Current requested rung: do not repeat the same boundary record; next safe work is either a new non-duplicative no-authority metadata checkpoint or Stage 13 RPG Visualizer-first visual/read-only quality.
 
 ## Stage 0 — Project charter and operating protocol
 

@@ -1,3 +1,35 @@
+## Current status — NAS Keeper production-write boundary recorded (2026-05-28T02:00Z)
+
+Scope completed:
+- Added a metadata-only NAS Keeper production-write boundary after the verified Step 11 hydration receipt.
+- The boundary records only safe refs/checksums/booleans and proves write-readiness is 100% while real NAS production write remains blocked without a future exact approval.
+- Deployed to VPS dashboard/core, rsynced ignored `web_dist`, restarted only dashboard/core services, and kept gateway untouched.
+- Wrote one protected metadata-only boundary record on VPS and verified duplicate POST idempotently replays without appending another record.
+
+Evidence captured:
+- RED observed: focused production-write-boundary tests failed before helper/API route existed.
+- GREEN focused tests passed: production-write-boundary tests = 2 passed.
+- Expanded focused tests passed: Step 11 hydration + production-write-boundary tests = 7 passed.
+- Full NAS Keeper artifact-retention/cleanup/Step 11 file passed: 40 passed.
+- `py_compile` for `office_controlled_mutation.py` and `web_server.py` passed.
+- `web` build passed with the existing Vite large-chunk warning.
+- `git diff --check` passed.
+- Added-line raw/control scan passed: no raw local/VPS path, secret-like token, raw markdown body key, raw write payload key, or newly opened watcher/cron/dispatcher/authority/public/gateway/real-write flags in added lines.
+- VPS protected API smoke: unauthenticated POST returned 401; authenticated POST stored one boundary record; duplicate POST returned idempotent replay; readback count=1; checksum length=64; write_readiness_percent=100.
+- VPS protected browser/API smoke through a Host-header tunnel: shell loaded, protected Office state API returned 200 with session header, boundary API readback count=1, real_write_enabled=false, real_write_executed=false, API raw-value leak probe=false, console JS errors=0.
+
+Safety boundaries preserved:
+- Real NAS production write remains false and was not executed.
+- Direct VPS NAS authority remains false.
+- watcher/cron/dispatcher/authority-adapter activation remains false.
+- public exposure and gateway restart remain false.
+- No raw markdown/path/root/secret/token/write_payload value was echoed in the boundary API.
+
+Readiness/result note:
+- Write-readiness is 100%.
+- The completed rung is a metadata-only write-readiness artifact, not a real NAS production write.
+- Next exact safe rung is either a docs-only handoff/deploy status sync or, if continuing without real production approval, only another non-duplicative metadata/no-authority checkpoint. Any real NAS production write still requires a fresh exact approval with target/content boundary.
+
 ## Current status — Stage 13 room/entity hierarchy cue added locally (2026-05-28T01:39Z)
 
 Scope completed:
