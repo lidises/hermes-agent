@@ -2561,10 +2561,15 @@ export function OfficeRpgMap({
             aria-label="AI Office Desk RPG rendered floor map"
             data-office-rpg-map-svg="true"
             data-office-rpg-map-svg-responsive="true"
+            data-office-rpg-pixel-office-density="baseline"
           >
             <defs>
               <pattern id="office-rpg-tile-grid" width="18" height="18" patternUnits="userSpaceOnUse">
                 <path d="M 18 0 L 0 0 0 18" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+              </pattern>
+              <pattern id="office-rpg-wood-floor" width="36" height="18" patternUnits="userSpaceOnUse">
+                <rect width="36" height="18" fill="#78350f" opacity="0.2" />
+                <path d="M0 9 H36 M18 0 V9 M0 18 H36" fill="none" stroke="rgba(251,191,36,0.18)" strokeWidth="1" />
               </pattern>
               <linearGradient id="office-rpg-room-fill" x1="0" x2="1" y1="0" y2="1">
                 <stop offset="0" stopColor="#052e2b" />
@@ -2579,7 +2584,8 @@ export function OfficeRpgMap({
               </filter>
             </defs>
             <rect x="0" y="0" width="800" height="360" rx="18" fill="#020617" />
-            <rect x="12" y="12" width="776" height="336" rx="14" fill="url(#office-rpg-tile-grid)" opacity="0.72" data-office-rpg-map-tile="floor" />
+            <rect x="12" y="12" width="776" height="336" rx="14" fill="url(#office-rpg-wood-floor)" opacity="0.72" data-office-rpg-map-tile="floor" data-office-rpg-floor-material="wood-tile" />
+            <rect x="12" y="12" width="776" height="336" rx="14" fill="url(#office-rpg-tile-grid)" opacity="0.42" data-office-rpg-map-tile="floor-grid" />
             <path d="M214 88 H252 M480 88 H520 M392 146 V198 M232 260 H280 M580 260 H624" stroke="#34d399" strokeWidth="10" strokeLinecap="round" opacity="0.18" data-office-rpg-map-path="command-to-board" />
             <path d="M214 88 H252 M480 88 H520 M580 260 H624" stroke="#a7f3d0" strokeWidth="2" strokeDasharray="7 7" opacity="0.7" data-office-rpg-map-path="worker-review-loop" />
             <g data-office-rpg-walking-route-layer="css-motion" aria-label="캐릭터 이동 경로">
@@ -2629,11 +2635,29 @@ export function OfficeRpgMap({
                 </g>
               );
             })}
-            <rect x="78" y="98" width="54" height="26" rx="6" fill="#0f766e" stroke="#5eead4" opacity="0.82" data-office-rpg-map-furniture="boss-desk" />
-            <rect x="326" y="70" width="82" height="28" rx="7" fill="#075985" stroke="#7dd3fc" opacity="0.78" data-office-rpg-map-furniture="orchestrator-desk" />
-            <rect x="594" y="58" width="118" height="46" rx="8" fill="#713f12" stroke="#fde68a" opacity="0.84" data-office-rpg-map-furniture="central-board" />
-            <rect x="354" y="228" width="154" height="54" rx="8" fill="#164e63" stroke="#67e8f9" opacity="0.76" data-office-rpg-map-furniture="source-shelves" />
-            <rect x="652" y="238" width="82" height="42" rx="8" fill="#7f1d1d" stroke="#fecaca" opacity="0.72" data-office-rpg-map-furniture="review-corner" />
+            <g data-office-rpg-furniture-layer="desk-rpg-world-density" aria-label="픽셀 오피스 생활감">
+              <text x="34" y="336" fill="rgba(253,230,138,0.74)" fontSize="9" data-office-rpg-furniture-caption="baseline">픽셀 오피스 생활감</text>
+              <rect x="78" y="98" width="54" height="26" rx="6" fill="#0f766e" stroke="#5eead4" opacity="0.82" data-office-rpg-map-furniture="boss-desk" data-office-rpg-furniture-piece="boss-desk" data-office-rpg-furniture-kind="desk" />
+              <rect x="86" y="128" width="18" height="14" rx="4" fill="#134e4a" stroke="#99f6e4" opacity="0.86" data-office-rpg-furniture-piece="boss-chair" data-office-rpg-furniture-kind="chair" />
+              <rect x="112" y="105" width="14" height="9" rx="2" fill="#0f172a" stroke="#93c5fd" opacity="0.9" data-office-rpg-furniture-piece="boss-monitor" data-office-rpg-furniture-kind="monitor" />
+              <rect x="326" y="70" width="82" height="28" rx="7" fill="#075985" stroke="#7dd3fc" opacity="0.78" data-office-rpg-map-furniture="orchestrator-desk" data-office-rpg-furniture-piece="orchestrator-desk" data-office-rpg-furniture-kind="desk" />
+              <rect x="336" y="103" width="18" height="14" rx="4" fill="#0c4a6e" stroke="#bae6fd" opacity="0.8" data-office-rpg-furniture-piece="orchestrator-chair-a" data-office-rpg-furniture-kind="chair" />
+              <rect x="376" y="103" width="18" height="14" rx="4" fill="#0c4a6e" stroke="#bae6fd" opacity="0.8" data-office-rpg-furniture-piece="orchestrator-chair-b" data-office-rpg-furniture-kind="chair" />
+              <rect x="366" y="77" width="15" height="9" rx="2" fill="#0f172a" stroke="#93c5fd" opacity="0.92" data-office-rpg-furniture-piece="orchestrator-monitor" data-office-rpg-furniture-kind="monitor" />
+              <rect x="538" y="58" width="34" height="26" rx="5" fill="#422006" stroke="#facc15" opacity="0.78" data-office-rpg-furniture-piece="briefing-table" data-office-rpg-furniture-kind="meeting-table" />
+              <rect x="594" y="58" width="118" height="46" rx="8" fill="#713f12" stroke="#fde68a" opacity="0.84" data-office-rpg-map-furniture="central-board" data-office-rpg-furniture-piece="central-board" data-office-rpg-furniture-kind="whiteboard" />
+              <rect x="604" y="114" width="26" height="15" rx="4" fill="#422006" stroke="#fef3c7" opacity="0.76" data-office-rpg-furniture-piece="board-chair-a" data-office-rpg-furniture-kind="chair" />
+              <rect x="650" y="114" width="26" height="15" rx="4" fill="#422006" stroke="#fef3c7" opacity="0.76" data-office-rpg-furniture-piece="board-chair-b" data-office-rpg-furniture-kind="chair" />
+              <rect x="348" y="196" width="62" height="26" rx="7" fill="#475569" stroke="#cbd5e1" opacity="0.74" data-office-rpg-furniture-piece="lounge-sofa" data-office-rpg-furniture-kind="sofa" />
+              <rect x="424" y="202" width="18" height="18" rx="9" fill="#166534" stroke="#bbf7d0" opacity="0.78" data-office-rpg-furniture-piece="lounge-plant" data-office-rpg-furniture-kind="plant" />
+              <rect x="354" y="228" width="154" height="54" rx="8" fill="#164e63" stroke="#67e8f9" opacity="0.76" data-office-rpg-map-furniture="source-shelves" data-office-rpg-furniture-piece="source-shelves" data-office-rpg-furniture-kind="bookcase" />
+              <rect x="370" y="240" width="32" height="8" rx="2" fill="#e0f2fe" opacity="0.7" data-office-rpg-furniture-piece="archive-books-a" data-office-rpg-furniture-kind="bookcase" />
+              <rect x="418" y="258" width="34" height="8" rx="2" fill="#fef9c3" opacity="0.72" data-office-rpg-furniture-piece="archive-books-b" data-office-rpg-furniture-kind="bookcase" />
+              <rect x="652" y="238" width="82" height="42" rx="8" fill="#7f1d1d" stroke="#fecaca" opacity="0.72" data-office-rpg-map-furniture="review-corner" data-office-rpg-furniture-piece="review-corner" data-office-rpg-furniture-kind="meeting-table" />
+              <rect x="670" y="288" width="22" height="15" rx="4" fill="#450a0a" stroke="#fecaca" opacity="0.78" data-office-rpg-furniture-piece="review-chair-a" data-office-rpg-furniture-kind="chair" />
+              <rect x="712" y="288" width="22" height="15" rx="4" fill="#450a0a" stroke="#fecaca" opacity="0.78" data-office-rpg-furniture-piece="review-chair-b" data-office-rpg-furniture-kind="chair" />
+              <rect x="742" y="221" width="18" height="18" rx="9" fill="#166534" stroke="#bbf7d0" opacity="0.78" data-office-rpg-furniture-piece="review-plant" data-office-rpg-furniture-kind="plant" />
+            </g>
             <rect x="224" y="74" width="18" height="28" rx="3" fill="#fef3c7" opacity="0.82" data-office-rpg-map-door="command-agent_desks" />
             <rect x="491" y="74" width="18" height="28" rx="3" fill="#fef3c7" opacity="0.82" data-office-rpg-map-door="agent_desks-task_board" />
             <rect x="590" y="246" width="22" height="28" rx="3" fill="#fef3c7" opacity="0.82" data-office-rpg-map-door="source_archive-incident_corner" />
@@ -2673,6 +2697,7 @@ export function OfficeRpgMap({
                     data-office-rpg-character-label-slot={labelLayout.slot}
                     data-office-rpg-character-selected={selected ? "true" : "false"}
                     data-office-rpg-character-keyboard-target="true"
+                    data-office-rpg-sprite-world-context="furniture-embedded"
                     data-office-rpg-selected-inspector-anchor={selected ? "#office-safe-inspector" : undefined}
                     aria-label={`${RPG_KIND_LABEL[entity.kind]} ${entity.label} SVG sprite`}
                     aria-describedby="office-rpg-keyboard-help"

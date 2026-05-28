@@ -18,6 +18,7 @@ Current corrected target:
 
 Current live position:
 - Overall stage: Stage 13 active and locked as the active work stage until the user explicitly advances; Stage 14 remains closed.
+- Latest local rung: Stage 13 DeskRPG pixel-office density baseline is added locally: primary SVG map declares `data-office-rpg-pixel-office-density="baseline"`, wood-tile floor material, a dedicated furniture-density layer, 21 furniture pieces across desk/chair/meeting-table/sofa/plant/monitor/whiteboard/bookcase kinds, `픽셀 오피스 생활감`, and furniture-embedded sprite context.
 - Latest completed/deployed rung: Stage 13 sprite silhouette/walking clarity polish is deployed/smoked on the VPS dashboard from `8446018da` plus cascade fix `7e727dee2`: visible sprites declare clarified silhouette metadata, readable head/body/footstep hooks, the map shows `걸음 실루엣 강화`, computed footstep duration is 0.58s, and a timed browser sample proved walking footstep transform changed without refresh.
 - Prior deployed rung: Stage 13 route-aligned sprite phase polish is deployed/smoked on the VPS dashboard from `b8031d2cb`: visible sprites declare route-synced phase/target metadata, route targets are distributed across command-to-task-board and task-board-to-review, the map shows `동선 맞춤 이동`, and a timed browser sample proved route-aligned sprite shadow opacity changed without refresh.
 - Prior deployed rung: Stage 13 walking route/path polish is deployed/smoked on the VPS dashboard from `5b92d82f0`: primary SVG RPG map has a read-only CSS-motion walking-route layer, two no-refresh pulsing route paths, and a timed browser sample proved route strokeDashoffset changed without refresh.
@@ -29,7 +30,7 @@ Current live position:
 - Prior RPG rung: mobile/small-screen RPG map layout cues added to the primary SVG RPG map: scroll-snap layout hook, pinch/pan cue, responsive SVG hook, and narrow-screen CSS.
 - Prior write rung: exact-approved one-shot Mac relay production write completed from a fresh packet; one markdown file plus one audit sidecar were written through the Mac relay, readback verified, and a metadata-only completed-write receipt recorded.
 - Prior RPG rung: Stage 13 Korean room labels and room/entity visual hierarchy cues were added inside the primary SVG RPG map.
-- Current requested rung: after DeskRPG reference calibration, continue Stage 13 with `DeskRPG pixel-office density baseline` before more abstract route/patrol polish: add read-only SVG/CSS floor/furniture density and place small sprites among office objects; do not force-replay failed_guarded or already-succeeded queue items.
+- Current requested rung: deploy/smoke the local `DeskRPG pixel-office density baseline` if appropriate, then continue Stage 13 with agent identity/status bubble improvements inside the map. Do not force-replay failed_guarded or already-succeeded queue items.
 
 ## Stage 0 — Project charter and operating protocol
 

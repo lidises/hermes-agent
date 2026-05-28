@@ -1,3 +1,25 @@
+## Current status — Stage 13 DeskRPG pixel-office density baseline added locally (2026-05-28T06:36Z)
+
+Scope completed:
+- Continued Stage 13 inside the existing `/office` RPG Visualizer surface; no new route/repo/renderer/dependency.
+- Added a DeskRPG Office World density baseline inside the primary SVG map: wood-tile floor material, a dedicated furniture-density layer, 21 furniture pieces, and representative desk/chair/meeting-table/sofa/plant/monitor/whiteboard/bookcase hooks.
+- Added a map-internal Korean cue `픽셀 오피스 생활감` and marked sprites as furniture-embedded so the next visual target is small agents living among office objects, not abstract status nodes.
+
+Evidence captured:
+- RED: `npm test -- --run OfficePage.rpg.test.tsx -t "renders the read-only RPG room map"` failed on missing pixel-office density/furniture hooks.
+- GREEN/focused: the same focused RPG test passed after the SVG-only implementation.
+- Combined Office tests: `npm test -- --run OfficePage.rpg.test.tsx OfficePage.test.ts` = 357 passed.
+- Build: `npm run build` passed; Vite large-chunk warning is existing/known.
+- Lint: `npm run lint` exited 0 with existing warnings only.
+- Diff gates: `git diff --check` passed; added-line scan found no private path, sensitive literal/value echo, new form/input/textarea/button/select, or new event-handler additions; added furniture piece hooks=21.
+
+Safety boundaries preserved:
+- Frontend-only/read-only SVG visual slice.
+- No backend/API/storage/runtime change, no state mutation, no Kanban mutation, no browser mutation controls, no NAS write, no dispatcher/authority activation, no public exposure, no gateway action, no sensitive raw-value/payload echo, and no new renderer/dependency.
+
+Next exact safe rung:
+- Commit/push this local Stage 13 density baseline. Optional next deployment rung: sync dashboard/core and ignored `web_dist`, restart dashboard/core only, then protected DOM/API/visual smoke proving the furniture/tile density hooks render live while summary/status/detail default-visible hooks remain 0 and gateway remains untouched.
+
 ## Current status — DeskRPG Office World target reset recorded (2026-05-28T06:30Z)
 
 Scope completed:

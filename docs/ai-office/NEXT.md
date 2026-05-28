@@ -1,3 +1,22 @@
+## NEXT — after Stage 13 DeskRPG pixel-office density baseline local slice (2026-05-28T06:36Z)
+
+Current next stage:
+- Stay in Stage 13 until the user explicitly advances stages.
+- `/office` now has a local DeskRPG Office World density baseline in the primary SVG map: wood-tile floor material, a dedicated furniture layer, 21 furniture pieces, representative desk/chair/meeting-table/sofa/plant/monitor/whiteboard/bookcase hooks, and `픽셀 오피스 생활감` as an in-map cue.
+- The slice is frontend-only/read-only and keeps the existing route/sprite animation scaffold.
+
+Preferred next safe rung:
+1. Commit/push the local density baseline if not already done.
+2. If deployment is requested/appropriate: VPS dashboard/core sync, ignored `web_dist` rsync/hash, dashboard/core restart only, protected DOM/API/visual smoke for `data-office-rpg-pixel-office-density`, furniture piece count, primary visual map, summary/status/detail default-visible count 0, controls inside visual map 0, raw leak false, console errors 0; gateway untouched.
+
+Second safe rung after deploy proof:
+- `Stage 13 — agent identity/status bubble baseline`: improve compact read-only nameplates/speech/status bubbles attached to sprites and furniture context, still SVG/CSS/frontend-only with no executable controls.
+
+Still forbidden unless separately and explicitly approved:
+- Additional real NAS production write or replacement write.
+- Force-replay of failed_guarded/succeeded queue items.
+- Actual NAS cleanup delete/move/archive/write, direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway service action, sensitive raw-value/payload echo, executable browser mutation controls, Kanban mutation controls, real chat/command input, or a new renderer/dependency.
+
 ## NEXT — after DeskRPG Office World target reset (2026-05-28T06:30Z)
 
 Current next stage:
@@ -26,7 +45,7 @@ Second safe rung after that:
 Still forbidden unless separately and explicitly approved:
 - Additional real NAS production write or replacement write.
 - Force-replay of failed_guarded/succeeded queue items.
-- Actual NAS cleanup delete/move/archive/write, direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway service action, raw content/root/secret/token/write-payload echo, executable browser mutation controls, Kanban mutation controls, real chat/command input, or a new renderer/dependency.
+- Actual NAS cleanup delete/move/archive/write, direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway service action, sensitive raw-value/payload echo, executable browser mutation controls, Kanban mutation controls, real chat/command input, or a new renderer/dependency.
 
 ## NEXT — after Stage 13 sprite silhouette/walking clarity VPS deploy (2026-05-28T06:07Z)
 
