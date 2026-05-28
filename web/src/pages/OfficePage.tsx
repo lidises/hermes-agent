@@ -2238,6 +2238,31 @@ function rpgVisualPosition(entity: OfficeRpgSceneEntity) {
   };
 }
 
+function rpgRoomTileCells(roomId: OfficeRpgRoomId) {
+  const room = RPG_ROOM_LAYOUT[roomId];
+  const cols = Math.max(3, Math.floor((room.w - 24) / 36));
+  const rows = Math.max(2, Math.floor((room.h - 24) / 30));
+  const cellW = (room.w - 24) / cols;
+  const cellH = (room.h - 24) / rows;
+  return Array.from({ length: cols * rows }, (_, index) => {
+    const col = index % cols;
+    const row = Math.floor(index / cols);
+    return {
+      id: `${roomId}:${col}-${row}`,
+      x: room.x + 12 + col * cellW,
+      y: room.y + 12 + row * cellH,
+      w: cellW,
+      h: cellH,
+    };
+  });
+}
+
+function rpgEntityLocalTile(entity: OfficeRpgSceneEntity) {
+  const col = Math.max(0, Math.min(9, Math.floor(entity.positionHint.x / 10)));
+  const row = Math.max(0, Math.min(9, Math.floor(entity.positionHint.y / 10)));
+  return `${entity.room}:${col}-${row}`;
+}
+
 function rpgVisualOverlapOffset(index: number) {
   if (index === 0) return { x: 0, y: 0 };
   const ring = Math.ceil(index / 6);
@@ -2562,6 +2587,8 @@ export function OfficeRpgMap({
             data-office-rpg-map-svg="true"
             data-office-rpg-map-svg-responsive="true"
             data-office-rpg-pixel-office-density="baseline"
+            data-office-deskrpg-block-grid="jrpg-room-blocks"
+            data-office-deskrpg-block-map="tile-block-architecture"
           >
             <defs>
               <pattern id="office-rpg-tile-grid" width="18" height="18" patternUnits="userSpaceOnUse">
@@ -2593,6 +2620,12 @@ export function OfficeRpgMap({
               <path className="office-rpg-walking-route office-rpg-walking-route--review" d="M620 104 C620 152 598 202 658 238 S690 250 708 260" fill="none" stroke="#fca5a5" strokeWidth="3" strokeLinecap="round" strokeDasharray="8 12" opacity="0.72" data-office-rpg-walking-route="task-board-to-review" data-office-rpg-route-pulse="no-refresh" />
               <text x="612" y="118" fill="rgba(167,243,208,0.72)" fontSize="8" data-office-rpg-route-label="live-path">캐릭터 이동 경로</text>
             </g>
+            <g data-office-deskrpg-corridor-layer="room-block-connectors" aria-label="JRPG 방 블록 연결 통로">
+              <rect x="214" y="78" width="38" height="20" rx="4" fill="#fef3c7" opacity="0.24" data-office-deskrpg-corridor-block="command-to-agent_desks" />
+              <rect x="480" y="78" width="40" height="20" rx="4" fill="#fef3c7" opacity="0.24" data-office-deskrpg-corridor-block="agent_desks-to-task_board" />
+              <rect x="580" y="246" width="44" height="22" rx="4" fill="#fef3c7" opacity="0.24" data-office-deskrpg-corridor-block="source_archive-to-incident_corner" />
+            </g>
+            <text x="34" y="26" fill="rgba(253,230,138,0.78)" fontSize="10" fontWeight="700" data-office-deskrpg-block-grid-label="true">JRPG 블록 오피스</text>
             {scene.rooms.map((room) => {
               const layout = RPG_ROOM_LAYOUT[room.id];
               const roomEntityCount = visibleEntities.filter((entity) => entity.room === room.id).length;
@@ -2602,6 +2635,7 @@ export function OfficeRpgMap({
               const facilityZone = RPG_ROOM_FACILITY_ZONE[room.id];
               const groupingCue = `${roomEntityCount}명 · ${facilityZone}`;
               const priorityCue = room.severity === "danger" || roomEntityCount > 0;
+              const tileCells = rpgRoomTileCells(room.id);
               return (
                 <g
                   key={`visual-room-${room.id}`}
@@ -2619,9 +2653,29 @@ export function OfficeRpgMap({
                   data-office-rpg-room-facility-zone={facilityZone}
                   data-office-rpg-room-grouping-cue={room.id}
                   data-office-rpg-room-priority-cue={priorityCue ? room.id : undefined}
+                  data-office-deskrpg-room-block={room.id}
+                  data-office-deskrpg-room-block-kind="bounded-room"
+                  data-office-deskrpg-room-local-origin="room-local"
                 >
                   <rect x={layout.x} y={layout.y} width={layout.w} height={layout.h} rx="12" fill="url(#office-rpg-room-fill)" stroke={RPG_STATUS_STROKE[room.severity]} strokeWidth="2" opacity="0.94" />
-                  <rect x={layout.x + 8} y={layout.y + 8} width={layout.w - 16} height={layout.h - 16} rx="8" fill="url(#office-rpg-tile-grid)" opacity="0.42" data-office-rpg-map-tile={room.id} />
+                  <g data-office-deskrpg-tile-cell-layer="walkable-room-cells" data-office-deskrpg-tile-cell-room={room.id}>
+                    {tileCells.map((cell) => (
+                      <rect
+                        key={cell.id}
+                        x={cell.x}
+                        y={cell.y}
+                        width={cell.w - 2}
+                        height={cell.h - 2}
+                        rx="2"
+                        fill="rgba(251,191,36,0.08)"
+                        stroke="rgba(253,230,138,0.12)"
+                        strokeWidth="0.8"
+                        data-office-deskrpg-tile-cell={cell.id}
+                        data-office-deskrpg-tile-walkable="true"
+                      />
+                    ))}
+                  </g>
+                  <rect x={layout.x + 8} y={layout.y + 8} width={layout.w - 16} height={layout.h - 16} rx="8" fill="url(#office-rpg-tile-grid)" opacity="0.28" data-office-rpg-map-tile={room.id} />
                   <rect x={layout.x + 10} y={layout.y + layout.h - 25} width={Math.max(34, Math.min(layout.w - 20, 38 + roomEntityCount * 12))} height="16" rx="6" fill="rgba(16,185,129,0.18)" stroke="rgba(167,243,208,0.42)" data-office-rpg-room-count-bar={room.id} />
                   <text x={layout.x + 14} y={layout.y + layout.h - 13} fill="#d1fae5" fontSize="9" data-office-rpg-room-count-label={room.id}>{roomEntityCount} actor</text>
                   <text x={layout.x + layout.w - 14} y={layout.y + 22} textAnchor="end" fill="rgba(167,243,208,0.68)" fontSize="9" letterSpacing="1.2" data-office-rpg-room-tier-label={room.id}>{roomTier}</text>
@@ -2698,6 +2752,8 @@ export function OfficeRpgMap({
                     data-office-rpg-character-selected={selected ? "true" : "false"}
                     data-office-rpg-character-keyboard-target="true"
                     data-office-rpg-sprite-world-context="furniture-embedded"
+                    data-office-deskrpg-sprite-room-block={entity.room}
+                    data-office-deskrpg-sprite-local-tile={rpgEntityLocalTile(entity)}
                     data-office-rpg-selected-inspector-anchor={selected ? "#office-safe-inspector" : undefined}
                     aria-label={`${RPG_KIND_LABEL[entity.kind]} ${entity.label} SVG sprite`}
                     aria-describedby="office-rpg-keyboard-help"

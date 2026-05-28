@@ -1,3 +1,25 @@
+## Current status — Stage 13 DeskRPG block-grid architecture baseline added locally (2026-05-28T07:14Z)
+
+Scope completed:
+- Accepted the user correction that the target DeskRPG/JRPG feel requires room/block structure, not just furniture density/nameplate polish.
+- Added the first frontend-only/read-only room-block baseline inside the primary `/office` SVG map: `data-office-deskrpg-block-grid="jrpg-room-blocks"`, `data-office-deskrpg-block-map="tile-block-architecture"`, per-room bounded block hooks, walkable tile-cell layer, corridor block connectors, and sprite room/local-tile hooks.
+- Preserved the existing Stage 13 safety posture: RPG map remains primary, legacy summary/status/detail layers remain hidden by default, and no backend/API/storage/runtime/NAS/gateway authority was added.
+
+Evidence captured:
+- RED: `npm test -- OfficePage.rpg.test.tsx --run` failed on the newly required block-grid hooks before implementation.
+- GREEN/focused: `npm test -- OfficePage.rpg.test.tsx --run` = 199 passed.
+- Combined Office tests: `npm test -- OfficePage.rpg.test.tsx OfficePage.test.ts --run` = 357 passed.
+- Build: `npm run build` passed; Vite large-chunk warning remains the existing known warning.
+- Lint: `npm run lint` exited 0 with existing warnings only.
+- Diff gates: `git diff --check` passed; added-line raw/control scan passed for token-shaped secrets, private paths, raw write_payload echo, and new executable control hooks.
+
+Safety boundaries preserved:
+- Frontend-only/read-only SVG/React slice.
+- No VPS deploy yet for this slice, no dashboard/core restart, no gateway action, no backend/API/storage/runtime change, no state mutation, no Kanban mutation, no browser mutation controls, no NAS write, no dispatcher/authority activation, no public exposure, no sensitive raw-value/payload echo, and no new renderer/dependency.
+
+Next exact safe rung:
+- Commit/push this local block-grid architecture baseline, then optionally deploy/smoke it to VPS dashboard/core only. After deploy proof, continue Stage 13 with block-internal sprite movement/readability so actors move within room blocks/corridor lanes rather than across a global SVG.
+
 ## Current status — Stage 13 DeskRPG pixel-office density baseline deployed to VPS (2026-05-28T06:50Z)
 
 Scope completed:

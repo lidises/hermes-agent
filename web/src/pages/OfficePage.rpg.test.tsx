@@ -433,6 +433,18 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("data-office-rpg-map-door=\"command-agent_desks\"");
     expect(markup).toContain("data-office-rpg-map-furniture=\"central-board\"");
     expect(markup).toContain("data-office-rpg-pixel-office-density=\"baseline\"");
+    expect(markup).toContain("data-office-deskrpg-block-grid=\"jrpg-room-blocks\"");
+    expect(markup).toContain("data-office-deskrpg-block-map=\"tile-block-architecture\"");
+    expect(markup).toContain("data-office-deskrpg-tile-cell-layer=\"walkable-room-cells\"");
+    expect(markup).toContain("data-office-deskrpg-room-block=\"command\"");
+    expect(markup).toContain("data-office-deskrpg-room-block=\"task_board\"");
+    expect(markup).toContain("data-office-deskrpg-room-block-kind=\"bounded-room\"");
+    expect(markup).toContain("data-office-deskrpg-room-local-origin=\"room-local\"");
+    expect(markup).toContain("data-office-deskrpg-corridor-block=\"command-to-agent_desks\"");
+    expect(markup).toContain("data-office-deskrpg-sprite-room-block=\"command\"");
+    expect(markup).toContain("data-office-deskrpg-sprite-local-tile");
+    expect(markup).toContain("JRPG 블록 오피스");
+    expect(markup.match(/data-office-deskrpg-tile-cell=/g)?.length).toBeGreaterThanOrEqual(24);
     expect(markup).toContain("data-office-rpg-floor-material=\"wood-tile\"");
     expect(markup).toContain("data-office-rpg-furniture-layer=\"desk-rpg-world-density\"");
     expect(markup).toContain("data-office-rpg-furniture-kind=\"desk\"");

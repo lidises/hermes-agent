@@ -1,21 +1,28 @@
-## NEXT — after Stage 13 DeskRPG pixel-office density baseline VPS deploy (2026-05-28T06:50Z)
+## NEXT — after Stage 13 DeskRPG block-grid architecture local slice (2026-05-28T07:14Z)
 
 Current next stage:
 - Stay in Stage 13 until the user explicitly advances stages.
-- `/office` now has the DeskRPG Office World density baseline deployed live: primary SVG map, wood-tile floor, dedicated furniture layer, live furniture kinds, small sprite world-context hooks, and `픽셀 오피스 생활감` in-map cue.
-- The live visual smoke confirmed the page reads as a DeskRPG-style office world rather than external summary/status panels, but label/edge crowding remains visible.
+- User corrected the target: the DeskRPG/JRPG feel is not just labels or furniture density; the office must be structured as room/block units where sprites move inside bounded blocks.
+- Local `/office` now has the first frontend-only/read-only block-grid baseline inside the primary SVG map: `data-office-deskrpg-block-grid="jrpg-room-blocks"`, bounded room blocks, walkable tile-cell layer, corridor block connectors, and sprite room/local-tile hooks.
+- This slice is local only so far; no VPS sync/restart/smoke has been performed for it yet.
 
 Preferred next safe rung:
-1. `Stage 13 — agent identity/status bubble baseline`
-   - RED: extend `OfficePage.rpg.test.tsx` to require compact read-only sprite-attached name/status/speech bubble hooks, Korean short activity cues, furniture-context attachment, primary map posture, summary/status/detail hidden defaults, and zero executable controls.
-   - GREEN: SVG/CSS/frontend-only bubble/nameplate polish using existing sprite data; no backend/API/storage/runtime change.
-   - VERIFY: focused RPG test, combined Office tests, lint/build, `git diff --check`, static raw-leak/control scan, commit/push.
-   - DEPLOY if appropriate: dashboard/core sync, ignored `web_dist` rsync/hash, dashboard/core restart only, protected DOM/API/visual smoke; gateway untouched.
+1. Commit/push this local Stage 13 block-grid architecture baseline if not already done.
+2. Optional deploy rung: VPS dashboard/core sync, ignored `web_dist` rsync/hash, dashboard/core restart only, protected DOM/API/visual smoke proving block grid, room blocks, tile cells, sprite local-tile hooks, primary map posture, summary/status/detail default-visible hooks 0, controls 0, raw leak false, console errors 0; gateway untouched.
+
+Second safe rung after deploy proof:
+- Improve block-internal movement/readability: make sprites visibly patrol within their room block/corridor lanes rather than drifting across a global SVG, still SVG/CSS/frontend-only/read-only with no executable controls.
 
 Still forbidden unless separately and explicitly approved:
 - Additional real NAS production write or replacement write.
 - Force-replay of failed_guarded/succeeded queue items.
 - Actual NAS cleanup delete/move/archive/write, direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway service action, sensitive raw-value/payload echo, executable browser mutation controls, Kanban mutation controls, real chat/command input, or a new renderer/dependency.
+
+## NEXT — after Stage 13 DeskRPG pixel-office density baseline VPS deploy (2026-05-28T06:50Z)
+
+Current next stage:
+- Superseded by the user correction above: do block-grid/JRPG room architecture before name/status bubble polish.
+
 
 ## NEXT — after Stage 13 DeskRPG pixel-office density baseline local slice (2026-05-28T06:36Z)
 
