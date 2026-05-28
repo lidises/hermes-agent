@@ -1,8 +1,8 @@
-## NEXT — /goal continuation for Stage 12-14 write-readiness progression (2026-05-28)
+## NEXT — after Stage 12 RPG Visualizer-first default deploy/smoke (2026-05-28T01:31Z)
 
 Current next stage:
-- Use `docs/ai-office/plans/2026-05-28-stage12-14-goal-prompt.md` as the fresh-session `/goal` prompt.
-- Continue AI Office in small bounded rungs from Stage 12 toward Stage 14, with RPG Visualizer-first `/office` as the canonical product surface.
+- Stage 12 current acceptance is deployed and smoked on the private VPS: `/office` opens with the actual RPG Visualizer map as the primary visible surface, while summary/status/detail evidence layers are fixed hidden by default.
+- Continue AI Office in small bounded rungs from Stage 13 toward Stage 14, with RPG Visualizer-first `/office` as the canonical product surface.
 - Every continuation should increase either RPG-readiness or write-readiness; do not loop on review/readback-only summaries.
 
 Approved task-scoped work for the next `/goal` session:
@@ -15,10 +15,10 @@ Still forbidden unless separately and explicitly approved:
 - Actual NAS cleanup delete/move/archive/write.
 - Direct VPS NAS authority, NAS credentials, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway restart, raw markdown/path/root/secret/token/write_payload echo, executable browser mutation controls, Kanban mutation controls, or a new renderer/dependency.
 
-Preferred first rung:
-1. Verify the `c695772ba` RPG-default-surface change locally and, if the new session chooses to deploy, sync it to VPS dashboard/core.
-2. Prove via protected DOM/API smoke that RPG map is primary and summary/status/detail layers are hidden by default.
-3. Then move into one small Stage 13 visual/read-only improvement, not another external summary panel.
+Preferred next safe rung:
+1. Start Stage 13 with one visual/read-only RPG-internal improvement, not another external summary panel.
+2. Best first candidates: improve room/entity hierarchy in the SVG map, Korean room/facility labels, compact in-map cues, character/facility copy, or mobile/small-screen layout.
+3. Use RED helper/component tests first, implement the smallest frontend-only change, then verify focused Office tests, build, `git diff --check`, raw-leak/control scan, local or VPS DOM smoke, docs handoff, commit, and push.
 
 ## NEXT — after Kanban operations room RPG absorption (2026-05-28)
 

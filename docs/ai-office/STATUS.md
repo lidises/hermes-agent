@@ -1,3 +1,30 @@
+## Current status — Stage 12 RPG Visualizer-first default deployed and smoked (2026-05-28T01:31Z)
+
+Scope completed:
+- Verified local `main` included baseline `c695772ba feat(office): keep rpg visualizer as default surface` and handoff commit `a26565635 docs(office): add stage 12-14 goal prompt`.
+- Confirmed VPS dashboard/core were behind at `a52e6e13`, then synced both worktrees to `a26565635/a2656563` and rsynced ignored `hermes_cli/web_dist` to dashboard/core.
+- Restarted only `hermes-agent-dashboard.service` and `hermes-vps-core-dashboard.service`; `hermes-gateway.service` remained active and was not restarted.
+
+Evidence captured:
+- Focused RPG-default tests passed: `npm test -- --run OfficePage.rpg.test.tsx -t "RPG-first|summary/detail|summary layers|detail summaries"` = 2 passed.
+- Full Office frontend tests passed: `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx` = 357 passed.
+- `npm run build` passed with the pre-existing Vite large-chunk warning.
+- `git diff --check` passed and local tree was clean before docs handoff update.
+- Local/dashboard/core `web_dist` relative hash matched: `be61bb892e65c67a392cb5086d91e40de64bfb194e18dab0b2852baddd56fdd6`.
+- VPS DOM smoke on private `/office`: RPG focused shell visible=1, RPG rendered map visible=1, `data-office-rpg-detail-summaries-visible="true"` count=0, unified workbench summary visible=0, RPG inspector evidence visible=0, top-level Kanban operations visible=0, forbidden legacy summary text=false, raw leak probe=false.
+- Protected API smoke: unauthenticated `/api/office/state` returned 401; authenticated `/api/office/state` returned 200 with safe OfficeState summary and raw leak probe=false.
+- Visual smoke confirmed `PRIMARY RENDERED RPG MAP` is the dominant top surface and no broad legacy summary/status/detail panel appears above it.
+
+Safety boundaries preserved:
+- UI/read-only consolidation only.
+- No additional real NAS production write or replacement write.
+- No actual NAS cleanup delete/move/archive/write.
+- No direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway restart, raw markdown/path/secret/token/write-payload echo, executable browser mutation controls, Kanban mutation controls, or new renderer/dependency.
+
+Readiness/result note:
+- Stage 12 current acceptance is deployed and smoked on VPS: `/office` opens on the actual RPG Visualizer map, with summary/status/detail evidence fixed hidden by default.
+- Next exact safe rung is Stage 13 visual/read-only depth: improve RPG map internal hierarchy, Korean copy, compact in-map cues, character/facility copy, or mobile/small-screen layout using TDD. Do not add external summary panels.
+
 ## Current status — Kanban operations room absorbed into RPG visualizer tabs (2026-05-28)
 
 Scope completed locally before deploy:

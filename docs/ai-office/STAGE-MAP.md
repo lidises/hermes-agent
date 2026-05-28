@@ -10,9 +10,9 @@ Current canonical product surface:
 - Kanban, NAS Keeper, Paperclip, Projection Cache, controlled-mutation, diagnostics, and legacy Office shells are supporting layers/tabs/drawers, not competing top-level products.
 
 Current live position:
-- Overall stage: Stage 12 in progress.
-- Latest completed rung: Kanban operations room absorbed into the RPG Visualizer detail system.
-- Current requested rung: keep stage/status/summary layers hidden by default so the page opens on the actual RPG Visualizer, while preserving technical evidence behind fixed-off/read-only gates.
+- Overall stage: Stage 13 ready to start after Stage 12 default-surface deploy/smoke.
+- Latest completed rung: Stage 12 RPG Visualizer-first default deployed to VPS dashboard/core and smoked: RPG map primary, summary/status/detail layers visible 0 by default.
+- Current requested rung: start one Stage 13 visual/read-only RPG-internal depth improvement while keeping external summaries hidden.
 
 ## Stage 0 — Project charter and operating protocol
 
@@ -186,16 +186,17 @@ Polish direction:
 
 ## Stage 12 — RPG Visualizer-first unified workbench consolidation
 
-Status: in progress.
+Status: complete for current default-surface acceptance; maintain.
 
 Completed rungs:
 1. Former Kanban/Paperclip/Projection/RPG/NAS Keeper surfaces modeled as aliases/layers of the unified workbench.
 2. Legacy top shell absorbed: old `Hermes AI 오피스` hero, focus row, diagnostics HUD, and live operations layer moved into RPG detail drawers.
 3. RPG sub-scenes folded behind default-closed drawers.
 4. Kanban operations room absorbed into the RPG Visualizer detail/tab system.
+5. Stage/status/summary/detail layers fixed hidden by default; VPS `/office` smoke proves RPG map primary and summary layers visible 0.
 
-Current rung:
-- Fix `/office` default presentation to show the actual RPG Visualizer first and hide every stage/status/summary/detail layer by default.
+Maintenance rule:
+- Keep `/office` default presentation on the actual RPG Visualizer first.
 - Keep implementation and evidence in code/tests/protected APIs, but do not show those summaries unless explicitly re-enabled for inspection.
 
 Acceptance criteria:
@@ -207,7 +208,7 @@ Acceptance criteria:
 
 ## Stage 13 — RPG operating experience depth
 
-Status: future.
+Status: ready to start.
 
 Purpose:
 - Make the RPG Visualizer itself richer and more useful without reintroducing dashboard clutter.
@@ -250,11 +251,11 @@ Hard gates:
 
 ## Current recommended next step
 
-Complete Stage 12 current rung:
-1. Keep `SHOW_OFFICE_RPG_DETAIL_SUMMARIES = false` as the default.
-2. Ensure `/office` opens on the actual RPG Visualizer map, not summary/status layers.
-3. Preserve hidden read-only evidence paths for tests and operator inspection only.
-4. Verify focused RPG tests, build, and diff/raw-leak checks.
+Start Stage 13 with one visual/read-only RPG-internal improvement:
+1. Pick exactly one small rung: room/entity hierarchy, Korean labels/copy, compact in-map cues, character/facility copy, or mobile/small-screen layout.
+2. Add RED helper/component tests first.
+3. Implement only the frontend/read-only visual change; do not add external summaries.
+4. Verify focused RPG tests, full Office frontend tests, build, `git diff --check`, raw-leak/control scan, and DOM smoke.
 5. If deploying, sync dashboard/core assets and restart only dashboard/core services; do not restart gateway.
 
 ## Approval gates
