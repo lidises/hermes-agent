@@ -450,6 +450,10 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("data-office-deskrpg-canvas-status-cue-contract=\"status-dot-descriptors\"");
     expect(markup).toContain("data-office-deskrpg-canvas-status-cue-count=\"6\"");
     expect(markup).toContain("data-office-deskrpg-canvas-sprite-detail-level=\"silhouette-nameplate\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-layer-contract=\"floor-room-depth-descriptors\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-layer-count=\"9\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-layer-stack=\"floor,corridor,room,tile-detail,furniture,door,sprite-shadow,sprite-body,sprite-label\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-depth-model=\"z-ordered-readonly\"");
     expect(markup).toContain("data-office-deskrpg-canvas-furniture-contract=\"room-furniture-descriptors\"");
     expect(markup).toContain("data-office-deskrpg-canvas-furniture-density=\"room-furniture-density\"");
     expect(markup).toContain("data-office-deskrpg-canvas-furniture-count=\"20\"");
@@ -457,7 +461,7 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("data-office-deskrpg-canvas-door-count=\"3\"");
     expect(markup).toContain("data-office-deskrpg-canvas-corridor-contract=\"corridor-descriptors\"");
     expect(markup).toContain("data-office-deskrpg-canvas-corridor-count=\"4\"");
-    expect(markup).toContain("data-office-deskrpg-canvas-contract-version=\"phase-b2-readonly\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-contract-version=\"phase-b3-readonly\"");
     expect(markup.indexOf("data-office-deskrpg-renderer=\"canvas\"")).toBeLessThan(markup.indexOf("data-office-rpg-map-svg=\"true\""));
     expect(markup.indexOf("data-office-rpg-visual-map=\"true\"")).toBeLessThan(markup.indexOf("data-office-rpg-mission-storyboard=\"true\""));
     expect(markup).toContain("data-office-rpg-map-path=\"command-to-board\"");

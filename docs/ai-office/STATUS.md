@@ -1,31 +1,26 @@
-## Current status — Stage 13 DeskRPG Canvas Phase B2 deployed to VPS (2026-05-28T10:38Z)
+## Current status — Stage 13 DeskRPG Canvas Phase B3 verified locally (2026-05-28T11:08Z)
 
 Scope completed:
-- Deployed `0b3a3b5ab feat(office): add canvas sprite silhouettes` to both VPS AI Office worktrees: dashboard and core/source.
-- Implemented `Phase B2 — read-only Canvas sprite silhouette/nameplate descriptor expansion` on top of deployed Phase B1.
-- Expanded the Canvas projection contract with typed silhouette, nameplate, and status-dot cue descriptors consumed by the native Canvas renderer.
-- The Canvas shell now declares sprite detail hooks: `data-office-deskrpg-canvas-silhouette-contract="head-body-feet-shadow"`, nameplate contract `compact-korean-cues`, status cue contract `status-dot-descriptors`, sprite detail level `silhouette-nameplate`, and contract version `phase-b2-readonly`.
-- Rsynced Mac-built ignored `hermes_cli/web_dist/` to both VPS worktrees and verified path-independent relative content hash match: `af9631912a793e38838d9856b408288984b457f8c1d6d29cc727dd972f5151de`, file_count=22.
-- Restarted only `hermes-agent-dashboard.service` and `hermes-vps-core-dashboard.service`; `hermes-gateway.service` stayed active with unchanged process id.
+- Implemented `Phase B3 — read-only Canvas floor/room depth layering` on top of deployed Phase B2.
+- Expanded the Canvas projection contract with typed z-ordered layer descriptors consumed by the native Canvas renderer.
+- The Canvas shell now declares layer/depth hooks: `data-office-deskrpg-canvas-layer-contract="floor-room-depth-descriptors"`, layer count 9, layer stack `floor,corridor,room,tile-detail,furniture,door,sprite-shadow,sprite-body,sprite-label`, depth model `z-ordered-readonly`, and contract version `phase-b3-readonly`.
+- The renderer now draws floor, corridors, rooms, tile details, furniture, doors, sprite shadows, sprite bodies, and labels via the layer descriptor stack while retaining typed tile/sprite/furniture/door/corridor/silhouette/nameplate/status cue descriptors and the SVG fallback.
 
 Safety posture:
-- Frontend-only/read-only TypeScript/React/Canvas change plus dashboard/core deploy only.
+- Frontend-only/read-only TypeScript/React/Canvas change.
 - No new dependency, no external sprite/tile asset, no websocket/SSE/realtime endpoint, no browser write UI, no backend/API/storage/runtime authority change, no Kanban/NAS execution, no public exposure, no gateway service action, no raw secret/path/payload echo, and no DeskRPG code/assets copied.
 - Canvas mutation/realtime capability stays explicitly false.
 
 Verification:
-- RED: `npm test -- OfficePage.rpg.test.tsx --run` failed before implementation on missing Canvas silhouette/nameplate/status cue descriptor hooks.
+- RED: `npm test -- OfficePage.rpg.test.tsx --run` failed before implementation on missing Canvas layer/depth descriptor hooks.
 - GREEN/focused: `npm test -- OfficePage.rpg.test.tsx --run` = 199 passed.
 - Combined Office tests: `npm test -- OfficePage.rpg.test.tsx OfficePage.test.ts --run` = 357 passed.
 - Build: `npm run build` passed; existing Vite large-chunk warning unchanged.
 - Lint: `npm run lint` exited 0 with existing warnings only.
 - Diff/static gates: `git diff --check` passed; static diff scan found no token/secret/password/write-payload/raw-markdown leak, no websocket/EventSource addition, no DeskRPG executable controls, and no renderer dependency.
-- Protected API smoke: `/api/status` 200 and `/api/office/state` 200 using the live in-page session token without printing the token.
-- Protected browser DOM smoke: primary RPG map=1, Canvas renderer=1, Canvas projection contract=1, silhouette contract=1, silhouette count=8, nameplate contract=1, nameplate count=8, status cue contract=1, status cue count=8, sprite detail level=1, furniture/door/corridor contracts=1 each, contract version phase-b2-readonly=1, SVG fallback retained=1, summary/status/detail default-visible hooks=0, executable controls=0, Canvas mutation capability=`false`, Canvas realtime capability=`false`, raw leak=false.
-- Protected visual smoke: `/office` shows the primary RPG Visualizer with a tiled DeskRPG office map, readable character silhouettes/nameplates/status-dot cues, read-only posture, no obvious error page, no write/mutation controls, and no raw payload leaks visible.
 
 Next exact safe rung:
-- Stay in Stage 13 and improve Canvas fidelity without adding authority: `Phase B3 — read-only Canvas floor/room depth layering`, adding typed z-order/layer descriptors for floor, rooms, furniture, sprites, and labels so the Canvas map reads closer to a game scene. Keep native Canvas placeholders only; no external assets, renderer dependency, websocket/SSE, write UI, backend mutation, NAS/VPS authority, public exposure, or gateway action.
+- Commit/push and deploy Phase B3 to dashboard/core only: sync both VPS worktrees, rsync Mac-built ignored `hermes_cli/web_dist/`, verify relative hash, restart only dashboard/core services, then protected API/DOM/visual smoke. Gateway remains untouched.
 
 
 ## Current status — Stage 13 mobile room-local patrol readability deployed to VPS (2026-05-28T08:58Z)

@@ -2464,10 +2464,32 @@ const OFFICE_DESKRPG_CANVAS_CORRIDORS: OfficeDeskRpgCanvasCorridorDescriptor[] =
   { id: "source_archive-to-incident_corner", x1: 580, y1: 260, x2: 624, y2: 260, width: 10 },
 ];
 
+type OfficeDeskRpgCanvasLayerId = "floor" | "corridor" | "room" | "tile-detail" | "furniture" | "door" | "sprite-shadow" | "sprite-body" | "sprite-label";
+
+type OfficeDeskRpgCanvasLayerDescriptor = {
+  id: OfficeDeskRpgCanvasLayerId;
+  z: number;
+  target: "background" | "path" | "room" | "furniture" | "actor" | "label";
+};
+
+const OFFICE_DESKRPG_CANVAS_LAYERS: OfficeDeskRpgCanvasLayerDescriptor[] = [
+  { id: "floor", z: 0, target: "background" },
+  { id: "corridor", z: 10, target: "path" },
+  { id: "room", z: 20, target: "room" },
+  { id: "tile-detail", z: 30, target: "room" },
+  { id: "furniture", z: 40, target: "furniture" },
+  { id: "door", z: 50, target: "path" },
+  { id: "sprite-shadow", z: 60, target: "actor" },
+  { id: "sprite-body", z: 70, target: "actor" },
+  { id: "sprite-label", z: 80, target: "label" },
+];
+
 type OfficeDeskRpgCanvasProjection = {
-  version: "phase-b2-readonly";
+  version: "phase-b3-readonly";
   source: "sanitized-scene";
   tileGrid: "room-local-coordinates";
+  layerContract: "floor-room-depth-descriptors";
+  depthModel: "z-ordered-readonly";
   furnitureContract: "room-furniture-descriptors";
   furnitureDensity: "room-furniture-density";
   doorContract: "door-descriptors";
@@ -2482,6 +2504,7 @@ type OfficeDeskRpgCanvasProjection = {
   doors: OfficeDeskRpgCanvasDoorDescriptor[];
   corridors: OfficeDeskRpgCanvasCorridorDescriptor[];
   sprites: OfficeDeskRpgCanvasSpriteDescriptor[];
+  layers: OfficeDeskRpgCanvasLayerDescriptor[];
 };
 
 function buildOfficeDeskRpgCanvasProjection(scene: OfficeRpgScene, entities: ReturnType<typeof rpgVisualEntities>): OfficeDeskRpgCanvasProjection {
@@ -2534,9 +2557,11 @@ function buildOfficeDeskRpgCanvasProjection(scene: OfficeRpgScene, entities: Ret
     };
   });
   return {
-    version: "phase-b2-readonly",
+    version: "phase-b3-readonly",
     source: "sanitized-scene",
     tileGrid: "room-local-coordinates",
+    layerContract: "floor-room-depth-descriptors",
+    depthModel: "z-ordered-readonly",
     furnitureContract: "room-furniture-descriptors",
     furnitureDensity: "room-furniture-density",
     doorContract: "door-descriptors",
@@ -2551,6 +2576,7 @@ function buildOfficeDeskRpgCanvasProjection(scene: OfficeRpgScene, entities: Ret
     doors: OFFICE_DESKRPG_CANVAS_DOORS,
     corridors: OFFICE_DESKRPG_CANVAS_CORRIDORS,
     sprites,
+    layers: OFFICE_DESKRPG_CANVAS_LAYERS,
   };
 }
 
@@ -2721,6 +2747,7 @@ function OfficeDeskRpgCanvasShell({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const projection = useMemo(() => buildOfficeDeskRpgCanvasProjection(scene, entities), [entities, scene]);
   const tileCount = projection.rooms.reduce((sum, room) => sum + room.tiles.length, 0);
+  const layerStack = projection.layers.map((layer) => layer.id).join(",");
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -2731,122 +2758,159 @@ function OfficeDeskRpgCanvasShell({
     const width = 800;
     const height = 360;
     context.clearRect(0, 0, width, height);
-    context.fillStyle = "#020617";
-    context.fillRect(0, 0, width, height);
 
-    context.fillStyle = "#3f220f";
-    context.fillRect(12, 12, 776, 336);
-    context.strokeStyle = "rgba(253,230,138,0.16)";
-    context.lineWidth = 1;
-    for (let x = 12; x <= 788; x += 18) {
-      context.beginPath();
-      context.moveTo(x, 12);
-      context.lineTo(x, 348);
-      context.stroke();
-    }
-    for (let y = 12; y <= 348; y += 18) {
-      context.beginPath();
-      context.moveTo(12, y);
-      context.lineTo(788, y);
-      context.stroke();
-    }
+    projection.layers
+      .slice()
+      .sort((a, b) => a.z - b.z)
+      .forEach((layer) => {
+        if (layer.id === "floor") {
+          context.fillStyle = "#020617";
+          context.fillRect(0, 0, width, height);
+          context.fillStyle = "#3f220f";
+          context.fillRect(12, 12, 776, 336);
+          context.strokeStyle = "rgba(253,230,138,0.16)";
+          context.lineWidth = 1;
+          for (let x = 12; x <= 788; x += 18) {
+            context.beginPath();
+            context.moveTo(x, 12);
+            context.lineTo(x, 348);
+            context.stroke();
+          }
+          for (let y = 12; y <= 348; y += 18) {
+            context.beginPath();
+            context.moveTo(12, y);
+            context.lineTo(788, y);
+            context.stroke();
+          }
+          return;
+        }
 
-    context.strokeStyle = "rgba(167,243,208,0.32)";
-    context.lineWidth = 10;
-    context.lineCap = "round";
-    projection.corridors.forEach((corridor) => {
-      context.strokeStyle = "rgba(167,243,208,0.30)";
-      context.lineWidth = corridor.width;
-      context.beginPath();
-      context.moveTo(corridor.x1, corridor.y1);
-      context.lineTo(corridor.x2, corridor.y2);
-      context.stroke();
-    });
+        if (layer.id === "corridor") {
+          context.lineCap = "round";
+          projection.corridors.forEach((corridor) => {
+            context.strokeStyle = "rgba(167,243,208,0.30)";
+            context.lineWidth = corridor.width;
+            context.beginPath();
+            context.moveTo(corridor.x1, corridor.y1);
+            context.lineTo(corridor.x2, corridor.y2);
+            context.stroke();
+          });
+          return;
+        }
 
-    projection.rooms.forEach((room) => {
-      context.fillStyle = "rgba(5,46,43,0.92)";
-      context.strokeStyle = RPG_STATUS_STROKE[room.severity];
-      context.lineWidth = 2;
-      context.beginPath();
-      context.roundRect(room.x, room.y, room.w, room.h, 12);
-      context.fill();
-      context.stroke();
-      context.fillStyle = "rgba(209,250,229,0.88)";
-      context.font = "700 12px system-ui, sans-serif";
-      context.fillText(room.label, room.x + 14, room.y + 24);
-      room.tiles.slice(0, 12).forEach((tile) => {
-        context.strokeStyle = "rgba(253,230,138,0.14)";
-        context.strokeRect(tile.x, tile.y, tile.w - 2, tile.h - 2);
+        if (layer.id === "room") {
+          projection.rooms.forEach((room) => {
+            context.fillStyle = "rgba(5,46,43,0.92)";
+            context.strokeStyle = RPG_STATUS_STROKE[room.severity];
+            context.lineWidth = 2;
+            context.beginPath();
+            context.roundRect(room.x, room.y, room.w, room.h, 12);
+            context.fill();
+            context.stroke();
+          });
+          return;
+        }
+
+        if (layer.id === "tile-detail") {
+          projection.rooms.forEach((room) => {
+            room.tiles.slice(0, 12).forEach((tile) => {
+              context.strokeStyle = "rgba(253,230,138,0.14)";
+              context.strokeRect(tile.x, tile.y, tile.w - 2, tile.h - 2);
+            });
+          });
+          return;
+        }
+
+        if (layer.id === "furniture") {
+          projection.furniture.forEach((piece) => {
+            context.fillStyle = piece.fill;
+            context.strokeStyle = piece.stroke ?? "rgba(255,255,255,0.30)";
+            context.lineWidth = 1.4;
+            context.beginPath();
+            context.roundRect(piece.x, piece.y, piece.w, piece.h, piece.rx);
+            context.fill();
+            if (piece.stroke) context.stroke();
+            if (piece.kind === "whiteboard" || piece.kind === "bookcase") {
+              context.strokeStyle = "rgba(255,255,255,0.22)";
+              context.lineWidth = 1;
+              context.beginPath();
+              context.moveTo(piece.x + 8, piece.y + Math.max(8, piece.h / 2));
+              context.lineTo(piece.x + piece.w - 8, piece.y + Math.max(8, piece.h / 2));
+              context.stroke();
+            }
+          });
+          return;
+        }
+
+        if (layer.id === "door") {
+          projection.doors.forEach((door) => {
+            context.fillStyle = "rgba(254,243,199,0.82)";
+            context.beginPath();
+            context.roundRect(door.x, door.y, door.w, door.h, 3);
+            context.fill();
+          });
+          return;
+        }
+
+        if (layer.id === "sprite-shadow") {
+          projection.sprites.forEach((sprite) => {
+            context.fillStyle = "rgba(0,0,0,0.34)";
+            context.beginPath();
+            context.ellipse(sprite.x, sprite.y + 17, sprite.shadowWidth / 2, 4, 0, 0, Math.PI * 2);
+            context.fill();
+          });
+          return;
+        }
+
+        if (layer.id === "sprite-body") {
+          projection.sprites.forEach((sprite) => {
+            context.fillStyle = sprite.fill;
+            context.strokeStyle = sprite.stroke;
+            context.lineWidth = 2;
+            context.beginPath();
+            context.roundRect(sprite.x - sprite.bodyWidth / 2, sprite.y + 1, sprite.bodyWidth, sprite.bodyHeight, 5);
+            context.fill();
+            context.stroke();
+            context.beginPath();
+            context.arc(sprite.x, sprite.y - 7, sprite.headRadius, 0, Math.PI * 2);
+            context.fill();
+            context.stroke();
+            context.fillStyle = sprite.stroke;
+            context.beginPath();
+            context.arc(sprite.x - 5, sprite.y + 20 + sprite.footOffset / 3, 2.4, 0, Math.PI * 2);
+            context.arc(sprite.x + 5, sprite.y + 20 - sprite.footOffset / 3, 2.4, 0, Math.PI * 2);
+            context.fill();
+          });
+          return;
+        }
+
+        if (layer.id === "sprite-label") {
+          projection.rooms.forEach((room) => {
+            context.fillStyle = "rgba(209,250,229,0.88)";
+            context.font = "700 12px system-ui, sans-serif";
+            context.textAlign = "start";
+            context.fillText(room.label, room.x + 14, room.y + 24);
+          });
+          projection.sprites.forEach((sprite) => {
+            context.fillStyle = "rgba(15,23,42,0.82)";
+            context.strokeStyle = "rgba(255,255,255,0.28)";
+            context.lineWidth = 1;
+            context.beginPath();
+            context.roundRect(sprite.x - sprite.nameplateWidth / 2, sprite.y - 29, sprite.nameplateWidth, 15, 6);
+            context.fill();
+            context.stroke();
+            context.fillStyle = "#ecfdf5";
+            context.font = "700 9px system-ui, sans-serif";
+            context.textAlign = "center";
+            context.fillText(sprite.label, sprite.x, sprite.y - 18);
+            context.fillStyle = sprite.status === "blocked" ? "#fca5a5" : sprite.status === "waiting" ? "#fde68a" : "#86efac";
+            context.beginPath();
+            context.arc(sprite.x + sprite.nameplateWidth / 2 - 7, sprite.y - 21, 3, 0, Math.PI * 2);
+            context.fill();
+            context.textAlign = "start";
+          });
+        }
       });
-    });
-
-    projection.furniture.forEach((piece) => {
-      context.fillStyle = piece.fill;
-      context.strokeStyle = piece.stroke ?? "rgba(255,255,255,0.30)";
-      context.lineWidth = 1.4;
-      context.beginPath();
-      context.roundRect(piece.x, piece.y, piece.w, piece.h, piece.rx);
-      context.fill();
-      if (piece.stroke) context.stroke();
-      if (piece.kind === "whiteboard" || piece.kind === "bookcase") {
-        context.strokeStyle = "rgba(255,255,255,0.22)";
-        context.lineWidth = 1;
-        context.beginPath();
-        context.moveTo(piece.x + 8, piece.y + Math.max(8, piece.h / 2));
-        context.lineTo(piece.x + piece.w - 8, piece.y + Math.max(8, piece.h / 2));
-        context.stroke();
-      }
-    });
-
-    projection.doors.forEach((door) => {
-      context.fillStyle = "rgba(254,243,199,0.82)";
-      context.beginPath();
-      context.roundRect(door.x, door.y, door.w, door.h, 3);
-      context.fill();
-    });
-
-    projection.sprites.forEach((sprite) => {
-      context.fillStyle = "rgba(0,0,0,0.34)";
-      context.beginPath();
-      context.ellipse(sprite.x, sprite.y + 17, sprite.shadowWidth / 2, 4, 0, 0, Math.PI * 2);
-      context.fill();
-
-      context.fillStyle = "rgba(15,23,42,0.82)";
-      context.strokeStyle = "rgba(255,255,255,0.28)";
-      context.lineWidth = 1;
-      context.beginPath();
-      context.roundRect(sprite.x - sprite.nameplateWidth / 2, sprite.y - 29, sprite.nameplateWidth, 15, 6);
-      context.fill();
-      context.stroke();
-      context.fillStyle = "#ecfdf5";
-      context.font = "700 9px system-ui, sans-serif";
-      context.textAlign = "center";
-      context.fillText(sprite.label, sprite.x, sprite.y - 18);
-
-      context.fillStyle = sprite.fill;
-      context.strokeStyle = sprite.stroke;
-      context.lineWidth = 2;
-      context.beginPath();
-      context.roundRect(sprite.x - sprite.bodyWidth / 2, sprite.y + 1, sprite.bodyWidth, sprite.bodyHeight, 5);
-      context.fill();
-      context.stroke();
-      context.beginPath();
-      context.arc(sprite.x, sprite.y - 7, sprite.headRadius, 0, Math.PI * 2);
-      context.fill();
-      context.stroke();
-
-      context.fillStyle = sprite.stroke;
-      context.beginPath();
-      context.arc(sprite.x - 5, sprite.y + 20 + sprite.footOffset / 3, 2.4, 0, Math.PI * 2);
-      context.arc(sprite.x + 5, sprite.y + 20 - sprite.footOffset / 3, 2.4, 0, Math.PI * 2);
-      context.fill();
-
-      context.fillStyle = sprite.status === "blocked" ? "#fca5a5" : sprite.status === "waiting" ? "#fde68a" : "#86efac";
-      context.beginPath();
-      context.arc(sprite.x + sprite.nameplateWidth / 2 - 7, sprite.y - 21, 3, 0, Math.PI * 2);
-      context.fill();
-      context.textAlign = "start";
-    });
   }, [projection]);
 
   return (
@@ -2874,6 +2938,10 @@ function OfficeDeskRpgCanvasShell({
       data-office-deskrpg-canvas-status-cue-contract={projection.statusCueContract}
       data-office-deskrpg-canvas-status-cue-count={projection.sprites.length}
       data-office-deskrpg-canvas-sprite-detail-level={projection.spriteDetailLevel}
+      data-office-deskrpg-canvas-layer-contract={projection.layerContract}
+      data-office-deskrpg-canvas-layer-count={projection.layers.length}
+      data-office-deskrpg-canvas-layer-stack={layerStack}
+      data-office-deskrpg-canvas-depth-model={projection.depthModel}
       data-office-deskrpg-canvas-furniture-contract={projection.furnitureContract}
       data-office-deskrpg-canvas-furniture-density={projection.furnitureDensity}
       data-office-deskrpg-canvas-furniture-count={projection.furniture.length}
