@@ -9,6 +9,13 @@ Current canonical product surface:
 - RPG Visualizer-first default view
 - Kanban, NAS Keeper, Paperclip, Projection Cache, controlled-mutation, diagnostics, and legacy Office shells are supporting layers/tabs/drawers, not competing top-level products.
 
+Current corrected target:
+- Product target name: `DeskRPG Office World`.
+- `/office` remains the canonical route; do not split into a new repo/project unless a later architecture decision proves the existing surface cannot carry the target.
+- The target is a 2D pixel multi-agent office game client: map-first, furniture/tile-dense, small agent sprites embedded among office objects, compact in-map name/status/speech cues, and auxiliary read-only game-log/inspector panels.
+- The target is not a dashboard with RPG styling and not a pile of top-level summary/status/detail strips.
+- Reference calibration comes from the two user-provided DeskRPG/OpenClaw videos reviewed on 2026-05-28.
+
 Current live position:
 - Overall stage: Stage 13 active and locked as the active work stage until the user explicitly advances; Stage 14 remains closed.
 - Latest completed/deployed rung: Stage 13 sprite silhouette/walking clarity polish is deployed/smoked on the VPS dashboard from `8446018da` plus cascade fix `7e727dee2`: visible sprites declare clarified silhouette metadata, readable head/body/footstep hooks, the map shows `걸음 실루엣 강화`, computed footstep duration is 0.58s, and a timed browser sample proved walking footstep transform changed without refresh.
@@ -22,7 +29,7 @@ Current live position:
 - Prior RPG rung: mobile/small-screen RPG map layout cues added to the primary SVG RPG map: scroll-snap layout hook, pinch/pan cue, responsive SVG hook, and narrow-screen CSS.
 - Prior write rung: exact-approved one-shot Mac relay production write completed from a fresh packet; one markdown file plus one audit sidecar were written through the Mac relay, readback verified, and a metadata-only completed-write receipt recorded.
 - Prior RPG rung: Stage 13 Korean room labels and room/entity visual hierarchy cues were added inside the primary SVG RPG map.
-- Current requested rung: continue RPG Visualizer-first Stage 13 quality with mobile label readability or room/entity hierarchy polish; do not force-replay failed_guarded or already-succeeded queue items.
+- Current requested rung: after DeskRPG reference calibration, continue Stage 13 with `DeskRPG pixel-office density baseline` before more abstract route/patrol polish: add read-only SVG/CSS floor/furniture density and place small sprites among office objects; do not force-replay failed_guarded or already-succeeded queue items.
 
 ## Stage 0 — Project charter and operating protocol
 

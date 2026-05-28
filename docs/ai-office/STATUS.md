@@ -1,3 +1,28 @@
+## Current status — DeskRPG Office World target reset recorded (2026-05-28T06:30Z)
+
+Scope completed:
+- Recalibrated the active `/office` product target using two DeskRPG/OpenClaw reference videos the user provided: `OpenClaw 2D 픽셀 가상 오피스 구축` and `OpenClaw 멀티에이전트 메타버스 오피스 만들기 | DeskRPG`.
+- Kept the current repo and route as canonical: continue in the existing `hermes-agent` checkout and `/office`, rather than starting a separate project/repo.
+- Renamed the active visual target from a generic RPG Visualizer toward `DeskRPG Office World`: a 2D pixel virtual office game-client surface where AI agents are small sprites embedded in furniture/tile space, with map-first state, compact name/status/speech cues, and auxiliary game-log/chat panels.
+- Reframed the next Stage 13 priority away from more abstract route polish and toward pixel-office world density: floor tiles, desks, chairs, meeting tables, sofa/lounge, plants, monitors/whiteboard/bookcase-like objects, and sprites placed among those objects.
+
+Reference-derived product corrections:
+- The target is not a dashboard with RPG styling; it is a living 2D pixel multi-agent office world.
+- Immersion comes first from furniture/tile density and small agent sprites embedded in the office, then from patrol/route polish.
+- Panels are allowed only as auxiliary game UI: read-only chat/log/inspector shells may support the map, but summary/status/detail dashboard layers must not become the default surface again.
+- Real chat input, command execution, mutation controls, NAS writes, gateway/public/automation authority, and renderer/dependency changes remain out of scope without later explicit approval.
+
+Evidence captured:
+- Docs-only rung; no frontend/backend/runtime code changed.
+- Local git state was clean at `fc9264a19` before edits.
+- Reference video metadata was inspected locally with `yt-dlp`; frame/contact-sheet visual review confirmed the above target.
+
+Safety boundaries preserved:
+- No code change, no build artifact change, no VPS sync/restart, no gateway action, no NAS write, no Kanban/browser mutation control, no backend/API route change, no public exposure, no raw content/root/secret/token/write-payload echo, and no new renderer/dependency.
+
+Next exact safe rung:
+- Stage 13 `DeskRPG pixel-office density baseline`: add frontend-only/read-only SVG/CSS furniture/tile density inside the primary RPG map via RED component test first, then minimal implementation, focused/full Office tests, lint/build, diff/raw/control scans, commit/push, and only then optional dashboard/core deploy/smoke if requested.
+
 ## Current status — Stage 13 sprite silhouette/walking clarity deployed to VPS (2026-05-28T06:07Z)
 
 Scope completed:

@@ -1,7 +1,7 @@
 # AI Office Desk RPG Product Vision 1
 
 Status: Draft product contract
-Last updated: 2026-05-14
+Last updated: 2026-05-28
 Scope: documentation only; no code, service, Kanban, cron, NAS, VPS, renderer dependency, or executable-control changes.
 
 ## Purpose
@@ -16,8 +16,21 @@ Source evidence:
 - `docs/ai-office/plans/2026-05-14-desk-rpg-master-spec-review.md`
 - `docs/ai-office/architecture/unified-operating-workbench.md`
 - `docs/ai-office/product/unified-operating-workbench.md`
+- 2026-05-28 user-provided DeskRPG/OpenClaw reference videos: `OpenClaw 2D 픽셀 가상 오피스 구축` and `OpenClaw 멀티에이전트 메타버스 오피스 만들기 | DeskRPG`.
 - `docs/ai-office/NEXT.md`
 - `docs/ai-office/STATUS.md`
+
+## 2026-05-28 visual target recalibration
+
+The current product target name is `DeskRPG Office World`.
+
+The reference videos corrected the target from “RPG-styled dashboard” to “2D pixel multi-agent office game client.” The `/office` page should make work state readable from the office world itself: a tile/furniture-dense map, small agent sprites embedded among desks and meeting/lounge objects, compact in-map name/status/speech cues, and auxiliary read-only game-log/inspector panels.
+
+Immediate Stage 13 implication:
+- Prior no-refresh sprite/route/silhouette work remains a useful safe scaffold.
+- The next visual priority is pixel-office density: floor tiles, desks, chairs, meeting tables, sofa/lounge, plants, monitor/whiteboard/bookcase-like objects, and sprite placement among those objects.
+- Additional abstract route/patrol polish should come after the office world has enough furniture/tile context to make movement meaningful.
+- Real chat input, command execution, browser mutation controls, NAS writes, gateway/public/automation authority, and renderer/dependency changes remain deferred until separate explicit approval.
 
 ## Core product sentence
 

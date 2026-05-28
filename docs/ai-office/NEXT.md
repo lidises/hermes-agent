@@ -1,3 +1,33 @@
+## NEXT — after DeskRPG Office World target reset (2026-05-28T06:30Z)
+
+Current next stage:
+- Stay in Stage 13 until the user explicitly advances stages.
+- Continue inside the existing repo and `/office` route; do not start a separate project/repo yet.
+- Active product target is now `DeskRPG Office World`: `/office` should feel like a 2D pixel multi-agent office game client, not a dashboard with RPG decoration.
+- The existing RPG Visualizer work is a safe scaffold: primary map, hidden summary/status/detail defaults, no-refresh sprite/route motion, and read-only posture remain valuable, but the next visual gap is world density.
+
+Reference target from the two DeskRPG/OpenClaw videos:
+- Map is the primary UI surface.
+- Furniture/tile density matters before more route polish: wood floor field, desks, chairs, meeting tables, sofa/lounge, plants, monitor/whiteboard/bookcase-like objects, and room/facility clusters.
+- Agent characters should be small sprites embedded among furniture, not large status nodes.
+- Short name/status/speech cues belong in the map.
+- Side panels may exist as read-only game-log/chat/inspector UI, but must remain auxiliary to the map.
+
+Preferred next safe rung:
+1. `Stage 13 — DeskRPG pixel-office density baseline`
+   - RED: extend `OfficePage.rpg.test.tsx` to require a furniture/tile layer inside the primary RPG map, representative furniture hooks, a Korean pixel-office/world cue, summary/status/detail hidden defaults, and zero controls.
+   - GREEN: add SVG/CSS-only floor/furniture objects and adjust sprite placement context without changing backend/API/storage/runtime.
+   - VERIFY: focused RPG test, combined Office tests, ESLint/build, `git diff --check`, static raw-leak/control scan, then commit/push.
+   - DEPLOY only if requested/appropriate: dashboard/core sync, ignored `web_dist` rsync/hash, dashboard/core restart only, protected DOM/API/visual smoke; gateway untouched.
+
+Second safe rung after that:
+- `Stage 13 — agent identity/status bubble baseline`: add compact read-only nameplates/speech/status bubbles attached to sprites, still SVG/CSS/frontend-only and no executable controls.
+
+Still forbidden unless separately and explicitly approved:
+- Additional real NAS production write or replacement write.
+- Force-replay of failed_guarded/succeeded queue items.
+- Actual NAS cleanup delete/move/archive/write, direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway service action, raw content/root/secret/token/write-payload echo, executable browser mutation controls, Kanban mutation controls, real chat/command input, or a new renderer/dependency.
+
 ## NEXT — after Stage 13 sprite silhouette/walking clarity VPS deploy (2026-05-28T06:07Z)
 
 Current next stage:
