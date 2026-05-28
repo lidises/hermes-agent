@@ -2180,6 +2180,15 @@ const RPG_ROOM_LAYOUT: Record<OfficeRpgRoomId, { x: number; y: number; w: number
   incident_corner: { x: 624, y: 198, w: 140, h: 126, short: "REV" },
 };
 
+const RPG_ROOM_TIER: Record<OfficeRpgRoomId, "control" | "execution" | "evidence"> = {
+  command: "control",
+  agent_desks: "execution",
+  task_board: "execution",
+  cron_room: "execution",
+  source_archive: "evidence",
+  incident_corner: "evidence",
+};
+
 const RPG_STATUS_FILL: Record<OfficeRpgSeverity, string> = {
   normal: "#a7f3d0",
   info: "#7dd3fc",
@@ -2545,10 +2554,25 @@ export function OfficeRpgMap({
             <path d="M214 88 H252 M480 88 H520 M580 260 H624" stroke="#a7f3d0" strokeWidth="2" strokeDasharray="7 7" opacity="0.7" data-office-rpg-map-path="worker-review-loop" />
             {scene.rooms.map((room) => {
               const layout = RPG_ROOM_LAYOUT[room.id];
+              const roomEntityCount = visibleEntities.filter((entity) => entity.room === room.id).length;
+              const roomTier = RPG_ROOM_TIER[room.id];
+              const priorityCue = room.severity === "danger" || roomEntityCount > 0;
               return (
-                <g key={`visual-room-${room.id}`} data-office-rpg-map-room={room.id}>
+                <g
+                  key={`visual-room-${room.id}`}
+                  data-office-rpg-map-room={room.id}
+                  data-office-rpg-room-hierarchy="true"
+                  data-office-rpg-room-tier={roomTier}
+                  data-office-rpg-room-entity-count={room.id}
+                  data-office-rpg-room-entity-count-value={roomEntityCount}
+                  data-office-rpg-room-priority-cue={priorityCue ? room.id : undefined}
+                >
                   <rect x={layout.x} y={layout.y} width={layout.w} height={layout.h} rx="12" fill="url(#office-rpg-room-fill)" stroke={RPG_STATUS_STROKE[room.severity]} strokeWidth="2" opacity="0.94" />
                   <rect x={layout.x + 8} y={layout.y + 8} width={layout.w - 16} height={layout.h - 16} rx="8" fill="url(#office-rpg-tile-grid)" opacity="0.42" data-office-rpg-map-tile={room.id} />
+                  <rect x={layout.x + 10} y={layout.y + layout.h - 25} width={Math.max(34, Math.min(layout.w - 20, 38 + roomEntityCount * 12))} height="16" rx="6" fill="rgba(16,185,129,0.18)" stroke="rgba(167,243,208,0.42)" data-office-rpg-room-count-bar={room.id} />
+                  <text x={layout.x + 14} y={layout.y + layout.h - 13} fill="#d1fae5" fontSize="9" data-office-rpg-room-count-label={room.id}>{roomEntityCount} actor</text>
+                  <text x={layout.x + layout.w - 14} y={layout.y + 22} textAnchor="end" fill="rgba(167,243,208,0.68)" fontSize="9" letterSpacing="1.2" data-office-rpg-room-tier-label={room.id}>{roomTier}</text>
+                  {priorityCue ? <circle cx={layout.x + layout.w - 16} cy={layout.y + layout.h - 16} r="5" fill={RPG_STATUS_STROKE[room.severity]} opacity="0.86" data-office-rpg-room-priority-dot={room.id} /> : null}
                   <text x={layout.x + 14} y={layout.y + 24} fill="#d1fae5" fontSize="12" fontWeight="700" letterSpacing="1.5">{layout.short}</text>
                   <text x={layout.x + 14} y={layout.y + 42} fill="rgba(209,250,229,0.72)" fontSize="10">{room.label}</text>
                 </g>

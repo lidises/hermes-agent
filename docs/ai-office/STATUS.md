@@ -1,3 +1,30 @@
+## Current status — Stage 13 room/entity hierarchy cue added locally (2026-05-28T01:39Z)
+
+Scope completed:
+- Started Stage 13 with the requested first rung: room/entity visual hierarchy inside the existing SVG RPG map.
+- Added read-only room tier metadata (`control`, `execution`, `evidence`), per-room visible actor count bars/labels, and priority dots directly inside the primary rendered map.
+- Kept this as a frontend-only visual/read-only change: no external summary panel, no backend route/schema/service change, no browser mutation controls, no new renderer/dependency.
+
+Evidence captured:
+- RED observed: focused RPG map test failed before `data-office-rpg-room-hierarchy`, room tier, entity-count, and priority-cue hooks existed.
+- GREEN focused test passed: `npm test -- --run OfficePage.rpg.test.tsx -t "renders the read-only RPG room map"`.
+- Full Office frontend tests passed: `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx` = 357 passed.
+- `npx eslint src/pages/OfficePage.tsx src/pages/OfficePage.rpg.test.tsx` passed with pre-existing warnings only.
+- `npm run build` passed with the pre-existing Vite large-chunk warning.
+- `git diff --check` passed.
+- Diff-scoped hierarchy cue scan passed: no form/button/input/select/textarea/fetch/submit controls in the new hierarchy cue slice.
+- Local protected dashboard DOM smoke on `/office`: RPG map visible=1, SVG visible=1, hierarchy room groups=6, tiers=`control/execution/evidence`, command count hook=1, task-board priority cue=1, summary/evidence visible=0, hierarchy controls=0, raw leak probe=false, console errors=0.
+
+Safety boundaries preserved:
+- UI/read-only visual depth only.
+- No additional real NAS production write or replacement write.
+- No actual NAS cleanup delete/move/archive/write.
+- No direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway restart, raw markdown/path/secret/token/write-payload echo, executable browser mutation controls, Kanban mutation controls, or new renderer/dependency.
+
+Readiness/result note:
+- Stage 13 has begun with a map-internal hierarchy artifact that improves RPG-readiness without reintroducing dashboard clutter.
+- Next exact safe rung: improve Korean room/facility labels or compact in-map cues with the same RED → minimal frontend-only implementation → verification → handoff path.
+
 ## Current status — Stage 12 RPG Visualizer-first default deployed and smoked (2026-05-28T01:31Z)
 
 Scope completed:

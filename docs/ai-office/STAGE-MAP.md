@@ -10,9 +10,9 @@ Current canonical product surface:
 - Kanban, NAS Keeper, Paperclip, Projection Cache, controlled-mutation, diagnostics, and legacy Office shells are supporting layers/tabs/drawers, not competing top-level products.
 
 Current live position:
-- Overall stage: Stage 13 ready to start after Stage 12 default-surface deploy/smoke.
-- Latest completed rung: Stage 12 RPG Visualizer-first default deployed to VPS dashboard/core and smoked: RPG map primary, summary/status/detail layers visible 0 by default.
-- Current requested rung: start one Stage 13 visual/read-only RPG-internal depth improvement while keeping external summaries hidden.
+- Overall stage: Stage 13 active.
+- Latest completed rung: Stage 13 room/entity visual hierarchy cue added to the primary SVG RPG map and locally smoked.
+- Current requested rung: continue one small visual/read-only RPG-internal depth improvement or deploy/smoke the hierarchy cue to VPS dashboard/core.
 
 ## Stage 0 — Project charter and operating protocol
 
@@ -208,7 +208,10 @@ Acceptance criteria:
 
 ## Stage 13 — RPG operating experience depth
 
-Status: ready to start.
+Status: active; first hierarchy cue rung complete locally.
+
+Completed rungs:
+1. Added read-only room/entity hierarchy cues inside the primary SVG map: room tiers (`control`, `execution`, `evidence`), visible actor count bars/labels, and priority dots.
 
 Purpose:
 - Make the RPG Visualizer itself richer and more useful without reintroducing dashboard clutter.

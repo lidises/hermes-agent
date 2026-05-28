@@ -1,3 +1,25 @@
+## NEXT — after Stage 13 room/entity hierarchy cue (2026-05-28T01:39Z)
+
+Current next stage:
+- Stage 13 is now active: the existing SVG RPG map has read-only room hierarchy cues (`control/execution/evidence` tiers), actor count bars/labels, and priority dots inside the primary map.
+- Continue visual/read-only RPG-internal depth. Do not add another external summary/status panel.
+- Keep `/office` default RPG Visualizer-first: summary/status/detail evidence layers remain hidden by default.
+
+Approved task-scoped work for the next `/goal` session:
+- Local repo edits, TDD tests, build, docs update, commit, and push.
+- VPS dashboard/core sync, ignored `web_dist` rsync, dashboard/core restart, and protected API/DOM smoke if deploying this slice.
+- Metadata-only safe-ref JSONL record write/readback, payload/write_payload preview contract, replay/idempotency metadata, and Mac relay isolated tmp-root write smoke remain allowed only within their safe metadata/tmp boundaries.
+
+Still forbidden unless separately and explicitly approved:
+- Additional real NAS production write or replacement write.
+- Actual NAS cleanup delete/move/archive/write.
+- Direct VPS NAS authority, NAS credentials, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway restart, raw markdown/path/root/secret/token/write_payload echo, executable browser mutation controls, Kanban mutation controls, or a new renderer/dependency.
+
+Preferred next safe rung:
+1. Either deploy/smoke the Stage 13 hierarchy cue to VPS dashboard/core, or continue locally with one more small Stage 13 visual/read-only improvement.
+2. Best next frontend-only candidates: Korean room/facility labels, compact in-map cues, character/facility copy, or mobile/small-screen layout.
+3. Use RED helper/component tests first, implement the smallest frontend-only change, then verify focused Office tests, build, `git diff --check`, raw-leak/control scan, DOM smoke, docs handoff, commit, and push.
+
 ## NEXT — after Stage 12 RPG Visualizer-first default deploy/smoke (2026-05-28T01:31Z)
 
 Current next stage:

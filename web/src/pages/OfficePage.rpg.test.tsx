@@ -429,6 +429,12 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("data-office-rpg-map-path=\"command-to-board\"");
     expect(markup).toContain("data-office-rpg-map-door=\"command-agent_desks\"");
     expect(markup).toContain("data-office-rpg-map-furniture=\"central-board\"");
+    expect(markup).toContain("data-office-rpg-room-hierarchy=\"true\"");
+    expect(markup).toContain("data-office-rpg-room-tier=\"control\"");
+    expect(markup).toContain("data-office-rpg-room-tier=\"execution\"");
+    expect(markup).toContain("data-office-rpg-room-tier=\"evidence\"");
+    expect(markup).toContain("data-office-rpg-room-entity-count=\"command\"");
+    expect(markup).toContain("data-office-rpg-room-priority-cue=\"task_board\"");
     expect(markup).toContain("data-office-rpg-character-sprite");
     expect(scene.entities.length).toBeLessThanOrEqual(8);
     expect(markup.match(/data-office-rpg-character-sprite=/g)?.length).toBe(scene.entities.length);
