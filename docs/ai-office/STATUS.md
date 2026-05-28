@@ -1,13 +1,15 @@
-## Current status — Stage 13 DeskRPG Canvas Phase B1 verified locally (2026-05-28T10:18Z)
+## Current status — Stage 13 DeskRPG Canvas Phase B1 deployed to VPS (2026-05-28T10:18Z)
 
 Scope completed:
+- Deployed `51a42da55 feat(office): add canvas furniture descriptors` to both VPS AI Office worktrees: dashboard and core/source.
 - Implemented `Phase B1 — read-only Canvas room/furniture descriptor expansion` on top of deployed Phase B0.
 - Expanded the Canvas projection contract with typed furniture, door, and corridor descriptors consumed by the native Canvas renderer.
 - The Canvas shell now declares room/furniture descriptor hooks: `data-office-deskrpg-canvas-furniture-contract="room-furniture-descriptors"`, furniture density `room-furniture-density`, furniture count 20, door contract/count 3, corridor contract/count 4, and contract version `phase-b1-readonly`.
-- The renderer now draws corridor descriptors, furniture descriptors, and door descriptors from the projection contract while retaining the SVG fallback and read-only placeholder sprite rendering.
+- Rsynced Mac-built ignored `hermes_cli/web_dist/` to both VPS worktrees and verified path-independent relative content hash match: `a86e31c116374f281b011e9dc3a89d174aa5d6a8226bc68cc7baa958c581240b`, file_count=22.
+- Restarted only `hermes-agent-dashboard.service` and `hermes-vps-core-dashboard.service`; `hermes-gateway.service` stayed active with unchanged process id.
 
 Safety posture:
-- Frontend-only/read-only TypeScript/React/Canvas change.
+- Frontend-only/read-only TypeScript/React/Canvas change plus dashboard/core deploy only.
 - No new dependency, no external sprite/tile asset, no websocket/SSE/realtime endpoint, no browser write UI, no backend/API/storage/runtime authority change, no Kanban/NAS execution, no public exposure, no gateway service action, no raw secret/path/payload echo, and no DeskRPG code/assets copied.
 - Canvas mutation/realtime capability stays explicitly false.
 
@@ -18,9 +20,12 @@ Verification:
 - Build: `npm run build` passed; existing Vite large-chunk warning unchanged.
 - Lint: `npm run lint` exited 0 with existing warnings only.
 - Diff/static gates: `git diff --check` passed; static diff scan found no token/secret/password/write-payload/raw-markdown leak, no websocket/EventSource addition, no DeskRPG executable controls, and no renderer dependency.
+- Protected API smoke: `/api/status` 200 and `/api/office/state` 200 using the live in-page session token without printing the token.
+- Protected browser DOM smoke: primary RPG map=1, Canvas renderer=1, Canvas projection contract=1, furniture contract=1, furniture density=1, furniture count=20, door contract=1, door count=3, corridor contract=1, corridor count=4, contract version phase-b1-readonly=1, SVG fallback retained=1, summary/status/detail default-visible hooks=0, executable controls=0, Canvas mutation capability=`false`, Canvas realtime capability=`false`, raw leak=false.
+- Protected visual smoke: `/office` shows the primary RPG Visualizer with a denser tiled DeskRPG office map, furniture/door/corridor cues, read-only posture, no obvious error page, no write/mutation controls, and no raw payload leaks visible.
 
 Next exact safe rung:
-- Commit/push and deploy Phase B1 to dashboard/core only: sync both VPS worktrees, rsync Mac-built ignored `hermes_cli/web_dist/`, verify relative hash, restart only dashboard/core services, then protected API/DOM/visual smoke. Gateway remains untouched.
+- Stay in Stage 13 and improve Canvas fidelity without adding authority: `Phase B2 — read-only Canvas sprite silhouette/nameplate descriptor expansion`, using the existing projection contract to add Canvas-side sprite silhouette parts and compact label/status cue descriptors. Keep placeholder/native Canvas only; no external assets, renderer dependency, websocket/SSE, write UI, backend mutation, NAS/VPS authority, public exposure, or gateway action.
 
 
 ## Current status — Stage 13 mobile room-local patrol readability deployed to VPS (2026-05-28T08:58Z)
