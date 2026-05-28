@@ -311,3 +311,7 @@ Approved for ordinary Stage 12 visual/read-only rungs:
 - Commit/push.
 - Dashboard/core sync and `web_dist` rsync.
 - Dashboard/core restart and protected API/DOM smoke, when deployment is explicitly in scope.
+
+- Phase B7 — read-only Canvas route/room focus polish (done 2026-05-28T15:03Z, commit `1672d5840`): route focus contract `corridor-room-focus-descriptors`, route focus count 4, room focus count 6, route emphasis `read-only-corridor-glow`, room focus mode `active-room-halo`; deployed/smoked on dashboard/core with gateway unchanged.
+
+- Phase B8 — read-only Canvas small-screen route/cue viewport contract (next): add mobile/viewport readability descriptors while preserving B7 route focus, B6 motion, B5 cue offsets, and all read-only guardrails.
