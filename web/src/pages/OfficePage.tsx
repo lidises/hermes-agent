@@ -2562,7 +2562,7 @@ const OFFICE_DESKRPG_CANVAS_LAYERS: OfficeDeskRpgCanvasLayerDescriptor[] = [
 ];
 
 type OfficeDeskRpgCanvasProjection = {
-  version: "phase-b7-readonly";
+  version: "phase-b8-readonly";
   source: "sanitized-scene";
   tileGrid: "room-local-coordinates";
   layerContract: "floor-room-depth-descriptors";
@@ -2570,6 +2570,13 @@ type OfficeDeskRpgCanvasProjection = {
   routeFocusContract: "corridor-room-focus-descriptors";
   routeEmphasis: "read-only-corridor-glow";
   roomFocusMode: "active-room-halo";
+  viewportContract: "small-screen-route-cue-viewport";
+  viewportMode: "compact-readable";
+  compactRouteScale: 0.86;
+  cueViewportLane: "mobile-edge-safe-cues";
+  mobileRouteVisibility: "persistent-readable-routes";
+  mobileViewportPadding: 24;
+  minCueLegibility: "8px-bold";
   furnitureContract: "room-furniture-descriptors";
   furnitureDensity: "room-furniture-density";
   furnitureCueContract: "room-local-korean-furniture-cues";
@@ -2678,7 +2685,7 @@ function buildOfficeDeskRpgCanvasProjection(scene: OfficeRpgScene, entities: Ret
     };
   });
   return {
-    version: "phase-b7-readonly",
+    version: "phase-b8-readonly",
     source: "sanitized-scene",
     tileGrid: "room-local-coordinates",
     layerContract: "floor-room-depth-descriptors",
@@ -2686,6 +2693,13 @@ function buildOfficeDeskRpgCanvasProjection(scene: OfficeRpgScene, entities: Ret
     routeFocusContract: "corridor-room-focus-descriptors",
     routeEmphasis: "read-only-corridor-glow",
     roomFocusMode: "active-room-halo",
+    viewportContract: "small-screen-route-cue-viewport",
+    viewportMode: "compact-readable",
+    compactRouteScale: 0.86,
+    cueViewportLane: "mobile-edge-safe-cues",
+    mobileRouteVisibility: "persistent-readable-routes",
+    mobileViewportPadding: 24,
+    minCueLegibility: "8px-bold",
     furnitureContract: "room-furniture-descriptors",
     furnitureDensity: "room-furniture-density",
     furnitureCueContract: "room-local-korean-furniture-cues",
@@ -2928,7 +2942,7 @@ function OfficeDeskRpgCanvasShell({
           context.lineCap = "round";
           projection.routeFocus.forEach((route) => {
             context.strokeStyle = route.emphasis === "review" ? "rgba(252,165,165,0.28)" : route.emphasis === "secondary" ? "rgba(103,232,249,0.24)" : "rgba(253,230,138,0.26)";
-            context.lineWidth = route.width;
+            context.lineWidth = Math.max(2, route.width * projection.compactRouteScale);
             context.setLineDash([10, 8]);
             context.beginPath();
             context.moveTo(route.x1, route.y1);
@@ -3064,8 +3078,8 @@ function OfficeDeskRpgCanvasShell({
             context.fillText(room.label, room.x + 14, room.y + 24);
           });
           projection.facilityCues.forEach((cue) => {
-            const cueX = cue.x + cue.offsetX;
-            const cueY = cue.y + cue.offsetY;
+            const cueX = Math.min(800 - projection.mobileViewportPadding - 92, Math.max(projection.mobileViewportPadding, cue.x + cue.offsetX));
+            const cueY = Math.min(360 - projection.mobileViewportPadding, Math.max(projection.mobileViewportPadding, cue.y + cue.offsetY));
             context.fillStyle = "rgba(2,6,23,0.62)";
             context.strokeStyle = "rgba(167,243,208,0.18)";
             context.lineWidth = 1;
@@ -3079,9 +3093,9 @@ function OfficeDeskRpgCanvasShell({
             context.fillText(cue.label.slice(0, 8), cueX + 2, cueY - 1);
           });
           projection.furnitureCues.forEach((cue) => {
-            const cueX = cue.x + cue.offsetX;
-            const cueY = cue.y + cue.offsetY;
             const labelWidth = cue.label.length * 10 + 10;
+            const cueX = Math.min(800 - projection.mobileViewportPadding - labelWidth, Math.max(projection.mobileViewportPadding, cue.x + cue.offsetX));
+            const cueY = Math.min(360 - projection.mobileViewportPadding, Math.max(projection.mobileViewportPadding, cue.y + cue.offsetY));
             context.fillStyle = "rgba(15,23,42,0.78)";
             context.strokeStyle = "rgba(253,230,138,0.42)";
             context.lineWidth = 1;
@@ -3173,6 +3187,13 @@ function OfficeDeskRpgCanvasShell({
       data-office-deskrpg-canvas-room-focus-count={projection.roomFocus.length}
       data-office-deskrpg-canvas-route-emphasis={projection.routeEmphasis}
       data-office-deskrpg-canvas-room-focus-mode={projection.roomFocusMode}
+      data-office-deskrpg-canvas-viewport-contract={projection.viewportContract}
+      data-office-deskrpg-canvas-viewport-mode={projection.viewportMode}
+      data-office-deskrpg-canvas-compact-route-scale={projection.compactRouteScale}
+      data-office-deskrpg-canvas-cue-viewport-lane={projection.cueViewportLane}
+      data-office-deskrpg-canvas-mobile-route-visibility={projection.mobileRouteVisibility}
+      data-office-deskrpg-canvas-mobile-viewport-padding={projection.mobileViewportPadding}
+      data-office-deskrpg-canvas-min-cue-legibility={projection.minCueLegibility}
       data-office-deskrpg-canvas-contract-version={projection.version}
       aria-label="Canvas 기반 DeskRPG 지도 shell · 읽기 전용"
     >
@@ -3186,7 +3207,7 @@ function OfficeDeskRpgCanvasShell({
         data-office-deskrpg-canvas="true"
       />
       <div className="office-deskrpg-canvas-shell__caption" data-office-deskrpg-canvas-caption="read-only-fallback-retained">
-        Canvas shell · read-only · SVG fallback retained · 가구 단서 · 시설 단서 · 겹침 완화 · 동선 강조
+        Canvas shell · read-only · SVG fallback retained · 가구 단서 · 시설 단서 · 겹침 완화 · 동선 강조 · 작은 화면 동선/단서
       </div>
     </div>
   );
