@@ -2522,6 +2522,8 @@ export function OfficeRpgMap({
           className="office-rpg-visual-map"
           data-office-rpg-visual-map="true"
           data-office-rpg-primary-view="true"
+          data-office-rpg-mobile-layout="scroll-snap"
+          data-office-rpg-mobile-cue="pinch-pan"
           aria-label="SVG 기반 AI Office RPG 지도와 캐릭터 스프라이트"
         >
           <div className="office-rpg-visual-map__header">
@@ -2540,6 +2542,7 @@ export function OfficeRpgMap({
             role="img"
             aria-label="AI Office Desk RPG rendered floor map"
             data-office-rpg-map-svg="true"
+            data-office-rpg-map-svg-responsive="true"
           >
             <defs>
               <pattern id="office-rpg-tile-grid" width="18" height="18" patternUnits="userSpaceOnUse">

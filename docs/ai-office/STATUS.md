@@ -1,3 +1,23 @@
+## Current status — Stage 13 mobile RPG map layout cues added (2026-05-28T03:00Z)
+
+Scope completed:
+- Continued option 2: Stage 13 RPG Visualizer-first visual quality rather than receipt projection.
+- Added mobile/small-screen layout metadata to the primary SVG RPG map: scroll-snap layout cue, pinch/pan cue, and responsive SVG hook.
+- Added small-screen CSS so the primary RPG map remains horizontally pannable/readable on narrow screens without introducing a new renderer, dependency, backend/API path, or mutation controls.
+
+Evidence captured:
+- RED: `npm test -- --run OfficePage.rpg.test.tsx -t "renders the read-only RPG room map"` failed on missing `data-office-rpg-mobile-layout="scroll-snap"`.
+- GREEN/focused+full Office frontend: `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx` = 357 passed.
+- Lint/build: `npx eslint src/pages/OfficePage.tsx src/pages/OfficePage.rpg.test.tsx src/index.css` = warnings only from existing rules/ignored CSS; `npm run build` passed.
+
+Safety boundaries preserved:
+- Frontend-only/read-only visual slice.
+- No additional real NAS write or replacement write.
+- No VPS direct NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, gateway service action, Kanban mutation, executable browser mutation controls, raw content/root/secret/token/write-payload echo, or new renderer/dependency.
+
+Next exact safe rung:
+- Either deploy/smoke this read-only RPG visual slice to the VPS dashboard/core with dashboard/core restart only, or continue Stage 13 with another frontend-only map-internal visual cue such as compact in-map facility copy.
+
 ## Current status — one-shot Mac relay real NAS write completed (2026-05-28T02:50Z)
 
 Scope completed:

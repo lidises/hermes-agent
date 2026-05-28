@@ -1,3 +1,24 @@
+## NEXT — after Stage 13 mobile RPG map layout cues (2026-05-28T03:00Z)
+
+Current next stage:
+- Stage 13 RPG Visualizer-first quality is active.
+- The primary `/office` SVG RPG map now carries mobile/small-screen layout hooks and CSS: scroll-snap container, pinch/pan cue, and responsive SVG minimum width.
+- The one-shot Mac relay real NAS write approval remains consumed; additional/replacement real NAS writes require a fresh explicit approval and packet.
+
+Allowed work boundary if continuing:
+- Local repo edits, TDD tests, build, docs update, commit, and push.
+- VPS dashboard/core sync, ignored `web_dist` rsync, dashboard/core restart, and protected DOM/API smoke if deploying this read-only visual slice.
+- Frontend-only/read-only Stage 13 map-internal polish: compact in-map facility copy, mobile label readability, room/entity hierarchy cues, or character/facility copy.
+
+Still forbidden unless separately and explicitly approved:
+- Additional real NAS production write or replacement write.
+- Force-replay of failed_guarded/succeeded queue items.
+- Actual NAS cleanup delete/move/archive/write, direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway service action, raw content/root/secret/token/write-payload echo, executable browser mutation controls, Kanban mutation controls, or a new renderer/dependency.
+
+Preferred next safe rung:
+1. Deploy/smoke the mobile RPG visual slice to VPS dashboard/core if live proof is desired: sync code and `web_dist`, restart dashboard/core only, then protected DOM smoke for the mobile hooks and summary/status/detail hidden state.
+2. Or continue local Stage 13 visual depth with another strict TDD frontend-only slice such as compact Korean facility copy inside the SVG map.
+
 ## NEXT — after one-shot Mac relay real NAS write (2026-05-28T02:50Z)
 
 Current next stage:

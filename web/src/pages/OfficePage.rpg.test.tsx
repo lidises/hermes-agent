@@ -424,8 +424,11 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("data-office-rpg-filter=\"role\"");
     expect(markup).toContain("data-office-rpg-visual-map=\"true\"");
     expect(markup).toContain("data-office-rpg-primary-view=\"true\"");
-    expect(markup.indexOf("data-office-rpg-visual-map=\"true\"")).toBeLessThan(markup.indexOf("data-office-rpg-mission-storyboard=\"true\""));
+    expect(markup).toContain("data-office-rpg-mobile-layout=\"scroll-snap\"");
+    expect(markup).toContain("data-office-rpg-mobile-cue=\"pinch-pan\"");
     expect(markup).toContain("data-office-rpg-map-svg=\"true\"");
+    expect(markup).toContain("data-office-rpg-map-svg-responsive=\"true\"");
+    expect(markup.indexOf("data-office-rpg-visual-map=\"true\"")).toBeLessThan(markup.indexOf("data-office-rpg-mission-storyboard=\"true\""));
     expect(markup).toContain("data-office-rpg-map-path=\"command-to-board\"");
     expect(markup).toContain("data-office-rpg-map-door=\"command-agent_desks\"");
     expect(markup).toContain("data-office-rpg-map-furniture=\"central-board\"");
