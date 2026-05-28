@@ -467,9 +467,15 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("data-office-deskrpg-canvas-facility-cue-count=\"6\"");
     expect(markup).toContain("data-office-deskrpg-canvas-cue-language=\"ko-compact\"");
     expect(markup).toContain("data-office-deskrpg-canvas-cue-mode=\"room-local-labels\"");
-    expect(markup).toContain("data-office-deskrpg-canvas-contract-version=\"phase-b4-readonly\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-cue-layout-contract=\"collision-aware-mobile-offsets\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-cue-density-contract=\"crowded-room-cue-density\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-cue-max-overlap=\"0\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-cue-offset-count=\"14\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-mobile-cue-readability=\"compact-offset-lanes\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-contract-version=\"phase-b5-readonly\"");
     expect(markup).toContain("가구 단서");
     expect(markup).toContain("시설 단서");
+    expect(markup).toContain("겹침 완화");
     expect(markup.indexOf("data-office-deskrpg-renderer=\"canvas\"")).toBeLessThan(markup.indexOf("data-office-rpg-map-svg=\"true\""));
     expect(markup.indexOf("data-office-rpg-visual-map=\"true\"")).toBeLessThan(markup.indexOf("data-office-rpg-mission-storyboard=\"true\""));
     expect(markup).toContain("data-office-rpg-map-path=\"command-to-board\"");
