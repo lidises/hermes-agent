@@ -1,3 +1,17 @@
+## NEXT — after RPG sub-scene drawer simplification (2026-05-28)
+
+Current next stage:
+- `/office` should open on the unified workbench plus the primary RPG SVG map, without secondary facility panels competing in the default visual flow.
+- Mission/first-implementation, orchestrator desk, Kanban board, Paperclip/source archive, review/approval/fanout/fallback details are preserved behind a default-closed sub-scenes drawer.
+
+Allowed next work:
+- Deploy/sync this read-only frontend consolidation to VPS dashboard/core, rsync `web_dist`, restart dashboard/core only, and run protected DOM/API smoke.
+- Continue only visual/read-only consolidation unless a new exact approval grants a stronger boundary.
+
+Still forbidden unless separately and explicitly approved:
+- Additional real NAS production write or replacement write.
+- Direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, gateway restart, raw markdown/path/secret/write-payload echo, or executable mutation controls.
+
 ## NEXT — after legacy top shell absorption (2026-05-28)
 
 Current next stage:

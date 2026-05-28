@@ -1,3 +1,20 @@
+## Current status — AI Office RPG sub-scenes folded behind default-closed drawer (2026-05-28)
+
+Scope completed locally before deploy:
+- Folded secondary RPG facilities out of the default main surface: mission/first-implementation scene, orchestrator desk, Kanban board facility, Paperclip/source archive, review corner, approval console, runtime fanout drilldown, filters/fallback map, and recent-event fallback now live behind a default-closed sub-scenes drawer inside the RPG map card.
+- Kept the primary rendered SVG map and unified workbench as the visible default surface.
+- This is frontend-only/read-only visual simplification; no backend authority or write path changed.
+
+Safety boundaries preserved:
+- UI/read-only consolidation only.
+- No real NAS production write or replacement write.
+- No direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway restart, raw markdown/path/secret/write-payload echo, or executable mutation controls.
+
+Verification before deploy:
+- RED observed: focused RPG source test failed before the sub-scene drawer existed.
+- GREEN: focused sub-scene drawer test passed after wrapping the secondary facilities.
+- Focused frontend Office tests passed 409/409; `npm run build` passed with the pre-existing Vite large-chunk warning.
+
 ## Current status — AI Office legacy top shell absorbed into RPG visualizer tabs (2026-05-28)
 
 Scope completed locally before deploy:

@@ -160,6 +160,33 @@ describe("Office controlled-mutation runtime status panel placement", () => {
     expect(liveOpsIndex).toBeLessThan(drawerCloseIndex);
   });
 
+  it("keeps RPG sub-scenes behind a default-closed drawer instead of the main visual surface", () => {
+    const source = officePageSource;
+    const mapIndex = source.indexOf('data-office-rpg-visual-map="true"');
+    const subSceneDrawerIndex = source.indexOf('data-office-rpg-sub-scenes-drawer="true"');
+    const subSceneDrawerCloseIndex = source.indexOf('{/* office-rpg-sub-scenes-drawer:end */}');
+
+    expect(mapIndex).toBeGreaterThan(0);
+    expect(subSceneDrawerIndex).toBeGreaterThan(mapIndex);
+    expect(subSceneDrawerCloseIndex).toBeGreaterThan(subSceneDrawerIndex);
+    expect(source).toContain('data-office-rpg-sub-scenes-default-open="false"');
+
+    for (const subSceneHook of [
+      'data-office-rpg-mission-storyboard="true"',
+      'data-office-rpg-orchestrator-desk="true"',
+      'data-office-rpg-kanban-board="true"',
+      'data-office-rpg-source-archive="true"',
+      'data-office-rpg-review-corner="true"',
+      'data-office-rpg-approval-console="true"',
+      'data-office-rpg-runtime-fanout-drilldown="true"',
+      'data-office-rpg-legacy-fallback-map="true"',
+    ]) {
+      const subSceneIndex = source.indexOf(subSceneHook, subSceneDrawerIndex);
+      expect(subSceneIndex).toBeGreaterThan(subSceneDrawerIndex);
+      expect(subSceneIndex).toBeLessThan(subSceneDrawerCloseIndex);
+    }
+  });
+
   it("keeps graduated status panels available outside legacy diagnostic lanes for smoke hooks", () => {
     const source = officePageSource;
     const legacyIndex = source.indexOf("{SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES ?");

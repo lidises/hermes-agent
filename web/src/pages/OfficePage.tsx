@@ -2489,7 +2489,15 @@ export function OfficeRpgMap({
             })}
           </svg>
         </section>
-        <section id="office-rpg-mission" className="office-rpg-mission" data-office-rpg-mission-storyboard="true" aria-label={missionStoryboard.title}>
+        <details
+          className="grid gap-4 border border-emerald-300/10 bg-black/10 p-3"
+          data-office-rpg-sub-scenes-drawer="true"
+          data-office-rpg-sub-scenes-default-open="false"
+        >
+          <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.16em] text-emerald-100">
+            Sub-scenes / facilities · default closed
+          </summary>
+          <section id="office-rpg-mission" className="office-rpg-mission" data-office-rpg-mission-storyboard="true" aria-label={missionStoryboard.title}>
           <div className="office-rpg-mission__header">
             <div>
               <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/70">{missionStoryboard.stageLabel}</div>
@@ -2620,7 +2628,9 @@ export function OfficeRpgMap({
             ))}
           </div>
         </section>
-        <OfficeRpgRuntimeFanoutDrilldownPanel drilldown={runtimeFanoutDrilldown} />
+        <div data-office-rpg-runtime-fanout-drilldown="true">
+          <OfficeRpgRuntimeFanoutDrilldownPanel drilldown={runtimeFanoutDrilldown} />
+        </div>
         {fanoutApprovalEventBridge ? <RpgFanoutApprovalEventBridgePanel bridge={fanoutApprovalEventBridge} /> : null}
         {approvalEventEnvelopeDetail ? <RpgApprovalEventEnvelopeDetailPanel detail={approvalEventEnvelopeDetail} /> : null}
         <div className="grid gap-2 text-xs md:grid-cols-4" data-office-rpg-filters="true">
@@ -2730,6 +2740,8 @@ export function OfficeRpgMap({
           </div>
           </div>
         </section>
+        </details>
+        {/* office-rpg-sub-scenes-drawer:end */}
       </CardContent>
     </Card>
   );
