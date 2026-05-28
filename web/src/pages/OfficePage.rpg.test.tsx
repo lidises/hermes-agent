@@ -436,6 +436,14 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("data-office-deskrpg-canvas-mutation-capability=\"false\"");
     expect(markup).toContain("data-office-deskrpg-canvas-realtime-capability=\"false\"");
     expect(markup).toContain("data-office-deskrpg-canvas-actor-count=\"6\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-projection=\"tile-sprite-contract\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-projection-source=\"sanitized-scene\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-tile-grid=\"room-local-coordinates\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-tile-count=\"87\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-room-count=\"6\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-sprite-contract=\"placeholder-descriptors\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-sprite-count=\"6\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-contract-version=\"phase-b0-readonly\"");
     expect(markup.indexOf("data-office-deskrpg-renderer=\"canvas\"")).toBeLessThan(markup.indexOf("data-office-rpg-map-svg=\"true\""));
     expect(markup.indexOf("data-office-rpg-visual-map=\"true\"")).toBeLessThan(markup.indexOf("data-office-rpg-mission-storyboard=\"true\""));
     expect(markup).toContain("data-office-rpg-map-path=\"command-to-board\"");
