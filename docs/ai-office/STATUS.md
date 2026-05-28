@@ -1,13 +1,16 @@
-## Current status — Stage 13 DeskRPG Canvas Phase B3 verified locally (2026-05-28T11:08Z)
+## Current status — Stage 13 DeskRPG Canvas Phase B3 deployed to VPS (2026-05-28T11:08Z)
 
 Scope completed:
+- Deployed `f7169773b feat(office): add canvas depth layers` to both VPS AI Office worktrees: dashboard and core/source.
 - Implemented `Phase B3 — read-only Canvas floor/room depth layering` on top of deployed Phase B2.
 - Expanded the Canvas projection contract with typed z-ordered layer descriptors consumed by the native Canvas renderer.
 - The Canvas shell now declares layer/depth hooks: `data-office-deskrpg-canvas-layer-contract="floor-room-depth-descriptors"`, layer count 9, layer stack `floor,corridor,room,tile-detail,furniture,door,sprite-shadow,sprite-body,sprite-label`, depth model `z-ordered-readonly`, and contract version `phase-b3-readonly`.
 - The renderer now draws floor, corridors, rooms, tile details, furniture, doors, sprite shadows, sprite bodies, and labels via the layer descriptor stack while retaining typed tile/sprite/furniture/door/corridor/silhouette/nameplate/status cue descriptors and the SVG fallback.
+- Rsynced Mac-built ignored `hermes_cli/web_dist/` to both VPS worktrees and verified path-independent relative content hash match: `87d95f8ece2e02bee50eef3e7ed5a35eb39c50078bc99d45cc8effada08b18fb`, file_count=22.
+- Restarted only `hermes-agent-dashboard.service` and `hermes-vps-core-dashboard.service`; `hermes-gateway.service` stayed active with unchanged process id `1059692`.
 
 Safety posture:
-- Frontend-only/read-only TypeScript/React/Canvas change.
+- Frontend-only/read-only TypeScript/React/Canvas change plus dashboard/core deploy only.
 - No new dependency, no external sprite/tile asset, no websocket/SSE/realtime endpoint, no browser write UI, no backend/API/storage/runtime authority change, no Kanban/NAS execution, no public exposure, no gateway service action, no raw secret/path/payload echo, and no DeskRPG code/assets copied.
 - Canvas mutation/realtime capability stays explicitly false.
 
@@ -18,9 +21,12 @@ Verification:
 - Build: `npm run build` passed; existing Vite large-chunk warning unchanged.
 - Lint: `npm run lint` exited 0 with existing warnings only.
 - Diff/static gates: `git diff --check` passed; static diff scan found no token/secret/password/write-payload/raw-markdown leak, no websocket/EventSource addition, no DeskRPG executable controls, and no renderer dependency.
+- Protected API smoke: `/api/status` 200 and `/api/office/state` 200 using the live in-page session token without printing the token.
+- Protected browser DOM smoke: primary view=1, RPG map=1, Canvas renderer=1, Canvas projection contract=1, layer contract=1, layer count=9, layer stack `floor,corridor,room,tile-detail,furniture,door,sprite-shadow,sprite-body,sprite-label`, depth model `z-ordered-readonly`, contract version phase-b3-readonly=1, silhouette/nameplate/status cue/furniture/door/corridor contracts=1 each, SVG fallback retained=1, summary/status/detail default-visible hooks=0, executable controls=0, Canvas mutation capability=`false`, Canvas realtime capability=`false`, raw leak=false.
+- Protected visual smoke: `/office` shows the primary AI Office RPG Visualizer with a tiled DeskRPG office map, floor grid, corridors, rooms, furniture, doors, sprite shadows/bodies/labels, visible room/floor depth layering, read-only posture, no obvious error page, no write/mutation controls, and no raw payload leaks visible.
 
 Next exact safe rung:
-- Commit/push and deploy Phase B3 to dashboard/core only: sync both VPS worktrees, rsync Mac-built ignored `hermes_cli/web_dist/`, verify relative hash, restart only dashboard/core services, then protected API/DOM/visual smoke. Gateway remains untouched.
+- Stay in Stage 13 and improve native Canvas fidelity without adding authority: `Phase B4 — read-only Canvas room-local furniture labels/cues`, adding compact in-map Korean cue descriptors for furniture/facility anchors while preserving layer/depth, tile/sprite/furniture/door/corridor/silhouette/nameplate/status cue contracts, SVG fallback, summary/status/detail default-visible hooks 0, controls 0, raw leak false, and Canvas mutation/realtime false.
 
 
 ## Current status — Stage 13 mobile room-local patrol readability deployed to VPS (2026-05-28T08:58Z)
