@@ -489,7 +489,13 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("data-office-deskrpg-canvas-mobile-route-visibility=\"persistent-readable-routes\"");
     expect(markup).toContain("data-office-deskrpg-canvas-mobile-viewport-padding=\"24\"");
     expect(markup).toContain("data-office-deskrpg-canvas-min-cue-legibility=\"8px-bold\"");
-    expect(markup).toContain("data-office-deskrpg-canvas-contract-version=\"phase-b8-readonly\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-viewport-frame-contract=\"safe-viewport-frame-descriptors\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-viewport-legend-mode=\"route-cue-padding-legend\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-viewport-frame-padding=\"24\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-viewport-legend-count=\"3\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-viewport-legend-labels=\"동선,단서,여백\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-viewport-frame-affordance=\"noninteractive-readonly-frame\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-contract-version=\"phase-b9-readonly\"");
     expect(markup).toContain("가구 단서");
     expect(markup).toContain("시설 단서");
     expect(markup).toContain("겹침 완화");
