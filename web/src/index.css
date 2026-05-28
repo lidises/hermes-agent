@@ -1815,6 +1815,22 @@ code { font-size: 0.875rem; }
 .office-rpg-character-sprite[data-office-rpg-sprite-motion-phase="2"] .office-rpg-character-motion {
   animation-delay: -1.3s;
 }
+.office-rpg-character-sprite[data-office-rpg-sprite-route-phase="route-synced"][data-office-rpg-sprite-route-target="command-to-task-board"] .office-rpg-character-motion {
+  animation-duration: 2.65s;
+}
+.office-rpg-character-sprite[data-office-rpg-sprite-route-phase="route-synced"][data-office-rpg-sprite-route-target="task-board-to-review"] .office-rpg-character-motion {
+  animation-delay: -0.9s;
+  animation-duration: 2.35s;
+}
+.office-rpg-character-sprite[data-office-rpg-sprite-route-phase="route-synced"] [data-office-rpg-motion-shadow="route-aligned"] {
+  animation: office-rpg-route-shadow-phase 1.85s linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes office-rpg-route-shadow-phase {
+  0%, 100% { opacity: 0.28; transform: scaleX(0.82); }
+  50% { opacity: 0.55; transform: scaleX(1.12); }
+}
 .office-rpg-character-sprite[data-office-rpg-sprite-live="no-refresh"] [data-office-rpg-sprite-arm-swing],
 .office-rpg-character-sprite[data-office-rpg-sprite-live="no-refresh"] [data-office-rpg-sprite-step-cycle] {
   animation: office-rpg-sprite-walk-cycle 0.72s ease-in-out infinite alternate;

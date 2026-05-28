@@ -11,6 +11,7 @@ Current canonical product surface:
 
 Current live position:
 - Overall stage: Stage 13 active and locked as the active work stage until the user explicitly advances; Stage 14 remains closed.
+- Latest local rung: Stage 13 route-aligned sprite phase polish added inside the primary SVG RPG map: visible sprites now declare route-synced phase/target metadata, the map shows `동선 맞춤 이동`, and sprite shadows pulse with route-aligned CSS timing.
 - Latest completed/deployed rung: Stage 13 walking route/path polish is deployed/smoked on the VPS dashboard from `5b92d82f0`: primary SVG RPG map has a read-only CSS-motion walking-route layer, two no-refresh pulsing route paths, and a timed browser sample proved route strokeDashoffset changed without refresh.
 - Prior deployed rung: Stage 13 live sprite movement baseline is deployed/smoked on the VPS dashboard from `fd45e834e`: primary SVG RPG map has a read-only CSS-motion sprite layer, all visible characters are no-refresh idle/patrol motion sprites, CSS animation is infinite, and a timed browser sample proved sprite position changed without refresh.
 - Prior deployed rung: Stage 13 actor/facility grouping cues were added inside the primary SVG RPG map and deployed/smoked on the VPS dashboard from `287021294`: all six room groups now declare visible-actor grouping, per-room facility zone, and compact Korean grouping label; grouping hooks hydrated, primary RPG map visible, controls inside visual map 0, raw leak false, console errors 0.

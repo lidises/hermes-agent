@@ -1,3 +1,26 @@
+## Current status — Stage 13 route-aligned sprite phase added locally (2026-05-28T05:41Z)
+
+Scope completed:
+- Continued Stage 13 only: route/sprite visual alignment inside the primary DeskRPG map.
+- Added per-sprite route phase metadata: `data-office-rpg-sprite-route-phase="route-synced"` and route targets for command-to-task-board plus task-board-to-review.
+- Added an in-map Korean cue `동선 맞춤 이동` and a route-aligned motion shadow marker: `data-office-rpg-motion-shadow="route-aligned"`.
+- Added CSS-only route-aligned sprite timing/shadow phase animation with `office-rpg-route-shadow-phase`, keeping existing SVG/CSS only.
+- No new renderer/dependency; no backend/API/storage/runtime changes.
+
+Evidence captured:
+- RED: focused RPG test failed on missing sprite route-phase/target/shadow hooks and Korean cue.
+- GREEN/focused: `npm test -- --run OfficePage.rpg.test.tsx -t "renders the read-only RPG room map"` passed after implementation.
+- Full Office frontend: `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx` = 357 passed.
+- Lint/build: `npx eslint src/pages/OfficePage.tsx src/pages/OfficePage.rpg.test.tsx src/index.css` = existing warnings only; `npm run build` passed.
+- Diff gates: `git diff --check` passed; diff scan found new_controls=0, raw_leak=0, forbidden_runtime=0; CSS checks found route-shadow keyframes, infinite route-shadow phase, route-target timing, and existing route pulse.
+
+Safety boundaries preserved:
+- Frontend-only/read-only visual phase slice.
+- No state mutation, no Kanban mutation, no browser mutation controls, no backend/API route change, no NAS write, no dispatcher/authority activation, no public exposure, no gateway action, no raw content/root/secret/token/write-payload echo, and no new renderer/dependency.
+
+Next exact safe rung:
+- Commit/push and deploy/smoke this Stage 13 route-aligned sprite phase polish to VPS dashboard/core with dashboard/core restart only and protected DOM/visual smoke; gateway remains untouched.
+
 ## Current status — Stage 13 walking route/path polish deployed to VPS (2026-05-28T05:08Z)
 
 Scope completed:

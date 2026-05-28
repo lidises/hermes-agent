@@ -2639,10 +2639,12 @@ export function OfficeRpgMap({
             <rect x="590" y="246" width="22" height="28" rx="3" fill="#fef3c7" opacity="0.82" data-office-rpg-map-door="source_archive-incident_corner" />
             <g data-office-rpg-live-sprite-layer="css-motion" aria-label="캐릭터 이동 중">
               <text x="606" y="326" fill="rgba(167,243,208,0.72)" fontSize="9" data-office-rpg-live-sprite-label="true">캐릭터 이동 중</text>
+              <text x="606" y="340" fill="rgba(94,234,212,0.72)" fontSize="8" data-office-rpg-sprite-route-phase-label="true">동선 맞춤 이동</text>
               {visualEntities.map(({ entity, position, pose, overlapIndex, roomIndex, labelLayout }) => {
                 const selected = selectedEntityId === entity.id;
                 const fill = RPG_STATUS_FILL[entity.severity];
                 const stroke = selected ? "#ffffff" : RPG_STATUS_STROKE[entity.severity];
+                const routeTarget = entity.room === "incident_corner" || entity.room === "source_archive" ? "task-board-to-review" : "command-to-task-board";
                 return (
                   <g
                     key={`visual-entity-${entity.id}`}
@@ -2659,6 +2661,8 @@ export function OfficeRpgMap({
                     data-office-rpg-character-pose={pose}
                     data-office-rpg-sprite-live="no-refresh"
                     data-office-rpg-sprite-motion="idle-patrol"
+                    data-office-rpg-sprite-route-phase="route-synced"
+                    data-office-rpg-sprite-route-target={routeTarget}
                     data-office-rpg-sprite-motion-phase={roomIndex % 3}
                     data-office-rpg-character-overlap-index={overlapIndex}
                     data-office-rpg-character-room-index={roomIndex}
@@ -2673,7 +2677,7 @@ export function OfficeRpgMap({
                     aria-keyshortcuts="Enter Space"
                   >
                     <g className="office-rpg-character-motion" data-office-rpg-sprite-walk-cycle="true">
-                      <ellipse cx="0" cy="18" rx="13" ry="4" fill="rgba(0,0,0,0.36)" />
+                      <ellipse cx="0" cy="18" rx="13" ry="4" fill="rgba(0,0,0,0.36)" data-office-rpg-motion-shadow="route-aligned" />
                       {selected ? <circle cx="0" cy="4" r="22" fill="none" stroke="#ffffff" strokeDasharray="4 4" strokeWidth="2" opacity="0.82" data-office-rpg-character-selection-halo={entity.id} /> : null}
                       <path d={pose === "blocked" ? "M-9 3 L9 3 L7 17 L-7 17 Z" : "M-8 2 H8 L10 17 H-10 Z"} fill={fill} stroke={stroke} strokeWidth="2" filter="url(#office-rpg-soft-glow)" />
                       <circle cx="0" cy="-7" r="9" fill={fill} stroke={stroke} strokeWidth="2" />

@@ -465,7 +465,12 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("data-office-rpg-walking-route=\"command-to-task-board\"");
     expect(markup).toContain("data-office-rpg-route-pulse=\"no-refresh\"");
     expect(markup).toContain("data-office-rpg-route-label=\"live-path\"");
+    expect(markup).toContain("data-office-rpg-sprite-route-phase=\"route-synced\"");
+    expect(markup).toContain("data-office-rpg-sprite-route-target=\"command-to-task-board\"");
+    expect(markup).toContain("data-office-rpg-sprite-route-target=\"task-board-to-review\"");
+    expect(markup).toContain("data-office-rpg-motion-shadow=\"route-aligned\"");
     expect(markup).toContain("캐릭터 이동 경로");
+    expect(markup).toContain("동선 맞춤 이동");
     expect(markup).toContain("캐릭터 이동 중");
     expect(scene.entities.length).toBeLessThanOrEqual(8);
     expect(markup.match(/data-office-rpg-character-sprite=/g)?.length).toBe(scene.entities.length);
