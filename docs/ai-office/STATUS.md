@@ -1,3 +1,26 @@
+## Current status — Stage 13 route-aligned sprite phase deployed to VPS (2026-05-28T05:46Z)
+
+Scope completed:
+- Deployed `b8031d2cb feat(office): sync sprite phases to rpg routes` to both VPS AI Office worktrees: dashboard and core/source.
+- Rsynced Mac-built ignored `hermes_cli/web_dist/` to both VPS worktrees and verified path-independent content hash matches.
+- Restarted only `hermes-agent-dashboard.service` and `hermes-vps-core-dashboard.service`; `hermes-gateway.service` stayed active and untouched.
+- Protected `/office` DOM, CSS animation, timed shadow pulse, and visual smoke confirmed the RPG Visualizer remains primary, sprites are route-synced, and sprite shadows pulse without refresh.
+
+Evidence captured:
+- VPS dashboard HEAD: `b8031d2cb`; VPS core/source HEAD: `b8031d2cb`.
+- `web_dist` relative content hash: `e2b8f62e6c2eeddf73a3dd9cc667cef3e584284c10273a83fe0f88e12e44d69d` on Mac, VPS dashboard, and VPS core/source; file_count=22.
+- Services after restart: dashboard=active, core=active, gateway=active.
+- Browser DOM smoke on `/office?sprite-phase=b8031d2cb`: visualMap=1, primaryView=1, liveLayer=1, liveSprites=8, routeLayer=1, routePulse=2, routeSynced=8, commandTarget=6, reviewTarget=2, shadows=8, Korean cue `동선 맞춤 이동` present, shadow animationName=`office-rpg-route-shadow-phase`, shadow animationDuration=1.85s, shadow animationIterationCount=infinite, sprite animationName=`office-rpg-sprite-idle-patrol`, sprite animationDuration=2.65s, API resource=200, summary/status/detail default-visible hooks=0, controlsInsideVisual=0, rawLeak=false, console errors=0.
+- Timed browser shadow sample over 900ms changed opacity from about 0.32 to 0.51, proving no-refresh route-aligned sprite shadow animation.
+- Browser visual smoke: the primary rendered RPG map remains dominant, character sprites are visible, route/path cues are visible, and sprite/shadow cues visually align with room routes.
+
+Safety boundaries preserved:
+- Dashboard/core deploy only; gateway restart was not performed.
+- No state mutation, no Kanban mutation, no browser mutation controls, no backend/API route change, no NAS write, no dispatcher/authority activation, no public exposure, no raw content/root/secret/token/write-payload echo, and no new renderer/dependency.
+
+Next exact safe rung:
+- Stay in Stage 13. Add the next real DeskRPG rendering polish, preferably stronger sprite silhouette/walking clarity or room-to-room patrol readability, via frontend-only/read-only TDD and no new renderer/dependency.
+
 ## Current status — Stage 13 route-aligned sprite phase added locally (2026-05-28T05:41Z)
 
 Scope completed:
