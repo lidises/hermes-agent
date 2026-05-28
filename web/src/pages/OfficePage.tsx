@@ -2373,6 +2373,8 @@ type OfficeDeskRpgCanvasRoomDescriptor = {
   tiles: OfficeDeskRpgCanvasTileDescriptor[];
 };
 
+type OfficeDeskRpgCanvasSpriteDetailLevel = "silhouette-nameplate";
+
 type OfficeDeskRpgCanvasSpriteDescriptor = {
   id: string;
   roomId: OfficeRpgRoomId;
@@ -2381,6 +2383,15 @@ type OfficeDeskRpgCanvasSpriteDescriptor = {
   y: number;
   fill: string;
   stroke: string;
+  label: string;
+  roleLabel: string;
+  status: OfficeRpgSceneEntity["status"];
+  headRadius: number;
+  bodyWidth: number;
+  bodyHeight: number;
+  footOffset: number;
+  shadowWidth: number;
+  nameplateWidth: number;
 };
 
 type OfficeDeskRpgCanvasFurnitureKind = "desk" | "chair" | "meeting-table" | "sofa" | "plant" | "monitor" | "whiteboard" | "bookcase";
@@ -2454,7 +2465,7 @@ const OFFICE_DESKRPG_CANVAS_CORRIDORS: OfficeDeskRpgCanvasCorridorDescriptor[] =
 ];
 
 type OfficeDeskRpgCanvasProjection = {
-  version: "phase-b1-readonly";
+  version: "phase-b2-readonly";
   source: "sanitized-scene";
   tileGrid: "room-local-coordinates";
   furnitureContract: "room-furniture-descriptors";
@@ -2462,6 +2473,10 @@ type OfficeDeskRpgCanvasProjection = {
   doorContract: "door-descriptors";
   corridorContract: "corridor-descriptors";
   spriteContract: "placeholder-descriptors";
+  silhouetteContract: "head-body-feet-shadow";
+  nameplateContract: "compact-korean-cues";
+  statusCueContract: "status-dot-descriptors";
+  spriteDetailLevel: OfficeDeskRpgCanvasSpriteDetailLevel;
   rooms: OfficeDeskRpgCanvasRoomDescriptor[];
   furniture: OfficeDeskRpgCanvasFurnitureDescriptor[];
   doors: OfficeDeskRpgCanvasDoorDescriptor[];
@@ -2496,17 +2511,30 @@ function buildOfficeDeskRpgCanvasProjection(scene: OfficeRpgScene, entities: Ret
       }),
     };
   });
-  const sprites = entities.map(({ entity, position }) => ({
-    id: entity.id,
-    roomId: entity.room,
-    localTile: rpgEntityLocalTile(entity),
-    x: position.x,
-    y: position.y,
-    fill: RPG_STATUS_FILL[entity.severity],
-    stroke: RPG_STATUS_STROKE[entity.severity],
-  }));
+  const sprites = entities.map(({ entity, position }) => {
+    const roleLabel = RPG_KIND_LABEL[entity.kind];
+    const label = roleLabel.length > 5 ? roleLabel.slice(0, 5) : roleLabel;
+    return {
+      id: entity.id,
+      roomId: entity.room,
+      localTile: rpgEntityLocalTile(entity),
+      x: position.x,
+      y: position.y,
+      fill: RPG_STATUS_FILL[entity.severity],
+      stroke: RPG_STATUS_STROKE[entity.severity],
+      label,
+      roleLabel,
+      status: entity.status,
+      headRadius: 7,
+      bodyWidth: 17,
+      bodyHeight: 18,
+      footOffset: 6,
+      shadowWidth: 22,
+      nameplateWidth: Math.max(34, label.length * 12 + 14),
+    };
+  });
   return {
-    version: "phase-b1-readonly",
+    version: "phase-b2-readonly",
     source: "sanitized-scene",
     tileGrid: "room-local-coordinates",
     furnitureContract: "room-furniture-descriptors",
@@ -2514,6 +2542,10 @@ function buildOfficeDeskRpgCanvasProjection(scene: OfficeRpgScene, entities: Ret
     doorContract: "door-descriptors",
     corridorContract: "corridor-descriptors",
     spriteContract: "placeholder-descriptors",
+    silhouetteContract: "head-body-feet-shadow",
+    nameplateContract: "compact-korean-cues",
+    statusCueContract: "status-dot-descriptors",
+    spriteDetailLevel: "silhouette-nameplate",
     rooms,
     furniture: OFFICE_DESKRPG_CANVAS_FURNITURE,
     doors: OFFICE_DESKRPG_CANVAS_DOORS,
@@ -2776,19 +2808,44 @@ function OfficeDeskRpgCanvasShell({
     projection.sprites.forEach((sprite) => {
       context.fillStyle = "rgba(0,0,0,0.34)";
       context.beginPath();
-      context.ellipse(sprite.x, sprite.y + 17, 12, 4, 0, 0, Math.PI * 2);
+      context.ellipse(sprite.x, sprite.y + 17, sprite.shadowWidth / 2, 4, 0, 0, Math.PI * 2);
       context.fill();
+
+      context.fillStyle = "rgba(15,23,42,0.82)";
+      context.strokeStyle = "rgba(255,255,255,0.28)";
+      context.lineWidth = 1;
+      context.beginPath();
+      context.roundRect(sprite.x - sprite.nameplateWidth / 2, sprite.y - 29, sprite.nameplateWidth, 15, 6);
+      context.fill();
+      context.stroke();
+      context.fillStyle = "#ecfdf5";
+      context.font = "700 9px system-ui, sans-serif";
+      context.textAlign = "center";
+      context.fillText(sprite.label, sprite.x, sprite.y - 18);
+
       context.fillStyle = sprite.fill;
       context.strokeStyle = sprite.stroke;
       context.lineWidth = 2;
       context.beginPath();
-      context.roundRect(sprite.x - 9, sprite.y + 1, 18, 18, 5);
+      context.roundRect(sprite.x - sprite.bodyWidth / 2, sprite.y + 1, sprite.bodyWidth, sprite.bodyHeight, 5);
       context.fill();
       context.stroke();
       context.beginPath();
-      context.arc(sprite.x, sprite.y - 7, 8, 0, Math.PI * 2);
+      context.arc(sprite.x, sprite.y - 7, sprite.headRadius, 0, Math.PI * 2);
       context.fill();
       context.stroke();
+
+      context.fillStyle = sprite.stroke;
+      context.beginPath();
+      context.arc(sprite.x - 5, sprite.y + 20 + sprite.footOffset / 3, 2.4, 0, Math.PI * 2);
+      context.arc(sprite.x + 5, sprite.y + 20 - sprite.footOffset / 3, 2.4, 0, Math.PI * 2);
+      context.fill();
+
+      context.fillStyle = sprite.status === "blocked" ? "#fca5a5" : sprite.status === "waiting" ? "#fde68a" : "#86efac";
+      context.beginPath();
+      context.arc(sprite.x + sprite.nameplateWidth / 2 - 7, sprite.y - 21, 3, 0, Math.PI * 2);
+      context.fill();
+      context.textAlign = "start";
     });
   }, [projection]);
 
@@ -2810,6 +2867,13 @@ function OfficeDeskRpgCanvasShell({
       data-office-deskrpg-canvas-room-count={projection.rooms.length}
       data-office-deskrpg-canvas-sprite-contract={projection.spriteContract}
       data-office-deskrpg-canvas-sprite-count={projection.sprites.length}
+      data-office-deskrpg-canvas-silhouette-contract={projection.silhouetteContract}
+      data-office-deskrpg-canvas-silhouette-count={projection.sprites.length}
+      data-office-deskrpg-canvas-nameplate-contract={projection.nameplateContract}
+      data-office-deskrpg-canvas-nameplate-count={projection.sprites.length}
+      data-office-deskrpg-canvas-status-cue-contract={projection.statusCueContract}
+      data-office-deskrpg-canvas-status-cue-count={projection.sprites.length}
+      data-office-deskrpg-canvas-sprite-detail-level={projection.spriteDetailLevel}
       data-office-deskrpg-canvas-furniture-contract={projection.furnitureContract}
       data-office-deskrpg-canvas-furniture-density={projection.furnitureDensity}
       data-office-deskrpg-canvas-furniture-count={projection.furniture.length}
