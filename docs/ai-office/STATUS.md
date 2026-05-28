@@ -1,3 +1,27 @@
+## Current status — Stage 13 mobile label readability deployed to VPS (2026-05-28T03:50Z)
+
+Scope completed:
+- Deployed `84eab5e21 feat(office): add mobile rpg label readability hooks` to both VPS AI Office worktrees: dashboard and core/source.
+- Rsynced Mac-built ignored `hermes_cli/web_dist/` to the VPS dashboard and core/source worktrees and verified path-independent content hash matches.
+- Restarted only `hermes-agent-dashboard.service` and `hermes-vps-core-dashboard.service`; `hermes-gateway.service` stayed active and untouched.
+- Protected `/office` live DOM and visual smoke confirmed the RPG Visualizer remains the primary rendered map and the new mobile label readability hooks are hydrated inside the SVG map.
+
+Evidence captured:
+- VPS dashboard HEAD: `84eab5e21`; VPS core/source HEAD: `84eab5e21`.
+- `web_dist` relative content hash: `55f1fa334335b5c5de0e4f228483dc5681af309b9ce6ff2f9e712075491d97c0` on Mac, VPS dashboard, and VPS core/source; file_count=22.
+- Services after restart: dashboard=active, core=active, gateway=active.
+- Live dashboard `/office` API resource: 200 through protected Host-header proxy.
+- Browser DOM smoke on `/office?mobile-label=84eab5e21`: visualMap=1, primaryView=1, labelStack=6, safeZone=6, maxChars=6, protectedBaseline=6, facilityCopy=6, controlsInsideVisual=0, summary/status/detail default-visible hooks=0, rawLeak=false, console errors=0.
+- Browser visual smoke: the main surface is the AI Office RPG Visualizer map with Korean room/facility cues visible inside the rendered map rather than legacy summary/status/detail panels.
+
+Safety boundaries preserved:
+- Dashboard/core deploy only; gateway restart was not performed.
+- No additional real NAS write or replacement write.
+- No VPS direct NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, Kanban mutation, executable browser mutation controls, raw content/root/secret/token/write-payload echo, or new renderer/dependency.
+
+Next exact safe rung:
+- Continue Stage 13 frontend-only RPG visual depth with strict TDD, preferably one small room/entity hierarchy or actor/facility refinement inside the SVG map; keep backend/NAS/Kanban/runtime/public/gateway boundaries closed unless explicitly approved.
+
 ## Current status — Stage 13 mobile label readability added locally (2026-05-28T03:42Z)
 
 Scope completed:
