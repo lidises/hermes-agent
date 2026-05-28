@@ -457,8 +457,14 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("인원·시설 묶음");
     expect(markup).toContain("data-office-rpg-room-priority-cue=\"task_board\"");
     expect(markup).toContain("data-office-rpg-character-sprite");
+    expect(markup).toContain("data-office-rpg-live-sprite-layer=\"css-motion\"");
+    expect(markup).toContain("data-office-rpg-sprite-live=\"no-refresh\"");
+    expect(markup).toContain("data-office-rpg-sprite-motion=\"idle-patrol\"");
+    expect(markup).toContain("data-office-rpg-sprite-walk-cycle=\"true\"");
+    expect(markup).toContain("캐릭터 이동 중");
     expect(scene.entities.length).toBeLessThanOrEqual(8);
     expect(markup.match(/data-office-rpg-character-sprite=/g)?.length).toBe(scene.entities.length);
+    expect(markup.match(/data-office-rpg-sprite-motion="idle-patrol"/g)?.length).toBe(scene.entities.length);
     expect(markup).toContain("data-office-rpg-character-overlap-index");
     expect(markup).toContain("data-office-rpg-character-density-tier");
     expect(markup).toContain("data-office-rpg-character-density-tier=\"compact\"");

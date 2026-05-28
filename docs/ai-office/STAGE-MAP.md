@@ -10,8 +10,9 @@ Current canonical product surface:
 - Kanban, NAS Keeper, Paperclip, Projection Cache, controlled-mutation, diagnostics, and legacy Office shells are supporting layers/tabs/drawers, not competing top-level products.
 
 Current live position:
-- Overall stage: Stage 13 active; Stage 14 safety boundary remains closed except metadata-only/readiness artifacts.
-- Latest completed/deployed rung: Stage 13 actor/facility grouping cues were added inside the primary SVG RPG map and deployed/smoked on the VPS dashboard from `287021294`: all six room groups now declare visible-actor grouping, per-room facility zone, and compact Korean grouping label; grouping hooks hydrated, primary RPG map visible, controls inside visual map 0, raw leak false, console errors 0.
+- Overall stage: Stage 13 active and locked as the active work stage until the user explicitly advances; Stage 14 remains closed.
+- Latest local rung: Stage 13 live sprite movement baseline added inside the primary SVG RPG map: the map now has a read-only CSS-motion sprite layer and every visible character is marked as no-refresh idle/patrol motion with walk-cycle SVG parts.
+- Prior deployed rung: Stage 13 actor/facility grouping cues were added inside the primary SVG RPG map and deployed/smoked on the VPS dashboard from `287021294`: all six room groups now declare visible-actor grouping, per-room facility zone, and compact Korean grouping label; grouping hooks hydrated, primary RPG map visible, controls inside visual map 0, raw leak false, console errors 0.
 - Prior deployed rung: Stage 13 mobile label readability hooks were added inside the primary SVG RPG map and deployed/smoked on the VPS dashboard from `84eab5e21`: each room group now declares `mobile-readable` label stacking, per-room safe zone, max Korean label length, and protected mobile label baseline.
 - Prior deployed rung: Stage 13 compact Korean facility copy was added inside the primary SVG RPG map and deployed/smoked on the VPS dashboard from `1702c0f0c`: each room now has a short map-internal Korean cue such as decision/boundary check, evidence storage, or blocked-issue review.
 - Current write boundary: the one-shot Mac relay production approval remains consumed; any additional or replacement real NAS write requires a fresh explicit approval and fresh packet. VPS direct NAS authority remains closed/fail-closed.

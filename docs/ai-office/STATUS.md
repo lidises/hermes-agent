@@ -1,3 +1,25 @@
+## Current status — Stage 13 live sprite movement baseline added locally (2026-05-28T04:20Z)
+
+Scope completed:
+- Continued Stage 13 only, per DeskRPG direction: actual RPG map plus browser-visible moving character sprites, not hooks-only.
+- Added a read-only live sprite layer inside the primary SVG RPG map: `data-office-rpg-live-sprite-layer="css-motion"`.
+- Marked every visible character sprite as no-refresh live motion with `data-office-rpg-sprite-live="no-refresh"` and `data-office-rpg-sprite-motion="idle-patrol"`.
+- Added CSS keyframe animation for subtle idle/patrol movement and walking-cycle limb motion using existing SVG/CSS only; no new renderer/dependency, no backend/API/storage/runtime path.
+
+Evidence captured:
+- RED: `npm test -- --run OfficePage.rpg.test.tsx -t "renders the read-only RPG room map"` failed on missing live sprite layer/motion hooks.
+- GREEN/focused: same test passed after adding live sprite layer, no-refresh motion markers, and walk-cycle markers.
+- Full Office frontend: `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx` = 357 passed.
+- Lint/build: `npx eslint src/pages/OfficePage.tsx src/pages/OfficePage.rpg.test.tsx src/index.css` = existing warnings only after fixing the new lint error; `npm run build` passed.
+- Diff gates: `git diff --check` passed; diff-scoped scan found new_controls=0, raw_leak=0, forbidden_runtime=0; CSS checks found idle/walk keyframes and infinite no-refresh animation.
+
+Safety boundaries preserved:
+- Frontend-only/read-only visual animation slice.
+- No state mutation, no Kanban mutation, no browser mutation controls, no backend/API route change, no NAS write, no dispatcher/authority activation, no public exposure, no gateway action, no raw content/root/secret/token/write-payload echo, and no new renderer/dependency.
+
+Next exact safe rung:
+- Commit/push and deploy/smoke this Stage 13 live sprite movement baseline to VPS dashboard/core with dashboard/core restart only and protected DOM/visual smoke; gateway remains untouched. Then continue Stage 13 with real sprite/map rendering polish only until the user explicitly advances stages.
+
 ## Current status — Stage 13 actor/facility grouping cue deployed to VPS (2026-05-28T04:02Z)
 
 Scope completed:

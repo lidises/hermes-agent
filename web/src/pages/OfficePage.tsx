@@ -2632,55 +2632,63 @@ export function OfficeRpgMap({
             <rect x="224" y="74" width="18" height="28" rx="3" fill="#fef3c7" opacity="0.82" data-office-rpg-map-door="command-agent_desks" />
             <rect x="491" y="74" width="18" height="28" rx="3" fill="#fef3c7" opacity="0.82" data-office-rpg-map-door="agent_desks-task_board" />
             <rect x="590" y="246" width="22" height="28" rx="3" fill="#fef3c7" opacity="0.82" data-office-rpg-map-door="source_archive-incident_corner" />
-            {visualEntities.map(({ entity, position, pose, overlapIndex, roomIndex, labelLayout }) => {
-              const selected = selectedEntityId === entity.id;
-              const fill = RPG_STATUS_FILL[entity.severity];
-              const stroke = selected ? "#ffffff" : RPG_STATUS_STROKE[entity.severity];
-              return (
-                <g
-                  key={`visual-entity-${entity.id}`}
-                  className="office-rpg-character-sprite"
-                  transform={`translate(${position.x} ${position.y})`}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => onInspectEntity(entity)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") onInspectEntity(entity);
-                  }}
-                  data-office-rpg-character-sprite={entity.id}
-                  data-office-rpg-character-kind={entity.kind}
-                  data-office-rpg-character-pose={pose}
-                  data-office-rpg-character-overlap-index={overlapIndex}
-                  data-office-rpg-character-room-index={roomIndex}
-                  data-office-rpg-character-density-tier={labelLayout.densityTier}
-                  data-office-rpg-character-density-room={labelLayout.densityRoom}
-                  data-office-rpg-character-label-slot={labelLayout.slot}
-                  data-office-rpg-character-selected={selected ? "true" : "false"}
-                  data-office-rpg-character-keyboard-target="true"
-                  data-office-rpg-selected-inspector-anchor={selected ? "#office-safe-inspector" : undefined}
-                  aria-label={`${RPG_KIND_LABEL[entity.kind]} ${entity.label} SVG sprite`}
-                  aria-describedby="office-rpg-keyboard-help"
-                  aria-keyshortcuts="Enter Space"
-                >
-                  <ellipse cx="0" cy="18" rx="13" ry="4" fill="rgba(0,0,0,0.36)" />
-                  {selected ? <circle cx="0" cy="4" r="22" fill="none" stroke="#ffffff" strokeDasharray="4 4" strokeWidth="2" opacity="0.82" data-office-rpg-character-selection-halo={entity.id} /> : null}
-                  <path d={pose === "blocked" ? "M-9 3 L9 3 L7 17 L-7 17 Z" : "M-8 2 H8 L10 17 H-10 Z"} fill={fill} stroke={stroke} strokeWidth="2" filter="url(#office-rpg-soft-glow)" />
-                  <circle cx="0" cy="-7" r="9" fill={fill} stroke={stroke} strokeWidth="2" />
-                  <path d={pose === "active" ? "M-5 -8 H5 M-5 -3 H3" : pose === "waiting" ? "M-4 -6 H4 M-4 -2 H4" : "M-4 -5 H4"} stroke="#0f172a" strokeWidth="1.6" strokeLinecap="round" />
-                  <path d={pose === "active" ? "M-10 7 L-18 1 M10 7 L18 2" : "M-10 8 L-15 12 M10 8 L15 12"} stroke={stroke} strokeWidth="2" strokeLinecap="round" />
-                  <path d="M-5 17 L-8 26 M5 17 L8 26" stroke={stroke} strokeWidth="2" strokeLinecap="round" />
-                  <line x1={labelLayout.labelLineStartX} y1={labelLayout.labelY > 0 ? 22 : -20} x2={labelLayout.labelLineEndX} y2={labelLayout.labelY + 9} stroke={stroke} strokeWidth="1" opacity="0.72" data-office-rpg-character-label-anchor={entity.id} />
-                  <g transform={`translate(${labelLayout.labelX} ${labelLayout.labelY})`} data-office-rpg-character-nameplate={entity.id}>
-                    <rect x="0" y="0" width={labelLayout.width} height="18" rx="7" fill="rgba(2,6,23,0.9)" stroke={stroke} strokeWidth="1" />
-                    <text x={labelLayout.textX} y="12" fill="#ecfdf5" fontSize={labelLayout.fontSize}>{RPG_KIND_LABEL[entity.kind]}</text>
+            <g data-office-rpg-live-sprite-layer="css-motion" aria-label="캐릭터 이동 중">
+              <text x="606" y="326" fill="rgba(167,243,208,0.72)" fontSize="9" data-office-rpg-live-sprite-label="true">캐릭터 이동 중</text>
+              {visualEntities.map(({ entity, position, pose, overlapIndex, roomIndex, labelLayout }) => {
+                const selected = selectedEntityId === entity.id;
+                const fill = RPG_STATUS_FILL[entity.severity];
+                const stroke = selected ? "#ffffff" : RPG_STATUS_STROKE[entity.severity];
+                return (
+                  <g
+                    key={`visual-entity-${entity.id}`}
+                    className="office-rpg-character-sprite"
+                    transform={`translate(${position.x} ${position.y})`}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => onInspectEntity(entity)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") onInspectEntity(entity);
+                    }}
+                    data-office-rpg-character-sprite={entity.id}
+                    data-office-rpg-character-kind={entity.kind}
+                    data-office-rpg-character-pose={pose}
+                    data-office-rpg-sprite-live="no-refresh"
+                    data-office-rpg-sprite-motion="idle-patrol"
+                    data-office-rpg-sprite-motion-phase={roomIndex % 3}
+                    data-office-rpg-character-overlap-index={overlapIndex}
+                    data-office-rpg-character-room-index={roomIndex}
+                    data-office-rpg-character-density-tier={labelLayout.densityTier}
+                    data-office-rpg-character-density-room={labelLayout.densityRoom}
+                    data-office-rpg-character-label-slot={labelLayout.slot}
+                    data-office-rpg-character-selected={selected ? "true" : "false"}
+                    data-office-rpg-character-keyboard-target="true"
+                    data-office-rpg-selected-inspector-anchor={selected ? "#office-safe-inspector" : undefined}
+                    aria-label={`${RPG_KIND_LABEL[entity.kind]} ${entity.label} SVG sprite`}
+                    aria-describedby="office-rpg-keyboard-help"
+                    aria-keyshortcuts="Enter Space"
+                  >
+                    <g className="office-rpg-character-motion" data-office-rpg-sprite-walk-cycle="true">
+                      <ellipse cx="0" cy="18" rx="13" ry="4" fill="rgba(0,0,0,0.36)" />
+                      {selected ? <circle cx="0" cy="4" r="22" fill="none" stroke="#ffffff" strokeDasharray="4 4" strokeWidth="2" opacity="0.82" data-office-rpg-character-selection-halo={entity.id} /> : null}
+                      <path d={pose === "blocked" ? "M-9 3 L9 3 L7 17 L-7 17 Z" : "M-8 2 H8 L10 17 H-10 Z"} fill={fill} stroke={stroke} strokeWidth="2" filter="url(#office-rpg-soft-glow)" />
+                      <circle cx="0" cy="-7" r="9" fill={fill} stroke={stroke} strokeWidth="2" />
+                      <path d={pose === "active" ? "M-5 -8 H5 M-5 -3 H3" : pose === "waiting" ? "M-4 -6 H4 M-4 -2 H4" : "M-4 -5 H4"} stroke="#0f172a" strokeWidth="1.6" strokeLinecap="round" />
+                      <path d={pose === "active" ? "M-10 7 L-18 1 M10 7 L18 2" : "M-10 8 L-15 12 M10 8 L15 12"} stroke={stroke} strokeWidth="2" strokeLinecap="round" data-office-rpg-sprite-arm-swing="true" />
+                      <path d="M-5 17 L-8 26 M5 17 L8 26" stroke={stroke} strokeWidth="2" strokeLinecap="round" data-office-rpg-sprite-step-cycle="true" />
+                    </g>
+                    <line x1={labelLayout.labelLineStartX} y1={labelLayout.labelY > 0 ? 22 : -20} x2={labelLayout.labelLineEndX} y2={labelLayout.labelY + 9} stroke={stroke} strokeWidth="1" opacity="0.72" data-office-rpg-character-label-anchor={entity.id} />
+                    <g transform={`translate(${labelLayout.labelX} ${labelLayout.labelY})`} data-office-rpg-character-nameplate={entity.id}>
+                      <rect x="0" y="0" width={labelLayout.width} height="18" rx="7" fill="rgba(2,6,23,0.9)" stroke={stroke} strokeWidth="1" />
+                      <text x={labelLayout.textX} y="12" fill="#ecfdf5" fontSize={labelLayout.fontSize}>{RPG_KIND_LABEL[entity.kind]}</text>
+                    </g>
+                    <g transform="translate(12 -25)" data-office-rpg-character-bubble={entity.id}>
+                      <rect x="0" y="0" width="58" height="18" rx="7" fill="rgba(2,6,23,0.88)" stroke={stroke} strokeWidth="1" />
+                      <text x="7" y="12" fill="#ecfdf5" fontSize="9">{entity.status}</text>
+                    </g>
                   </g>
-                  <g transform="translate(12 -25)" data-office-rpg-character-bubble={entity.id}>
-                    <rect x="0" y="0" width="58" height="18" rx="7" fill="rgba(2,6,23,0.88)" stroke={stroke} strokeWidth="1" />
-                    <text x="7" y="12" fill="#ecfdf5" fontSize="9">{entity.status}</text>
-                  </g>
-                </g>
-              );
-            })}
+                );
+              })}
+            </g>
           </svg>
         </section>
         <details
