@@ -264,6 +264,7 @@ const EVENT_LIMIT = 12;
 const CHANGE_LIMIT = 6;
 const SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES = false;
 const SHOW_OFFICE_SECONDARY_DETAILS = false;
+const SHOW_OFFICE_RPG_DETAIL_SUMMARIES = false;
 type FocusOption = (typeof FOCUS_OPTIONS)[number];
 
 const DEFAULT_NAS_SINGLE_WRITE_DRAFT: OfficeNasMacRelayWritePayload = {
@@ -15093,8 +15094,13 @@ export default function OfficePage() {
   void suppressedNasKeeperHeavyLadderErrors;
 
   return (
-    <div className="flex flex-col gap-6 normal-case" data-office-rpg-focused-shell="true">
-      <section
+    <div
+      className="flex flex-col gap-6 normal-case"
+      data-office-rpg-focused-shell="true"
+      data-office-rpg-detail-summaries-visible={String(SHOW_OFFICE_RPG_DETAIL_SUMMARIES)}
+    >
+      {SHOW_OFFICE_RPG_DETAIL_SUMMARIES ? (
+        <section
         className="border border-emerald-300/25 bg-gradient-to-br from-emerald-950/25 via-black/30 to-sky-950/20 p-5"
         data-office-unified-workbench="true"
         data-office-unified-approval-status={unifiedWorkbenchView.safetyPosture.approvalModel.status}
@@ -15158,6 +15164,9 @@ export default function OfficePage() {
           </div>
         </div>
       </section>
+      ) : (
+        <div hidden data-office-rpg-detail-summaries-visible="false">RPG visualizer details are fixed hidden by default</div>
+      )}
 
       {showOverview ? (
         <OfficeRpgMap
@@ -15180,6 +15189,8 @@ export default function OfficePage() {
         />
       ) : null}
 
+      {SHOW_OFFICE_RPG_DETAIL_SUMMARIES ? (
+        <>
       <section className="grid gap-2 border border-emerald-300/15 bg-black/20 p-3 text-xs text-midground/70 md:grid-cols-3" data-office-rpg-inspector-evidence="true">
         {unifiedWorkbenchView.inspectorEvidenceFacets.map((facet) => (
           <a key={facet.id} href={facet.target} className="border border-current/15 bg-black/20 p-2 hover:text-foreground" data-office-rpg-inspector-evidence-facet={facet.id} data-office-rpg-inspector-evidence-controls={facet.enabledControls}>
@@ -15355,6 +15366,8 @@ export default function OfficePage() {
           </OfficeControlledMutationCompactDashboardPanel>
         </details>
       </OfficeRpgVisualizerTabsDrawer>
+        </>
+      ) : null}
 
       {SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES ? (
         <>

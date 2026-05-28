@@ -100,41 +100,27 @@ describe("Office controlled-mutation runtime status panel placement", () => {
     }
   });
 
-  it("collapses office-like status pages into RPG visualizer tabs instead of leaving them in the main feed", () => {
+  it("keeps the Office page RPG-first by hiding summary/detail drawers from the default visual surface", () => {
     const source = officePageSource;
     const mapIndex = source.indexOf("<OfficeRpgMap");
+    const rpgFirstFlagIndex = source.indexOf("SHOW_OFFICE_RPG_DETAIL_SUMMARIES = false");
     const drawerIndex = source.indexOf("<OfficeRpgVisualizerTabsDrawer");
-    const drawerCloseIndex = source.indexOf("</OfficeRpgVisualizerTabsDrawer>");
+    const inspectorEvidenceIndex = source.indexOf('data-office-rpg-inspector-evidence="true"');
+
     expect(mapIndex).toBeGreaterThan(0);
-    expect(drawerIndex).toBeGreaterThan(mapIndex);
-    expect(drawerCloseIndex).toBeGreaterThan(drawerIndex);
-    expect(source).toContain('data-office-rpg-visualizer-tabs-drawer="true"');
-    expect(source).toContain('data-office-rpg-visualizer-tabs-default-open="false"');
-    expect(source).toContain('data-office-rpg-tab="nas-keeper"');
-    expect(source).toContain('data-office-rpg-tab="controlled-mutation"');
-    expect(source).toContain('data-office-rpg-tab="evidence"');
-    expect(source).toContain('data-office-rpg-tab-panel-default-open="false"');
+    expect(rpgFirstFlagIndex).toBeGreaterThan(0);
+    expect(source).toContain('data-office-rpg-primary-view="true"');
+    expect(source).toContain('data-office-rpg-detail-summaries-visible="false"');
+    expect(drawerIndex).toBeGreaterThan(rpgFirstFlagIndex);
+    expect(inspectorEvidenceIndex).toBeGreaterThan(rpgFirstFlagIndex);
+    expect(source).toContain("{SHOW_OFFICE_RPG_DETAIL_SUMMARIES ? (");
+    expect(source).toContain("RPG visualizer details are fixed hidden by default");
     expect(source).toContain('data-office-merged-project-aliases="true"');
     expect(source).toContain('data-office-merged-project-alias={alias.layerId}');
     expect(source).toContain('data-office-absorbed-navigation="true"');
     expect(source).toContain('data-office-absorbed-nav-item={item.layerId}');
     expect(source).toContain('data-office-unified-status-badges="true"');
     expect(source).toContain('data-office-unified-status-badge={badge.id}');
-    expect(source).toContain('data-office-rpg-inspector-evidence="true"');
-    expect(source).toContain('data-office-rpg-inspector-evidence-facet={facet.id}');
-    expect(source).toContain("RPG visualizer 통합");
-    expect(source).toContain("RPG visualizer 중심으로 통합");
-
-    for (const panel of [
-      "<NasKeeperStep11ReadOnlyRenderingStatusPanel",
-      "<NasKeeperDurableQueueGuardedOperatorReadinessPanel",
-      "<OfficeVisualizerEvidenceDrawer",
-      "<OfficeControlledMutationCompactDashboardPanel",
-    ]) {
-      const panelIndex = source.indexOf(panel);
-      expect(panelIndex).toBeGreaterThan(drawerIndex);
-      expect(panelIndex).toBeLessThan(drawerCloseIndex);
-    }
   });
 
   it("absorbs the old hero focus controls, diagnostics HUD, and live operations layer into the RPG tabs drawer", () => {
@@ -187,15 +173,19 @@ describe("Office controlled-mutation runtime status panel placement", () => {
     }
   });
 
-  it("absorbs the Kanban operations room into the RPG visualizer tabs drawer", () => {
+  it("keeps the Kanban operations room implementation hidden behind the fixed-off RPG detail summaries gate", () => {
     const source = officePageSource;
-    const drawerIndex = source.indexOf("<OfficeRpgVisualizerTabsDrawer>");
-    const drawerCloseIndex = source.indexOf("</OfficeRpgVisualizerTabsDrawer>");
+    const gateIndex = source.indexOf("SHOW_OFFICE_RPG_DETAIL_SUMMARIES = false");
+    const conditionalIndex = source.indexOf("{SHOW_OFFICE_RPG_DETAIL_SUMMARIES ? (");
+    const drawerIndex = source.indexOf("<OfficeRpgVisualizerTabsDrawer>", conditionalIndex);
+    const drawerCloseIndex = source.indexOf("</OfficeRpgVisualizerTabsDrawer>", drawerIndex);
     const kanbanTabIndex = source.indexOf('data-office-rpg-tab="kanban-operations"');
     const kanbanPanelIndex = source.indexOf('data-office-rpg-tab-panel="kanban-operations"', drawerIndex);
     const kanbanProjectionIndex = source.indexOf("<OfficeKanbanOperationsRoomPanel", drawerIndex);
 
-    expect(drawerIndex).toBeGreaterThan(0);
+    expect(gateIndex).toBeGreaterThan(0);
+    expect(conditionalIndex).toBeGreaterThan(gateIndex);
+    expect(drawerIndex).toBeGreaterThan(conditionalIndex);
     expect(drawerCloseIndex).toBeGreaterThan(drawerIndex);
     expect(kanbanTabIndex).toBeGreaterThan(0);
     expect(kanbanTabIndex).toBeLessThan(drawerCloseIndex);
