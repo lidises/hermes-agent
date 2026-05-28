@@ -1,3 +1,32 @@
+## Current status — Stage 13 DeskRPG Canvas Phase B5 deployed to VPS (2026-05-28T13:43Z)
+
+Scope completed:
+- Deployed `79a5d906a feat(office): add canvas cue collision offsets` to both VPS AI Office worktrees: dashboard and core/source.
+- Implemented `Phase B5 — read-only Canvas cue collision/mobile readability` on top of deployed Phase B4.
+- Expanded the Canvas projection contract with collision-aware cue layout hooks: cue layout contract `collision-aware-mobile-offsets`, density contract `crowded-room-cue-density`, cue max overlap `0`, cue offset count `14`, mobile cue readability `compact-offset-lanes`, and contract version `phase-b5-readonly`.
+- The native Canvas renderer now consumes deterministic furniture/facility cue offsets when drawing compact Korean in-map labels while preserving the Phase B4 cue contracts, Phase B3 layer/depth stack, typed tile/sprite/furniture/door/corridor/silhouette/nameplate/status cue descriptors, and SVG fallback.
+- Rsynced Mac-built ignored `hermes_cli/web_dist/` to both VPS worktrees and verified path-independent relative content hash match: `23fef02068078f58f6fe502d6e007afb30532ca0ebc0bab4493a254181ec5515`, file_count=22.
+- Restarted only `hermes-agent-dashboard.service` and `hermes-vps-core-dashboard.service`; `hermes-gateway.service` stayed active with unchanged process id `1059692`.
+
+Safety posture:
+- Frontend-only/read-only TypeScript/React/Canvas change plus dashboard/core deploy only.
+- No new dependency, no external sprite/tile asset, no websocket/SSE/realtime endpoint, no write-intent UI, no backend/API/storage/runtime authority change, no Kanban/NAS execution, no public exposure, no gateway service action, no sensitive raw-value/path/payload echo, and no DeskRPG code/assets copied.
+- Canvas mutation/realtime capability stays explicitly false.
+
+Verification:
+- RED: `npm test -- OfficePage.rpg.test.tsx --run` failed before implementation on missing Canvas cue collision/mobile readability hooks.
+- GREEN/focused: `npm test -- OfficePage.rpg.test.tsx --run` = 199 passed.
+- Combined Office tests: `npm test -- OfficePage.rpg.test.tsx OfficePage.test.ts --run` = 357 passed.
+- Build: `npm run build` passed; existing Vite large-chunk warning unchanged.
+- Lint: `npm run lint` exited 0 with existing warnings only.
+- Diff/static gates: `git diff --check` passed; diff-scoped static scan found no token-shaped credential/raw-markdown leak, no websocket/EventSource addition, no DeskRPG executable controls, and no renderer dependency.
+- Protected API smoke: `/api/status` 200 and `/api/office/state` 200 using the live in-page session token without printing the token.
+- Protected browser DOM smoke: primary view=1, RPG map=1, Canvas renderer=1, Canvas contract version `phase-b5-readonly`, cue layout contract `collision-aware-mobile-offsets`, cue density contract `crowded-room-cue-density`, cue max overlap=0, cue offset count=14, mobile cue readability `compact-offset-lanes`, furniture cue count=8, facility cue count=6, SVG fallback retained=1, summary/status/detail default-visible hooks=0, executable controls=0, Canvas mutation capability=`false`, Canvas realtime capability=`false`, raw leak=false.
+- Protected visual smoke: `/office` still shows the primary AI Office RPG Visualizer with the Canvas DeskRPG map and compact furniture/facility cue labels; the labels are offset enough to improve small-screen/crowded-room readability, with no visible write/mutation controls or raw payload leaks.
+
+Next exact safe rung:
+- Stay in Stage 13 and improve native Canvas fidelity without adding authority: `Phase B6 — read-only Canvas tile/sprite motion affordance`, adding small non-realtime descriptor hooks for sprite route/step affordance or active-room focus while preserving B5 cue/readability contracts, SVG fallback, summary/status/detail default-visible hooks 0, controls 0, raw leak false, and Canvas mutation/realtime false.
+
 ## Current status — Stage 13 DeskRPG Canvas Phase B4 deployed to VPS (2026-05-28T13:24Z)
 
 Scope completed:
@@ -10,7 +39,7 @@ Scope completed:
 
 Safety posture:
 - Frontend-only/read-only TypeScript/React/Canvas change plus dashboard/core deploy only.
-- No new dependency, no external sprite/tile asset, no websocket/SSE/realtime endpoint, no write-intent UI, no backend/API/storage/runtime authority change, no Kanban/NAS execution, no public exposure, no gateway service action, no raw secret/path/payload echo, and no DeskRPG code/assets copied.
+- No new dependency, no external sprite/tile asset, no websocket/SSE/realtime endpoint, no write-intent UI, no backend/API/storage/runtime authority change, no Kanban/NAS execution, no public exposure, no gateway service action, no sensitive raw-value/path/payload echo, and no DeskRPG code/assets copied.
 - Canvas mutation/realtime capability stays explicitly false.
 
 Verification:
@@ -40,7 +69,7 @@ Scope completed:
 
 Safety posture:
 - Frontend-only/read-only TypeScript/React/Canvas change plus dashboard/core deploy only.
-- No new dependency, no external sprite/tile asset, no websocket/SSE/realtime endpoint, no browser write UI, no backend/API/storage/runtime authority change, no Kanban/NAS execution, no public exposure, no gateway service action, no raw secret/path/payload echo, and no DeskRPG code/assets copied.
+- No new dependency, no external sprite/tile asset, no websocket/SSE/realtime endpoint, no browser write UI, no backend/API/storage/runtime authority change, no Kanban/NAS execution, no public exposure, no gateway service action, no sensitive raw-value/path/payload echo, and no DeskRPG code/assets copied.
 - Canvas mutation/realtime capability stays explicitly false.
 
 Verification:
