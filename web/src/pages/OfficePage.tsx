@@ -2383,12 +2383,89 @@ type OfficeDeskRpgCanvasSpriteDescriptor = {
   stroke: string;
 };
 
+type OfficeDeskRpgCanvasFurnitureKind = "desk" | "chair" | "meeting-table" | "sofa" | "plant" | "monitor" | "whiteboard" | "bookcase";
+
+type OfficeDeskRpgCanvasFurnitureDescriptor = {
+  id: string;
+  roomId: OfficeRpgRoomId;
+  kind: OfficeDeskRpgCanvasFurnitureKind;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  rx: number;
+  fill: string;
+  stroke?: string;
+};
+
+type OfficeDeskRpgCanvasDoorDescriptor = {
+  id: string;
+  from: OfficeRpgRoomId;
+  to: OfficeRpgRoomId;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+};
+
+type OfficeDeskRpgCanvasCorridorDescriptor = {
+  id: string;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  width: number;
+};
+
+const OFFICE_DESKRPG_CANVAS_FURNITURE: OfficeDeskRpgCanvasFurnitureDescriptor[] = [
+  { id: "boss-desk", roomId: "command", kind: "desk", x: 78, y: 98, w: 54, h: 26, rx: 6, fill: "#0f766e", stroke: "#5eead4" },
+  { id: "boss-chair", roomId: "command", kind: "chair", x: 86, y: 128, w: 18, h: 14, rx: 4, fill: "#134e4a", stroke: "#99f6e4" },
+  { id: "boss-monitor", roomId: "command", kind: "monitor", x: 112, y: 105, w: 14, h: 9, rx: 2, fill: "#0f172a", stroke: "#93c5fd" },
+  { id: "orchestrator-desk", roomId: "agent_desks", kind: "desk", x: 326, y: 70, w: 82, h: 28, rx: 7, fill: "#075985", stroke: "#7dd3fc" },
+  { id: "orchestrator-chair-a", roomId: "agent_desks", kind: "chair", x: 336, y: 103, w: 18, h: 14, rx: 4, fill: "#0c4a6e", stroke: "#bae6fd" },
+  { id: "orchestrator-chair-b", roomId: "agent_desks", kind: "chair", x: 376, y: 103, w: 18, h: 14, rx: 4, fill: "#0c4a6e", stroke: "#bae6fd" },
+  { id: "orchestrator-monitor", roomId: "agent_desks", kind: "monitor", x: 366, y: 77, w: 15, h: 9, rx: 2, fill: "#0f172a", stroke: "#93c5fd" },
+  { id: "briefing-table", roomId: "task_board", kind: "meeting-table", x: 538, y: 58, w: 34, h: 26, rx: 5, fill: "#422006", stroke: "#facc15" },
+  { id: "central-board", roomId: "task_board", kind: "whiteboard", x: 594, y: 58, w: 118, h: 46, rx: 8, fill: "#713f12", stroke: "#fde68a" },
+  { id: "board-chair-a", roomId: "task_board", kind: "chair", x: 604, y: 114, w: 26, h: 15, rx: 4, fill: "#422006", stroke: "#fef3c7" },
+  { id: "board-chair-b", roomId: "task_board", kind: "chair", x: 650, y: 114, w: 26, h: 15, rx: 4, fill: "#422006", stroke: "#fef3c7" },
+  { id: "lounge-sofa", roomId: "cron_room", kind: "sofa", x: 348, y: 196, w: 62, h: 26, rx: 7, fill: "#475569", stroke: "#cbd5e1" },
+  { id: "lounge-plant", roomId: "cron_room", kind: "plant", x: 424, y: 202, w: 18, h: 18, rx: 9, fill: "#166534", stroke: "#bbf7d0" },
+  { id: "source-shelves", roomId: "source_archive", kind: "bookcase", x: 354, y: 228, w: 154, h: 54, rx: 8, fill: "#164e63", stroke: "#67e8f9" },
+  { id: "archive-books-a", roomId: "source_archive", kind: "bookcase", x: 370, y: 240, w: 32, h: 8, rx: 2, fill: "#e0f2fe" },
+  { id: "archive-books-b", roomId: "source_archive", kind: "bookcase", x: 418, y: 258, w: 34, h: 8, rx: 2, fill: "#fef9c3" },
+  { id: "review-corner", roomId: "incident_corner", kind: "meeting-table", x: 652, y: 238, w: 82, h: 42, rx: 8, fill: "#7f1d1d", stroke: "#fecaca" },
+  { id: "review-chair-a", roomId: "incident_corner", kind: "chair", x: 670, y: 288, w: 22, h: 15, rx: 4, fill: "#450a0a", stroke: "#fecaca" },
+  { id: "review-chair-b", roomId: "incident_corner", kind: "chair", x: 712, y: 288, w: 22, h: 15, rx: 4, fill: "#450a0a", stroke: "#fecaca" },
+  { id: "review-plant", roomId: "incident_corner", kind: "plant", x: 742, y: 221, w: 18, h: 18, rx: 9, fill: "#166534", stroke: "#bbf7d0" },
+];
+
+const OFFICE_DESKRPG_CANVAS_DOORS: OfficeDeskRpgCanvasDoorDescriptor[] = [
+  { id: "command-agent_desks", from: "command", to: "agent_desks", x: 224, y: 74, w: 18, h: 28 },
+  { id: "agent_desks-task_board", from: "agent_desks", to: "task_board", x: 491, y: 74, w: 18, h: 28 },
+  { id: "source_archive-incident_corner", from: "source_archive", to: "incident_corner", x: 590, y: 246, w: 22, h: 28 },
+];
+
+const OFFICE_DESKRPG_CANVAS_CORRIDORS: OfficeDeskRpgCanvasCorridorDescriptor[] = [
+  { id: "command-to-agent_desks", x1: 214, y1: 88, x2: 252, y2: 88, width: 10 },
+  { id: "agent_desks-to-task_board", x1: 480, y1: 88, x2: 520, y2: 88, width: 10 },
+  { id: "agent_desks-to-source_archive", x1: 392, y1: 146, x2: 392, y2: 198, width: 10 },
+  { id: "source_archive-to-incident_corner", x1: 580, y1: 260, x2: 624, y2: 260, width: 10 },
+];
+
 type OfficeDeskRpgCanvasProjection = {
-  version: "phase-b0-readonly";
+  version: "phase-b1-readonly";
   source: "sanitized-scene";
   tileGrid: "room-local-coordinates";
+  furnitureContract: "room-furniture-descriptors";
+  furnitureDensity: "room-furniture-density";
+  doorContract: "door-descriptors";
+  corridorContract: "corridor-descriptors";
   spriteContract: "placeholder-descriptors";
   rooms: OfficeDeskRpgCanvasRoomDescriptor[];
+  furniture: OfficeDeskRpgCanvasFurnitureDescriptor[];
+  doors: OfficeDeskRpgCanvasDoorDescriptor[];
+  corridors: OfficeDeskRpgCanvasCorridorDescriptor[];
   sprites: OfficeDeskRpgCanvasSpriteDescriptor[];
 };
 
@@ -2429,11 +2506,18 @@ function buildOfficeDeskRpgCanvasProjection(scene: OfficeRpgScene, entities: Ret
     stroke: RPG_STATUS_STROKE[entity.severity],
   }));
   return {
-    version: "phase-b0-readonly",
+    version: "phase-b1-readonly",
     source: "sanitized-scene",
     tileGrid: "room-local-coordinates",
+    furnitureContract: "room-furniture-descriptors",
+    furnitureDensity: "room-furniture-density",
+    doorContract: "door-descriptors",
+    corridorContract: "corridor-descriptors",
     spriteContract: "placeholder-descriptors",
     rooms,
+    furniture: OFFICE_DESKRPG_CANVAS_FURNITURE,
+    doors: OFFICE_DESKRPG_CANVAS_DOORS,
+    corridors: OFFICE_DESKRPG_CANVAS_CORRIDORS,
     sprites,
   };
 }
@@ -2638,10 +2722,12 @@ function OfficeDeskRpgCanvasShell({
     context.strokeStyle = "rgba(167,243,208,0.32)";
     context.lineWidth = 10;
     context.lineCap = "round";
-    [[214, 88, 252, 88], [480, 88, 520, 88], [392, 146, 392, 198], [580, 260, 624, 260]].forEach(([x1, y1, x2, y2]) => {
+    projection.corridors.forEach((corridor) => {
+      context.strokeStyle = "rgba(167,243,208,0.30)";
+      context.lineWidth = corridor.width;
       context.beginPath();
-      context.moveTo(x1, y1);
-      context.lineTo(x2, y2);
+      context.moveTo(corridor.x1, corridor.y1);
+      context.lineTo(corridor.x2, corridor.y2);
       context.stroke();
     });
 
@@ -2660,6 +2746,31 @@ function OfficeDeskRpgCanvasShell({
         context.strokeStyle = "rgba(253,230,138,0.14)";
         context.strokeRect(tile.x, tile.y, tile.w - 2, tile.h - 2);
       });
+    });
+
+    projection.furniture.forEach((piece) => {
+      context.fillStyle = piece.fill;
+      context.strokeStyle = piece.stroke ?? "rgba(255,255,255,0.30)";
+      context.lineWidth = 1.4;
+      context.beginPath();
+      context.roundRect(piece.x, piece.y, piece.w, piece.h, piece.rx);
+      context.fill();
+      if (piece.stroke) context.stroke();
+      if (piece.kind === "whiteboard" || piece.kind === "bookcase") {
+        context.strokeStyle = "rgba(255,255,255,0.22)";
+        context.lineWidth = 1;
+        context.beginPath();
+        context.moveTo(piece.x + 8, piece.y + Math.max(8, piece.h / 2));
+        context.lineTo(piece.x + piece.w - 8, piece.y + Math.max(8, piece.h / 2));
+        context.stroke();
+      }
+    });
+
+    projection.doors.forEach((door) => {
+      context.fillStyle = "rgba(254,243,199,0.82)";
+      context.beginPath();
+      context.roundRect(door.x, door.y, door.w, door.h, 3);
+      context.fill();
     });
 
     projection.sprites.forEach((sprite) => {
@@ -2699,6 +2810,13 @@ function OfficeDeskRpgCanvasShell({
       data-office-deskrpg-canvas-room-count={projection.rooms.length}
       data-office-deskrpg-canvas-sprite-contract={projection.spriteContract}
       data-office-deskrpg-canvas-sprite-count={projection.sprites.length}
+      data-office-deskrpg-canvas-furniture-contract={projection.furnitureContract}
+      data-office-deskrpg-canvas-furniture-density={projection.furnitureDensity}
+      data-office-deskrpg-canvas-furniture-count={projection.furniture.length}
+      data-office-deskrpg-canvas-door-contract={projection.doorContract}
+      data-office-deskrpg-canvas-door-count={projection.doors.length}
+      data-office-deskrpg-canvas-corridor-contract={projection.corridorContract}
+      data-office-deskrpg-canvas-corridor-count={projection.corridors.length}
       data-office-deskrpg-canvas-contract-version={projection.version}
       aria-label="Canvas 기반 DeskRPG 지도 shell · 읽기 전용"
     >

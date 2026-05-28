@@ -1,16 +1,17 @@
-## NEXT — after Stage 13 DeskRPG Canvas Phase B0 VPS deploy (2026-05-28T10:00Z)
+## NEXT — after Stage 13 DeskRPG Canvas Phase B1 local verification (2026-05-28T10:18Z)
 
 Current next stage:
 - Stay in Stage 13, continuing the original-DeskRPG pivot ladder.
-- Phase B0 is deployed: the Canvas renderer consumes a typed read-only tile/sprite projection contract rather than ad hoc primitive draw inputs.
+- Phase B1 is locally verified: the Canvas renderer consumes typed furniture, door, and corridor descriptors in addition to the existing tile/sprite contract.
 - The Canvas shell remains placeholder/read-only: no sprite assets, no renderer dependency, no realtime transport, no write-intent UI, and no backend mutation.
 
 Preferred next safe rung:
-1. `Phase B1 — read-only Canvas room/furniture descriptor expansion`
-   - RED: require furniture/door/corridor descriptor hooks in the Canvas projection contract while preserving tile/sprite contract hooks, primary map posture, SVG fallback, summary/status/detail default-visible hooks 0, controls 0, raw leak false, and Canvas mutation/realtime false.
-   - GREEN: add the smallest typed descriptor expansion consumed by the native Canvas renderer for room furniture density and corridor/door cues. Keep placeholder shapes and existing sanitized scene data; no external assets or dependency.
-   - VERIFY: focused RPG tests, combined Office tests, build/lint, `git diff --check`, static raw-leak/control/socket/dependency scan, then commit/push.
-   - DEPLOY if verification stays clean: dashboard/core sync, ignored `web_dist` rsync/hash, dashboard/core restart only, protected DOM/API/visual smoke; gateway untouched.
+1. `Deploy Phase B1 — read-only Canvas room/furniture descriptor expansion`
+   - SYNC: push/fast-forward dashboard/core worktrees only and rsync ignored `hermes_cli/web_dist/` built on Mac.
+   - VERIFY HASH: compare path-independent relative `web_dist` hashes for local, dashboard, and core/source; keep file count recorded.
+   - RESTART: restart only `hermes-agent-dashboard.service` and `hermes-vps-core-dashboard.service`; gateway remains untouched.
+   - SMOKE: protected API/DOM/visual smoke must show primary RPG map, Canvas room/furniture/door/corridor descriptor hooks, SVG fallback retained, summary/status/detail default-visible hooks 0, executable controls 0, raw leak false, and Canvas mutation/realtime false.
+   - HANDOFF: record deploy evidence in `STATUS.md`/`STAGE-MAP.md` after smoke.
 
 Still forbidden unless separately and explicitly approved:
 - Production NAS write or replacement write; direct VPS NAS authority; watcher/cron/dispatcher/authority-adapter activation; public exposure; gateway service action; sensitive raw-value/payload echo; arbitrary browser execution controls; Kanban mutation execution; websocket/SSE/realtime endpoint; renderer dependency such as Phaser/PixiJS; external sprite/tile assets; write-intent UI.
