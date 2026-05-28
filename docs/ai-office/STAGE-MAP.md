@@ -11,9 +11,10 @@ Current canonical product surface:
 
 Current live position:
 - Overall stage: Stage 13 active; Stage 14 safety boundary remains closed except metadata-only/readiness artifacts.
-- Latest completed rung: NAS Keeper metadata-only production-write boundary recorded and deployed/smoked on VPS; write-readiness is 100%, but real NAS production write still requires a fresh exact approval.
+- Latest completed rung: Stage 13 Korean room labels added inside the primary SVG RPG map after real-write approval was safely blocked by missing Mac relay root and no pending authorized packet.
+- Prior write-readiness rung: NAS Keeper metadata-only production-write boundary recorded and deployed/smoked on VPS; write-readiness is 100%, but real NAS production write still requires a configured Mac relay root plus a fresh exact target/content packet.
 - Prior RPG rung: Stage 13 room/entity visual hierarchy cue added to the primary SVG RPG map and locally smoked.
-- Current requested rung: do not repeat the same boundary record; next safe work is either a new non-duplicative no-authority metadata checkpoint or Stage 13 RPG Visualizer-first visual/read-only quality.
+- Current requested rung: continue RPG Visualizer-first quality or prepare a fresh one-shot real-write packet; do not force-replay failed_guarded or already-succeeded queue items.
 
 ## Stage 0 — Project charter and operating protocol
 

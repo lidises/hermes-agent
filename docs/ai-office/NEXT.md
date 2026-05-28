@@ -1,3 +1,25 @@
+## NEXT — after Stage 13 Korean room labels (2026-05-28T02:19Z)
+
+Current next stage:
+- Stage 13 is active and the primary `/office` SVG RPG map now has Korean room labels (`지휘실`, `작업석`, `작업 보드`, `자동화실`, `자료 금고`, `검토 코너`) with English labels kept as secondary captions.
+- A one-shot real NAS write was approved but not executed because Mac relay root is unset and there is no pending authorized packet; do not force-replay failed_guarded or already-succeeded queue items.
+- Keep `/office` RPG Visualizer-first; do not add another external summary/status panel.
+
+Allowed work boundary if continuing:
+- Local repo edits, TDD tests, build, docs update, commit, and push.
+- VPS dashboard/core sync, ignored `web_dist` rsync, dashboard/core restart, and protected API/DOM smoke if deploying this slice.
+- Metadata-only safe-ref JSONL records and Mac relay tmp-root smokes remain allowed inside safe metadata/tmp-root boundaries.
+
+Still forbidden unless separately and explicitly approved:
+- Additional real NAS production write or replacement write.
+- Force-replay of failed_guarded/succeeded queue items.
+- Actual NAS cleanup delete/move/archive/write, direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway service action, raw content/root/secret/token/write-payload echo, executable browser mutation controls, Kanban mutation controls, or a new renderer/dependency.
+
+Preferred next safe rung:
+1. If pursuing the real write: first configure Mac-local relay root and create/authorize a fresh one-shot packet with exact target/content boundary; then execute once and record receipt/readback. Do not reuse an already succeeded packet.
+2. Otherwise continue Stage 13 read-only visual depth: compact in-map cues or mobile/small-screen layout.
+3. Use RED helper/component tests first, implement the smallest frontend-only change, then verify focused Office tests, build, `git diff --check`, raw-leak/control scan, DOM smoke, docs handoff, commit, and push.
+
 ## NEXT — after NAS Keeper production-write boundary (2026-05-28T02:00Z)
 
 Current next stage:
@@ -5,7 +27,7 @@ Current next stage:
 - The boundary proves the source Step 11 hydration receipt, stores safe refs/checksums only, and blocks real NAS production write without a fresh exact approval.
 - Real NAS production write, direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, gateway restart, and raw markdown/path/root/secret/token/write_payload echo remain closed.
 
-Approved task-scoped work if continuing:
+Allowed work boundary if continuing:
 - Local repo edits, TDD tests, build, docs update, commit, and push.
 - VPS dashboard/core sync, ignored `web_dist` rsync, dashboard/core restart, and protected API/DOM smoke.
 - Metadata-only safe-ref JSONL record write/readback, payload/write_payload preview contract, replay/idempotency metadata, and Mac relay isolated tmp-root write smoke remain allowed only within safe metadata/tmp-root boundaries.

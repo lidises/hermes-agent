@@ -433,6 +433,10 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("data-office-rpg-room-tier=\"control\"");
     expect(markup).toContain("data-office-rpg-room-tier=\"execution\"");
     expect(markup).toContain("data-office-rpg-room-tier=\"evidence\"");
+    expect(markup).toContain("data-office-rpg-room-korean-label=\"command\"");
+    expect(markup).toContain("지휘실");
+    expect(markup).toContain("작업 보드");
+    expect(markup).toContain("자료 금고");
     expect(markup).toContain("data-office-rpg-room-entity-count=\"command\"");
     expect(markup).toContain("data-office-rpg-room-priority-cue=\"task_board\"");
     expect(markup).toContain("data-office-rpg-character-sprite");

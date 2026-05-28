@@ -1,3 +1,28 @@
+## Current status — Stage 13 Korean room labels added to primary RPG map (2026-05-28T02:19Z)
+
+Scope completed:
+- Received one-shot real NAS write approval for the existing latest approved preview/packet, but did not execute it because the Mac relay root was unset and no currently authorized pending packet was present.
+- Preserved the safety boundary: latest failed_guarded packet was not force-replayed, latest succeeded packet was not re-written, and no replacement/duplicate real NAS write occurred.
+- Completed a fallback Stage 13 read-only RPG-readiness rung instead: primary SVG rooms now show Korean room labels while keeping English room labels as secondary small captions.
+
+Evidence captured:
+- Live state checked: local main clean at `e2d4038f5`; Mac relay root shell/launchctl env unset; local queue had no `authorized_for_mac_relay_execution` pending packet.
+- RED observed: focused RPG room-map test failed before `data-office-rpg-room-korean-label` and Korean room labels existed.
+- GREEN focused test passed: `npm test -- --run OfficePage.rpg.test.tsx -t "renders the read-only RPG room map"`.
+- Full Office frontend tests passed: `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx` = 357 passed.
+- `npm run build` passed with the existing Vite large-chunk warning.
+- `git diff --check` passed.
+- Diff-scoped leak/control scan passed: no local/VPS filesystem value, secret-like token, body-field key, write-payload key, fetch/control additions, watcher/cron/dispatch/gateway opening, or Mac relay root value exposure.
+
+Safety boundaries preserved:
+- No real NAS production write was executed in this rung.
+- No replacement write, NAS cleanup/delete/move/archive, direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway service action, raw content/root/secret/token/write-payload echo, Kanban mutation controls, or new renderer/dependency.
+- UI change is frontend-only/read-only and stays inside the existing primary RPG SVG map.
+
+Readiness/result note:
+- RPG-readiness increased via Korean room/facility copy inside the primary map.
+- Exact next safe rung: either configure Mac relay root plus create/authorize a fresh one-shot packet before any real write, or continue Stage 13 with compact in-map cues/mobile layout using the same RED → GREEN → verify path.
+
 ## Current status — NAS Keeper production-write boundary recorded (2026-05-28T02:00Z)
 
 Scope completed:

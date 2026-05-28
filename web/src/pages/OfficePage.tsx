@@ -2189,6 +2189,15 @@ const RPG_ROOM_TIER: Record<OfficeRpgRoomId, "control" | "execution" | "evidence
   incident_corner: "evidence",
 };
 
+const RPG_ROOM_KOREAN_LABEL: Record<OfficeRpgRoomId, string> = {
+  command: "지휘실",
+  agent_desks: "작업석",
+  task_board: "작업 보드",
+  cron_room: "자동화실",
+  source_archive: "자료 금고",
+  incident_corner: "검토 코너",
+};
+
 const RPG_STATUS_FILL: Record<OfficeRpgSeverity, string> = {
   normal: "#a7f3d0",
   info: "#7dd3fc",
@@ -2556,6 +2565,7 @@ export function OfficeRpgMap({
               const layout = RPG_ROOM_LAYOUT[room.id];
               const roomEntityCount = visibleEntities.filter((entity) => entity.room === room.id).length;
               const roomTier = RPG_ROOM_TIER[room.id];
+              const roomKoreanLabel = RPG_ROOM_KOREAN_LABEL[room.id];
               const priorityCue = room.severity === "danger" || roomEntityCount > 0;
               return (
                 <g
@@ -2563,6 +2573,7 @@ export function OfficeRpgMap({
                   data-office-rpg-map-room={room.id}
                   data-office-rpg-room-hierarchy="true"
                   data-office-rpg-room-tier={roomTier}
+                  data-office-rpg-room-korean-label={room.id}
                   data-office-rpg-room-entity-count={room.id}
                   data-office-rpg-room-entity-count-value={roomEntityCount}
                   data-office-rpg-room-priority-cue={priorityCue ? room.id : undefined}
@@ -2574,7 +2585,8 @@ export function OfficeRpgMap({
                   <text x={layout.x + layout.w - 14} y={layout.y + 22} textAnchor="end" fill="rgba(167,243,208,0.68)" fontSize="9" letterSpacing="1.2" data-office-rpg-room-tier-label={room.id}>{roomTier}</text>
                   {priorityCue ? <circle cx={layout.x + layout.w - 16} cy={layout.y + layout.h - 16} r="5" fill={RPG_STATUS_STROKE[room.severity]} opacity="0.86" data-office-rpg-room-priority-dot={room.id} /> : null}
                   <text x={layout.x + 14} y={layout.y + 24} fill="#d1fae5" fontSize="12" fontWeight="700" letterSpacing="1.5">{layout.short}</text>
-                  <text x={layout.x + 14} y={layout.y + 42} fill="rgba(209,250,229,0.72)" fontSize="10">{room.label}</text>
+                  <text x={layout.x + 14} y={layout.y + 42} fill="rgba(209,250,229,0.72)" fontSize="10">{roomKoreanLabel}</text>
+                  <text x={layout.x + 14} y={layout.y + 57} fill="rgba(209,250,229,0.52)" fontSize="8.5">{room.label}</text>
                 </g>
               );
             })}
