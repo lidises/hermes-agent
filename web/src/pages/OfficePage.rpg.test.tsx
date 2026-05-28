@@ -472,7 +472,12 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("data-office-deskrpg-canvas-cue-max-overlap=\"0\"");
     expect(markup).toContain("data-office-deskrpg-canvas-cue-offset-count=\"14\"");
     expect(markup).toContain("data-office-deskrpg-canvas-mobile-cue-readability=\"compact-offset-lanes\"");
-    expect(markup).toContain("data-office-deskrpg-canvas-contract-version=\"phase-b5-readonly\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-sprite-motion-contract=\"room-local-step-affordance\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-sprite-step-count=\"6\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-sprite-route-vector-count=\"6\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-active-room-focus=\"tile-step-focus-rings\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-motion-affordance=\"read-only-ghost-steps\"");
+    expect(markup).toContain("data-office-deskrpg-canvas-contract-version=\"phase-b6-readonly\"");
     expect(markup).toContain("가구 단서");
     expect(markup).toContain("시설 단서");
     expect(markup).toContain("겹침 완화");

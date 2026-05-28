@@ -2381,6 +2381,12 @@ type OfficeDeskRpgCanvasSpriteDescriptor = {
   localTile: string;
   x: number;
   y: number;
+  nextX: number;
+  nextY: number;
+  stepCueX: number;
+  stepCueY: number;
+  routeVector: "horizontal" | "vertical" | "diagonal";
+  focusRadius: number;
   fill: string;
   stroke: string;
   label: string;
@@ -2535,7 +2541,7 @@ const OFFICE_DESKRPG_CANVAS_LAYERS: OfficeDeskRpgCanvasLayerDescriptor[] = [
 ];
 
 type OfficeDeskRpgCanvasProjection = {
-  version: "phase-b5-readonly";
+  version: "phase-b6-readonly";
   source: "sanitized-scene";
   tileGrid: "room-local-coordinates";
   layerContract: "floor-room-depth-descriptors";
@@ -2556,6 +2562,9 @@ type OfficeDeskRpgCanvasProjection = {
   silhouetteContract: "head-body-feet-shadow";
   nameplateContract: "compact-korean-cues";
   statusCueContract: "status-dot-descriptors";
+  spriteMotionContract: "room-local-step-affordance";
+  activeRoomFocus: "tile-step-focus-rings";
+  motionAffordance: "read-only-ghost-steps";
   spriteDetailLevel: OfficeDeskRpgCanvasSpriteDetailLevel;
   rooms: OfficeDeskRpgCanvasRoomDescriptor[];
   furniture: OfficeDeskRpgCanvasFurnitureDescriptor[];
@@ -2566,6 +2575,17 @@ type OfficeDeskRpgCanvasProjection = {
   sprites: OfficeDeskRpgCanvasSpriteDescriptor[];
   layers: OfficeDeskRpgCanvasLayerDescriptor[];
 };
+
+function officeDeskRpgCanvasStepAffordance(entity: OfficeRpgSceneEntity, roomIndex: number, index: number) {
+  const patrol = rpgEntityRoomPatrol(entity, roomIndex);
+  const direction = index % 2 === 0 ? 1 : -1;
+  return {
+    dx: patrol.axis === "horizontal" ? direction * patrol.x : 0,
+    dy: patrol.axis === "vertical" ? direction * patrol.y : 0,
+    routeVector: patrol.axis as "horizontal" | "vertical",
+    focusRadius: entity.status === "blocked" || entity.severity === "danger" ? 19 : 15,
+  };
+}
 
 function buildOfficeDeskRpgCanvasProjection(scene: OfficeRpgScene, entities: ReturnType<typeof rpgVisualEntities>): OfficeDeskRpgCanvasProjection {
   const rooms = (Object.entries(RPG_ROOM_LAYOUT) as Array<[OfficeRpgRoomId, (typeof RPG_ROOM_LAYOUT)[OfficeRpgRoomId]]>).map(([roomId, layout]) => {
@@ -2594,15 +2614,22 @@ function buildOfficeDeskRpgCanvasProjection(scene: OfficeRpgScene, entities: Ret
       }),
     };
   });
-  const sprites = entities.map(({ entity, position }) => {
+  const sprites = entities.map(({ entity, position, roomIndex }, index) => {
     const roleLabel = RPG_KIND_LABEL[entity.kind];
     const label = roleLabel.length > 5 ? roleLabel.slice(0, 5) : roleLabel;
+    const stepAffordance = officeDeskRpgCanvasStepAffordance(entity, roomIndex, index);
     return {
       id: entity.id,
       roomId: entity.room,
       localTile: rpgEntityLocalTile(entity),
       x: position.x,
       y: position.y,
+      nextX: position.x + stepAffordance.dx,
+      nextY: position.y + stepAffordance.dy,
+      stepCueX: position.x + stepAffordance.dx / 2,
+      stepCueY: position.y + stepAffordance.dy / 2,
+      routeVector: stepAffordance.routeVector,
+      focusRadius: stepAffordance.focusRadius,
       fill: RPG_STATUS_FILL[entity.severity],
       stroke: RPG_STATUS_STROKE[entity.severity],
       label,
@@ -2617,7 +2644,7 @@ function buildOfficeDeskRpgCanvasProjection(scene: OfficeRpgScene, entities: Ret
     };
   });
   return {
-    version: "phase-b5-readonly",
+    version: "phase-b6-readonly",
     source: "sanitized-scene",
     tileGrid: "room-local-coordinates",
     layerContract: "floor-room-depth-descriptors",
@@ -2638,6 +2665,9 @@ function buildOfficeDeskRpgCanvasProjection(scene: OfficeRpgScene, entities: Ret
     silhouetteContract: "head-body-feet-shadow",
     nameplateContract: "compact-korean-cues",
     statusCueContract: "status-dot-descriptors",
+    spriteMotionContract: "room-local-step-affordance",
+    activeRoomFocus: "tile-step-focus-rings",
+    motionAffordance: "read-only-ghost-steps",
     spriteDetailLevel: "silhouette-nameplate",
     rooms,
     furniture: OFFICE_DESKRPG_CANVAS_FURNITURE,
@@ -2924,9 +2954,25 @@ function OfficeDeskRpgCanvasShell({
 
         if (layer.id === "sprite-shadow") {
           projection.sprites.forEach((sprite) => {
+            context.strokeStyle = "rgba(253,230,138,0.34)";
+            context.lineWidth = 1.2;
+            context.setLineDash([4, 4]);
+            context.beginPath();
+            context.moveTo(sprite.x, sprite.y + 12);
+            context.lineTo(sprite.nextX, sprite.nextY + 12);
+            context.stroke();
+            context.setLineDash([]);
+            context.strokeStyle = "rgba(125,211,252,0.26)";
+            context.beginPath();
+            context.arc(sprite.nextX, sprite.nextY + 10, sprite.focusRadius / 2, 0, Math.PI * 2);
+            context.stroke();
             context.fillStyle = "rgba(0,0,0,0.34)";
             context.beginPath();
             context.ellipse(sprite.x, sprite.y + 17, sprite.shadowWidth / 2, 4, 0, 0, Math.PI * 2);
+            context.fill();
+            context.fillStyle = "rgba(253,230,138,0.58)";
+            context.beginPath();
+            context.arc(sprite.stepCueX, sprite.stepCueY + 16, 2.2, 0, Math.PI * 2);
             context.fill();
           });
           return;
@@ -3061,6 +3107,11 @@ function OfficeDeskRpgCanvasShell({
       data-office-deskrpg-canvas-cue-max-overlap={projection.cueMaxOverlap}
       data-office-deskrpg-canvas-cue-offset-count={projection.furnitureCues.length + projection.facilityCues.length}
       data-office-deskrpg-canvas-mobile-cue-readability={projection.mobileCueReadability}
+      data-office-deskrpg-canvas-sprite-motion-contract={projection.spriteMotionContract}
+      data-office-deskrpg-canvas-sprite-step-count={projection.sprites.length}
+      data-office-deskrpg-canvas-sprite-route-vector-count={projection.sprites.length}
+      data-office-deskrpg-canvas-active-room-focus={projection.activeRoomFocus}
+      data-office-deskrpg-canvas-motion-affordance={projection.motionAffordance}
       data-office-deskrpg-canvas-contract-version={projection.version}
       aria-label="Canvas 기반 DeskRPG 지도 shell · 읽기 전용"
     >
