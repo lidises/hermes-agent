@@ -443,6 +443,12 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("data-office-deskrpg-corridor-block=\"command-to-agent_desks\"");
     expect(markup).toContain("data-office-deskrpg-sprite-room-block=\"command\"");
     expect(markup).toContain("data-office-deskrpg-sprite-local-tile");
+    expect(markup).toContain("data-office-deskrpg-sprite-patrol=\"room-local\"");
+    expect(markup).toContain("data-office-deskrpg-sprite-patrol-bounds=\"bounded-room\"");
+    expect(markup).toContain("data-office-deskrpg-sprite-patrol-axis=\"horizontal\"");
+    expect(markup).toContain("data-office-deskrpg-sprite-patrol-axis=\"vertical\"");
+    expect(markup).toContain("data-office-deskrpg-sprite-step-mode=\"tile-step\"");
+    expect(markup).toContain("방 안 이동");
     expect(markup).toContain("JRPG 블록 오피스");
     expect(markup.match(/data-office-deskrpg-tile-cell=/g)?.length).toBeGreaterThanOrEqual(24);
     expect(markup).toContain("data-office-rpg-floor-material=\"wood-tile\"");

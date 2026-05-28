@@ -2263,6 +2263,18 @@ function rpgEntityLocalTile(entity: OfficeRpgSceneEntity) {
   return `${entity.room}:${col}-${row}`;
 }
 
+function rpgEntityRoomPatrol(entity: OfficeRpgSceneEntity, roomIndex: number) {
+  const room = RPG_ROOM_LAYOUT[entity.room];
+  const axis = roomIndex % 2 === 0 ? "horizontal" : "vertical";
+  const tileStep = Math.max(10, Math.min(18, Math.floor(Math.min(room.w, room.h) / 6)));
+  return {
+    axis,
+    x: axis === "horizontal" ? tileStep : Math.max(4, Math.floor(tileStep / 4)),
+    y: axis === "vertical" ? tileStep : Math.max(3, Math.floor(tileStep / 5)),
+    duration: `${2.4 + (roomIndex % 3) * 0.28}s`,
+  };
+}
+
 function rpgVisualOverlapOffset(index: number) {
   if (index === 0) return { x: 0, y: 0 };
   const ring = Math.ceil(index / 6);
@@ -2719,16 +2731,19 @@ export function OfficeRpgMap({
               <text x="606" y="326" fill="rgba(167,243,208,0.72)" fontSize="9" data-office-rpg-live-sprite-label="true">캐릭터 이동 중</text>
               <text x="606" y="340" fill="rgba(94,234,212,0.72)" fontSize="8" data-office-rpg-sprite-route-phase-label="true">동선 맞춤 이동</text>
               <text x="606" y="353" fill="rgba(254,240,138,0.72)" fontSize="8" data-office-rpg-sprite-silhouette-label="true">걸음 실루엣 강화</text>
+              <text x="34" y="48" fill="rgba(254,240,138,0.72)" fontSize="8" data-office-deskrpg-sprite-patrol-label="room-local">방 안 이동</text>
               {visualEntities.map(({ entity, position, pose, overlapIndex, roomIndex, labelLayout }) => {
                 const selected = selectedEntityId === entity.id;
                 const fill = RPG_STATUS_FILL[entity.severity];
                 const stroke = selected ? "#ffffff" : RPG_STATUS_STROKE[entity.severity];
                 const routeTarget = entity.room === "incident_corner" || entity.room === "source_archive" ? "task-board-to-review" : "command-to-task-board";
+                const patrol = rpgEntityRoomPatrol(entity, roomIndex);
                 return (
                   <g
                     key={`visual-entity-${entity.id}`}
-                    className="office-rpg-character-sprite"
+                    className="office-rpg-character-sprite office-rpg-character-sprite--room-patrol"
                     transform={`translate(${position.x} ${position.y})`}
+                    style={{ "--office-rpg-patrol-x": `${patrol.x}px`, "--office-rpg-patrol-y": `${patrol.y}px`, "--office-rpg-patrol-duration": patrol.duration } as React.CSSProperties}
                     role="button"
                     tabIndex={0}
                     onClick={() => onInspectEntity(entity)}
@@ -2754,31 +2769,36 @@ export function OfficeRpgMap({
                     data-office-rpg-sprite-world-context="furniture-embedded"
                     data-office-deskrpg-sprite-room-block={entity.room}
                     data-office-deskrpg-sprite-local-tile={rpgEntityLocalTile(entity)}
+                    data-office-deskrpg-sprite-patrol="room-local"
+                    data-office-deskrpg-sprite-patrol-bounds="bounded-room"
+                    data-office-deskrpg-sprite-patrol-axis={patrol.axis}
                     data-office-rpg-selected-inspector-anchor={selected ? "#office-safe-inspector" : undefined}
                     aria-label={`${RPG_KIND_LABEL[entity.kind]} ${entity.label} SVG sprite`}
                     aria-describedby="office-rpg-keyboard-help"
                     aria-keyshortcuts="Enter Space"
                   >
-                    <g className="office-rpg-character-motion" data-office-rpg-sprite-walk-cycle="true">
-                      <ellipse cx="0" cy="18" rx="13" ry="4" fill="rgba(0,0,0,0.36)" data-office-rpg-motion-shadow="route-aligned" />
-                      {selected ? <circle cx="0" cy="4" r="22" fill="none" stroke="#ffffff" strokeDasharray="4 4" strokeWidth="2" opacity="0.82" data-office-rpg-character-selection-halo={entity.id} /> : null}
-                      <path d={pose === "blocked" ? "M-9 3 L9 3 L7 17 L-7 17 Z" : "M-8 2 H8 L10 17 H-10 Z"} fill={fill} stroke={stroke} strokeWidth="2" filter="url(#office-rpg-soft-glow)" data-office-rpg-sprite-body-core="readable" />
-                      <path d={pose === "blocked" ? "M-5 6 H5 L4 14 H-4 Z" : "M-5 5 H5 L6 14 H-6 Z"} fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.38)" strokeWidth="0.8" data-office-rpg-sprite-body-highlight="readable" />
-                      <circle cx="0" cy="-7" r="9" fill={fill} stroke={stroke} strokeWidth="2" data-office-rpg-sprite-head-highlight="readable" />
-                      <circle cx="-3" cy="-9" r="1.4" fill="#f8fafc" opacity="0.9" />
-                      <circle cx="3" cy="-9" r="1.4" fill="#f8fafc" opacity="0.9" />
-                      <path d={pose === "active" ? "M-5 -8 H5 M-5 -3 H3" : pose === "waiting" ? "M-4 -6 H4 M-4 -2 H4" : "M-4 -5 H4"} stroke="#0f172a" strokeWidth="1.6" strokeLinecap="round" />
-                      <path d={pose === "active" ? "M-10 7 L-18 1 M10 7 L18 2" : "M-10 8 L-15 12 M10 8 L15 12"} stroke={stroke} strokeWidth="2" strokeLinecap="round" data-office-rpg-sprite-arm-swing="true" />
-                      <path d="M-5 17 L-8 26 M5 17 L8 26" stroke={stroke} strokeWidth="2.4" strokeLinecap="round" data-office-rpg-sprite-step-cycle="true" data-office-rpg-sprite-footstep-clarity="walking" />
-                    </g>
-                    <line x1={labelLayout.labelLineStartX} y1={labelLayout.labelY > 0 ? 22 : -20} x2={labelLayout.labelLineEndX} y2={labelLayout.labelY + 9} stroke={stroke} strokeWidth="1" opacity="0.72" data-office-rpg-character-label-anchor={entity.id} />
-                    <g transform={`translate(${labelLayout.labelX} ${labelLayout.labelY})`} data-office-rpg-character-nameplate={entity.id}>
-                      <rect x="0" y="0" width={labelLayout.width} height="18" rx="7" fill="rgba(2,6,23,0.9)" stroke={stroke} strokeWidth="1" />
-                      <text x={labelLayout.textX} y="12" fill="#ecfdf5" fontSize={labelLayout.fontSize}>{RPG_KIND_LABEL[entity.kind]}</text>
-                    </g>
-                    <g transform="translate(12 -25)" data-office-rpg-character-bubble={entity.id}>
-                      <rect x="0" y="0" width="58" height="18" rx="7" fill="rgba(2,6,23,0.88)" stroke={stroke} strokeWidth="1" />
-                      <text x="7" y="12" fill="#ecfdf5" fontSize="9">{entity.status}</text>
+                    <g className="office-rpg-character-room-patrol" data-office-deskrpg-sprite-step-mode="tile-step">
+                      <g className="office-rpg-character-motion" data-office-rpg-sprite-walk-cycle="true">
+                        <ellipse cx="0" cy="18" rx="13" ry="4" fill="rgba(0,0,0,0.36)" data-office-rpg-motion-shadow="route-aligned" />
+                        {selected ? <circle cx="0" cy="4" r="22" fill="none" stroke="#ffffff" strokeDasharray="4 4" strokeWidth="2" opacity="0.82" data-office-rpg-character-selection-halo={entity.id} /> : null}
+                        <path d={pose === "blocked" ? "M-9 3 L9 3 L7 17 L-7 17 Z" : "M-8 2 H8 L10 17 H-10 Z"} fill={fill} stroke={stroke} strokeWidth="2" filter="url(#office-rpg-soft-glow)" data-office-rpg-sprite-body-core="readable" />
+                        <path d={pose === "blocked" ? "M-5 6 H5 L4 14 H-4 Z" : "M-5 5 H5 L6 14 H-6 Z"} fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.38)" strokeWidth="0.8" data-office-rpg-sprite-body-highlight="readable" />
+                        <circle cx="0" cy="-7" r="9" fill={fill} stroke={stroke} strokeWidth="2" data-office-rpg-sprite-head-highlight="readable" />
+                        <circle cx="-3" cy="-9" r="1.4" fill="#f8fafc" opacity="0.9" />
+                        <circle cx="3" cy="-9" r="1.4" fill="#f8fafc" opacity="0.9" />
+                        <path d={pose === "active" ? "M-5 -8 H5 M-5 -3 H3" : pose === "waiting" ? "M-4 -6 H4 M-4 -2 H4" : "M-4 -5 H4"} stroke="#0f172a" strokeWidth="1.6" strokeLinecap="round" />
+                        <path d={pose === "active" ? "M-10 7 L-18 1 M10 7 L18 2" : "M-10 8 L-15 12 M10 8 L15 12"} stroke={stroke} strokeWidth="2" strokeLinecap="round" data-office-rpg-sprite-arm-swing="true" />
+                        <path d="M-5 17 L-8 26 M5 17 L8 26" stroke={stroke} strokeWidth="2.4" strokeLinecap="round" data-office-rpg-sprite-step-cycle="true" data-office-rpg-sprite-footstep-clarity="walking" />
+                      </g>
+                      <line x1={labelLayout.labelLineStartX} y1={labelLayout.labelY > 0 ? 22 : -20} x2={labelLayout.labelLineEndX} y2={labelLayout.labelY + 9} stroke={stroke} strokeWidth="1" opacity="0.72" data-office-rpg-character-label-anchor={entity.id} />
+                      <g transform={`translate(${labelLayout.labelX} ${labelLayout.labelY})`} data-office-rpg-character-nameplate={entity.id}>
+                        <rect x="0" y="0" width={labelLayout.width} height="18" rx="7" fill="rgba(2,6,23,0.9)" stroke={stroke} strokeWidth="1" />
+                        <text x={labelLayout.textX} y="12" fill="#ecfdf5" fontSize={labelLayout.fontSize}>{RPG_KIND_LABEL[entity.kind]}</text>
+                      </g>
+                      <g transform="translate(12 -25)" data-office-rpg-character-bubble={entity.id}>
+                        <rect x="0" y="0" width="58" height="18" rx="7" fill="rgba(2,6,23,0.88)" stroke={stroke} strokeWidth="1" />
+                        <text x="7" y="12" fill="#ecfdf5" fontSize="9">{entity.status}</text>
+                      </g>
                     </g>
                   </g>
                 );
