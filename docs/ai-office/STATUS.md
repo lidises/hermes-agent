@@ -1,3 +1,30 @@
+## Current status — one-shot Mac relay real NAS write completed (2026-05-28T02:50Z)
+
+Scope completed:
+- Created a Mac-local AI Office relay root folder under the existing NAS-mounted Hermes volume and configured the Mac user launch environment for future relay-root discovery; no raw root value is recorded here.
+- Created a fresh one-shot NAS Keeper handoff/authorization packet for this approval and executed exactly one Mac relay production write: one markdown file plus one audit sidecar.
+- Recorded the queue execution state as succeeded and appended a metadata-only completed-real-write receipt; duplicate receipt submission replayed idempotently without another write.
+
+Evidence captured:
+- Sanitized Mac root probe: configured=true, readable=true, writable=true, raw_root_path_included=false, credential_value_included=false.
+- Initial malformed execute attempt failed before write with unsupported-field validation; the same still-pending fresh packet was then executed with the bounded allowed execution payload only.
+- Real write result: safe logical path `ai_office_controlled_mutation::ai-office-real-write-boundary-20260528-024541.md`, bytes_written=267, readback_verified=true, readback_sha256=`292bf6e1b0e74a34b79953a80e4b5527596eef1c855a22e70d05377f99b4ccdc`, audit_written=true, rollback_created=false.
+- Queue status after execution: `mac_relay_execution_succeeded`.
+- Completed-write receipt: stored=true; duplicate receipt replay idempotent=true; receipt count=1.
+- Focused relay tests passed: `./.venv/bin/python -m pytest tests/hermes_cli/test_office_controlled_mutation_nas_mac_relay_write_execute.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_one_shot_arm_review.py tests/hermes_cli/test_office_controlled_mutation_nas_keeper_execution_state_record.py -q` = 16 passed.
+- VPS fail-closed smoke: direct helper execution with no relay root returned executed=false, written=false, `mac_relay_root_not_configured`.
+
+Safety boundaries preserved:
+- The exact approval was consumed by this one write only.
+- No additional/replacement real write was performed.
+- No NAS cleanup/delete/move/archive was performed.
+- No direct VPS NAS mount/credential/write authority was added; VPS remains fail-closed for real write execution.
+- No watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway service action, raw content/root/secret/token/write-payload echo, Kanban mutation controls, or new renderer/dependency.
+
+Readiness/result note:
+- Write-readiness crossed the approved one-shot production boundary and is now closed again.
+- Next exact safe rung: project the completed-write receipt read-only into `/office` or return to Stage 13 RPG Visualizer visual depth. Any additional or replacement real NAS write requires a fresh explicit approval and fresh packet.
+
 ## Current status — Stage 13 Korean room labels added to primary RPG map (2026-05-28T02:19Z)
 
 Scope completed:
