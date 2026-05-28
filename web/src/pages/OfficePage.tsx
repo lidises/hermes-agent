@@ -2561,8 +2561,15 @@ const OFFICE_DESKRPG_CANVAS_LAYERS: OfficeDeskRpgCanvasLayerDescriptor[] = [
   { id: "sprite-label", z: 80, target: "label" },
 ];
 
+type OfficeDeskRpgCanvasLegendSwatchDescriptor = {
+  label: "동선" | "단서" | "여백";
+  swatch: "corridor-glow-blue" | "label-chip-amber" | "safe-frame-dash";
+  fill: string;
+  stroke: string;
+};
+
 type OfficeDeskRpgCanvasProjection = {
-  version: "phase-b9-readonly";
+  version: "phase-b10-readonly";
   source: "sanitized-scene";
   tileGrid: "room-local-coordinates";
   layerContract: "floor-room-depth-descriptors";
@@ -2582,6 +2589,9 @@ type OfficeDeskRpgCanvasProjection = {
   viewportFramePadding: 24;
   viewportLegendLabels: ["동선", "단서", "여백"];
   viewportFrameAffordance: "noninteractive-readonly-frame";
+  legendSwatchContract: "route-cue-padding-swatch-descriptors";
+  legendContrastMode: "high-contrast-mini-swatches";
+  legendSwatches: OfficeDeskRpgCanvasLegendSwatchDescriptor[];
   furnitureContract: "room-furniture-descriptors";
   furnitureDensity: "room-furniture-density";
   furnitureCueContract: "room-local-korean-furniture-cues";
@@ -2690,7 +2700,7 @@ function buildOfficeDeskRpgCanvasProjection(scene: OfficeRpgScene, entities: Ret
     };
   });
   return {
-    version: "phase-b9-readonly",
+    version: "phase-b10-readonly",
     source: "sanitized-scene",
     tileGrid: "room-local-coordinates",
     layerContract: "floor-room-depth-descriptors",
@@ -2710,6 +2720,13 @@ function buildOfficeDeskRpgCanvasProjection(scene: OfficeRpgScene, entities: Ret
     viewportFramePadding: 24,
     viewportLegendLabels: ["동선", "단서", "여백"],
     viewportFrameAffordance: "noninteractive-readonly-frame",
+    legendSwatchContract: "route-cue-padding-swatch-descriptors",
+    legendContrastMode: "high-contrast-mini-swatches",
+    legendSwatches: [
+      { label: "동선", swatch: "corridor-glow-blue", fill: "rgba(103,232,249,0.58)", stroke: "rgba(224,242,254,0.78)" },
+      { label: "단서", swatch: "label-chip-amber", fill: "rgba(253,230,138,0.72)", stroke: "rgba(251,191,36,0.86)" },
+      { label: "여백", swatch: "safe-frame-dash", fill: "rgba(15,23,42,0.70)", stroke: "rgba(125,211,252,0.78)" },
+    ],
     furnitureContract: "room-furniture-descriptors",
     furnitureDensity: "room-furniture-density",
     furnitureCueContract: "room-local-korean-furniture-cues",
@@ -3095,13 +3112,26 @@ function OfficeDeskRpgCanvasShell({
           context.strokeStyle = "rgba(125,211,252,0.32)";
           context.lineWidth = 1;
           context.beginPath();
-          context.roundRect(618, 30, 142, 24, 8);
+          context.roundRect(618, 30, 142, 34, 8);
           context.fill();
           context.stroke();
           context.fillStyle = "rgba(224,242,254,0.86)";
           context.font = "800 8px system-ui, sans-serif";
           context.textAlign = "start";
-          context.fillText(`뷰포트 ${projection.viewportLegendLabels.join("/")}`, 628, 45);
+          context.fillText(`뷰포트 ${projection.viewportLegendLabels.join("/")}`, 628, 44);
+          projection.legendSwatches.forEach((swatch, index) => {
+            const swatchX = 628 + index * 42;
+            context.fillStyle = swatch.fill;
+            context.strokeStyle = swatch.stroke;
+            context.lineWidth = 1;
+            context.beginPath();
+            context.roundRect(swatchX, 50, 10, 7, 3);
+            context.fill();
+            context.stroke();
+            context.fillStyle = "rgba(224,242,254,0.82)";
+            context.font = "800 7px system-ui, sans-serif";
+            context.fillText(swatch.label, swatchX + 13, 56);
+          });
           projection.rooms.forEach((room) => {
             context.fillStyle = "rgba(209,250,229,0.88)";
             context.font = "700 12px system-ui, sans-serif";
@@ -3231,6 +3261,13 @@ function OfficeDeskRpgCanvasShell({
       data-office-deskrpg-canvas-viewport-legend-count={projection.viewportLegendLabels.length}
       data-office-deskrpg-canvas-viewport-legend-labels={projection.viewportLegendLabels.join(",")}
       data-office-deskrpg-canvas-viewport-frame-affordance={projection.viewportFrameAffordance}
+      data-office-deskrpg-canvas-legend-swatch-contract={projection.legendSwatchContract}
+      data-office-deskrpg-canvas-legend-swatch-count={projection.legendSwatches.length}
+      data-office-deskrpg-canvas-legend-swatch-labels={projection.legendSwatches.map((swatch) => swatch.label).join(",")}
+      data-office-deskrpg-canvas-legend-contrast-mode={projection.legendContrastMode}
+      data-office-deskrpg-canvas-route-swatch={projection.legendSwatches[0]?.swatch}
+      data-office-deskrpg-canvas-cue-swatch={projection.legendSwatches[1]?.swatch}
+      data-office-deskrpg-canvas-padding-swatch={projection.legendSwatches[2]?.swatch}
       data-office-deskrpg-canvas-contract-version={projection.version}
       aria-label="Canvas 기반 DeskRPG 지도 shell · 읽기 전용"
     >
@@ -3244,7 +3281,7 @@ function OfficeDeskRpgCanvasShell({
         data-office-deskrpg-canvas="true"
       />
       <div className="office-deskrpg-canvas-shell__caption" data-office-deskrpg-canvas-caption="read-only-fallback-retained">
-        Canvas shell · read-only · SVG fallback retained · 가구 단서 · 시설 단서 · 겹침 완화 · 동선 강조 · 작은 화면 동선/단서 · 뷰포트 범례
+        Canvas shell · read-only · SVG fallback retained · 가구 단서 · 시설 단서 · 겹침 완화 · 동선 강조 · 작은 화면 동선/단서 · 뷰포트 범례 · 범례 swatch
       </div>
     </div>
   );
