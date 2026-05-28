@@ -2409,6 +2409,23 @@ type OfficeDeskRpgCanvasFurnitureDescriptor = {
   stroke?: string;
 };
 
+type OfficeDeskRpgCanvasFurnitureCueDescriptor = {
+  id: string;
+  roomId: OfficeRpgRoomId;
+  furnitureId: string;
+  label: string;
+  x: number;
+  y: number;
+};
+
+type OfficeDeskRpgCanvasFacilityCueDescriptor = {
+  id: string;
+  roomId: OfficeRpgRoomId;
+  label: string;
+  x: number;
+  y: number;
+};
+
 type OfficeDeskRpgCanvasDoorDescriptor = {
   id: string;
   from: OfficeRpgRoomId;
@@ -2451,6 +2468,27 @@ const OFFICE_DESKRPG_CANVAS_FURNITURE: OfficeDeskRpgCanvasFurnitureDescriptor[] 
   { id: "review-plant", roomId: "incident_corner", kind: "plant", x: 742, y: 221, w: 18, h: 18, rx: 9, fill: "#166534", stroke: "#bbf7d0" },
 ];
 
+const OFFICE_DESKRPG_CANVAS_FURNITURE_CUES: OfficeDeskRpgCanvasFurnitureCueDescriptor[] = [
+  { id: "boss-desk-cue", roomId: "command", furnitureId: "boss-desk", label: "결정", x: 91, y: 94 },
+  { id: "orchestrator-desk-cue", roomId: "agent_desks", furnitureId: "orchestrator-desk", label: "실행", x: 350, y: 66 },
+  { id: "central-board-cue", roomId: "task_board", furnitureId: "central-board", label: "보드", x: 634, y: 54 },
+  { id: "briefing-table-cue", roomId: "task_board", furnitureId: "briefing-table", label: "회의", x: 540, y: 54 },
+  { id: "lounge-sofa-cue", roomId: "cron_room", furnitureId: "lounge-sofa", label: "대기", x: 366, y: 192 },
+  { id: "source-shelves-cue", roomId: "source_archive", furnitureId: "source-shelves", label: "근거", x: 404, y: 224 },
+  { id: "review-corner-cue", roomId: "incident_corner", furnitureId: "review-corner", label: "검토", x: 676, y: 234 },
+  { id: "review-plant-cue", roomId: "incident_corner", furnitureId: "review-plant", label: "완충", x: 730, y: 217 },
+];
+
+function buildOfficeDeskRpgCanvasFacilityCues(rooms: OfficeDeskRpgCanvasRoomDescriptor[]): OfficeDeskRpgCanvasFacilityCueDescriptor[] {
+  return rooms.map((room) => ({
+    id: `${room.id}-facility-cue`,
+    roomId: room.id,
+    label: RPG_ROOM_FACILITY_COPY[room.id],
+    x: room.x + 14,
+    y: room.y + room.h - 13,
+  }));
+}
+
 const OFFICE_DESKRPG_CANVAS_DOORS: OfficeDeskRpgCanvasDoorDescriptor[] = [
   { id: "command-agent_desks", from: "command", to: "agent_desks", x: 224, y: 74, w: 18, h: 28 },
   { id: "agent_desks-task_board", from: "agent_desks", to: "task_board", x: 491, y: 74, w: 18, h: 28 },
@@ -2485,13 +2523,17 @@ const OFFICE_DESKRPG_CANVAS_LAYERS: OfficeDeskRpgCanvasLayerDescriptor[] = [
 ];
 
 type OfficeDeskRpgCanvasProjection = {
-  version: "phase-b3-readonly";
+  version: "phase-b4-readonly";
   source: "sanitized-scene";
   tileGrid: "room-local-coordinates";
   layerContract: "floor-room-depth-descriptors";
   depthModel: "z-ordered-readonly";
   furnitureContract: "room-furniture-descriptors";
   furnitureDensity: "room-furniture-density";
+  furnitureCueContract: "room-local-korean-furniture-cues";
+  facilityCueContract: "room-local-korean-facility-cues";
+  cueLanguage: "ko-compact";
+  cueMode: "room-local-labels";
   doorContract: "door-descriptors";
   corridorContract: "corridor-descriptors";
   spriteContract: "placeholder-descriptors";
@@ -2501,6 +2543,8 @@ type OfficeDeskRpgCanvasProjection = {
   spriteDetailLevel: OfficeDeskRpgCanvasSpriteDetailLevel;
   rooms: OfficeDeskRpgCanvasRoomDescriptor[];
   furniture: OfficeDeskRpgCanvasFurnitureDescriptor[];
+  furnitureCues: OfficeDeskRpgCanvasFurnitureCueDescriptor[];
+  facilityCues: OfficeDeskRpgCanvasFacilityCueDescriptor[];
   doors: OfficeDeskRpgCanvasDoorDescriptor[];
   corridors: OfficeDeskRpgCanvasCorridorDescriptor[];
   sprites: OfficeDeskRpgCanvasSpriteDescriptor[];
@@ -2557,13 +2601,17 @@ function buildOfficeDeskRpgCanvasProjection(scene: OfficeRpgScene, entities: Ret
     };
   });
   return {
-    version: "phase-b3-readonly",
+    version: "phase-b4-readonly",
     source: "sanitized-scene",
     tileGrid: "room-local-coordinates",
     layerContract: "floor-room-depth-descriptors",
     depthModel: "z-ordered-readonly",
     furnitureContract: "room-furniture-descriptors",
     furnitureDensity: "room-furniture-density",
+    furnitureCueContract: "room-local-korean-furniture-cues",
+    facilityCueContract: "room-local-korean-facility-cues",
+    cueLanguage: "ko-compact",
+    cueMode: "room-local-labels",
     doorContract: "door-descriptors",
     corridorContract: "corridor-descriptors",
     spriteContract: "placeholder-descriptors",
@@ -2573,6 +2621,8 @@ function buildOfficeDeskRpgCanvasProjection(scene: OfficeRpgScene, entities: Ret
     spriteDetailLevel: "silhouette-nameplate",
     rooms,
     furniture: OFFICE_DESKRPG_CANVAS_FURNITURE,
+    furnitureCues: OFFICE_DESKRPG_CANVAS_FURNITURE_CUES,
+    facilityCues: buildOfficeDeskRpgCanvasFacilityCues(rooms),
     doors: OFFICE_DESKRPG_CANVAS_DOORS,
     corridors: OFFICE_DESKRPG_CANVAS_CORRIDORS,
     sprites,
@@ -2891,6 +2941,33 @@ function OfficeDeskRpgCanvasShell({
             context.textAlign = "start";
             context.fillText(room.label, room.x + 14, room.y + 24);
           });
+          projection.facilityCues.forEach((cue) => {
+            context.fillStyle = "rgba(2,6,23,0.62)";
+            context.strokeStyle = "rgba(167,243,208,0.18)";
+            context.lineWidth = 1;
+            context.beginPath();
+            context.roundRect(cue.x - 3, cue.y - 11, Math.min(92, cue.label.length * 9 + 10), 14, 5);
+            context.fill();
+            context.stroke();
+            context.fillStyle = "rgba(209,250,229,0.78)";
+            context.font = "700 8px system-ui, sans-serif";
+            context.textAlign = "start";
+            context.fillText(cue.label.slice(0, 8), cue.x + 2, cue.y - 1);
+          });
+          projection.furnitureCues.forEach((cue) => {
+            const labelWidth = cue.label.length * 10 + 10;
+            context.fillStyle = "rgba(15,23,42,0.78)";
+            context.strokeStyle = "rgba(253,230,138,0.42)";
+            context.lineWidth = 1;
+            context.beginPath();
+            context.roundRect(cue.x, cue.y - 13, labelWidth, 14, 5);
+            context.fill();
+            context.stroke();
+            context.fillStyle = "#fde68a";
+            context.font = "800 8px system-ui, sans-serif";
+            context.textAlign = "start";
+            context.fillText(cue.label, cue.x + 5, cue.y - 3);
+          });
           projection.sprites.forEach((sprite) => {
             context.fillStyle = "rgba(15,23,42,0.82)";
             context.strokeStyle = "rgba(255,255,255,0.28)";
@@ -2949,6 +3026,12 @@ function OfficeDeskRpgCanvasShell({
       data-office-deskrpg-canvas-door-count={projection.doors.length}
       data-office-deskrpg-canvas-corridor-contract={projection.corridorContract}
       data-office-deskrpg-canvas-corridor-count={projection.corridors.length}
+      data-office-deskrpg-canvas-furniture-cue-contract={projection.furnitureCueContract}
+      data-office-deskrpg-canvas-furniture-cue-count={projection.furnitureCues.length}
+      data-office-deskrpg-canvas-facility-cue-contract={projection.facilityCueContract}
+      data-office-deskrpg-canvas-facility-cue-count={projection.facilityCues.length}
+      data-office-deskrpg-canvas-cue-language={projection.cueLanguage}
+      data-office-deskrpg-canvas-cue-mode={projection.cueMode}
       data-office-deskrpg-canvas-contract-version={projection.version}
       aria-label="Canvas 기반 DeskRPG 지도 shell · 읽기 전용"
     >
@@ -2962,7 +3045,7 @@ function OfficeDeskRpgCanvasShell({
         data-office-deskrpg-canvas="true"
       />
       <div className="office-deskrpg-canvas-shell__caption" data-office-deskrpg-canvas-caption="read-only-fallback-retained">
-        Canvas shell · read-only · SVG fallback retained
+        Canvas shell · read-only · SVG fallback retained · 가구 단서 · 시설 단서
       </div>
     </div>
   );
