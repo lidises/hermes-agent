@@ -1,3 +1,25 @@
+## Current status — Stage 13 compact Korean facility copy added locally (2026-05-28T03:23Z)
+
+Scope completed:
+- Continued option 1: compact Korean facility copy inside the primary SVG RPG map.
+- Added short room-level Korean cues for decision/boundary checking, worker execution posture, board flow, automation observation, evidence storage, and blocked-issue review.
+- Kept the change frontend-only/read-only and map-internal: no external summary/status/detail panel expansion, no backend/API/storage path, no new renderer/dependency, and no executable mutation controls.
+
+Evidence captured:
+- RED: `npm test -- --run OfficePage.rpg.test.tsx -t "renders the read-only RPG room map"` failed on missing `data-office-rpg-room-facility-copy="command"`.
+- GREEN/focused: the same test passed after adding the map-internal compact facility copy.
+- Full Office frontend: `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx` = 357 passed.
+- Lint/build: `npx eslint src/pages/OfficePage.tsx src/pages/OfficePage.rpg.test.tsx src/index.css` = existing warnings only; `npm run build` passed.
+- Diff gates: `git diff --check` passed; diff-scoped safety scan found controls=0, raw_leak=0, forbidden_runtime=0.
+
+Safety boundaries preserved:
+- Frontend-only/read-only visual slice.
+- No additional real NAS write or replacement write.
+- No VPS direct NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, gateway service action, Kanban mutation, executable browser mutation controls, raw content/root/secret/token/write-payload echo, or new renderer/dependency.
+
+Next exact safe rung:
+- Deploy/smoke this compact facility-copy slice to VPS dashboard/core with dashboard/core restart only, protected DOM/API smoke, and gateway untouched; then continue Stage 13 with mobile label readability polish or room/entity hierarchy refinement.
+
 ## Current status — Stage 13 mobile RPG map layout cues deployed to VPS (2026-05-28T03:07Z)
 
 Scope completed:

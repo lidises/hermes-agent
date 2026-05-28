@@ -2198,6 +2198,15 @@ const RPG_ROOM_KOREAN_LABEL: Record<OfficeRpgRoomId, string> = {
   incident_corner: "검토 코너",
 };
 
+const RPG_ROOM_FACILITY_COPY: Record<OfficeRpgRoomId, string> = {
+  command: "결정과 경계 확인",
+  agent_desks: "작업자 실행 대기",
+  task_board: "작업 흐름 정리",
+  cron_room: "자동화 상태 관측",
+  source_archive: "자료·근거 보관",
+  incident_corner: "차단 이슈 검토",
+};
+
 const RPG_STATUS_FILL: Record<OfficeRpgSeverity, string> = {
   normal: "#a7f3d0",
   info: "#7dd3fc",
@@ -2569,6 +2578,7 @@ export function OfficeRpgMap({
               const roomEntityCount = visibleEntities.filter((entity) => entity.room === room.id).length;
               const roomTier = RPG_ROOM_TIER[room.id];
               const roomKoreanLabel = RPG_ROOM_KOREAN_LABEL[room.id];
+              const facilityCopy = RPG_ROOM_FACILITY_COPY[room.id];
               const priorityCue = room.severity === "danger" || roomEntityCount > 0;
               return (
                 <g
@@ -2589,7 +2599,8 @@ export function OfficeRpgMap({
                   {priorityCue ? <circle cx={layout.x + layout.w - 16} cy={layout.y + layout.h - 16} r="5" fill={RPG_STATUS_STROKE[room.severity]} opacity="0.86" data-office-rpg-room-priority-dot={room.id} /> : null}
                   <text x={layout.x + 14} y={layout.y + 24} fill="#d1fae5" fontSize="12" fontWeight="700" letterSpacing="1.5">{layout.short}</text>
                   <text x={layout.x + 14} y={layout.y + 42} fill="rgba(209,250,229,0.72)" fontSize="10">{roomKoreanLabel}</text>
-                  <text x={layout.x + 14} y={layout.y + 57} fill="rgba(209,250,229,0.52)" fontSize="8.5">{room.label}</text>
+                  <text x={layout.x + 14} y={layout.y + 55} fill="rgba(209,250,229,0.78)" fontSize="8.5" data-office-rpg-room-facility-copy={room.id} data-office-rpg-facility-copy-mode="compact-korean">{facilityCopy}</text>
+                  <text x={layout.x + 14} y={layout.y + 68} fill="rgba(209,250,229,0.48)" fontSize="8">{room.label}</text>
                 </g>
               );
             })}

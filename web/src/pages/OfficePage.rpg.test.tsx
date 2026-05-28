@@ -440,6 +440,11 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("지휘실");
     expect(markup).toContain("작업 보드");
     expect(markup).toContain("자료 금고");
+    expect(markup).toContain("data-office-rpg-room-facility-copy=\"command\"");
+    expect(markup).toContain("결정과 경계 확인");
+    expect(markup).toContain("자료·근거 보관");
+    expect(markup).toContain("차단 이슈 검토");
+    expect(markup).toContain("data-office-rpg-facility-copy-mode=\"compact-korean\"");
     expect(markup).toContain("data-office-rpg-room-entity-count=\"command\"");
     expect(markup).toContain("data-office-rpg-room-priority-cue=\"task_board\"");
     expect(markup).toContain("data-office-rpg-character-sprite");

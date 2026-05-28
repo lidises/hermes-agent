@@ -11,12 +11,13 @@ Current canonical product surface:
 
 Current live position:
 - Overall stage: Stage 13 active; Stage 14 safety boundary remains closed except metadata-only/readiness artifacts.
-- Latest completed rung: Stage 13 mobile/small-screen RPG map layout cues deployed and smoked on the VPS dashboard from `bf1074e0b`: mobile layout/cue hooks hydrated, responsive SVG hook present, primary RPG map visible, controls inside visual map 0, raw leak false, console errors 0.
+- Latest completed local rung: Stage 13 compact Korean facility copy was added inside the primary SVG RPG map: each room now has a short map-internal Korean cue such as decision/boundary check, evidence storage, or blocked-issue review. Local tests/build/leak scan are green at the pre-deploy code state.
+- Latest deployed rung: Stage 13 mobile/small-screen RPG map layout cues deployed and smoked on the VPS dashboard from `bf1074e0b`: mobile layout/cue hooks hydrated, responsive SVG hook present, primary RPG map visible, controls inside visual map 0, raw leak false, console errors 0.
 - Current write boundary: the one-shot Mac relay production approval remains consumed; any additional or replacement real NAS write requires a fresh explicit approval and fresh packet. VPS direct NAS authority remains closed/fail-closed.
 - Prior RPG rung: mobile/small-screen RPG map layout cues added to the primary SVG RPG map: scroll-snap layout hook, pinch/pan cue, responsive SVG hook, and narrow-screen CSS.
 - Prior write rung: exact-approved one-shot Mac relay production write completed from a fresh packet; one markdown file plus one audit sidecar were written through the Mac relay, readback verified, and a metadata-only completed-write receipt recorded.
 - Prior RPG rung: Stage 13 Korean room labels and room/entity visual hierarchy cues were added inside the primary SVG RPG map.
-- Current requested rung: continue RPG Visualizer-first Stage 13 quality, preferably compact Korean facility copy or mobile label readability; do not force-replay failed_guarded or already-succeeded queue items.
+- Current requested rung: deploy/smoke the compact Korean facility copy slice to VPS dashboard/core, then continue RPG Visualizer-first Stage 13 quality with mobile label readability or room/entity hierarchy polish; do not force-replay failed_guarded or already-succeeded queue items.
 
 ## Stage 0 — Project charter and operating protocol
 
