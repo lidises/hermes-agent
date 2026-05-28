@@ -1,3 +1,35 @@
+## Current status — Stage 13 mobile room-local patrol readability deployed to VPS (2026-05-28T08:58Z)
+
+Scope completed:
+- Deployed `7052030e2 feat(office): improve mobile patrol readability` to both VPS AI Office worktrees: dashboard and core/source.
+- Added compact small-screen room-local patrol readability inside the primary SVG map: `compact-room-cues` layer hook, `room-local-patrol` mobile cue lane, compact in-room sprite name label mode, status-dot bubble mode, and the in-map Korean cue `작은 화면 방 안 이동`.
+- Rsynced Mac-built ignored `hermes_cli/web_dist/` to both VPS worktrees and verified path-independent relative content hash match.
+- Restarted only `hermes-agent-dashboard.service` and `hermes-vps-core-dashboard.service` under the restricted `hermes` user; `hermes-gateway.service` stayed active with unchanged process counters.
+- Protected `/office` API/DOM/visual smoke confirmed the primary map renders live with compact mobile patrol readability hooks and bounded room-local patrol sprites.
+
+Evidence captured:
+- Local/VPS HEAD before docs handoff: dashboard=`7052030e2`, core/source=`7052030e2`; both VPS worktrees reset to the pushed commit.
+- `web_dist` relative content hash: `c17b1a11e281e9696a7bfca6c2936892860cc1d509363a72aa498bd53301ef0e` on Mac, VPS dashboard, and VPS core/source; file_count=22.
+- Services after deploy smoke: dashboard=active, core=active, gateway=active; gateway process counters stayed unchanged.
+- Protected API smoke: `/api/status` 200 and `/api/office/state` 200 using the live in-page session token without printing the token.
+- Protected browser DOM smoke through a Host-header-preserving SSH tunnel/proxy: `data-office-rpg-primary-view="true"`=1, `data-office-rpg-visual-map="true"`=1, `data-office-deskrpg-block-grid="jrpg-room-blocks"`=1, `data-office-deskrpg-block-map="tile-block-architecture"`=1, compact mobile patrol readability hooks=1, cue lane=1, compact label mode=8, status-dot bubble mode=8, room-local patrol sprites=8, tile-step groups=8, Korean cue `작은 화면 방 안 이동` present, summary/status/detail default-visible hooks=0, executable mutation controls inside the visual map=0, raw leak=false, console errors=0.
+- Browser visual smoke: the central primary rendered RPG map visually dominates the page; bounded room blocks and sprites are visible with compact in-map Korean cues; external summary/status/detail panels do not visually dominate above it.
+
+Verification before deploy:
+- RED: `npm test -- OfficePage.rpg.test.tsx --run` failed on missing compact mobile patrol readability hooks before implementation.
+- GREEN/focused: `npm test -- OfficePage.rpg.test.tsx --run` = 199 passed.
+- Combined Office tests: `npm test -- OfficePage.rpg.test.tsx OfficePage.test.ts --run` = 357 passed.
+- Build: `npm run build` passed; existing Vite large-chunk warning unchanged.
+- Lint: `npm run lint` exited 0 with existing warnings only.
+- Diff/static gates: `git diff --check` passed; added-line scan found no private paths, token-shaped secrets, sensitive payload echo, new executable HTML controls, mutation handlers, gateway service action, or new renderer/dependency.
+
+Safety boundaries preserved:
+- Frontend-only/read-only SVG/CSS/React slice plus dashboard/core deploy only.
+- No gateway service action, no backend/API/storage/runtime authority change, no state mutation, no Kanban mutation, no browser mutation controls, no NAS write, no dispatcher/authority activation, no public exposure, no sensitive raw-value/payload echo, and no new renderer/dependency.
+
+Next exact safe rung:
+- Stay in Stage 13 and improve the next DeskRPG visual readability slice without adding external summaries: for example, add collision-aware sprite/name cue offsets per crowded room or mobile viewport smoke hooks, preserving primary map, room-local patrol, summary/status/detail visible 0, controls 0, raw leak false, and gateway untouched.
+
 ## Current status — Stage 13 mobile room-local patrol readability verified locally (2026-05-28T08:48Z)
 
 Scope completed:

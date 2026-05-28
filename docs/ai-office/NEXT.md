@@ -1,3 +1,22 @@
+## NEXT — after Stage 13 mobile room-local patrol readability VPS deploy (2026-05-28T08:58Z)
+
+Current next stage:
+- Stay in Stage 13 until the user explicitly advances stages.
+- `/office` now has deployed compact small-screen room-local patrol readability inside the primary SVG map: `compact-room-cues`, `room-local-patrol` mobile cue lane, compact in-room label mode, status-dot bubble mode, and the Korean cue `작은 화면 방 안 이동`.
+- Live deploy proof exists for dashboard/core sync, ignored `web_dist` rsync/hash, dashboard/core restart only under the restricted `hermes` user, protected API/DOM/visual smoke, summary/status/detail default-visible hooks 0, controls 0, raw leak false, console errors 0, and gateway untouched.
+
+Preferred next safe rung:
+1. `Stage 13 — crowded-room collision-aware mobile cue offsets`
+   - RED: extend `OfficePage.rpg.test.tsx` to require per-room/per-density offset hooks for name/status cues in the most crowded rooms while preserving compact mobile patrol readability, room-local patrol hooks, and zero controls.
+   - GREEN: make the smallest SVG/CSS/frontend-only/read-only change so selected/hovered/focused sprites reveal labels while dense-room labels stay subdued and less overlapping on narrow screens.
+   - VERIFY: focused RPG test, combined Office tests, build/lint, `git diff --check`, static raw-leak/control/new-renderer scan, then commit/push.
+   - DEPLOY: dashboard/core sync, ignored `web_dist` rsync/hash, dashboard/core restart only, protected DOM/API/visual smoke; gateway untouched.
+
+Still forbidden unless separately and explicitly approved:
+- Additional real NAS production write or replacement write.
+- Force-replay of failed_guarded/succeeded queue items.
+- Actual NAS cleanup delete/move/archive/write, direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway service action, sensitive raw-value/payload echo, executable browser mutation controls, Kanban mutation controls, real chat/command input, or a new renderer/dependency.
+
 ## NEXT — after Stage 13 mobile room-local patrol readability local verification (2026-05-28T08:48Z)
 
 Current next stage:
