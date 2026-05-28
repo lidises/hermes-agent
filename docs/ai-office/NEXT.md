@@ -1,17 +1,16 @@
-## NEXT — after Stage 13 DeskRPG Canvas Phase A local verification (2026-05-28T09:23Z)
+## NEXT — after Stage 13 DeskRPG Canvas Phase A VPS deploy (2026-05-28T09:23Z)
 
 Current next stage:
 - Stay in Stage 13, now in the original-DeskRPG pivot ladder.
-- Phase A has local RED/GREEN proof for a native Canvas 2D read-only shell inside the primary `/office` RPG visual map while retaining the SVG fallback.
+- Phase A is deployed: `/office` includes a native Canvas 2D read-only shell inside the primary RPG visual map while retaining the SVG fallback.
 - The Canvas shell is still primitive placeholder rendering only: no sprite assets, no renderer dependency, no realtime transport, no write-intent UI, and no backend mutation.
 
 Preferred next safe rung:
-1. `Deploy Phase A — native Canvas renderer shell, read-only`
-   - SYNC: push/fast-forward dashboard/core worktrees only and rsync ignored Mac-built `hermes_cli/web_dist/`.
-   - VERIFY ASSETS: compare path-independent relative content hashes and ensure `web_dist` mtime/sentinel freshness so the VPS does not try a local frontend build.
-   - RESTART: restart only `hermes-agent-dashboard.service` and `hermes-vps-core-dashboard.service`; keep gateway untouched.
-   - SMOKE: protected API/DOM/visual smoke must show Canvas renderer shell, SVG fallback retained, primary RPG map visible, summary/status/detail default-visible hooks 0, executable mutation controls 0, raw leak false, console errors 0.
-   - HANDOFF: record deploy evidence in `STATUS.md`/`STAGE-MAP.md` after smoke.
+1. `Phase B0 — read-only Canvas tile/sprite projection contract`
+   - RED: require typed/declared Canvas tile-map and sprite descriptor hooks that the renderer consumes, while preserving primary map posture, SVG fallback, summary/status/detail default-visible hooks 0, controls 0, raw leak false, and Canvas mutation/realtime false.
+   - GREEN: factor the current primitive draw data into a small read-only projection contract shared by tests and renderer; keep placeholder shapes, no external assets, no renderer dependency.
+   - VERIFY: focused RPG tests, combined Office tests, build/lint, `git diff --check`, static raw-leak/control/socket/dependency scan, protected DOM/visual smoke if deployed.
+   - Do not add websocket/SSE, operator movement broadcast, write-intent UI, backend mutation, renderer dependency, or asset import in this rung.
 
 Still forbidden unless separately and explicitly approved:
 - Production NAS write or replacement write; direct VPS NAS authority; watcher/cron/dispatcher/authority-adapter activation; public exposure; gateway service action; sensitive raw-value/payload echo; arbitrary browser execution controls; Kanban mutation execution; websocket/SSE/realtime endpoint; renderer dependency such as Phaser/PixiJS; external sprite/tile assets; write-intent UI.

@@ -1,12 +1,15 @@
-## Current status — Stage 13 DeskRPG Canvas Phase A verified locally (2026-05-28T09:23Z)
+## Current status — Stage 13 DeskRPG Canvas Phase A deployed to VPS (2026-05-28T09:23Z)
 
 Scope completed:
+- Deployed `1303e6194 feat(office): add read-only deskrpg canvas shell` to both VPS AI Office worktrees: dashboard and core/source.
 - Started the approved original-DeskRPG pivot with `Phase A — native Canvas renderer shell, read-only`.
 - Added a native Canvas 2D shell inside the primary `/office` RPG visual map: `data-office-deskrpg-renderer="canvas"`, tiled floor/grid, bounded rooms, safe Korean room labels, corridor strokes, and placeholder actor drawing from the existing sanitized scene projection.
 - Preserved the existing SVG map as fallback immediately after the Canvas shell: `data-office-deskrpg-canvas-fallback="svg-retained"` and `data-office-rpg-map-svg="true"` remain present.
+- Rsynced Mac-built ignored `hermes_cli/web_dist/` to both VPS worktrees and verified path-independent relative content hash match: `cbed94351340597bbfaaa8081ca3f56269c3a3fd7e7d9a30c2402b6bbd156857`, file_count=22.
+- Restarted only `hermes-agent-dashboard.service` and `hermes-vps-core-dashboard.service`; `hermes-gateway.service` stayed active with unchanged process id.
 
 Safety posture:
-- Frontend-only/read-only React/Canvas/CSS slice.
+- Frontend-only/read-only React/Canvas/CSS slice plus dashboard/core deploy only.
 - No new dependency, no websocket/SSE/realtime endpoint, no browser write UI, no backend/API/storage/runtime authority change, no Kanban/NAS execution, no public exposure, no gateway service action, no raw secret/path/payload echo, and no DeskRPG code/assets copied.
 - Canvas explicitly declares mutation/realtime capabilities false.
 
@@ -17,9 +20,12 @@ Verification:
 - Build: `npm run build` passed; existing Vite large-chunk warning unchanged.
 - Lint: `npm run lint` exited 0 with existing warnings only.
 - Diff/static gates: `git diff --check` passed; static diff scan found no token/secret/password/write-payload/raw-markdown leak, no websocket/EventSource addition, and no DeskRPG executable controls.
+- Protected API smoke: `/api/status` 200 and `/api/office/state` 200 using the live in-page session token without printing the token.
+- Protected browser DOM smoke: Canvas renderer shell=1, Canvas element=1, native Canvas shell=1, SVG fallback retained=1, primary RPG map=1, summary/status/detail default-visible hooks=0, executable mutation controls in map=0, Canvas mutation capability=`false`, Canvas realtime capability=`false`, raw leak=false.
+- Protected visual smoke: the top of the RPG visualizer shows a canvas-like tiled office shell with room outlines, Korean room labels, placeholder sprite markers, and read-only posture; no obvious error page or mutation/write controls.
 
 Next exact safe rung:
-- Commit/push and deploy Phase A: dashboard/core sync, ignored Mac-built `web_dist` rsync with relative hash + mtime freshness, restart only dashboard/core services, protected API/DOM/visual smoke proving Canvas renderer shell exists, SVG fallback remains, summary/status/detail visible hooks 0, controls 0, raw leak false, and gateway untouched.
+- Stay in Stage 13 and add the smallest read-only Canvas tile/sprite projection contract: typed tile coordinates and sprite descriptors shared by tests and renderer, still no external assets, no renderer dependency, no realtime/socket, no write UI, no backend mutation, and SVG fallback retained.
 
 
 ## Current status — Stage 13 mobile room-local patrol readability deployed to VPS (2026-05-28T08:58Z)
