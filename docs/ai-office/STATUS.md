@@ -1,3 +1,26 @@
+## Current status — Stage 13 walking route/path polish deployed to VPS (2026-05-28T05:08Z)
+
+Scope completed:
+- Deployed `5b92d82f0 feat(office): add rpg walking route pulses` to both VPS AI Office worktrees: dashboard and core/source.
+- Rsynced Mac-built ignored `hermes_cli/web_dist/` to both VPS worktrees and verified path-independent content hash matches.
+- Restarted only `hermes-agent-dashboard.service` and `hermes-vps-core-dashboard.service`; `hermes-gateway.service` stayed active and untouched.
+- Protected `/office` DOM, CSS animation, timed route pulse, and visual smoke confirmed the RPG Visualizer remains primary, character sprites remain live, and route/path cues pulse without refresh.
+
+Evidence captured:
+- VPS dashboard HEAD: `5b92d82f0`; VPS core/source HEAD: `5b92d82f0`.
+- `web_dist` relative content hash: `0c8d616521e3ebf7774ff1e1c60098b47a68425ac0e12e5025b6ccc8bc1df0ea` on Mac, VPS dashboard, and VPS core/source; file_count=22.
+- Services after restart: dashboard=active, core=active, gateway=active.
+- Browser DOM smoke on `/office?route=5b92d82f0`: visualMap=1, primaryView=1, liveLayer=1, liveSprites=8, routeLayer=1, routePaths=2, routePulse=2, routeLabel=1, CSS animationName=`office-rpg-route-pulse`, animationDuration=1.85s, animationIterationCount=infinite, API resource=200, summary/status/detail default-visible hooks=0, controlsInsideVisual=0, rawLeak=false, console errors=0.
+- Timed browser route pulse sample over 900ms changed route strokeDashoffset from about -4.36px to -25.96px, proving no-refresh route/path animation.
+- Browser visual smoke: the primary rendered RPG map remains dominant, character sprites are visible, and map-internal route/path cues are visible between rooms.
+
+Safety boundaries preserved:
+- Dashboard/core deploy only; gateway restart was not performed.
+- No state mutation, no Kanban mutation, no browser mutation controls, no backend/API route change, no NAS write, no dispatcher/authority activation, no public exposure, no raw content/root/secret/token/write-payload echo, and no new renderer/dependency.
+
+Next exact safe rung:
+- Stay in Stage 13. Add the next real DeskRPG rendering polish, preferably route-aligned sprite phase, stronger sprite silhouette/walking clarity, or room-to-room patrol readability, via frontend-only/read-only TDD and no new renderer/dependency.
+
 ## Current status — Stage 13 walking route/path polish added locally (2026-05-28T05:03Z)
 
 Scope completed:

@@ -1,3 +1,23 @@
+## NEXT — after Stage 13 walking route/path VPS deploy (2026-05-28T05:08Z)
+
+Current next stage:
+- Stay in Stage 13 until the user explicitly advances stages.
+- `/office` now has a deployed DeskRPG route polish slice: primary RPG map, visible character sprites, no-refresh sprite motion, and map-internal animated walking route/path cues.
+- The one-shot Mac relay real NAS write approval remains consumed; additional/replacement real NAS writes require a fresh explicit approval and packet.
+
+Allowed work boundary if continuing:
+- Local repo edits, TDD tests, build, docs update, commit, and push for further Stage 13 map/sprite rendering polish.
+- If deployed: VPS dashboard/core sync, ignored `web_dist` rsync, dashboard/core restart, and protected DOM/API/visual smoke.
+
+Still forbidden unless separately and explicitly approved:
+- Additional real NAS production write or replacement write.
+- Force-replay of failed_guarded/succeeded queue items.
+- Actual NAS cleanup delete/move/archive/write, direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway service action, raw content/root/secret/token/write-payload echo, executable browser mutation controls, Kanban mutation controls, or a new renderer/dependency.
+
+Preferred next safe rung:
+1. Add Stage 13 route-aligned sprite phase polish: make sprite motion visually align with the pulsing route/path cues using existing SVG/CSS only, with no controls or state mutation.
+2. Alternative: improve sprite silhouette/walking clarity or room-to-room patrol readability, frontend-only/read-only.
+
 ## NEXT — after Stage 13 walking route/path local slice (2026-05-28T05:03Z)
 
 Current next stage:
