@@ -1,17 +1,16 @@
-## NEXT — after Stage 13 DeskRPG block-grid architecture local slice (2026-05-28T07:14Z)
+## NEXT — after Stage 13 DeskRPG block-grid architecture VPS deploy (2026-05-28T07:31Z)
 
 Current next stage:
 - Stay in Stage 13 until the user explicitly advances stages.
-- User corrected the target: the DeskRPG/JRPG feel is not just labels or furniture density; the office must be structured as room/block units where sprites move inside bounded blocks.
-- Local `/office` now has the first frontend-only/read-only block-grid baseline inside the primary SVG map: `data-office-deskrpg-block-grid="jrpg-room-blocks"`, bounded room blocks, walkable tile-cell layer, corridor block connectors, and sprite room/local-tile hooks.
-- This slice is local only so far; no VPS sync/restart/smoke has been performed for it yet.
+- The corrected DeskRPG/JRPG direction is now live on VPS: `/office` uses bounded room/block units with visible walkable tile cells, corridor connectors, and sprite room/local-tile hooks inside the primary SVG map.
+- Live deploy proof exists for dashboard/core sync, ignored `web_dist` rsync/hash, dashboard/core restart only, protected API/DOM/visual smoke, summary/status/detail default-visible hooks 0, controls 0, raw leak false, console errors 0, and gateway untouched.
 
 Preferred next safe rung:
-1. Commit/push this local Stage 13 block-grid architecture baseline if not already done.
-2. Optional deploy rung: VPS dashboard/core sync, ignored `web_dist` rsync/hash, dashboard/core restart only, protected DOM/API/visual smoke proving block grid, room blocks, tile cells, sprite local-tile hooks, primary map posture, summary/status/detail default-visible hooks 0, controls 0, raw leak false, console errors 0; gateway untouched.
-
-Second safe rung after deploy proof:
-- Improve block-internal movement/readability: make sprites visibly patrol within their room block/corridor lanes rather than drifting across a global SVG, still SVG/CSS/frontend-only/read-only with no executable controls.
+1. `Stage 13 — block-internal sprite movement/readability`
+   - RED: extend `OfficePage.rpg.test.tsx` to require sprites to expose room-local patrol/corridor-lane movement hooks such as room-local route cells or corridor-lane targets, while preserving block-grid hooks and zero controls.
+   - GREEN: make the smallest SVG/CSS/frontend-only/read-only change so sprites visually move within their bounded room blocks or explicit corridor lanes rather than implying global free drift.
+   - VERIFY: focused RPG test, combined Office tests, build/lint, `git diff --check`, static raw-leak/control scan, then commit/push.
+   - DEPLOY: dashboard/core sync, ignored `web_dist` rsync/hash, dashboard/core restart only, protected DOM/API/timed animation/visual smoke; gateway untouched.
 
 Still forbidden unless separately and explicitly approved:
 - Additional real NAS production write or replacement write.

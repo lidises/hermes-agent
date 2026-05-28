@@ -1,24 +1,32 @@
-## Current status — Stage 13 DeskRPG block-grid architecture baseline added locally (2026-05-28T07:14Z)
+## Current status — Stage 13 DeskRPG block-grid architecture baseline deployed to VPS (2026-05-28T07:31Z)
 
 Scope completed:
-- Accepted the user correction that the target DeskRPG/JRPG feel requires room/block structure, not just furniture density/nameplate polish.
-- Added the first frontend-only/read-only room-block baseline inside the primary `/office` SVG map: `data-office-deskrpg-block-grid="jrpg-room-blocks"`, `data-office-deskrpg-block-map="tile-block-architecture"`, per-room bounded block hooks, walkable tile-cell layer, corridor block connectors, and sprite room/local-tile hooks.
-- Preserved the existing Stage 13 safety posture: RPG map remains primary, legacy summary/status/detail layers remain hidden by default, and no backend/API/storage/runtime/NAS/gateway authority was added.
+- Deployed `ea131e419 feat(office): add deskrpg block grid baseline` to both VPS AI Office worktrees: dashboard and core/source.
+- Rsynced Mac-built ignored `hermes_cli/web_dist/` to both VPS worktrees and verified path-independent relative content hash match.
+- Restarted only `hermes-agent-dashboard.service` and `hermes-vps-core-dashboard.service`; `hermes-gateway.service` stayed active with the same MainPID/restart count.
+- Protected `/office` API/DOM/visual smoke confirmed the JRPG-style room/block grid renders live as the primary visual surface.
 
 Evidence captured:
+- Local/VPS HEAD: dashboard=`ea131e419`, core/source=`ea131e419`; both VPS worktrees clean.
+- `web_dist` relative content hash: `7d631a92092ed1eb33a3cd6883e0c04fb84da7db4feeb45af3cf80f2fb951085` on Mac, VPS dashboard, and VPS core/source; file_count=22.
+- Services after restart: dashboard=active, core=active, gateway=active with unchanged gateway MainPID/restart count.
+- Protected browser/API smoke: `/api/office/state` 200 with live browser token, `data-office-deskrpg-block-grid="jrpg-room-blocks"`=1, `data-office-deskrpg-block-map="tile-block-architecture"`=1, room blocks=6, tile cells=87, corridor blocks=3, sprite room/local-tile hooks=8, summary/status/detail default-visible hooks=0, executable mutation controls inside the map=0, raw leak=false, console errors=0.
+- Browser visual smoke: the central primary rendered RPG map visually dominates the page and now reads as bounded JRPG room blocks with visible walkable tile cells, corridor/door connectors, props, and sprites inside rooms; no external summary/status/detail dashboard panels visually dominate above it.
+
+Prior local evidence retained:
 - RED: `npm test -- OfficePage.rpg.test.tsx --run` failed on the newly required block-grid hooks before implementation.
 - GREEN/focused: `npm test -- OfficePage.rpg.test.tsx --run` = 199 passed.
 - Combined Office tests: `npm test -- OfficePage.rpg.test.tsx OfficePage.test.ts --run` = 357 passed.
 - Build: `npm run build` passed; Vite large-chunk warning remains the existing known warning.
 - Lint: `npm run lint` exited 0 with existing warnings only.
-- Diff gates: `git diff --check` passed; added-line raw/control scan passed for token-shaped secrets, private paths, raw write_payload echo, and new executable control hooks.
+- Diff gates: `git diff --check` passed; added-line raw/control scan passed for token-shaped secrets, private paths, sensitive payload echo, and new executable control hooks.
 
 Safety boundaries preserved:
-- Frontend-only/read-only SVG/React slice.
-- No VPS deploy yet for this slice, no dashboard/core restart, no gateway action, no backend/API/storage/runtime change, no state mutation, no Kanban mutation, no browser mutation controls, no NAS write, no dispatcher/authority activation, no public exposure, no sensitive raw-value/payload echo, and no new renderer/dependency.
+- Frontend-only/read-only SVG/React slice plus dashboard/core deploy only.
+- No gateway restart, no backend/API/storage/runtime change, no state mutation, no Kanban mutation, no browser mutation controls, no NAS write, no dispatcher/authority activation, no public exposure, no sensitive raw-value/payload echo, and no new renderer/dependency.
 
 Next exact safe rung:
-- Commit/push this local block-grid architecture baseline, then optionally deploy/smoke it to VPS dashboard/core only. After deploy proof, continue Stage 13 with block-internal sprite movement/readability so actors move within room blocks/corridor lanes rather than across a global SVG.
+- Stay in Stage 13 and add block-internal sprite movement/readability: make actors visibly patrol within room blocks/corridor lanes rather than drifting across a global SVG, still SVG/CSS/frontend-only/read-only with no executable controls.
 
 ## Current status — Stage 13 DeskRPG pixel-office density baseline deployed to VPS (2026-05-28T06:50Z)
 
