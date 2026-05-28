@@ -1790,6 +1790,19 @@ code { font-size: 0.875rem; }
   cursor: pointer;
   outline: none;
 }
+.office-rpg-walking-route[data-office-rpg-route-pulse="no-refresh"] {
+  animation: office-rpg-route-pulse 1.85s linear infinite;
+  filter: drop-shadow(0 0 5px rgba(94, 234, 212, 0.45));
+  will-change: stroke-dashoffset, opacity;
+}
+.office-rpg-walking-route--review[data-office-rpg-route-pulse="no-refresh"] {
+  animation-delay: -0.8s;
+}
+@keyframes office-rpg-route-pulse {
+  0% { stroke-dashoffset: 0; opacity: 0.35; }
+  50% { opacity: 0.92; }
+  100% { stroke-dashoffset: -44; opacity: 0.35; }
+}
 .office-rpg-character-sprite[data-office-rpg-sprite-live="no-refresh"] .office-rpg-character-motion {
   animation: office-rpg-sprite-idle-patrol 2.8s ease-in-out infinite;
   transform-box: fill-box;

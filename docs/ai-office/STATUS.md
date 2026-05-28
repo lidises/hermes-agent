@@ -1,3 +1,26 @@
+## Current status — Stage 13 walking route/path polish added locally (2026-05-28T05:03Z)
+
+Scope completed:
+- Continued Stage 13 only: actual DeskRPG rendering polish, not hooks-only.
+- Added a read-only map-internal walking-route layer inside the primary SVG RPG map: `data-office-rpg-walking-route-layer="css-motion"`.
+- Added two visible route paths with no-refresh CSS pulse markers: command-to-task-board and task-board-to-review.
+- Added Korean map-internal route label `캐릭터 이동 경로` and CSS keyframe animation `office-rpg-route-pulse`.
+- No new renderer/dependency; no backend/API/storage/runtime changes.
+
+Evidence captured:
+- RED: focused RPG test failed on missing walking-route layer/path/pulse hooks.
+- GREEN/focused: `npm test -- --run OfficePage.rpg.test.tsx -t "renders the read-only RPG room map"` passed after route layer implementation.
+- Full Office frontend: `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx` = 357 passed.
+- Lint/build: `npx eslint src/pages/OfficePage.tsx src/pages/OfficePage.rpg.test.tsx src/index.css` = existing warnings only; `npm run build` passed.
+- Diff gates: `git diff --check` passed; refined diff scan found new_controls=0, raw_leak=0, forbidden_runtime=0; CSS checks found route keyframes, infinite route pulse, and existing sprite motion keyframes.
+
+Safety boundaries preserved:
+- Frontend-only/read-only visual route slice.
+- No state mutation, no Kanban mutation, no browser mutation controls, no backend/API route change, no NAS write, no dispatcher/authority activation, no public exposure, no gateway action, no raw content/root/secret/token/write-payload echo, and no new renderer/dependency.
+
+Next exact safe rung:
+- Commit/push and deploy/smoke this Stage 13 walking route/path polish to VPS dashboard/core with dashboard/core restart only and protected DOM/visual smoke; gateway remains untouched.
+
 ## Current status — Stage 13 live sprite movement baseline deployed to VPS (2026-05-28T04:24Z)
 
 Scope completed:

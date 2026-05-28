@@ -2582,6 +2582,11 @@ export function OfficeRpgMap({
             <rect x="12" y="12" width="776" height="336" rx="14" fill="url(#office-rpg-tile-grid)" opacity="0.72" data-office-rpg-map-tile="floor" />
             <path d="M214 88 H252 M480 88 H520 M392 146 V198 M232 260 H280 M580 260 H624" stroke="#34d399" strokeWidth="10" strokeLinecap="round" opacity="0.18" data-office-rpg-map-path="command-to-board" />
             <path d="M214 88 H252 M480 88 H520 M580 260 H624" stroke="#a7f3d0" strokeWidth="2" strokeDasharray="7 7" opacity="0.7" data-office-rpg-map-path="worker-review-loop" />
+            <g data-office-rpg-walking-route-layer="css-motion" aria-label="캐릭터 이동 경로">
+              <path className="office-rpg-walking-route" d="M132 88 C210 88 238 90 306 88 S450 88 520 88 S598 88 650 88" fill="none" stroke="#5eead4" strokeWidth="3" strokeLinecap="round" strokeDasharray="10 12" opacity="0.78" data-office-rpg-walking-route="command-to-task-board" data-office-rpg-route-pulse="no-refresh" />
+              <path className="office-rpg-walking-route office-rpg-walking-route--review" d="M620 104 C620 152 598 202 658 238 S690 250 708 260" fill="none" stroke="#fca5a5" strokeWidth="3" strokeLinecap="round" strokeDasharray="8 12" opacity="0.72" data-office-rpg-walking-route="task-board-to-review" data-office-rpg-route-pulse="no-refresh" />
+              <text x="612" y="118" fill="rgba(167,243,208,0.72)" fontSize="8" data-office-rpg-route-label="live-path">캐릭터 이동 경로</text>
+            </g>
             {scene.rooms.map((room) => {
               const layout = RPG_ROOM_LAYOUT[room.id];
               const roomEntityCount = visibleEntities.filter((entity) => entity.room === room.id).length;
