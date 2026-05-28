@@ -1,3 +1,22 @@
+## NEXT — after Stage 13 mobile room-local patrol readability local verification (2026-05-28T08:48Z)
+
+Current next stage:
+- Stay in Stage 13 until the user explicitly advances stages.
+- `/office` now has local RED/GREEN proof for compact small-screen room-local patrol readability inside the primary SVG map: `compact-room-cues` layer hook, `room-local-patrol` mobile cue lane, compact in-room sprite label mode, status-dot bubble mode, and the Korean cue `작은 화면 방 안 이동`.
+- Local proof exists for focused/combined Office tests, build/lint, `git diff --check`, and added-line raw/control/new-renderer/gateway scan.
+
+Preferred next safe rung:
+1. `Deploy Stage 13 mobile room-local patrol readability`
+   - SYNC: push/fast-forward dashboard/core worktrees only, rsync ignored `hermes_cli/web_dist/`, compare relative content hashes.
+   - RESTART: restart only `hermes-agent-dashboard.service` and `hermes-vps-core-dashboard.service` under the restricted `hermes` user; keep gateway untouched.
+   - SMOKE: protected API/DOM/visual smoke must show primary RPG map, compact mobile patrol hooks, room-local patrol sprites, summary/status/detail default-visible hooks 0, executable controls 0, raw leak false, and console errors 0.
+   - HANDOFF: record deploy evidence in `STATUS.md`/`STAGE-MAP.md` after smoke; do not add new renderer/dependency or authority.
+
+Still forbidden unless separately and explicitly approved:
+- Additional real NAS production write or replacement write.
+- Force-replay of failed_guarded/succeeded queue items.
+- Actual NAS cleanup delete/move/archive/write, direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway service action, sensitive raw-value/payload echo, executable browser mutation controls, Kanban mutation controls, real chat/command input, or a new renderer/dependency.
+
 ## NEXT — after Stage 13 block-internal sprite patrol VPS deploy (2026-05-28T07:56Z)
 
 Current next stage:

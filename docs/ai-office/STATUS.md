@@ -1,3 +1,26 @@
+## Current status — Stage 13 mobile room-local patrol readability verified locally (2026-05-28T08:48Z)
+
+Scope completed:
+- Added a RED-first focused test requiring compact mobile room-local patrol readability hooks inside the primary SVG map.
+- Implemented the smallest frontend-only/read-only SVG/CSS change in `OfficePage.tsx` and `index.css`: the live sprite layer now declares compact-room-cue mobile posture, sprites expose compact in-room name/status modes, and the map includes the compact Korean cue `작은 화면 방 안 이동`.
+- No forbidden renderer/network/asset stack, dependency, backend, storage, gateway service action, or NAS authority changes.
+
+Verification:
+- RED: `npm test -- OfficePage.rpg.test.tsx --run` failed before implementation on missing `data-office-deskrpg-mobile-patrol-readability`.
+- GREEN/focused: `npm test -- OfficePage.rpg.test.tsx --run` = 199 passed.
+- Combined Office tests: `npm test -- OfficePage.rpg.test.tsx OfficePage.test.ts --run` = 357 passed.
+- Build: `npm run build` passed; existing large-chunk warning unchanged.
+- Lint: `npm run lint` exited 0 with existing warnings only.
+- Diff/static gates: `git diff --check` passed; added-line scan found no private paths, token-shaped secrets, raw payload echo, new controls/event handlers, gateway action, or new renderer/dependency.
+
+Safety boundaries preserved:
+- Summary/status/detail default-visible hooks remain part of the zero-visible expectation; no browser mutation controls were added.
+- Gateway service untouched locally; no deployment service action has included it.
+- Raw leak false by static added-line scan and existing component test redaction assertions.
+
+Next exact safe rung:
+- Deploy this mobile patrol readability slice if not already deployed: dashboard/core sync, ignored `web_dist` rsync/hash, dashboard/core restart only, protected DOM/API/visual smoke, gateway untouched.
+
 ## Current status — Stage 13 block-internal sprite patrol deployed to VPS (2026-05-28T07:56Z)
 
 Scope completed:

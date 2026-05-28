@@ -1904,6 +1904,35 @@ code { font-size: 0.875rem; }
   opacity: 1;
   stroke-width: 2;
 }
+.office-rpg-character-sprite[data-office-rpg-character-mobile-label-mode="compact-in-room"] [data-office-rpg-character-nameplate],
+.office-rpg-character-sprite[data-office-rpg-character-mobile-bubble-mode="status-dot"] [data-office-rpg-character-bubble] {
+  filter: drop-shadow(0 1px 3px rgba(2, 6, 23, 0.72));
+}
+@media (max-width: 640px) {
+  [data-office-deskrpg-mobile-patrol-readability="compact-room-cues"] .office-rpg-character-sprite[data-office-rpg-character-mobile-label-mode="compact-in-room"] [data-office-rpg-character-nameplate] {
+    transform: translate(-4px, -3px) scale(0.82);
+    opacity: 0.72;
+  }
+  [data-office-deskrpg-mobile-patrol-readability="compact-room-cues"] .office-rpg-character-sprite[data-office-rpg-character-density-tier="compact"] [data-office-rpg-character-nameplate] {
+    opacity: 0.54;
+  }
+  [data-office-deskrpg-mobile-patrol-readability="compact-room-cues"] .office-rpg-character-sprite[data-office-rpg-character-mobile-bubble-mode="status-dot"] [data-office-rpg-character-bubble] {
+    transform: translate(7px, -21px) scale(0.72);
+    transform-origin: left center;
+    opacity: 0.78;
+  }
+  [data-office-deskrpg-mobile-patrol-readability="compact-room-cues"] .office-rpg-character-sprite [data-office-rpg-character-label-anchor] {
+    opacity: 0.44;
+  }
+  [data-office-deskrpg-mobile-patrol-readability="compact-room-cues"] .office-rpg-character-sprite:hover [data-office-rpg-character-nameplate],
+  [data-office-deskrpg-mobile-patrol-readability="compact-room-cues"] .office-rpg-character-sprite:focus-visible [data-office-rpg-character-nameplate],
+  [data-office-deskrpg-mobile-patrol-readability="compact-room-cues"] .office-rpg-character-sprite[data-office-rpg-character-selected="true"] [data-office-rpg-character-nameplate],
+  [data-office-deskrpg-mobile-patrol-readability="compact-room-cues"] .office-rpg-character-sprite:hover [data-office-rpg-character-bubble],
+  [data-office-deskrpg-mobile-patrol-readability="compact-room-cues"] .office-rpg-character-sprite:focus-visible [data-office-rpg-character-bubble],
+  [data-office-deskrpg-mobile-patrol-readability="compact-room-cues"] .office-rpg-character-sprite[data-office-rpg-character-selected="true"] [data-office-rpg-character-bubble] {
+    opacity: 1;
+  }
+}
 .office-rpg-character-sprite:focus-visible path:first-of-type,
 .office-rpg-character-sprite:hover path:first-of-type {
   stroke-width: 3;

@@ -2727,11 +2727,17 @@ export function OfficeRpgMap({
             <rect x="224" y="74" width="18" height="28" rx="3" fill="#fef3c7" opacity="0.82" data-office-rpg-map-door="command-agent_desks" />
             <rect x="491" y="74" width="18" height="28" rx="3" fill="#fef3c7" opacity="0.82" data-office-rpg-map-door="agent_desks-task_board" />
             <rect x="590" y="246" width="22" height="28" rx="3" fill="#fef3c7" opacity="0.82" data-office-rpg-map-door="source_archive-incident_corner" />
-            <g data-office-rpg-live-sprite-layer="css-motion" aria-label="캐릭터 이동 중">
+            <g
+              data-office-rpg-live-sprite-layer="css-motion"
+              data-office-deskrpg-mobile-patrol-readability="compact-room-cues"
+              data-office-deskrpg-mobile-cue-lane="room-local-patrol"
+              aria-label="캐릭터 이동 중"
+            >
               <text x="606" y="326" fill="rgba(167,243,208,0.72)" fontSize="9" data-office-rpg-live-sprite-label="true">캐릭터 이동 중</text>
               <text x="606" y="340" fill="rgba(94,234,212,0.72)" fontSize="8" data-office-rpg-sprite-route-phase-label="true">동선 맞춤 이동</text>
               <text x="606" y="353" fill="rgba(254,240,138,0.72)" fontSize="8" data-office-rpg-sprite-silhouette-label="true">걸음 실루엣 강화</text>
               <text x="34" y="48" fill="rgba(254,240,138,0.72)" fontSize="8" data-office-deskrpg-sprite-patrol-label="room-local">방 안 이동</text>
+              <text x="34" y="61" fill="rgba(94,234,212,0.72)" fontSize="8" data-office-deskrpg-mobile-patrol-label="compact-room-cues">작은 화면 방 안 이동</text>
               {visualEntities.map(({ entity, position, pose, overlapIndex, roomIndex, labelLayout }) => {
                 const selected = selectedEntityId === entity.id;
                 const fill = RPG_STATUS_FILL[entity.severity];
@@ -2764,6 +2770,8 @@ export function OfficeRpgMap({
                     data-office-rpg-character-density-tier={labelLayout.densityTier}
                     data-office-rpg-character-density-room={labelLayout.densityRoom}
                     data-office-rpg-character-label-slot={labelLayout.slot}
+                    data-office-rpg-character-mobile-label-mode="compact-in-room"
+                    data-office-rpg-character-mobile-bubble-mode="status-dot"
                     data-office-rpg-character-selected={selected ? "true" : "false"}
                     data-office-rpg-character-keyboard-target="true"
                     data-office-rpg-sprite-world-context="furniture-embedded"

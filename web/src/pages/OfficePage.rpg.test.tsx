@@ -448,6 +448,11 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("data-office-deskrpg-sprite-patrol-axis=\"horizontal\"");
     expect(markup).toContain("data-office-deskrpg-sprite-patrol-axis=\"vertical\"");
     expect(markup).toContain("data-office-deskrpg-sprite-step-mode=\"tile-step\"");
+    expect(markup).toContain("data-office-deskrpg-mobile-patrol-readability=\"compact-room-cues\"");
+    expect(markup).toContain("data-office-deskrpg-mobile-cue-lane=\"room-local-patrol\"");
+    expect(markup).toContain("data-office-rpg-character-mobile-label-mode=\"compact-in-room\"");
+    expect(markup).toContain("data-office-rpg-character-mobile-bubble-mode=\"status-dot\"");
+    expect(markup).toContain("작은 화면 방 안 이동");
     expect(markup).toContain("방 안 이동");
     expect(markup).toContain("JRPG 블록 오피스");
     expect(markup.match(/data-office-deskrpg-tile-cell=/g)?.length).toBeGreaterThanOrEqual(24);
