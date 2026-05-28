@@ -1,3 +1,18 @@
+## NEXT — after Kanban operations room RPG absorption (2026-05-28)
+
+Current next stage:
+- `/office` should keep unified workbench/RPG Visualizer as the canonical default surface.
+- The read-only `칸반 운영실` projection is now available inside the default-closed RPG visualizer `kanban-operations` tab, not as a competing top-level panel.
+- The tab preserves safe board/task/assignee/graph refs, operating posture, mutation dry-run readiness, and observability summaries.
+
+Allowed next work:
+- Deploy/sync this read-only frontend consolidation to VPS dashboard/core, rsync `web_dist`, restart dashboard/core only, and run protected DOM/API smoke.
+- Continue only visual/read-only consolidation unless a new exact approval grants a stronger boundary.
+
+Still forbidden unless separately and explicitly approved:
+- Additional real NAS production write or replacement write.
+- Kanban mutation controls, direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, gateway restart, raw markdown/path/secret/write-payload echo, or executable mutation controls.
+
 ## NEXT — after RPG sub-scene drawer simplification (2026-05-28)
 
 Current next stage:

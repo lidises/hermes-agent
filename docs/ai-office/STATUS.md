@@ -1,3 +1,20 @@
+## Current status — Kanban operations room absorbed into RPG visualizer tabs (2026-05-28)
+
+Scope completed locally before deploy:
+- Moved the read-only `칸반 운영실` projection out of the default `/office` main feed and into a default-closed RPG visualizer tab.
+- Preserved the existing safe Kanban functions inside the tab: board/task counts, assignee summary, dependency graph refs, Kanban-first operating posture, mutation dry-run readiness review, observability cards, capped attention refs, and safe graph refs.
+- Added `data-office-kanban-rpg-absorbed="true"` so browser smoke can prove this is the absorbed RPG surface, not a competing top-level Kanban panel.
+
+Safety boundaries preserved:
+- UI/read-only consolidation only.
+- No Kanban mutation controls, real NAS production write or replacement write.
+- No direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway restart, raw markdown/path/secret/write-payload echo, or executable mutation controls.
+
+Verification before deploy:
+- RED observed: focused RPG source test failed while no `kanban-operations` RPG visualizer tab/panel existed.
+- GREEN: focused RPG test passed after placing `<OfficeKanbanOperationsRoomPanel>` inside the default-closed RPG visualizer drawer and removing the former top-level Kanban card.
+- Focused frontend Office tests passed 357/357; `npm run build` passed with the pre-existing Vite large-chunk warning; `git diff --check` passed.
+
 ## Current status — AI Office RPG sub-scenes folded behind default-closed drawer (2026-05-28)
 
 Scope completed locally before deploy:

@@ -187,6 +187,27 @@ describe("Office controlled-mutation runtime status panel placement", () => {
     }
   });
 
+  it("absorbs the Kanban operations room into the RPG visualizer tabs drawer", () => {
+    const source = officePageSource;
+    const drawerIndex = source.indexOf("<OfficeRpgVisualizerTabsDrawer>");
+    const drawerCloseIndex = source.indexOf("</OfficeRpgVisualizerTabsDrawer>");
+    const kanbanTabIndex = source.indexOf('data-office-rpg-tab="kanban-operations"');
+    const kanbanPanelIndex = source.indexOf('data-office-rpg-tab-panel="kanban-operations"', drawerIndex);
+    const kanbanProjectionIndex = source.indexOf("<OfficeKanbanOperationsRoomPanel", drawerIndex);
+
+    expect(drawerIndex).toBeGreaterThan(0);
+    expect(drawerCloseIndex).toBeGreaterThan(drawerIndex);
+    expect(kanbanTabIndex).toBeGreaterThan(0);
+    expect(kanbanTabIndex).toBeLessThan(drawerCloseIndex);
+    expect(kanbanPanelIndex).toBeGreaterThan(drawerIndex);
+    expect(kanbanPanelIndex).toBeLessThan(drawerCloseIndex);
+    expect(kanbanProjectionIndex).toBeGreaterThan(kanbanPanelIndex);
+    expect(kanbanProjectionIndex).toBeLessThan(drawerCloseIndex);
+    expect(source.indexOf('data-office-kanban-projection="true"', drawerCloseIndex)).toBe(-1);
+    expect(source).toContain('data-office-kanban-rpg-absorbed="true"');
+    expect(source).toContain('data-office-rpg-tab-panel-default-open="false"');
+  });
+
   it("keeps graduated status panels available outside legacy diagnostic lanes for smoke hooks", () => {
     const source = officePageSource;
     const legacyIndex = source.indexOf("{SHOW_OFFICE_LEGACY_DIAGNOSTIC_LANES ?");

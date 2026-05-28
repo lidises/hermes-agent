@@ -240,6 +240,7 @@ import {
   type OfficeCharacterFacilityCompletionReview,
   type OfficeCharacter,
   type OfficeKanbanMutationDryRunReadiness,
+  type OfficeKanbanProjection,
   type OfficeMapDensityMode,
   type OfficeMapFlow,
   type OfficeMapNode,
@@ -1268,6 +1269,128 @@ export function OfficeKanbanMutationDryRunReadinessPanel({ readiness }: { readin
         ))}
       </div>
     </div>
+  );
+}
+
+export function OfficeKanbanOperationsRoomPanel({ projection }: { projection: OfficeKanbanProjection }) {
+  return (
+    <Card data-office-kanban-projection="true" data-office-readonly-kanban="true" data-office-kanban-rpg-absorbed="true">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <MapPinned className="h-4 w-4" /> {projection.stageLabel}
+        </CardTitle>
+        <div className="text-xs leading-5 text-midground/55">{projection.redactionNote}</div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid gap-3 md:grid-cols-3">
+          <div className="border border-current/15 bg-black/15 p-3">
+            <SectionLabel>보드</SectionLabel>
+            <div className="mt-2 text-2xl text-foreground">{projection.boards.length}</div>
+            <div className="mt-1 text-xs text-midground/65">작업 {projection.cards.length}개 · 읽기 전용</div>
+          </div>
+          <div className="border border-current/15 bg-black/15 p-3">
+            <SectionLabel>담당자</SectionLabel>
+            <div className="mt-2 text-2xl text-foreground">{projection.assignees.length}</div>
+            <div className="mt-1 text-xs text-midground/65">{projection.assignees.slice(0, 3).map((item) => `${item.id} ${item.count}`).join(" · ") || "—"}</div>
+          </div>
+          <div className="border border-current/15 bg-black/15 p-3" data-office-kanban-graph="true">
+            <SectionLabel>의존성 그래프</SectionLabel>
+            <div className="mt-2 text-2xl text-foreground">{projection.graphEdges.length}</div>
+            <div className="mt-1 text-xs text-midground/65">parent → child ref만 표시</div>
+          </div>
+        </div>
+        <div className="border border-sky-300/15 bg-sky-950/10 p-3" data-office-kanban-operating-posture="true">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <SectionLabel>{projection.operatingPosture.stageLabel}</SectionLabel>
+            <span className="text-xs text-midground/55">source of truth: {projection.operatingPosture.sourceOfTruth}</span>
+          </div>
+          <div className="mt-3 grid gap-2 md:grid-cols-4">
+            <div className="border border-current/15 p-3 text-xs" data-office-kanban-operating-count="open">
+              <div className="uppercase tracking-[0.18em] text-current/60">열린 작업</div>
+              <div className="mt-1 text-xl font-semibold tabular-nums">{projection.operatingPosture.openTaskCount}</div>
+            </div>
+            <div className="border border-current/15 p-3 text-xs" data-office-kanban-operating-count="active">
+              <div className="uppercase tracking-[0.18em] text-current/60">진행/대기</div>
+              <div className="mt-1 text-xl font-semibold tabular-nums">{projection.operatingPosture.activeTaskCount}</div>
+            </div>
+            <div className="border border-current/15 p-3 text-xs" data-office-kanban-operating-count="blocked">
+              <div className="uppercase tracking-[0.18em] text-current/60">막힘</div>
+              <div className="mt-1 text-xl font-semibold tabular-nums">{projection.operatingPosture.blockedTaskCount}</div>
+            </div>
+            <div className="border border-current/15 p-3 text-xs" data-office-kanban-operating-count="done">
+              <div className="uppercase tracking-[0.18em] text-current/60">완료 기록</div>
+              <div className="mt-1 text-xl font-semibold tabular-nums">{projection.operatingPosture.doneTaskCount}</div>
+            </div>
+          </div>
+          <div className="mt-3 grid gap-2 md:grid-cols-2">
+            {projection.operatingPosture.guidanceCards.map((card) => (
+              <div key={card.id} className={`border p-3 text-xs ${changeToneClass(card.tone)}`} data-office-kanban-operating-card={card.id}>
+                <div className="font-semibold">{card.label}</div>
+                <div className="mt-1 text-current/70">{card.detail}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <OfficeKanbanMutationDryRunReadinessPanel readiness={projection.mutationDryRunReadiness} />
+        <div className="border border-amber-300/15 bg-amber-950/10 p-3" data-office-kanban-observability="true">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <SectionLabel>{projection.observability.stageLabel}</SectionLabel>
+            <span className="text-xs text-midground/55">정체·막힘·작업량 safe summary</span>
+          </div>
+          <div className="mt-3 grid gap-2 md:grid-cols-3">
+            {projection.observability.summaryCards.map((card) => (
+              <div key={card.id} className={`border p-3 ${changeToneClass(card.tone)}`} data-office-kanban-observability-card={card.id}>
+                <div className="text-xs uppercase tracking-[0.18em] text-current/70">{card.label}</div>
+                <div className="mt-1 text-xl font-semibold">{card.value}</div>
+                <div className="mt-1 text-xs text-current/70">{card.detail}</div>
+              </div>
+            ))}
+          </div>
+          {projection.observability.workloadByBoard.length > 0 ? (
+            <div className="mt-3 flex flex-wrap gap-2 text-xs" aria-label="Kanban workload by board">
+              {projection.observability.workloadByBoard.slice(0, 6).map((board) => (
+                <span key={board.boardId} className="border border-current/15 px-2 py-1" data-office-kanban-workload-board={board.boardId}>
+                  {board.boardId}: 전체 {board.total} · 실행 {board.running} · 막힘 {board.blocked} · 정체 {board.stale}
+                </span>
+              ))}
+            </div>
+          ) : null}
+          {projection.observability.attentionRefs.length > 0 ? (
+            <div className="mt-2 text-xs text-amber-100/75" data-office-kanban-attention-refs="true">
+              확인 ref {projection.observability.attentionRefs.slice(0, 6).join(" · ")}
+            </div>
+          ) : null}
+        </div>
+        {projection.boards.length === 0 ? (
+          <div className="border border-dashed border-current/15 bg-black/10 p-4 text-sm text-midground/65">Kanban 보드 DTO가 아직 없습니다. 이 영역은 원문을 추론하지 않고 빈 상태만 표시합니다.</div>
+        ) : (
+          <div className="grid gap-3 lg:grid-cols-2">
+            {projection.boards.map((board) => (
+              <div key={board.boardId} className="border border-emerald-300/15 bg-emerald-950/10 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="font-semibold text-foreground">{board.displayName}</div>
+                  <span className="border border-emerald-400/30 px-2 py-0.5 text-xs text-emerald-200">{board.boardId}</span>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-2 text-xs text-midground/70">
+                  {Object.entries(board.counts).slice(0, 7).map(([status, count]) => (
+                    <span key={`${board.boardId}-${status}`} className="border border-current/15 px-2 py-1">{status} {count}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        {projection.graphEdges.length > 0 ? (
+          <div className="flex flex-wrap gap-2 text-xs" aria-label="Kanban safe graph refs">
+            {projection.graphEdges.slice(0, 8).map((edge) => (
+              <span key={`${edge.parent}-${edge.child}`} className="border border-cyan-300/20 bg-cyan-950/10 px-2 py-1 text-cyan-100">
+                {edge.parent} → {edge.child}
+              </span>
+            ))}
+          </div>
+        ) : null}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -6852,6 +6975,7 @@ export function OfficeRpgVisualizerTabsDrawer({ children }: { children: ReactNod
       </p>
       <nav className="mt-3 flex flex-wrap gap-2 text-xs" role="tablist" aria-label="AI Office RPG visualizer detail tabs">
         <a href="#office-rpg-tab-nas-keeper" className="border border-emerald-300/25 bg-emerald-950/20 px-3 py-1 text-emerald-100" role="tab" data-office-rpg-tab="nas-keeper">NAS Keeper</a>
+        <a href="#office-rpg-tab-kanban-operations" className="border border-amber-300/25 bg-amber-950/20 px-3 py-1 text-amber-100" role="tab" data-office-rpg-tab="kanban-operations">칸반 운영실</a>
         <a href="#office-rpg-tab-controlled-mutation" className="border border-sky-300/25 bg-sky-950/20 px-3 py-1 text-sky-100" role="tab" data-office-rpg-tab="controlled-mutation">Controlled mutation</a>
         <a href="#office-rpg-tab-evidence" className="border border-violet-300/25 bg-violet-950/20 px-3 py-1 text-violet-100" role="tab" data-office-rpg-tab="evidence">Evidence</a>
       </nav>
@@ -15153,6 +15277,11 @@ export default function OfficePage() {
           <NasKeeperDurableQueueGuardedOperatorReadinessPanel readiness={nasKeeperDurableQueueGuardedOperatorReadiness} />
         </details>
 
+        <details id="office-rpg-tab-kanban-operations" role="tabpanel" data-office-rpg-tab-panel="kanban-operations" data-office-rpg-tab-panel-default-open="false" className="grid gap-4 scroll-mt-24 border border-amber-300/10 bg-black/10 p-3">
+          <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.16em] text-amber-100">칸반 운영실 · RPG visualizer absorbed</summary>
+          <OfficeKanbanOperationsRoomPanel projection={kanbanProjection} />
+        </details>
+
         <details id="office-rpg-tab-evidence" role="tabpanel" data-office-rpg-tab-panel="evidence" data-office-rpg-tab-panel-default-open="false" className="grid gap-4 scroll-mt-24 border border-violet-300/10 bg-black/10 p-3">
           <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.16em] text-violet-100">Technical evidence drawer</summary>
           <OfficeVisualizerEvidenceDrawer terminalResult={nasKeeperGuardedFailureStateResult}>
@@ -16166,125 +16295,7 @@ export default function OfficePage() {
         <StatCard label="가림 처리" value={state.redactions.redacted_field_count} detail={`정책 v${state.redactions.policy_version}; 민감 원문 필드 제외`} />
       </div>
 
-      {showWork ? (
-        <Card data-office-kanban-projection="true" data-office-readonly-kanban="true">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <MapPinned className="h-4 w-4" /> {kanbanProjection.stageLabel}
-            </CardTitle>
-            <div className="text-xs leading-5 text-midground/55">{kanbanProjection.redactionNote}</div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-3 md:grid-cols-3">
-              <div className="border border-current/15 bg-black/15 p-3">
-                <SectionLabel>보드</SectionLabel>
-                <div className="mt-2 text-2xl text-foreground">{kanbanProjection.boards.length}</div>
-                <div className="mt-1 text-xs text-midground/65">작업 {kanbanProjection.cards.length}개 · 읽기 전용</div>
-              </div>
-              <div className="border border-current/15 bg-black/15 p-3">
-                <SectionLabel>담당자</SectionLabel>
-                <div className="mt-2 text-2xl text-foreground">{kanbanProjection.assignees.length}</div>
-                <div className="mt-1 text-xs text-midground/65">{kanbanProjection.assignees.slice(0, 3).map((item) => `${item.id} ${item.count}`).join(" · ") || "—"}</div>
-              </div>
-              <div className="border border-current/15 bg-black/15 p-3" data-office-kanban-graph="true">
-                <SectionLabel>의존성 그래프</SectionLabel>
-                <div className="mt-2 text-2xl text-foreground">{kanbanProjection.graphEdges.length}</div>
-                <div className="mt-1 text-xs text-midground/65">parent → child ref만 표시</div>
-              </div>
-            </div>
-            <div className="border border-sky-300/15 bg-sky-950/10 p-3" data-office-kanban-operating-posture="true">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <SectionLabel>{kanbanProjection.operatingPosture.stageLabel}</SectionLabel>
-                <span className="text-xs text-midground/55">source of truth: {kanbanProjection.operatingPosture.sourceOfTruth}</span>
-              </div>
-              <div className="mt-3 grid gap-2 md:grid-cols-4">
-                <div className="border border-current/15 p-3 text-xs" data-office-kanban-operating-count="open">
-                  <div className="uppercase tracking-[0.18em] text-current/60">열린 작업</div>
-                  <div className="mt-1 text-xl font-semibold tabular-nums">{kanbanProjection.operatingPosture.openTaskCount}</div>
-                </div>
-                <div className="border border-current/15 p-3 text-xs" data-office-kanban-operating-count="active">
-                  <div className="uppercase tracking-[0.18em] text-current/60">진행/대기</div>
-                  <div className="mt-1 text-xl font-semibold tabular-nums">{kanbanProjection.operatingPosture.activeTaskCount}</div>
-                </div>
-                <div className="border border-current/15 p-3 text-xs" data-office-kanban-operating-count="blocked">
-                  <div className="uppercase tracking-[0.18em] text-current/60">막힘</div>
-                  <div className="mt-1 text-xl font-semibold tabular-nums">{kanbanProjection.operatingPosture.blockedTaskCount}</div>
-                </div>
-                <div className="border border-current/15 p-3 text-xs" data-office-kanban-operating-count="done">
-                  <div className="uppercase tracking-[0.18em] text-current/60">완료 기록</div>
-                  <div className="mt-1 text-xl font-semibold tabular-nums">{kanbanProjection.operatingPosture.doneTaskCount}</div>
-                </div>
-              </div>
-              <div className="mt-3 grid gap-2 md:grid-cols-2">
-                {kanbanProjection.operatingPosture.guidanceCards.map((card) => (
-                  <div key={card.id} className={`border p-3 text-xs ${changeToneClass(card.tone)}`} data-office-kanban-operating-card={card.id}>
-                    <div className="font-semibold">{card.label}</div>
-                    <div className="mt-1 text-current/70">{card.detail}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <OfficeKanbanMutationDryRunReadinessPanel readiness={kanbanProjection.mutationDryRunReadiness} />
-            <div className="border border-amber-300/15 bg-amber-950/10 p-3" data-office-kanban-observability="true">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <SectionLabel>{kanbanProjection.observability.stageLabel}</SectionLabel>
-                <span className="text-xs text-midground/55">정체·막힘·작업량 safe summary</span>
-              </div>
-              <div className="mt-3 grid gap-2 md:grid-cols-3">
-                {kanbanProjection.observability.summaryCards.map((card) => (
-                  <div key={card.id} className={`border p-3 ${changeToneClass(card.tone)}`} data-office-kanban-observability-card={card.id}>
-                    <div className="text-xs uppercase tracking-[0.18em] text-current/70">{card.label}</div>
-                    <div className="mt-1 text-xl font-semibold">{card.value}</div>
-                    <div className="mt-1 text-xs text-current/70">{card.detail}</div>
-                  </div>
-                ))}
-              </div>
-              {kanbanProjection.observability.workloadByBoard.length > 0 ? (
-                <div className="mt-3 flex flex-wrap gap-2 text-xs" aria-label="Kanban workload by board">
-                  {kanbanProjection.observability.workloadByBoard.slice(0, 6).map((board) => (
-                    <span key={board.boardId} className="border border-current/15 px-2 py-1" data-office-kanban-workload-board={board.boardId}>
-                      {board.boardId}: 전체 {board.total} · 실행 {board.running} · 막힘 {board.blocked} · 정체 {board.stale}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-              {kanbanProjection.observability.attentionRefs.length > 0 ? (
-                <div className="mt-2 text-xs text-amber-100/75" data-office-kanban-attention-refs="true">
-                  확인 ref {kanbanProjection.observability.attentionRefs.slice(0, 6).join(" · ")}
-                </div>
-              ) : null}
-            </div>
-            {kanbanProjection.boards.length === 0 ? (
-              <div className="border border-dashed border-current/15 bg-black/10 p-4 text-sm text-midground/65">Kanban 보드 DTO가 아직 없습니다. 이 영역은 원문을 추론하지 않고 빈 상태만 표시합니다.</div>
-            ) : (
-              <div className="grid gap-3 lg:grid-cols-2">
-                {kanbanProjection.boards.map((board) => (
-                  <div key={board.boardId} className="border border-emerald-300/15 bg-emerald-950/10 p-3">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="font-semibold text-foreground">{board.displayName}</div>
-                      <span className="border border-emerald-400/30 px-2 py-0.5 text-xs text-emerald-200">{board.boardId}</span>
-                    </div>
-                    <div className="mt-2 flex flex-wrap gap-2 text-xs text-midground/70">
-                      {Object.entries(board.counts).slice(0, 7).map(([status, count]) => (
-                        <span key={`${board.boardId}-${status}`} className="border border-current/15 px-2 py-1">{status} {count}</span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            {kanbanProjection.graphEdges.length > 0 ? (
-              <div className="flex flex-wrap gap-2 text-xs" aria-label="Kanban safe graph refs">
-                {kanbanProjection.graphEdges.slice(0, 8).map((edge) => (
-                  <span key={`${edge.parent}-${edge.child}`} className="border border-cyan-300/20 bg-cyan-950/10 px-2 py-1 text-cyan-100">
-                    {edge.parent} → {edge.child}
-                  </span>
-                ))}
-              </div>
-            ) : null}
-          </CardContent>
-        </Card>
-      ) : null}
+
 
       <OfficeSectionDrawer plan={sectionById.sources}>
         <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
