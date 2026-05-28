@@ -1,3 +1,26 @@
+## Current status — Stage 13 compact Korean facility copy deployed to VPS (2026-05-28T03:31Z)
+
+Scope completed:
+- Deployed `1702c0f0c feat(office): add compact rpg facility copy` to both VPS AI Office worktrees: dashboard and core/source.
+- Rsynced Mac-built ignored `hermes_cli/web_dist/` to the VPS dashboard and core/source worktrees and verified path-independent content hash matches.
+- Restarted only `hermes-agent-dashboard.service` and `hermes-vps-core-dashboard.service`; `hermes-gateway.service` stayed active and untouched.
+- Protected `/office` live DOM smoke confirmed the RPG Visualizer remains primary and the new compact Korean facility-copy hooks are hydrated inside the SVG map.
+
+Evidence captured:
+- VPS dashboard HEAD: `1702c0f0c`; VPS core/source HEAD: `1702c0f0c`.
+- `web_dist` relative content hash: `5cafe2a7cb94bf1c38e3b8e68b4bdc44ed2b21aaa808151c990db0b0143ed586` on Mac, VPS dashboard, and VPS core/source; file_count=22.
+- Services after restart: dashboard=active, core=active, gateway=active.
+- Live dashboard `/office` HTTP: 200 on the dashboard service.
+- Browser DOM smoke on `/office?facility-copy=1702c0f0c`: visualMap=1, primary=1, mapSvg=1, responsiveSvg=1, mobileLayout=1, facilityCopy=6, facilityMode=6, rooms=6, sprites=8, controlsInsideVisual=0, summary/status/detail default-visible hooks=0, rawLeak=false, console errors=0.
+
+Safety boundaries preserved:
+- Dashboard/core deploy only; gateway restart was not performed.
+- No additional real NAS write or replacement write.
+- No VPS direct NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, Kanban mutation, executable browser mutation controls, raw content/root/secret/token/write-payload echo, or new renderer/dependency.
+
+Next exact safe rung:
+- Continue Stage 13 frontend-only RPG visual depth with strict TDD, preferably mobile label readability inside the SVG map or one small room/entity hierarchy refinement; keep backend/NAS/Kanban/runtime/public/gateway boundaries closed unless explicitly approved.
+
 ## Current status — Stage 13 compact Korean facility copy added locally (2026-05-28T03:23Z)
 
 Scope completed:

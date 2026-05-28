@@ -1,3 +1,24 @@
+## NEXT — after Stage 13 compact Korean facility copy VPS deploy (2026-05-28T03:31Z)
+
+Current next stage:
+- Stage 13 RPG Visualizer-first quality remains active and the compact Korean facility-copy slice is now live on the VPS dashboard.
+- `/office` live smoke proves the RPG Visualizer remains primary, room-level compact Korean cues are hydrated inside the SVG map, and legacy summary/status/detail default-visible hooks remain absent.
+- The one-shot Mac relay real NAS write approval remains consumed; additional/replacement real NAS writes require a fresh explicit approval and packet.
+
+Allowed work boundary if continuing:
+- Local repo edits, TDD tests, build, docs update, commit, and push.
+- If another frontend-only read-only visual slice is deployed: VPS dashboard/core sync, ignored `web_dist` rsync, dashboard/core restart, and protected DOM/API smoke.
+- Frontend-only/read-only Stage 13 map-internal polish: mobile label readability, room/entity hierarchy refinement, character/facility copy refinement, or compact in-map cues.
+
+Still forbidden unless separately and explicitly approved:
+- Additional real NAS production write or replacement write.
+- Force-replay of failed_guarded/succeeded queue items.
+- Actual NAS cleanup delete/move/archive/write, direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway service action, raw content/root/secret/token/write-payload echo, executable browser mutation controls, Kanban mutation controls, or a new renderer/dependency.
+
+Preferred next safe rung:
+1. Refine mobile label readability inside the SVG map with strict RED/GREEN tests, keeping the map primary and external summary/status/detail layers hidden.
+2. Or add one small room/entity hierarchy cue refinement if it improves in-map comprehension without expanding controls or raw data.
+
 ## NEXT — after Stage 13 compact Korean facility copy local slice (2026-05-28T03:23Z)
 
 Current next stage:
