@@ -1,3 +1,25 @@
+## Current status — Stage 13 mobile label readability added locally (2026-05-28T03:42Z)
+
+Scope completed:
+- Continued Stage 13 RPG Visualizer-first quality with a frontend-only/read-only mobile label readability hook slice.
+- Added stable SVG room-group hooks for `mobile-readable` label stacking, per-room safe zones, max Korean label length, and protected mobile label baseline.
+- Kept all changes map-internal: no external summary/status/detail panel expansion, no backend/API/storage/runtime path, no new renderer/dependency, and no executable mutation controls.
+
+Evidence captured:
+- RED: `npm test -- --run OfficePage.rpg.test.tsx -t "renders the read-only RPG room map"` failed on missing `data-office-rpg-room-label-stack="mobile-readable"`.
+- GREEN/focused: the same test passed after adding the room label readability hooks.
+- Full Office frontend: `npm test -- --run OfficePage.test.ts OfficePage.rpg.test.tsx` = 357 passed.
+- Lint/build: `npx eslint src/pages/OfficePage.tsx src/pages/OfficePage.rpg.test.tsx src/index.css` = existing warnings only; `npm run build` passed.
+- Diff gates: `git diff --check` passed; diff-scoped scan found controls=0, raw_leak=0, forbidden_runtime=0.
+
+Safety boundaries preserved:
+- Frontend-only/read-only visual slice.
+- No additional real NAS write or replacement write.
+- No VPS direct NAS authority, watcher/cron/dispatcher/authority-adapter, public exposure, gateway service action, Kanban mutation, executable browser mutation controls, raw content/root/secret/token/write-payload echo, or new renderer/dependency.
+
+Next exact safe rung:
+- Deploy/smoke this mobile label readability slice to VPS dashboard/core with dashboard/core restart only, protected DOM/API smoke, and gateway untouched; then continue Stage 13 with one small room/entity hierarchy or actor/facility refinement.
+
 ## Current status — Stage 13 compact Korean facility copy deployed to VPS (2026-05-28T03:31Z)
 
 Scope completed:

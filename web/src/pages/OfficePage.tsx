@@ -2587,6 +2587,10 @@ export function OfficeRpgMap({
                   data-office-rpg-room-hierarchy="true"
                   data-office-rpg-room-tier={roomTier}
                   data-office-rpg-room-korean-label={room.id}
+                  data-office-rpg-room-label-stack="mobile-readable"
+                  data-office-rpg-room-label-safe-zone={room.id}
+                  data-office-rpg-room-label-max-chars="12"
+                  data-office-rpg-room-mobile-label-baseline="protected"
                   data-office-rpg-room-entity-count={room.id}
                   data-office-rpg-room-entity-count-value={roomEntityCount}
                   data-office-rpg-room-priority-cue={priorityCue ? room.id : undefined}

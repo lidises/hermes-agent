@@ -445,6 +445,10 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("자료·근거 보관");
     expect(markup).toContain("차단 이슈 검토");
     expect(markup).toContain("data-office-rpg-facility-copy-mode=\"compact-korean\"");
+    expect(markup).toContain("data-office-rpg-room-label-stack=\"mobile-readable\"");
+    expect(markup).toContain("data-office-rpg-room-label-safe-zone=\"command\"");
+    expect(markup).toContain("data-office-rpg-room-label-max-chars=\"12\"");
+    expect(markup).toContain("data-office-rpg-room-mobile-label-baseline=\"protected\"");
     expect(markup).toContain("data-office-rpg-room-entity-count=\"command\"");
     expect(markup).toContain("data-office-rpg-room-priority-cue=\"task_board\"");
     expect(markup).toContain("data-office-rpg-character-sprite");
