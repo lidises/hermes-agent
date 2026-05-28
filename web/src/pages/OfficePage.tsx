@@ -2207,6 +2207,15 @@ const RPG_ROOM_FACILITY_COPY: Record<OfficeRpgRoomId, string> = {
   incident_corner: "차단 이슈 검토",
 };
 
+const RPG_ROOM_FACILITY_ZONE: Record<OfficeRpgRoomId, "decision" | "workers" | "board" | "automation" | "evidence" | "review"> = {
+  command: "decision",
+  agent_desks: "workers",
+  task_board: "board",
+  cron_room: "automation",
+  source_archive: "evidence",
+  incident_corner: "review",
+};
+
 const RPG_STATUS_FILL: Record<OfficeRpgSeverity, string> = {
   normal: "#a7f3d0",
   info: "#7dd3fc",
@@ -2579,6 +2588,8 @@ export function OfficeRpgMap({
               const roomTier = RPG_ROOM_TIER[room.id];
               const roomKoreanLabel = RPG_ROOM_KOREAN_LABEL[room.id];
               const facilityCopy = RPG_ROOM_FACILITY_COPY[room.id];
+              const facilityZone = RPG_ROOM_FACILITY_ZONE[room.id];
+              const groupingCue = `${roomEntityCount}명 · ${facilityZone}`;
               const priorityCue = room.severity === "danger" || roomEntityCount > 0;
               return (
                 <g
@@ -2593,6 +2604,9 @@ export function OfficeRpgMap({
                   data-office-rpg-room-mobile-label-baseline="protected"
                   data-office-rpg-room-entity-count={room.id}
                   data-office-rpg-room-entity-count-value={roomEntityCount}
+                  data-office-rpg-room-actor-grouping="visible-actors"
+                  data-office-rpg-room-facility-zone={facilityZone}
+                  data-office-rpg-room-grouping-cue={room.id}
                   data-office-rpg-room-priority-cue={priorityCue ? room.id : undefined}
                 >
                   <rect x={layout.x} y={layout.y} width={layout.w} height={layout.h} rx="12" fill="url(#office-rpg-room-fill)" stroke={RPG_STATUS_STROKE[room.severity]} strokeWidth="2" opacity="0.94" />
@@ -2604,6 +2618,8 @@ export function OfficeRpgMap({
                   <text x={layout.x + 14} y={layout.y + 24} fill="#d1fae5" fontSize="12" fontWeight="700" letterSpacing="1.5">{layout.short}</text>
                   <text x={layout.x + 14} y={layout.y + 42} fill="rgba(209,250,229,0.72)" fontSize="10">{roomKoreanLabel}</text>
                   <text x={layout.x + 14} y={layout.y + 55} fill="rgba(209,250,229,0.78)" fontSize="8.5" data-office-rpg-room-facility-copy={room.id} data-office-rpg-facility-copy-mode="compact-korean">{facilityCopy}</text>
+                  <text x={layout.x + layout.w - 14} y={layout.y + layout.h - 38} textAnchor="end" fill="rgba(167,243,208,0.7)" fontSize="7.5" data-office-rpg-room-grouping-label={room.id}>인원·시설 묶음</text>
+                  <text x={layout.x + layout.w - 14} y={layout.y + layout.h - 28} textAnchor="end" fill="rgba(209,250,229,0.58)" fontSize="7.5" data-office-rpg-room-grouping-cue-label={room.id}>{groupingCue}</text>
                   <text x={layout.x + 14} y={layout.y + 68} fill="rgba(209,250,229,0.48)" fontSize="8">{room.label}</text>
                 </g>
               );

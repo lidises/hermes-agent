@@ -1,3 +1,24 @@
+## NEXT — after Stage 13 actor/facility grouping cue local slice (2026-05-28T03:58Z)
+
+Current next stage:
+- Stage 13 RPG Visualizer-first quality remains active.
+- The primary SVG RPG map now includes stable room-level actor/facility grouping cues: visible actor grouping, facility zone, and a compact Korean grouping label inside each room.
+- Local verification is green; VPS deploy/smoke for this slice is the next runtime proof if continuing in order.
+- The one-shot Mac relay real NAS write approval remains consumed; additional/replacement real NAS writes require a fresh explicit approval and packet.
+
+Allowed work boundary if continuing:
+- VPS dashboard/core sync, ignored `web_dist` rsync, dashboard/core restart, and protected DOM/API smoke for this read-only visual slice.
+- Local repo edits, TDD tests, build, docs update, commit, and push for the next frontend-only/read-only Stage 13 map-internal polish.
+
+Still forbidden unless separately and explicitly approved:
+- Additional real NAS production write or replacement write.
+- Force-replay of failed_guarded/succeeded queue items.
+- Actual NAS cleanup delete/move/archive/write, direct VPS NAS authority, watcher/cron/dispatcher/authority-adapter activation, public exposure, gateway service action, raw content/root/secret/token/write-payload echo, executable browser mutation controls, Kanban mutation controls, or a new renderer/dependency.
+
+Preferred next safe rung:
+1. Deploy/smoke the actor/facility grouping cue slice to VPS dashboard/core: sync code and `web_dist`, restart dashboard/core only, then protected DOM smoke for grouping hooks plus summary/status/detail hidden state.
+2. After deploy proof, continue Stage 13 with one small map-internal actor/facility refinement, or prepare Stage 14 only as metadata-only/safe-ref readiness with no execution authority.
+
 ## NEXT — after Stage 13 mobile label readability VPS deploy (2026-05-28T03:50Z)
 
 Current next stage:

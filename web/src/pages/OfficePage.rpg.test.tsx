@@ -450,6 +450,11 @@ describe("OfficeRpgMap", () => {
     expect(markup).toContain("data-office-rpg-room-label-max-chars=\"12\"");
     expect(markup).toContain("data-office-rpg-room-mobile-label-baseline=\"protected\"");
     expect(markup).toContain("data-office-rpg-room-entity-count=\"command\"");
+    expect(markup).toContain("data-office-rpg-room-actor-grouping=\"visible-actors\"");
+    expect(markup).toContain("data-office-rpg-room-facility-zone=\"decision\"");
+    expect(markup).toContain("data-office-rpg-room-facility-zone=\"evidence\"");
+    expect(markup).toContain("data-office-rpg-room-grouping-cue=\"task_board\"");
+    expect(markup).toContain("인원·시설 묶음");
     expect(markup).toContain("data-office-rpg-room-priority-cue=\"task_board\"");
     expect(markup).toContain("data-office-rpg-character-sprite");
     expect(scene.entities.length).toBeLessThanOrEqual(8);
